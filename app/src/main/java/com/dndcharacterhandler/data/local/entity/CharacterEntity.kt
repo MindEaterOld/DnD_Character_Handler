@@ -326,7 +326,8 @@ data class FeatureEntity(
     val description: String,
     val level: Int?,
     val source: FeatureSource,
-    val category: String = ""
+    val category: String = "",
+    val catalogId: String? = null
 )
 
 @Entity(

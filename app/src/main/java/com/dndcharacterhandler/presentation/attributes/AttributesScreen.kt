@@ -70,8 +70,10 @@ import com.dndcharacterhandler.domain.model.Skill
 import com.dndcharacterhandler.domain.model.SpellcastingAbility
 import com.dndcharacterhandler.domain.repository.FeatureCatalogRepository
 import com.dndcharacterhandler.presentation.features.FeatureCard
+import com.dndcharacterhandler.presentation.features.FeatureCatalogLookup
 import com.dndcharacterhandler.presentation.features.FeatureCatalogRow
 import com.dndcharacterhandler.presentation.features.FeatureEditDialog
+import com.dndcharacterhandler.presentation.features.localizedWith
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -346,8 +348,11 @@ fun AttributesContent(
     val proficiencyBonus = proficiencyBonusForLevel(character.level)
     val perceptionSkill = characterBundle?.skills?.firstOrNull { it.name == "skill_perception" }
     val passivePerception = passivePerceptionValue(character, proficiencyBonus, perceptionSkill)
-    val darkvisionFeatures = remember(characterBundle?.features) {
-        characterBundle?.features.orEmpty().filter { it.isDarkvisionFeature() }
+    val darkvisionCatalogLookup = remember(darkvisionCatalogItems) { FeatureCatalogLookup(darkvisionCatalogItems) }
+    val darkvisionFeatures = remember(characterBundle?.features, darkvisionCatalogLookup, strings.language) {
+        characterBundle?.features.orEmpty()
+            .filter { it.isDarkvisionFeature() }
+            .localizedWith(darkvisionCatalogLookup, russian = strings.language == AppLanguage.RUSSIAN)
     }
     val darkvisionFeet = when (character.darkvisionMode) {
         DarkvisionMode.AUTO -> darkvisionFeatures.mapNotNull { it.darkvisionFeet() }.maxOrNull() ?: 0

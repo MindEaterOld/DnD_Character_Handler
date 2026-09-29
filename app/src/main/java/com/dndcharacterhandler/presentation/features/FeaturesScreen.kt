@@ -226,9 +226,13 @@ internal fun FeaturesContent(
     }
 
     val resolvedBundle = characterBundle
-    val visibleFeatures = remember(resolvedBundle.features, query) {
+    val catalogLookup = remember(catalogItems) { FeatureCatalogLookup(catalogItems) }
+    val displayedFeatures = remember(resolvedBundle.features, catalogLookup, russian) {
+        resolvedBundle.features.localizedWith(catalogLookup, russian)
+    }
+    val visibleFeatures = remember(displayedFeatures, query) {
         val needle = query.trim()
-        resolvedBundle.features.filter { feature ->
+        displayedFeatures.filter { feature ->
             needle.isBlank() ||
                 feature.name.contains(needle, ignoreCase = true) ||
                 feature.description.contains(needle, ignoreCase = true)

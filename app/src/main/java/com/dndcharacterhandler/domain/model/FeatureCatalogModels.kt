@@ -29,6 +29,7 @@ data class FeatureCatalogItem(
             description = displayDescription(russian),
             level = level,
             source = source,
-            category = displayCategory(russian)
+            category = displayCategory(russian),
+            catalogId = id
         )
 }

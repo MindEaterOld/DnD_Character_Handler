@@ -4,6 +4,7 @@ import com.dndcharacterhandler.data.localization.LocalizedStrings
 import com.dndcharacterhandler.domain.model.AppLanguage
 import com.dndcharacterhandler.domain.model.Spell
 import com.dndcharacterhandler.domain.model.SpellCatalogItem
+import com.dndcharacterhandler.presentation.localization.catalogFieldText
 
 /** Catalog spell name in the current language ("spell_name_<index>" keys), or [fallback] if there's no key. */
 internal fun localizedSpellNameOf(catalogId: String?, fallback: String, strings: LocalizedStrings): String {
@@ -18,15 +19,14 @@ internal fun SpellCatalogItem.toLocalizedSpell(strings: LocalizedStrings): Spell
     toSpell().localizedWith(this, strings)
 
 /**
- * Spells added from the catalog keep the text of the language that was active when they were added.
- * While a field still equals one of the catalog's own variants (English or Russian) the user hasn't
- * edited it, so it's shown in the current language; text the user changed is shown as is.
+ * A character's catalog spell with its name, description, higher-level text and material in the
+ * current language; fields the user edited are kept (see [catalogFieldText]).
  */
 internal fun Spell.localizedWith(catalogItem: SpellCatalogItem?, strings: LocalizedStrings): Spell {
     if (catalogItem == null) return this
     val russian = strings.language == AppLanguage.RUSSIAN
     return copy(
-        name = catalogText(
+        name = catalogFieldText(
             stored = name,
             english = catalogItem.name,
             russian = catalogItem.ruName,
@@ -50,19 +50,10 @@ internal fun List<Spell>.localizedWith(
 ): List<Spell> = map { spell -> spell.localizedWith(spell.catalogId?.let(catalogById::get), strings) }
 
 private fun catalogText(stored: String, english: String, russian: String, useRussian: Boolean): String =
-    catalogText(
+    catalogFieldText(
         stored = stored,
         english = english,
         russian = russian,
         // Some catalog spells have no Russian text for a field; fall back to English instead of blank.
         current = if (useRussian && russian.isNotBlank()) russian else english
     )
-
-private fun catalogText(stored: String, english: String, russian: String, current: String): String {
-    val value = stored.trim()
-    val untouched = value == english.trim() ||
-        (russian.isNotBlank() && value == russian.trim()) ||
-        // Added in Russian while that field had no Russian text: the empty value came from the catalog.
-        (value.isEmpty() && russian.isBlank())
-    return if (untouched) current else stored
-}

@@ -220,7 +220,9 @@ data class Feature(
     val description: String,
     val level: Int? = null,
     val source: FeatureSource = FeatureSource.OTHER,
-    val category: String = ""
+    val category: String = "",
+    /** [FeatureCatalogItem.id] this feature was added from, or null for hand-made features. */
+    val catalogId: String? = null
 )
 data class Note(
     val id: Long = 0,

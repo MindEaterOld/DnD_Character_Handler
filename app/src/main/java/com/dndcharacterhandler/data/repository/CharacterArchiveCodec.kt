@@ -246,6 +246,8 @@ fun CharacterBundle.toArchiveManifest(
                 put("level", feature.level)
                 put("source", feature.source.name)
                 put("category", feature.category)
+                // Optional and additive: older app versions just ignore it.
+                feature.catalogId?.let { put("catalogId", it) }
             }
         }))
         put("notes", JSONArray(notes.map { note ->
@@ -570,7 +572,8 @@ private fun JSONArray.toFeatureList(): List<Feature> =
                     .takeIf { it.isNotBlank() }
                     ?.let { runCatching { FeatureSource.valueOf(it) }.getOrDefault(FeatureSource.OTHER) }
                     ?: FeatureSource.OTHER,
-                category = json.optString("category")
+                category = json.optString("category"),
+                catalogId = json.optNullableString("catalogId")
             )
         }
     }

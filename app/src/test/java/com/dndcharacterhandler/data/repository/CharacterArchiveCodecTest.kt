@@ -265,7 +265,8 @@ class CharacterArchiveCodecTest {
                     name = "Favored Enemy",
                     description = "Advantage on tracking.",
                     level = 1,
-                    source = FeatureSource.CLASS
+                    source = FeatureSource.CLASS,
+                    catalogId = "CLASS:favored-enemy"
                 )
             ),
             notes = listOf(
