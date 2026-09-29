@@ -65,37 +65,37 @@
   "drawer_open_character_manager": {
     "en": "Open character manager",
     "ru": "Открыть менеджер персонажей",
-    "de": "Open character manager",
-    "fr": "Open character manager",
-    "es": "Open character manager"
+    "de": "Charakterverwaltung öffnen",
+    "fr": "Ouvrir le gestionnaire de personnages",
+    "es": "Abrir gestor de personajes"
   },
   "drawer_characters": {
     "en": "Characters",
     "ru": "Персонажи",
-    "de": "Characters",
-    "fr": "Characters",
-    "es": "Characters"
+    "de": "Charaktere",
+    "fr": "Personnages",
+    "es": "Personajes"
   },
   "drawer_new_character": {
     "en": "New Character",
     "ru": "Новый персонаж",
-    "de": "New Character",
-    "fr": "New Character",
-    "es": "New Character"
+    "de": "Neuer Charakter",
+    "fr": "Nouveau personnage",
+    "es": "Nuevo personaje"
   },
   "drawer_export_character": {
     "en": "Export Character",
     "ru": "Экспорт персонажа",
-    "de": "Export Character",
-    "fr": "Export Character",
-    "es": "Export Character"
+    "de": "Charakter exportieren",
+    "fr": "Exporter le personnage",
+    "es": "Exportar personaje"
   },
   "drawer_delete_character": {
     "en": "Delete Character",
     "ru": "Удалить персонажа",
-    "de": "Delete Character",
-    "fr": "Delete Character",
-    "es": "Delete Character"
+    "de": "Charakter löschen",
+    "fr": "Supprimer le personnage",
+    "es": "Eliminar personaje"
   },
   "drawer_delete_confirm_title": {
     "en": "Delete character?",
@@ -128,9 +128,9 @@
   "drawer_import_character": {
     "en": "Import Character",
     "ru": "Импорт персонажа",
-    "de": "Import Character",
-    "fr": "Import Character",
-    "es": "Import Character"
+    "de": "Charakter importieren",
+    "fr": "Importer un personnage",
+    "es": "Importar personaje"
   },
   "settings_language": {
     "en": "Language",
@@ -156,58 +156,58 @@
   "drawer_export_success": {
     "en": "Character exported successfully.",
     "ru": "Персонаж успешно экспортирован.",
-    "de": "Character exported successfully.",
-    "fr": "Character exported successfully.",
-    "es": "Character exported successfully."
+    "de": "Charakter erfolgreich exportiert.",
+    "fr": "Personnage exporté avec succès.",
+    "es": "Personaje exportado correctamente."
   },
   "drawer_export_error": {
     "en": "Unable to export the selected character.",
     "ru": "Не удалось экспортировать выбранного персонажа.",
-    "de": "Unable to export the selected character.",
-    "fr": "Unable to export the selected character.",
-    "es": "Unable to export the selected character."
+    "de": "Der ausgewählte Charakter konnte nicht exportiert werden.",
+    "fr": "Impossible d'exporter le personnage sélectionné.",
+    "es": "No se pudo exportar el personaje seleccionado."
   },
   "drawer_import_success": {
     "en": "Character imported successfully.",
     "ru": "Персонаж успешно импортирован.",
-    "de": "Character imported successfully.",
-    "fr": "Character imported successfully.",
-    "es": "Character imported successfully."
+    "de": "Charakter erfolgreich importiert.",
+    "fr": "Personnage importé avec succès.",
+    "es": "Personaje importado correctamente."
   },
   "drawer_import_error": {
     "en": "Unable to import the selected character file.",
     "ru": "Не удалось импортировать выбранный файл персонажа.",
-    "de": "Unable to import the selected character file.",
-    "fr": "Unable to import the selected character file.",
-    "es": "Unable to import the selected character file."
+    "de": "Die ausgewählte Charakterdatei konnte nicht importiert werden.",
+    "fr": "Impossible d'importer le fichier de personnage sélectionné.",
+    "es": "No se pudo importar el archivo de personaje seleccionado."
   },
   "placeholder_loading_character": {
     "en": "Loading Character",
     "ru": "Загрузка персонажа",
-    "de": "Loading Character",
-    "fr": "Loading Character",
-    "es": "Loading Character"
+    "de": "Charakter wird geladen",
+    "fr": "Chargement du personnage",
+    "es": "Cargando personaje"
   },
   "placeholder_race": {
     "en": "Race",
     "ru": "Раса",
-    "de": "Race",
+    "de": "Volk",
     "fr": "Race",
-    "es": "Race"
+    "es": "Raza"
   },
   "placeholder_class": {
     "en": "Class",
     "ru": "Класс",
-    "de": "Class",
-    "fr": "Class",
-    "es": "Class"
+    "de": "Klasse",
+    "fr": "Classe",
+    "es": "Clase"
   },
   "placeholder_subclass": {
     "en": "Subclass",
     "ru": "Подкласс",
-    "de": "Subclass",
-    "fr": "Subclass",
-    "es": "Subclass"
+    "de": "Unterklasse",
+    "fr": "Sous-classe",
+    "es": "Subclase"
   },
   "placeholder_level_short": {
     "en": "Lv.",
@@ -268,865 +268,1360 @@
   "overview_section_vitals_body": {
     "en": "Current HP, max HP, armor class, speed, initiative, and experience will live here.",
     "ru": "Здесь будут текущие и максимальные HP, класс брони, скорость, инициатива и опыт.",
-    "de": "Current HP, max HP, armor class, speed, initiative, and experience will live here.",
-    "fr": "Current HP, max HP, armor class, speed, initiative, and experience will live here.",
-    "es": "Current HP, max HP, armor class, speed, initiative, and experience will live here."
+    "de": "Hier stehen künftig aktuelle und maximale TP, Rüstungsklasse, Bewegungsrate, Initiative und Erfahrung.",
+    "fr": "Les pv actuels et maximum, la classe d'armure, la vitesse, l'initiative et l'expérience figureront ici.",
+    "es": "Aquí aparecerán los PG actuales y máximos, la Clase de Armadura, la velocidad, la iniciativa y la experiencia."
   },
   "overview_section_snapshot_title": {
     "en": "Party Snapshot",
     "ru": "Сводка группы",
-    "de": "Party Snapshot",
-    "fr": "Party Snapshot",
-    "es": "Party Snapshot"
+    "de": "Gruppenübersicht",
+    "fr": "Aperçu du groupe",
+    "es": "Resumen del grupo"
   },
   "overview_section_snapshot_body": {
     "en": "This foundation keeps the gameplay-first shell in place for session use.",
     "ru": "Этот базовый каркас уже ориентирован на быстрый доступ во время сессии.",
-    "de": "This foundation keeps the gameplay-first shell in place for session use.",
-    "fr": "This foundation keeps the gameplay-first shell in place for session use.",
-    "es": "This foundation keeps the gameplay-first shell in place for session use."
+    "de": "Dieses Grundgerüst ist bereits auf schnellen Zugriff während der Spielsitzung ausgelegt.",
+    "fr": "Cette base conserve une interface pensée d'abord pour le jeu, prête pour vos séances.",
+    "es": "Esta base ya está pensada para un acceso rápido durante la sesión de juego."
   },
   "attributes_section_scores_title": {
     "en": "Ability Scores",
     "ru": "Основные характеристики",
-    "de": "Ability Scores",
-    "fr": "Ability Scores",
-    "es": "Ability Scores"
+    "de": "Attributswerte",
+    "fr": "Valeurs de caractéristique",
+    "es": "Puntuaciones de característica"
   },
   "attributes_section_scores_body": {
     "en": "Strength, Dexterity, Constitution, Intelligence, Wisdom, and Charisma placeholders.",
     "ru": "Заглушки для Силы, Ловкости, Телосложения, Интеллекта, Мудрости и Харизмы.",
-    "de": "Strength, Dexterity, Constitution, Intelligence, Wisdom, and Charisma placeholders.",
-    "fr": "Strength, Dexterity, Constitution, Intelligence, Wisdom, and Charisma placeholders.",
-    "es": "Strength, Dexterity, Constitution, Intelligence, Wisdom, and Charisma placeholders."
+    "de": "Platzhalter für Stärke, Geschicklichkeit, Konstitution, Intelligenz, Weisheit und Charisma.",
+    "fr": "Emplacements réservés pour la Force, la Dextérité, la Constitution, l'Intelligence, la Sagesse et le Charisme.",
+    "es": "Marcadores para Fuerza, Destreza, Constitución, Inteligencia, Sabiduría y Carisma."
   },
   "attributes_section_skills_title": {
     "en": "Skills",
     "ru": "Навыки",
-    "de": "Skills",
-    "fr": "Skills",
-    "es": "Skills"
+    "de": "Fertigkeiten",
+    "fr": "Compétences",
+    "es": "Habilidades"
   },
   "attributes_section_skills_body": {
     "en": "All D&D 5e skills and proficiency state are scaffolded in the data layer.",
     "ru": "Все навыки D&D 5e и состояние владения уже заложены в слой данных.",
-    "de": "All D&D 5e skills and proficiency state are scaffolded in the data layer.",
-    "fr": "All D&D 5e skills and proficiency state are scaffolded in the data layer.",
-    "es": "All D&D 5e skills and proficiency state are scaffolded in the data layer."
+    "de": "Alle D&D-5e-Fertigkeiten und der Übungsstatus sind in der Datenschicht bereits angelegt.",
+    "fr": "Toutes les compétences de D&D 5e et leur état de maîtrise sont déjà prévus dans la couche de données.",
+    "es": "Todas las habilidades de D&D 5e y su estado de competencia ya están preparados en la capa de datos."
   },
   "skill_acrobatics": {
     "en": "Acrobatics",
     "ru": "Акробатика",
-    "de": "Acrobatics",
-    "fr": "Acrobatics",
-    "es": "Acrobatics"
+    "de": "Akrobatik",
+    "fr": "Acrobaties",
+    "es": "Acrobacias"
   },
   "skill_animal_handling": {
     "en": "Animal Handling",
     "ru": "Уход за животными",
-    "de": "Animal Handling",
-    "fr": "Animal Handling",
-    "es": "Animal Handling"
+    "de": "Mit Tieren umgehen",
+    "fr": "Dressage",
+    "es": "Trato con Animales"
   },
   "skill_arcana": {
     "en": "Arcana",
     "ru": "Магия",
-    "de": "Arcana",
-    "fr": "Arcana",
-    "es": "Arcana"
+    "de": "Arkane Kunde",
+    "fr": "Arcanes",
+    "es": "Conocimiento Arcano"
   },
   "skill_athletics": {
     "en": "Athletics",
     "ru": "Атлетика",
-    "de": "Athletics",
-    "fr": "Athletics",
-    "es": "Athletics"
+    "de": "Athletik",
+    "fr": "Athlétisme",
+    "es": "Atletismo"
   },
   "skill_deception": {
     "en": "Deception",
     "ru": "Обман",
-    "de": "Deception",
-    "fr": "Deception",
-    "es": "Deception"
+    "de": "Täuschen",
+    "fr": "Tromperie",
+    "es": "Engaño"
   },
   "skill_history": {
     "en": "History",
     "ru": "История",
-    "de": "History",
-    "fr": "History",
-    "es": "History"
+    "de": "Geschichte",
+    "fr": "Histoire",
+    "es": "Historia"
   },
   "skill_insight": {
     "en": "Insight",
     "ru": "Проницательность",
-    "de": "Insight",
-    "fr": "Insight",
-    "es": "Insight"
+    "de": "Motiv erkennen",
+    "fr": "Intuition",
+    "es": "Perspicacia"
   },
   "skill_intimidation": {
     "en": "Intimidation",
     "ru": "Запугивание",
-    "de": "Intimidation",
+    "de": "Einschüchtern",
     "fr": "Intimidation",
-    "es": "Intimidation"
+    "es": "Intimidación"
   },
   "skill_investigation": {
     "en": "Investigation",
     "ru": "Расследование",
-    "de": "Investigation",
+    "de": "Nachforschungen",
     "fr": "Investigation",
-    "es": "Investigation"
+    "es": "Investigación"
   },
   "skill_medicine": {
     "en": "Medicine",
     "ru": "Медицина",
-    "de": "Medicine",
-    "fr": "Medicine",
-    "es": "Medicine"
+    "de": "Heilkunde",
+    "fr": "Médecine",
+    "es": "Medicina"
   },
   "skill_nature": {
     "en": "Nature",
     "ru": "Природа",
-    "de": "Nature",
+    "de": "Naturkunde",
     "fr": "Nature",
-    "es": "Nature"
+    "es": "Naturaleza"
   },
   "skill_perception": {
     "en": "Perception",
     "ru": "Внимательность",
-    "de": "Perception",
+    "de": "Wahrnehmung",
     "fr": "Perception",
-    "es": "Perception"
+    "es": "Percepción"
   },
   "skill_performance": {
     "en": "Performance",
     "ru": "Выступление",
-    "de": "Performance",
-    "fr": "Performance",
-    "es": "Performance"
+    "de": "Auftreten",
+    "fr": "Représentation",
+    "es": "Interpretación"
   },
   "skill_persuasion": {
     "en": "Persuasion",
     "ru": "Убеждение",
-    "de": "Persuasion",
+    "de": "Überzeugen",
     "fr": "Persuasion",
-    "es": "Persuasion"
+    "es": "Persuasión"
   },
   "skill_religion": {
     "en": "Religion",
     "ru": "Религия",
     "de": "Religion",
     "fr": "Religion",
-    "es": "Religion"
+    "es": "Religión"
   },
   "skill_sleight_of_hand": {
     "en": "Sleight of Hand",
     "ru": "Ловкость рук",
-    "de": "Sleight of Hand",
-    "fr": "Sleight of Hand",
-    "es": "Sleight of Hand"
+    "de": "Fingerfertigkeit",
+    "fr": "Escamotage",
+    "es": "Juego de Manos"
   },
   "skill_stealth": {
     "en": "Stealth",
     "ru": "Скрытность",
-    "de": "Stealth",
-    "fr": "Stealth",
-    "es": "Stealth"
+    "de": "Heimlichkeit",
+    "fr": "Discrétion",
+    "es": "Sigilo"
   },
   "skill_survival": {
     "en": "Survival",
     "ru": "Выживание",
-    "de": "Survival",
-    "fr": "Survival",
-    "es": "Survival"
+    "de": "Überlebenskunst",
+    "fr": "Survie",
+    "es": "Supervivencia"
   },
   "attributes_proficiency_bonus": {
     "en": "Proficiency Bonus",
-    "ru": "Бонус мастерства"
+    "ru": "Бонус мастерства",
+    "de": "Übungsbonus",
+    "fr": "Bonus de maîtrise",
+    "es": "Bonificador por competencia"
   },
   "attributes_passive_perception": {
     "en": "Passive Perception",
-    "ru": "Пассивная внимательность"
+    "ru": "Пассивная внимательность",
+    "de": "Passive Wahrnehmung",
+    "fr": "Perception passive",
+    "es": "Percepción pasiva"
   },
   "attributes_darkvision": {
     "en": "Darkvision",
-    "ru": "Тёмное зрение"
+    "ru": "Тёмное зрение",
+    "de": "Dunkelsicht",
+    "fr": "Vision dans le noir",
+    "es": "Visión en la oscuridad"
   },
   "attributes_darkvision_title": {
     "en": "Darkvision",
-    "ru": "Тёмное зрение"
+    "ru": "Тёмное зрение",
+    "de": "Dunkelsicht",
+    "fr": "Vision dans le noir",
+    "es": "Visión en la oscuridad"
   },
   "attributes_darkvision_mode_auto": {
     "en": "Auto",
-    "ru": "Авто"
+    "ru": "Авто",
+    "de": "Auto",
+    "fr": "Auto",
+    "es": "Auto"
   },
   "attributes_darkvision_mode_manual": {
     "en": "Manual",
-    "ru": "Вручную"
+    "ru": "Вручную",
+    "de": "Manuell",
+    "fr": "Manuel",
+    "es": "Manual"
   },
   "attributes_darkvision_none": {
     "en": "You don't have Darkvision right now.",
-    "ru": "Сейчас у вас нет Тёмного зрения."
+    "ru": "Сейчас у вас нет Тёмного зрения.",
+    "de": "Du hast derzeit keine Dunkelsicht.",
+    "fr": "Vous n'avez pas de vision dans le noir pour l'instant.",
+    "es": "Ahora mismo no tienes visión en la oscuridad."
   },
   "attributes_darkvision_add": {
     "en": "Add Darkvision",
-    "ru": "Добавить Тёмное зрение"
+    "ru": "Добавить Тёмное зрение",
+    "de": "Dunkelsicht hinzufügen",
+    "fr": "Ajouter la vision dans le noir",
+    "es": "Añadir visión en la oscuridad"
   },
   "attributes_darkvision_manual_hint": {
     "en": "You're entering Darkvision manually.",
-    "ru": "Вы вводите Тёмное зрение вручную."
+    "ru": "Вы вводите Тёмное зрение вручную.",
+    "de": "Du gibst die Dunkelsicht manuell ein.",
+    "fr": "Vous saisissez la vision dans le noir manuellement.",
+    "es": "Estás introduciendo la visión en la oscuridad manualmente."
   },
   "attributes_darkvision_feet": {
     "en": "Feet",
-    "ru": "Футы"
+    "ru": "Футы",
+    "de": "Fuß",
+    "fr": "Pieds",
+    "es": "Pies"
   },
   "attributes_ability_scores": {
     "en": "Ability Scores",
-    "ru": "Характеристики"
+    "ru": "Характеристики",
+    "de": "Attribute",
+    "fr": "Caractéristiques",
+    "es": "Características"
   },
   "attributes_skills": {
     "en": "Skills",
-    "ru": "Навыки"
+    "ru": "Навыки",
+    "de": "Fertigkeiten",
+    "fr": "Compétences",
+    "es": "Habilidades"
   },
   "attributes_proficiencies": {
     "en": "Proficiencies",
-    "ru": "Владения"
+    "ru": "Владения",
+    "de": "Übungen",
+    "fr": "Maîtrises",
+    "es": "Competencias"
   },
   "attributes_passive_perception_bonus_title": {
     "en": "Passive Perception Bonus",
-    "ru": "Бонус пассивной внимательности"
+    "ru": "Бонус пассивной внимательности",
+    "de": "Bonus auf passive Wahrnehmung",
+    "fr": "Bonus de Perception passive",
+    "es": "Bonificador a Percepción pasiva"
   },
   "attributes_base_value": {
     "en": "Base value: %s",
-    "ru": "Базовое значение: %s"
+    "ru": "Базовое значение: %s",
+    "de": "Grundwert: %s",
+    "fr": "Valeur de base : %s",
+    "es": "Valor base: %s"
   },
   "attributes_additional_bonus": {
     "en": "Additional bonus",
-    "ru": "Дополнительный бонус"
+    "ru": "Дополнительный бонус",
+    "de": "Zusätzlicher Bonus",
+    "fr": "Bonus supplémentaire",
+    "es": "Bonificador adicional"
   },
   "attributes_has_proficiency": {
     "en": "Has proficiency",
-    "ru": "Есть владение"
+    "ru": "Есть владение",
+    "de": "Geübt",
+    "fr": "Possède la maîtrise",
+    "es": "Tiene competencia"
   },
   "attributes_has_expertise": {
     "en": "Has expertise",
-    "ru": "Есть экспертиза"
+    "ru": "Есть экспертиза",
+    "de": "Expertise",
+    "fr": "Possède l'expertise",
+    "es": "Tiene pericia"
   },
   "attributes_jack_of_all_trades": {
     "en": "Jack of All Trades",
-    "ru": "Мастер на все руки"
+    "ru": "Мастер на все руки",
+    "de": "Alleskönner",
+    "fr": "Touche-à-tout",
+    "es": "Aprendiz de todo"
   },
   "attributes_edit_ability_title": {
     "en": "Edit %s",
-    "ru": "Изменить %s"
+    "ru": "Изменить %s",
+    "de": "%s bearbeiten",
+    "fr": "Modifier %s",
+    "es": "Editar %s"
   },
   "attributes_edit_ability_hint": {
     "en": "Set %s score, not the modifier.",
-    "ru": "Введите значение %s, а не модификатор."
+    "ru": "Введите значение %s, а не модификатор.",
+    "de": "Gib den Wert für %s ein, nicht den Modifikator.",
+    "fr": "%s : saisissez la valeur, pas le modificateur.",
+    "es": "Introduce la puntuación de %s, no el modificador."
   },
   "attributes_ability_score_label": {
     "en": "%s score",
-    "ru": "Значение %s"
+    "ru": "Значение %s",
+    "de": "%s-Wert",
+    "fr": "Valeur (%s)",
+    "es": "Puntuación de %s"
   },
   "attributes_save_proficiency_label": {
     "en": "Proficient in %s saving throw",
-    "ru": "Владение спасброском %s"
+    "ru": "Владение спасброском %s",
+    "de": "Geübt in %s-Rettungswürfen",
+    "fr": "Maîtrise du jet de sauvegarde (%s)",
+    "es": "Competencia en tiradas de salvación de %s"
   },
   "attributes_saving_throw_short": {
     "en": "Save",
-    "ru": "Спас."
+    "ru": "Спас.",
+    "de": "RW",
+    "fr": "Sauv.",
+    "es": "Salv."
   },
   "ability_str_short": {
     "en": "STR",
-    "ru": "СИЛ"
+    "ru": "СИЛ",
+    "de": "STÄ",
+    "fr": "FOR",
+    "es": "FUE"
   },
   "ability_dex_short": {
     "en": "DEX",
-    "ru": "ЛОВ"
+    "ru": "ЛОВ",
+    "de": "GES",
+    "fr": "DEX",
+    "es": "DES"
   },
   "ability_con_short": {
     "en": "CON",
-    "ru": "ТЕЛ"
+    "ru": "ТЕЛ",
+    "de": "KON",
+    "fr": "CON",
+    "es": "CON"
   },
   "ability_int_short": {
     "en": "INT",
-    "ru": "ИНТ"
+    "ru": "ИНТ",
+    "de": "INT",
+    "fr": "INT",
+    "es": "INT"
   },
   "ability_wis_short": {
     "en": "WIS",
-    "ru": "МДР"
+    "ru": "МДР",
+    "de": "WEI",
+    "fr": "SAG",
+    "es": "SAB"
   },
   "ability_cha_short": {
     "en": "CHA",
-    "ru": "ХАР"
+    "ru": "ХАР",
+    "de": "CHA",
+    "fr": "CHA",
+    "es": "CAR"
   },
   "ability_strength": {
     "en": "Strength",
-    "ru": "Сила"
+    "ru": "Сила",
+    "de": "Stärke",
+    "fr": "Force",
+    "es": "Fuerza"
   },
   "ability_dexterity": {
     "en": "Dexterity",
-    "ru": "Ловкость"
+    "ru": "Ловкость",
+    "de": "Geschicklichkeit",
+    "fr": "Dextérité",
+    "es": "Destreza"
   },
   "ability_constitution": {
     "en": "Constitution",
-    "ru": "Телосложение"
+    "ru": "Телосложение",
+    "de": "Konstitution",
+    "fr": "Constitution",
+    "es": "Constitución"
   },
   "ability_intelligence": {
     "en": "Intelligence",
-    "ru": "Интеллект"
+    "ru": "Интеллект",
+    "de": "Intelligenz",
+    "fr": "Intelligence",
+    "es": "Inteligencia"
   },
   "ability_wisdom": {
     "en": "Wisdom",
-    "ru": "Мудрость"
+    "ru": "Мудрость",
+    "de": "Weisheit",
+    "fr": "Sagesse",
+    "es": "Sabiduría"
   },
   "ability_charisma": {
     "en": "Charisma",
-    "ru": "Харизма"
+    "ru": "Харизма",
+    "de": "Charisma",
+    "fr": "Charisme",
+    "es": "Carisma"
   },
   "common_none": {
     "en": "None",
-    "ru": "Нет"
+    "ru": "Нет",
+    "de": "Keine",
+    "fr": "Aucun",
+    "es": "Ninguno"
   },
   "common_automatic": {
     "en": "Automatic",
-    "ru": "\u0410\u0432\u0442\u043e\u043c\u0430\u0442\u0438\u0447\u0435\u0441\u043a\u0438\u0439"
+    "ru": "\u0410\u0432\u0442\u043e\u043c\u0430\u0442\u0438\u0447\u0435\u0441\u043a\u0438\u0439",
+    "de": "Automatisch",
+    "fr": "Automatique",
+    "es": "Automático"
   },
   "common_manual": {
     "en": "Manual",
-    "ru": "\u0420\u0443\u0447\u043d\u043e\u0439"
+    "ru": "\u0420\u0443\u0447\u043d\u043e\u0439",
+    "de": "Manuell",
+    "fr": "Manuel",
+    "es": "Manual"
   },
   "attributes_proficiency_armor": {
     "en": "Armor",
-    "ru": "Броня"
+    "ru": "Броня",
+    "de": "Rüstung",
+    "fr": "Armures",
+    "es": "Armadura"
   },
   "attributes_proficiency_weapons": {
     "en": "Weapons",
-    "ru": "Оружие"
+    "ru": "Оружие",
+    "de": "Waffen",
+    "fr": "Armes",
+    "es": "Armas"
   },
   "attributes_proficiency_tools": {
     "en": "Tools",
-    "ru": "Инструменты"
+    "ru": "Инструменты",
+    "de": "Werkzeuge",
+    "fr": "Outils",
+    "es": "Herramientas"
   },
   "attributes_proficiency_languages": {
     "en": "Languages",
-    "ru": "Языки"
+    "ru": "Языки",
+    "de": "Sprachen",
+    "fr": "Langues",
+    "es": "Idiomas"
   },
   "attributes_armor_dialog_title": {
     "en": "Armor Proficiencies",
-    "ru": "Владение броней"
+    "ru": "Владение броней",
+    "de": "Übung mit Rüstungen",
+    "fr": "Maîtrise des armures",
+    "es": "Competencia con armaduras"
   },
   "attributes_weapon_dialog_title": {
     "en": "Weapon Proficiencies",
-    "ru": "Владение оружием"
+    "ru": "Владение оружием",
+    "de": "Übung mit Waffen",
+    "fr": "Maîtrise des armes",
+    "es": "Competencia con armas"
   },
   "attributes_tools_dialog_title": {
     "en": "Tool Proficiencies",
-    "ru": "Владение инструментами"
+    "ru": "Владение инструментами",
+    "de": "Übung mit Werkzeugen",
+    "fr": "Maîtrise des outils",
+    "es": "Competencia con herramientas"
   },
   "attributes_languages_dialog_title": {
     "en": "Language Proficiencies",
-    "ru": "Владение языками"
+    "ru": "Владение языками",
+    "de": "Sprachkenntnisse",
+    "fr": "Maîtrise des langues",
+    "es": "Competencia en idiomas"
   },
   "attributes_weapon_simple": {
     "en": "Simple Weapons",
-    "ru": "Простое оружие"
+    "ru": "Простое оружие",
+    "de": "Einfache Waffen",
+    "fr": "Armes courantes",
+    "es": "Armas sencillas"
   },
   "attributes_weapon_martial": {
     "en": "Martial Weapons",
-    "ru": "Воинское оружие"
+    "ru": "Воинское оружие",
+    "de": "Kriegswaffen",
+    "fr": "Armes de guerre",
+    "es": "Armas marciales"
   },
   "attributes_weapon_simple_short": {
     "en": "Simple",
-    "ru": "Простое"
+    "ru": "Простое",
+    "de": "Einfach",
+    "fr": "Courantes",
+    "es": "Sencillas"
   },
   "attributes_weapon_martial_short": {
     "en": "Martial",
-    "ru": "Воинское"
+    "ru": "Воинское",
+    "de": "Kriegswaffe",
+    "fr": "De guerre",
+    "es": "Marciales"
   },
   "attributes_show_simple_weapons": {
     "en": "Show Simple list",
-    "ru": "Показать простое оружие"
+    "ru": "Показать простое оружие",
+    "de": "Einfache Waffen zeigen",
+    "fr": "Afficher les armes courantes",
+    "es": "Mostrar armas sencillas"
   },
   "attributes_show_martial_weapons": {
     "en": "Show Martial list",
-    "ru": "Показать воинское оружие"
+    "ru": "Показать воинское оружие",
+    "de": "Kriegswaffen zeigen",
+    "fr": "Afficher les armes de guerre",
+    "es": "Mostrar armas marciales"
   },
   "attributes_add_custom_tool": {
     "en": "Add custom tool",
-    "ru": "Добавить свой инструмент"
+    "ru": "Добавить свой инструмент",
+    "de": "Eigenes Werkzeug hinzufügen",
+    "fr": "Ajouter un outil personnalisé",
+    "es": "Añadir herramienta propia"
   },
   "attributes_custom_tool": {
     "en": "Custom tool",
-    "ru": "Свой инструмент"
+    "ru": "Свой инструмент",
+    "de": "Eigenes Werkzeug",
+    "fr": "Outil personnalisé",
+    "es": "Herramienta propia"
   },
   "attributes_add_custom_language": {
     "en": "Add custom language",
-    "ru": "Добавить свой язык"
+    "ru": "Добавить свой язык",
+    "de": "Eigene Sprache hinzufügen",
+    "fr": "Ajouter une langue personnalisée",
+    "es": "Añadir idioma propio"
   },
   "attributes_custom_language": {
     "en": "Custom language",
-    "ru": "Свой язык"
+    "ru": "Свой язык",
+    "de": "Eigene Sprache",
+    "fr": "Langue personnalisée",
+    "es": "Idioma propio"
   },
   "Light Armor": {
     "en": "Light Armor",
-    "ru": "Легкая броня"
+    "ru": "Легкая броня",
+    "de": "Leichte Rüstung",
+    "fr": "Armures légères",
+    "es": "Armadura ligera"
   },
   "Medium Armor": {
     "en": "Medium Armor",
-    "ru": "Средняя броня"
+    "ru": "Средняя броня",
+    "de": "Mittelschwere Rüstung",
+    "fr": "Armures intermédiaires",
+    "es": "Armadura intermedia"
   },
   "Heavy Armor": {
     "en": "Heavy Armor",
-    "ru": "Тяжелая броня"
+    "ru": "Тяжелая броня",
+    "de": "Schwere Rüstung",
+    "fr": "Armures lourdes",
+    "es": "Armadura pesada"
   },
   "Shields": {
     "en": "Shields",
-    "ru": "Щиты"
+    "ru": "Щиты",
+    "de": "Schilde",
+    "fr": "Boucliers",
+    "es": "Escudos"
   },
   "Club": {
     "en": "Club",
-    "ru": "Дубинка"
+    "ru": "Дубинка",
+    "de": "Knüppel",
+    "fr": "Gourdin",
+    "es": "Clava"
   },
   "Dagger": {
     "en": "Dagger",
-    "ru": "Кинжал"
+    "ru": "Кинжал",
+    "de": "Dolch",
+    "fr": "Dague",
+    "es": "Daga"
   },
   "Greatclub": {
     "en": "Greatclub",
-    "ru": "Большая дубинка"
+    "ru": "Большая дубинка",
+    "de": "Zweihandknüppel",
+    "fr": "Massue",
+    "es": "Gran clava"
   },
   "Handaxe": {
     "en": "Handaxe",
-    "ru": "Ручной топор"
+    "ru": "Ручной топор",
+    "de": "Handaxt",
+    "fr": "Hachette",
+    "es": "Hacha de mano"
   },
   "Javelin": {
     "en": "Javelin",
-    "ru": "Метательное копье"
+    "ru": "Метательное копье",
+    "de": "Wurfspeer",
+    "fr": "Javeline",
+    "es": "Jabalina"
   },
   "Light Hammer": {
     "en": "Light Hammer",
-    "ru": "Легкий молот"
+    "ru": "Легкий молот",
+    "de": "Leichter Hammer",
+    "fr": "Marteau léger",
+    "es": "Martillo ligero"
   },
   "Mace": {
     "en": "Mace",
-    "ru": "Булава"
+    "ru": "Булава",
+    "de": "Streitkolben",
+    "fr": "Masse d'armes",
+    "es": "Maza"
   },
   "Quarterstaff": {
     "en": "Quarterstaff",
-    "ru": "Боевой посох"
+    "ru": "Боевой посох",
+    "de": "Kampfstab",
+    "fr": "Bâton",
+    "es": "Bastón"
   },
   "Sickle": {
     "en": "Sickle",
-    "ru": "Серп"
+    "ru": "Серп",
+    "de": "Sichel",
+    "fr": "Serpe",
+    "es": "Hoz"
   },
   "Spear": {
     "en": "Spear",
-    "ru": "Копье"
+    "ru": "Копье",
+    "de": "Speer",
+    "fr": "Lance",
+    "es": "Lanza"
   },
   "Light Crossbow": {
     "en": "Light Crossbow",
-    "ru": "Легкий арбалет"
+    "ru": "Легкий арбалет",
+    "de": "Leichte Armbrust",
+    "fr": "Arbalète légère",
+    "es": "Ballesta ligera"
   },
   "Dart": {
     "en": "Dart",
-    "ru": "Дротик"
+    "ru": "Дротик",
+    "de": "Wurfpfeil",
+    "fr": "Fléchette",
+    "es": "Dardo"
   },
   "Shortbow": {
     "en": "Shortbow",
-    "ru": "Короткий лук"
+    "ru": "Короткий лук",
+    "de": "Kurzbogen",
+    "fr": "Arc court",
+    "es": "Arco corto"
   },
   "Sling": {
     "en": "Sling",
-    "ru": "Праща"
+    "ru": "Праща",
+    "de": "Schleuder",
+    "fr": "Fronde",
+    "es": "Honda"
   },
   "Battleaxe": {
     "en": "Battleaxe",
-    "ru": "Боевой топор"
+    "ru": "Боевой топор",
+    "de": "Streitaxt",
+    "fr": "Hache d'armes",
+    "es": "Hacha de batalla"
   },
   "Flail": {
     "en": "Flail",
-    "ru": "Цеп"
+    "ru": "Цеп",
+    "de": "Flegel",
+    "fr": "Fléau d'armes",
+    "es": "Mangual"
   },
   "Glaive": {
     "en": "Glaive",
-    "ru": "Глефа"
+    "ru": "Глефа",
+    "de": "Glefe",
+    "fr": "Coutille",
+    "es": "Guja"
   },
   "Greataxe": {
     "en": "Greataxe",
-    "ru": "Секира"
+    "ru": "Секира",
+    "de": "Zweihandaxt",
+    "fr": "Hache à deux mains",
+    "es": "Gran hacha"
   },
   "Greatsword": {
     "en": "Greatsword",
-    "ru": "Двуручный меч"
+    "ru": "Двуручный меч",
+    "de": "Zweihandschwert",
+    "fr": "Épée à deux mains",
+    "es": "Espadón"
   },
   "Halberd": {
     "en": "Halberd",
-    "ru": "Алебарда"
+    "ru": "Алебарда",
+    "de": "Hellebarde",
+    "fr": "Hallebarde",
+    "es": "Alabarda"
   },
   "Lance": {
     "en": "Lance",
-    "ru": "Пика"
+    "ru": "Пика",
+    "de": "Lanze",
+    "fr": "Lance d'arçon",
+    "es": "Lanza de caballería"
   },
   "Longsword": {
     "en": "Longsword",
-    "ru": "Длинный меч"
+    "ru": "Длинный меч",
+    "de": "Langschwert",
+    "fr": "Épée longue",
+    "es": "Espada larga"
   },
   "Maul": {
     "en": "Maul",
-    "ru": "Кувалда"
+    "ru": "Кувалда",
+    "de": "Zweihandhammer",
+    "fr": "Maillet d'armes",
+    "es": "Mazo"
   },
   "Morningstar": {
     "en": "Morningstar",
-    "ru": "Моргенштерн"
+    "ru": "Моргенштерн",
+    "de": "Morgenstern",
+    "fr": "Morgenstern",
+    "es": "Lucero del alba"
   },
   "Musket": {
     "en": "Musket",
-    "ru": "\u041c\u0443\u0448\u043a\u0435\u0442"
+    "ru": "\u041c\u0443\u0448\u043a\u0435\u0442",
+    "de": "Muskete",
+    "fr": "Mousquet",
+    "es": "Mosquete"
   },
   "Pike": {
     "en": "Pike",
-    "ru": "Пика"
+    "ru": "Пика",
+    "de": "Pike",
+    "fr": "Pique",
+    "es": "Pica"
   },
   "Rapier": {
     "en": "Rapier",
-    "ru": "Рапира"
+    "ru": "Рапира",
+    "de": "Rapier",
+    "fr": "Rapière",
+    "es": "Estoque"
   },
   "Scimitar": {
     "en": "Scimitar",
-    "ru": "Скимитар"
+    "ru": "Скимитар",
+    "de": "Krummsäbel",
+    "fr": "Cimeterre",
+    "es": "Cimitarra"
   },
   "Shortsword": {
     "en": "Shortsword",
-    "ru": "Короткий меч"
+    "ru": "Короткий меч",
+    "de": "Kurzschwert",
+    "fr": "Épée courte",
+    "es": "Espada corta"
   },
   "Trident": {
     "en": "Trident",
-    "ru": "Трезубец"
+    "ru": "Трезубец",
+    "de": "Dreizack",
+    "fr": "Trident",
+    "es": "Tridente"
   },
   "War Pick": {
     "en": "War Pick",
-    "ru": "Боевая кирка"
+    "ru": "Боевая кирка",
+    "de": "Kriegspicke",
+    "fr": "Pic de guerre",
+    "es": "Pico de guerra"
   },
   "Warhammer": {
     "en": "Warhammer",
-    "ru": "Боевой молот"
+    "ru": "Боевой молот",
+    "de": "Kriegshammer",
+    "fr": "Marteau de guerre",
+    "es": "Martillo de guerra"
   },
   "Whip": {
     "en": "Whip",
-    "ru": "Кнут"
+    "ru": "Кнут",
+    "de": "Peitsche",
+    "fr": "Fouet",
+    "es": "Látigo"
   },
   "Blowgun": {
     "en": "Blowgun",
-    "ru": "Духовая трубка"
+    "ru": "Духовая трубка",
+    "de": "Blasrohr",
+    "fr": "Sarbacane",
+    "es": "Cerbatana"
   },
   "Hand Crossbow": {
     "en": "Hand Crossbow",
-    "ru": "Ручной арбалет"
+    "ru": "Ручной арбалет",
+    "de": "Handarmbrust",
+    "fr": "Arbalète de poing",
+    "es": "Ballesta de mano"
   },
   "Heavy Crossbow": {
     "en": "Heavy Crossbow",
-    "ru": "Тяжелый арбалет"
+    "ru": "Тяжелый арбалет",
+    "de": "Schwere Armbrust",
+    "fr": "Arbalète lourde",
+    "es": "Ballesta pesada"
   },
   "Longbow": {
     "en": "Longbow",
-    "ru": "Длинный лук"
+    "ru": "Длинный лук",
+    "de": "Langbogen",
+    "fr": "Arc long",
+    "es": "Arco largo"
   },
   "Net": {
     "en": "Net",
-    "ru": "Сеть"
+    "ru": "Сеть",
+    "de": "Netz",
+    "fr": "Filet",
+    "es": "Red"
   },
   "Artisan's Tools": {
     "en": "Artisan's Tools",
-    "ru": "Ремесленные инструменты"
+    "ru": "Ремесленные инструменты",
+    "de": "Handwerkszeug",
+    "fr": "Outils d'artisan",
+    "es": "Herramientas de artesano"
   },
   "Gaming Sets": {
     "en": "Gaming Sets",
-    "ru": "Игровые наборы"
+    "ru": "Игровые наборы",
+    "de": "Spielsets",
+    "fr": "Jeux",
+    "es": "Juegos"
   },
   "Musical Instruments": {
     "en": "Musical Instruments",
-    "ru": "Музыкальные инструменты"
+    "ru": "Музыкальные инструменты",
+    "de": "Musikinstrumente",
+    "fr": "Instruments de musique",
+    "es": "Instrumentos musicales"
   },
   "Other Tools": {
     "en": "Other Tools",
-    "ru": "Прочие инструменты"
+    "ru": "Прочие инструменты",
+    "de": "Andere Werkzeuge",
+    "fr": "Autres outils",
+    "es": "Otras herramientas"
   },
   "Vehicles": {
     "en": "Vehicles",
-    "ru": "Транспорт"
+    "ru": "Транспорт",
+    "de": "Fahrzeuge",
+    "fr": "Véhicules",
+    "es": "Vehículos"
   },
   "Alchemist's Supplies": {
     "en": "Alchemist's Supplies",
-    "ru": "Инструменты алхимика"
+    "ru": "Инструменты алхимика",
+    "de": "Alchemistenausrüstung",
+    "fr": "Matériel d'alchimiste",
+    "es": "Útiles de alquimista"
   },
   "Brewer's Supplies": {
     "en": "Brewer's Supplies",
-    "ru": "Инструменты пивовара"
+    "ru": "Инструменты пивовара",
+    "de": "Brauerausrüstung",
+    "fr": "Matériel de brasseur",
+    "es": "Útiles de cervecero"
   },
   "Calligrapher's Supplies": {
     "en": "Calligrapher's Supplies",
-    "ru": "Инструменты каллиграфа"
+    "ru": "Инструменты каллиграфа",
+    "de": "Kalligrafenausrüstung",
+    "fr": "Matériel de calligraphie",
+    "es": "Útiles de calígrafo"
   },
   "Carpenter's Tools": {
     "en": "Carpenter's Tools",
-    "ru": "Инструменты плотника"
+    "ru": "Инструменты плотника",
+    "de": "Zimmermannswerkzeug",
+    "fr": "Outils de charpentier",
+    "es": "Herramientas de carpintero"
   },
   "Cartographer's Tools": {
     "en": "Cartographer's Tools",
-    "ru": "Инструменты картографа"
+    "ru": "Инструменты картографа",
+    "de": "Kartografenwerkzeug",
+    "fr": "Outils de cartographe",
+    "es": "Herramientas de cartógrafo"
   },
   "Cobbler's Tools": {
     "en": "Cobbler's Tools",
-    "ru": "Инструменты сапожника"
+    "ru": "Инструменты сапожника",
+    "de": "Schusterwerkzeug",
+    "fr": "Outils de cordonnier",
+    "es": "Herramientas de zapatero"
   },
   "Cook's Utensils": {
     "en": "Cook's Utensils",
-    "ru": "Кухонная утварь"
+    "ru": "Кухонная утварь",
+    "de": "Kochutensilien",
+    "fr": "Ustensiles de cuisinier",
+    "es": "Utensilios de cocinero"
   },
   "Glassblower's Tools": {
     "en": "Glassblower's Tools",
-    "ru": "Инструменты стеклодува"
+    "ru": "Инструменты стеклодува",
+    "de": "Glasbläserwerkzeug",
+    "fr": "Outils de souffleur de verre",
+    "es": "Herramientas de soplador de vidrio"
   },
   "Jeweler's Tools": {
     "en": "Jeweler's Tools",
-    "ru": "Инструменты ювелира"
+    "ru": "Инструменты ювелира",
+    "de": "Juwelierwerkzeug",
+    "fr": "Outils de joaillier",
+    "es": "Herramientas de joyero"
   },
   "Leatherworker's Tools": {
     "en": "Leatherworker's Tools",
-    "ru": "Инструменты кожевника"
+    "ru": "Инструменты кожевника",
+    "de": "Lederverarbeitungswerkzeug",
+    "fr": "Outils de tanneur",
+    "es": "Herramientas de peletero"
   },
   "Mason's Tools": {
     "en": "Mason's Tools",
-    "ru": "Инструменты каменщика"
+    "ru": "Инструменты каменщика",
+    "de": "Maurerwerkzeug",
+    "fr": "Outils de maçon",
+    "es": "Herramientas de albañil"
   },
   "Painter's Supplies": {
     "en": "Painter's Supplies",
-    "ru": "Инструменты художника"
+    "ru": "Инструменты художника",
+    "de": "Malerausrüstung",
+    "fr": "Matériel de peintre",
+    "es": "Útiles de pintor"
   },
   "Potter's Tools": {
     "en": "Potter's Tools",
-    "ru": "Инструменты гончара"
+    "ru": "Инструменты гончара",
+    "de": "Töpferwerkzeug",
+    "fr": "Outils de potier",
+    "es": "Herramientas de alfarero"
   },
   "Smith's Tools": {
     "en": "Smith's Tools",
-    "ru": "Инструменты кузнеца"
+    "ru": "Инструменты кузнеца",
+    "de": "Schmiedewerkzeug",
+    "fr": "Outils de forgeron",
+    "es": "Herramientas de herrero"
   },
   "Tinker's Tools": {
     "en": "Tinker's Tools",
-    "ru": "Инструменты ремонтника"
+    "ru": "Инструменты ремонтника",
+    "de": "Tüftlerwerkzeug",
+    "fr": "Outils de bricoleur",
+    "es": "Herramientas de hojalatero"
   },
   "Weaver's Tools": {
     "en": "Weaver's Tools",
-    "ru": "Инструменты ткача"
+    "ru": "Инструменты ткача",
+    "de": "Weberwerkzeug",
+    "fr": "Outils de tisserand",
+    "es": "Herramientas de tejedor"
   },
   "Woodcarver's Tools": {
     "en": "Woodcarver's Tools",
-    "ru": "Инструменты резчика по дереву"
+    "ru": "Инструменты резчика по дереву",
+    "de": "Holzschnitzwerkzeug",
+    "fr": "Outils de menuisier",
+    "es": "Herramientas de tallista"
   },
   "Dice Set": {
     "en": "Dice Set",
-    "ru": "Набор костей"
+    "ru": "Набор костей",
+    "de": "Würfelspiel",
+    "fr": "Jeu de dés",
+    "es": "Juego de dados"
   },
   "Dragonchess Set": {
     "en": "Dragonchess Set",
-    "ru": "Драконьи шахматы"
+    "ru": "Драконьи шахматы",
+    "de": "Drachenschach",
+    "fr": "Échecs draconiques",
+    "es": "Ajedrez de dragones"
   },
   "Playing Card Set": {
     "en": "Playing Card Set",
-    "ru": "Игральные карты"
+    "ru": "Игральные карты",
+    "de": "Kartenspiel",
+    "fr": "Jeu de cartes",
+    "es": "Baraja de cartas"
   },
   "Three-Dragon Ante Set": {
     "en": "Three-Dragon Ante Set",
-    "ru": "Ставка трех драконов"
+    "ru": "Ставка трех драконов",
+    "de": "Drei-Drachen-Ante",
+    "fr": "Jeu des trois dragons",
+    "es": "Apuesta de los Tres Dragones"
   },
   "Bagpipes": {
     "en": "Bagpipes",
-    "ru": "Волынка"
+    "ru": "Волынка",
+    "de": "Dudelsack",
+    "fr": "Cornemuse",
+    "es": "Gaita"
   },
   "Drum": {
     "en": "Drum",
-    "ru": "Барабан"
+    "ru": "Барабан",
+    "de": "Trommel",
+    "fr": "Tambour",
+    "es": "Tambor"
   },
   "Dulcimer": {
     "en": "Dulcimer",
-    "ru": "Цимбалы"
+    "ru": "Цимбалы",
+    "de": "Hackbrett",
+    "fr": "Tympanon",
+    "es": "Dulcémele"
   },
   "Flute": {
     "en": "Flute",
-    "ru": "Флейта"
+    "ru": "Флейта",
+    "de": "Flöte",
+    "fr": "Flûte",
+    "es": "Flauta"
   },
   "Lute": {
     "en": "Lute",
-    "ru": "Лютня"
+    "ru": "Лютня",
+    "de": "Laute",
+    "fr": "Luth",
+    "es": "Laúd"
   },
   "Lyre": {
     "en": "Lyre",
-    "ru": "Лира"
+    "ru": "Лира",
+    "de": "Leier",
+    "fr": "Lyre",
+    "es": "Lira"
   },
   "Horn": {
     "en": "Horn",
-    "ru": "Рожок"
+    "ru": "Рожок",
+    "de": "Horn",
+    "fr": "Cor",
+    "es": "Cuerno"
   },
   "Pan Flute": {
     "en": "Pan Flute",
-    "ru": "Флейта Пана"
+    "ru": "Флейта Пана",
+    "de": "Panflöte",
+    "fr": "Flûte de Pan",
+    "es": "Flauta de Pan"
   },
   "Shawm": {
     "en": "Shawm",
-    "ru": "Шалмей"
+    "ru": "Шалмей",
+    "de": "Schalmei",
+    "fr": "Chalemie",
+    "es": "Chirimía"
   },
   "Viol": {
     "en": "Viol",
-    "ru": "Виола"
+    "ru": "Виола",
+    "de": "Gambe",
+    "fr": "Viole",
+    "es": "Viola"
   },
   "Disguise Kit": {
     "en": "Disguise Kit",
-    "ru": "Набор для грима"
+    "ru": "Набор для грима",
+    "de": "Verkleidungsausrüstung",
+    "fr": "Kit de déguisement",
+    "es": "Útiles de disfraz"
   },
   "Forgery Kit": {
     "en": "Forgery Kit",
-    "ru": "Набор фальсификатора"
+    "ru": "Набор фальсификатора",
+    "de": "Fälscherausrüstung",
+    "fr": "Kit de contrefaçon",
+    "es": "Útiles de falsificación"
   },
   "Herbalism Kit": {
     "en": "Herbalism Kit",
-    "ru": "Набор травника"
+    "ru": "Набор травника",
+    "de": "Kräuterkundeausrüstung",
+    "fr": "Kit d'herboriste",
+    "es": "Útiles de herborista"
   },
   "Navigator's Tools": {
     "en": "Navigator's Tools",
-    "ru": "Инструменты навигатора"
+    "ru": "Инструменты навигатора",
+    "de": "Navigationswerkzeug",
+    "fr": "Instruments de navigateur",
+    "es": "Herramientas de navegante"
   },
   "Poisoner's Kit": {
     "en": "Poisoner's Kit",
-    "ru": "Набор отравителя"
+    "ru": "Набор отравителя",
+    "de": "Giftmischerausrüstung",
+    "fr": "Kit d'empoisonneur",
+    "es": "Útiles de envenenador"
   },
   "Thieves' Tools": {
     "en": "Thieves' Tools",
-    "ru": "Воровские инструменты"
+    "ru": "Воровские инструменты",
+    "de": "Diebeswerkzeug",
+    "fr": "Outils de voleur",
+    "es": "Herramientas de ladrón"
   },
   "Land Vehicles": {
     "en": "Land Vehicles",
-    "ru": "Наземный транспорт"
+    "ru": "Наземный транспорт",
+    "de": "Landfahrzeuge",
+    "fr": "Véhicules terrestres",
+    "es": "Vehículos terrestres"
   },
   "Water Vehicles": {
     "en": "Water Vehicles",
-    "ru": "Водный транспорт"
+    "ru": "Водный транспорт",
+    "de": "Wasserfahrzeuge",
+    "fr": "Véhicules aquatiques",
+    "es": "Vehículos acuáticos"
   },
   "Standard Languages": {
     "en": "Standard Languages",
-    "ru": "Стандартные языки"
+    "ru": "Стандартные языки",
+    "de": "Standardsprachen",
+    "fr": "Langues standard",
+    "es": "Idiomas estándar"
   },
   "Exotic Languages": {
     "en": "Exotic Languages",
-    "ru": "Экзотические языки"
+    "ru": "Экзотические языки",
+    "de": "Exotische Sprachen",
+    "fr": "Langues exotiques",
+    "es": "Idiomas exóticos"
   },
   "Special Languages": {
     "en": "Special Languages",
-    "ru": "Особые языки"
+    "ru": "Особые языки",
+    "de": "Besondere Sprachen",
+    "fr": "Langues spéciales",
+    "es": "Idiomas especiales"
   },
   "Common": {
     "en": "Common",
-    "ru": "Общий"
+    "ru": "Общий",
+    "de": "Gemeinsprache",
+    "fr": "Commun",
+    "es": "Común"
   },
   "Dwarvish": {
     "en": "Dwarvish",
-    "ru": "Дварфийский"
+    "ru": "Дварфийский",
+    "de": "Zwergisch",
+    "fr": "Nain",
+    "es": "Enano"
   },
   "Elvish": {
     "en": "Elvish",
-    "ru": "Эльфийский"
+    "ru": "Эльфийский",
+    "de": "Elfisch",
+    "fr": "Elfique",
+    "es": "Élfico"
   },
   "Giant": {
     "en": "Giant",
-    "ru": "Великаний"
+    "ru": "Великаний",
+    "de": "Riesisch",
+    "fr": "Géant",
+    "es": "Gigante"
   },
   "Gnomish": {
     "en": "Gnomish",
-    "ru": "Гномий"
+    "ru": "Гномий",
+    "de": "Gnomisch",
+    "fr": "Gnome",
+    "es": "Gnomo"
   },
   "Goblin": {
     "en": "Goblin",
-    "ru": "Гоблинский"
+    "ru": "Гоблинский",
+    "de": "Goblinisch",
+    "fr": "Gobelin",
+    "es": "Goblin"
   },
   "Halfling": {
     "en": "Halfling",
-    "ru": "Полуросликов"
+    "ru": "Полуросликов",
+    "de": "Halblingisch",
+    "fr": "Halfelin",
+    "es": "Mediano"
   },
   "Orc": {
     "en": "Orc",
-    "ru": "Орочий"
+    "ru": "Орочий",
+    "de": "Orkisch",
+    "fr": "Orc",
+    "es": "Orco"
   },
   "Abyssal": {
     "en": "Abyssal",
-    "ru": "Бездны"
+    "ru": "Бездны",
+    "de": "Abyssisch",
+    "fr": "Abyssal",
+    "es": "Abisal"
   },
   "Celestial": {
     "en": "Celestial",
-    "ru": "Небесный"
+    "ru": "Небесный",
+    "de": "Celestisch",
+    "fr": "Céleste",
+    "es": "Celestial"
   },
   "Draconic": {
     "en": "Draconic",
-    "ru": "Драконий"
+    "ru": "Драконий",
+    "de": "Drakonisch",
+    "fr": "Draconique",
+    "es": "Dracónico"
   },
   "Deep Speech": {
     "en": "Deep Speech",
-    "ru": "Глубинная речь"
+    "ru": "Глубинная речь",
+    "de": "Tiefensprache",
+    "fr": "Profond",
+    "es": "Habla profunda"
   },
   "Infernal": {
     "en": "Infernal",
-    "ru": "Инфернальный"
+    "ru": "Инфернальный",
+    "de": "Infernalisch",
+    "fr": "Infernal",
+    "es": "Infernal"
   },
   "Primordial": {
     "en": "Primordial",
-    "ru": "Первозданный"
+    "ru": "Первозданный",
+    "de": "Urtümlich",
+    "fr": "Primordial",
+    "es": "Primordial"
   },
   "Sylvan": {
     "en": "Sylvan",
-    "ru": "Сильван"
+    "ru": "Сильван",
+    "de": "Sylvanisch",
+    "fr": "Sylvestre",
+    "es": "Silvano"
   },
   "Undercommon": {
     "en": "Undercommon",
-    "ru": "Подземный общий"
+    "ru": "Подземный общий",
+    "de": "Gemeinsprache der Unterreiche",
+    "fr": "Commun des profondeurs",
+    "es": "Infracomún"
   },
   "Druidic": {
     "en": "Druidic",
-    "ru": "Друидический"
+    "ru": "Друидический",
+    "de": "Druidisch",
+    "fr": "Druidique",
+    "es": "Druídico"
   },
   "Thieves' Cant": {
     "en": "Thieves' Cant",
-    "ru": "Воровской жаргон"
+    "ru": "Воровской жаргон",
+    "de": "Diebessprache",
+    "fr": "Jargon des voleurs",
+    "es": "Jerga de ladrones"
   },
   "Telepathy": {
     "en": "Telepathy",
-    "ru": "Телепатия"
+    "ru": "Телепатия",
+    "de": "Telepathie",
+    "fr": "Télépathie",
+    "es": "Telepatía"
   },
   "combat_section_attacks_title": {
     "en": "Attacks",
     "ru": "Атаки",
-    "de": "Attacks",
-    "fr": "Attacks",
-    "es": "Attacks"
+    "de": "Angriffe",
+    "fr": "Attaques",
+    "es": "Ataques"
   },
   "combat_section_attacks_body": {
     "en": "Attack list scaffolding supports icon, range, attack bonus or save DC, damage, and damage type.",
     "ru": "Каркас списка атак уже поддерживает иконку, дальность, бонус атаки или DC спасброска, урон и тип урона.",
-    "de": "Attack list scaffolding supports icon, range, attack bonus or save DC, damage, and damage type.",
-    "fr": "Attack list scaffolding supports icon, range, attack bonus or save DC, damage, and damage type.",
-    "es": "Attack list scaffolding supports icon, range, attack bonus or save DC, damage, and damage type."
+    "de": "Das Grundgerüst der Angriffsliste unterstützt Symbol, Reichweite, Angriffsbonus oder Rettungswurf-SG, Schaden und Schadensart.",
+    "fr": "La liste d'attaques prend déjà en charge l'icône, la portée, le bonus d'attaque ou le DD de sauvegarde, les dégâts et le type de dégâts.",
+    "es": "La estructura de la lista de ataques ya admite icono, alcance, bonificador de ataque o CD de salvación, daño y tipo de daño."
   },
   "combat_section_resources_title": {
     "en": "Resources",
     "ru": "Ресурсы",
-    "de": "Resources",
-    "fr": "Resources",
-    "es": "Resources"
+    "de": "Ressourcen",
+    "fr": "Ressources",
+    "es": "Recursos"
   },
   "combat_section_resources_body": {
     "en": "Combat resource tracking is stored locally and ready for UI implementation.",
     "ru": "Отслеживание боевых ресурсов уже хранится локально и готово к UI-реализации.",
-    "de": "Combat resource tracking is stored locally and ready for UI implementation.",
-    "fr": "Combat resource tracking is stored locally and ready for UI implementation.",
-    "es": "Combat resource tracking is stored locally and ready for UI implementation."
+    "de": "Kampfressourcen werden lokal gespeichert und sind bereit für die UI-Umsetzung.",
+    "fr": "Le suivi des ressources de combat est stocké localement et prêt pour l'interface.",
+    "es": "El seguimiento de recursos de combate se guarda localmente y está listo para implementarse en la interfaz."
   },
   "combat_spell_attack_bonus": {
     "en": "Spell Attack Bonus",
@@ -1460,30 +1955,30 @@
   "inventory_section_items_title": {
     "en": "Inventory List",
     "ru": "Список предметов",
-    "de": "Inventory List",
-    "fr": "Inventory List",
-    "es": "Inventory List"
+    "de": "Inventarliste",
+    "fr": "Liste d'inventaire",
+    "es": "Lista de inventario"
   },
   "inventory_section_items_body": {
     "en": "Items support category, weight, quantity, equipped state, and icon.",
     "ru": "Предметы уже поддерживают категорию, вес, количество, состояние экипировки и иконку.",
-    "de": "Items support category, weight, quantity, equipped state, and icon.",
-    "fr": "Items support category, weight, quantity, equipped state, and icon.",
-    "es": "Items support category, weight, quantity, equipped state, and icon."
+    "de": "Gegenstände unterstützen Kategorie, Gewicht, Anzahl, Ausrüstungsstatus und Symbol.",
+    "fr": "Les objets prennent en charge la catégorie, le poids, la quantité, l'état équipé et l'icône.",
+    "es": "Los objetos admiten categoría, peso, cantidad, estado de equipado e icono."
   },
   "inventory_section_loadout_title": {
     "en": "Loadout",
     "ru": "Снаряжение",
-    "de": "Loadout",
-    "fr": "Loadout",
-    "es": "Loadout"
+    "de": "Ausrüstung",
+    "fr": "Équipement",
+    "es": "Equipamiento"
   },
   "inventory_section_loadout_body": {
     "en": "The layout will later prioritize quick access during tabletop play.",
     "ru": "Позже этот экран будет оптимизирован под быстрый доступ во время игры.",
-    "de": "The layout will later prioritize quick access during tabletop play.",
-    "fr": "The layout will later prioritize quick access during tabletop play.",
-    "es": "The layout will later prioritize quick access during tabletop play."
+    "de": "Das Layout wird später auf schnellen Zugriff am Spieltisch optimiert.",
+    "fr": "La mise en page privilégiera plus tard l'accès rapide pendant les parties.",
+    "es": "Más adelante, el diseño priorizará el acceso rápido durante la partida."
   },
   "inventory_search_placeholder": {
     "en": "Search Inventory",
@@ -1537,58 +2032,58 @@
   "spells_section_spellbook_title": {
     "en": "Spellbook",
     "ru": "Книга заклинаний",
-    "de": "Spellbook",
-    "fr": "Spellbook",
-    "es": "Spellbook"
+    "de": "Zauberbuch",
+    "fr": "Grimoire",
+    "es": "Libro de conjuros"
   },
   "spells_section_spellbook_body": {
     "en": "Spell name, level, school, prepared state, and description are modeled in Room.",
     "ru": "Модель Room уже содержит имя заклинания, уровень, школу, состояние подготовки и описание.",
-    "de": "Spell name, level, school, prepared state, and description are modeled in Room.",
-    "fr": "Spell name, level, school, prepared state, and description are modeled in Room.",
-    "es": "Spell name, level, school, prepared state, and description are modeled in Room."
+    "de": "Zaubername, Grad, Schule, Vorbereitungsstatus und Beschreibung sind in Room modelliert.",
+    "fr": "Le nom, le niveau, l'école, l'état de préparation et la description des sorts sont modélisés dans Room.",
+    "es": "El nombre, nivel, escuela, estado de preparación y descripción del conjuro están modelados en Room."
   },
   "spells_section_casting_title": {
     "en": "Casting Workflow",
     "ru": "Применение",
-    "de": "Casting Workflow",
-    "fr": "Casting Workflow",
-    "es": "Casting Workflow"
+    "de": "Zauberwirken",
+    "fr": "Incantation",
+    "es": "Lanzamiento"
   },
   "spells_section_casting_body": {
     "en": "The screen shell is ready for later spell-slot and prepared-list UX.",
     "ru": "Каркас экрана готов для будущего UX слотов заклинаний и списка подготовленных заклинаний.",
-    "de": "The screen shell is ready for later spell-slot and prepared-list UX.",
-    "fr": "The screen shell is ready for later spell-slot and prepared-list UX.",
-    "es": "The screen shell is ready for later spell-slot and prepared-list UX."
+    "de": "Das Bildschirmgerüst ist bereit für die spätere UX von Zauberplätzen und vorbereiteten Zaubern.",
+    "fr": "L'écran est prêt pour la future gestion des emplacements de sorts et de la liste des sorts préparés.",
+    "es": "La estructura de la pantalla está lista para la futura gestión de espacios de conjuro y conjuros preparados."
   },
   "features_section_class_title": {
     "en": "Class Features",
     "ru": "Классовые особенности",
-    "de": "Class Features",
-    "fr": "Class Features",
-    "es": "Class Features"
+    "de": "Klassenmerkmale",
+    "fr": "Aptitudes de classe",
+    "es": "Rasgos de clase"
   },
   "features_section_class_body": {
     "en": "Feature descriptions and optional resource tracking are already represented in the model.",
     "ru": "Описания особенностей и необязательный трекинг ресурсов уже представлены в модели.",
-    "de": "Feature descriptions and optional resource tracking are already represented in the model.",
-    "fr": "Feature descriptions and optional resource tracking are already represented in the model.",
-    "es": "Feature descriptions and optional resource tracking are already represented in the model."
+    "de": "Merkmalsbeschreibungen und optionale Ressourcenverfolgung sind bereits im Modell abgebildet.",
+    "fr": "Les descriptions d'aptitudes et le suivi facultatif des ressources sont déjà représentés dans le modèle.",
+    "es": "Las descripciones de los rasgos y el seguimiento opcional de recursos ya están representados en el modelo."
   },
   "features_section_passive_title": {
     "en": "Passive References",
     "ru": "Пассивные справки",
-    "de": "Passive References",
-    "fr": "Passive References",
-    "es": "Passive References"
+    "de": "Passive Referenzen",
+    "fr": "Références passives",
+    "es": "Referencias pasivas"
   },
   "features_section_passive_body": {
     "en": "This screen will later carry compact scan-friendly gameplay references.",
     "ru": "Позже здесь появятся компактные справочные блоки для быстрого просмотра во время игры.",
-    "de": "This screen will later carry compact scan-friendly gameplay references.",
-    "fr": "This screen will later carry compact scan-friendly gameplay references.",
-    "es": "This screen will later carry compact scan-friendly gameplay references."
+    "de": "Dieser Bildschirm enthält später kompakte, schnell erfassbare Spielreferenzen.",
+    "fr": "Cet écran proposera plus tard des références de jeu compactes et faciles à parcourir.",
+    "es": "Más adelante, esta pantalla ofrecerá referencias de juego compactas y fáciles de consultar."
   },
   "features_search_placeholder": {
     "en": "Search Features",
@@ -1726,46 +2221,58 @@
   "biography_section_identity_title": {
     "en": "Identity",
     "ru": "Личность",
-    "de": "Identity",
-    "fr": "Identity",
-    "es": "Identity"
+    "de": "Identität",
+    "fr": "Identité",
+    "es": "Identidad"
   },
   "biography_section_identity_body": {
     "en": "Alignment, background, faith, homeland, age, gender, physical traits, and more are scaffolded.",
     "ru": "Мировоззрение, предыстория, вера, родина, возраст, пол, внешность и другие поля уже заложены.",
-    "de": "Alignment, background, faith, homeland, age, gender, physical traits, and more are scaffolded.",
-    "fr": "Alignment, background, faith, homeland, age, gender, physical traits, and more are scaffolded.",
-    "es": "Alignment, background, faith, homeland, age, gender, physical traits, and more are scaffolded."
+    "de": "Gesinnung, Hintergrund, Glaube, Heimat, Alter, Geschlecht, äußere Merkmale und mehr sind bereits angelegt.",
+    "fr": "Alignement, historique, foi, patrie, âge, genre, traits physiques et plus encore sont déjà prévus.",
+    "es": "Alineamiento, trasfondo, fe, tierra natal, edad, género, rasgos físicos y más ya están preparados."
   },
   "biography_section_history_title": {
     "en": "History",
     "ru": "История",
-    "de": "History",
-    "fr": "History",
-    "es": "History"
+    "de": "Geschichte",
+    "fr": "Histoire",
+    "es": "Historia"
   },
   "biography_section_history_body": {
     "en": "Long-form biography text support is in the core character model.",
     "ru": "Поддержка длинной биографии уже есть в основной модели персонажа.",
-    "de": "Long-form biography text support is in the core character model.",
-    "fr": "Long-form biography text support is in the core character model.",
-    "es": "Long-form biography text support is in the core character model."
+    "de": "Lange Biografietexte werden im Kernmodell des Charakters unterstützt.",
+    "fr": "Le modèle de personnage prend en charge une biographie longue.",
+    "es": "El modelo principal del personaje ya admite una biografía extensa."
   },
   "biography_identity": {
     "en": "Character Identity",
-    "ru": "Личность персонажа"
+    "ru": "Личность персонажа",
+    "de": "Charakteridentität",
+    "fr": "Identité du personnage",
+    "es": "Identidad del personaje"
   },
   "biography_appearance": {
     "en": "Appearance",
-    "ru": "Внешность"
+    "ru": "Внешность",
+    "de": "Aussehen",
+    "fr": "Apparence",
+    "es": "Apariencia"
   },
   "biography_character_history": {
     "en": "Character History",
-    "ru": "История персонажа"
+    "ru": "История персонажа",
+    "de": "Charaktergeschichte",
+    "fr": "Histoire du personnage",
+    "es": "Historia del personaje"
   },
   "biography_history_placeholder": {
     "en": "Write your story here",
-    "ru": "Напишите здесь историю персонажа"
+    "ru": "Напишите здесь историю персонажа",
+    "de": "Schreibe hier deine Geschichte",
+    "fr": "Écrivez votre histoire ici",
+    "es": "Escribe aquí tu historia"
   },
   "alignment_lawful_good": {
     "en": "Lawful Good",
@@ -1839,27 +2346,45 @@
   },
   "biography_alignment": {
     "en": "Alignment",
-    "ru": "Мировоззрение"
+    "ru": "Мировоззрение",
+    "de": "Gesinnung",
+    "fr": "Alignement",
+    "es": "Alineamiento"
   },
   "biography_background": {
     "en": "Background",
-    "ru": "Предыстория"
+    "ru": "Предыстория",
+    "de": "Hintergrund",
+    "fr": "Historique",
+    "es": "Trasfondo"
   },
   "biography_faith": {
     "en": "Faith",
-    "ru": "Вера"
+    "ru": "Вера",
+    "de": "Glaube",
+    "fr": "Foi",
+    "es": "Fe"
   },
   "biography_homeland": {
     "en": "Homeland",
-    "ru": "Родина"
+    "ru": "Родина",
+    "de": "Heimat",
+    "fr": "Patrie",
+    "es": "Tierra natal"
   },
   "biography_age": {
     "en": "Age",
-    "ru": "Возраст"
+    "ru": "Возраст",
+    "de": "Alter",
+    "fr": "Âge",
+    "es": "Edad"
   },
   "biography_gender": {
     "en": "Gender",
-    "ru": "Пол"
+    "ru": "Пол",
+    "de": "Geschlecht",
+    "fr": "Genre",
+    "es": "Género"
   },
   "biography_gender_male": {
     "en": "Male",
@@ -1898,67 +2423,94 @@
   },
   "biography_height": {
     "en": "Height",
-    "ru": "Рост"
+    "ru": "Рост",
+    "de": "Größe",
+    "fr": "Taille",
+    "es": "Altura"
   },
   "biography_weight": {
     "en": "Weight",
-    "ru": "Вес"
+    "ru": "Вес",
+    "de": "Gewicht",
+    "fr": "Poids",
+    "es": "Peso"
   },
   "biography_eyes": {
     "en": "Eyes",
-    "ru": "Глаза"
+    "ru": "Глаза",
+    "de": "Augen",
+    "fr": "Yeux",
+    "es": "Ojos"
   },
   "biography_hair": {
     "en": "Hair",
-    "ru": "Волосы"
+    "ru": "Волосы",
+    "de": "Haare",
+    "fr": "Cheveux",
+    "es": "Pelo"
   },
   "biography_skin": {
     "en": "Skin",
-    "ru": "Кожа"
+    "ru": "Кожа",
+    "de": "Haut",
+    "fr": "Peau",
+    "es": "Piel"
   },
   "biography_personality_traits": {
     "en": "Personality Traits",
-    "ru": "Черты характера"
+    "ru": "Черты характера",
+    "de": "Persönlichkeitsmerkmale",
+    "fr": "Traits de personnalité",
+    "es": "Rasgos de personalidad"
   },
   "biography_ideals": {
     "en": "Ideals",
-    "ru": "Идеалы"
+    "ru": "Идеалы",
+    "de": "Ideale",
+    "fr": "Idéaux",
+    "es": "Ideales"
   },
   "biography_bonds": {
     "en": "Bonds",
-    "ru": "Привязанности"
+    "ru": "Привязанности",
+    "de": "Bindungen",
+    "fr": "Liens",
+    "es": "Vínculos"
   },
   "biography_flaws": {
     "en": "Flaws",
-    "ru": "Слабости"
+    "ru": "Слабости",
+    "de": "Makel",
+    "fr": "Défauts",
+    "es": "Defectos"
   },
   "notes_section_adventure_title": {
     "en": "Adventure Notes",
     "ru": "Приключенческие заметки",
-    "de": "Adventure Notes",
-    "fr": "Adventure Notes",
-    "es": "Adventure Notes"
+    "de": "Abenteuernotizen",
+    "fr": "Notes d'aventure",
+    "es": "Notas de aventura"
   },
   "notes_section_adventure_body": {
     "en": "Local notes support title, created date, updated date, and freeform content.",
     "ru": "Локальные заметки уже поддерживают заголовок, даты создания и обновления и произвольный текст.",
-    "de": "Local notes support title, created date, updated date, and freeform content.",
-    "fr": "Local notes support title, created date, updated date, and freeform content.",
-    "es": "Local notes support title, created date, updated date, and freeform content."
+    "de": "Lokale Notizen unterstützen Titel, Erstellungs- und Änderungsdatum sowie freien Text.",
+    "fr": "Les notes locales prennent en charge un titre, une date de création, une date de mise à jour et un contenu libre.",
+    "es": "Las notas locales admiten título, fecha de creación, fecha de actualización y contenido libre."
   },
   "notes_section_session_title": {
     "en": "Session Use",
     "ru": "Использование на сессии",
-    "de": "Session Use",
-    "fr": "Session Use",
-    "es": "Session Use"
+    "de": "Nutzung in der Sitzung",
+    "fr": "Utilisation en séance",
+    "es": "Uso en la sesión"
   },
   "notes_section_session_body": {
     "en": "This placeholder will later become a fast note-taking and recall surface.",
     "ru": "Позже эта заглушка превратится в быстрый экран записи и поиска заметок.",
-    "de": "This placeholder will later become a fast note-taking and recall surface.",
-    "fr": "This placeholder will later become a fast note-taking and recall surface.",
-    "es": "This placeholder will later become a fast note-taking and recall surface."
+    "de": "Dieser Platzhalter wird später zu einer schnellen Oberfläche zum Notieren und Nachschlagen.",
+    "fr": "Cet espace deviendra plus tard un outil rapide de prise et de consultation de notes.",
+    "es": "Más adelante, este espacio servirá para tomar y consultar notas rápidamente."
   },
   "notes_search_placeholder": {
     "en": "Search Notes",
@@ -2033,9 +2585,9 @@
   "overview_name_placeholder": {
     "en": "Character Name",
     "ru": "\u0418\u043c\u044f \u043f\u0435\u0440\u0441\u043e\u043d\u0430\u0436\u0430",
-    "de": "Character Name",
-    "fr": "Character Name",
-    "es": "Character Name"
+    "de": "Charaktername",
+    "fr": "Nom du personnage",
+    "es": "Nombre del personaje"
   },
   "overview_subtitle_format": {
     "en": "%1$s \u2022 %2$s \u2022 Level %3$s",
@@ -2054,30 +2606,30 @@
   "overview_short_rest": {
     "en": "Short Rest",
     "ru": "\u041a\u043e\u0440\u043e\u0442\u043a\u0438\u0439 \u043e\u0442\u0434\u044b\u0445",
-    "de": "Short Rest",
-    "fr": "Short Rest",
-    "es": "Short Rest"
+    "de": "Kurze Rast",
+    "fr": "Repos court",
+    "es": "Descanso corto"
   },
   "overview_long_rest": {
     "en": "Long Rest",
     "ru": "\u0414\u043e\u043b\u0433\u0438\u0439 \u043e\u0442\u0434\u044b\u0445",
-    "de": "Long Rest",
-    "fr": "Long Rest",
-    "es": "Long Rest"
+    "de": "Lange Rast",
+    "fr": "Repos long",
+    "es": "Descanso largo"
   },
   "overview_long_rest_confirm": {
     "en": "Confirm that this character takes a long rest of up to 8 hours?",
     "ru": "\u041f\u043e\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u0435, \u0447\u0442\u043e \u043f\u0435\u0440\u0441\u043e\u043d\u0430\u0436 \u0441\u043e\u0432\u0435\u0440\u0448\u0430\u0435\u0442 \u0434\u043e\u043b\u0433\u0438\u0439 \u043e\u0442\u0434\u044b\u0445 \u0434\u043e 8 \u0447\u0430\u0441\u043e\u0432?",
-    "de": "Confirm that this character takes a long rest of up to 8 hours?",
-    "fr": "Confirm that this character takes a long rest of up to 8 hours?",
-    "es": "Confirm that this character takes a long rest of up to 8 hours?"
+    "de": "Soll dieser Charakter eine Lange Rast von bis zu 8 Stunden einlegen?",
+    "fr": "Confirmer que ce personnage prend un repos long de 8 heures maximum ?",
+    "es": "¿Confirmas que este personaje realiza un descanso largo de hasta 8 horas?"
   },
   "overview_long_rest_confirm_button": {
     "en": "Rest",
     "ru": "\u041e\u0442\u0434\u043e\u0445\u043d\u0443\u0442\u044c",
-    "de": "Rest",
-    "fr": "Rest",
-    "es": "Rest"
+    "de": "Rasten",
+    "fr": "Se reposer",
+    "es": "Descansar"
   },
   "overview_portrait_menu_title": {
     "en": "Portrait",
@@ -2105,49 +2657,49 @@
     "ru": "\u0412\u0434\u043e\u0445\u043d\u043e\u0432\u0435\u043d\u0438\u0435",
     "de": "Inspiration",
     "fr": "Inspiration",
-    "es": "Inspiration"
+    "es": "Inspiración"
   },
   "overview_xp": {
     "en": "EXP",
     "ru": "EXP",
-    "de": "EXP",
-    "fr": "EXP",
-    "es": "EXP"
+    "de": "EP",
+    "fr": "PX",
+    "es": "PX"
   },
   "overview_hp": {
     "en": "HP",
     "ru": "HP",
-    "de": "HP",
-    "fr": "HP",
-    "es": "HP"
+    "de": "TP",
+    "fr": "pv",
+    "es": "PG"
   },
   "overview_ac": {
     "en": "AC",
     "ru": "\u041a\u0411",
-    "de": "AC",
-    "fr": "AC",
-    "es": "AC"
+    "de": "RK",
+    "fr": "CA",
+    "es": "CA"
   },
   "overview_ac_full": {
     "en": "Armor Class",
     "ru": "\u041a\u043b\u0430\u0441\u0441 \u0431\u0440\u043e\u043d\u0438",
-    "de": "Armor Class",
-    "fr": "Armor Class",
-    "es": "Armor Class"
+    "de": "Rüstungsklasse",
+    "fr": "Classe d'armure",
+    "es": "Clase de Armadura"
   },
   "overview_initiative": {
     "en": "Initiative",
     "ru": "\u0418\u043d\u0438\u0446\u0438\u0430\u0442\u0438\u0432\u0430",
     "de": "Initiative",
     "fr": "Initiative",
-    "es": "Initiative"
+    "es": "Iniciativa"
   },
   "overview_speed": {
     "en": "Speed",
     "ru": "\u0421\u043a\u043e\u0440\u043e\u0441\u0442\u044c",
-    "de": "Speed",
-    "fr": "Speed",
-    "es": "Speed"
+    "de": "Bewegung",
+    "fr": "Vitesse",
+    "es": "Velocidad"
   },
   "overview_settings": {
     "en": "Settings",
@@ -2159,156 +2711,156 @@
   "overview_rename_title": {
     "en": "Rename Character",
     "ru": "\u0418\u043c\u044f \u043f\u0435\u0440\u0441\u043e\u043d\u0430\u0436\u0430",
-    "de": "Rename Character",
-    "fr": "Rename Character",
-    "es": "Rename Character"
+    "de": "Charakter umbenennen",
+    "fr": "Renommer le personnage",
+    "es": "Renombrar personaje"
   },
   "overview_edit_race_title": {
     "en": "Edit Race",
     "ru": "\u0420\u0430\u0441\u0430",
-    "de": "Edit Race",
-    "fr": "Edit Race",
-    "es": "Edit Race"
+    "de": "Volk bearbeiten",
+    "fr": "Modifier la race",
+    "es": "Editar raza"
   },
   "overview_edit_class_title": {
     "en": "Edit Class",
     "ru": "\u041a\u043b\u0430\u0441\u0441",
-    "de": "Edit Class",
-    "fr": "Edit Class",
-    "es": "Edit Class"
+    "de": "Klasse bearbeiten",
+    "fr": "Modifier la classe",
+    "es": "Editar clase"
   },
   "overview_level_picker_title": {
     "en": "Select Level",
     "ru": "\u0412\u044b\u0431\u043e\u0440 \u0443\u0440\u043e\u0432\u043d\u044f",
-    "de": "Select Level",
-    "fr": "Select Level",
-    "es": "Select Level"
+    "de": "Stufe wählen",
+    "fr": "Choisir le niveau",
+    "es": "Elegir nivel"
   },
   "overview_exp_dialog_title": {
     "en": "Edit Experience",
     "ru": "\u0418\u0437\u043c\u0435\u043d\u0438\u0442\u044c EXP",
-    "de": "Edit Experience",
-    "fr": "Edit Experience",
-    "es": "Edit Experience"
+    "de": "Erfahrung bearbeiten",
+    "fr": "Modifier les PX",
+    "es": "Editar experiencia"
   },
   "overview_exp_add": {
     "en": "Add",
     "ru": "\u0414\u043e\u0431\u0430\u0432\u0438\u0442\u044c",
-    "de": "Add",
-    "fr": "Add",
-    "es": "Add"
+    "de": "Hinzufügen",
+    "fr": "Ajouter",
+    "es": "Añadir"
   },
   "overview_exp_set": {
     "en": "Set",
     "ru": "\u0417\u0430\u0434\u0430\u0442\u044c",
-    "de": "Set",
-    "fr": "Set",
-    "es": "Set"
+    "de": "Festlegen",
+    "fr": "Définir",
+    "es": "Fijar"
   },
   "overview_exp_current": {
     "en": "Current EXP: %1$s",
     "ru": "\u0422\u0435\u043a\u0443\u0449\u0438\u0439 EXP: %1$s",
-    "de": "Current EXP: %1$s",
-    "fr": "Current EXP: %1$s",
-    "es": "Current EXP: %1$s"
+    "de": "Aktuelle EP: %1$s",
+    "fr": "PX actuels : %1$s",
+    "es": "PX actuales: %1$s"
   },
   "overview_exp_result": {
     "en": "Result: %1$s EXP",
     "ru": "\u0418\u0442\u043e\u0433: %1$s EXP",
-    "de": "Result: %1$s EXP",
-    "fr": "Result: %1$s EXP",
-    "es": "Result: %1$s EXP"
+    "de": "Ergebnis: %1$s EP",
+    "fr": "Résultat : %1$s PX",
+    "es": "Resultado: %1$s PX"
   },
   "overview_hp_dialog_title": {
     "en": "Edit HP",
     "ru": "\u0418\u0437\u043c\u0435\u043d\u0438\u0442\u044c HP",
-    "de": "Edit HP",
-    "fr": "Edit HP",
-    "es": "Edit HP"
+    "de": "TP bearbeiten",
+    "fr": "Modifier les pv",
+    "es": "Editar PG"
   },
   "overview_hp_damage": {
     "en": "Damage",
     "ru": "\u0423\u0440\u043e\u043d",
-    "de": "Damage",
-    "fr": "Damage",
-    "es": "Damage"
+    "de": "Schaden",
+    "fr": "Dégâts",
+    "es": "Daño"
   },
   "overview_hp_heal": {
     "en": "Heal",
     "ru": "\u0425\u0438\u043b",
-    "de": "Heal",
-    "fr": "Heal",
-    "es": "Heal"
+    "de": "Heilen",
+    "fr": "Soins",
+    "es": "Curar"
   },
   "overview_hp_temporary": {
     "en": "Temp HP",
     "ru": "\u0412\u0440\u0435\u043c. HP",
-    "de": "Temp HP",
-    "fr": "Temp HP",
-    "es": "Temp HP"
+    "de": "Temp. TP",
+    "fr": "pv temp.",
+    "es": "PG temp."
   },
   "overview_hp_current": {
     "en": "Current HP: %1$s",
     "ru": "\u0422\u0435\u043a\u0443\u0449\u0438\u0435 HP: %1$s",
-    "de": "Current HP: %1$s",
-    "fr": "Current HP: %1$s",
-    "es": "Current HP: %1$s"
+    "de": "Aktuelle TP: %1$s",
+    "fr": "pv actuels : %1$s",
+    "es": "PG actuales: %1$s"
   },
   "overview_hp_result": {
     "en": "Result: %1$s",
     "ru": "\u0418\u0442\u043e\u0433: %1$s",
-    "de": "Result: %1$s",
-    "fr": "Result: %1$s",
-    "es": "Result: %1$s"
+    "de": "Ergebnis: %1$s",
+    "fr": "Résultat : %1$s",
+    "es": "Resultado: %1$s"
   },
   "overview_hp_max_dialog_title": {
     "en": "Edit Max HP",
     "ru": "\u0418\u0437\u043c\u0435\u043d\u0438\u0442\u044c \u043c\u0430\u043a\u0441. HP",
-    "de": "Edit Max HP",
-    "fr": "Edit Max HP",
-    "es": "Edit Max HP"
+    "de": "Max. TP bearbeiten",
+    "fr": "Modifier les pv max",
+    "es": "Editar PG máx."
   },
   "overview_hp_max": {
     "en": "Max HP",
     "ru": "\u041c\u0430\u043a\u0441. HP",
-    "de": "Max HP",
-    "fr": "Max HP",
-    "es": "Max HP"
+    "de": "Max. TP",
+    "fr": "pv max",
+    "es": "PG máx."
   },
   "overview_hit_dice_remaining_hint": {
     "en": "You currently have",
     "ru": "\u0421\u0435\u0439\u0447\u0430\u0441 \u0443 \u0432\u0430\u0441 \u043e\u0441\u0442\u0430\u043b\u043e\u0441\u044c",
-    "de": "You currently have",
-    "fr": "You currently have",
-    "es": "You currently have"
+    "de": "Du hast derzeit",
+    "fr": "Il vous reste actuellement",
+    "es": "Actualmente tienes"
   },
   "overview_hit_dice_spend_hint": {
     "en": "Confirm how many hit dice you want to spend during the rest",
     "ru": "\u041f\u043e\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u0435, \u0441\u043a\u043e\u043b\u044c\u043a\u043e \u043a\u043e\u0441\u0442\u0435\u0439 \u0445\u0438\u0442\u043e\u0432 \u0445\u043e\u0442\u0438\u0442\u0435 \u043f\u043e\u0442\u0440\u0430\u0442\u0438\u0442\u044c \u0432\u043e \u0432\u0440\u0435\u043c\u044f \u043e\u0442\u0434\u044b\u0445\u0430",
-    "de": "Confirm how many hit dice you want to spend during the rest",
-    "fr": "Confirm how many hit dice you want to spend during the rest",
-    "es": "Confirm how many hit dice you want to spend during the rest"
+    "de": "Bestätige, wie viele Trefferwürfel du während der Rast ausgeben möchtest",
+    "fr": "Indiquez combien de dés de vie vous voulez dépenser pendant le repos",
+    "es": "Confirma cuántos dados de golpe quieres gastar durante el descanso"
   },
   "overview_hit_dice_spend": {
     "en": "Spend",
     "ru": "\u041f\u043e\u0442\u0440\u0430\u0442\u0438\u0442\u044c",
-    "de": "Spend",
-    "fr": "Spend",
-    "es": "Spend"
+    "de": "Ausgeben",
+    "fr": "Dépenser",
+    "es": "Gastar"
   },
   "overview_edit_ac_title": {
     "en": "Edit Armor Class",
     "ru": "\u0418\u0437\u043c\u0435\u043d\u0438\u0442\u044c \u043a\u043b\u0430\u0441\u0441 \u0431\u0440\u043e\u043d\u0438",
-    "de": "Edit Armor Class",
-    "fr": "Edit Armor Class",
-    "es": "Edit Armor Class"
+    "de": "Rüstungsklasse bearbeiten",
+    "fr": "Modifier la classe d'armure",
+    "es": "Editar Clase de Armadura"
   },
   "overview_edit_initiative_title": {
     "en": "Edit Initiative",
     "ru": "\u0418\u0437\u043c\u0435\u043d\u0438\u0442\u044c \u0438\u043d\u0438\u0446\u0438\u0430\u0442\u0438\u0432\u0443",
-    "de": "Edit Initiative",
-    "fr": "Edit Initiative",
-    "es": "Edit Initiative"
+    "de": "Initiative bearbeiten",
+    "fr": "Modifier l'initiative",
+    "es": "Editar iniciativa"
   },
   "overview_initiative_bonus": {
     "en": "Initiative bonus",
@@ -2334,23 +2886,23 @@
   "overview_edit_speed_title": {
     "en": "Edit Speed",
     "ru": "\u0418\u0437\u043c\u0435\u043d\u0438\u0442\u044c \u0441\u043a\u043e\u0440\u043e\u0441\u0442\u044c",
-    "de": "Edit Speed",
-    "fr": "Edit Speed",
-    "es": "Edit Speed"
+    "de": "Bewegungsrate bearbeiten",
+    "fr": "Modifier la vitesse",
+    "es": "Editar velocidad"
   },
   "common_save": {
     "en": "Save",
     "ru": "\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c",
-    "de": "Save",
-    "fr": "Save",
-    "es": "Save"
+    "de": "Speichern",
+    "fr": "Enregistrer",
+    "es": "Guardar"
   },
   "common_cancel": {
     "en": "Cancel",
     "ru": "\u041e\u0442\u043c\u0435\u043d\u0430",
-    "de": "Cancel",
-    "fr": "Cancel",
-    "es": "Cancel"
+    "de": "Abbrechen",
+    "fr": "Annuler",
+    "es": "Cancelar"
   },
   "common_close": {
     "en": "Close",
@@ -2361,7 +2913,10 @@
   },
   "common_dash": {
     "en": "—",
-    "ru": "—"
+    "ru": "—",
+    "de": "—",
+    "fr": "—",
+    "es": "—"
   },
   "nav_overview_compact": {
     "en": "Over.",
@@ -2387,7 +2942,7 @@
   "nav_inventory_compact": {
     "en": "Bag",
     "ru": "\u0418\u043d\u0432.",
-    "de": "Bag",
+    "de": "Inv.",
     "fr": "Sac",
     "es": "Bolsa"
   },
@@ -2842,7 +3397,7 @@
   "inventory_tag_strength_short": {
     "en": "Str",
     "ru": "\u0421\u0438\u043b",
-    "de": "Str",
+    "de": "Stä",
     "fr": "For",
     "es": "Fue"
   },
@@ -2928,14 +3483,14 @@
     "ru": "\u0411\u043e\u043d\u0443\u0441",
     "de": "Bonus",
     "fr": "Bonus",
-    "es": "Bonus"
+    "es": "Bonif."
   },
   "inventory_field_magical_bonus": {
     "en": "Bonus",
     "ru": "\u0411\u043e\u043d\u0443\u0441",
     "de": "Bonus",
     "fr": "Bonus",
-    "es": "Bonus"
+    "es": "Bonif."
   },
   "inventory_field_damage_dice": {
     "en": "Damage dice",
@@ -3340,7 +3895,7 @@
     "en": "Reaction",
     "ru": "Реакция",
     "de": "Reaktion",
-    "fr": "Reaction",
+    "fr": "Réaction",
     "es": "Reaccion"
   },
   "spells_casting_minutes": {
@@ -3431,7 +3986,7 @@
     "en": "rnd",
     "ru": "рнд",
     "de": "Rnd",
-    "fr": "rnd",
+    "fr": "rd",
     "es": "asl"
   },
   "spells_duration_unit_days": {
@@ -3452,7 +4007,7 @@
     "en": "Verbal",
     "ru": "Вербальный",
     "de": "Verbal",
-    "fr": "Verbal",
+    "fr": "Verbale",
     "es": "Verbal"
   },
   "spells_component_somatic": {
@@ -3465,7 +4020,7 @@
   "spells_component_material": {
     "en": "Material",
     "ru": "Материальный",
-    "de": "Material",
+    "de": "Materiell",
     "fr": "Materiel",
     "es": "Material"
   },
@@ -3474,7 +4029,7 @@
     "ru": "Материалы",
     "de": "Material",
     "fr": "Materiel",
-    "es": "Material"
+    "es": "Materiales"
   },
   "spells_material_cost": {
     "en": "GP",
@@ -3560,325 +4115,325 @@
     "fr": "Soins",
     "es": "Curacion"
   },
-  "spell_name_acid-splash": { "en": "Acid Splash", "ru": "Брызги кислоты" },
-  "spell_name_chill-touch": { "en": "Chill Touch", "ru": "Леденящее прикосновение" },
-  "spell_name_dancing-lights": { "en": "Dancing Lights", "ru": "Пляшущие огоньки" },
-  "spell_name_druidcraft": { "en": "Druidcraft", "ru": "Искусство друидов" },
-  "spell_name_eldritch-blast": { "en": "Eldritch Blast", "ru": "Мистический заряд" },
-  "spell_name_fire-bolt": { "en": "Fire Bolt", "ru": "Огненный снаряд" },
-  "spell_name_guidance": { "en": "Guidance", "ru": "Наставление" },
-  "spell_name_light": { "en": "Light", "ru": "Свет" },
-  "spell_name_mage-hand": { "en": "Mage Hand", "ru": "Волшебная рука" },
-  "spell_name_mending": { "en": "Mending", "ru": "Починка" },
-  "spell_name_message": { "en": "Message", "ru": "Сообщение" },
-  "spell_name_minor-illusion": { "en": "Minor Illusion", "ru": "Малая иллюзия" },
-  "spell_name_poison-spray": { "en": "Poison Spray", "ru": "Ядовитые брызги" },
-  "spell_name_prestidigitation": { "en": "Prestidigitation", "ru": "Фокусы" },
-  "spell_name_produce-flame": { "en": "Produce Flame", "ru": "Сотворение пламени" },
-  "spell_name_ray-of-frost": { "en": "Ray of Frost", "ru": "Луч холода" },
-  "spell_name_resistance": { "en": "Resistance", "ru": "Сопротивление" },
-  "spell_name_sacred-flame": { "en": "Sacred Flame", "ru": "Священное пламя" },
-  "spell_name_shillelagh": { "en": "Shillelagh", "ru": "Дубинка" },
-  "spell_name_shocking-grasp": { "en": "Shocking Grasp", "ru": "Электрошок" },
-  "spell_name_spare-the-dying": { "en": "Spare the Dying", "ru": "Уход за умирающим" },
-  "spell_name_thaumaturgy": { "en": "Thaumaturgy", "ru": "Чудотворство" },
-  "spell_name_true-strike": { "en": "True Strike", "ru": "Меткий удар" },
-  "spell_name_vicious-mockery": { "en": "Vicious Mockery", "ru": "Злая насмешка" },
-  "spell_name_alarm": { "en": "Alarm", "ru": "Сигнал тревоги" },
-  "spell_name_animal-friendship": { "en": "Animal Friendship", "ru": "Дружба с животными" },
-  "spell_name_bane": { "en": "Bane", "ru": "Порча" },
-  "spell_name_burning-hands": { "en": "Burning Hands", "ru": "Огненные ладони" },
-  "spell_name_charm-person": { "en": "Charm Person", "ru": "Очарование личности" },
-  "spell_name_color-spray": { "en": "Color Spray", "ru": "Сверкающие брызги" },
-  "spell_name_command": { "en": "Command", "ru": "Приказ" },
-  "spell_name_comprehend-languages": { "en": "Comprehend Languages", "ru": "Понимание языков" },
-  "spell_name_create-or-destroy-water": { "en": "Create or Destroy Water", "ru": "Сотворение или уничтожение воды" },
-  "spell_name_cure-wounds": { "en": "Cure Wounds", "ru": "Лечение ран" },
-  "spell_name_detect-evil-and-good": { "en": "Detect Evil and Good", "ru": "Обнаружение добра и зла" },
-  "spell_name_detect-magic": { "en": "Detect Magic", "ru": "Обнаружение магии" },
-  "spell_name_detect-poison-and-disease": { "en": "Detect Poison and Disease", "ru": "Обнаружение болезней и яда" },
-  "spell_name_disguise-self": { "en": "Disguise Self", "ru": "Маскировка" },
-  "spell_name_entangle": { "en": "Entangle", "ru": "Опутывание" },
-  "spell_name_expeditious-retreat": { "en": "Expeditious Retreat", "ru": "Поспешное отступление" },
-  "spell_name_faerie-fire": { "en": "Faerie Fire", "ru": "Огонь фей" },
-  "spell_name_false-life": { "en": "False Life", "ru": "Псевдожизнь" },
-  "spell_name_feather-fall": { "en": "Feather Fall", "ru": "Падение пёрышком" },
-  "spell_name_find-familiar": { "en": "Find Familiar", "ru": "Поиск фамильяра" },
-  "spell_name_floating-disk": { "en": "Floating Disk", "ru": "Тензеров парящий диск" },
-  "spell_name_fog-cloud": { "en": "Fog Cloud", "ru": "Туманное облако" },
-  "spell_name_goodberry": { "en": "Goodberry", "ru": "Чудо-ягоды" },
-  "spell_name_grease": { "en": "Grease", "ru": "Скольжение" },
-  "spell_name_guiding-bolt": { "en": "Guiding Bolt", "ru": "Направляющий снаряд" },
-  "spell_name_healing-word": { "en": "Healing Word", "ru": "Лечащее слово" },
-  "spell_name_hideous-laughter": { "en": "Hideous Laughter", "ru": "Жуткий смех Таши" },
-  "spell_name_hunters-mark": { "en": "Hunter's Mark", "ru": "Метка охотника" },
-  "spell_name_identify": { "en": "Identify", "ru": "Опознание" },
-  "spell_name_illusory-script": { "en": "Illusory Script", "ru": "Иллюзорные письмена" },
-  "spell_name_inflict-wounds": { "en": "Inflict Wounds", "ru": "Нанесение ран" },
-  "spell_name_jump": { "en": "Jump", "ru": "Прыжок" },
-  "spell_name_longstrider": { "en": "Longstrider", "ru": "Скороход" },
-  "spell_name_protection-from-evil-and-good": { "en": "Protection from Evil and Good", "ru": "Защита от зла и добра" },
-  "spell_name_purify-food-and-drink": { "en": "Purify Food and Drink", "ru": "Очищение пищи и питья" },
-  "spell_name_sanctuary": { "en": "Sanctuary", "ru": "Убежище" },
-  "spell_name_shield": { "en": "Shield", "ru": "Щит" },
-  "spell_name_shield-of-faith": { "en": "Shield of Faith", "ru": "Щит веры" },
-  "spell_name_sleep": { "en": "Sleep", "ru": "Усыпление" },
-  "spell_name_speak-with-animals": { "en": "Speak with Animals", "ru": "Разговор с животными" },
-  "spell_name_unseen-servant": { "en": "Unseen Servant", "ru": "Невидимый слуга" },
-  "spell_name_hellish-rebuke": { "en": "Hellish Rebuke", "ru": "Адское возмездие" },
-  "spell_name_silent-image": { "en": "Silent Image", "ru": "Безмолвный образ" },
-  "spell_name_bless": { "en": "Bless", "ru": "Благословение" },
-  "spell_name_divine-favor": { "en": "Divine Favor", "ru": "Божественное благоволение" },
-  "spell_name_thunderwave": { "en": "Thunderwave", "ru": "Волна грома" },
-  "spell_name_magic-missile": { "en": "Magic Missile", "ru": "Волшебная стрела" },
-  "spell_name_heroism": { "en": "Heroism", "ru": "Героизм" },
-  "spell_name_mage-armor": { "en": "Mage Armor", "ru": "Доспехи мага" },
-  "spell_name_acid-arrow": { "en": "Acid Arrow", "ru": "Мельфова кислотная стрела" },
-  "spell_name_aid": { "en": "Aid", "ru": "Подмога" },
-  "spell_name_branding-smite": { "en": "Branding Smite", "ru": "Клеймящая кара" },
-  "spell_name_alter-self": { "en": "Alter Self", "ru": "Смена обличья" },
-  "spell_name_animal-messenger": { "en": "Animal Messenger", "ru": "Почтовое животное" },
-  "spell_name_arcane-lock": { "en": "Arcane Lock", "ru": "Волшебный замок" },
-  "spell_name_arcanists-magic-aura": { "en": "Arcanist's Magic Aura", "ru": "Нистулова ложная магия" },
-  "spell_name_augury": { "en": "Augury", "ru": "Гадание" },
-  "spell_name_barkskin": { "en": "Barkskin", "ru": "Дубовая кожа" },
-  "spell_name_blindness-deafness": { "en": "Blindness/Deafness", "ru": "Глухота/слепота" },
-  "spell_name_blur": { "en": "Blur", "ru": "Размытый образ" },
-  "spell_name_calm-emotions": { "en": "Calm Emotions", "ru": "Умиротворение" },
-  "spell_name_continual-flame": { "en": "Continual Flame", "ru": "Вечный огонь" },
-  "spell_name_darkness": { "en": "Darkness", "ru": "Тьма" },
-  "spell_name_darkvision": { "en": "Darkvision", "ru": "Тёмное зрение" },
-  "spell_name_detect-thoughts": { "en": "Detect Thoughts", "ru": "Обнаружение мыслей" },
-  "spell_name_enhance-ability": { "en": "Enhance Ability", "ru": "Улучшение характеристики" },
-  "spell_name_enlarge-reduce": { "en": "Enlarge/Reduce", "ru": "Увеличение/уменьшение" },
-  "spell_name_enthrall": { "en": "Enthrall", "ru": "Речь златоуста" },
-  "spell_name_find-steed": { "en": "Find Steed", "ru": "Поиск скакуна" },
-  "spell_name_find-traps": { "en": "Find Traps", "ru": "Поиск ловушек" },
-  "spell_name_flame-blade": { "en": "Flame Blade", "ru": "Горящий клинок" },
-  "spell_name_flaming-sphere": { "en": "Flaming Sphere", "ru": "Пылающий шар" },
-  "spell_name_gentle-repose": { "en": "Gentle Repose", "ru": "Нетленные останки" },
-  "spell_name_gust-of-wind": { "en": "Gust of Wind", "ru": "Порыв ветра" },
-  "spell_name_heat-metal": { "en": "Heat Metal", "ru": "Раскалённый металл" },
-  "spell_name_hold-person": { "en": "Hold Person", "ru": "Удержание личности" },
-  "spell_name_invisibility": { "en": "Invisibility", "ru": "Невидимость" },
-  "spell_name_knock": { "en": "Knock", "ru": "Стук" },
-  "spell_name_lesser-restoration": { "en": "Lesser Restoration", "ru": "Малое восстановление" },
-  "spell_name_levitate": { "en": "Levitate", "ru": "Левитация" },
-  "spell_name_locate-animals-or-plants": { "en": "Locate Animals or Plants", "ru": "Поиск животных или растений" },
-  "spell_name_locate-object": { "en": "Locate Object", "ru": "Поиск объекта" },
-  "spell_name_magic-mouth": { "en": "Magic Mouth", "ru": "Волшебные уста" },
-  "spell_name_magic-weapon": { "en": "Magic Weapon", "ru": "Магическое оружие" },
-  "spell_name_mirror-image": { "en": "Mirror Image", "ru": "Отражения" },
-  "spell_name_misty-step": { "en": "Misty Step", "ru": "Туманный шаг" },
-  "spell_name_moonbeam": { "en": "Moonbeam", "ru": "Лунный луч" },
-  "spell_name_pass-without-trace": { "en": "Pass Without Trace", "ru": "Бесследное передвижение" },
-  "spell_name_prayer-of-healing": { "en": "Prayer of Healing", "ru": "Молебен лечения" },
-  "spell_name_protection-from-poison": { "en": "Protection from Poison", "ru": "Защита от яда" },
-  "spell_name_ray-of-enfeeblement": { "en": "Ray of Enfeeblement", "ru": "Луч слабости" },
-  "spell_name_rope-trick": { "en": "Rope Trick", "ru": "Трюк с верёвкой" },
-  "spell_name_scorching-ray": { "en": "Scorching Ray", "ru": "Палящий луч" },
-  "spell_name_see-invisibility": { "en": "See Invisibility", "ru": "Видение невидимого" },
-  "spell_name_shatter": { "en": "Shatter", "ru": "Дребезги" },
-  "spell_name_silence": { "en": "Silence", "ru": "Тишина" },
-  "spell_name_spider-climb": { "en": "Spider Climb", "ru": "Паук" },
-  "spell_name_spike-growth": { "en": "Spike Growth", "ru": "Шипастая поросль" },
-  "spell_name_spiritual-weapon": { "en": "Spiritual Weapon", "ru": "Божественное оружие" },
-  "spell_name_suggestion": { "en": "Suggestion", "ru": "Внушение" },
-  "spell_name_warding-bond": { "en": "Warding Bond", "ru": "Охраняющая связь" },
-  "spell_name_web": { "en": "Web", "ru": "Паутина" },
-  "spell_name_zone-of-truth": { "en": "Zone of Truth", "ru": "Область истины" },
-  "spell_name_animate-dead": { "en": "Animate Dead", "ru": "Оживление мертвецов" },
-  "spell_name_beacon-of-hope": { "en": "Beacon of Hope", "ru": "Маяк надежды" },
-  "spell_name_bestow-curse": { "en": "Bestow Curse", "ru": "Проклятие" },
-  "spell_name_blink": { "en": "Blink", "ru": "Мерцание" },
-  "spell_name_call-lightning": { "en": "Call Lightning", "ru": "Призыв молнии" },
-  "spell_name_clairvoyance": { "en": "Clairvoyance", "ru": "Подсматривание" },
-  "spell_name_conjure-animals": { "en": "Conjure Animals", "ru": "Вызов животных" },
-  "spell_name_counterspell": { "en": "Counterspell", "ru": "Контрзаклинание" },
-  "spell_name_create-food-and-water": { "en": "Create Food and Water", "ru": "Сотворение пищи и воды" },
-  "spell_name_daylight": { "en": "Daylight", "ru": "Дневной свет" },
-  "spell_name_dispel-magic": { "en": "Dispel Magic", "ru": "Рассеивание магии" },
-  "spell_name_fear": { "en": "Fear", "ru": "Ужас" },
-  "spell_name_fireball": { "en": "Fireball", "ru": "Огненный шар" },
-  "spell_name_fly": { "en": "Fly", "ru": "Полёт" },
-  "spell_name_gaseous-form": { "en": "Gaseous Form", "ru": "Газообразная форма" },
-  "spell_name_glyph-of-warding": { "en": "Glyph of Warding", "ru": "Охранные руны" },
-  "spell_name_haste": { "en": "Haste", "ru": "Ускорение" },
-  "spell_name_hypnotic-pattern": { "en": "Hypnotic Pattern", "ru": "Гипнотический узор" },
-  "spell_name_lightning-bolt": { "en": "Lightning Bolt", "ru": "Молния" },
-  "spell_name_magic-circle": { "en": "Magic Circle", "ru": "Магический круг" },
-  "spell_name_major-image": { "en": "Major Image", "ru": "Образ" },
-  "spell_name_mass-healing-word": { "en": "Mass Healing Word", "ru": "Множественное лечащее слово" },
-  "spell_name_meld-into-stone": { "en": "Meld Into Stone", "ru": "Слияние с камнем" },
-  "spell_name_nondetection": { "en": "Nondetection", "ru": "Необнаружимость" },
-  "spell_name_phantom-steed": { "en": "Phantom Steed", "ru": "Призрачный скакун" },
-  "spell_name_plant-growth": { "en": "Plant Growth", "ru": "Рост растений" },
-  "spell_name_protection-from-energy": { "en": "Protection From Energy", "ru": "Защита от энергии" },
-  "spell_name_remove-curse": { "en": "Remove Curse", "ru": "Снятие проклятья" },
-  "spell_name_revivify": { "en": "Revivify", "ru": "Низшее воскрешение" },
-  "spell_name_sending": { "en": "Sending", "ru": "Послание" },
-  "spell_name_sleet-storm": { "en": "Sleet Storm", "ru": "Метель" },
-  "spell_name_slow": { "en": "Slow", "ru": "Замедление" },
-  "spell_name_speak-with-dead": { "en": "Speak with Dead", "ru": "Разговор с мёртвыми" },
-  "spell_name_speak-with-plants": { "en": "Speak with Plants", "ru": "Разговор с растениями" },
-  "spell_name_spirit-guardians": { "en": "Spirit Guardians", "ru": "Духовные стражи" },
-  "spell_name_stinking-cloud": { "en": "Stinking Cloud", "ru": "Зловонное облако" },
-  "spell_name_tiny-hut": { "en": "Tiny Hut", "ru": "Леомундова хижина" },
-  "spell_name_tongues": { "en": "Tongues", "ru": "Языки" },
-  "spell_name_vampiric-touch": { "en": "Vampiric Touch", "ru": "Прикосновение вампира" },
-  "spell_name_water-breathing": { "en": "Water Breathing", "ru": "Подводное дыхание" },
-  "spell_name_water-walk": { "en": "Water Walk", "ru": "Хождение по воде" },
-  "spell_name_wind-wall": { "en": "Wind Wall", "ru": "Стена ветра" },
-  "spell_name_arcane-eye": { "en": "Arcane Eye", "ru": "Магический глаз" },
-  "spell_name_banishment": { "en": "Banishment", "ru": "Изгнание" },
-  "spell_name_black-tentacles": { "en": "Black Tentacles", "ru": "Эвардовы чёрные щупальца" },
-  "spell_name_blight": { "en": "Blight", "ru": "Усыхание" },
-  "spell_name_compulsion": { "en": "Compulsion", "ru": "Принуждение" },
-  "spell_name_confusion": { "en": "Confusion", "ru": "Смятение" },
-  "spell_name_conjure-minor-elementals": { "en": "Conjure Minor Elementals", "ru": "Вызов малых элементалей" },
-  "spell_name_conjure-woodland-beings": { "en": "Conjure Woodland Beings", "ru": "Вызов лесных обитателей" },
-  "spell_name_control-water": { "en": "Control Water", "ru": "Власть над водами" },
-  "spell_name_death-ward": { "en": "Death Ward", "ru": "Защита от смерти" },
-  "spell_name_dimension-door": { "en": "Dimension Door", "ru": "Переносящая дверь" },
-  "spell_name_divination": { "en": "Divination", "ru": "Предсказание" },
-  "spell_name_dominate-beast": { "en": "Dominate Beast", "ru": "Подчинение зверя" },
-  "spell_name_fabricate": { "en": "Fabricate", "ru": "Изготовление" },
-  "spell_name_faithful-hound": { "en": "Faithful Hound", "ru": "Верный пёс Морденкайнена" },
-  "spell_name_fire-shield": { "en": "Fire Shield", "ru": "Огненный щит" },
-  "spell_name_freedom-of-movement": { "en": "Freedom of Movement", "ru": "Свобода перемещения" },
-  "spell_name_giant-insect": { "en": "Giant Insect", "ru": "Гигантское насекомое" },
-  "spell_name_greater-invisibility": { "en": "Greater Invisibility", "ru": "Высшая невидимость" },
-  "spell_name_guardian-of-faith": { "en": "Guardian of Faith", "ru": "Страж веры" },
-  "spell_name_hallucinatory-terrain": { "en": "Hallucinatory Terrain", "ru": "Мираж" },
-  "spell_name_ice-storm": { "en": "Ice Storm", "ru": "Град" },
-  "spell_name_locate-creature": { "en": "Locate Creature", "ru": "Поиск существа" },
-  "spell_name_phantasmal-killer": { "en": "Phantasmal Killer", "ru": "Воображаемый убийца" },
-  "spell_name_polymorph": { "en": "Polymorph", "ru": "Полиморф" },
-  "spell_name_private-sanctum": { "en": "Private Sanctum", "ru": "Кабинет Морденкайнена" },
-  "spell_name_resilient-sphere": { "en": "Resilient Sphere", "ru": "Отилюков упругий шар" },
-  "spell_name_secret-chest": { "en": "Secret Chest", "ru": "Леомундов потайной сундук" },
-  "spell_name_stone-shape": { "en": "Stone Shape", "ru": "Изменение формы камня" },
-  "spell_name_stoneskin": { "en": "Stoneskin", "ru": "Каменная кожа" },
-  "spell_name_wall-of-fire": { "en": "Wall of Fire", "ru": "Стена огня" },
-  "spell_name_raise-dead": { "en": "Raise Dead", "ru": "Воскрешение" },
-  "spell_name_animate-objects": { "en": "Animate Objects", "ru": "Оживление вещей" },
-  "spell_name_antilife-shell": { "en": "Antilife Shell", "ru": "Преграда жизни" },
-  "spell_name_arcane-hand": { "en": "Arcane Hand", "ru": "Длань Бигби" },
-  "spell_name_awaken": { "en": "Awaken", "ru": "Пробуждение разума" },
-  "spell_name_cloudkill": { "en": "Cloudkill", "ru": "Облако смерти" },
-  "spell_name_commune": { "en": "Commune", "ru": "Общение" },
-  "spell_name_commune-with-nature": { "en": "Commune With Nature", "ru": "Общение с природой" },
-  "spell_name_cone-of-cold": { "en": "Cone of Cold", "ru": "Конус холода" },
-  "spell_name_conjure-elemental": { "en": "Conjure Elemental", "ru": "Вызов элементаля" },
-  "spell_name_contact-other-plane": { "en": "Contact Other Plane", "ru": "Связь с иным планом" },
-  "spell_name_contagion": { "en": "Contagion", "ru": "Заражение" },
-  "spell_name_creation": { "en": "Creation", "ru": "Сотворение" },
-  "spell_name_dispel-evil-and-good": { "en": "Dispel Evil and Good", "ru": "Рассеивание добра и зла" },
-  "spell_name_dominate-person": { "en": "Dominate Person", "ru": "Подчинение личности" },
-  "spell_name_dream": { "en": "Dream", "ru": "Сновидение" },
-  "spell_name_flame-strike": { "en": "Flame Strike", "ru": "Небесный огонь" },
-  "spell_name_geas": { "en": "Geas", "ru": "Обет" },
-  "spell_name_greater-restoration": { "en": "Greater Restoration", "ru": "Высшее восстановление" },
-  "spell_name_hallow": { "en": "Hallow", "ru": "Святилище" },
-  "spell_name_hold-monster": { "en": "Hold Monster", "ru": "Удержание чудовища" },
-  "spell_name_insect-plague": { "en": "Insect Plague", "ru": "Нашествие насекомых" },
-  "spell_name_legend-lore": { "en": "Legend Lore", "ru": "Знание легенд" },
-  "spell_name_mass-cure-wounds": { "en": "Mass Cure Wounds", "ru": "Множественное лечение ран" },
-  "spell_name_mislead": { "en": "Mislead", "ru": "Фальшивый двойник" },
-  "spell_name_modify-memory": { "en": "Modify Memory", "ru": "Изменение памяти" },
-  "spell_name_passwall": { "en": "Passwall", "ru": "Создание прохода" },
-  "spell_name_planar-binding": { "en": "Planar Binding", "ru": "Планарные узы" },
-  "spell_name_reincarnate": { "en": "Reincarnate", "ru": "Реинкарнация" },
-  "spell_name_scrying": { "en": "Scrying", "ru": "Наблюдение" },
-  "spell_name_seeming": { "en": "Seeming", "ru": "Притворство" },
-  "spell_name_telekinesis": { "en": "Telekinesis", "ru": "Телекинез" },
-  "spell_name_telepathic-bond": { "en": "Telepathic Bond", "ru": "Ментальная связь Рэри" },
-  "spell_name_teleportation-circle": { "en": "Teleportation Circle", "ru": "Круг телепортации" },
-  "spell_name_tree-stride": { "en": "Tree Stride", "ru": "Древесный путь" },
-  "spell_name_wall-of-force": { "en": "Wall of Force", "ru": "Стена силы" },
-  "spell_name_wall-of-stone": { "en": "Wall of Stone", "ru": "Стена камня" },
-  "spell_name_blade-barrier": { "en": "Blade Barrier", "ru": "Стена клинков" },
-  "spell_name_chain-lightning": { "en": "Chain Lightning", "ru": "Цепная молния" },
-  "spell_name_circle-of-death": { "en": "Circle of Death", "ru": "Круг смерти" },
-  "spell_name_conjure-fey": { "en": "Conjure Fey", "ru": "Вызов феи" },
-  "spell_name_contingency": { "en": "Contingency", "ru": "Предосторожность" },
-  "spell_name_create-undead": { "en": "Create Undead", "ru": "Сотворение нежити" },
-  "spell_name_disintegrate": { "en": "Disintegrate", "ru": "Распад" },
-  "spell_name_eyebite": { "en": "Eyebite", "ru": "Разящее око" },
-  "spell_name_find-the-path": { "en": "Find the Path", "ru": "Поиск пути" },
-  "spell_name_flesh-to-stone": { "en": "Flesh to Stone", "ru": "Окаменение" },
-  "spell_name_forbiddance": { "en": "Forbiddance", "ru": "Запрет" },
-  "spell_name_freezing-sphere": { "en": "Freezing Sphere", "ru": "Отилюков ледяной шар" },
-  "spell_name_globe-of-invulnerability": { "en": "Globe of Invulnerability", "ru": "Сфера неуязвимости" },
-  "spell_name_guards-and-wards": { "en": "Guards and Wards", "ru": "Стражи" },
-  "spell_name_harm": { "en": "Harm", "ru": "Поражение" },
-  "spell_name_heal": { "en": "Heal", "ru": "Исцеление" },
-  "spell_name_heroes-feast": { "en": "Heroes' Feast", "ru": "Пир героев" },
-  "spell_name_instant-summons": { "en": "Instant Summons", "ru": "Дромиджево появление" },
-  "spell_name_irresistible-dance": { "en": "Irresistible Dance", "ru": "Неудержимая пляска Отто" },
-  "spell_name_magic-jar": { "en": "Magic Jar", "ru": "Волшебный сосуд" },
-  "spell_name_mass-suggestion": { "en": "Mass Suggestion", "ru": "Множественное внушение" },
-  "spell_name_move-earth": { "en": "Move Earth", "ru": "Движение почвы" },
-  "spell_name_planar-ally": { "en": "Planar Ally", "ru": "Планарный союзник" },
-  "spell_name_programmed-illusion": { "en": "Programmed Illusion", "ru": "Заданная иллюзия" },
-  "spell_name_sunbeam": { "en": "Sunbeam", "ru": "Солнечный луч" },
-  "spell_name_transport-via-plants": { "en": "Transport via Plants", "ru": "Путешествие через растения" },
-  "spell_name_true-seeing": { "en": "True Seeing", "ru": "Истинное зрение" },
-  "spell_name_wall-of-ice": { "en": "Wall of Ice", "ru": "Стена льда" },
-  "spell_name_wall-of-thorns": { "en": "Wall of Thorns", "ru": "Стена шипов" },
-  "spell_name_wind-walk": { "en": "Wind Walk", "ru": "Хождение по ветру" },
-  "spell_name_word-of-recall": { "en": "Word of Recall", "ru": "Слово возврата" },
-  "spell_name_arcane-sword": { "en": "Arcane Sword", "ru": "Меч Морденкайнена" },
-  "spell_name_conjure-celestial": { "en": "Conjure Celestial", "ru": "Вызов небожителя" },
-  "spell_name_delayed-blast-fireball": { "en": "Delayed Blast Fireball", "ru": "Замедленный огненный шар" },
-  "spell_name_divine-word": { "en": "Divine Word", "ru": "Божественное слово" },
-  "spell_name_etherealness": { "en": "Etherealness", "ru": "Эфирность" },
-  "spell_name_finger-of-death": { "en": "Finger of Death", "ru": "Перст смерти" },
-  "spell_name_fire-storm": { "en": "Fire Storm", "ru": "Огненная буря" },
-  "spell_name_forcecage": { "en": "Forcecage", "ru": "Силовая клетка" },
-  "spell_name_magnificent-mansion": { "en": "Magnificent Mansion", "ru": "Великолепный особняк Морденкайнена" },
-  "spell_name_mirage-arcane": { "en": "Mirage Arcane", "ru": "Таинственный мираж" },
-  "spell_name_plane-shift": { "en": "Plane Shift", "ru": "Уход в иной план" },
-  "spell_name_prismatic-spray": { "en": "Prismatic Spray", "ru": "Радужные брызги" },
-  "spell_name_project-image": { "en": "Project Image", "ru": "Проекция" },
-  "spell_name_regenerate": { "en": "Regenerate", "ru": "Регенерация" },
-  "spell_name_resurrection": { "en": "Resurrection", "ru": "Высшее воскрешение" },
-  "spell_name_reverse-gravity": { "en": "Reverse Gravity", "ru": "Изменение тяготения" },
-  "spell_name_sequester": { "en": "Sequester", "ru": "Изоляция" },
-  "spell_name_simulacrum": { "en": "Simulacrum", "ru": "Подобие" },
-  "spell_name_symbol": { "en": "Symbol", "ru": "Знак" },
-  "spell_name_teleport": { "en": "Teleport", "ru": "Телепортация" },
-  "spell_name_animal-shapes": { "en": "Animal Shapes", "ru": "Превращение в животных" },
-  "spell_name_antimagic-field": { "en": "Antimagic Field", "ru": "Поле антимагии" },
-  "spell_name_antipathy-sympathy": { "en": "Antipathy/Sympathy", "ru": "Антипатия/симпатия" },
-  "spell_name_clone": { "en": "Clone", "ru": "Двойник" },
-  "spell_name_control-weather": { "en": "Control Weather", "ru": "Власть над погодой" },
-  "spell_name_demiplane": { "en": "Demiplane", "ru": "Демиплан" },
-  "spell_name_dominate-monster": { "en": "Dominate Monster", "ru": "Подчинение чудовища" },
-  "spell_name_earthquake": { "en": "Earthquake", "ru": "Землетрясение" },
-  "spell_name_feeblemind": { "en": "Feeblemind", "ru": "Замешательство" },
-  "spell_name_glibness": { "en": "Glibness", "ru": "Находчивость" },
-  "spell_name_holy-aura": { "en": "Holy Aura", "ru": "Аура святости" },
-  "spell_name_incendiary-cloud": { "en": "Incendiary Cloud", "ru": "Воспламеняющаяся туча" },
-  "spell_name_maze": { "en": "Maze", "ru": "Лабиринт" },
-  "spell_name_mind-blank": { "en": "Mind Blank", "ru": "Сокрытие разума" },
-  "spell_name_power-word-stun": { "en": "Power Word Stun", "ru": "Слово силы: Ошеломление" },
-  "spell_name_sunburst": { "en": "Sunburst", "ru": "Солнечный ожог" },
-  "spell_name_astral-projection": { "en": "Astral Projection", "ru": "Проекция в астрал" },
-  "spell_name_foresight": { "en": "Foresight", "ru": "Предвидение" },
-  "spell_name_gate": { "en": "Gate", "ru": "Врата" },
-  "spell_name_imprisonment": { "en": "Imprisonment", "ru": "Заточение" },
-  "spell_name_mass-heal": { "en": "Mass Heal", "ru": "Множественное исцеление" },
-  "spell_name_meteor-swarm": { "en": "Meteor Swarm", "ru": "Метеоритный дождь" },
-  "spell_name_power-word-kill": { "en": "Power Word Kill", "ru": "Слово силы: Смерть" },
-  "spell_name_prismatic-wall": { "en": "Prismatic Wall", "ru": "Радужная стена" },
-  "spell_name_shapechange": { "en": "Shapechange", "ru": "Полное превращение" },
-  "spell_name_storm-of-vengeance": { "en": "Storm of Vengeance", "ru": "Гроза гнева" },
-  "spell_name_time-stop": { "en": "Time Stop", "ru": "Остановка времени" },
-  "spell_name_true-polymorph": { "en": "True Polymorph", "ru": "Истинный полиморф" },
-  "spell_name_true-resurrection": { "en": "True Resurrection", "ru": "Истинное воскрешение" },
-  "spell_name_weird": { "en": "Weird", "ru": "Жуть" },
-  "spell_name_wish": { "en": "Wish", "ru": "Желание" },
+  "spell_name_acid-splash": { "en": "Acid Splash", "ru": "Брызги кислоты", "de": "Säurespritzer", "fr": "Aspersion acide", "es": "Salpicadura ácida" },
+  "spell_name_chill-touch": { "en": "Chill Touch", "ru": "Леденящее прикосновение", "de": "Kalte Hand", "fr": "Contact glacial", "es": "Toque gélido" },
+  "spell_name_dancing-lights": { "en": "Dancing Lights", "ru": "Пляшущие огоньки", "de": "Tanzende Lichter", "fr": "Lumières dansantes", "es": "Luces danzantes" },
+  "spell_name_druidcraft": { "en": "Druidcraft", "ru": "Искусство друидов", "de": "Druidenkunst", "fr": "Druidisme", "es": "Druidismo" },
+  "spell_name_eldritch-blast": { "en": "Eldritch Blast", "ru": "Мистический заряд", "de": "Schauriger Strahl", "fr": "Décharge occulte", "es": "Descarga sobrenatural" },
+  "spell_name_fire-bolt": { "en": "Fire Bolt", "ru": "Огненный снаряд", "de": "Feuerpfeil", "fr": "Trait de feu", "es": "Descarga de fuego" },
+  "spell_name_guidance": { "en": "Guidance", "ru": "Наставление", "de": "Göttliche Führung", "fr": "Assistance", "es": "Orientación" },
+  "spell_name_light": { "en": "Light", "ru": "Свет", "de": "Licht", "fr": "Lumière", "es": "Luz" },
+  "spell_name_mage-hand": { "en": "Mage Hand", "ru": "Волшебная рука", "de": "Magierhand", "fr": "Main de mage", "es": "Mano de mago" },
+  "spell_name_mending": { "en": "Mending", "ru": "Починка", "de": "Ausbessern", "fr": "Réparation", "es": "Reparar" },
+  "spell_name_message": { "en": "Message", "ru": "Сообщение", "de": "Botschaft", "fr": "Message", "es": "Mensaje" },
+  "spell_name_minor-illusion": { "en": "Minor Illusion", "ru": "Малая иллюзия", "de": "Kleine Illusion", "fr": "Illusion mineure", "es": "Ilusión menor" },
+  "spell_name_poison-spray": { "en": "Poison Spray", "ru": "Ядовитые брызги", "de": "Gift versprühen", "fr": "Bouffée de poison", "es": "Rociada venenosa" },
+  "spell_name_prestidigitation": { "en": "Prestidigitation", "ru": "Фокусы", "de": "Taschenspielerei", "fr": "Prestidigitation", "es": "Prestidigitación" },
+  "spell_name_produce-flame": { "en": "Produce Flame", "ru": "Сотворение пламени", "de": "Flammen erzeugen", "fr": "Production de flamme", "es": "Crear llama" },
+  "spell_name_ray-of-frost": { "en": "Ray of Frost", "ru": "Луч холода", "de": "Froststrahl", "fr": "Rayon de givre", "es": "Rayo de escarcha" },
+  "spell_name_resistance": { "en": "Resistance", "ru": "Сопротивление", "de": "Resistenz", "fr": "Résistance", "es": "Resistencia" },
+  "spell_name_sacred-flame": { "en": "Sacred Flame", "ru": "Священное пламя", "de": "Heilige Flamme", "fr": "Flamme sacrée", "es": "Llama sagrada" },
+  "spell_name_shillelagh": { "en": "Shillelagh", "ru": "Дубинка", "de": "Shillelagh", "fr": "Gourdin magique", "es": "Shillelagh" },
+  "spell_name_shocking-grasp": { "en": "Shocking Grasp", "ru": "Электрошок", "de": "Schockgriff", "fr": "Poigne électrique", "es": "Agarre electrizante" },
+  "spell_name_spare-the-dying": { "en": "Spare the Dying", "ru": "Уход за умирающим", "de": "Verschonung der Sterbenden", "fr": "Épargner les mourants", "es": "Piedad con los moribundos" },
+  "spell_name_thaumaturgy": { "en": "Thaumaturgy", "ru": "Чудотворство", "de": "Thaumaturgie", "fr": "Thaumaturgie", "es": "Taumaturgia" },
+  "spell_name_true-strike": { "en": "True Strike", "ru": "Меткий удар", "de": "Gezielter Schlag", "fr": "Coup au but", "es": "Impacto certero" },
+  "spell_name_vicious-mockery": { "en": "Vicious Mockery", "ru": "Злая насмешка", "de": "Gehässiger Spott", "fr": "Moquerie cruelle", "es": "Burla dañina" },
+  "spell_name_alarm": { "en": "Alarm", "ru": "Сигнал тревоги", "de": "Alarm", "fr": "Alarme", "es": "Alarma" },
+  "spell_name_animal-friendship": { "en": "Animal Friendship", "ru": "Дружба с животными", "de": "Tierfreundschaft", "fr": "Amitié avec les animaux", "es": "Amistad con los animales" },
+  "spell_name_bane": { "en": "Bane", "ru": "Порча", "de": "Verderben", "fr": "Fléau", "es": "Perdición" },
+  "spell_name_burning-hands": { "en": "Burning Hands", "ru": "Огненные ладони", "de": "Brennende Hände", "fr": "Mains brûlantes", "es": "Manos ardientes" },
+  "spell_name_charm-person": { "en": "Charm Person", "ru": "Очарование личности", "de": "Person bezaubern", "fr": "Charme-personne", "es": "Hechizar persona" },
+  "spell_name_color-spray": { "en": "Color Spray", "ru": "Сверкающие брызги", "de": "Farbenspiel", "fr": "Couleurs dansantes", "es": "Rociada de color" },
+  "spell_name_command": { "en": "Command", "ru": "Приказ", "de": "Befehl", "fr": "Injonction", "es": "Orden imperiosa" },
+  "spell_name_comprehend-languages": { "en": "Comprehend Languages", "ru": "Понимание языков", "de": "Sprachen verstehen", "fr": "Compréhension des langues", "es": "Comprensión idiomática" },
+  "spell_name_create-or-destroy-water": { "en": "Create or Destroy Water", "ru": "Сотворение или уничтожение воды", "de": "Wasser erschaffen oder zerstören", "fr": "Création ou destruction d'eau", "es": "Crear o destruir agua" },
+  "spell_name_cure-wounds": { "en": "Cure Wounds", "ru": "Лечение ран", "de": "Wunden heilen", "fr": "Soin des blessures", "es": "Curar heridas" },
+  "spell_name_detect-evil-and-good": { "en": "Detect Evil and Good", "ru": "Обнаружение добра и зла", "de": "Gutes und Böses entdecken", "fr": "Détection du mal et du bien", "es": "Detectar el bien y el mal" },
+  "spell_name_detect-magic": { "en": "Detect Magic", "ru": "Обнаружение магии", "de": "Magie entdecken", "fr": "Détection de la magie", "es": "Detectar magia" },
+  "spell_name_detect-poison-and-disease": { "en": "Detect Poison and Disease", "ru": "Обнаружение болезней и яда", "de": "Gift und Krankheit entdecken", "fr": "Détection du poison et des maladies", "es": "Detectar venenos y enfermedades" },
+  "spell_name_disguise-self": { "en": "Disguise Self", "ru": "Маскировка", "de": "Selbstverkleidung", "fr": "Déguisement", "es": "Disfrazarse" },
+  "spell_name_entangle": { "en": "Entangle", "ru": "Опутывание", "de": "Verstricken", "fr": "Enchevêtrement", "es": "Enmarañar" },
+  "spell_name_expeditious-retreat": { "en": "Expeditious Retreat", "ru": "Поспешное отступление", "de": "Rascher Rückzug", "fr": "Repli expéditif", "es": "Retirada expeditiva" },
+  "spell_name_faerie-fire": { "en": "Faerie Fire", "ru": "Огонь фей", "de": "Feenfeuer", "fr": "Lueurs féeriques", "es": "Fuego feérico" },
+  "spell_name_false-life": { "en": "False Life", "ru": "Псевдожизнь", "de": "Falsches Leben", "fr": "Simulacre de vie", "es": "Falsa vida" },
+  "spell_name_feather-fall": { "en": "Feather Fall", "ru": "Падение пёрышком", "de": "Federfall", "fr": "Feuille morte", "es": "Caída de pluma" },
+  "spell_name_find-familiar": { "en": "Find Familiar", "ru": "Поиск фамильяра", "de": "Vertrauten finden", "fr": "Appel de familier", "es": "Encontrar familiar" },
+  "spell_name_floating-disk": { "en": "Floating Disk", "ru": "Тензеров парящий диск", "de": "Tensers schwebende Scheibe", "fr": "Disque flottant de Tenser", "es": "Disco flotante de Tenser" },
+  "spell_name_fog-cloud": { "en": "Fog Cloud", "ru": "Туманное облако", "de": "Nebelwolke", "fr": "Nappe de brouillard", "es": "Nube de niebla" },
+  "spell_name_goodberry": { "en": "Goodberry", "ru": "Чудо-ягоды", "de": "Gute Beeren", "fr": "Baies nourricières", "es": "Buenas bayas" },
+  "spell_name_grease": { "en": "Grease", "ru": "Скольжение", "de": "Schmieren", "fr": "Graisse", "es": "Grasa" },
+  "spell_name_guiding-bolt": { "en": "Guiding Bolt", "ru": "Направляющий снаряд", "de": "Lenkendes Geschoss", "fr": "Éclair traçant", "es": "Saeta guía" },
+  "spell_name_healing-word": { "en": "Healing Word", "ru": "Лечащее слово", "de": "Heilendes Wort", "fr": "Mot de guérison", "es": "Palabra curativa" },
+  "spell_name_hideous-laughter": { "en": "Hideous Laughter", "ru": "Жуткий смех Таши", "de": "Tashas fürchterliches Gelächter", "fr": "Fou rire de Tasha", "es": "Risa horrible de Tasha" },
+  "spell_name_hunters-mark": { "en": "Hunter's Mark", "ru": "Метка охотника", "de": "Mal des Jägers", "fr": "Marque du chasseur", "es": "Marca del cazador" },
+  "spell_name_identify": { "en": "Identify", "ru": "Опознание", "de": "Identifizieren", "fr": "Identification", "es": "Identificar" },
+  "spell_name_illusory-script": { "en": "Illusory Script", "ru": "Иллюзорные письмена", "de": "Illusionsschrift", "fr": "Écriture illusoire", "es": "Escritura ilusoria" },
+  "spell_name_inflict-wounds": { "en": "Inflict Wounds", "ru": "Нанесение ран", "de": "Wunden verursachen", "fr": "Blessure", "es": "Infligir heridas" },
+  "spell_name_jump": { "en": "Jump", "ru": "Прыжок", "de": "Sprung", "fr": "Saut", "es": "Salto" },
+  "spell_name_longstrider": { "en": "Longstrider", "ru": "Скороход", "de": "Weite Schritte", "fr": "Grande foulée", "es": "Zancada prodigiosa" },
+  "spell_name_protection-from-evil-and-good": { "en": "Protection from Evil and Good", "ru": "Защита от зла и добра", "de": "Schutz vor Gut und Böse", "fr": "Protection contre le mal et le bien", "es": "Protección contra el bien y el mal" },
+  "spell_name_purify-food-and-drink": { "en": "Purify Food and Drink", "ru": "Очищение пищи и питья", "de": "Speisen und Getränke reinigen", "fr": "Purification de nourriture et d'eau", "es": "Purificar comida y bebida" },
+  "spell_name_sanctuary": { "en": "Sanctuary", "ru": "Убежище", "de": "Heiligtum", "fr": "Sanctuaire", "es": "Santuario" },
+  "spell_name_shield": { "en": "Shield", "ru": "Щит", "de": "Schild", "fr": "Bouclier", "es": "Escudo" },
+  "spell_name_shield-of-faith": { "en": "Shield of Faith", "ru": "Щит веры", "de": "Schild des Glaubens", "fr": "Bouclier de la foi", "es": "Escudo de fe" },
+  "spell_name_sleep": { "en": "Sleep", "ru": "Усыпление", "de": "Schlaf", "fr": "Sommeil", "es": "Dormir" },
+  "spell_name_speak-with-animals": { "en": "Speak with Animals", "ru": "Разговор с животными", "de": "Mit Tieren sprechen", "fr": "Communication avec les animaux", "es": "Hablar con los animales" },
+  "spell_name_unseen-servant": { "en": "Unseen Servant", "ru": "Невидимый слуга", "de": "Unsichtbarer Diener", "fr": "Serviteur invisible", "es": "Sirviente invisible" },
+  "spell_name_hellish-rebuke": { "en": "Hellish Rebuke", "ru": "Адское возмездие", "de": "Höllischer Tadel", "fr": "Représailles infernales", "es": "Represión infernal" },
+  "spell_name_silent-image": { "en": "Silent Image", "ru": "Безмолвный образ", "de": "Lautloses Trugbild", "fr": "Image silencieuse", "es": "Imagen silenciosa" },
+  "spell_name_bless": { "en": "Bless", "ru": "Благословение", "de": "Segnen", "fr": "Bénédiction", "es": "Bendición" },
+  "spell_name_divine-favor": { "en": "Divine Favor", "ru": "Божественное благоволение", "de": "Göttliche Gunst", "fr": "Faveur divine", "es": "Favor divino" },
+  "spell_name_thunderwave": { "en": "Thunderwave", "ru": "Волна грома", "de": "Donnerwoge", "fr": "Vague tonnante", "es": "Onda atronadora" },
+  "spell_name_magic-missile": { "en": "Magic Missile", "ru": "Волшебная стрела", "de": "Magisches Geschoss", "fr": "Projectile magique", "es": "Proyectil mágico" },
+  "spell_name_heroism": { "en": "Heroism", "ru": "Героизм", "de": "Heldenmut", "fr": "Héroïsme", "es": "Heroísmo" },
+  "spell_name_mage-armor": { "en": "Mage Armor", "ru": "Доспехи мага", "de": "Magierrüstung", "fr": "Armure de mage", "es": "Armadura de mago" },
+  "spell_name_acid-arrow": { "en": "Acid Arrow", "ru": "Мельфова кислотная стрела", "de": "Melfs Säurepfeil", "fr": "Flèche acide de Melf", "es": "Flecha ácida de Melf" },
+  "spell_name_aid": { "en": "Aid", "ru": "Подмога", "de": "Hilfe", "fr": "Aide", "es": "Ayuda" },
+  "spell_name_branding-smite": { "en": "Branding Smite", "ru": "Клеймящая кара", "de": "Brandmarkendes Niederstrecken", "fr": "Frappe lumineuse", "es": "Castigo marcador" },
+  "spell_name_alter-self": { "en": "Alter Self", "ru": "Смена обличья", "de": "Selbstverwandlung", "fr": "Modification d'apparence", "es": "Alterar el propio aspecto" },
+  "spell_name_animal-messenger": { "en": "Animal Messenger", "ru": "Почтовое животное", "de": "Tierbote", "fr": "Messager animal", "es": "Mensajero animal" },
+  "spell_name_arcane-lock": { "en": "Arcane Lock", "ru": "Волшебный замок", "de": "Arkanes Schloss", "fr": "Verrou magique", "es": "Cerradura arcana" },
+  "spell_name_arcanists-magic-aura": { "en": "Arcanist's Magic Aura", "ru": "Нистулова ложная магия", "de": "Nystuls magische Aura", "fr": "Aura magique de Nystul", "es": "Aura mágica de Nystul" },
+  "spell_name_augury": { "en": "Augury", "ru": "Гадание", "de": "Vorahnung", "fr": "Augure", "es": "Augurio" },
+  "spell_name_barkskin": { "en": "Barkskin", "ru": "Дубовая кожа", "de": "Borkenhaut", "fr": "Peau d'écorce", "es": "Piel robliza" },
+  "spell_name_blindness-deafness": { "en": "Blindness/Deafness", "ru": "Глухота/слепота", "de": "Blindheit/Taubheit", "fr": "Cécité/Surdité", "es": "Ceguera/sordera" },
+  "spell_name_blur": { "en": "Blur", "ru": "Размытый образ", "de": "Verschwimmen", "fr": "Flou", "es": "Desenfocar" },
+  "spell_name_calm-emotions": { "en": "Calm Emotions", "ru": "Умиротворение", "de": "Gefühle besänftigen", "fr": "Apaisement des émotions", "es": "Calmar emociones" },
+  "spell_name_continual-flame": { "en": "Continual Flame", "ru": "Вечный огонь", "de": "Immerwährende Flamme", "fr": "Flamme éternelle", "es": "Llama continua" },
+  "spell_name_darkness": { "en": "Darkness", "ru": "Тьма", "de": "Dunkelheit", "fr": "Ténèbres", "es": "Oscuridad" },
+  "spell_name_darkvision": { "en": "Darkvision", "ru": "Тёмное зрение", "de": "Dunkelsicht", "fr": "Vision dans le noir", "es": "Visión en la oscuridad" },
+  "spell_name_detect-thoughts": { "en": "Detect Thoughts", "ru": "Обнаружение мыслей", "de": "Gedanken wahrnehmen", "fr": "Détection des pensées", "es": "Detectar pensamientos" },
+  "spell_name_enhance-ability": { "en": "Enhance Ability", "ru": "Улучшение характеристики", "de": "Attribut verbessern", "fr": "Amélioration de caractéristique", "es": "Potenciar característica" },
+  "spell_name_enlarge-reduce": { "en": "Enlarge/Reduce", "ru": "Увеличение/уменьшение", "de": "Vergrößern/Verkleinern", "fr": "Agrandissement/Rapetissement", "es": "Agrandar/reducir" },
+  "spell_name_enthrall": { "en": "Enthrall", "ru": "Речь златоуста", "de": "Betören", "fr": "Discours captivant", "es": "Cautivar" },
+  "spell_name_find-steed": { "en": "Find Steed", "ru": "Поиск скакуна", "de": "Reittier finden", "fr": "Appel de destrier", "es": "Encontrar corcel" },
+  "spell_name_find-traps": { "en": "Find Traps", "ru": "Поиск ловушек", "de": "Fallen finden", "fr": "Détection des pièges", "es": "Encontrar trampas" },
+  "spell_name_flame-blade": { "en": "Flame Blade", "ru": "Горящий клинок", "de": "Flammenklinge", "fr": "Lame de feu", "es": "Hoja de fuego" },
+  "spell_name_flaming-sphere": { "en": "Flaming Sphere", "ru": "Пылающий шар", "de": "Flammenkugel", "fr": "Sphère de feu", "es": "Esfera flamígera" },
+  "spell_name_gentle-repose": { "en": "Gentle Repose", "ru": "Нетленные останки", "de": "Sanfte Ruhe", "fr": "Doux repos", "es": "Descanso apacible" },
+  "spell_name_gust-of-wind": { "en": "Gust of Wind", "ru": "Порыв ветра", "de": "Windstoß", "fr": "Bourrasque", "es": "Ráfaga de viento" },
+  "spell_name_heat-metal": { "en": "Heat Metal", "ru": "Раскалённый металл", "de": "Metall erhitzen", "fr": "Chauffer le métal", "es": "Calentar metal" },
+  "spell_name_hold-person": { "en": "Hold Person", "ru": "Удержание личности", "de": "Person festhalten", "fr": "Immobilisation de personne", "es": "Inmovilizar persona" },
+  "spell_name_invisibility": { "en": "Invisibility", "ru": "Невидимость", "de": "Unsichtbarkeit", "fr": "Invisibilité", "es": "Invisibilidad" },
+  "spell_name_knock": { "en": "Knock", "ru": "Стук", "de": "Klopfen", "fr": "Déblocage", "es": "Apertura" },
+  "spell_name_lesser-restoration": { "en": "Lesser Restoration", "ru": "Малое восстановление", "de": "Schwache Genesung", "fr": "Restauration partielle", "es": "Restablecimiento menor" },
+  "spell_name_levitate": { "en": "Levitate", "ru": "Левитация", "de": "Schweben", "fr": "Lévitation", "es": "Levitar" },
+  "spell_name_locate-animals-or-plants": { "en": "Locate Animals or Plants", "ru": "Поиск животных или растений", "de": "Tiere oder Pflanzen aufspüren", "fr": "Localisation d'animaux ou de plantes", "es": "Localizar animales o plantas" },
+  "spell_name_locate-object": { "en": "Locate Object", "ru": "Поиск объекта", "de": "Gegenstand aufspüren", "fr": "Localisation d'objet", "es": "Localizar objeto" },
+  "spell_name_magic-mouth": { "en": "Magic Mouth", "ru": "Волшебные уста", "de": "Magischer Mund", "fr": "Bouche magique", "es": "Boca mágica" },
+  "spell_name_magic-weapon": { "en": "Magic Weapon", "ru": "Магическое оружие", "de": "Magische Waffe", "fr": "Arme magique", "es": "Arma mágica" },
+  "spell_name_mirror-image": { "en": "Mirror Image", "ru": "Отражения", "de": "Spiegelbilder", "fr": "Image miroir", "es": "Imagen múltiple" },
+  "spell_name_misty-step": { "en": "Misty Step", "ru": "Туманный шаг", "de": "Nebelschritt", "fr": "Foulée brumeuse", "es": "Paso brumoso" },
+  "spell_name_moonbeam": { "en": "Moonbeam", "ru": "Лунный луч", "de": "Mondstrahl", "fr": "Rayon de lune", "es": "Rayo de luna" },
+  "spell_name_pass-without-trace": { "en": "Pass Without Trace", "ru": "Бесследное передвижение", "de": "Spurloses Gehen", "fr": "Passage sans trace", "es": "Pasar sin rastro" },
+  "spell_name_prayer-of-healing": { "en": "Prayer of Healing", "ru": "Молебен лечения", "de": "Gebet der Heilung", "fr": "Prière de guérison", "es": "Plegaria de curación" },
+  "spell_name_protection-from-poison": { "en": "Protection from Poison", "ru": "Защита от яда", "de": "Schutz vor Gift", "fr": "Protection contre le poison", "es": "Protección contra veneno" },
+  "spell_name_ray-of-enfeeblement": { "en": "Ray of Enfeeblement", "ru": "Луч слабости", "de": "Schwächestrahl", "fr": "Rayon affaiblissant", "es": "Rayo debilitador" },
+  "spell_name_rope-trick": { "en": "Rope Trick", "ru": "Трюк с верёвкой", "de": "Seiltrick", "fr": "Corde enchantée", "es": "Truco de la cuerda" },
+  "spell_name_scorching-ray": { "en": "Scorching Ray", "ru": "Палящий луч", "de": "Sengender Strahl", "fr": "Rayon ardent", "es": "Rayo abrasador" },
+  "spell_name_see-invisibility": { "en": "See Invisibility", "ru": "Видение невидимого", "de": "Unsichtbares sehen", "fr": "Détection de l'invisibilité", "es": "Ver invisibilidad" },
+  "spell_name_shatter": { "en": "Shatter", "ru": "Дребезги", "de": "Zersplittern", "fr": "Fracassement", "es": "Romper" },
+  "spell_name_silence": { "en": "Silence", "ru": "Тишина", "de": "Stille", "fr": "Silence", "es": "Silencio" },
+  "spell_name_spider-climb": { "en": "Spider Climb", "ru": "Паук", "de": "Spinnenklettern", "fr": "Pattes d'araignée", "es": "Trepar cual arácnido" },
+  "spell_name_spike-growth": { "en": "Spike Growth", "ru": "Шипастая поросль", "de": "Dornenwuchs", "fr": "Croissance d'épines", "es": "Crecimiento de espinas" },
+  "spell_name_spiritual-weapon": { "en": "Spiritual Weapon", "ru": "Божественное оружие", "de": "Spirituelle Waffe", "fr": "Arme spirituelle", "es": "Arma espiritual" },
+  "spell_name_suggestion": { "en": "Suggestion", "ru": "Внушение", "de": "Einflüsterung", "fr": "Suggestion", "es": "Sugestión" },
+  "spell_name_warding-bond": { "en": "Warding Bond", "ru": "Охраняющая связь", "de": "Schutzbund", "fr": "Lien de protection", "es": "Vínculo protector" },
+  "spell_name_web": { "en": "Web", "ru": "Паутина", "de": "Netz", "fr": "Toile d'araignée", "es": "Telaraña" },
+  "spell_name_zone-of-truth": { "en": "Zone of Truth", "ru": "Область истины", "de": "Zone der Wahrheit", "fr": "Zone de vérité", "es": "Zona de verdad" },
+  "spell_name_animate-dead": { "en": "Animate Dead", "ru": "Оживление мертвецов", "de": "Tote beleben", "fr": "Animation des morts", "es": "Reanimar a los muertos" },
+  "spell_name_beacon-of-hope": { "en": "Beacon of Hope", "ru": "Маяк надежды", "de": "Leuchtfeuer der Hoffnung", "fr": "Lueur d'espoir", "es": "Faro de esperanza" },
+  "spell_name_bestow-curse": { "en": "Bestow Curse", "ru": "Проклятие", "de": "Fluch verhängen", "fr": "Malédiction", "es": "Imponer maldición" },
+  "spell_name_blink": { "en": "Blink", "ru": "Мерцание", "de": "Blinzeln", "fr": "Clignotement", "es": "Intermitencia" },
+  "spell_name_call-lightning": { "en": "Call Lightning", "ru": "Призыв молнии", "de": "Blitze herbeirufen", "fr": "Appel de la foudre", "es": "Llamar al relámpago" },
+  "spell_name_clairvoyance": { "en": "Clairvoyance", "ru": "Подсматривание", "de": "Hellsehen", "fr": "Clairvoyance", "es": "Clarividencia" },
+  "spell_name_conjure-animals": { "en": "Conjure Animals", "ru": "Вызов животных", "de": "Tiere herbeizaubern", "fr": "Invocation d'animaux", "es": "Conjurar animales" },
+  "spell_name_counterspell": { "en": "Counterspell", "ru": "Контрзаклинание", "de": "Gegenzauber", "fr": "Contresort", "es": "Contraconjuro" },
+  "spell_name_create-food-and-water": { "en": "Create Food and Water", "ru": "Сотворение пищи и воды", "de": "Nahrung und Wasser erschaffen", "fr": "Création de nourriture et d'eau", "es": "Crear comida y agua" },
+  "spell_name_daylight": { "en": "Daylight", "ru": "Дневной свет", "de": "Tageslicht", "fr": "Lumière du jour", "es": "Luz del día" },
+  "spell_name_dispel-magic": { "en": "Dispel Magic", "ru": "Рассеивание магии", "de": "Magie bannen", "fr": "Dissipation de la magie", "es": "Disipar magia" },
+  "spell_name_fear": { "en": "Fear", "ru": "Ужас", "de": "Furcht", "fr": "Terreur", "es": "Miedo" },
+  "spell_name_fireball": { "en": "Fireball", "ru": "Огненный шар", "de": "Feuerball", "fr": "Boule de feu", "es": "Bola de fuego" },
+  "spell_name_fly": { "en": "Fly", "ru": "Полёт", "de": "Fliegen", "fr": "Vol", "es": "Volar" },
+  "spell_name_gaseous-form": { "en": "Gaseous Form", "ru": "Газообразная форма", "de": "Gasförmige Gestalt", "fr": "Forme gazeuse", "es": "Forma gaseosa" },
+  "spell_name_glyph-of-warding": { "en": "Glyph of Warding", "ru": "Охранные руны", "de": "Glyphe des Schutzes", "fr": "Glyphe de protection", "es": "Glifo custodio" },
+  "spell_name_haste": { "en": "Haste", "ru": "Ускорение", "de": "Hast", "fr": "Hâte", "es": "Acelerar" },
+  "spell_name_hypnotic-pattern": { "en": "Hypnotic Pattern", "ru": "Гипнотический узор", "de": "Hypnotisches Muster", "fr": "Motif hypnotique", "es": "Patrón hipnótico" },
+  "spell_name_lightning-bolt": { "en": "Lightning Bolt", "ru": "Молния", "de": "Blitz", "fr": "Éclair", "es": "Relámpago" },
+  "spell_name_magic-circle": { "en": "Magic Circle", "ru": "Магический круг", "de": "Magischer Kreis", "fr": "Cercle magique", "es": "Círculo mágico" },
+  "spell_name_major-image": { "en": "Major Image", "ru": "Образ", "de": "Großes Trugbild", "fr": "Image majeure", "es": "Imagen mayor" },
+  "spell_name_mass-healing-word": { "en": "Mass Healing Word", "ru": "Множественное лечащее слово", "de": "Massen-Heilendes Wort", "fr": "Mot de guérison de groupe", "es": "Palabra curativa en masa" },
+  "spell_name_meld-into-stone": { "en": "Meld Into Stone", "ru": "Слияние с камнем", "de": "Mit Stein verschmelzen", "fr": "Fusion dans la pierre", "es": "Fundirse con la piedra" },
+  "spell_name_nondetection": { "en": "Nondetection", "ru": "Необнаружимость", "de": "Unauffindbarkeit", "fr": "Antidétection", "es": "Indetectable" },
+  "spell_name_phantom-steed": { "en": "Phantom Steed", "ru": "Призрачный скакун", "de": "Phantomross", "fr": "Destrier fantôme", "es": "Corcel fantasmal" },
+  "spell_name_plant-growth": { "en": "Plant Growth", "ru": "Рост растений", "de": "Pflanzenwachstum", "fr": "Croissance végétale", "es": "Crecimiento vegetal" },
+  "spell_name_protection-from-energy": { "en": "Protection From Energy", "ru": "Защита от энергии", "de": "Schutz vor Energie", "fr": "Protection contre l'énergie", "es": "Protección contra la energía" },
+  "spell_name_remove-curse": { "en": "Remove Curse", "ru": "Снятие проклятья", "de": "Fluch brechen", "fr": "Délivrance des malédictions", "es": "Levantar maldición" },
+  "spell_name_revivify": { "en": "Revivify", "ru": "Низшее воскрешение", "de": "Wiederbeleben", "fr": "Retour à la vie", "es": "Revivir" },
+  "spell_name_sending": { "en": "Sending", "ru": "Послание", "de": "Fernbotschaft", "fr": "Communication à distance", "es": "Recado" },
+  "spell_name_sleet-storm": { "en": "Sleet Storm", "ru": "Метель", "de": "Schneeregensturm", "fr": "Tempête de neige", "es": "Tormenta de aguanieve" },
+  "spell_name_slow": { "en": "Slow", "ru": "Замедление", "de": "Verlangsamen", "fr": "Lenteur", "es": "Ralentizar" },
+  "spell_name_speak-with-dead": { "en": "Speak with Dead", "ru": "Разговор с мёртвыми", "de": "Mit Toten sprechen", "fr": "Communication avec les morts", "es": "Hablar con los muertos" },
+  "spell_name_speak-with-plants": { "en": "Speak with Plants", "ru": "Разговор с растениями", "de": "Mit Pflanzen sprechen", "fr": "Communication avec les plantes", "es": "Hablar con las plantas" },
+  "spell_name_spirit-guardians": { "en": "Spirit Guardians", "ru": "Духовные стражи", "de": "Schutzgeister", "fr": "Esprits gardiens", "es": "Espíritus guardianes" },
+  "spell_name_stinking-cloud": { "en": "Stinking Cloud", "ru": "Зловонное облако", "de": "Stinkende Wolke", "fr": "Nuage nauséabond", "es": "Nube apestosa" },
+  "spell_name_tiny-hut": { "en": "Tiny Hut", "ru": "Леомундова хижина", "de": "Leomunds winzige Hütte", "fr": "Petite hutte de Léomund", "es": "Diminuta cabaña de Leomund" },
+  "spell_name_tongues": { "en": "Tongues", "ru": "Языки", "de": "Zungen", "fr": "Don des langues", "es": "Don de lenguas" },
+  "spell_name_vampiric-touch": { "en": "Vampiric Touch", "ru": "Прикосновение вампира", "de": "Vampirische Berührung", "fr": "Caresse du vampire", "es": "Toque vampírico" },
+  "spell_name_water-breathing": { "en": "Water Breathing", "ru": "Подводное дыхание", "de": "Wasseratmung", "fr": "Respiration aquatique", "es": "Respirar bajo el agua" },
+  "spell_name_water-walk": { "en": "Water Walk", "ru": "Хождение по воде", "de": "Wasserlaufen", "fr": "Marche sur l'onde", "es": "Caminar sobre el agua" },
+  "spell_name_wind-wall": { "en": "Wind Wall", "ru": "Стена ветра", "de": "Windwand", "fr": "Mur de vent", "es": "Muro de viento" },
+  "spell_name_arcane-eye": { "en": "Arcane Eye", "ru": "Магический глаз", "de": "Arkanes Auge", "fr": "Œil magique", "es": "Ojo arcano" },
+  "spell_name_banishment": { "en": "Banishment", "ru": "Изгнание", "de": "Verbannung", "fr": "Bannissement", "es": "Destierro" },
+  "spell_name_black-tentacles": { "en": "Black Tentacles", "ru": "Эвардовы чёрные щупальца", "de": "Evards schwarze Tentakel", "fr": "Tentacules noirs d'Evard", "es": "Tentáculos negros de Evard" },
+  "spell_name_blight": { "en": "Blight", "ru": "Усыхание", "de": "Verdorren", "fr": "Flétrissement", "es": "Marchitar" },
+  "spell_name_compulsion": { "en": "Compulsion", "ru": "Принуждение", "de": "Zwang", "fr": "Compulsion", "es": "Compulsión" },
+  "spell_name_confusion": { "en": "Confusion", "ru": "Смятение", "de": "Verwirrung", "fr": "Confusion", "es": "Confusión" },
+  "spell_name_conjure-minor-elementals": { "en": "Conjure Minor Elementals", "ru": "Вызов малых элементалей", "de": "Kleinere Elementare herbeizaubern", "fr": "Invocation d'élémentaires mineurs", "es": "Conjurar elementales menores" },
+  "spell_name_conjure-woodland-beings": { "en": "Conjure Woodland Beings", "ru": "Вызов лесных обитателей", "de": "Waldwesen herbeizaubern", "fr": "Invocation d'êtres sylvestres", "es": "Conjurar seres del bosque" },
+  "spell_name_control-water": { "en": "Control Water", "ru": "Власть над водами", "de": "Wasser kontrollieren", "fr": "Contrôle de l'eau", "es": "Controlar agua" },
+  "spell_name_death-ward": { "en": "Death Ward", "ru": "Защита от смерти", "de": "Todesschutz", "fr": "Protection contre la mort", "es": "Custodia contra la muerte" },
+  "spell_name_dimension-door": { "en": "Dimension Door", "ru": "Переносящая дверь", "de": "Dimensionstür", "fr": "Porte dimensionnelle", "es": "Puerta dimensional" },
+  "spell_name_divination": { "en": "Divination", "ru": "Предсказание", "de": "Weissagung", "fr": "Divination", "es": "Adivinación" },
+  "spell_name_dominate-beast": { "en": "Dominate Beast", "ru": "Подчинение зверя", "de": "Tier beherrschen", "fr": "Domination de bête", "es": "Dominar bestia" },
+  "spell_name_fabricate": { "en": "Fabricate", "ru": "Изготовление", "de": "Fabrizieren", "fr": "Fabrication", "es": "Fabricar" },
+  "spell_name_faithful-hound": { "en": "Faithful Hound", "ru": "Верный пёс Морденкайнена", "de": "Mordenkainens treuer Hund", "fr": "Chien de garde de Mordenkainen", "es": "Perro fiel de Mordenkainen" },
+  "spell_name_fire-shield": { "en": "Fire Shield", "ru": "Огненный щит", "de": "Feuerschild", "fr": "Bouclier de feu", "es": "Escudo de fuego" },
+  "spell_name_freedom-of-movement": { "en": "Freedom of Movement", "ru": "Свобода перемещения", "de": "Bewegungsfreiheit", "fr": "Liberté de mouvement", "es": "Libertad de movimiento" },
+  "spell_name_giant-insect": { "en": "Giant Insect", "ru": "Гигантское насекомое", "de": "Rieseninsekt", "fr": "Insecte géant", "es": "Insecto gigante" },
+  "spell_name_greater-invisibility": { "en": "Greater Invisibility", "ru": "Высшая невидимость", "de": "Mächtige Unsichtbarkeit", "fr": "Invisibilité supérieure", "es": "Invisibilidad mayor" },
+  "spell_name_guardian-of-faith": { "en": "Guardian of Faith", "ru": "Страж веры", "de": "Wächter des Glaubens", "fr": "Gardien de la foi", "es": "Guardián de la fe" },
+  "spell_name_hallucinatory-terrain": { "en": "Hallucinatory Terrain", "ru": "Мираж", "de": "Halluzinatorisches Gelände", "fr": "Terrain hallucinatoire", "es": "Terreno alucinatorio" },
+  "spell_name_ice-storm": { "en": "Ice Storm", "ru": "Град", "de": "Eissturm", "fr": "Tempête de grêle", "es": "Tormenta de hielo" },
+  "spell_name_locate-creature": { "en": "Locate Creature", "ru": "Поиск существа", "de": "Kreatur aufspüren", "fr": "Localisation de créature", "es": "Localizar criatura" },
+  "spell_name_phantasmal-killer": { "en": "Phantasmal Killer", "ru": "Воображаемый убийца", "de": "Tödliches Trugbild", "fr": "Assassin imaginaire", "es": "Asesino fantasmal" },
+  "spell_name_polymorph": { "en": "Polymorph", "ru": "Полиморф", "de": "Verwandlung", "fr": "Métamorphose", "es": "Polimorfar" },
+  "spell_name_private-sanctum": { "en": "Private Sanctum", "ru": "Кабинет Морденкайнена", "de": "Mordenkainens privates Refugium", "fr": "Sanctuaire privé de Mordenkainen", "es": "Santuario privado de Mordenkainen" },
+  "spell_name_resilient-sphere": { "en": "Resilient Sphere", "ru": "Отилюков упругий шар", "de": "Otilukes elastische Kugel", "fr": "Sphère résiliente d'Otiluke", "es": "Esfera elástica de Otiluke" },
+  "spell_name_secret-chest": { "en": "Secret Chest", "ru": "Леомундов потайной сундук", "de": "Leomunds geheime Truhe", "fr": "Coffre secret de Léomund", "es": "Cofre secreto de Leomund" },
+  "spell_name_stone-shape": { "en": "Stone Shape", "ru": "Изменение формы камня", "de": "Stein formen", "fr": "Façonnage de la pierre", "es": "Moldear la piedra" },
+  "spell_name_stoneskin": { "en": "Stoneskin", "ru": "Каменная кожа", "de": "Steinhaut", "fr": "Peau de pierre", "es": "Piel pétrea" },
+  "spell_name_wall-of-fire": { "en": "Wall of Fire", "ru": "Стена огня", "de": "Feuerwand", "fr": "Mur de feu", "es": "Muro de fuego" },
+  "spell_name_raise-dead": { "en": "Raise Dead", "ru": "Воскрешение", "de": "Tote erwecken", "fr": "Rappel à la vie", "es": "Revivir a los muertos" },
+  "spell_name_animate-objects": { "en": "Animate Objects", "ru": "Оживление вещей", "de": "Gegenstände beleben", "fr": "Animation d'objets", "es": "Animar objetos" },
+  "spell_name_antilife-shell": { "en": "Antilife Shell", "ru": "Преграда жизни", "de": "Antilebenshülle", "fr": "Coquille antivie", "es": "Caparazón antivida" },
+  "spell_name_arcane-hand": { "en": "Arcane Hand", "ru": "Длань Бигби", "de": "Bigbys Hand", "fr": "Main de Bigby", "es": "Mano de Bigby" },
+  "spell_name_awaken": { "en": "Awaken", "ru": "Пробуждение разума", "de": "Erwecken", "fr": "Éveil", "es": "Despertar" },
+  "spell_name_cloudkill": { "en": "Cloudkill", "ru": "Облако смерти", "de": "Todeswolke", "fr": "Brume mortelle", "es": "Nube aniquiladora" },
+  "spell_name_commune": { "en": "Commune", "ru": "Общение", "de": "Kommunion", "fr": "Communion", "es": "Comunión" },
+  "spell_name_commune-with-nature": { "en": "Commune With Nature", "ru": "Общение с природой", "de": "Kommunion mit der Natur", "fr": "Communion avec la nature", "es": "Comunión con la naturaleza" },
+  "spell_name_cone-of-cold": { "en": "Cone of Cold", "ru": "Конус холода", "de": "Kältekegel", "fr": "Cône de froid", "es": "Cono de frío" },
+  "spell_name_conjure-elemental": { "en": "Conjure Elemental", "ru": "Вызов элементаля", "de": "Elementar herbeizaubern", "fr": "Invocation d'élémentaire", "es": "Conjurar elemental" },
+  "spell_name_contact-other-plane": { "en": "Contact Other Plane", "ru": "Связь с иным планом", "de": "Kontakt mit anderen Ebenen", "fr": "Contacter un autre plan", "es": "Contactar con otro plano" },
+  "spell_name_contagion": { "en": "Contagion", "ru": "Заражение", "de": "Ansteckung", "fr": "Contagion", "es": "Contagio" },
+  "spell_name_creation": { "en": "Creation", "ru": "Сотворение", "de": "Erschaffung", "fr": "Création", "es": "Creación" },
+  "spell_name_dispel-evil-and-good": { "en": "Dispel Evil and Good", "ru": "Рассеивание добра и зла", "de": "Gutes und Böses bannen", "fr": "Dissipation du mal et du bien", "es": "Disipar el bien y el mal" },
+  "spell_name_dominate-person": { "en": "Dominate Person", "ru": "Подчинение личности", "de": "Person beherrschen", "fr": "Domination de personne", "es": "Dominar persona" },
+  "spell_name_dream": { "en": "Dream", "ru": "Сновидение", "de": "Traum", "fr": "Rêve", "es": "Sueño" },
+  "spell_name_flame-strike": { "en": "Flame Strike", "ru": "Небесный огонь", "de": "Flammenschlag", "fr": "Colonne de flamme", "es": "Golpe flamígero" },
+  "spell_name_geas": { "en": "Geas", "ru": "Обет", "de": "Geas", "fr": "Quête", "es": "Geas" },
+  "spell_name_greater-restoration": { "en": "Greater Restoration", "ru": "Высшее восстановление", "de": "Vollständige Genesung", "fr": "Restauration supérieure", "es": "Restablecimiento mayor" },
+  "spell_name_hallow": { "en": "Hallow", "ru": "Святилище", "de": "Weihen", "fr": "Sanctification", "es": "Santificar" },
+  "spell_name_hold-monster": { "en": "Hold Monster", "ru": "Удержание чудовища", "de": "Monster festhalten", "fr": "Immobilisation de monstre", "es": "Inmovilizar monstruo" },
+  "spell_name_insect-plague": { "en": "Insect Plague", "ru": "Нашествие насекомых", "de": "Insektenplage", "fr": "Fléau d'insectes", "es": "Plaga de insectos" },
+  "spell_name_legend-lore": { "en": "Legend Lore", "ru": "Знание легенд", "de": "Legendenkunde", "fr": "Mythes et légendes", "es": "Conocimiento de leyendas" },
+  "spell_name_mass-cure-wounds": { "en": "Mass Cure Wounds", "ru": "Множественное лечение ран", "de": "Massen-Wunden heilen", "fr": "Soin des blessures de groupe", "es": "Curar heridas en masa" },
+  "spell_name_mislead": { "en": "Mislead", "ru": "Фальшивый двойник", "de": "Irreführung", "fr": "Double illusoire", "es": "Despistar" },
+  "spell_name_modify-memory": { "en": "Modify Memory", "ru": "Изменение памяти", "de": "Gedächtnis verändern", "fr": "Modification de mémoire", "es": "Modificar recuerdo" },
+  "spell_name_passwall": { "en": "Passwall", "ru": "Создание прохода", "de": "Wanddurchgang", "fr": "Passe-muraille", "es": "Pasamuros" },
+  "spell_name_planar-binding": { "en": "Planar Binding", "ru": "Планарные узы", "de": "Ebenenbindung", "fr": "Entrave planaire", "es": "Vínculo planar" },
+  "spell_name_reincarnate": { "en": "Reincarnate", "ru": "Реинкарнация", "de": "Reinkarnation", "fr": "Réincarnation", "es": "Reencarnar" },
+  "spell_name_scrying": { "en": "Scrying", "ru": "Наблюдение", "de": "Ausspähung", "fr": "Scrutation", "es": "Escudriñar" },
+  "spell_name_seeming": { "en": "Seeming", "ru": "Притворство", "de": "Anschein", "fr": "Apparence trompeuse", "es": "Apariencia" },
+  "spell_name_telekinesis": { "en": "Telekinesis", "ru": "Телекинез", "de": "Telekinese", "fr": "Télékinésie", "es": "Telequinesis" },
+  "spell_name_telepathic-bond": { "en": "Telepathic Bond", "ru": "Ментальная связь Рэри", "de": "Rarys telepathisches Band", "fr": "Lien télépathique de Rary", "es": "Vínculo telepático de Rary" },
+  "spell_name_teleportation-circle": { "en": "Teleportation Circle", "ru": "Круг телепортации", "de": "Teleportationskreis", "fr": "Cercle de téléportation", "es": "Círculo de teletransporte" },
+  "spell_name_tree-stride": { "en": "Tree Stride", "ru": "Древесный путь", "de": "Baumschreiten", "fr": "Passage par les arbres", "es": "Zancada arbórea" },
+  "spell_name_wall-of-force": { "en": "Wall of Force", "ru": "Стена силы", "de": "Energiewand", "fr": "Mur de force", "es": "Muro de fuerza" },
+  "spell_name_wall-of-stone": { "en": "Wall of Stone", "ru": "Стена камня", "de": "Steinwand", "fr": "Mur de pierre", "es": "Muro de piedra" },
+  "spell_name_blade-barrier": { "en": "Blade Barrier", "ru": "Стена клинков", "de": "Klingenbarriere", "fr": "Barrière de lames", "es": "Barrera de cuchillas" },
+  "spell_name_chain-lightning": { "en": "Chain Lightning", "ru": "Цепная молния", "de": "Kettenblitz", "fr": "Chaîne d'éclairs", "es": "Cadena de relámpagos" },
+  "spell_name_circle-of-death": { "en": "Circle of Death", "ru": "Круг смерти", "de": "Todeskreis", "fr": "Cercle de mort", "es": "Círculo de muerte" },
+  "spell_name_conjure-fey": { "en": "Conjure Fey", "ru": "Вызов феи", "de": "Feenwesen herbeizaubern", "fr": "Invocation de fée", "es": "Conjurar feérico" },
+  "spell_name_contingency": { "en": "Contingency", "ru": "Предосторожность", "de": "Eventualität", "fr": "Contingence", "es": "Contingencia" },
+  "spell_name_create-undead": { "en": "Create Undead", "ru": "Сотворение нежити", "de": "Untote erschaffen", "fr": "Création de mort-vivant", "es": "Crear muerto viviente" },
+  "spell_name_disintegrate": { "en": "Disintegrate", "ru": "Распад", "de": "Auflösung", "fr": "Désintégration", "es": "Desintegrar" },
+  "spell_name_eyebite": { "en": "Eyebite", "ru": "Разящее око", "de": "Böser Blick", "fr": "Mauvais œil", "es": "Mal de ojo" },
+  "spell_name_find-the-path": { "en": "Find the Path", "ru": "Поиск пути", "de": "Weg finden", "fr": "Découverte du chemin", "es": "Encontrar el camino" },
+  "spell_name_flesh-to-stone": { "en": "Flesh to Stone", "ru": "Окаменение", "de": "Fleisch zu Stein", "fr": "Pétrification", "es": "Carne a piedra" },
+  "spell_name_forbiddance": { "en": "Forbiddance", "ru": "Запрет", "de": "Verbot", "fr": "Interdiction", "es": "Prohibición" },
+  "spell_name_freezing-sphere": { "en": "Freezing Sphere", "ru": "Отилюков ледяной шар", "de": "Otilukes eisige Sphäre", "fr": "Sphère glacée d'Otiluke", "es": "Esfera congelante de Otiluke" },
+  "spell_name_globe-of-invulnerability": { "en": "Globe of Invulnerability", "ru": "Сфера неуязвимости", "de": "Kugel der Unverwundbarkeit", "fr": "Globe d'invulnérabilité", "es": "Globo de invulnerabilidad" },
+  "spell_name_guards-and-wards": { "en": "Guards and Wards", "ru": "Стражи", "de": "Wächter und Schutzbanne", "fr": "Protections et sceaux", "es": "Guardas y custodias" },
+  "spell_name_harm": { "en": "Harm", "ru": "Поражение", "de": "Leid", "fr": "Mise à mal", "es": "Dañar" },
+  "spell_name_heal": { "en": "Heal", "ru": "Исцеление", "de": "Heilung", "fr": "Guérison", "es": "Curar" },
+  "spell_name_heroes-feast": { "en": "Heroes' Feast", "ru": "Пир героев", "de": "Heldenmahl", "fr": "Festin des héros", "es": "Banquete de héroes" },
+  "spell_name_instant-summons": { "en": "Instant Summons", "ru": "Дромиджево появление", "de": "Drawmijs sofortige Herbeirufung", "fr": "Convocation instantanée de Drawmij", "es": "Invocación instantánea de Drawmij" },
+  "spell_name_irresistible-dance": { "en": "Irresistible Dance", "ru": "Неудержимая пляска Отто", "de": "Ottos unwiderstehlicher Tanz", "fr": "Danse irrésistible d'Otto", "es": "Danza irresistible de Otto" },
+  "spell_name_magic-jar": { "en": "Magic Jar", "ru": "Волшебный сосуд", "de": "Magisches Gefäß", "fr": "Possession", "es": "Receptáculo mágico" },
+  "spell_name_mass-suggestion": { "en": "Mass Suggestion", "ru": "Множественное внушение", "de": "Massen-Einflüsterung", "fr": "Suggestion de groupe", "es": "Sugestión en masa" },
+  "spell_name_move-earth": { "en": "Move Earth", "ru": "Движение почвы", "de": "Erde bewegen", "fr": "Glissement de terrain", "es": "Mover la tierra" },
+  "spell_name_planar-ally": { "en": "Planar Ally", "ru": "Планарный союзник", "de": "Ebenenverbündeter", "fr": "Allié planaire", "es": "Aliado planar" },
+  "spell_name_programmed-illusion": { "en": "Programmed Illusion", "ru": "Заданная иллюзия", "de": "Programmierte Illusion", "fr": "Illusion programmée", "es": "Ilusión programada" },
+  "spell_name_sunbeam": { "en": "Sunbeam", "ru": "Солнечный луч", "de": "Sonnenstrahl", "fr": "Rayon de soleil", "es": "Rayo de sol" },
+  "spell_name_transport-via-plants": { "en": "Transport via Plants", "ru": "Путешествие через растения", "de": "Transport durch Pflanzen", "fr": "Voie végétale", "es": "Transporte vegetal" },
+  "spell_name_true-seeing": { "en": "True Seeing", "ru": "Истинное зрение", "de": "Wahrer Blick", "fr": "Vision suprême", "es": "Visión verdadera" },
+  "spell_name_wall-of-ice": { "en": "Wall of Ice", "ru": "Стена льда", "de": "Eiswand", "fr": "Mur de glace", "es": "Muro de hielo" },
+  "spell_name_wall-of-thorns": { "en": "Wall of Thorns", "ru": "Стена шипов", "de": "Dornenwand", "fr": "Mur d'épines", "es": "Muro de espinas" },
+  "spell_name_wind-walk": { "en": "Wind Walk", "ru": "Хождение по ветру", "de": "Windwandeln", "fr": "Marche sur le vent", "es": "Caminar con el viento" },
+  "spell_name_word-of-recall": { "en": "Word of Recall", "ru": "Слово возврата", "de": "Wort der Rückkehr", "fr": "Mot de rappel", "es": "Palabra de regreso" },
+  "spell_name_arcane-sword": { "en": "Arcane Sword", "ru": "Меч Морденкайнена", "de": "Mordenkainens Schwert", "fr": "Épée de Mordenkainen", "es": "Espada de Mordenkainen" },
+  "spell_name_conjure-celestial": { "en": "Conjure Celestial", "ru": "Вызов небожителя", "de": "Himmlisches Wesen herbeizaubern", "fr": "Invocation de céleste", "es": "Conjurar celestial" },
+  "spell_name_delayed-blast-fireball": { "en": "Delayed Blast Fireball", "ru": "Замедленный огненный шар", "de": "Verzögerter Feuerball", "fr": "Boule de feu à explosion retardée", "es": "Bola de fuego de explosión retardada" },
+  "spell_name_divine-word": { "en": "Divine Word", "ru": "Божественное слово", "de": "Göttliches Wort", "fr": "Parole divine", "es": "Palabra divina" },
+  "spell_name_etherealness": { "en": "Etherealness", "ru": "Эфирность", "de": "Ätherische Gestalt", "fr": "Forme éthérée", "es": "Excursión etérea" },
+  "spell_name_finger-of-death": { "en": "Finger of Death", "ru": "Перст смерти", "de": "Finger des Todes", "fr": "Doigt de mort", "es": "Dedo de la muerte" },
+  "spell_name_fire-storm": { "en": "Fire Storm", "ru": "Огненная буря", "de": "Feuersturm", "fr": "Tempête de feu", "es": "Tormenta de fuego" },
+  "spell_name_forcecage": { "en": "Forcecage", "ru": "Силовая клетка", "de": "Energiekäfig", "fr": "Cage de force", "es": "Jaula de fuerza" },
+  "spell_name_magnificent-mansion": { "en": "Magnificent Mansion", "ru": "Великолепный особняк Морденкайнена", "de": "Mordenkainens prächtige Villa", "fr": "Manoir somptueux de Mordenkainen", "es": "Mansión magnífica de Mordenkainen" },
+  "spell_name_mirage-arcane": { "en": "Mirage Arcane", "ru": "Таинственный мираж", "de": "Arkane Luftspiegelung", "fr": "Mirage", "es": "Espejismo arcano" },
+  "spell_name_plane-shift": { "en": "Plane Shift", "ru": "Уход в иной план", "de": "Ebenenwechsel", "fr": "Changement de plan", "es": "Desplazamiento entre planos" },
+  "spell_name_prismatic-spray": { "en": "Prismatic Spray", "ru": "Радужные брызги", "de": "Prismatische Strahlen", "fr": "Embruns prismatiques", "es": "Rociada prismática" },
+  "spell_name_project-image": { "en": "Project Image", "ru": "Проекция", "de": "Abbild projizieren", "fr": "Projection d'image", "es": "Proyectar imagen" },
+  "spell_name_regenerate": { "en": "Regenerate", "ru": "Регенерация", "de": "Regeneration", "fr": "Régénération", "es": "Regenerar" },
+  "spell_name_resurrection": { "en": "Resurrection", "ru": "Высшее воскрешение", "de": "Auferstehung", "fr": "Résurrection", "es": "Resurrección" },
+  "spell_name_reverse-gravity": { "en": "Reverse Gravity", "ru": "Изменение тяготения", "de": "Umgekehrte Schwerkraft", "fr": "Inversion de la gravité", "es": "Invertir la gravedad" },
+  "spell_name_sequester": { "en": "Sequester", "ru": "Изоляция", "de": "Abschotten", "fr": "Séquestration", "es": "Recluir" },
+  "spell_name_simulacrum": { "en": "Simulacrum", "ru": "Подобие", "de": "Simulacrum", "fr": "Simulacre", "es": "Simulacro" },
+  "spell_name_symbol": { "en": "Symbol", "ru": "Знак", "de": "Symbol", "fr": "Symbole", "es": "Símbolo" },
+  "spell_name_teleport": { "en": "Teleport", "ru": "Телепортация", "de": "Teleportieren", "fr": "Téléportation", "es": "Teletransporte" },
+  "spell_name_animal-shapes": { "en": "Animal Shapes", "ru": "Превращение в животных", "de": "Tiergestalten", "fr": "Formes animales", "es": "Formas animales" },
+  "spell_name_antimagic-field": { "en": "Antimagic Field", "ru": "Поле антимагии", "de": "Antimagisches Feld", "fr": "Champ antimagie", "es": "Campo antimagia" },
+  "spell_name_antipathy-sympathy": { "en": "Antipathy/Sympathy", "ru": "Антипатия/симпатия", "de": "Antipathie/Sympathie", "fr": "Antipathie/Sympathie", "es": "Antipatía/simpatía" },
+  "spell_name_clone": { "en": "Clone", "ru": "Двойник", "de": "Klon", "fr": "Clone", "es": "Clon" },
+  "spell_name_control-weather": { "en": "Control Weather", "ru": "Власть над погодой", "de": "Wetterkontrolle", "fr": "Contrôle du climat", "es": "Controlar el clima" },
+  "spell_name_demiplane": { "en": "Demiplane", "ru": "Демиплан", "de": "Halbebene", "fr": "Demi-plan", "es": "Semiplano" },
+  "spell_name_dominate-monster": { "en": "Dominate Monster", "ru": "Подчинение чудовища", "de": "Monster beherrschen", "fr": "Domination de monstre", "es": "Dominar monstruo" },
+  "spell_name_earthquake": { "en": "Earthquake", "ru": "Землетрясение", "de": "Erdbeben", "fr": "Tremblement de terre", "es": "Terremoto" },
+  "spell_name_feeblemind": { "en": "Feeblemind", "ru": "Замешательство", "de": "Schwachsinn", "fr": "Esprit faible", "es": "Debilidad mental" },
+  "spell_name_glibness": { "en": "Glibness", "ru": "Находчивость", "de": "Zungenfertigkeit", "fr": "Bagou", "es": "Labia" },
+  "spell_name_holy-aura": { "en": "Holy Aura", "ru": "Аура святости", "de": "Heilige Aura", "fr": "Aura sacrée", "es": "Aura sagrada" },
+  "spell_name_incendiary-cloud": { "en": "Incendiary Cloud", "ru": "Воспламеняющаяся туча", "de": "Brandwolke", "fr": "Nuage incendiaire", "es": "Nube incendiaria" },
+  "spell_name_maze": { "en": "Maze", "ru": "Лабиринт", "de": "Labyrinth", "fr": "Dédale", "es": "Laberinto" },
+  "spell_name_mind-blank": { "en": "Mind Blank", "ru": "Сокрытие разума", "de": "Gedankenleere", "fr": "Esprit impénétrable", "es": "Mente en blanco" },
+  "spell_name_power-word-stun": { "en": "Power Word Stun", "ru": "Слово силы: Ошеломление", "de": "Machtwort: Betäubung", "fr": "Mot de pouvoir étourdissant", "es": "Palabra de poder: aturdir" },
+  "spell_name_sunburst": { "en": "Sunburst", "ru": "Солнечный ожог", "de": "Sonnenexplosion", "fr": "Éclat du soleil", "es": "Estallido solar" },
+  "spell_name_astral-projection": { "en": "Astral Projection", "ru": "Проекция в астрал", "de": "Astralprojektion", "fr": "Projection astrale", "es": "Proyección astral" },
+  "spell_name_foresight": { "en": "Foresight", "ru": "Предвидение", "de": "Voraussicht", "fr": "Prémonition", "es": "Presciencia" },
+  "spell_name_gate": { "en": "Gate", "ru": "Врата", "de": "Tor", "fr": "Portail", "es": "Portal" },
+  "spell_name_imprisonment": { "en": "Imprisonment", "ru": "Заточение", "de": "Einkerkerung", "fr": "Emprisonnement", "es": "Encarcelamiento" },
+  "spell_name_mass-heal": { "en": "Mass Heal", "ru": "Множественное исцеление", "de": "Massen-Heilung", "fr": "Guérison de groupe", "es": "Curar en masa" },
+  "spell_name_meteor-swarm": { "en": "Meteor Swarm", "ru": "Метеоритный дождь", "de": "Meteoritenschwarm", "fr": "Nuée de météores", "es": "Lluvia de meteoritos" },
+  "spell_name_power-word-kill": { "en": "Power Word Kill", "ru": "Слово силы: Смерть", "de": "Machtwort: Tod", "fr": "Mot de pouvoir mortel", "es": "Palabra de poder: matar" },
+  "spell_name_prismatic-wall": { "en": "Prismatic Wall", "ru": "Радужная стена", "de": "Prismatische Wand", "fr": "Mur prismatique", "es": "Muro prismático" },
+  "spell_name_shapechange": { "en": "Shapechange", "ru": "Полное превращение", "de": "Gestaltwandel", "fr": "Changement de forme", "es": "Cambiar de forma" },
+  "spell_name_storm-of-vengeance": { "en": "Storm of Vengeance", "ru": "Гроза гнева", "de": "Sturm der Vergeltung", "fr": "Tempête vengeresse", "es": "Tormenta de venganza" },
+  "spell_name_time-stop": { "en": "Time Stop", "ru": "Остановка времени", "de": "Zeitstopp", "fr": "Arrêt du temps", "es": "Detener el tiempo" },
+  "spell_name_true-polymorph": { "en": "True Polymorph", "ru": "Истинный полиморф", "de": "Wahre Verwandlung", "fr": "Métamorphose suprême", "es": "Polimorfar verdadero" },
+  "spell_name_true-resurrection": { "en": "True Resurrection", "ru": "Истинное воскрешение", "de": "Wahre Auferstehung", "fr": "Résurrection suprême", "es": "Resurrección verdadera" },
+  "spell_name_weird": { "en": "Weird", "ru": "Жуть", "de": "Grauen", "fr": "Ennemi subconscient", "es": "Extraño" },
+  "spell_name_wish": { "en": "Wish", "ru": "Желание", "de": "Wunsch", "fr": "Souhait", "es": "Deseo" },
   "spells_damage_type": {
     "en": "Damage Type",
     "ru": "Тип урона",
@@ -4058,7 +4613,7 @@
     "en": "Sphere",
     "ru": "Сфера",
     "de": "Kugel",
-    "fr": "Sphere",
+    "fr": "Sphère",
     "es": "Esfera"
   },
   "spells_area_cube": {
@@ -4086,7 +4641,7 @@
     "en": "Cone",
     "ru": "Конус",
     "de": "Kegel",
-    "fr": "Cone",
+    "fr": "Cône",
     "es": "Cono"
   },
   "spells_healing": {
@@ -4254,7 +4809,7 @@
     "en": "Evocation",
     "ru": "Воплощение",
     "de": "Hervorrufung",
-    "fr": "Evocation",
+    "fr": "Évocation",
     "es": "Evocacion"
   },
   "spells_school_illusion": {
