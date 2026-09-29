@@ -14,9 +14,12 @@ import com.dndcharacterhandler.domain.repository.CharacterRepository
 import org.json.JSONObject
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.io.InputStream
+import java.io.OutputStream
 import java.util.UUID
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
@@ -43,6 +46,7 @@ class CharacterFileRepositoryImpl(
             val stagingDir = CharacterAssetStorage
                 .importStagingDir(context.filesDir, UUID.randomUUID().toString())
                 .apply { mkdirs() }
+            var createdCharacterId: Long? = null
             try {
                 val importedArchive = readCharacterArchive(Uri.parse(sourceUri), stagingDir)
                 val characterId = characterRepository.createCharacter(
@@ -50,6 +54,7 @@ class CharacterFileRepositoryImpl(
                         character = importedArchive.characterBundle.character.copy(id = 0)
                     )
                 )
+                createdCharacterId = characterId
                 val relocatedBundle = relocateImportedAssets(
                     characterId = characterId,
                     bundle = importedArchive.characterBundle,
@@ -59,6 +64,13 @@ class CharacterFileRepositoryImpl(
                     relocatedBundle.copy(character = relocatedBundle.character.copy(id = characterId))
                 )
                 characterId
+            } catch (throwable: Throwable) {
+                // Roll back a partially-imported character so a failure after createCharacter
+                // can't leave an orphan row (and its asset directory) behind.
+                createdCharacterId?.let { id ->
+                    runCatching { characterRepository.deleteCharacter(id) }
+                }
+                throw throwable
             } finally {
                 stagingDir.deleteRecursively()
             }
@@ -95,7 +107,10 @@ class CharacterFileRepositoryImpl(
             val moved = stagedFile.renameTo(target) || runCatching {
                 stagedFile.copyTo(target, overwrite = true); true
             }.getOrDefault(false)
-            val resolved = if (moved) target.absolutePath else reference
+            // If relocation failed, drop the reference rather than point at the staging file that
+            // gets deleted right after import (which would leave a broken portrait/icon path).
+            if (!moved) return null
+            val resolved = target.absolutePath
             relocatedReferences[reference] = resolved
             return resolved
         }
@@ -153,14 +168,22 @@ class CharacterFileRepositoryImpl(
     private fun readCharacterArchive(sourceUri: Uri, importDirectory: File): ImportedArchive {
         val extractedAssets = linkedMapOf<String, File>()
         var manifestJson: String? = null
+        var entryCount = 0
+        var remainingBytes = MAX_TOTAL_EXTRACTED_BYTES
 
         context.contentResolver.openInputStream(sourceUri)?.use { inputStream ->
             ZipInputStream(BufferedInputStream(inputStream)).use { zipInputStream ->
                 var entry = zipInputStream.nextEntry
                 while (entry != null) {
+                    entryCount += 1
+                    if (entryCount > MAX_ENTRY_COUNT) {
+                        error("Character archive contains too many entries.")
+                    }
                     when {
                         entry.name == "manifest.json" -> {
-                            manifestJson = zipInputStream.readBytes().toString(Charsets.UTF_8)
+                            val buffer = ByteArrayOutputStream()
+                            remainingBytes -= copyWithLimit(zipInputStream, buffer, remainingBytes)
+                            manifestJson = buffer.toByteArray().toString(Charsets.UTF_8)
                         }
 
                         entry.name.startsWith("assets/") && !entry.isDirectory -> {
@@ -170,7 +193,7 @@ class CharacterFileRepositoryImpl(
                             if (withinStaging) {
                                 targetFile.parentFile?.mkdirs()
                                 FileOutputStream(targetFile).use { output ->
-                                    zipInputStream.copyTo(output)
+                                    remainingBytes -= copyWithLimit(zipInputStream, output, remainingBytes)
                                 }
                                 extractedAssets[entry.name] = targetFile
                             }
@@ -187,6 +210,32 @@ class CharacterFileRepositoryImpl(
         return archiveManifestToCharacterBundle(manifest) { rawValue ->
             resolveImportedAssetReference(rawValue, extractedAssets)
         }
+    }
+
+    /**
+     * Streams [input] into [output], aborting if the copied size would exceed [remaining]. Guards
+     * against decompression bombs / corrupt archives that would otherwise fill internal storage.
+     * Returns the number of bytes written.
+     */
+    private fun copyWithLimit(input: InputStream, output: OutputStream, remaining: Long): Long {
+        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+        var written = 0L
+        while (true) {
+            val read = input.read(buffer)
+            if (read == -1) break
+            written += read
+            if (written > remaining) {
+                error("Character archive exceeds the maximum allowed size.")
+            }
+            output.write(buffer, 0, read)
+        }
+        return written
+    }
+
+    private companion object {
+        /** Cap on total bytes extracted from a single archive (portraits + icons + manifest). */
+        private const val MAX_TOTAL_EXTRACTED_BYTES = 64L * 1024 * 1024
+        private const val MAX_ENTRY_COUNT = 512
     }
 }
 

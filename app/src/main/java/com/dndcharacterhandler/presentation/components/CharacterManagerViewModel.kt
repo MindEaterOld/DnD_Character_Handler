@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 data class CharacterManagerUiState(
@@ -36,7 +37,9 @@ class CharacterManagerViewModel(
     private val _events = MutableSharedFlow<String>()
     val events: SharedFlow<String> = _events.asSharedFlow()
 
-    private var seededDefaultCharacter = false
+    // True only while a default-character seed is in flight, so we don't seed twice for the same
+    // empty state but still re-seed if the user later deletes their last character.
+    private var seedingInProgress = false
 
     init {
         viewModelScope.launch {
@@ -47,38 +50,50 @@ class CharacterManagerViewModel(
         viewModelScope.launch {
             characterRepository.observeCharacters().collectLatest { characters ->
                 if (characters.isEmpty()) {
-                    if (!seededDefaultCharacter) {
-                        seededDefaultCharacter = true
-                        val id = characterRepository.createCharacter(defaultCharacterBundle())
-                        selectedCharacterHolder.setSelectedCharacterId(id)
-                        _uiState.value = _uiState.value.copy(selectedCharacterId = id)
-                    } else {
-                        selectedCharacterHolder.setSelectedCharacterId(null)
-                        _uiState.value = _uiState.value.copy(
-                            characters = emptyList(),
-                            selectedCharacterId = null
-                        )
+                    // Always restore the app to a usable state: seed a default character whenever
+                    // the list is empty (first launch or after deleting the last character).
+                    if (!seedingInProgress) {
+                        seedingInProgress = true
+                        try {
+                            val id = characterRepository.createCharacter(defaultCharacterBundle())
+                            applySelection(id, characters = emptyList())
+                        } catch (throwable: Throwable) {
+                            seedingInProgress = false
+                            throw throwable
+                        }
                     }
                 } else {
+                    seedingInProgress = false
                     val currentSelectedId = _uiState.value.selectedCharacterId
+                        ?: languagePreferencesRepository.selectedCharacterId.first()
                     val selected = characters
                         .firstOrNull { it.character.id == currentSelectedId }
                         ?.character
                         ?.id
                         ?: characters.first().character.id
-                    selectedCharacterHolder.setSelectedCharacterId(selected)
-                    _uiState.value = _uiState.value.copy(
-                        characters = characters,
-                        selectedCharacterId = selected
-                    )
+                    applySelection(selected, characters = characters)
                 }
             }
+        }
+    }
+
+    /** Updates the in-memory selection and persists it (only when it actually changed). */
+    private suspend fun applySelection(characterId: Long?, characters: List<CharacterBundle>) {
+        val changed = _uiState.value.selectedCharacterId != characterId
+        selectedCharacterHolder.setSelectedCharacterId(characterId)
+        _uiState.value = _uiState.value.copy(
+            characters = characters,
+            selectedCharacterId = characterId
+        )
+        if (changed) {
+            languagePreferencesRepository.setSelectedCharacterId(characterId)
         }
     }
 
     fun selectCharacter(characterId: Long) {
         selectedCharacterHolder.setSelectedCharacterId(characterId)
         _uiState.value = _uiState.value.copy(selectedCharacterId = characterId)
+        viewModelScope.launch { languagePreferencesRepository.setSelectedCharacterId(characterId) }
     }
 
     fun createCharacter() {
@@ -86,6 +101,7 @@ class CharacterManagerViewModel(
             val id = characterRepository.createCharacter(defaultCharacterBundle())
             selectedCharacterHolder.setSelectedCharacterId(id)
             _uiState.value = _uiState.value.copy(selectedCharacterId = id)
+            languagePreferencesRepository.setSelectedCharacterId(id)
         }
     }
 
@@ -104,6 +120,7 @@ class CharacterManagerViewModel(
                 val characterId = result.getOrThrow()
                 selectedCharacterHolder.setSelectedCharacterId(characterId)
                 _uiState.value = _uiState.value.copy(selectedCharacterId = characterId)
+                languagePreferencesRepository.setSelectedCharacterId(characterId)
                 _events.emit("drawer_import_success")
             } else {
                 _events.emit("drawer_import_error")
@@ -117,6 +134,7 @@ class CharacterManagerViewModel(
             characterRepository.deleteCharacter(selectedId)
             selectedCharacterHolder.setSelectedCharacterId(null)
             _uiState.value = _uiState.value.copy(selectedCharacterId = null)
+            languagePreferencesRepository.setSelectedCharacterId(null)
         }
     }
 

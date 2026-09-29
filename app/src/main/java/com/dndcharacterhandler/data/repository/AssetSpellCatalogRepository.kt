@@ -1,13 +1,18 @@
 package com.dndcharacterhandler.data.repository
 
 import android.content.Context
+import com.dndcharacterhandler.data.localization.LocalizationRepository
+import com.dndcharacterhandler.domain.model.AppLanguage
 import com.dndcharacterhandler.domain.model.SpellCatalogItem
 import com.dndcharacterhandler.domain.repository.SpellCatalogRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 
 class AssetSpellCatalogRepository(
-    private val context: Context
+    private val context: Context,
+    private val localizationRepository: LocalizationRepository
 ) : SpellCatalogRepository {
     @Volatile
     private var cachedItems: List<SpellCatalogItem>? = null
@@ -27,11 +32,17 @@ class AssetSpellCatalogRepository(
 
     override suspend fun getItems(): List<SpellCatalogItem> {
         cachedItems?.let { return it }
-        val items = readArray("5e-SRD-Spells.json")
-            .mapNotNull(::parseSpell)
-            .sortedBy { it.name }
-        cachedItems = items
-        return items
+        return withContext(Dispatchers.IO) {
+            cachedItems?.let { return@withContext it }
+            // Spell names are translated in localization.json ("spell_name_<index>"). The Russian one is
+            // kept on the item so screens can tell an untouched catalog spell from a user-renamed one.
+            val russianStrings = localizationRepository.getStrings(AppLanguage.RUSSIAN)
+            val items = readArray("5e-SRD-Spells.json")
+                .mapNotNull { json -> parseSpell(json, russianStrings::get) }
+                .sortedBy { it.name }
+            cachedItems = items
+            items
+        }
     }
 
     private fun readArray(assetName: String): JSONArray {
@@ -46,10 +57,12 @@ class AssetSpellCatalogRepository(
             }
         }
 
-    private fun parseSpell(json: JSONObject): SpellCatalogItem? {
+    private fun parseSpell(json: JSONObject, russianString: (String) -> String): SpellCatalogItem? {
         val id = json.optString("index").ifBlank { return null }
         val name = json.optString("name").ifBlank { return null }
         val ruText = ruText().optJSONObject(id)
+        val ruNameKey = "spell_name_$id"
+        val ruName = russianString(ruNameKey).takeIf { it != ruNameKey }.orEmpty()
         val description = json.optJSONArray("desc").joinText()
         val higherLevel = json.optJSONArray("higher_level").joinText()
         val material = json.optString("material")
@@ -75,6 +88,7 @@ class AssetSpellCatalogRepository(
             school = json.optJSONObject("school")?.optString("name").orEmpty(),
             description = description,
             higherLevelDescription = higherLevel,
+            ruName = ruName,
             ruDescription = ruText?.optString("description").orEmpty(),
             ruHigherLevel = ruText?.optString("higherLevel").orEmpty(),
             ruMaterial = ruText?.optString("material").orEmpty(),

@@ -34,13 +34,16 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
@@ -225,9 +228,9 @@ internal fun BiographyContent(
                     title = text("biography_appearance"),
                     rows = listOf(
                         BiographyRow(BiographyField.AGE, Icons.Outlined.Inventory2, text("biography_age"), resolvedCharacter.age),
-                        BiographyRow(BiographyField.GENDER, Icons.Outlined.Badge, text("biography_gender"), resolvedCharacter.gender),
-                        BiographyRow(BiographyField.HEIGHT, Icons.Outlined.Badge, text("biography_height"), resolvedCharacter.height),
-                        BiographyRow(BiographyField.WEIGHT, Icons.Outlined.Inventory2, text("biography_weight"), resolvedCharacter.weight),
+                        BiographyRow(BiographyField.GENDER, Icons.Outlined.Badge, text("biography_gender"), localizedGender(resolvedCharacter.gender)),
+                        BiographyRow(BiographyField.HEIGHT, Icons.Outlined.Badge, text("biography_height"), localizedMeasuredValue(resolvedCharacter.height)),
+                        BiographyRow(BiographyField.WEIGHT, Icons.Outlined.Inventory2, text("biography_weight"), localizedMeasuredValue(resolvedCharacter.weight)),
                         BiographyRow(BiographyField.EYES, Icons.Outlined.Visibility, text("biography_eyes"), resolvedCharacter.eyes),
                         BiographyRow(BiographyField.HAIR, Icons.Outlined.AutoAwesome, text("biography_hair"), resolvedCharacter.hair),
                         BiographyRow(BiographyField.SKIN, Icons.Outlined.Badge, text("biography_skin"), resolvedCharacter.skin)
@@ -382,7 +385,17 @@ private fun BiographyHistorySection(
     onHistoryChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // Keep edits local while typing and persist only once the field loses focus, so we don't
+    // issue one DB write per keystroke (which also re-keyed this draft mid-typing).
     var draft by remember(history) { mutableStateOf(history) }
+    var wasFocused by remember { mutableStateOf(false) }
+
+    // Safety net: if the screen leaves composition while editing (e.g. navigating away
+    // before a focus-lost event), persist the latest draft. updateBiography de-dupes equal values.
+    val latestDraft by rememberUpdatedState(draft)
+    DisposableEffect(Unit) {
+        onDispose { onHistoryChange(latestDraft) }
+    }
 
     Column(
         modifier = modifier,
@@ -397,11 +410,15 @@ private fun BiographyHistorySection(
         ) {
             OutlinedTextField(
                 value = draft,
-                onValueChange = {
-                    draft = it
-                    onHistoryChange(it)
-                },
-                modifier = Modifier.fillMaxWidth(),
+                onValueChange = { draft = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onFocusChanged { focusState ->
+                        if (wasFocused && !focusState.isFocused) {
+                            onHistoryChange(draft)
+                        }
+                        wasFocused = focusState.isFocused
+                    },
                 placeholder = {
                     Text(
                         text = text("biography_history_placeholder"),
@@ -566,7 +583,7 @@ private fun BiographyGenderDialog(
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 genderOptions.forEach { option ->
                     BiographySelectionOption(
-                        text = option,
+                        text = localizedGender(option),
                         selected = selected == option,
                         onClick = { selected = option }
                     )
@@ -625,17 +642,19 @@ private fun BiographyHeightDialog(
 ) {
     var unit by remember(currentValue) { mutableStateOf(detectHeightUnit(currentValue)) }
     var amount by remember(currentValue) { mutableStateOf(parseLeadingNumber(currentValue)?.let(::formatNumber).orEmpty()) }
+    val cmLabel = text(HeightUnit.CM.labelKey)
+    val ftLabel = text(HeightUnit.FT.labelKey)
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(text("biography_height")) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 UnitSwitcher(
-                    first = HeightUnit.CM.label,
-                    second = HeightUnit.FT.label,
-                    selected = unit.label,
+                    first = cmLabel,
+                    second = ftLabel,
+                    selected = if (unit == HeightUnit.CM) cmLabel else ftLabel,
                     onSelected = { next ->
-                        val nextUnit = if (next == HeightUnit.CM.label) HeightUnit.CM else HeightUnit.FT
+                        val nextUnit = if (next == cmLabel) HeightUnit.CM else HeightUnit.FT
                         amount = convertHeightAmount(amount, unit, nextUnit)
                         unit = nextUnit
                     }
@@ -649,7 +668,7 @@ private fun BiographyHeightDialog(
             }
         },
         confirmButton = {
-            Button(onClick = { onSave(formatMeasuredValue(amount, unit.label)) }) {
+            Button(onClick = { onSave(formatMeasuredValue(amount, unit.code)) }) {
                 Text(text("common_save"))
             }
         },
@@ -669,17 +688,19 @@ private fun BiographyWeightDialog(
 ) {
     var unit by remember(currentValue) { mutableStateOf(detectWeightUnit(currentValue)) }
     var amount by remember(currentValue) { mutableStateOf(parseLeadingNumber(currentValue)?.let(::formatNumber).orEmpty()) }
+    val lbLabel = text(WeightUnit.LB.labelKey)
+    val kgLabel = text(WeightUnit.KG.labelKey)
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(text("biography_weight")) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 UnitSwitcher(
-                    first = WeightUnit.LB.label,
-                    second = WeightUnit.KG.label,
-                    selected = unit.label,
+                    first = lbLabel,
+                    second = kgLabel,
+                    selected = if (unit == WeightUnit.LB) lbLabel else kgLabel,
                     onSelected = { next ->
-                        val nextUnit = if (next == WeightUnit.LB.label) WeightUnit.LB else WeightUnit.KG
+                        val nextUnit = if (next == lbLabel) WeightUnit.LB else WeightUnit.KG
                         amount = convertWeightAmount(amount, unit, nextUnit)
                         unit = nextUnit
                     }
@@ -693,7 +714,7 @@ private fun BiographyWeightDialog(
             }
         },
         confirmButton = {
-            Button(onClick = { onSave(formatMeasuredValue(amount, unit.label)) }) {
+            Button(onClick = { onSave(formatMeasuredValue(amount, unit.code)) }) {
                 Text(text("common_save"))
             }
         },
@@ -804,14 +825,28 @@ enum class BiographyEditor {
     WEIGHT
 }
 
-private enum class HeightUnit(val label: String) {
-    CM("cm"),
-    FT("ft")
+/** [code] is what gets saved in the character ("180 cm"); [labelKey] is how it's shown. */
+private enum class HeightUnit(val code: String, val labelKey: String) {
+    CM("cm", "biography_unit_cm"),
+    FT("ft", "inventory_unit_feet")
 }
 
-private enum class WeightUnit(val label: String) {
-    LB("lb"),
-    KG("kg")
+private enum class WeightUnit(val code: String, val labelKey: String) {
+    LB("lb", "inventory_unit_pounds"),
+    KG("kg", "biography_unit_kg")
+}
+
+private val measuredValueRegex = Regex("""^(-?\d+(?:[.,]\d+)?)\s*(cm|ft|lb|kg)$""", RegexOption.IGNORE_CASE)
+
+/** Shows a saved "180 cm" / "150 lb" value with the unit in the current language; other text as is. */
+@Composable
+private fun localizedMeasuredValue(value: String): String {
+    val match = measuredValueRegex.matchEntire(value.trim()) ?: return value
+    val (amount, code) = match.destructured
+    val labelKey = HeightUnit.entries.firstOrNull { it.code.equals(code, ignoreCase = true) }?.labelKey
+        ?: WeightUnit.entries.firstOrNull { it.code.equals(code, ignoreCase = true) }?.labelKey
+        ?: return value
+    return "$amount ${text(labelKey)}"
 }
 
 @Composable
@@ -833,9 +868,20 @@ private val alignmentOptions = listOf(
     BiographyChoiceOption("Unaligned", "alignment_unaligned")
 )
 
+// Stored as these English codes (like alignment) and shown through localization keys.
 private const val GenderCustomOption = "Custom"
 private const val GenderMaleOption = "Male"
-private val genderOptions = listOf(GenderMaleOption, "Female", GenderCustomOption)
+private const val GenderFemaleOption = "Female"
+private val genderOptions = listOf(GenderMaleOption, GenderFemaleOption, GenderCustomOption)
+
+@Composable
+private fun localizedGender(value: String): String =
+    when (value) {
+        GenderMaleOption -> text("biography_gender_male")
+        GenderFemaleOption -> text("biography_gender_female")
+        GenderCustomOption -> text("biography_gender_custom")
+        else -> value
+    }
 
 private fun detectHeightUnit(value: String): HeightUnit =
     if (value.contains("ft", ignoreCase = true) || value.contains("'") || value.contains("\"")) HeightUnit.FT else HeightUnit.CM

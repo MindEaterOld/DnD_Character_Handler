@@ -579,7 +579,7 @@ fun AttributesContent(
             },
             dismissButton = {
                 TextButton(onClick = { isPassiveDialogOpen = false }) {
-                    Text("Cancel")
+                    Text(text("common_cancel"))
                 }
             }
         )
@@ -758,7 +758,7 @@ fun AttributesContent(
             },
             dismissButton = {
                 TextButton(onClick = { editingAbility = null }) {
-                    Text("Cancel")
+                    Text(text("common_cancel"))
                 }
             }
         )
@@ -818,7 +818,7 @@ fun AttributesContent(
             },
             dismissButton = {
                 TextButton(onClick = { editingSkill = null }) {
-                    Text("Cancel")
+                    Text(text("common_cancel"))
                 }
             }
         )

@@ -4,6 +4,8 @@ import android.content.Context
 import com.dndcharacterhandler.domain.model.FeatureCatalogItem
 import com.dndcharacterhandler.domain.model.FeatureSource
 import com.dndcharacterhandler.domain.repository.FeatureCatalogRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -50,17 +52,20 @@ class AssetFeatureCatalogRepository(
 
     override suspend fun getItems(): List<FeatureCatalogItem> {
         cachedItems?.let { return it }
-        val classFeatures = readArray("5e-SRD-Features.json")
-            .mapNotNull { parseFeature(it, FeatureSource.CLASS) }
-        val racialTraits = readArray("5e-SRD-Traits.json")
-            .mapNotNull { parseFeature(it, FeatureSource.RACE) }
-        val originFeats = readArray("5e-SRD-Feats.json")
-            .mapNotNull { parseOriginFeat(it) }
-        val extras = readArray("feature_catalog_extra.json")
-            .mapNotNull { parseExtra(it) }
-        val items = (classFeatures + racialTraits + originFeats + extras).sortedBy { it.name }
-        cachedItems = items
-        return items
+        return withContext(Dispatchers.IO) {
+            cachedItems?.let { return@withContext it }
+            val classFeatures = readArray("5e-SRD-Features.json")
+                .mapNotNull { parseFeature(it, FeatureSource.CLASS) }
+            val racialTraits = readArray("5e-SRD-Traits.json")
+                .mapNotNull { parseFeature(it, FeatureSource.RACE) }
+            val originFeats = readArray("5e-SRD-Feats.json")
+                .mapNotNull { parseOriginFeat(it) }
+            val extras = readArray("feature_catalog_extra.json")
+                .mapNotNull { parseExtra(it) }
+            val items = (classFeatures + racialTraits + originFeats + extras).sortedBy { it.name }
+            cachedItems = items
+            items
+        }
     }
 
     /** Parses a fully-formed catalog entry from the supplementary PHB asset (non-SRD content). */

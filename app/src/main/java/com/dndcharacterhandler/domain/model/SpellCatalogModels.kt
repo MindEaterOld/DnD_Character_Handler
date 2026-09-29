@@ -9,6 +9,7 @@ data class SpellCatalogItem(
     val school: String,
     val description: String,
     val higherLevelDescription: String = "",
+    val ruName: String = "",
     val ruDescription: String = "",
     val ruHigherLevel: String = "",
     val ruMaterial: String = "",

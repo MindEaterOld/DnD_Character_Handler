@@ -69,12 +69,14 @@ import com.dndcharacterhandler.domain.model.InventoryItem
 import com.dndcharacterhandler.domain.model.InventoryWeaponProperty
 import com.dndcharacterhandler.domain.model.InventoryWeaponRangeType
 import com.dndcharacterhandler.domain.model.Spell
+import com.dndcharacterhandler.domain.model.SpellCatalogItem
 import com.dndcharacterhandler.domain.model.SpellcastingAbility
 import com.dndcharacterhandler.domain.rules.abilityModifier
 import com.dndcharacterhandler.domain.rules.calculateArmorClass
 import com.dndcharacterhandler.domain.rules.proficiencyBonusForLevel
 import com.dndcharacterhandler.domain.rules.scoreForSpellcastingAbility
 import com.dndcharacterhandler.domain.repository.CharacterRepository
+import com.dndcharacterhandler.domain.repository.SpellCatalogRepository
 import com.dndcharacterhandler.domain.usecase.GetCharacterBundleUseCase
 import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
@@ -87,17 +89,33 @@ import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.spells.SpellEditDialog
 import com.dndcharacterhandler.presentation.spells.SpellResolutionKind
+import com.dndcharacterhandler.presentation.spells.localizedWith
 import com.dndcharacterhandler.presentation.spells.newDraftSpell
 import com.dndcharacterhandler.presentation.spells.parseResolutionKind
+import com.dndcharacterhandler.presentation.spells.spellRangeDisplayLabel
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlin.math.max
 
 class CombatViewModel(
     private val characterRepository: CharacterRepository,
+    private val spellCatalogRepository: SpellCatalogRepository,
     getCharacterBundleUseCase: GetCharacterBundleUseCase,
     selectedCharacterHolder: SelectedCharacterHolder
 ) : BaseCharacterViewModel(getCharacterBundleUseCase, selectedCharacterHolder) {
+    // Used to show catalog spell attacks in the current language (see localizedWith).
+    private val _spellCatalog = MutableStateFlow<Map<String, SpellCatalogItem>>(emptyMap())
+    val spellCatalog: StateFlow<Map<String, SpellCatalogItem>> = _spellCatalog.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            _spellCatalog.value = spellCatalogRepository.getItems().associateBy { it.id }
+        }
+    }
+
     fun updateArmorClass(
         characterBundle: CharacterBundle,
         baseArmorClass: Int,
@@ -216,8 +234,10 @@ fun CombatScreen(
     onOpenSettings: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val spellCatalog by viewModel.spellCatalog.collectAsStateWithLifecycle()
     CombatContent(
         characterBundle = state.character,
+        spellCatalog = spellCatalog,
         onOpenDrawer = onOpenDrawer,
         onOpenSettings = onOpenSettings,
         onUpdateArmorClass = viewModel::updateArmorClass,
@@ -235,6 +255,7 @@ fun CombatScreen(
 @Composable
 internal fun CombatContent(
     characterBundle: CharacterBundle?,
+    spellCatalog: Map<String, SpellCatalogItem> = emptyMap(),
     onOpenDrawer: () -> Unit = {},
     onOpenSettings: () -> Unit = {},
     onUpdateArmorClass: (CharacterBundle, Int, ArmorClassMode, Int?) -> Unit = { _, _, _, _ -> },
@@ -288,16 +309,36 @@ internal fun CombatContent(
     }
 
     val resolvedBundle = characterBundle
-    val spellModifier = abilityModifier(scoreForSpellcastingAbility(character, character.spellcastingAbility))
-    val proficiencyBonus = proficiencyBonusForLevel(character.level)
+    val spellModifier = remember(character) {
+        abilityModifier(scoreForSpellcastingAbility(character, character.spellcastingAbility))
+    }
+    val proficiencyBonus = remember(character.level) { proficiencyBonusForLevel(character.level) }
     val weaponProficiencyIds = remember(character.weaponProficiencies) {
         decodeProficiencyIds(character.weaponProficiencies)
     }
-    val spellAttackBonus = signedNumber(proficiencyBonus + spellModifier)
-    val spellSaveDc = (8 + proficiencyBonus + spellModifier).toString()
-    val spellSaveDcLabel = LocalStrings.current.format("combat_attack_save_dc", spellSaveDc)
+    val spellAttackBonus = remember(proficiencyBonus, spellModifier) {
+        signedNumber(proficiencyBonus + spellModifier)
+    }
+    val spellSaveDc = remember(proficiencyBonus, spellModifier) {
+        (8 + proficiencyBonus + spellModifier).toString()
+    }
+    val strings = LocalStrings.current
+    val spellSaveDcLabel = remember(strings, spellSaveDc) {
+        strings.format("combat_attack_save_dc", spellSaveDc)
+    }
     val resourceRows = remember(resolvedBundle.combatResources) {
         resolvedBundle.combatResources.chunked(3)
+    }
+    val weaponAttackOptions = remember(resolvedBundle.inventoryItems) {
+        resolvedBundle.inventoryItems.filter {
+            it.category == InventoryCategory.WEAPON && it.weaponDetails != null
+        }
+    }
+    val spellAttackOptions = remember(resolvedBundle.spells, spellCatalog, strings) {
+        resolvedBundle.spells.filter { it.isCombatSpell() }.localizedWith(spellCatalog, strings)
+    }
+    val spellAttacks = remember(resolvedBundle.spellAttacks, spellCatalog, strings) {
+        resolvedBundle.spellAttacks.localizedWith(spellCatalog, strings)
     }
 
     ScreenBackground {
@@ -370,7 +411,7 @@ internal fun CombatContent(
                             onClick = { editingAttack = attack }
                         )
                     }
-                    items(resolvedBundle.spellAttacks, key = { "spell-${it.id}" }) { spell ->
+                    items(spellAttacks, key = { "spell-${it.id}" }) { spell ->
                         SpellAttackCard(
                             spell = spell,
                             spellAttackBonus = spellAttackBonus,
@@ -439,7 +480,7 @@ internal fun CombatContent(
 
     if (isWeaponAttackPickerOpen) {
         WeaponAttackPickerDialog(
-            weapons = resolvedBundle.inventoryItems.filter { it.category == InventoryCategory.WEAPON && it.weaponDetails != null },
+            weapons = weaponAttackOptions,
             onDismiss = { isWeaponAttackPickerOpen = false },
             onSelect = { weapon ->
                 onUpdateAttack(
@@ -457,7 +498,7 @@ internal fun CombatContent(
 
     if (isSpellAttackPickerOpen) {
         SpellAttackPickerDialog(
-            spells = resolvedBundle.spells.filter { it.isCombatSpell() },
+            spells = spellAttackOptions,
             spellAttackBonus = spellAttackBonus,
             spellSaveDcLabel = spellSaveDcLabel,
             spellModifier = spellModifier,
@@ -959,7 +1000,8 @@ private fun AttackCard(
     )
     val attackBonusLabel = attack.displayAttackBonusOrSaveDc(
         character = character,
-        proficiencyBonus = proficiencyBonus
+        proficiencyBonus = proficiencyBonus,
+        attackLabel = text("combat_attack_section_attack")
     )
     val damageLabel = attack.displayDamage(character = character)
     Surface(
@@ -1044,7 +1086,7 @@ private fun SpellAttackCard(
 ) {
     val strings = LocalStrings.current
     val resolution = parseResolutionKind(spell)
-    val rangeLabel = spellRangeTagLabel(spell.range, text("inventory_unit_feet"))
+    val rangeLabel = spellRangeDisplayLabel(spell.range, strings)
     val levelLabel = spellLevelLabel(spell.level, strings)
     val componentsLabel = spellComponentsLabel(spell.components, strings)
     val materialCostLabel = spell.materialCost.takeIf { it.isNotBlank() }
@@ -1878,13 +1920,6 @@ private fun Spell.combatAmountDiceLabel(spellModifier: Int): String {
     return builder.toString()
 }
 
-private fun spellRangeTagLabel(range: String, feetLabel: String): String? {
-    val trimmed = range.trim()
-    if (trimmed.isBlank()) return null
-    val digits = Regex("""\d+""").find(trimmed)?.value
-    return if (digits != null) "$digits $feetLabel" else trimmed
-}
-
 private fun spellDamageTypeLabel(
     spell: Spell,
     strings: com.dndcharacterhandler.data.localization.LocalizedStrings
@@ -1963,7 +1998,8 @@ private fun spellPickerTags(
 ): String {
     val levelLabel = spellLevelLabel(spell.level, strings)
     val schoolLabel = spell.school.takeIf { it.isNotBlank() }?.let {
-        strings[spellSchoolLocalizationKey(it)]
+        // A school we don't know (e.g. typed by hand) is shown as entered instead of as "Abjuration".
+        spellSchoolLocalizationKey(it)?.let(strings::get) ?: it
     }
     val areaLabel = spellAreaLabel(spell.areaOfEffect, strings)
     return listOfNotNull(levelLabel.takeIf { it.isNotBlank() }, schoolLabel, areaLabel)
@@ -1993,7 +2029,7 @@ private fun spellAreaLabel(
     }
 }
 
-private fun spellSchoolLocalizationKey(value: String): String =
+private fun spellSchoolLocalizationKey(value: String): String? =
     when (value.lowercase()) {
         "abjuration" -> "spells_school_abjuration"
         "conjuration" -> "spells_school_conjuration"
@@ -2003,17 +2039,8 @@ private fun spellSchoolLocalizationKey(value: String): String =
         "illusion" -> "spells_school_illusion"
         "necromancy" -> "spells_school_necromancy"
         "transmutation" -> "spells_school_transmutation"
-        else -> "spells_school_abjuration"
+        else -> null
     }
-
-private fun attackFallbackIcon(attack: Attack): ImageVector {
-    val description = "${attack.name} ${attack.primaryDamageType}".lowercase()
-    return when {
-        "fire" in description || "bolt" in description -> Icons.Outlined.Bolt
-        "cold" in description -> Icons.Outlined.FlashOn
-        else -> Icons.Outlined.Shield
-    }
-}
 
 private fun damageTypeColor(value: String): Color {
     val key = value.lowercase()
@@ -2294,7 +2321,8 @@ private fun decodeProficiencyIds(value: String): Set<String> =
 private fun com.dndcharacterhandler.domain.model.InventoryWeaponDetails.isCharacterProficient(
     weaponProficiencyIds: Set<String>
 ): Boolean {
-    val baseWeaponId = baseWeaponId
+    // Older catalog items may store SRD ids with hyphens ("war-pick"); proficiency ids use underscores.
+    val baseWeaponId = baseWeaponId?.replace('-', '_')
     return when {
         !baseWeaponId.isNullOrBlank() && baseWeaponId in weaponProficiencyIds -> true
         weaponClass == com.dndcharacterhandler.domain.model.InventoryWeaponClass.SIMPLE &&
@@ -2510,14 +2538,15 @@ private fun Attack.displayRange(
 
 private fun Attack.displayAttackBonusOrSaveDc(
     character: com.dndcharacterhandler.domain.model.Character,
-    proficiencyBonus: Int
+    proficiencyBonus: Int,
+    attackLabel: String
 ): String {
     return if (calculationMode == AttackCalculationMode.MANUAL) {
         manualAttackBonusOrSaveDc
     } else {
         val abilityScore = scoreForSpellcastingAbility(character, ability)
         val total = (if (isProficient) proficiencyBonus else 0) + abilityModifier(abilityScore) + magicalBonus
-        "${signedNumber(total)} Attack"
+        "${signedNumber(total)} $attackLabel"
     }
 }
 

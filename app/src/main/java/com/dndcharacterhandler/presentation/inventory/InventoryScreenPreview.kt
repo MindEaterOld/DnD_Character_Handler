@@ -34,6 +34,7 @@ fun InventoryScreenPreview() {
             "placeholder_loading_character" to "Loading character",
             "inventory_search_placeholder" to "Search Inventory",
             "inventory_carry_weight" to "Carry Weight",
+            "inventory_unit_pounds" to "lb",
             "inventory_category_weapon" to "Weapon",
             "inventory_category_armor" to "Armor",
             "inventory_category_consumable" to "Consumable",

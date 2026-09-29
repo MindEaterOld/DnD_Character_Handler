@@ -14,7 +14,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.dndcharacterhandler.presentation.theme.DnDCardDefaults
 
@@ -39,7 +38,7 @@ fun StatCard(label: String, value: String) {
     Card(colors = DnDCardDefaults.elevatedCardColors()) {
         Column(modifier = Modifier.padding(12.dp)) {
             Text(label, style = MaterialTheme.typography.labelMedium)
-            Text(value, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text(value, style = MaterialTheme.typography.titleLarge)
         }
     }
 }

@@ -76,6 +76,7 @@ fun CombatScreenPreview() {
             "inventory_field_damage_die_type" to "Die type",
             "inventory_weapon_range_melee" to "Melee",
             "inventory_unit_feet" to "ft",
+            "spells_range_touch" to "Touch",
             "ability_strength" to "Strength",
             "ability_dexterity" to "Dexterity",
             "ability_constitution" to "Constitution",

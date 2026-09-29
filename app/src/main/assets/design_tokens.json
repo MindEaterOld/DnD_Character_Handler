@@ -141,45 +141,60 @@
       "outline": "#706359",
       "outlineVariant": "#423830"
     },
-    "overview": {
-      "backgroundRadialStart": "#1A161D",
-      "backgroundRadialMiddle": "#0E0B11",
-      "backgroundRadialEnd": "#09070D",
-      "textPrimary": "#F7F2EA",
-      "textWarmPrimary": "#FFF6EA",
-      "textAction": "#F1ECE5",
-      "textMuted": "#D2CAC2",
-      "textSubtle": "#AAA29A",
-      "textLabel": "#C2BBB3",
-      "textMiniLabel": "#BEB6AE",
-      "headerIcon": "#F3EEE6",
-      "surfaceCard": "#17141B",
-      "surfaceButton": "#1A171D",
-      "surfaceSelected": "#3A3244",
-      "surfaceInspiration": "#2A2419",
-      "portraitSurface": "#141118",
-      "portraitFallbackStart": "#3B3840",
-      "portraitFallbackMiddle": "#18151C",
-      "portraitFallbackEnd": "#0F0C12",
-      "accentInspiration": "#FFD86B",
-      "accentXpCapped": "#E0B84E",
-      "accentHpTemporary": "#69B7FF",
-      "accentHeal": "#8AD178",
-      "dangerHpZero": "#E85C5C",
-      "xpProgress": "#D7D1CC",
-      "xpTrack": "#30FFFFFF",
-      "borderDefault": "#50FFFFFF",
-      "borderPanel": "#44FFFFFF",
-      "borderMiniCard": "#42FFFFFF",
-      "borderSelected": "#66FFF6EA",
-      "borderMuted": "#30FFFFFF",
-      "ornamentOuter": "#20FFFFFF",
-      "ornamentMiddle": "#80C7C1BB",
-      "ornamentInnerGlow": "#42FFFFFF",
-      "ornamentInner": "#E9E2D9",
-      "ornamentShadow": "#14000000",
-      "ornamentStroke": "#55A19892",
-      "ornamentDot": "#2D2730"
+    "appComment": "App palette grouped by role. Hex is #RRGGBB (opaque) or #AARRGGBB (with alpha). Accessed in code via LocalDesignTokens.colors.",
+    "app": {
+      "text": {
+        "primary": "#F7F2EA",
+        "warmPrimary": "#FFF6EA",
+        "action": "#F1ECE5",
+        "muted": "#D2CAC2",
+        "subtle": "#AAA29A",
+        "label": "#C2BBB3",
+        "miniLabel": "#BEB6AE",
+        "icon": "#F3EEE6"
+      },
+      "background": {
+        "radialStart": "#1A161D",
+        "radialMiddle": "#0E0B11",
+        "radialEnd": "#09070D"
+      },
+      "surface": {
+        "card": "#17141B",
+        "button": "#1A171D",
+        "selected": "#3A3244",
+        "inspiration": "#2A2419",
+        "portrait": "#141118",
+        "portraitFallbackStart": "#3B3840",
+        "portraitFallbackMiddle": "#18151C",
+        "portraitFallbackEnd": "#0F0C12"
+      },
+      "border": {
+        "default": "#50FFFFFF",
+        "panel": "#44FFFFFF",
+        "miniCard": "#42FFFFFF",
+        "selected": "#66FFF6EA",
+        "muted": "#30FFFFFF"
+      },
+      "accent": {
+        "inspiration": "#FFD86B",
+        "xpCapped": "#E0B84E",
+        "hpTemporary": "#69B7FF",
+        "heal": "#8AD178",
+        "dangerHpZero": "#E85C5C"
+      },
+      "progress": {
+        "xpFill": "#D7D1CC",
+        "xpTrack": "#30FFFFFF"
+      },
+      "ornament": {
+        "outer": "#20FFFFFF",
+        "middle": "#80C7C1BB",
+        "innerGlow": "#42FFFFFF",
+        "inner": "#E9E2D9",
+        "shadow": "#14000000",
+        "stroke": "#55A19892",
+        "dot": "#2D2730"
+      }
     }
   },
   "spacingDp": {

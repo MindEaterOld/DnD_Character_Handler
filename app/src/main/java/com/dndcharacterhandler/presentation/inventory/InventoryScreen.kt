@@ -210,6 +210,7 @@ fun InventoryScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val catalogState by viewModel.catalogUiState.collectAsStateWithLifecycle()
+    val strings = LocalStrings.current
     var isAddItemDialogOpen by remember { mutableStateOf(false) }
     var isCategoryPickerOpen by remember { mutableStateOf(false) }
     var editingItem by remember { mutableStateOf<InventoryItem?>(null) }
@@ -249,7 +250,7 @@ fun InventoryScreen(
         InventoryCategoryPickerDialog(
             onDismiss = { isCategoryPickerOpen = false },
             onSelectCategory = { category ->
-                creatingItem = defaultInventoryItem(category)
+                creatingItem = defaultInventoryItem(category, strings[category.titleKey()])
                 isCategoryPickerOpen = false
             }
         )
@@ -641,7 +642,7 @@ private fun CarryWeightBlock(
                 color = Color(0xFFF7F2EA)
             )
             Text(
-                text = "${formatWeight(current)} / ${formatWeight(safeMaximum)} lb",
+                text = "${formatWeight(current)} / ${formatWeight(safeMaximum)} ${text("inventory_unit_pounds")}",
                 style = MaterialTheme.typography.bodyLarge,
                 color = Color(0xFFD2CAC2)
             )
@@ -774,7 +775,7 @@ private fun InventoryCatalogRow(
                 item.detailLine?.let { detail ->
                     Text(
                         text = detail,
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = Color(0xFFC2BBB3),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -783,7 +784,7 @@ private fun InventoryCatalogRow(
                 if (item.description.isNotBlank()) {
                     Text(
                         text = item.description.replace('\n', ' '),
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = Color(0xFFD2CAC2),
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
@@ -796,8 +797,8 @@ private fun InventoryCatalogRow(
             ) {
                 if (item.weight > 0.0) {
                     Text(
-                        text = "${formatWeight(item.weight)} lb",
-                        style = MaterialTheme.typography.bodySmall,
+                        text = "${formatWeight(item.weight)} ${text("inventory_unit_pounds")}",
+                        style = MaterialTheme.typography.bodyMedium,
                         color = Color(0xFFC2BBB3)
                     )
                 }
@@ -836,7 +837,7 @@ private fun InventoryAddEntryDialog(
         title = {
             Text(
                 text = text("inventory_add_item"),
-                style = MaterialTheme.typography.headlineSmall
+                style = MaterialTheme.typography.titleLarge
             )
         },
         text = {
@@ -908,7 +909,7 @@ private fun InventoryCategoryPickerDialog(
         title = {
             Text(
                 text = text("inventory_select_item_type"),
-                style = MaterialTheme.typography.headlineSmall
+                style = MaterialTheme.typography.titleLarge
             )
         },
         text = {
@@ -1012,7 +1013,7 @@ private fun InventoryItemRow(
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                text = "${formatWeight(item.weight)} lb",
+                text = "${formatWeight(item.weight)} ${text("inventory_unit_pounds")}",
                 modifier = Modifier.padding(start = 10.dp, end = 8.dp),
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color(0xFFC2BBB3),
@@ -1065,9 +1066,11 @@ private fun InventoryItemEditDialog(
     var strengthMinimum by remember(inventoryItem) { mutableStateOf(inventoryItem.armorDetails?.strengthMinimum?.toString().orEmpty()) }
     var hasStealthDisadvantage by remember(inventoryItem) { mutableStateOf(inventoryItem.armorDetails?.hasStealthDisadvantage ?: false) }
 
-    val initialWeaponKind = inventoryItem.weaponDetails.toWeaponKindOption()
-    val initialPrimaryDamage = inventoryItem.weaponDetails.toPrimaryDamageEditorState()
-    val initialAlternateDamage = inventoryItem.weaponDetails?.twoHandedDamage.toEditorState()
+    // Derived purely from inventoryItem and only used to seed the remember(...) drafts below;
+    // memoize so the dice-string parsing isn't redone on every recomposition of the open dialog.
+    val initialWeaponKind = remember(inventoryItem) { inventoryItem.weaponDetails.toWeaponKindOption() }
+    val initialPrimaryDamage = remember(inventoryItem) { inventoryItem.weaponDetails.toPrimaryDamageEditorState() }
+    val initialAlternateDamage = remember(inventoryItem) { inventoryItem.weaponDetails?.twoHandedDamage.toEditorState() }
 
     var weaponKind by remember(inventoryItem) { mutableStateOf(initialWeaponKind) }
     var isWeaponTypeDialogOpen by remember { mutableStateOf(false) }
@@ -1089,7 +1092,8 @@ private fun InventoryItemEditDialog(
         mutableStateOf(inventoryItem.weaponDetails?.properties ?: emptySet())
     }
     var baseWeaponId by remember(inventoryItem) {
-        mutableStateOf(inventoryItem.weaponDetails?.baseWeaponId.orEmpty())
+        // Items added from the catalog before ids were normalized may still hold "light-hammer".
+        mutableStateOf(inventoryItem.weaponDetails?.baseWeaponId.orEmpty().replace('-', '_'))
     }
 
     AlertDialog(
@@ -1250,14 +1254,14 @@ private fun InventoryItemEditDialog(
                                 value = weaponNormalRange,
                                 onValueChange = { weaponNormalRange = it.filter(Char::isDigit) },
                                 label = text("inventory_field_normal_range"),
-                                suffixText = "ft",
+                                suffixText = text("inventory_unit_feet"),
                                 modifier = Modifier.weight(1f)
                             )
                             CompactTextField(
                                 value = weaponLongRange,
                                 onValueChange = { weaponLongRange = it.filter(Char::isDigit) },
                                 label = text("inventory_field_long_range"),
-                                suffixText = "ft",
+                                suffixText = text("inventory_unit_feet"),
                                 modifier = Modifier.weight(1f)
                             )
                         }
@@ -1339,7 +1343,7 @@ private fun InventoryItemEditDialog(
                             value = weight,
                             onValueChange = { weight = sanitizeDecimalInput(it) },
                             label = text("inventory_field_weight"),
-                            suffixText = "lb",
+                            suffixText = text("inventory_unit_pounds"),
                             modifier = Modifier.weight(1f)
                         )
                         CompactTextField(
@@ -1350,7 +1354,7 @@ private fun InventoryItemEditDialog(
                         )
                         CompactSelectionField(
                             label = text("inventory_field_cost_unit"),
-                            value = costUnit.ifBlank { defaultCurrencyUnit() }.uppercase(),
+                            value = currencyShortLabel(costUnit.ifBlank { defaultCurrencyUnit() }, strings),
                             onClick = { isCurrencyUnitDialogOpen = true },
                             modifier = Modifier.weight(1f)
                         )
@@ -1460,8 +1464,8 @@ private fun InventoryItemEditDialog(
     if (isBaseWeaponDialogOpen) {
         SelectionDialog(
             title = text("inventory_field_base_weapon"),
-            options = baseWeaponOptions(),
-            selected = baseWeaponOptions().firstOrNull { it.id == baseWeaponId } ?: baseWeaponOptions().first(),
+            options = baseWeaponOptions,
+            selected = baseWeaponOptions.firstOrNull { it.id == baseWeaponId } ?: baseWeaponOptions.first(),
             labelForOption = { strings[it.labelKey] },
             onDismiss = { isBaseWeaponDialogOpen = false },
             onSelect = {
@@ -1476,7 +1480,7 @@ private fun InventoryItemEditDialog(
             title = text("inventory_field_cost_unit"),
             options = currencyUnitOptions(),
             selected = costUnit.ifBlank { defaultCurrencyUnit() },
-            labelForOption = { it.uppercase() },
+            labelForOption = { currencyShortLabel(it, strings) },
             onDismiss = { isCurrencyUnitDialogOpen = false },
             onSelect = {
                 costUnit = it
@@ -2070,7 +2074,7 @@ private fun InventoryPropertyTags(
                 Text(
                     text = tag,
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                    style = MaterialTheme.typography.labelSmall,
+                    style = MaterialTheme.typography.labelMedium,
                     color = Color(0xFFE6DED3),
                     maxLines = 1
                 )
@@ -2080,12 +2084,14 @@ private fun InventoryPropertyTags(
 }
 
 @Composable
-private fun InventoryCategory.title(): String =
+private fun InventoryCategory.title(): String = text(titleKey())
+
+private fun InventoryCategory.titleKey(): String =
     when (this) {
-        InventoryCategory.WEAPON -> text("inventory_category_weapon")
-        InventoryCategory.ARMOR -> text("inventory_category_armor")
-        InventoryCategory.CONSUMABLE -> text("inventory_category_consumable")
-        InventoryCategory.OTHER -> text("inventory_category_other")
+        InventoryCategory.WEAPON -> "inventory_category_weapon"
+        InventoryCategory.ARMOR -> "inventory_category_armor"
+        InventoryCategory.CONSUMABLE -> "inventory_category_consumable"
+        InventoryCategory.OTHER -> "inventory_category_other"
     }
 
 private fun formatWeight(value: Double): String {
@@ -2133,7 +2139,7 @@ private fun weaponKindOptions(): List<WeaponKindOption> = listOf(
     WeaponKindOption(InventoryWeaponClass.MARTIAL, InventoryWeaponRangeType.RANGED)
 )
 
-private fun baseWeaponOptions(): List<BaseWeaponOption> = listOf(
+private val baseWeaponOptions: List<BaseWeaponOption> = listOf(
     BaseWeaponOption("", "common_none"),
     BaseWeaponOption("club", "Club"),
     BaseWeaponOption("dagger", "Dagger"),
@@ -2176,7 +2182,7 @@ private fun baseWeaponOptions(): List<BaseWeaponOption> = listOf(
 )
 
 private fun baseWeaponLabelKey(id: String): String =
-    baseWeaponOptions().firstOrNull { it.id == id }?.labelKey ?: "common_none"
+    baseWeaponOptions.firstOrNull { it.id == id }?.labelKey ?: "common_none"
 
 private fun InventoryWeaponDetails?.toWeaponKindOption(): WeaponKindOption =
     WeaponKindOption(
@@ -2234,6 +2240,13 @@ private fun currencyUnitOptions(): List<String> = listOf("gp", "sp", "cp", "pp")
 
 private fun defaultCurrencyUnit(): String = "gp"
 
+/** Localized coin abbreviation for a stored SRD unit code ("gp" → "GP" / "зм"). */
+private fun currencyShortLabel(unit: String, strings: LocalizedStrings): String {
+    val key = "inventory_currency_short_${unit.trim().lowercase()}"
+    val label = strings[key]
+    return if (label == key) unit.uppercase() else label
+}
+
 private fun damageTypeOptions(): List<String> = listOf(
     "Acid",
     "Bludgeoning",
@@ -2250,13 +2263,8 @@ private fun damageTypeOptions(): List<String> = listOf(
     "Thunder"
 )
 
-private fun defaultInventoryItem(category: InventoryCategory): InventoryItem {
-    val defaultName = when (category) {
-        InventoryCategory.WEAPON -> "Weapon"
-        InventoryCategory.ARMOR -> "Armor"
-        InventoryCategory.CONSUMABLE -> "Consumable"
-        InventoryCategory.OTHER -> "Loot"
-    }
+/** A new hand-made item, pre-named after its category in the current language ([defaultName]). */
+private fun defaultInventoryItem(category: InventoryCategory, defaultName: String): InventoryItem {
     return InventoryItem(
         name = defaultName,
         isMagical = false,
@@ -2318,14 +2326,6 @@ private fun InventoryItem.propertyTags(dexterityScore: Int, strings: LocalizedSt
         }
     }
 }
-
-private fun InventoryArmorType.label(): String =
-    when (this) {
-        InventoryArmorType.LIGHT -> "Light"
-        InventoryArmorType.MEDIUM -> "Medium"
-        InventoryArmorType.HEAVY -> "Heavy"
-        InventoryArmorType.SHIELD -> "Shield"
-    }
 
 private fun InventoryArmorType.localizationKey(): String =
     when (this) {
@@ -2398,41 +2398,16 @@ private fun appendBonusToDice(dice: String, magicalBonus: Int): String {
     }
 }
 
-private fun InventoryWeaponClass.label(): String =
-    when (this) {
-        InventoryWeaponClass.SIMPLE -> "Simple"
-        InventoryWeaponClass.MARTIAL -> "Martial"
-    }
-
 private fun InventoryWeaponClass.localizationKey(): String =
     when (this) {
         InventoryWeaponClass.SIMPLE -> "attributes_weapon_simple_short"
         InventoryWeaponClass.MARTIAL -> "attributes_weapon_martial_short"
     }
 
-private fun InventoryWeaponRangeType.label(): String =
-    when (this) {
-        InventoryWeaponRangeType.MELEE -> "Melee"
-        InventoryWeaponRangeType.RANGED -> "Ranged"
-    }
-
 private fun InventoryWeaponRangeType.localizationKey(): String =
     when (this) {
         InventoryWeaponRangeType.MELEE -> "inventory_weapon_range_melee"
         InventoryWeaponRangeType.RANGED -> "inventory_weapon_range_ranged"
-    }
-
-private fun InventoryWeaponProperty.label(): String =
-    when (this) {
-        InventoryWeaponProperty.AMMUNITION -> "Ammunition"
-        InventoryWeaponProperty.FINESSE -> "Finesse"
-        InventoryWeaponProperty.HEAVY -> "Heavy"
-        InventoryWeaponProperty.LIGHT -> "Light"
-        InventoryWeaponProperty.LOADING -> "Loading"
-        InventoryWeaponProperty.REACH -> "Reach"
-        InventoryWeaponProperty.THROWN -> "Thrown"
-        InventoryWeaponProperty.TWO_HANDED -> "Two-Handed"
-        InventoryWeaponProperty.VERSATILE -> "Versatile"
     }
 
 private fun InventoryWeaponProperty.localizationKey(): String =

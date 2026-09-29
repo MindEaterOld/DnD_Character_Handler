@@ -34,6 +34,8 @@ fun BiographyScreenPreview() {
             "biography_homeland" to "Homeland",
             "biography_age" to "Age",
             "biography_gender" to "Gender",
+            "biography_gender_male" to "Male",
+            "inventory_unit_pounds" to "lb",
             "biography_height" to "Height",
             "biography_weight" to "Weight",
             "biography_eyes" to "Eyes",

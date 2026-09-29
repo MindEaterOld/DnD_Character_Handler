@@ -2,6 +2,7 @@ package com.dndcharacterhandler.presentation.theme
 
 import android.content.Context
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Color
 import org.json.JSONObject
 
 data class TextSizeToken(
@@ -34,8 +35,142 @@ data class DesignTypographyTokens(
     val shortRestCounterValue: TextSizeToken
 )
 
+// ---- Color tokens, grouped by role (mirrors colors.app in design_tokens.json) ----
+
+/** Text & icon foreground colors. */
+data class TextColorTokens(
+    val primary: Color,
+    val warmPrimary: Color,
+    val action: Color,
+    val muted: Color,
+    val subtle: Color,
+    val label: Color,
+    val miniLabel: Color,
+    val icon: Color
+)
+
+/** Screen background (radial gradient stops). */
+data class BackgroundColorTokens(
+    val radialStart: Color,
+    val radialMiddle: Color,
+    val radialEnd: Color
+)
+
+/** Card / button / portrait surfaces. */
+data class SurfaceColorTokens(
+    val card: Color,
+    val button: Color,
+    val selected: Color,
+    val inspiration: Color,
+    val portrait: Color,
+    val portraitFallbackStart: Color,
+    val portraitFallbackMiddle: Color,
+    val portraitFallbackEnd: Color
+)
+
+/** Outline / stroke colors for cards, panels and selections. */
+data class BorderColorTokens(
+    val default: Color,
+    val panel: Color,
+    val miniCard: Color,
+    val selected: Color,
+    val muted: Color
+)
+
+/** Semantic accents (inspiration, HP, healing, danger). */
+data class AccentColorTokens(
+    val inspiration: Color,
+    val xpCapped: Color,
+    val hpTemporary: Color,
+    val heal: Color,
+    val dangerHpZero: Color
+)
+
+/** XP / progress bar fill and track. */
+data class ProgressColorTokens(
+    val xpFill: Color,
+    val xpTrack: Color
+)
+
+/** Portrait ornament frame layers. */
+data class OrnamentColorTokens(
+    val outer: Color,
+    val middle: Color,
+    val innerGlow: Color,
+    val inner: Color,
+    val shadow: Color,
+    val stroke: Color,
+    val dot: Color
+)
+
+data class DesignColorTokens(
+    val text: TextColorTokens,
+    val background: BackgroundColorTokens,
+    val surface: SurfaceColorTokens,
+    val border: BorderColorTokens,
+    val accent: AccentColorTokens,
+    val progress: ProgressColorTokens,
+    val ornament: OrnamentColorTokens
+)
+
 data class DesignTokens(
-    val typography: DesignTypographyTokens
+    val typography: DesignTypographyTokens,
+    val colors: DesignColorTokens
+)
+
+val DefaultDesignColors = DesignColorTokens(
+    text = TextColorTokens(
+        primary = Color(0xFFF7F2EA),
+        warmPrimary = Color(0xFFFFF6EA),
+        action = Color(0xFFF1ECE5),
+        muted = Color(0xFFD2CAC2),
+        subtle = Color(0xFFAAA29A),
+        label = Color(0xFFC2BBB3),
+        miniLabel = Color(0xFFBEB6AE),
+        icon = Color(0xFFF3EEE6)
+    ),
+    background = BackgroundColorTokens(
+        radialStart = Color(0xFF1A161D),
+        radialMiddle = Color(0xFF0E0B11),
+        radialEnd = Color(0xFF09070D)
+    ),
+    surface = SurfaceColorTokens(
+        card = Color(0xFF17141B),
+        button = Color(0xFF1A171D),
+        selected = Color(0xFF3A3244),
+        inspiration = Color(0xFF2A2419),
+        portrait = Color(0xFF141118),
+        portraitFallbackStart = Color(0xFF3B3840),
+        portraitFallbackMiddle = Color(0xFF18151C),
+        portraitFallbackEnd = Color(0xFF0F0C12)
+    ),
+    border = BorderColorTokens(
+        default = Color(0x50FFFFFF),
+        panel = Color(0x44FFFFFF),
+        miniCard = Color(0x42FFFFFF),
+        selected = Color(0x66FFF6EA),
+        muted = Color(0x30FFFFFF)
+    ),
+    accent = AccentColorTokens(
+        inspiration = Color(0xFFFFD86B),
+        xpCapped = Color(0xFFE0B84E),
+        hpTemporary = Color(0xFF69B7FF),
+        heal = Color(0xFF8AD178),
+        dangerHpZero = Color(0xFFE85C5C)
+    ),
+    progress = ProgressColorTokens(
+        xpFill = Color(0xFFD7D1CC),
+        xpTrack = Color(0x30FFFFFF)
+    ),
+    ornament = OrnamentColorTokens(
+        outer = Color(0x20FFFFFF),
+        middle = Color(0x80C7C1BB),
+        innerGlow = Color(0x42FFFFFF),
+        inner = Color(0xFFE9E2D9),
+        shadow = Color(0x14000000),
+        stroke = Color(0x55A19892),
+        dot = Color(0xFF2D2730)
+    )
 )
 
 val DefaultDesignTokens = DesignTokens(
@@ -61,7 +196,8 @@ val DefaultDesignTokens = DesignTokens(
         shortRestDieToken = TextSizeToken(fontSizeSp = 18f),
         shortRestCounterButton = TextSizeToken(fontSizeSp = 28f),
         shortRestCounterValue = TextSizeToken(fontSizeSp = 40f)
-    )
+    ),
+    colors = DefaultDesignColors
 )
 
 val LocalDesignTokens = staticCompositionLocalOf { DefaultDesignTokens }
@@ -101,9 +237,89 @@ fun loadDesignTokens(context: Context): DesignTokens {
                 shortRestDieToken = overview.textToken("shortRestDieToken", defaults.shortRestDieToken),
                 shortRestCounterButton = overview.textToken("shortRestCounterButton", defaults.shortRestCounterButton),
                 shortRestCounterValue = overview.textToken("shortRestCounterValue", defaults.shortRestCounterValue)
-            )
+            ),
+            colors = loadColorTokens(root.optJSONObject("colors")?.optJSONObject("app"))
         )
     }.getOrDefault(DefaultDesignTokens)
+}
+
+private fun loadColorTokens(app: JSONObject?): DesignColorTokens {
+    if (app == null) return DefaultDesignColors
+    val defaults = DefaultDesignColors
+    val text = app.optJSONObject("text") ?: JSONObject()
+    val background = app.optJSONObject("background") ?: JSONObject()
+    val surface = app.optJSONObject("surface") ?: JSONObject()
+    val border = app.optJSONObject("border") ?: JSONObject()
+    val accent = app.optJSONObject("accent") ?: JSONObject()
+    val progress = app.optJSONObject("progress") ?: JSONObject()
+    val ornament = app.optJSONObject("ornament") ?: JSONObject()
+    return DesignColorTokens(
+        text = TextColorTokens(
+            primary = text.colorToken("primary", defaults.text.primary),
+            warmPrimary = text.colorToken("warmPrimary", defaults.text.warmPrimary),
+            action = text.colorToken("action", defaults.text.action),
+            muted = text.colorToken("muted", defaults.text.muted),
+            subtle = text.colorToken("subtle", defaults.text.subtle),
+            label = text.colorToken("label", defaults.text.label),
+            miniLabel = text.colorToken("miniLabel", defaults.text.miniLabel),
+            icon = text.colorToken("icon", defaults.text.icon)
+        ),
+        background = BackgroundColorTokens(
+            radialStart = background.colorToken("radialStart", defaults.background.radialStart),
+            radialMiddle = background.colorToken("radialMiddle", defaults.background.radialMiddle),
+            radialEnd = background.colorToken("radialEnd", defaults.background.radialEnd)
+        ),
+        surface = SurfaceColorTokens(
+            card = surface.colorToken("card", defaults.surface.card),
+            button = surface.colorToken("button", defaults.surface.button),
+            selected = surface.colorToken("selected", defaults.surface.selected),
+            inspiration = surface.colorToken("inspiration", defaults.surface.inspiration),
+            portrait = surface.colorToken("portrait", defaults.surface.portrait),
+            portraitFallbackStart = surface.colorToken("portraitFallbackStart", defaults.surface.portraitFallbackStart),
+            portraitFallbackMiddle = surface.colorToken("portraitFallbackMiddle", defaults.surface.portraitFallbackMiddle),
+            portraitFallbackEnd = surface.colorToken("portraitFallbackEnd", defaults.surface.portraitFallbackEnd)
+        ),
+        border = BorderColorTokens(
+            default = border.colorToken("default", defaults.border.default),
+            panel = border.colorToken("panel", defaults.border.panel),
+            miniCard = border.colorToken("miniCard", defaults.border.miniCard),
+            selected = border.colorToken("selected", defaults.border.selected),
+            muted = border.colorToken("muted", defaults.border.muted)
+        ),
+        accent = AccentColorTokens(
+            inspiration = accent.colorToken("inspiration", defaults.accent.inspiration),
+            xpCapped = accent.colorToken("xpCapped", defaults.accent.xpCapped),
+            hpTemporary = accent.colorToken("hpTemporary", defaults.accent.hpTemporary),
+            heal = accent.colorToken("heal", defaults.accent.heal),
+            dangerHpZero = accent.colorToken("dangerHpZero", defaults.accent.dangerHpZero)
+        ),
+        progress = ProgressColorTokens(
+            xpFill = progress.colorToken("xpFill", defaults.progress.xpFill),
+            xpTrack = progress.colorToken("xpTrack", defaults.progress.xpTrack)
+        ),
+        ornament = OrnamentColorTokens(
+            outer = ornament.colorToken("outer", defaults.ornament.outer),
+            middle = ornament.colorToken("middle", defaults.ornament.middle),
+            innerGlow = ornament.colorToken("innerGlow", defaults.ornament.innerGlow),
+            inner = ornament.colorToken("inner", defaults.ornament.inner),
+            shadow = ornament.colorToken("shadow", defaults.ornament.shadow),
+            stroke = ornament.colorToken("stroke", defaults.ornament.stroke),
+            dot = ornament.colorToken("dot", defaults.ornament.dot)
+        )
+    )
+}
+
+/** Parses "#RRGGBB" (opaque) or "#AARRGGBB" hex into a [Color]; falls back on malformed values. */
+private fun JSONObject.colorToken(key: String, fallback: Color): Color {
+    val raw = optString(key).trim().removePrefix("#")
+    if (raw.isEmpty()) return fallback
+    val parsed = raw.toLongOrNull(16) ?: return fallback
+    val argb = when (raw.length) {
+        6 -> 0xFF000000L or parsed
+        8 -> parsed
+        else -> return fallback
+    }
+    return Color(argb)
 }
 
 private fun JSONObject.textToken(

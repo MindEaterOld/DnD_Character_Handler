@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
@@ -174,8 +175,7 @@ internal fun NotesContent(
                     NotesSectionTitle(text("nav_notes"))
                 }
 
-                items(visibleNotes.size) { index ->
-                    val note = visibleNotes[index]
+                items(visibleNotes, key = { it.id }) { note ->
                     NoteCard(
                         note = note,
                         onClick = { editingNote = note },
@@ -312,7 +312,7 @@ private fun NoteCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = note.title.ifBlank { text("notes_untitled") },
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.titleLarge,
                     color = Color(0xFFF7F2EA),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis

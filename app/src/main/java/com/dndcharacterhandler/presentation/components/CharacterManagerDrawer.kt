@@ -25,19 +25,12 @@ import androidx.compose.material.icons.outlined.AddCircleOutline
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material.icons.outlined.FileUpload
-import androidx.compose.material.icons.outlined.Language
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,7 +46,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import com.dndcharacterhandler.data.localization.LocalizedStrings
-import com.dndcharacterhandler.domain.model.AppLanguage
 import com.dndcharacterhandler.domain.model.AssetReferences
 import com.dndcharacterhandler.domain.model.Character
 import com.dndcharacterhandler.domain.model.CharacterBundle
@@ -69,10 +61,8 @@ fun CharacterManagerDrawer(
     onCreateCharacter: () -> Unit,
     onExportCharacter: () -> Unit,
     onDeleteCharacter: () -> Unit,
-    onImportCharacter: () -> Unit,
-    onLanguageSelected: (AppLanguage) -> Unit
+    onImportCharacter: () -> Unit
 ) {
-    var languageExpanded by remember { mutableStateOf(false) }
     val tokens = LocalDesignTokens.current.typography
 
     Box(
@@ -147,31 +137,6 @@ fun CharacterManagerDrawer(
                     icon = Icons.Outlined.FileDownload,
                     onClick = onImportCharacter
                 )
-            }
-
-            item {
-                DrawerOrnamentDivider(modifier = Modifier.padding(top = 10.dp, bottom = 6.dp))
-                Box {
-                    DrawerLanguageCard(
-                        label = text("drawer_language"),
-                        value = state.language.code.uppercase(),
-                        onClick = { languageExpanded = true }
-                    )
-                    DropdownMenu(
-                        expanded = languageExpanded,
-                        onDismissRequest = { languageExpanded = false }
-                    ) {
-                        AppLanguage.entries.forEach { language ->
-                            DropdownMenuItem(
-                                text = { Text(text(language.localizationKey)) },
-                                onClick = {
-                                    languageExpanded = false
-                                    onLanguageSelected(language)
-                                }
-                            )
-                        }
-                    }
-                }
             }
 
             item {
@@ -362,56 +327,6 @@ private fun DrawerActionCard(
                 text = label,
                 modifier = Modifier.padding(start = 14.dp),
                 style = MaterialTheme.typography.titleMedium.copy(fontSize = tokens.titleMedium.fontSizeSp.sp),
-                color = Color(0xFFD2CAC2),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-    }
-}
-
-@Composable
-private fun DrawerLanguageCard(
-    label: String,
-    value: String,
-    onClick: () -> Unit
-) {
-    val tokens = LocalDesignTokens.current.typography
-
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(60.dp)
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(8.dp),
-        color = Color(0xFF17141B).copy(alpha = 0.48f),
-        border = BorderStroke(1.dp, Color(0x42FFFFFF))
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 18.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.Language,
-                contentDescription = null,
-                tint = Color(0xFFF1ECE5),
-                modifier = Modifier.size(24.dp)
-            )
-            Text(
-                text = label,
-                modifier = Modifier
-                    .padding(start = 14.dp)
-                    .padding(end = 10.dp),
-                style = MaterialTheme.typography.titleMedium.copy(fontSize = tokens.titleMedium.fontSizeSp.sp),
-                color = Color(0xFFD2CAC2),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = value,
-                style = MaterialTheme.typography.bodyLarge,
                 color = Color(0xFFD2CAC2),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis

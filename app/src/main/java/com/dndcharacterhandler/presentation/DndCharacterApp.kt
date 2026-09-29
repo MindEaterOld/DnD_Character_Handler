@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBars
@@ -22,8 +21,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -39,7 +41,8 @@ import com.dndcharacterhandler.presentation.biography.BiographyScreen
 import com.dndcharacterhandler.presentation.combat.CombatScreen
 import com.dndcharacterhandler.presentation.components.BottomNavigationBar
 import com.dndcharacterhandler.presentation.components.CharacterManagerDrawer
-import com.dndcharacterhandler.presentation.components.ScreenTopActions
+import com.dndcharacterhandler.presentation.components.DeleteCharacterDialog
+import com.dndcharacterhandler.presentation.components.SettingsDialog
 import com.dndcharacterhandler.presentation.features.FeaturesScreen
 import com.dndcharacterhandler.presentation.inventory.InventoryScreen
 import com.dndcharacterhandler.presentation.localization.LocalStrings
@@ -74,6 +77,9 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
         appState.localizationRepository.getStrings(managerState.language)
     }
     val snackbarHostState = remember { SnackbarHostState() }
+    var isSettingsOpen by remember { mutableStateOf(false) }
+    var isDeleteConfirmOpen by remember { mutableStateOf(false) }
+    val openSettings: () -> Unit = { isSettingsOpen = true }
     val selectedCharacterName = managerState.characters
         .firstOrNull { it.character.id == managerState.selectedCharacterId }
         ?.character
@@ -93,9 +99,12 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
         }
     }
 
-    LaunchedEffect(appState.characterManagerViewModel, strings) {
+    // Subscribe once per ViewModel (not per language) so an event emitted while the language
+    // changes isn't dropped during re-subscription; read the latest strings via rememberUpdatedState.
+    val currentStrings by rememberUpdatedState(strings)
+    LaunchedEffect(appState.characterManagerViewModel) {
         appState.characterManagerViewModel.events.collect { messageKey ->
-            snackbarHostState.showSnackbar(strings[messageKey])
+            snackbarHostState.showSnackbar(currentStrings[messageKey])
         }
     }
 
@@ -111,42 +120,20 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                         onExportCharacter = {
                             exportLauncher.launch(suggestCharacterArchiveName(selectedCharacterName))
                         },
-                        onDeleteCharacter = appState.characterManagerViewModel::deleteCurrentCharacter,
+                        onDeleteCharacter = {
+                            if (managerState.selectedCharacterId != null) {
+                                isDeleteConfirmOpen = true
+                            }
+                        },
                         onImportCharacter = {
                             importLauncher.launch(arrayOf("application/octet-stream", "application/zip", "*/*"))
-                        },
-                        onLanguageSelected = appState.characterManagerViewModel::setLanguage
+                        }
                     )
                 }
             ) {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
-                contentWindowInsets = WindowInsets.systemBars,
-                topBar = {
-                    if (
-                        currentRoute != AppScreen.Overview.route &&
-                        currentRoute != AppScreen.Attributes.route &&
-                        currentRoute != AppScreen.Combat.route &&
-                        currentRoute != AppScreen.Inventory.route &&
-                        currentRoute != AppScreen.Spells.route &&
-                        currentRoute != AppScreen.Features.route &&
-                        currentRoute != AppScreen.Biography.route &&
-                        currentRoute != AppScreen.Notes.route
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .statusBarsPadding()
-                                .padding(horizontal = 24.dp, vertical = 4.dp)
-                                .height(44.dp)
-                        ) {
-                            ScreenTopActions(
-                                onOpenDrawer = { scope.launch { drawerState.open() } },
-                                onOpenSettings = {}
-                            )
-                        }
-                    }
-                },
+                    contentWindowInsets = WindowInsets.systemBars,
                     bottomBar = {
                         BottomNavigationBar(
                             currentRoute = currentRoute,
@@ -177,56 +164,56 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                             OverviewScreen(
                                 viewModel = appState.overviewViewModel,
                                 onOpenDrawer = { scope.launch { drawerState.open() } },
-                                onOpenSettings = {}
+                                onOpenSettings = openSettings
                             )
                         }
                             composable(AppScreen.Attributes.route) {
                                 AttributesScreen(
                                     viewModel = appState.attributesViewModel,
                                     onOpenDrawer = { scope.launch { drawerState.open() } },
-                                    onOpenSettings = {}
+                                    onOpenSettings = openSettings
                                 )
                             }
                             composable(AppScreen.Combat.route) {
                                 CombatScreen(
                                     viewModel = appState.combatViewModel,
                                     onOpenDrawer = { scope.launch { drawerState.open() } },
-                                    onOpenSettings = {}
+                                    onOpenSettings = openSettings
                                 )
                             }
                             composable(AppScreen.Inventory.route) {
                                 InventoryScreen(
                                     viewModel = appState.inventoryViewModel,
                                     onOpenDrawer = { scope.launch { drawerState.open() } },
-                                    onOpenSettings = {}
+                                    onOpenSettings = openSettings
                                 )
                             }
                             composable(AppScreen.Spells.route) {
                                 SpellsScreen(
                                     viewModel = appState.spellsViewModel,
                                     onOpenDrawer = { scope.launch { drawerState.open() } },
-                                    onOpenSettings = {}
+                                    onOpenSettings = openSettings
                                 )
                             }
                             composable(AppScreen.Features.route) {
                                 FeaturesScreen(
                                     viewModel = appState.featuresViewModel,
                                     onOpenDrawer = { scope.launch { drawerState.open() } },
-                                    onOpenSettings = {}
+                                    onOpenSettings = openSettings
                                 )
                             }
                             composable(AppScreen.Biography.route) {
                                 BiographyScreen(
                                     viewModel = appState.biographyViewModel,
                                     onOpenDrawer = { scope.launch { drawerState.open() } },
-                                    onOpenSettings = {}
+                                    onOpenSettings = openSettings
                                 )
                             }
                             composable(AppScreen.Notes.route) {
                                 NotesScreen(
                                     viewModel = appState.notesViewModel,
                                     onOpenDrawer = { scope.launch { drawerState.open() } },
-                                    onOpenSettings = {}
+                                    onOpenSettings = openSettings
                                 )
                             }
                         }
@@ -243,14 +230,35 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                     .padding(horizontal = 16.dp, vertical = 12.dp)
             )
         }
+
+        if (isSettingsOpen) {
+            SettingsDialog(
+                currentLanguage = managerState.language,
+                onLanguageSelected = appState.characterManagerViewModel::setLanguage,
+                onDismiss = { isSettingsOpen = false }
+            )
+        }
+
+        if (isDeleteConfirmOpen) {
+            DeleteCharacterDialog(
+                characterName = selectedCharacterName,
+                onConfirm = {
+                    isDeleteConfirmOpen = false
+                    appState.characterManagerViewModel.deleteCurrentCharacter()
+                },
+                onDismiss = { isDeleteConfirmOpen = false }
+            )
+        }
     }
 }
 
 private fun suggestCharacterArchiveName(characterName: String?): String {
+    // Keep letters of any script (a Cyrillic name used to collapse to "_.dndchar").
     val baseName = characterName
         ?.trim()
+        ?.replace(Regex("""[^\p{L}\p{N}._-]+"""), "_")
+        ?.trim('_')
         ?.ifBlank { null }
-        ?.replace(Regex("[^A-Za-z0-9._-]+"), "_")
         ?: "character"
     return "$baseName.dndchar"
 }

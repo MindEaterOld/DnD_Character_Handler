@@ -97,6 +97,34 @@
     "fr": "Delete Character",
     "es": "Delete Character"
   },
+  "drawer_delete_confirm_title": {
+    "en": "Delete character?",
+    "ru": "Удалить персонажа?",
+    "de": "Charakter löschen?",
+    "fr": "Supprimer le personnage ?",
+    "es": "¿Eliminar personaje?"
+  },
+  "drawer_delete_confirm_message": {
+    "en": "\"%1$s\" will be deleted permanently. This can't be undone.",
+    "ru": "«%1$s» будет удалён навсегда. Это действие нельзя отменить.",
+    "de": "„%1$s“ wird endgültig gelöscht. Das kann nicht rückgängig gemacht werden.",
+    "fr": "« %1$s » sera supprimé définitivement. Cette action est irréversible.",
+    "es": "«%1$s» se eliminará para siempre. Esta acción no se puede deshacer."
+  },
+  "drawer_delete_confirm_message_unnamed": {
+    "en": "This character will be deleted permanently. This can't be undone.",
+    "ru": "Персонаж будет удалён навсегда. Это действие нельзя отменить.",
+    "de": "Dieser Charakter wird endgültig gelöscht. Das kann nicht rückgängig gemacht werden.",
+    "fr": "Ce personnage sera supprimé définitivement. Cette action est irréversible.",
+    "es": "Este personaje se eliminará para siempre. Esta acción no se puede deshacer."
+  },
+  "drawer_delete_confirm_button": {
+    "en": "Delete",
+    "ru": "Удалить",
+    "de": "Löschen",
+    "fr": "Supprimer",
+    "es": "Eliminar"
+  },
   "drawer_import_character": {
     "en": "Import Character",
     "ru": "Импорт персонажа",
@@ -104,19 +132,12 @@
     "fr": "Import Character",
     "es": "Import Character"
   },
-  "drawer_language": {
+  "settings_language": {
     "en": "Language",
     "ru": "Язык",
     "de": "Sprache",
     "fr": "Langue",
     "es": "Idioma"
-  },
-  "drawer_language_value": {
-    "en": "Language: %1$s",
-    "ru": "Язык: %1$s",
-    "de": "Sprache: %1$s",
-    "fr": "Langue: %1$s",
-    "es": "Idioma: %1$s"
   },
   "drawer_level": {
     "en": "Level %1$s",
@@ -1130,7 +1151,7 @@
   },
   "combat_spell_dc": {
     "en": "Spell DC",
-    "ru": "Spell DC",
+    "ru": "СЛ заклинаний",
     "de": "Zauber-SG",
     "fr": "DD des sorts",
     "es": "CD de conjuro"
@@ -1744,7 +1765,7 @@
   },
   "biography_history_placeholder": {
     "en": "Write your story here",
-    "ru": "Write your story here"
+    "ru": "Напишите здесь историю персонажа"
   },
   "alignment_lawful_good": {
     "en": "Lawful Good",
@@ -1839,6 +1860,41 @@
   "biography_gender": {
     "en": "Gender",
     "ru": "Пол"
+  },
+  "biography_gender_male": {
+    "en": "Male",
+    "ru": "Мужской",
+    "de": "Männlich",
+    "fr": "Masculin",
+    "es": "Masculino"
+  },
+  "biography_gender_female": {
+    "en": "Female",
+    "ru": "Женский",
+    "de": "Weiblich",
+    "fr": "Féminin",
+    "es": "Femenino"
+  },
+  "biography_gender_custom": {
+    "en": "Custom",
+    "ru": "Другое",
+    "de": "Andere",
+    "fr": "Autre",
+    "es": "Otro"
+  },
+  "biography_unit_cm": {
+    "en": "cm",
+    "ru": "см",
+    "de": "cm",
+    "fr": "cm",
+    "es": "cm"
+  },
+  "biography_unit_kg": {
+    "en": "kg",
+    "ru": "кг",
+    "de": "kg",
+    "fr": "kg",
+    "es": "kg"
   },
   "biography_height": {
     "en": "Height",
@@ -2023,6 +2079,27 @@
     "fr": "Rest",
     "es": "Rest"
   },
+  "overview_portrait_menu_title": {
+    "en": "Portrait",
+    "ru": "\u041f\u043e\u0440\u0442\u0440\u0435\u0442",
+    "de": "Portr\u00e4t",
+    "fr": "Portrait",
+    "es": "Retrato"
+  },
+  "overview_portrait_show": {
+    "en": "View portrait",
+    "ru": "\u041f\u043e\u043a\u0430\u0437\u0430\u0442\u044c \u043f\u043e\u0440\u0442\u0440\u0435\u0442",
+    "de": "Portr\u00e4t anzeigen",
+    "fr": "Voir le portrait",
+    "es": "Ver retrato"
+  },
+  "overview_portrait_change": {
+    "en": "Change portrait",
+    "ru": "\u041f\u043e\u043c\u0435\u043d\u044f\u0442\u044c \u043f\u043e\u0440\u0442\u0440\u0435\u0442",
+    "de": "Portr\u00e4t \u00e4ndern",
+    "fr": "Changer le portrait",
+    "es": "Cambiar retrato"
+  },
   "overview_inspiration": {
     "en": "Inspiration",
     "ru": "\u0412\u0434\u043e\u0445\u043d\u043e\u0432\u0435\u043d\u0438\u0435",
@@ -2075,9 +2152,9 @@
   "overview_settings": {
     "en": "Settings",
     "ru": "\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438",
-    "de": "Settings",
-    "fr": "Settings",
-    "es": "Settings"
+    "de": "Einstellungen",
+    "fr": "Param\u00e8tres",
+    "es": "Ajustes"
   },
   "overview_rename_title": {
     "en": "Rename Character",
@@ -2274,6 +2351,13 @@
     "de": "Cancel",
     "fr": "Cancel",
     "es": "Cancel"
+  },
+  "common_close": {
+    "en": "Close",
+    "ru": "\u0417\u0430\u043a\u0440\u044b\u0442\u044c",
+    "de": "Schlie\u00dfen",
+    "fr": "Fermer",
+    "es": "Cerrar"
   },
   "common_dash": {
     "en": "—",
@@ -2776,6 +2860,13 @@
     "fr": "ft",
     "es": "ft"
   },
+  "inventory_unit_pounds": {
+    "en": "lb",
+    "ru": "\u0444\u043d\u0442",
+    "de": "Pfd.",
+    "fr": "lb",
+    "es": "lb"
+  },
   "inventory_field_weapon_class": {
     "en": "Weapon class",
     "ru": "\u041a\u043b\u0430\u0441\u0441 \u043e\u0440\u0443\u0436\u0438\u044f",
@@ -2936,6 +3027,41 @@
     "de": "Goldmuenzen",
     "fr": "Pieces d'or",
     "es": "Monedas de oro"
+  },
+  "inventory_currency_short_cp": {
+    "en": "CP",
+    "ru": "\u043c\u043c",
+    "de": "KM",
+    "fr": "pc",
+    "es": "pc"
+  },
+  "inventory_currency_short_sp": {
+    "en": "SP",
+    "ru": "\u0441\u043c",
+    "de": "SM",
+    "fr": "pa",
+    "es": "pp"
+  },
+  "inventory_currency_short_ep": {
+    "en": "EP",
+    "ru": "\u044d\u043c",
+    "de": "EM",
+    "fr": "p\u00e9",
+    "es": "pe"
+  },
+  "inventory_currency_short_gp": {
+    "en": "GP",
+    "ru": "\u0437\u043c",
+    "de": "GM",
+    "fr": "po",
+    "es": "po"
+  },
+  "inventory_currency_short_pp": {
+    "en": "PP",
+    "ru": "\u043f\u043c",
+    "de": "PM",
+    "fr": "pp",
+    "es": "ppt"
   },
   "overview_ac_base": {
     "en": "Base AC",
@@ -3174,6 +3300,20 @@
     "de": "Speziell",
     "fr": "Speciale",
     "es": "Especial"
+  },
+  "spells_range_one_mile": {
+    "en": "1 mile",
+    "ru": "1 миля",
+    "de": "1 Meile",
+    "fr": "1 mille",
+    "es": "1 milla"
+  },
+  "spells_range_miles_format": {
+    "en": "%1$s miles",
+    "ru": "%1$s миль",
+    "de": "%1$s Meilen",
+    "fr": "%1$s milles",
+    "es": "%1$s millas"
   },
   "spells_casting_time": {
     "en": "Casting Time",

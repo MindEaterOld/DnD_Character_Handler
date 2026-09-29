@@ -270,19 +270,22 @@ fun archiveManifestToCharacterBundle(
     }
 
     val characterJson = manifest.getJSONObject("character")
+    // Guard against corrupt/hand-edited archives: optInt coerces non-numeric values to 0, which
+    // would import as level 0 / 0 max HP and let spentHitDice exceed the level.
+    val importedLevel = characterJson.optInt("level").coerceIn(1, 20)
     val character = Character(
         id = 0,
         name = characterJson.optString("name"),
         race = characterJson.optString("race"),
         characterClass = characterJson.optString("characterClass"),
         subclass = characterJson.optString("subclass"),
-        level = characterJson.optInt("level"),
+        level = importedLevel,
         portraitUri = resolveAssetReference(characterJson.optNullableString("portraitUri")),
         currentHp = characterJson.optInt("currentHp"),
-        maxHp = characterJson.optInt("maxHp"),
+        maxHp = characterJson.optInt("maxHp").coerceAtLeast(1),
         temporaryHp = characterJson.optInt("temporaryHp").coerceAtLeast(0),
         hitDieSides = characterJson.optInt("hitDieSides", 8).coerceInHitDieSides(),
-        spentHitDice = characterJson.optInt("spentHitDice").coerceAtLeast(0),
+        spentHitDice = characterJson.optInt("spentHitDice").coerceIn(0, importedLevel),
         hasInspiration = characterJson.optBoolean("hasInspiration"),
         armorClass = characterJson.optInt("armorClass"),
         baseArmorClass = characterJson.optInt("baseArmorClass", 10).coerceAtLeast(1),

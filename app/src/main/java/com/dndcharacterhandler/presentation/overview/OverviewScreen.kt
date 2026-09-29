@@ -9,6 +9,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,6 +25,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -31,9 +33,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.DirectionsRun
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.Bedtime
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.FlashOn
+import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.LocalCafe
 import androidx.compose.material.icons.outlined.Shield
+import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.AlertDialog
@@ -72,6 +77,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.dndcharacterhandler.data.localization.LocalizedStrings
@@ -417,7 +424,14 @@ fun OverviewScreen(
     onOpenSettings: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    LaunchedEffect(state.character) {
+    // Only re-sync AC when an input that actually affects it changes (keys compare structurally),
+    // not on every HP/XP/name edit.
+    LaunchedEffect(
+        state.character?.character?.baseArmorClass,
+        state.character?.character?.dexterity,
+        state.character?.character?.armorClassMode,
+        state.character?.inventoryItems
+    ) {
         state.character?.let(viewModel::syncAutomaticArmorClass)
     }
     OverviewContent(
@@ -486,6 +500,8 @@ private fun OverviewContent(
         }
     }
     var activeField by remember { mutableStateOf<OverviewEditableField?>(null) }
+    var isPortraitMenuOpen by remember { mutableStateOf(false) }
+    var isPortraitViewerOpen by remember { mutableStateOf(false) }
     var isExperienceDialogOpen by remember { mutableStateOf(false) }
     var experienceEditMode by remember { mutableStateOf(OverviewExperienceEditMode.ADD) }
     var experienceDraft by remember(character?.id, character?.experience) { mutableStateOf("") }
@@ -518,32 +534,36 @@ private fun OverviewContent(
     val levelLabel = strings.format("overview_level_format", character?.level ?: 1)
     val xpInfo = remember(character) { buildXpInfo(character) }
 
-    val actions = listOf(
-        OverviewAction("overview_short_rest", Icons.Outlined.LocalCafe),
-        OverviewAction("overview_long_rest", Icons.Outlined.Bedtime),
-        OverviewAction("overview_inspiration", Icons.Outlined.AutoAwesome)
-    )
-
-    val miniStats = listOf(
-        OverviewStat(
-            labelKey = "overview_ac",
-            value = (character?.armorClass ?: 10).toString(),
-            icon = Icons.Outlined.Shield,
-            field = OverviewMiniStatField.ARMOR_CLASS
-        ),
-        OverviewStat(
-            labelKey = "overview_initiative",
-            value = signed(calculateInitiative(character?.dexterity ?: 10, character?.initiativeBonus ?: 0)),
-            icon = Icons.Outlined.FlashOn,
-            field = OverviewMiniStatField.INITIATIVE
-        ),
-        OverviewStat(
-            labelKey = "overview_speed",
-            value = "${character?.speed ?: 30} ft",
-            icon = Icons.AutoMirrored.Outlined.DirectionsRun,
-            field = OverviewMiniStatField.SPEED
+    val actions = remember {
+        listOf(
+            OverviewAction("overview_short_rest", Icons.Outlined.LocalCafe),
+            OverviewAction("overview_long_rest", Icons.Outlined.Bedtime),
+            OverviewAction("overview_inspiration", Icons.Outlined.AutoAwesome)
         )
-    )
+    }
+
+    val miniStats = remember(character, strings) {
+        listOf(
+            OverviewStat(
+                labelKey = "overview_ac",
+                value = (character?.armorClass ?: 10).toString(),
+                icon = Icons.Outlined.Shield,
+                field = OverviewMiniStatField.ARMOR_CLASS
+            ),
+            OverviewStat(
+                labelKey = "overview_initiative",
+                value = signed(calculateInitiative(character?.dexterity ?: 10, character?.initiativeBonus ?: 0)),
+                icon = Icons.Outlined.FlashOn,
+                field = OverviewMiniStatField.INITIATIVE
+            ),
+            OverviewStat(
+                labelKey = "overview_speed",
+                value = "${character?.speed ?: 30} ${strings["inventory_unit_feet"]}",
+                icon = Icons.AutoMirrored.Outlined.DirectionsRun,
+                field = OverviewMiniStatField.SPEED
+            )
+        )
+    }
 
     ScreenBackground {
         LazyColumn(
@@ -568,7 +588,7 @@ private fun OverviewContent(
                         characterName = displayName,
                         onClick = {
                             if (characterBundle != null) {
-                                portraitPickerLauncher.launch(arrayOf("image/*"))
+                                isPortraitMenuOpen = true
                             }
                         }
                     )
@@ -1308,6 +1328,30 @@ private fun OverviewContent(
             }
         )
     }
+
+    if (isPortraitMenuOpen && characterBundle != null) {
+        PortraitMenuDialog(
+            hasPortrait = !characterBundle.character.portraitUri.isNullOrBlank(),
+            onShowPortrait = {
+                isPortraitMenuOpen = false
+                isPortraitViewerOpen = true
+            },
+            onChangePortrait = {
+                isPortraitMenuOpen = false
+                portraitPickerLauncher.launch(arrayOf("image/*"))
+            },
+            onDismiss = { isPortraitMenuOpen = false }
+        )
+    }
+
+    val viewerPortraitUri = character?.portraitUri
+    if (isPortraitViewerOpen && !viewerPortraitUri.isNullOrBlank()) {
+        PortraitViewer(
+            portraitUri = viewerPortraitUri,
+            characterName = displayName,
+            onClose = { isPortraitViewerOpen = false }
+        )
+    }
 }
 
 @Composable
@@ -1493,6 +1537,134 @@ private fun PortraitFallback(characterName: String) {
             style = MaterialTheme.typography.headlineMedium.copy(fontSize = token.fontSizeSp.sp),
             color = Color(0xFFF7F2EA)
         )
+    }
+}
+
+@Composable
+private fun PortraitMenuDialog(
+    hasPortrait: Boolean,
+    onShowPortrait: () -> Unit,
+    onChangePortrait: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text("overview_portrait_menu_title")) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                PortraitMenuOption(
+                    label = text("overview_portrait_show"),
+                    icon = Icons.Outlined.Visibility,
+                    enabled = hasPortrait,
+                    onClick = onShowPortrait
+                )
+                PortraitMenuOption(
+                    label = text("overview_portrait_change"),
+                    icon = Icons.Outlined.Image,
+                    enabled = true,
+                    onClick = onChangePortrait
+                )
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text("common_cancel"))
+            }
+        }
+    )
+}
+
+@Composable
+private fun PortraitMenuOption(
+    label: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    enabled: Boolean,
+    onClick: () -> Unit
+) {
+    val colors = LocalDesignTokens.current.colors
+    val contentColor = if (enabled) colors.text.muted else colors.text.subtle
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(enabled = enabled, onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = if (enabled) colors.text.icon else colors.text.subtle,
+            modifier = Modifier.size(24.dp)
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge,
+            color = contentColor
+        )
+    }
+}
+
+@Composable
+private fun PortraitViewer(
+    portraitUri: String,
+    characterName: String,
+    onClose: () -> Unit
+) {
+    Dialog(
+        onDismissRequest = onClose,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            decorFitsSystemWindows = false
+        )
+    ) {
+        PortraitViewerContent(
+            portraitUri = portraitUri,
+            characterName = characterName,
+            onClose = onClose
+        )
+    }
+}
+
+@Composable
+private fun PortraitViewerContent(
+    portraitUri: String,
+    characterName: String,
+    onClose: () -> Unit
+) {
+    val colors = LocalDesignTokens.current.colors
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colors.background.radialEnd)
+    ) {
+        AppImage(
+            imageRef = portraitUri,
+            contentDescription = characterName,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Fit
+        )
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .systemBarsPadding()
+                .padding(16.dp)
+                .size(44.dp)
+                .clip(CircleShape)
+                .background(colors.surface.button)
+                .border(1.dp, colors.border.default, CircleShape)
+                .clickable(onClick = onClose),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Close,
+                contentDescription = text("common_close"),
+                tint = colors.text.icon,
+                modifier = Modifier.size(28.dp)
+            )
+        }
     }
 }
 
@@ -1848,7 +2020,7 @@ private fun playAssetSound(
     context: Context,
     assetPath: String
 ) {
-    val descriptor = context.assets.openFd(assetPath)
+    val descriptor = runCatching { context.assets.openFd(assetPath) }.getOrNull() ?: return
     val player = MediaPlayer()
     player.setOnCompletionListener { completedPlayer ->
         completedPlayer.release()
@@ -1859,9 +2031,16 @@ private fun playAssetSound(
         descriptor.close()
         true
     }
-    player.setDataSource(descriptor.fileDescriptor, descriptor.startOffset, descriptor.length)
-    player.prepare()
-    player.start()
+    player.setOnPreparedListener { it.start() }
+    // prepareAsync keeps decoding off the UI thread; setDataSource/prepare can throw IOException,
+    // so release the player and descriptor instead of crashing out of the click handler.
+    runCatching {
+        player.setDataSource(descriptor.fileDescriptor, descriptor.startOffset, descriptor.length)
+        player.prepareAsync()
+    }.onFailure {
+        player.release()
+        descriptor.close()
+    }
 }
 
 private fun copyPortraitToCharacterFiles(
@@ -2006,7 +2185,7 @@ private fun ArmorClassModeOption(
                 Text(text = title, style = MaterialTheme.typography.bodyLarge, color = Color(0xFFF7F2EA))
                 Text(
                     text = description,
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = Color(0xFFD2CAC2)
                 )
             }
@@ -2035,6 +2214,7 @@ private fun OverviewScreenPreview() {
             "overview_ac" to "AC",
             "overview_initiative" to "Initiative",
             "overview_speed" to "Speed",
+            "inventory_unit_feet" to "ft",
             "overview_settings" to "Settings",
             "overview_rename_title" to "Rename Character",
             "overview_edit_race_title" to "Edit Race",
@@ -2070,8 +2250,12 @@ private fun OverviewScreenPreview() {
             "overview_initiative_base_value" to "Dexterity modifier: %1\$s",
             "overview_initiative_result" to "Result: %1\$s",
             "overview_edit_speed_title" to "Edit Speed",
+            "overview_portrait_menu_title" to "Portrait",
+            "overview_portrait_show" to "View portrait",
+            "overview_portrait_change" to "Change portrait",
             "common_save" to "Save",
             "common_cancel" to "Cancel",
+            "common_close" to "Close",
             "drawer_open_character_manager" to "Open character manager"
         )
     )

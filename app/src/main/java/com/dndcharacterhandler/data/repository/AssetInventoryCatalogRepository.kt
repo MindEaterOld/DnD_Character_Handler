@@ -12,6 +12,8 @@ import com.dndcharacterhandler.domain.model.InventoryWeaponDetails
 import com.dndcharacterhandler.domain.model.InventoryWeaponProperty
 import com.dndcharacterhandler.domain.model.InventoryWeaponRangeType
 import com.dndcharacterhandler.domain.repository.InventoryCatalogRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -23,12 +25,15 @@ class AssetInventoryCatalogRepository(
 
     override suspend fun getItems(): List<InventoryCatalogItem> {
         cachedItems?.let { return it }
+        return withContext(Dispatchers.IO) {
+            cachedItems?.let { return@withContext it }
 
-        val equipmentItems = readArray("5e-SRD-Equipment.json").mapNotNull(::parseEquipmentItem)
-        val magicItems = readArray("5e-SRD-Magic-Items.json").mapNotNull(::parseMagicItem)
-        val merged = (equipmentItems + magicItems).sortedBy { it.name }
-        cachedItems = merged
-        return merged
+            val equipmentItems = readArray("5e-SRD-Equipment.json").mapNotNull(::parseEquipmentItem)
+            val magicItems = readArray("5e-SRD-Magic-Items.json").mapNotNull(::parseMagicItem)
+            val merged = (equipmentItems + magicItems).sortedBy { it.name }
+            cachedItems = merged
+            merged
+        }
     }
 
     private fun readArray(assetName: String): JSONArray {
@@ -155,7 +160,8 @@ class AssetInventoryCatalogRepository(
         return InventoryWeaponDetails(
             weaponClass = weaponClass,
             rangeType = rangeType,
-            baseWeaponId = optString("index").ifBlank { null },
+            // SRD indexes use hyphens ("light-hammer"); the app's weapon/proficiency ids use underscores.
+            baseWeaponId = optString("index").ifBlank { null }?.replace('-', '_'),
             normalRange = range?.first,
             longRange = range?.second,
             damages = listOf(baseDamage),

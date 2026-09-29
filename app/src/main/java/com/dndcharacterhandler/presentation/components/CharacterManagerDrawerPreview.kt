@@ -27,8 +27,6 @@ fun CharacterManagerDrawerPreview() {
             "drawer_export_character" to "Export Character",
             "drawer_delete_character" to "Delete Character",
             "drawer_import_character" to "Import Character",
-            "drawer_language" to "Language",
-            "drawer_language_value" to "%1\$s",
             "drawer_level" to "Level %1\$s",
             "placeholder_loading_character" to "Unnamed Adventurer",
             "placeholder_race" to "Human",
@@ -79,8 +77,7 @@ fun CharacterManagerDrawerPreview() {
                 onCreateCharacter = {},
                 onExportCharacter = {},
                 onDeleteCharacter = {},
-                onImportCharacter = {},
-                onLanguageSelected = {}
+                onImportCharacter = {}
             )
         }
     }

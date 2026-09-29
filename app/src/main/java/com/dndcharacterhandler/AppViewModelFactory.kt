@@ -39,6 +39,7 @@ class AppViewModelFactory(
 
             modelClass.isAssignableFrom(CombatViewModel::class.java) -> CombatViewModel(
                 characterRepository = container.characterRepository,
+                spellCatalogRepository = container.spellCatalogRepository,
                 getCharacterBundleUseCase = container.getCharacterBundleUseCase,
                 selectedCharacterHolder = container.selectedCharacterHolder
             )

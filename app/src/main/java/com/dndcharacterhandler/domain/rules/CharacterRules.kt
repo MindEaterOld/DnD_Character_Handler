@@ -8,7 +8,7 @@ import com.dndcharacterhandler.domain.model.SpellcastingAbility
 
 fun abilityModifier(score: Int): Int = Math.floorDiv(score - 10, 2)
 
-fun proficiencyBonusForLevel(level: Int): Int = 2 + ((level.coerceAtLeast(1) - 1) / 4)
+fun proficiencyBonusForLevel(level: Int): Int = 2 + ((level.coerceIn(1, 20) - 1) / 4)
 
 fun calculateInitiative(dexterityScore: Int, initiativeBonus: Int): Int =
     abilityModifier(dexterityScore) + initiativeBonus

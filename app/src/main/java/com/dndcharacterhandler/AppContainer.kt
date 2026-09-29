@@ -47,7 +47,8 @@ class AppContainer(context: Context) {
     val inventoryCatalogRepository: InventoryCatalogRepository =
         AssetInventoryCatalogRepository(appContext)
 
-    val spellCatalogRepository: SpellCatalogRepository = AssetSpellCatalogRepository(appContext)
+    val spellCatalogRepository: SpellCatalogRepository =
+        AssetSpellCatalogRepository(appContext, localizationRepository)
 
     val featureCatalogRepository: FeatureCatalogRepository = AssetFeatureCatalogRepository(appContext)
 

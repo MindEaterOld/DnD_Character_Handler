@@ -306,9 +306,13 @@ internal fun SpellsContent(
     val spellSaveDc = (8 + proficiencyBonus + spellModifier).toString()
     val slotMaximums = remember(character.spellSlotMaximums) { character.spellSlotMaximums.toSpellSlotList() }
     val slotRemainings = remember(character.spellSlotRemaining) { character.spellSlotRemaining.toSpellSlotList() }
-    val filteredSpells = remember(resolvedBundle.spells, query) {
+    val catalogById = remember(catalogState.items) { catalogState.items.associateBy { it.id } }
+    val displayedSpells = remember(resolvedBundle.spells, catalogById, strings) {
+        resolvedBundle.spells.localizedWith(catalogById, strings)
+    }
+    val filteredSpells = remember(displayedSpells, query) {
         val needle = query.trim()
-        resolvedBundle.spells.filter { spell ->
+        displayedSpells.filter { spell ->
             needle.isBlank() ||
                 spell.name.contains(needle, ignoreCase = true) ||
                 spell.description.contains(needle, ignoreCase = true) ||
@@ -425,7 +429,7 @@ internal fun SpellsContent(
                 editingSpell = newDraftSpell()
             },
             onSelectCatalogItem = { item ->
-                onUpdateSpell(resolvedBundle, buildLocalizedCatalogSpell(item, strings))
+                onUpdateSpell(resolvedBundle, item.toLocalizedSpell(strings))
                 isAddEntryDialogOpen = false
             }
         )
@@ -522,7 +526,7 @@ private fun SpellStatCard(
                 )
                 Text(
                     text = value,
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.titleLarge,
                     color = Color(0xFFF7F2EA),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -825,7 +829,7 @@ private fun SpellCatalogRow(
                 Text(
                     text = "${spellLevelTitle(item.level)} • ${spellSchoolLabel(item.school)}",
                     modifier = Modifier.padding(top = 4.dp),
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = Color(0xFFD2CAC2),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -1867,24 +1871,6 @@ private fun <T> SelectionDialog(
     )
 }
 
-private fun localizedSpellNameOf(catalogId: String?, fallback: String, strings: LocalizedStrings): String {
-    if (catalogId.isNullOrBlank()) return fallback
-    val key = "spell_name_" + catalogId.removePrefix("spell:")
-    val localized = strings[key]
-    return if (localized == key) fallback else localized
-}
-
-private fun buildLocalizedCatalogSpell(item: SpellCatalogItem, strings: LocalizedStrings): Spell {
-    val spell = item.toSpell()
-    val useRu = strings.language == AppLanguage.RUSSIAN && item.ruDescription.isNotBlank()
-    return spell.copy(
-        name = localizedSpellNameOf(item.id, item.name, strings),
-        description = if (useRu) item.ruDescription else spell.description,
-        higherLevelDescription = if (useRu) item.ruHigherLevel else spell.higherLevelDescription,
-        material = if (useRu && item.ruMaterial.isNotBlank()) item.ruMaterial else spell.material
-    )
-}
-
 internal fun newDraftSpell(): Spell =
     Spell(
         id = 0,
@@ -1937,6 +1923,27 @@ private fun encodeRange(kind: SpellRangeKind, feet: String, special: String): St
         SpellRangeKind.RANGED -> "${feet.trim().ifBlank { "0" }} feet"
         SpellRangeKind.SPECIAL -> special.trim()
     }
+
+private val rangeMilesRegex = Regex("""^(\d+)\s*miles?$""", RegexOption.IGNORE_CASE)
+
+/** Short localized range for spell cards ("60 ft", "Touch", "1 mile"); null when no range is set. */
+internal fun spellRangeDisplayLabel(range: String, strings: LocalizedStrings): String? {
+    val value = range.trim()
+    if (value.isEmpty()) return null
+    return when (val kind = parseRangeKind(value)) {
+        SpellRangeKind.RANGED -> "${parseRangeFeet(value)} ${strings["inventory_unit_feet"]}"
+        SpellRangeKind.SPECIAL -> {
+            val miles = rangeMilesRegex.matchEntire(value)?.groupValues?.get(1)
+            when {
+                miles == "1" -> strings["spells_range_one_mile"]
+                miles != null -> strings.format("spells_range_miles_format", miles)
+                value.equals("special", ignoreCase = true) -> strings["spells_range_special"]
+                else -> value
+            }
+        }
+        else -> rangeKindLabel(kind, strings)
+    }
+}
 
 private fun rangeKindLabel(kind: SpellRangeKind, strings: LocalizedStrings): String =
     strings[
