@@ -14,12 +14,27 @@ data class InventoryCatalogItem(
     val costQuantity: Int? = null,
     val costUnit: String? = null,
     val armorDetails: InventoryArmorDetails? = null,
-    val weaponDetails: InventoryWeaponDetails? = null
+    val weaponDetails: InventoryWeaponDetails? = null,
+    val ruName: String = "",
+    val ruDescription: String = "",
+    val ruDetailLine: String = ""
 ) {
-    fun toInventoryItem(): InventoryItem =
+    /** Display name, preferring the Russian translation when [russian] is requested and available. */
+    fun displayName(russian: Boolean): String =
+        if (russian && ruName.isNotBlank()) ruName else name
+
+    /** Display description, preferring the Russian translation when [russian] is requested and available. */
+    fun displayDescription(russian: Boolean): String =
+        if (russian && ruDescription.isNotBlank()) ruDescription else description
+
+    /** Short "cost - damage - AC" / "type - rarity" line in the requested language. */
+    fun displayDetailLine(russian: Boolean): String? =
+        if (russian && ruDetailLine.isNotBlank()) ruDetailLine else detailLine
+
+    fun toInventoryItem(russian: Boolean = false): InventoryItem =
         InventoryItem(
-            name = name,
-            description = description,
+            name = displayName(russian),
+            description = displayDescription(russian),
             isMagical = isMagical,
             category = category,
             weight = weight,
@@ -29,6 +44,7 @@ data class InventoryCatalogItem(
             costQuantity = costQuantity,
             costUnit = costUnit,
             armorDetails = armorDetails,
-            weaponDetails = weaponDetails
+            weaponDetails = weaponDetails,
+            catalogId = id
         )
 }

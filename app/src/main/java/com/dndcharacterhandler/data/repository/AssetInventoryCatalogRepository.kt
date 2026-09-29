@@ -30,11 +30,31 @@ class AssetInventoryCatalogRepository(
 
             val equipmentItems = readArray("5e-SRD-Equipment.json").mapNotNull(::parseEquipmentItem)
             val magicItems = readArray("5e-SRD-Magic-Items.json").mapNotNull(::parseMagicItem)
-            val merged = (equipmentItems + magicItems).sortedBy { it.name }
+            val russian = readRussianText()
+            val merged = (equipmentItems + magicItems)
+                .map { item -> item.withRussianText(russian.optJSONObject(item.id)) }
+                .sortedBy { it.name }
             cachedItems = merged
             merged
         }
     }
+
+    /** Russian names/descriptions keyed by catalog id ("equipment:<index>", "magic:<index>"), from TTG Club. */
+    private fun readRussianText(): JSONObject =
+        runCatching {
+            JSONObject(context.assets.open("inventory_text_ru.json").bufferedReader().use { it.readText() })
+        }.getOrDefault(JSONObject())
+
+    private fun InventoryCatalogItem.withRussianText(text: JSONObject?): InventoryCatalogItem =
+        if (text == null) {
+            this
+        } else {
+            copy(
+                ruName = text.optString("name"),
+                ruDescription = text.optString("description"),
+                ruDetailLine = text.optString("detail")
+            )
+        }
 
     private fun readArray(assetName: String): JSONArray {
         val rawJson = context.assets.open(assetName).bufferedReader().use { it.readText() }

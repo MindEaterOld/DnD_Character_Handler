@@ -30,7 +30,7 @@ import com.dndcharacterhandler.data.local.entity.SpellEntity
         FeatureEntity::class,
         NoteEntity::class
     ],
-    version = 44,
+    version = 45,
     exportSchema = false
 )
 @TypeConverters(RoomConverters::class)
@@ -90,7 +90,8 @@ abstract class AppDatabase : RoomDatabase() {
                     MIGRATION_40_41,
                     MIGRATION_41_42,
                     MIGRATION_42_43,
-                    MIGRATION_43_44
+                    MIGRATION_43_44,
+                    MIGRATION_44_45
                 ).build().also { INSTANCE = it }
             }
         }
@@ -523,6 +524,12 @@ abstract class AppDatabase : RoomDatabase() {
         private val MIGRATION_43_44 = object : Migration(43, 44) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE features ADD COLUMN catalogId TEXT")
+            }
+        }
+
+        private val MIGRATION_44_45 = object : Migration(44, 45) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE inventory_items ADD COLUMN catalogId TEXT")
             }
         }
     }

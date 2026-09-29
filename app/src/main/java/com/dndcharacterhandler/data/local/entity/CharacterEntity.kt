@@ -204,7 +204,8 @@ data class InventoryItemEntity(
     val weaponPrimaryDamageType: String?,
     val weaponTwoHandedDamageDice: String?,
     val weaponTwoHandedDamageType: String?,
-    val weaponProperties: String?
+    val weaponProperties: String?,
+    val catalogId: String? = null
 )
 
 @Entity(

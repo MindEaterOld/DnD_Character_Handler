@@ -175,7 +175,9 @@ data class InventoryItem(
     val costQuantity: Int? = null,
     val costUnit: String? = null,
     val armorDetails: InventoryArmorDetails? = null,
-    val weaponDetails: InventoryWeaponDetails? = null
+    val weaponDetails: InventoryWeaponDetails? = null,
+    /** [InventoryCatalogItem.id] this item was added from, or null for hand-made items. */
+    val catalogId: String? = null
 )
 data class Spell(
     val id: Long = 0,

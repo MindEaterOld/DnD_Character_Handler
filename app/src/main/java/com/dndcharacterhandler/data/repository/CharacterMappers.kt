@@ -237,7 +237,8 @@ fun InventoryItemEntity.toDomain(): InventoryItem =
             )
         } else {
             null
-        }
+        },
+        catalogId = catalogId
     )
 
 fun Character.toEntity(): CharacterEntity =
@@ -387,7 +388,8 @@ fun InventoryItem.toEntity(characterId: Long): InventoryItemEntity =
         weaponProperties = weaponDetails?.properties
             ?.map(InventoryWeaponProperty::name)
             ?.sorted()
-            ?.joinToString(",")
+            ?.joinToString(","),
+        catalogId = catalogId
     )
 
 fun Spell.toEntity(characterId: Long): SpellEntity =

@@ -183,6 +183,7 @@ class CharacterArchiveCodecTest {
                     icon = "res:drawable/half_plate",
                     costQuantity = 750,
                     costUnit = "gp",
+                    catalogId = "equipment:half-plate-armor",
                     armorDetails = InventoryArmorDetails(
                         armorType = InventoryArmorType.MEDIUM,
                         armorClass = 15,

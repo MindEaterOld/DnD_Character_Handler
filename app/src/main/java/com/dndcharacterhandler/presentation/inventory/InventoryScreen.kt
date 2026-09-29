@@ -58,6 +58,7 @@ import com.dndcharacterhandler.data.localization.LocalizedStrings
 import com.dndcharacterhandler.domain.model.CharacterBundle
 import com.dndcharacterhandler.domain.model.InventoryArmorDetails
 import com.dndcharacterhandler.domain.model.InventoryArmorType
+import com.dndcharacterhandler.domain.model.AppLanguage
 import com.dndcharacterhandler.domain.model.InventoryCatalogItem
 import com.dndcharacterhandler.domain.model.InventoryCategory
 import com.dndcharacterhandler.domain.model.InventoryItem
@@ -124,11 +125,11 @@ class InventoryViewModel(
         }
     }
 
-    fun addCatalogItem(characterBundle: CharacterBundle, item: InventoryCatalogItem) {
+    fun addCatalogItem(characterBundle: CharacterBundle, item: InventoryCatalogItem, russian: Boolean) {
         viewModelScope.launch {
             characterRepository.upsertInventoryItem(
                 characterId = characterBundle.character.id,
-                item = item.toInventoryItem()
+                item = item.toInventoryItem(russian)
             )
         }
     }
@@ -219,6 +220,7 @@ fun InventoryScreen(
 
     InventoryContent(
         characterBundle = state.character,
+        catalogItems = catalogState.items,
         onOpenDrawer = onOpenDrawer,
         onOpenSettings = onOpenSettings,
         onAddItem = { isAddItemDialogOpen = true },
@@ -240,7 +242,7 @@ fun InventoryScreen(
                 isCategoryPickerOpen = true
             },
             onSelectCatalogItem = { item ->
-                viewModel.addCatalogItem(characterBundle, item)
+                viewModel.addCatalogItem(characterBundle, item, russian = strings.language == AppLanguage.RUSSIAN)
                 isAddItemDialogOpen = false
             }
         )
@@ -303,6 +305,7 @@ fun InventoryScreen(
 @Composable
 internal fun InventoryContent(
     characterBundle: CharacterBundle?,
+    catalogItems: List<InventoryCatalogItem> = emptyList(),
     onOpenDrawer: () -> Unit = {},
     onOpenSettings: () -> Unit = {},
     onAddItem: () -> Unit = {},
@@ -336,9 +339,14 @@ internal fun InventoryContent(
         return
     }
 
-    val items = remember(characterBundle.inventoryItems, query) {
+    val russian = LocalStrings.current.language == AppLanguage.RUSSIAN
+    val catalogLookup = remember(catalogItems) { InventoryCatalogLookup(catalogItems) }
+    val displayedItems = remember(characterBundle.inventoryItems, catalogLookup, russian) {
+        characterBundle.inventoryItems.localizedWith(catalogLookup, russian)
+    }
+    val items = remember(displayedItems, query) {
         val needle = query.trim()
-        characterBundle.inventoryItems.filter { item ->
+        displayedItems.filter { item ->
             needle.isBlank() ||
                 item.name.contains(needle, ignoreCase = true) ||
                 item.category.name.contains(needle, ignoreCase = true)
@@ -749,8 +757,10 @@ private fun InventorySectionTitle(title: String) {
 @Composable
 private fun InventoryCatalogRow(
     item: InventoryCatalogItem,
+    russian: Boolean,
     onAdd: () -> Unit
 ) {
+    val description = item.displayDescription(russian)
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
@@ -766,13 +776,13 @@ private fun InventoryCatalogRow(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = item.name,
+                    text = item.displayName(russian),
                     style = MaterialTheme.typography.bodyLarge,
                     color = Color(0xFFF7F2EA),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                item.detailLine?.let { detail ->
+                item.displayDetailLine(russian)?.let { detail ->
                     Text(
                         text = detail,
                         style = MaterialTheme.typography.bodyMedium,
@@ -781,9 +791,9 @@ private fun InventoryCatalogRow(
                         overflow = TextOverflow.Ellipsis
                     )
                 }
-                if (item.description.isNotBlank()) {
+                if (description.isNotBlank()) {
                     Text(
-                        text = item.description.replace('\n', ' '),
+                        text = description.replace('\n', ' '),
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color(0xFFD2CAC2),
                         maxLines = 2,
@@ -823,13 +833,17 @@ private fun InventoryAddEntryDialog(
     onSelectCatalogItem: (InventoryCatalogItem) -> Unit
 ) {
     var query by remember { mutableStateOf("") }
-    val filteredItems = remember(catalogItems, query) {
+    val russian = LocalStrings.current.language == AppLanguage.RUSSIAN
+    val filteredItems = remember(catalogItems, query, russian) {
         val needle = query.trim()
-        catalogItems.filter { item ->
-            needle.isBlank() ||
-                item.name.contains(needle, ignoreCase = true) ||
-                item.description.contains(needle, ignoreCase = true)
-        }
+        catalogItems
+            .filter { item ->
+                needle.isBlank() ||
+                    item.name.contains(needle, ignoreCase = true) ||
+                    item.ruName.contains(needle, ignoreCase = true) ||
+                    item.displayDescription(russian).contains(needle, ignoreCase = true)
+            }
+            .sortedBy { it.displayName(russian) }
     }
 
     AlertDialog(
@@ -881,6 +895,7 @@ private fun InventoryAddEntryDialog(
                                 items(filteredItems, key = { it.id }) { item ->
                                     InventoryCatalogRow(
                                         item = item,
+                                        russian = russian,
                                         onAdd = { onSelectCatalogItem(item) }
                                     )
                                 }

@@ -163,6 +163,8 @@ fun CharacterBundle.toArchiveManifest(
                 put("costUnit", item.costUnit)
                 put("armorDetails", item.armorDetails?.toJson())
                 put("weaponDetails", item.weaponDetails?.toJson())
+                // Optional and additive: older app versions just ignore it.
+                item.catalogId?.let { put("catalogId", it) }
             }
         }))
         put("spells", JSONArray(spells.map { spell ->
@@ -438,7 +440,8 @@ private fun JSONArray.toInventoryItemList(resolveAssetReference: (String?) -> St
                 costQuantity = json.optNullableInt("costQuantity"),
                 costUnit = json.optNullableString("costUnit"),
                 armorDetails = json.optJSONObject("armorDetails")?.toArmorDetails(),
-                weaponDetails = json.optJSONObject("weaponDetails")?.toWeaponDetails()
+                weaponDetails = json.optJSONObject("weaponDetails")?.toWeaponDetails(),
+                catalogId = json.optNullableString("catalogId")
             )
         }
     }
