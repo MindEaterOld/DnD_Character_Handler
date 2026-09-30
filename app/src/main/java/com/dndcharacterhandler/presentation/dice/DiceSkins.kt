@@ -71,28 +71,40 @@ internal fun DiceSkin.colors(): DiceSkinColors {
     }
 }
 
-/** Camera height for the swatch: closer than the table's, for a bit more perspective. */
-private const val SWATCH_CAMERA_HEIGHT = 9.0
+/** Camera height for die icons: closer than the table's, for a bit more perspective. */
+private const val ICON_CAMERA_HEIGHT = 9.0
 
-/** A d20 showing its 20, tipped toward the light so several faces show. */
-private val SwatchOrientation: Quat by lazy {
-    val twenty = DieShapes.of(DieShapeKind.D20).faces.first { it.value == 20 }
-    Quat.axisAngle(Vec3(1.0, 0.0, 0.4), 0.45) * Quat.rotationBetween(twenty.normal, Vec3.UP)
+/** Icon poses: the highest face up, tipped toward the light so several faces show. */
+private val IconOrientations = mutableMapOf<DieShapeKind, Quat>()
+
+private fun iconOrientation(kind: DieShapeKind): Quat = IconOrientations.getOrPut(kind) {
+    val shape = DieShapes.of(kind)
+    val top = shape.faces.maxBy { it.value }
+    Quat.axisAngle(Vec3(1.0, 0.0, 0.4), 0.45) * Quat.rotationBetween(top.normal, Vec3.UP)
 }
 
-/** A d20 drawn in [skin], the way it looks on the table: the swatch in the skin picker. */
+/** A d20 drawn in [skin]: the swatch in the skin picker. */
 @Composable
-internal fun DieSkinSwatch(skin: DiceSkin, modifier: Modifier = Modifier) {
+internal fun DieSkinSwatch(skin: DiceSkin, modifier: Modifier = Modifier) =
+    DieIcon(DieType.D20, skin, modifier)
+
+/**
+ * A die of [type] drawn in [skin], the way it looks on the table — the icon of whatever throws it
+ * ("Roll d10" shows a d10). A d100 shows its tens die.
+ */
+@Composable
+internal fun DieIcon(type: DieType, skin: DiceSkin, modifier: Modifier = Modifier) {
     val colors = skin.colors()
     val numbers = rememberDieNumberPaint()
     val scratch = remember { DieDrawScratch() }
-    val camera = remember { DiceCamera(eyeHeight = SWATCH_CAMERA_HEIGHT) }
-    val die = remember { DieBody(DieShapes.of(DieShapeKind.D20), Vec3.ZERO, SwatchOrientation) }
+    val camera = remember { DiceCamera(eyeHeight = ICON_CAMERA_HEIGHT) }
+    val kind = DieShapes.kindsFor(type).first()
+    val die = remember(kind) { DieBody(DieShapes.of(kind), Vec3.ZERO, iconOrientation(kind)) }
     Canvas(modifier = modifier) {
         camera.setViewport(
             width = size.width,
             height = size.height,
-            focalLength = 0.4 * size.minDimension * SWATCH_CAMERA_HEIGHT / die.shape.circumradius
+            focalLength = 0.4 * size.minDimension * ICON_CAMERA_HEIGHT / die.shape.circumradius
         )
         drawDie(camera, die, colors, numbers.get(), scratch)
     }

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -23,7 +24,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.Casino
 import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.Remove
@@ -71,6 +71,8 @@ import com.dndcharacterhandler.domain.rules.proficiencyBonusForLevel
 import com.dndcharacterhandler.data.localization.LocalizedStrings
 import com.dndcharacterhandler.presentation.components.OverlayCloseButton
 import com.dndcharacterhandler.presentation.dice.DiceTableOverlay
+import com.dndcharacterhandler.presentation.dice.DieIcon
+import com.dndcharacterhandler.presentation.dice.dieTypeOf
 import com.dndcharacterhandler.presentation.dice.DieType
 import com.dndcharacterhandler.presentation.dice.LocalDiceSkin
 import com.dndcharacterhandler.presentation.localization.LocalStrings
@@ -203,12 +205,7 @@ internal fun LevelUpWizard(
 /** A hit die being thrown on the dice table for the hit point page [pageKey]. */
 private data class HitDieRoll(val pageKey: String, val sides: Int) {
     val dieType: DieType
-        get() = when (sides) {
-            6 -> DieType.D6
-            10 -> DieType.D10
-            12 -> DieType.D12
-            else -> DieType.D8
-        }
+        get() = dieTypeOf(sides) ?: DieType.D8
 }
 
 private fun formulaContext(bundle: CharacterBundle, summary: LevelUpSummary, catalog: CharacterCatalog): FormulaContext {
@@ -363,7 +360,8 @@ private fun LazyListScope.hitPointsPage(
             ChoiceCard(
                 title = if (rolled != null) strings.format("levelup_hp_rolled", rolled.value) else strings.format("levelup_hp_roll", "d$die"),
                 selected = rolled != null,
-                leading = { Icon(Icons.Outlined.Casino, contentDescription = null, tint = LocalDesignTokens.current.colors.accent.inspiration) },
+                // The die that will be thrown, in the player's dice skin.
+                leading = { DieIcon(dieTypeOf(die) ?: DieType.D8, LocalDiceSkin.current, Modifier.size(32.dp)) },
                 onClick = onRoll
             )
         }

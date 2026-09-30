@@ -17,6 +17,18 @@ enum class DieType(val label: String, val bodyCount: Int) {
     D100("d100", 2)
 }
 
+/** The die with [sides] faces (a hit die), or null for sizes there's no die of. */
+internal fun dieTypeOf(sides: Int): DieType? = when (sides) {
+    4 -> DieType.D4
+    6 -> DieType.D6
+    8 -> DieType.D8
+    10 -> DieType.D10
+    12 -> DieType.D12
+    20 -> DieType.D20
+    100 -> DieType.D100
+    else -> null
+}
+
 /** Physical die bodies that can lie on the table. */
 internal enum class DieShapeKind { D4, D6, D8, D10, D10_TENS, D12, D20 }
 
