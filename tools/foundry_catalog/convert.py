@@ -14,7 +14,7 @@ import os
 import re
 import sys
 
-from foundry_text import description_text, split_name, table_text
+from foundry_text import description_text, load_reference_labels, split_name, table_text
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 EXPORT = os.path.join(HERE, 'export')
@@ -112,6 +112,7 @@ class Catalog:
             for entry in data['index']:
                 target[entry['uuid']] = entry
         self.embeds = load_json(os.path.join(EXPORT, 'embeds.json'), {})
+        load_reference_labels(load_json(os.path.join(EXPORT, 'references.json'), {}))
         self.warnings = collections.Counter()
 
     # --- names and texts -------------------------------------------------------------------------

@@ -112,4 +112,24 @@ for (const trait of ['skills', 'saves', 'armor', 'weapon', 'tool', 'languages', 
   categories[trait] = { en: label, ru: enToRu[label] ?? null };
 }
 report.push({ id: 'traits', status: await send('traits.json', { traits, categories }) });
+
+// Every &Reference[...] key in the texts, with the name Foundry shows for it (the Fifthpendium rules glossary).
+const referenceKeys = new Set();
+for (const id of DOCUMENT_PACKS) {
+  const pack = game.packs.get(id);
+  if (!pack) continue;
+  for (const doc of await pack.getDocuments()) {
+    const html = doc.system?.description?.value ?? '';
+    for (const m of html.matchAll(/&(?:amp;)?[Rr]eference\[([^\]]+)\]/g)) {
+      referenceKeys.add(m[1].split('|')[0].split(/\s+/).filter(w => !w.includes('=')).join(' ').toLowerCase());
+    }
+  }
+}
+const references = {};
+for (const key of referenceKeys) {
+  const div = document.createElement('div');
+  div.innerHTML = await foundry.applications.ux.TextEditor.implementation.enrichHTML(`&Reference[${key}]`);
+  references[key] = div.textContent.trim();
+}
+report.push({ id: 'references', count: referenceKeys.size, status: await send('references.json', references) });
 return report;

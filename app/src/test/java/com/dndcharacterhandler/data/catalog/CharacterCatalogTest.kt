@@ -99,7 +99,8 @@ class CharacterCatalogTest {
         catalog.features.forEach { feature ->
             assertTrue("${feature.id} has a Russian name", feature.name.ru.isNotBlank())
             for (text in listOf(feature.text.en, feature.text.ru)) {
-                listOf("@UUID[", "[[/", "&Reference[", "@Embed[", "<p>", "</").forEach { markup ->
+                // Also enricher options that leaked into the text ("Unconscious apply=false").
+                listOf("@UUID[", "[[/", "&Reference[", "&reference[", "apply=", "@Embed[", "<p>", "</").forEach { markup ->
                     assertTrue("${feature.id} still has $markup", markup !in text)
                 }
                 // Formulas are well-formed tokens: every {= is closed.

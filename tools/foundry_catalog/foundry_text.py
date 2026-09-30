@@ -23,18 +23,39 @@ SKILLS = {
     'slt': ('Sleight of Hand', 'Ловкость рук'), 'ste': ('Stealth', 'Скрытность'), 'sur': ('Survival', 'Выживание'),
 }
 CURRENCY = {'pp': ('PP', 'пм'), 'gp': ('GP', 'зм'), 'ep': ('EP', 'эм'), 'sp': ('SP', 'см'), 'cp': ('CP', 'мм')}
-REFERENCES = {
-    'attack': ('Attack', 'Атака'), 'dash': ('Dash', 'Рывок'), 'magic': ('Magic', 'Магия'), 'size': ('size', 'размер'),
-    'disengage': ('Disengage', 'Отход'), 'd20 test': ('D20 Test', 'Тест к20'), 'study': ('Study', 'Изучение'),
-    'search': ('Search', 'Поиск'), 'dodge': ('Dodge', 'Уклонение'), 'help': ('Help', 'Помощь'), 'hide': ('Hide', 'Засада'),
-    'influence': ('Influence', 'Влияние'), 'ready': ('Ready', 'Подготовка'), 'utilize': ('Utilize', 'Использование'),
-    'blinded': ('Blinded', 'Ослеплённый'), 'charmed': ('Charmed', 'Очарованный'), 'deafened': ('Deafened', 'Оглохший'),
-    'exhaustion': ('Exhaustion', 'Истощение'), 'frightened': ('Frightened', 'Испуганный'), 'grappled': ('Grappled', 'Схваченный'),
-    'incapacitated': ('Incapacitated', 'Недееспособный'), 'invisible': ('Invisible', 'Невидимый'),
-    'paralyzed': ('Paralyzed', 'Парализованный'), 'petrified': ('Petrified', 'Окаменевший'), 'poisoned': ('Poisoned', 'Отравленный'),
-    'prone': ('Prone', 'Лежащий ничком'), 'restrained': ('Restrained', 'Опутанный'), 'stunned': ('Stunned', 'Ошеломлённый'),
-    'unconscious': ('Unconscious', 'Бессознательный'),
+# English names of the rules &Reference[...] points at, by key without spaces or hyphens. The Russian
+# names are the ones Foundry shows (Fifthpendium's rules glossary), loaded by load_reference_labels.
+REFERENCES_EN = {
+    'advantage': 'Advantage', 'attack': 'Attack', 'blinded': 'Blinded', 'blindsight': 'Blindsight',
+    'bloodied': 'Bloodied', 'bonusaction': 'Bonus Action', 'brightlight': 'Bright Light', 'charmed': 'Charmed',
+    'concentration': 'Concentration', 'construct': 'Construct', 'criticalhits': 'Critical Hit', 'd20test': 'D20 Test',
+    'darkness': 'Darkness', 'darkvision': 'Darkvision', 'dash': 'Dash', 'deafened': 'Deafened',
+    'deathsaves': 'Death Saving Throws', 'difficultterrain': 'Difficult Terrain', 'dimlight': 'Dim Light',
+    'disadvantage': 'Disadvantage', 'disengage': 'Disengage', 'dodge': 'Dodge', 'exhaustion': 'Exhaustion',
+    'expertise': 'Expertise', 'flying': 'Fly Speed', 'friendly': 'Friendly', 'frightened': 'Frightened',
+    'grappled': 'Grappled', 'halfcover': 'Half Cover', 'help': 'Help', 'hide': 'Hide', 'highjump': 'High Jump',
+    'hover': 'Hover', 'immunity': 'Immunity', 'incapacitated': 'Incapacitated', 'influence': 'Influence',
+    'initiative': 'Initiative', 'inspiration': 'Heroic Inspiration', 'invisible': 'Invisible', 'jumping': 'Jumping',
+    'longjump': 'Long Jump', 'longrest': 'Long Rest', 'magic': 'Magic', 'material': 'Material', 'necrotic': 'Necrotic',
+    'opportunityattacks': 'Opportunity Attacks', 'paralyzed': 'Paralyzed', 'petrified': 'Petrified',
+    'poisoned': 'Poisoned', 'prone': 'Prone', 'radiant': 'Radiant', 'reaction': 'Reaction', 'ready': 'Ready',
+    'resistance': 'Resistance', 'restrained': 'Restrained', 'ritual': 'Ritual', 'sap': 'Sap', 'search': 'Search',
+    'shortrest': 'Short Rest', 'size': 'Size', 'slow': 'Slow', 'speed': 'Speed', 'study': 'Study', 'stunned': 'Stunned',
+    'threequarterscover': 'Three-Quarters Cover', 'topple': 'Topple', 'totalcover': 'Total Cover',
+    'tremorsense': 'Tremorsense', 'truesight': 'Truesight', 'unarmedstrike': 'Unarmed Strike',
+    'unconscious': 'Unconscious', 'utilize': 'Utilize', 'vex': 'Vex', 'vulnerability': 'Vulnerability',
+    'cleave': 'Cleave', 'graze': 'Graze', 'nick': 'Nick', 'push': 'Push',
 }
+REFERENCES_RU = {}
+
+
+def reference_key(key):
+    return re.sub(r'[\s-]+', '', key.lower())
+
+
+def load_reference_labels(labels):
+    """Russian names for &Reference keys, as Foundry shows them (export/references.json)."""
+    REFERENCES_RU.update({reference_key(k): v for k, v in labels.items() if v})
 
 NAME_WITH_ENGLISH = re.compile(r'^(.*?)\s*\[([^\[\]]+)\]\s*$')
 
@@ -241,7 +262,7 @@ def html_to_text(value):
 EMBED = re.compile(r'@[Ee]mbed\[([^\]\s]+)([^\]]*)\](?:\{([^}]*)\})?')
 UUID = re.compile(r'@UUID\[([^\]]+)\](?:\{([^}]*)\})?')
 # The ampersand is sometimes stored HTML-escaped.
-REFERENCE = re.compile(r'&(?:amp;)?Reference\[([^\]]+)\](?:\{([^}]*)\})?')
+REFERENCE = re.compile(r'&(?:amp;)?[Rr]eference\[([^\]]+)\](?:\{([^}]*)\})?')
 PLACEHOLDER = '\u0001EMBED{}\u0001'
 
 
@@ -269,9 +290,12 @@ def description_text(value, lang, resolve_name, render_embed):
     def reference(match):
         if match.group(2):
             return match.group(2)
-        key = match.group(1).split('|')[0].strip()
-        pair = REFERENCES.get(key.lower())
-        return pick(pair, lang) if pair else key
+        # "Unconscious apply=false": options after the name aren't part of it.
+        key = ' '.join(word for word in match.group(1).split('|')[0].split() if '=' not in word)
+        normalized = reference_key(key)
+        if lang == 'ru' and normalized in REFERENCES_RU:
+            return REFERENCES_RU[normalized]
+        return REFERENCES_EN.get(normalized) or key
 
     value = REFERENCE.sub(reference, value)
     value = replace_inline_rolls(value, lang)
