@@ -87,6 +87,25 @@ internal data class Quat(val w: Double, val x: Double, val y: Double, val z: Dou
     companion object {
         val IDENTITY = Quat(1.0, 0.0, 0.0, 0.0)
 
+        /** Rotation by [angle] radians about [axis]. */
+        fun axisAngle(axis: Vec3, angle: Double): Quat {
+            val unit = axis.normalized()
+            val s = sin(angle / 2)
+            return Quat(cos(angle / 2), unit.x * s, unit.y * s, unit.z * s)
+        }
+
+        /** The shortest rotation that turns unit vector [from] into unit vector [to]. */
+        fun rotationBetween(from: Vec3, to: Vec3): Quat {
+            val cos = from dot to
+            if (cos < -0.999999) {
+                // Opposite vectors: half a turn about any axis perpendicular to them.
+                val axis = (from cross Vec3(1.0, 0.0, 0.0)).let { if (it.length < 1e-6) from cross Vec3.UP else it }
+                return axisAngle(axis, PI)
+            }
+            val axis = from cross to
+            return Quat(1 + cos, axis.x, axis.y, axis.z).normalized()
+        }
+
         /** Uniformly distributed random orientation (Shoemake's method). */
         fun random(random: Random): Quat {
             val u1 = random.nextDouble()

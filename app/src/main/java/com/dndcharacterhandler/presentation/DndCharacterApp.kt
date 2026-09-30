@@ -51,6 +51,7 @@ import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
 import com.dndcharacterhandler.presentation.components.SingleFloatingButtonInset
 import com.dndcharacterhandler.presentation.components.SettingsDialog
 import com.dndcharacterhandler.presentation.dice.DicePickerDialog
+import com.dndcharacterhandler.presentation.dice.DiceSkin
 import com.dndcharacterhandler.presentation.dice.DiceTableOverlay
 import com.dndcharacterhandler.presentation.dice.DieType
 import com.dndcharacterhandler.presentation.features.FeaturesScreen
@@ -93,6 +94,7 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
     var isDicePickerOpen by remember { mutableStateOf(false) }
     var diceSelection by remember { mutableStateOf(mapOf(DieType.D20 to 1)) }
     var diceTableSelection by remember { mutableStateOf<Map<DieType, Int>?>(null) }
+    var diceSkin by remember { mutableStateOf(DiceSkin.GOLD) }
     val openSettings: () -> Unit = { isSettingsOpen = true }
     val selectedCharacterName = managerState.characters
         .firstOrNull { it.character.id == managerState.selectedCharacterId }
@@ -269,13 +271,15 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
 
             // Covers the whole app, bottom navigation included: the screen edges are the table walls.
             diceTableSelection?.let { selection ->
-                DiceTableOverlay(selection = selection, onClose = { diceTableSelection = null })
+                DiceTableOverlay(selection = selection, skin = diceSkin, onClose = { diceTableSelection = null })
             }
         }
 
         if (isDicePickerOpen) {
             DicePickerDialog(
                 initialSelection = diceSelection,
+                skin = diceSkin,
+                onSkinChange = { diceSkin = it },
                 onDismiss = { isDicePickerOpen = false },
                 onRoll = { selection ->
                     diceSelection = selection

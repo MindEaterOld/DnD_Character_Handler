@@ -43,6 +43,8 @@ internal class DieFace(
      * projected vertices gives the transform that paints [labels] onto the face.
      */
     val canonical: FloatArray,
+    /** All of the face's corners (x0, y0, x1, y1, ...) in the same face-local frame, in order around it. */
+    val outline: FloatArray,
     val labels: List<FaceLabel>
 ) {
     /** Distance of the face's plane from the die's centre. */
@@ -248,12 +250,13 @@ internal object DieShapes {
             return ((offset dot right) * scale).toFloat() to (-(offset dot up) * scale).toFloat()
         }
 
-        val canonical = FloatArray(minOf(4, points.size) * 2)
-        for (i in 0 until minOf(4, points.size)) {
+        val outline = FloatArray(points.size * 2)
+        for (i in points.indices) {
             val (x, y) = toCanvas(points[i])
-            canonical[2 * i] = x
-            canonical[2 * i + 1] = y
+            outline[2 * i] = x
+            outline[2 * i + 1] = y
         }
+        val canonical = outline.copyOf(minOf(4, points.size) * 2)
 
         val labels = if (vertexValues != null) {
             // d4: each face shows the number of each of its corners, printed near that corner.
@@ -276,6 +279,6 @@ internal object DieShapes {
             val underline = kind != DieShapeKind.D6 && kind != DieShapeKind.D10_TENS && (value == 6 || value == 9)
             listOf(FaceLabel(text, underline, offsetX = 0f, offsetY = 0f, rotationDegrees = 0f))
         }
-        return DieFace(indices, normal, center, value, canonical, labels)
+        return DieFace(indices, normal, center, value, canonical, outline, labels)
     }
 }

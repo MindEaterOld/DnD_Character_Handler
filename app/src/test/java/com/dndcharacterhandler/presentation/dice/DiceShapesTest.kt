@@ -39,6 +39,39 @@ class DiceShapesTest {
     }
 
     @Test
+    fun faceOutlinesHaveEveryCornerAroundTheCentre() {
+        for (kind in DieShapeKind.entries) {
+            DieShapes.of(kind).faces.forEach { face ->
+                val outline = face.outline
+                assertEquals("$kind outline corners", face.vertexIndices.size * 2, outline.size)
+                // The mapping points are the outline's first corners.
+                face.canonical.indices.forEach { assertEquals("$kind canonical", outline[it], face.canonical[it], 1e-4f) }
+                // Convex and wound one way around the centre (0, 0), where the number sits.
+                val corners = outline.size / 2
+                val turns = (0 until corners).map { i ->
+                    val next = (i + 1) % corners
+                    outline[2 * i] * outline[2 * next + 1] - outline[2 * i + 1] * outline[2 * next]
+                }
+                assertTrue("$kind outline doesn't go around the centre", turns.all { it > 0 } || turns.all { it < 0 })
+            }
+        }
+    }
+
+    @Test
+    fun rotationBetweenTurnsOneDirectionOntoAnother() {
+        val directions = listOf(
+            Vec3.UP, -Vec3.UP, Vec3(1.0, 0.0, 0.0), Vec3(-1.0, 0.0, 0.0),
+            Vec3(0.3, -0.8, 0.5).normalized(), Vec3(-0.6, 0.1, -0.7).normalized()
+        )
+        for (from in directions) for (to in directions) {
+            val turned = Quat.rotationBetween(from, to).rotate(from)
+            assertTrue("$from -> $to gave $turned", (turned - to).length < 1e-9)
+        }
+        val quarter = Quat.axisAngle(Vec3(0.0, 0.0, 2.0), Math.PI / 2).rotate(Vec3(1.0, 0.0, 0.0))
+        assertTrue("quarter turn about z gave $quarter", (quarter - Vec3(0.0, 1.0, 0.0)).length < 1e-9)
+    }
+
+    @Test
     fun facesArePlanarAndPointOutward() {
         for (kind in DieShapeKind.entries) {
             val shape = DieShapes.of(kind)

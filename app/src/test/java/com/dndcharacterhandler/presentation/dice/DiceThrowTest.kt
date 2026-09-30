@@ -10,15 +10,7 @@ class DiceThrowTest {
     private fun showing(kind: DieShapeKind, value: Int): DieBody {
         val shape = DieShapes.of(kind)
         val normal = shape.faces.single { it.value == value }.normal
-        return DieBody(shape, Vec3.ZERO, rotationBetween(normal, Vec3.UP))
-    }
-
-    /** The shortest rotation that turns unit vector [from] into unit vector [to]. */
-    private fun rotationBetween(from: Vec3, to: Vec3): Quat {
-        val cos = from dot to
-        if (cos < -0.999999) return Quat(0.0, 1.0, 0.0, 0.0) // Upside down: half a turn about x.
-        val axis = from cross to
-        return Quat(1 + cos, axis.x, axis.y, axis.z).normalized()
+        return DieBody(shape, Vec3.ZERO, Quat.rotationBetween(normal, Vec3.UP))
     }
 
     @Test
