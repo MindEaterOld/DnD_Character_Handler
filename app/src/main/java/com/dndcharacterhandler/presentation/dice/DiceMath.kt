@@ -29,6 +29,12 @@ internal data class Vec3(val x: Double, val y: Double, val z: Double) {
         return if (length < 1e-12) this else this / length
     }
 
+    /** This vector, shortened to [maxLength] if it is longer. */
+    fun limitedTo(maxLength: Double): Vec3 {
+        val length = length
+        return if (length > maxLength) this * (maxLength / length) else this
+    }
+
     companion object {
         val ZERO = Vec3(0.0, 0.0, 0.0)
         val UP = Vec3(0.0, 1.0, 0.0)

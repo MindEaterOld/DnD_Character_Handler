@@ -46,6 +46,9 @@ import com.dndcharacterhandler.presentation.components.CharacterManagerDrawer
 import com.dndcharacterhandler.presentation.components.DeleteCharacterDialog
 import com.dndcharacterhandler.presentation.components.FloatingActionButtonSize
 import com.dndcharacterhandler.presentation.components.FloatingAddButton
+import com.dndcharacterhandler.presentation.components.FloatingButtonSpacing
+import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
+import com.dndcharacterhandler.presentation.components.SingleFloatingButtonInset
 import com.dndcharacterhandler.presentation.components.SettingsDialog
 import com.dndcharacterhandler.presentation.dice.DicePickerDialog
 import com.dndcharacterhandler.presentation.dice.DiceTableOverlay
@@ -168,6 +171,15 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                             .background(Color.Transparent)
                     ) {
                     Box(modifier = Modifier.fillMaxSize()) {
+                    // Dice prototype: the dice button sits right above the screen's own "+" button (or
+                    // in its place on screens without one), and lists leave room to scroll past both.
+                    val screenHasAddButton = currentRoute in routesWithAddButton
+                    val floatingButtonsInset = if (screenHasAddButton) {
+                        SingleFloatingButtonInset + FloatingActionButtonSize + FloatingButtonSpacing
+                    } else {
+                        SingleFloatingButtonInset
+                    }
+                    CompositionLocalProvider(LocalFloatingButtonsInset provides floatingButtonsInset) {
                     NavHost(
                         navController = navController,
                         startDestination = AppScreen.Overview.route
@@ -229,9 +241,7 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                                 )
                             }
                         }
-                        // Dice prototype: sits right above the screen's own "+" button (or in its
-                        // place on screens without one).
-                        val screenHasAddButton = currentRoute in routesWithAddButton
+                    }
                         FloatingAddButton(
                             onClick = { isDicePickerOpen = true },
                             icon = Icons.Outlined.Casino,
@@ -240,7 +250,7 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                                 .align(Alignment.BottomEnd)
                                 .padding(
                                     end = 24.dp,
-                                    bottom = if (screenHasAddButton) 15.dp + FloatingActionButtonSize + 12.dp else 15.dp
+                                    bottom = if (screenHasAddButton) 15.dp + FloatingActionButtonSize + FloatingButtonSpacing else 15.dp
                                 )
                         )
                     }

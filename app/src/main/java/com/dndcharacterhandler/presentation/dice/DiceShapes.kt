@@ -44,7 +44,10 @@ internal class DieFace(
      */
     val canonical: FloatArray,
     val labels: List<FaceLabel>
-)
+) {
+    /** Distance of the face's plane from the die's centre. */
+    val planeOffset: Double = normal dot center
+}
 
 internal class DieShape(
     val kind: DieShapeKind,
@@ -55,7 +58,11 @@ internal class DieShape(
     val circumradius: Double,
     /** Radius of the inscribed sphere: the die is at least this thick in every direction. */
     val inradius: Double,
-    /** Text size of face numbers in [DieFace.canonical] units. */
+    /**
+     * Height of the face numbers in [DieFace.canonical] units (a face spans about ±100), i.e. the
+     * share of the face the number covers. The number is scaled with the die on screen, so this
+     * is part of the die's geometry rather than a text size from the type scale.
+     */
     val labelSize: Float
 )
 

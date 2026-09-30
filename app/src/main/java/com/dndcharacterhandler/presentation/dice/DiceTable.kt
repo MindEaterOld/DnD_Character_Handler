@@ -2,12 +2,10 @@ package com.dndcharacterhandler.presentation.dice
 
 import android.graphics.Matrix
 import android.graphics.Paint
-import android.graphics.Typeface
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
@@ -15,13 +13,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,6 +24,7 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,25 +41,21 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalFontFamilyResolver
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.resolveAsTypeface
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
+import com.dndcharacterhandler.presentation.components.OverlayCloseButton
 import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
+import kotlinx.coroutines.flow.collectLatest
 import kotlin.math.max
 import kotlin.random.Random
 
 internal enum class DicePhase { READY, HOLDING, ROLLING, SETTLED }
-
-/** One picked die and the bodies thrown for it (two for a d100). */
-internal class ThrownDie(val type: DieType, val bodies: List<DieBody>) {
-    fun value(): Int = when (type) {
-        DieType.D10 -> bodies[0].topValue().let { if (it == 0) 10 else it }
-        DieType.D100 -> (bodies[0].topValue() * 10 + bodies[1].topValue()).let { if (it == 0) 100 else it }
-        else -> bodies[0].topValue()
-    }
-}
 
 /** State of the dice table: the physics world, the camera and what the player is doing. */
 internal class DiceTableState(private val selection: Map<DieType, Int>, seed: Long = System.nanoTime()) {
@@ -74,6 +64,9 @@ internal class DiceTableState(private val selection: Map<DieType, Int>, seed: Lo
         private set
     var results by mutableStateOf<List<ThrownDie>>(emptyList())
         private set
+
+    /** The dice are in hand or rolling, so the simulation needs every frame. */
+    val isAnimating: Boolean get() = phase == DicePhase.HOLDING || phase == DicePhase.ROLLING
 
     /** Bumped every simulated frame so the canvas redraws. */
     var frame by mutableLongStateOf(0L)
@@ -109,13 +102,7 @@ internal class DiceTableState(private val selection: Map<DieType, Int>, seed: Lo
     fun press(offset: Offset) {
         val hand = unproject(offset, world.handHeight)
         if (dice.isEmpty()) {
-            val kindsPerDie = DieType.entries.flatMap { type -> List(selection[type] ?: 0) { type } }
-            world.spawnInHand(kindsPerDie.flatMap(DieShapes::kindsFor), hand)
-            var next = 0
-            dice = kindsPerDie.map { type ->
-                val count = DieShapes.kindsFor(type).size
-                ThrownDie(type, world.bodies.subList(next, next + count).toList()).also { next += count }
-            }
+            dice = world.spawnSelection(selection, hand)
         } else {
             world.grab(hand)
         }
@@ -135,7 +122,7 @@ internal class DiceTableState(private val selection: Map<DieType, Int>, seed: Lo
     }
 
     fun tick(seconds: Double) {
-        if (phase != DicePhase.HOLDING && phase != DicePhase.ROLLING) return
+        if (!isAnimating) return
         world.advance(seconds)
         frame++
         if (phase == DicePhase.ROLLING && world.allSettled) {
@@ -157,11 +144,15 @@ internal fun DiceTableOverlay(selection: Map<DieType, Int>, onClose: () -> Unit)
     BackHandler(onBack = onClose)
 
     LaunchedEffect(state) {
-        var previous = 0L
-        while (true) {
-            withFrameNanos { now ->
-                if (previous != 0L) state.tick((now - previous) / 1_000_000_000.0)
-                previous = now
+        // Frames are only requested while the dice move; between throws the table sits idle.
+        snapshotFlow { state.isAnimating }.collectLatest { animating ->
+            if (!animating) return@collectLatest
+            var previous = 0L
+            while (true) {
+                withFrameNanos { now ->
+                    if (previous != 0L) state.tick((now - previous) / 1_000_000_000.0)
+                    previous = now
+                }
             }
         }
     }
@@ -204,25 +195,7 @@ internal fun DiceTableOverlay(selection: Map<DieType, Int>, onClose: () -> Unit)
                 .padding(start = 72.dp, end = 72.dp, top = 16.dp)
         )
 
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .systemBarsPadding()
-                .padding(16.dp)
-                .size(44.dp)
-                .clip(CircleShape)
-                .background(colors.surface.button)
-                .border(1.dp, colors.border.default, CircleShape)
-                .clickable(onClick = onClose),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.Close,
-                contentDescription = text("common_close"),
-                tint = colors.text.icon,
-                modifier = Modifier.size(28.dp)
-            )
-        }
+        OverlayCloseButton(onClick = onClose, modifier = Modifier.align(Alignment.TopEnd))
     }
 }
 
@@ -276,21 +249,25 @@ private fun DiceCanvas(state: DiceTableState, modifier: Modifier = Modifier) {
     val bodyColor = colors.accent.inspiration
     val numberColor = colors.surface.card
     val shadowColor = colors.background.radialEnd
-    val paint = remember {
-        Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            textAlign = Paint.Align.CENTER
-            typeface = Typeface.create(Typeface.SERIF, Typeface.BOLD)
-        }
+    // Numbers in the app's headline face (the serif of the type scale).
+    val numberStyle = MaterialTheme.typography.headlineMedium
+    val fontFamilyResolver = LocalFontFamilyResolver.current
+    val typeface by remember(numberStyle, fontFamilyResolver) {
+        fontFamilyResolver.resolveAsTypeface(numberStyle.fontFamily, numberStyle.fontWeight ?: FontWeight.Normal)
     }
-    val matrix = remember { Matrix() }
+    val paint = remember {
+        Paint(Paint.ANTI_ALIAS_FLAG).apply { textAlign = Paint.Align.CENTER }
+    }
+    val scratch = remember { DieDrawScratch() }
 
     Canvas(modifier = modifier) {
         // Reading the frame counter subscribes this draw to every simulation step.
         state.frame
         paint.color = numberColor.toArgb()
+        paint.typeface = typeface
         val bodies = state.world.bodies.sortedBy { it.position.y }
         bodies.forEach { drawShadow(state, it, shadowColor) }
-        bodies.forEach { drawDie(state, it, bodyColor, paint, matrix) }
+        bodies.forEach { drawDie(state, it, bodyColor, paint, scratch) }
     }
 }
 
@@ -305,16 +282,35 @@ private fun DrawScope.drawShadow(state: DiceTableState, body: DieBody, shadowCol
     )
 }
 
+/** Objects reused for every die drawn, so a frame doesn't allocate them per face. */
+private class DieDrawScratch {
+    val matrix = Matrix()
+    val path = Path()
+    /** Projected corners of the die being drawn. */
+    var projected = FloatArray(0)
+    /** Projected corners of one face, in the order [DieFace.canonical] lists them. */
+    val destination = FloatArray(8)
+}
+
 private fun DrawScope.drawDie(
     state: DiceTableState,
     body: DieBody,
     bodyColor: Color,
     paint: Paint,
-    matrix: Matrix
+    scratch: DieDrawScratch
 ) {
     val shape = body.shape
     val eye = Vec3(0.0, state.world.cameraHeight, 0.0)
-    val projected = shape.vertices.indices.map { state.project(body.worldVertex(it)) }
+    if (scratch.projected.size < shape.vertices.size * 2) scratch.projected = FloatArray(shape.vertices.size * 2)
+    val projected = scratch.projected
+    for (index in shape.vertices.indices) {
+        val point = state.project(body.worldVertex(index))
+        projected[2 * index] = point.x
+        projected[2 * index + 1] = point.y
+    }
+    val path = scratch.path
+    val matrix = scratch.matrix
+    val destination = scratch.destination
     paint.textSize = shape.labelSize
 
     for (face in shape.faces) {
@@ -325,26 +321,24 @@ private fun DrawScope.drawDie(
         if (facing <= 0) continue
 
         val brightness = (0.38 + 0.62 * max(0.0, normal dot LightDirection)).toFloat()
-        val path = Path().apply {
-            val first = projected[face.vertexIndices[0]]
-            moveTo(first.x, first.y)
-            for (i in 1 until face.vertexIndices.size) {
-                val point = projected[face.vertexIndices[i]]
-                lineTo(point.x, point.y)
-            }
-            close()
+        path.reset()
+        val first = face.vertexIndices[0]
+        path.moveTo(projected[2 * first], projected[2 * first + 1])
+        for (i in 1 until face.vertexIndices.size) {
+            val vertex = face.vertexIndices[i]
+            path.lineTo(projected[2 * vertex], projected[2 * vertex + 1])
         }
+        path.close()
         drawPath(path, color = bodyColor.shaded(brightness))
         drawPath(path, color = bodyColor.shaded(brightness * 0.55f), style = Stroke(width = 1.5f))
 
         // Numbers at grazing angles would be squashed into slivers; skip them.
         if (facing < 0.2) continue
         val pointCount = face.canonical.size / 2
-        val destination = FloatArray(pointCount * 2)
         for (i in 0 until pointCount) {
-            val point = projected[face.vertexIndices[i]]
-            destination[2 * i] = point.x
-            destination[2 * i + 1] = point.y
+            val vertex = face.vertexIndices[i]
+            destination[2 * i] = projected[2 * vertex]
+            destination[2 * i + 1] = projected[2 * vertex + 1]
         }
         if (!matrix.setPolyToPoly(face.canonical, 0, destination, 0, pointCount)) continue
         drawIntoCanvas { canvas ->
