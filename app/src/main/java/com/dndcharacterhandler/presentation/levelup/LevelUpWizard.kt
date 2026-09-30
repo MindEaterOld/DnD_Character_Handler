@@ -1,6 +1,8 @@
 package com.dndcharacterhandler.presentation.levelup
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -47,8 +49,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import com.dndcharacterhandler.domain.levelup.HitPointMethod
 import com.dndcharacterhandler.domain.levelup.LevelUpAnswer
 import com.dndcharacterhandler.domain.levelup.LevelUpDraft
@@ -107,78 +107,78 @@ internal fun LevelUpWizard(
         draft = draft.copy(answers = draft.answers + (page.key to value))
     }
 
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
+    BackHandler(onBack = onDismiss)
+    // A layer over the whole app rather than a dialog window: a dialog doesn't get the navigation
+    // bar's inset, which pushed the buttons off the bottom of the screen.
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colors.background.radialEnd)
+            // Taps on empty space must not reach the screen underneath.
+            .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {}
+            .systemBarsPadding()
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(colors.background.radialEnd)
-                .systemBarsPadding()
-        ) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                Column(modifier = Modifier.padding(start = 20.dp, end = 72.dp, top = 20.dp, bottom = 8.dp)) {
-                    Text(
-                        text = text("levelup_title"),
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = colors.text.primary
-                    )
-                    Text(
-                        text = strings.format("levelup_levels", summary?.fromLevel ?: bundle.character.level, summary?.toLevel ?: targetLevel) +
-                            " • " + strings.format("levelup_step_counter", index + 1, run.pages.size),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = colors.text.muted
-                    )
-                }
-                // Every page starts at its top.
-                val listState = remember(page.key) { LazyListState() }
-                LazyColumn(
-                    state = listState,
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-                    contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    when (page) {
-                        is LevelUpPage.Setup -> setupPage(strings, page, draft.setup, russian, catalog) { draft = draft.copy(setup = it) }
-                        is LevelUpPage.ChooseClass -> chooseClassPage(strings, page, russian) { classId ->
-                            draft = draft.copy(classPicks = draft.classPicks + (page.characterLevel to classId))
-                        }
-                        is LevelUpPage.HitPoints -> hitPointsPage(strings, page, answer as? LevelUpAnswer.HitPoints, russian, ::setAnswer)
-                        is LevelUpPage.Features -> featuresPage(strings, page, answer as? LevelUpAnswer.Grants, russian, render, ::setAnswer)
-                        is LevelUpPage.Traits -> traitsPage(strings, page, answer as? LevelUpAnswer.Traits, russian, ::setAnswer)
-                        is LevelUpPage.Items -> itemsPage(strings, page, answer as? LevelUpAnswer.Items, russian, render, ::setAnswer)
-                        is LevelUpPage.AbilityScores -> abilityScoresPage(strings, page, answer, russian, render, ::setAnswer)
-                        is LevelUpPage.Subclass -> subclassPage(strings, page, answer as? LevelUpAnswer.Subclass, russian, render, ::setAnswer)
-                        is LevelUpPage.Summary -> summaryPage(strings, page.summary, russian, catalog)
+        Column(modifier = Modifier.fillMaxSize()) {
+            Column(modifier = Modifier.padding(start = 20.dp, end = 72.dp, top = 20.dp, bottom = 8.dp)) {
+                Text(
+                    text = text("levelup_title"),
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = colors.text.primary
+                )
+                Text(
+                    text = strings.format("levelup_levels", summary?.fromLevel ?: bundle.character.level, summary?.toLevel ?: targetLevel) +
+                        " • " + strings.format("levelup_step_counter", index + 1, run.pages.size),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colors.text.muted
+                )
+            }
+            // Every page starts at its top.
+            val listState = remember(page.key) { LazyListState() }
+            LazyColumn(
+                state = listState,
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                when (page) {
+                    is LevelUpPage.Setup -> setupPage(strings, page, draft.setup, russian, catalog) { draft = draft.copy(setup = it) }
+                    is LevelUpPage.ChooseClass -> chooseClassPage(strings, page, russian) { classId ->
+                        draft = draft.copy(classPicks = draft.classPicks + (page.characterLevel to classId))
                     }
+                    is LevelUpPage.HitPoints -> hitPointsPage(strings, page, answer as? LevelUpAnswer.HitPoints, russian, ::setAnswer)
+                    is LevelUpPage.Features -> featuresPage(strings, page, answer as? LevelUpAnswer.Grants, russian, render, ::setAnswer)
+                    is LevelUpPage.Traits -> traitsPage(strings, page, answer as? LevelUpAnswer.Traits, russian, ::setAnswer)
+                    is LevelUpPage.Items -> itemsPage(strings, page, answer as? LevelUpAnswer.Items, russian, render, ::setAnswer)
+                    is LevelUpPage.AbilityScores -> abilityScoresPage(strings, page, answer, russian, render, ::setAnswer)
+                    is LevelUpPage.Subclass -> subclassPage(strings, page, answer as? LevelUpAnswer.Subclass, russian, render, ::setAnswer)
+                    is LevelUpPage.Summary -> summaryPage(strings, page.summary, russian, catalog)
                 }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    TextButton(onClick = { pageIndex = index - 1 }, enabled = index > 0) {
-                        Text(text("levelup_back"))
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextButton(onClick = { pageIndex = index - 1 }, enabled = index > 0) {
+                    Text(text("levelup_back"))
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                if (page is LevelUpPage.Summary) {
+                    Button(onClick = { onApply(draft) }, enabled = run.isComplete) {
+                        Text(text("levelup_apply"))
                     }
-                    Spacer(modifier = Modifier.weight(1f))
-                    if (page is LevelUpPage.Summary) {
-                        Button(onClick = { onApply(draft) }, enabled = run.isComplete) {
-                            Text(text("levelup_apply"))
-                        }
-                    } else {
-                        Button(onClick = { pageIndex = index + 1 }, enabled = engine.isAnswered(page, draft)) {
-                            Text(text("levelup_next"))
-                        }
+                } else {
+                    Button(onClick = { pageIndex = index + 1 }, enabled = engine.isAnswered(page, draft)) {
+                        Text(text("levelup_next"))
                     }
                 }
             }
-            OverlayCloseButton(onClick = onDismiss, modifier = Modifier.align(Alignment.TopEnd))
         }
+        OverlayCloseButton(onClick = onDismiss, modifier = Modifier.align(Alignment.TopEnd))
     }
 }
 

@@ -455,7 +455,8 @@ private enum class OverviewMiniStatField {
 fun OverviewScreen(
     viewModel: OverviewViewModel,
     onOpenDrawer: () -> Unit,
-    onOpenSettings: () -> Unit
+    onOpenSettings: () -> Unit,
+    onOpenLevelUp: (targetLevel: Int) -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val catalog by viewModel.catalog.collectAsStateWithLifecycle()
@@ -473,7 +474,7 @@ fun OverviewScreen(
     OverviewContent(
         characterBundle = state.character,
         catalog = catalog,
-        onApplyLevelUp = viewModel::applyLevelUp,
+        onOpenLevelUp = onOpenLevelUp,
         onOpenDrawer = onOpenDrawer,
         onOpenSettings = onOpenSettings,
         onUpdateIdentity = viewModel::updateIdentity,
@@ -494,11 +495,34 @@ fun OverviewScreen(
     )
 }
 
+/**
+ * The level-up wizard over the whole app (the bottom navigation included), for the character the
+ * overview shows. It waits for the catalog to load; applying goes through [OverviewViewModel.applyLevelUp].
+ */
+@Composable
+fun OverviewLevelUpOverlay(viewModel: OverviewViewModel, targetLevel: Int, onClose: () -> Unit) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val catalog by viewModel.catalog.collectAsStateWithLifecycle()
+    val bundle = state.character ?: return
+    val loadedCatalog = catalog ?: return
+    val russian = LocalStrings.current.language == AppLanguage.RUSSIAN
+    LevelUpWizard(
+        bundle = bundle,
+        catalog = loadedCatalog,
+        targetLevel = targetLevel,
+        onDismiss = onClose,
+        onApply = { draft ->
+            viewModel.applyLevelUp(bundle, draft, russian)
+            onClose()
+        }
+    )
+}
+
 @Composable
 private fun OverviewContent(
     characterBundle: CharacterBundle?,
     catalog: CharacterCatalog? = null,
-    onApplyLevelUp: (CharacterBundle, LevelUpDraft, Boolean) -> Unit = { _, _, _ -> },
+    onOpenLevelUp: (Int) -> Unit = {},
     onOpenDrawer: () -> Unit,
     onOpenSettings: () -> Unit,
     onUpdateIdentity: (CharacterBundle, String?, String?, String?, Int?) -> Unit,
@@ -546,7 +570,6 @@ private fun OverviewContent(
         }
     }
     var activeField by remember { mutableStateOf<OverviewEditableField?>(null) }
-    var levelUpTarget by remember(character?.id) { mutableStateOf<Int?>(null) }
     var isLevelDownNoticeOpen by remember { mutableStateOf(false) }
     var isPortraitMenuOpen by remember { mutableStateOf(false) }
     var isPortraitViewerOpen by remember { mutableStateOf(false) }
@@ -695,7 +718,7 @@ private fun OverviewContent(
                         xpInfo = xpInfo,
                         canLevelUp = character != null &&
                             character.level < MAX_CHARACTER_LEVEL && levelForExperience(character.experience) > character.level,
-                        onLevelUp = { character?.let { levelUpTarget = levelForExperience(it.experience) } },
+                        onLevelUp = { character?.let { onOpenLevelUp(levelForExperience(it.experience)) } },
                         onClick = {
                             experienceEditMode = OverviewExperienceEditMode.ADD
                             experienceDraft = ""
@@ -792,20 +815,6 @@ private fun OverviewContent(
         }
     }
 
-    val wizardTarget = levelUpTarget
-    if (wizardTarget != null && characterBundle != null && catalog != null) {
-        LevelUpWizard(
-            bundle = characterBundle,
-            catalog = catalog,
-            targetLevel = wizardTarget,
-            onDismiss = { levelUpTarget = null },
-            onApply = { draft ->
-                onApplyLevelUp(characterBundle, draft, russian)
-                levelUpTarget = null
-            }
-        )
-    }
-
     if (isLevelDownNoticeOpen) {
         AlertDialog(
             onDismissRequest = { isLevelDownNoticeOpen = false },
@@ -840,7 +849,7 @@ private fun OverviewContent(
                                         val current = characterBundle.character.level
                                         when {
                                             // Going up walks the wizard through every level, as Foundry does.
-                                            level > current && catalog != null -> levelUpTarget = level
+                                            level > current -> onOpenLevelUp(level)
                                             // The wizard can't take levels back yet.
                                             level < current && characterBundle.character.classes.isNotEmpty() ->
                                                 isLevelDownNoticeOpen = true

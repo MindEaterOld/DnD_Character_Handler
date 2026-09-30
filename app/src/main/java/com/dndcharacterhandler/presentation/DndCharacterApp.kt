@@ -47,6 +47,7 @@ import com.dndcharacterhandler.presentation.features.FeaturesScreen
 import com.dndcharacterhandler.presentation.inventory.InventoryScreen
 import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.notes.NotesScreen
+import com.dndcharacterhandler.presentation.overview.OverviewLevelUpOverlay
 import com.dndcharacterhandler.presentation.overview.OverviewScreen
 import com.dndcharacterhandler.presentation.spells.SpellsScreen
 import kotlinx.coroutines.flow.collect
@@ -73,6 +74,7 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route ?: AppScreen.Overview.route
     val managerState by appState.characterManagerViewModel.uiState.collectAsStateWithLifecycle()
+    var levelUpTarget by remember { mutableStateOf<Int?>(null) }
     val strings = remember(managerState.language) {
         appState.localizationRepository.getStrings(managerState.language)
     }
@@ -164,7 +166,8 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                             OverviewScreen(
                                 viewModel = appState.overviewViewModel,
                                 onOpenDrawer = { scope.launch { drawerState.open() } },
-                                onOpenSettings = openSettings
+                                onOpenSettings = openSettings,
+                                onOpenLevelUp = { levelUpTarget = it }
                             )
                         }
                             composable(AppScreen.Attributes.route) {
@@ -229,6 +232,15 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 12.dp)
             )
+
+            // Covers the whole app, bottom navigation included.
+            levelUpTarget?.let { target ->
+                OverviewLevelUpOverlay(
+                    viewModel = appState.overviewViewModel,
+                    targetLevel = target,
+                    onClose = { levelUpTarget = null }
+                )
+            }
         }
 
         if (isSettingsOpen) {
