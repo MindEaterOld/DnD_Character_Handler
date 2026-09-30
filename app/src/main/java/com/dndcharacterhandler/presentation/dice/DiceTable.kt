@@ -225,7 +225,7 @@ private fun DiceCanvas(state: DiceTableState, skin: DiceSkin, modifier: Modifier
     Canvas(modifier = modifier) {
         // Reading the frame counter subscribes this draw to every simulation step.
         state.frame
-        val numberPaint = numbers.inColor(skinColors.number)
+        val numberPaint = numbers.get()
         val bodies = state.world.bodies.sortedBy { it.position.y }
         bodies.forEach { drawDieShadow(state.camera, it, shadowColor) }
         bodies.forEach { drawDie(state.camera, it, skinColors, numberPaint, scratch) }

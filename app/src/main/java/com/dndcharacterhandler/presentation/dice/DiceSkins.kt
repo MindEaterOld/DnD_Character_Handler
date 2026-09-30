@@ -90,6 +90,6 @@ internal fun DieSkinSwatch(skin: DiceSkin, modifier: Modifier = Modifier) {
             height = size.height,
             focalLength = 0.4 * size.minDimension * SWATCH_CAMERA_HEIGHT / die.shape.circumradius
         )
-        drawDie(camera, die, colors, numbers.inColor(colors.number), scratch)
+        drawDie(camera, die, colors, numbers.get(), scratch)
     }
 }

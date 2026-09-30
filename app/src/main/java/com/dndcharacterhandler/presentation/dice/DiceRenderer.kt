@@ -50,11 +50,8 @@ internal class DiceCamera(val eyeHeight: Double) {
 
 /** Paint for the face numbers, in the app's headline face (the serif of the type scale). */
 internal class DieNumberPaint(private val paint: Paint, private val typeface: State<Typeface>) {
-    /** The paint in [color]; reading it inside a draw block also redraws once the font has loaded. */
-    fun inColor(color: Color): Paint = paint.also {
-        it.typeface = typeface.value
-        it.color = color.toArgb()
-    }
+    /** The paint; reading it inside a draw block also redraws once the font has loaded. */
+    fun get(): Paint = paint.also { it.typeface = typeface.value }
 }
 
 @Composable
@@ -72,8 +69,14 @@ internal fun rememberDieNumberPaint(): DieNumberPaint {
 /** Light direction for the flat shading: from the upper left of the screen. */
 private val LightDirection = Vec3(-0.35, 1.0, -0.45).normalized()
 
-/** Faces turned further away than this show no numbers: they would be squashed into slivers. */
-private const val LABEL_MIN_FACING = 0.2
+/**
+ * A number fades in while its face turns toward the camera, from this facing (cosine of the angle
+ * to the view direction; nearly edge-on, where it would be squashed into a sliver) ...
+ */
+private const val LABEL_FADE_START = 0.08
+
+/** ... to fully shown here, so numbers never pop in while a die tumbles. */
+private const val LABEL_FADE_END = 0.35
 
 /** Edge lines, in screen pixels. */
 private const val EDGE_WIDTH = 1.5f
@@ -165,7 +168,7 @@ internal fun DrawScope.drawDie(
         path.close()
         drawPath(path, color = skin.body.shaded(brightness))
 
-        val showsNumber = facing >= LABEL_MIN_FACING
+        val showsNumber = facing > LABEL_FADE_START
         var mapped = false
         if (texture != null || showsNumber) {
             val pointCount = face.canonical.size / 2
@@ -180,6 +183,11 @@ internal fun DrawScope.drawDie(
         drawPath(path, color = skin.edge.shaded(brightness), style = Stroke(width = EDGE_WIDTH))
 
         if (!mapped || !showsNumber) continue
+        // Printed numbers are lit like their face and fade in as it turns toward the camera.
+        val fade = ((facing - LABEL_FADE_START) / (LABEL_FADE_END - LABEL_FADE_START)).coerceIn(0.0, 1.0).toFloat()
+        val shown = fade * fade * (3 - 2 * fade)
+        val number = skin.number.shaded(brightness)
+        numberPaint.color = number.copy(alpha = number.alpha * shown).toArgb()
         drawIntoCanvas { canvas ->
             val native = canvas.nativeCanvas
             native.save()
