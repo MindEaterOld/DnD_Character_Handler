@@ -27,7 +27,8 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 
-private const val SCHEMA_VERSION = 17
+// 18: armor/shield magicalBonus is meaningful (adds to AC).
+private const val SCHEMA_VERSION = 18
 
 data class ImportedArchive(
     val characterBundle: CharacterBundle,
@@ -359,7 +360,9 @@ fun archiveManifestToCharacterBundle(
             skills = manifest.optJSONArray("skills")?.toSkillList().orEmpty(),
             attacks = manifest.optJSONArray("attacks")?.toAttackList(resolveAssetReference).orEmpty(),
             combatResources = manifest.optJSONArray("combatResources")?.toCombatResourceList().orEmpty(),
-            inventoryItems = manifest.optJSONArray("inventoryItems")?.toInventoryItemList(resolveAssetReference).orEmpty(),
+            inventoryItems = manifest.optJSONArray("inventoryItems")
+                ?.toInventoryItemList(resolveAssetReference, schemaVersion)
+                .orEmpty(),
             spells = manifest.optJSONArray("spells")?.toSpellList().orEmpty(),
             spellAttacks = manifest.optJSONArray("spellAttacks")?.toSpellList().orEmpty(),
             features = manifest.optJSONArray("features")?.toFeatureList().orEmpty(),
@@ -424,15 +427,24 @@ private fun JSONArray.toCombatResourceList(): List<CombatResource> =
         }
     }
 
-private fun JSONArray.toInventoryItemList(resolveAssetReference: (String?) -> String?): List<InventoryItem> =
+private fun JSONArray.toInventoryItemList(
+    resolveAssetReference: (String?) -> String?,
+    schemaVersion: Int
+): List<InventoryItem> =
     (0 until length()).map { index ->
         getJSONObject(index).let { json ->
+            val category = json.optString("category").toEnumOrDefault(InventoryCategory.OTHER)
             InventoryItem(
                 name = json.optString("name"),
                 description = json.optString("description"),
                 isMagical = json.optBoolean("isMagical", false),
-                magicalBonus = json.optInt("magicalBonus", 1),
-                category = json.optString("category").toEnumOrDefault(InventoryCategory.OTHER),
+                // Before v18 armor's bonus was always saved as 1 without affecting AC; it counts now.
+                magicalBonus = if (schemaVersion < 18 && category == InventoryCategory.ARMOR) {
+                    0
+                } else {
+                    json.optInt("magicalBonus", 1)
+                },
+                category = category,
                 weight = json.optDouble("weight"),
                 quantity = json.optInt("quantity"),
                 isEquipped = json.optBoolean("isEquipped"),

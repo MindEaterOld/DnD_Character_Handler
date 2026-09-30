@@ -29,21 +29,28 @@ fun calculateArmorClass(
     inventoryItems: List<InventoryItem>
 ): Int {
     val dexterityModifier = abilityModifier(dexterityScore)
-    val equippedArmor = inventoryItems.firstOrNull {
+    val equippedArmorItem = inventoryItems.firstOrNull {
         it.isEquipped && it.armorDetails?.armorType != null && it.armorDetails.armorType != InventoryArmorType.SHIELD
-    }?.armorDetails
-    val equippedShield = inventoryItems.firstOrNull {
+    }
+    val equippedShieldItem = inventoryItems.firstOrNull {
         it.isEquipped && it.armorDetails?.armorType == InventoryArmorType.SHIELD
-    }?.armorDetails
+    }
+    val equippedArmor = equippedArmorItem?.armorDetails
+    val equippedShield = equippedShieldItem?.armorDetails
 
     val effectiveArmorClass = if (equippedArmor != null) {
-        equippedArmor.armorClass + equippedArmor.appliedDexterityModifier(dexterityModifier)
+        equippedArmor.armorClass + equippedArmor.appliedDexterityModifier(dexterityModifier) +
+            equippedArmorItem.armorMagicBonus()
     } else {
         baseArmorClass + dexterityModifier
     }
+    val shieldArmorClass = equippedShield?.let { it.armorClass + equippedShieldItem.armorMagicBonus() } ?: 0
 
-    return (effectiveArmorClass + (equippedShield?.armorClass ?: 0)).coerceAtLeast(1)
+    return (effectiveArmorClass + shieldArmorClass).coerceAtLeast(1)
 }
+
+/** "+N" of magic armor or a magic shield (e.g. Plate Armor +1, Shield +2); 0 for mundane items. */
+fun InventoryItem.armorMagicBonus(): Int = if (isMagical) magicalBonus.coerceAtLeast(0) else 0
 
 fun InventoryArmorDetails.appliedDexterityModifier(dexterityModifier: Int): Int {
     if (!appliesDexterityBonus) return 0

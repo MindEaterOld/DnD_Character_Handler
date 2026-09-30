@@ -3,7 +3,9 @@ package com.dndcharacterhandler.data.repository
 import android.content.Context
 import com.dndcharacterhandler.domain.model.InventoryArmorDetails
 import com.dndcharacterhandler.domain.model.InventoryArmorType
+import com.dndcharacterhandler.domain.model.InventoryCatalogBonusVariant
 import com.dndcharacterhandler.domain.model.InventoryCatalogItem
+import com.dndcharacterhandler.domain.model.InventoryCatalogKind
 import com.dndcharacterhandler.domain.model.InventoryCatalogSource
 import com.dndcharacterhandler.domain.model.InventoryCategory
 import com.dndcharacterhandler.domain.model.InventoryWeaponClass
@@ -33,13 +35,137 @@ class AssetInventoryCatalogRepository(
     }
 
     private suspend fun loadItems(): List<InventoryCatalogItem> = withContext(Dispatchers.IO) {
-        val equipmentItems = readArray("5e-SRD-Equipment.json").mapNotNull(::parseEquipmentItem)
-        val magicItems = readArray("5e-SRD-Magic-Items.json").mapNotNull(::parseMagicItem)
+        val equipmentJson = readArray("5e-SRD-Equipment.json")
+        val equipmentItems = equipmentJson.mapNotNull(::parseEquipmentItem)
+        val ammunitionIds = equipmentJson.objects()
+            .filter { json -> json.optJSONArray("equipment_categories").categoryNames().contains("Ammunition") }
+            .map { json -> "equipment:${json.optString("index")}" }
+            .toSet()
         val russian = readRussianText()
+        val magicItems = parseMagicItems(
+            entries = readArray("5e-SRD-Magic-Items.json").objects(),
+            equipment = equipmentItems,
+            ammunitionIds = ammunitionIds,
+            russian = russian
+        )
         (equipmentItems + magicItems)
             .map { item -> item.withRussianText(russian.optJSONObject(item.id)) }
             .sortedBy { it.name }
     }
+
+    /**
+     * Sorts SRD magic items into things you can own ([InventoryCatalogKind.ITEM]) and properties
+     * applied to a mundane base ([InventoryCatalogKind.ENCHANTMENT]: "Armor (Any Light, Medium, or
+     * Heavy)", "Weapon (Any Melee Weapon)", ...). "+1/+2/+3" variants of an enchantment are folded into
+     * it, and grouping entries that only list variants ("Shield", "Horn of Valhalla") are dropped.
+     * Magic weapons/armor with a named base ("Weapon (Longsword)") keep that base's stats.
+     */
+    private fun parseMagicItems(
+        entries: List<JSONObject>,
+        equipment: List<InventoryCatalogItem>,
+        ammunitionIds: Set<String>,
+        russian: JSONObject
+    ): List<InventoryCatalogItem> {
+        val byIndex = entries.associateBy { it.optString("index") }
+        val parentOfVariant = buildMap<String, JSONObject> {
+            entries.forEach { parent ->
+                parent.optJSONArray("variants").objects().forEach { variant -> put(variant.optString("index"), parent) }
+            }
+        }
+        return entries.mapNotNull { entry ->
+            val index = entry.optString("index")
+            val item = parseMagicItem(entry) ?: return@mapNotNull null
+            val (baseType, baseRule) = entry.baseTypeAndRule() ?: (null to null)
+            val variants = entry.optJSONArray("variants").objects()
+            when {
+                parentOfVariant[index]?.isEnchantmentTemplate() == true -> null
+                entry.isEnchantmentTemplate() -> item.copy(
+                    kind = InventoryCatalogKind.ENCHANTMENT,
+                    name = if (variants.isEmpty()) item.name else "${item.name} +1, +2, or +3",
+                    baseItemIds = anyBaseIds(baseType.orEmpty(), baseRule.orEmpty(), equipment, ammunitionIds),
+                    magicBonus = entry.fixedMagicBonus(),
+                    bonusVariants = variants.mapNotNull { variant ->
+                        val variantIndex = variant.optString("index")
+                        val bonus = Regex("""-(\d)$""").find(variantIndex)?.groupValues?.get(1)?.toIntOrNull()
+                            ?: return@mapNotNull null
+                        InventoryCatalogBonusVariant(
+                            id = "magic:$variantIndex",
+                            bonus = bonus,
+                            name = byIndex[variantIndex]?.optString("name").orEmpty(),
+                            ruName = russian.optJSONObject("magic:$variantIndex")?.optString("name").orEmpty()
+                        )
+                    }.sortedBy { it.bonus }
+                )
+                variants.isNotEmpty() -> null
+                else -> item.copy(
+                    baseItemIds = baseRule?.let { specificBaseIds(it, equipment) }.orEmpty(),
+                    magicBonus = entry.fixedMagicBonus()
+                )
+            }
+        }
+    }
+
+    /** ("Weapon", "Any Melee Weapon") from a description starting "Weapon (Any Melee Weapon)". */
+    private fun JSONObject.baseTypeAndRule(): Pair<String, String>? {
+        val typeLine = optString("desc").lineSequence().firstOrNull()?.trim().orEmpty()
+        val match = Regex("""^(Weapon|Armor) \((.+)\)$""").find(typeLine) ?: return null
+        return match.groupValues[1] to match.groupValues[2]
+    }
+
+    private fun JSONObject.isEnchantmentTemplate(): Boolean =
+        baseTypeAndRule()?.second?.startsWith("Any", ignoreCase = true) == true
+
+    /** "+2 bonus to attack rolls and damage rolls" / "+1 bonus to Armor Class" stated in the description. */
+    private fun JSONObject.fixedMagicBonus(): Int {
+        val desc = optString("desc")
+        val pattern = Regex("""\+(\d) bonus to (?:attack (?:rolls )?and damage rolls|Armor Class|AC)""", RegexOption.IGNORE_CASE)
+        return pattern.find(desc)?.groupValues?.get(1)?.toIntOrNull() ?: 0
+    }
+
+    /** Mundane items allowed by rules like "Any Light, Medium, or Heavy" or "Any Medium or Heavy, Except Hide Armor". */
+    private fun anyBaseIds(
+        type: String,
+        rule: String,
+        equipment: List<InventoryCatalogItem>,
+        ammunitionIds: Set<String>
+    ): List<String> {
+        val lower = rule.lowercase()
+        val excludedName = Regex("""except ([a-z ]+)""").find(lower)?.groupValues?.get(1)?.trim()
+        val candidates = when {
+            "ammunition" in lower -> equipment.filter { it.id in ammunitionIds }
+            type == "Weapon" -> equipment.filter { item ->
+                val weapon = item.weaponDetails ?: return@filter false
+                "melee" !in lower || weapon.rangeType == InventoryWeaponRangeType.MELEE
+            }
+            type == "Armor" -> equipment.filter { item ->
+                when (item.armorDetails?.armorType) {
+                    InventoryArmorType.LIGHT -> "light" in lower
+                    InventoryArmorType.MEDIUM -> "medium" in lower
+                    InventoryArmorType.HEAVY -> "heavy" in lower
+                    InventoryArmorType.SHIELD, null -> false
+                }
+            }
+            else -> emptyList()
+        }
+        return candidates.filterNot { it.name.lowercase() == excludedName }.map { it.id }
+    }
+
+    /** Mundane items named in rules like "Glaive, Greatsword, or Longsword" / "Half Plate Armor or Plate Armor". */
+    private fun specificBaseIds(rule: String, equipment: List<InventoryCatalogItem>): List<String> {
+        val normalize = { value: String -> value.lowercase().filter(Char::isLetter) }
+        val byName = equipment.associateBy { normalize(it.name) }
+        return rule.split(Regex(""",\s*(?:or\s+)?|\s+or\s+"""))
+            .mapNotNull { name -> byName[normalize(name)]?.id }
+            .distinct()
+    }
+
+    private fun JSONArray?.objects(): List<JSONObject> {
+        val array = this ?: return emptyList()
+        return (0 until array.length()).mapNotNull { index -> array.optJSONObject(index) }
+    }
+
+    private fun JSONArray?.categoryNames(): List<String> =
+        objects().map { it.optString("name") }
 
     /** Russian names/descriptions keyed by catalog id ("equipment:<index>", "magic:<index>"), from TTG Club. */
     private fun readRussianText(): JSONObject =

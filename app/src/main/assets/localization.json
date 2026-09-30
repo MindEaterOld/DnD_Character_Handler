@@ -3016,6 +3016,34 @@
     "fr": "Ajouter depuis le catalogue",
     "es": "Agregar desde el catalogo"
   },
+  "inventory_catalog_tab_items": {
+    "en": "Items",
+    "ru": "\u041f\u0440\u0435\u0434\u043c\u0435\u0442\u044b",
+    "de": "Gegenst\u00e4nde",
+    "fr": "Objets",
+    "es": "Objetos"
+  },
+  "inventory_catalog_tab_enchantments": {
+    "en": "Enchantments",
+    "ru": "\u0417\u0430\u0447\u0430\u0440\u043e\u0432\u0430\u043d\u0438\u044f",
+    "de": "Verzauberungen",
+    "fr": "Enchantements",
+    "es": "Encantamientos"
+  },
+  "inventory_enchant_bonus": {
+    "en": "Bonus",
+    "ru": "\u0411\u043e\u043d\u0443\u0441",
+    "de": "Bonus",
+    "fr": "Bonus",
+    "es": "Bonificador"
+  },
+  "inventory_enchant_choose_base": {
+    "en": "Choose the base item",
+    "ru": "\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u043e\u0441\u043d\u043e\u0432\u0443",
+    "de": "Grundgegenstand w\u00e4hlen",
+    "fr": "Choisissez l'objet de base",
+    "es": "Elige el objeto base"
+  },
   "inventory_create_action": {
     "en": "Create",
     "ru": "\u0421\u043e\u0437\u0434\u0430\u0442\u044c",

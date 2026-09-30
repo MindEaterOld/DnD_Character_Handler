@@ -96,6 +96,24 @@ class CharacterRulesTest {
     }
 
     @Test
+    fun armorClass_addsMagicBonusOfArmorAndShield() {
+        val armor = armorItem(InventoryArmorType.HEAVY, armorClass = 18, appliesDex = false, maxDex = null)
+            .copy(isMagical = true, magicalBonus = 1)
+        val shield = armorItem(InventoryArmorType.SHIELD, armorClass = 2, appliesDex = false, maxDex = null)
+            .copy(isMagical = true, magicalBonus = 2)
+        val ac = calculateArmorClass(baseArmorClass = 10, dexterityScore = 10, inventoryItems = listOf(armor, shield))
+        assertEquals(23, ac)
+    }
+
+    @Test
+    fun armorClass_ignoresBonusOfMundaneArmor() {
+        val armor = armorItem(InventoryArmorType.HEAVY, armorClass = 18, appliesDex = false, maxDex = null)
+            .copy(isMagical = false, magicalBonus = 1)
+        val ac = calculateArmorClass(baseArmorClass = 10, dexterityScore = 10, inventoryItems = listOf(armor))
+        assertEquals(18, ac)
+    }
+
+    @Test
     fun armorClass_onlyCountsEquippedItems() {
         val unequipped = armorItem(InventoryArmorType.HEAVY, armorClass = 18, appliesDex = false, maxDex = null)
             .copy(isEquipped = false)

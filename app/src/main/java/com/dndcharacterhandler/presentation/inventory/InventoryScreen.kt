@@ -59,7 +59,9 @@ import com.dndcharacterhandler.domain.model.CharacterBundle
 import com.dndcharacterhandler.domain.model.InventoryArmorDetails
 import com.dndcharacterhandler.domain.model.InventoryArmorType
 import com.dndcharacterhandler.domain.model.AppLanguage
+import com.dndcharacterhandler.domain.model.InventoryCatalogBonusVariant
 import com.dndcharacterhandler.domain.model.InventoryCatalogItem
+import com.dndcharacterhandler.domain.model.InventoryCatalogKind
 import com.dndcharacterhandler.domain.model.InventoryCategory
 import com.dndcharacterhandler.domain.model.InventoryItem
 import com.dndcharacterhandler.domain.model.InventoryWeaponDamage
@@ -69,6 +71,7 @@ import com.dndcharacterhandler.domain.model.InventoryWeaponRangeType
 import com.dndcharacterhandler.domain.model.InventoryWeaponClass
 import com.dndcharacterhandler.domain.rules.abilityModifier
 import com.dndcharacterhandler.domain.rules.appliedDexterityModifier
+import com.dndcharacterhandler.domain.rules.armorMagicBonus
 import com.dndcharacterhandler.domain.repository.CharacterRepository
 import com.dndcharacterhandler.domain.repository.InventoryCatalogRepository
 import com.dndcharacterhandler.domain.usecase.GetCharacterBundleUseCase
@@ -125,11 +128,18 @@ class InventoryViewModel(
         }
     }
 
-    fun addCatalogItem(characterBundle: CharacterBundle, item: InventoryCatalogItem, russian: Boolean) {
+    /** Adds [item] from the catalog; a magic item or enchantment with a [base] takes the base's stats. */
+    fun addCatalogItem(
+        characterBundle: CharacterBundle,
+        item: InventoryCatalogItem,
+        base: InventoryCatalogItem?,
+        variant: InventoryCatalogBonusVariant?,
+        russian: Boolean
+    ) {
         viewModelScope.launch {
             characterRepository.upsertInventoryItem(
                 characterId = characterBundle.character.id,
-                item = item.toInventoryItem(russian)
+                item = if (base != null) item.appliedTo(base, variant, russian) else item.toInventoryItem(russian)
             )
         }
     }
@@ -241,8 +251,14 @@ fun InventoryScreen(
                 isAddItemDialogOpen = false
                 isCategoryPickerOpen = true
             },
-            onSelectCatalogItem = { item ->
-                viewModel.addCatalogItem(characterBundle, item, russian = strings.language == AppLanguage.RUSSIAN)
+            onSelectCatalogItem = { item, base, variant ->
+                viewModel.addCatalogItem(
+                    characterBundle = characterBundle,
+                    item = item,
+                    base = base,
+                    variant = variant,
+                    russian = strings.language == AppLanguage.RUSSIAN
+                )
                 isAddItemDialogOpen = false
             }
         )
@@ -831,13 +847,21 @@ private fun InventoryAddEntryDialog(
     isLoading: Boolean,
     onDismiss: () -> Unit,
     onCreateItem: () -> Unit,
-    onSelectCatalogItem: (InventoryCatalogItem) -> Unit
+    onSelectCatalogItem: (
+        item: InventoryCatalogItem,
+        base: InventoryCatalogItem?,
+        variant: InventoryCatalogBonusVariant?
+    ) -> Unit
 ) {
     var query by remember { mutableStateOf("") }
+    var shownKind by remember { mutableStateOf(InventoryCatalogKind.ITEM) }
+    var choosingBaseFor by remember { mutableStateOf<InventoryCatalogItem?>(null) }
     val russian = LocalStrings.current.language == AppLanguage.RUSSIAN
-    val filteredItems = remember(catalogItems, query, russian) {
+    val catalogById = remember(catalogItems) { catalogItems.associateBy { it.id } }
+    val filteredItems = remember(catalogItems, query, russian, shownKind) {
         val needle = query.trim()
         catalogItems
+            .filter { it.kind == shownKind }
             .filter { item ->
                 needle.isBlank() ||
                     item.name.contains(needle, ignoreCase = true) ||
@@ -845,6 +869,15 @@ private fun InventoryAddEntryDialog(
                     item.displayDescription(russian).contains(needle, ignoreCase = true)
             }
             .sortedBy { it.displayName(russian) }
+    }
+    val onAddCatalogEntry = { item: InventoryCatalogItem ->
+        val bases = item.baseItemIds.mapNotNull(catalogById::get)
+        // Enchantments always need a base; magic items with several possible bases ask which one.
+        if (item.kind == InventoryCatalogKind.ENCHANTMENT || bases.size > 1) {
+            choosingBaseFor = item
+        } else {
+            onSelectCatalogItem(item, bases.firstOrNull(), null)
+        }
     }
 
     AlertDialog(
@@ -865,6 +898,20 @@ private fun InventoryAddEntryDialog(
                 }
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     InventoryDialogSection(text("inventory_add_catalog_section"))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        InventoryToggleButton(
+                            modifier = Modifier.weight(1f),
+                            label = text("inventory_catalog_tab_items"),
+                            selected = shownKind == InventoryCatalogKind.ITEM,
+                            onClick = { shownKind = InventoryCatalogKind.ITEM }
+                        )
+                        InventoryToggleButton(
+                            modifier = Modifier.weight(1f),
+                            label = text("inventory_catalog_tab_enchantments"),
+                            selected = shownKind == InventoryCatalogKind.ENCHANTMENT,
+                            onClick = { shownKind = InventoryCatalogKind.ENCHANTMENT }
+                        )
+                    }
                     InventorySearchField(
                         value = query,
                         onValueChange = { query = it }
@@ -897,7 +944,7 @@ private fun InventoryAddEntryDialog(
                                     InventoryCatalogRow(
                                         item = item,
                                         russian = russian,
-                                        onAdd = { onSelectCatalogItem(item) }
+                                        onAdd = { onAddCatalogEntry(item) }
                                     )
                                 }
                             }
@@ -913,6 +960,135 @@ private fun InventoryAddEntryDialog(
             }
         }
     )
+
+    choosingBaseFor?.let { magicItem ->
+        InventoryBaseItemDialog(
+            magicItem = magicItem,
+            bases = magicItem.baseItemIds.mapNotNull(catalogById::get),
+            russian = russian,
+            onDismiss = { choosingBaseFor = null },
+            onSelect = { base, variant ->
+                choosingBaseFor = null
+                onSelectCatalogItem(magicItem, base, variant)
+            }
+        )
+    }
+}
+
+/**
+ * Picks the mundane item an enchantment ("Weapon +1", "Flame Tongue") or a magic item with several
+ * possible bases ("Frost Brand") is made from, plus the "+N" for enchantments that have variants.
+ */
+@Composable
+private fun InventoryBaseItemDialog(
+    magicItem: InventoryCatalogItem,
+    bases: List<InventoryCatalogItem>,
+    russian: Boolean,
+    onDismiss: () -> Unit,
+    onSelect: (base: InventoryCatalogItem, variant: InventoryCatalogBonusVariant?) -> Unit
+) {
+    val colors = LocalDesignTokens.current.colors
+    var variant by remember(magicItem) { mutableStateOf(magicItem.bonusVariants.firstOrNull()) }
+    val sortedBases = remember(bases, russian) { bases.sortedBy { it.displayName(russian) } }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = magicItem.displayName(russian),
+                style = MaterialTheme.typography.titleLarge
+            )
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                if (magicItem.bonusVariants.isNotEmpty()) {
+                    InventoryDialogSection(text("inventory_enchant_bonus"))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        magicItem.bonusVariants.forEach { option ->
+                            InventoryToggleButton(
+                                modifier = Modifier.weight(1f),
+                                label = "+${option.bonus}",
+                                selected = option == variant,
+                                onClick = { variant = option }
+                            )
+                        }
+                    }
+                }
+                InventoryDialogSection(text("inventory_enchant_choose_base"))
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 300.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    items(sortedBases, key = { it.id }) { base ->
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(10.dp),
+                            color = colors.surface.card.copy(alpha = 0.62f),
+                            border = BorderStroke(1.dp, colors.border.muted),
+                            onClick = { onSelect(base, variant) }
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                                verticalArrangement = Arrangement.spacedBy(2.dp)
+                            ) {
+                                Text(
+                                    text = magicItem.composedName(base, variant, russian),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = colors.text.primary,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                base.displayDetailLine(russian)?.let { detail ->
+                                    Text(
+                                        text = detail,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = colors.text.label,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text("common_cancel"))
+            }
+        }
+    )
+}
+
+@Composable
+private fun InventoryToggleButton(
+    modifier: Modifier = Modifier,
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    val colors = LocalDesignTokens.current.colors
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(12.dp),
+        color = if (selected) colors.surface.selected else colors.surface.button,
+        border = BorderStroke(1.dp, if (selected) colors.border.selected else colors.border.muted),
+        onClick = onClick
+    ) {
+        Text(
+            text = label,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+            style = MaterialTheme.typography.bodyLarge,
+            color = if (selected) colors.text.warmPrimary else colors.text.muted,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
 }
 
 @Composable
@@ -2320,14 +2496,15 @@ private fun defaultInventoryItem(category: InventoryCategory, defaultName: Strin
     )
 }
 
+/** Weapons add it to attack/damage, armor and shields to AC. */
 private fun InventoryCategory.allowsMagicalBonus(): Boolean =
-    this == InventoryCategory.WEAPON
+    this == InventoryCategory.WEAPON || this == InventoryCategory.ARMOR
 
 private fun InventoryItem.propertyTags(dexterityScore: Int, strings: LocalizedStrings): List<String> {
     return buildList {
         armorDetails?.let { armor ->
             add(strings[armor.armorType.localizationKey()])
-            add("${armor.armorClass} ${strings["inventory_tag_ac_short"]}")
+            add("${armor.armorClass + armorMagicBonus()} ${strings["inventory_tag_ac_short"]}")
             armor.currentDexterityTag(dexterityScore, strings)?.let(::add)
             if (armor.strengthMinimum > 0) {
                 add("${strings["inventory_tag_strength_short"]} ${armor.strengthMinimum}")
