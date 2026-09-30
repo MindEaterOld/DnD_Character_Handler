@@ -57,7 +57,9 @@ internal class DieFace(
     val canonical: FloatArray,
     /** All of the face's corners (x0, y0, x1, y1, ...) in the same face-local frame, in order around it. */
     val outline: FloatArray,
-    val labels: List<FaceLabel>
+    val labels: List<FaceLabel>,
+    /** Unit vector in the face's plane (model space) that the top of its number points along. */
+    val up: Vec3
 ) {
     /** Distance of the face's plane from the die's centre. */
     val planeOffset: Double = normal dot center
@@ -291,6 +293,6 @@ internal object DieShapes {
             val underline = kind != DieShapeKind.D6 && kind != DieShapeKind.D10_TENS && (value == 6 || value == 9)
             listOf(FaceLabel(text, underline, offsetX = 0f, offsetY = 0f, rotationDegrees = 0f))
         }
-        return DieFace(indices, normal, center, value, canonical, outline, labels)
+        return DieFace(indices, normal, center, value, canonical, outline, labels, up)
     }
 }

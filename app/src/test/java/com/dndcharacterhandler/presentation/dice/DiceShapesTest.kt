@@ -81,6 +81,8 @@ class DiceShapesTest {
                     assertTrue("$kind vertex off its face plane", abs((face.normal dot shape.vertices[index]) - offset) < 1e-6)
                 }
                 assertTrue("$kind normal points inward", offset > 0)
+                // The number's "up" lies in the face.
+                assertTrue("$kind label up is off the face", abs(face.up dot face.normal) < 1e-9 && abs(face.up.length - 1) < 1e-9)
             }
         }
     }

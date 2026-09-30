@@ -74,13 +74,15 @@ internal fun DiceSkin.colors(): DiceSkinColors {
 /** Camera height for die icons: closer than the table's, for a bit more perspective. */
 private const val ICON_CAMERA_HEIGHT = 9.0
 
-/** Icon poses: the highest face up, tipped toward the light so several faces show. */
+/** Icon poses: seen from the front, the highest face toward the viewer with its number upright. */
 private val IconOrientations = mutableMapOf<DieShapeKind, Quat>()
 
 private fun iconOrientation(kind: DieShapeKind): Quat = IconOrientations.getOrPut(kind) {
-    val shape = DieShapes.of(kind)
-    val top = shape.faces.maxBy { it.value }
-    Quat.axisAngle(Vec3(1.0, 0.0, 0.4), 0.45) * Quat.rotationBetween(top.normal, Vec3.UP)
+    val top = DieShapes.of(kind).faces.maxBy { it.value }
+    val faceToCamera = Quat.rotationBetween(top.normal, Vec3.UP)
+    // Then turn about the view axis until the number reads upright (screen up is -z on the table).
+    val numberUp = faceToCamera.rotate(top.up).let { Vec3(it.x, 0.0, it.z).normalized() }
+    Quat.rotationBetween(numberUp, Vec3(0.0, 0.0, -1.0)) * faceToCamera
 }
 
 /** A d20 drawn in [skin]: the swatch in the skin picker. */
