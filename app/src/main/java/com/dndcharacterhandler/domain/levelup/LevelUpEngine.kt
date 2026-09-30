@@ -44,7 +44,7 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
 
     /** Whether [page] has everything it needs in [draft]. */
     fun isAnswered(page: LevelUpPage, draft: LevelUpDraft): Boolean = when (page) {
-        is LevelUpPage.Setup -> draft.setup != null
+        is LevelUpPage.Setup -> draft.setup?.classId?.let { id -> catalog.classes.any { it.id == id } } == true
         is LevelUpPage.ChooseClass -> true
         is LevelUpPage.HitPoints -> page.takesMaximum || draft.answers[page.key] is LevelUpAnswer.HitPoints
         is LevelUpPage.Features -> true
@@ -55,7 +55,7 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
             answer.picks.size == page.required + if (answer.replacedId != null) 1 else 0
         } ?: (page.required == 0)
         is LevelUpPage.AbilityScores -> when (val answer = draft.answers[page.key]) {
-            is LevelUpAnswer.Feat -> page.allowFeat
+            is LevelUpAnswer.Feat -> page.allowFeat && page.feats.any { it.id == answer.featId }
             is LevelUpAnswer.AbilityScores -> answer.increases.values.sum() == page.required
             else -> page.required == 0
         }

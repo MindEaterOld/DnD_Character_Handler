@@ -87,15 +87,23 @@ import com.dndcharacterhandler.domain.model.ArmorClassMode
 import com.dndcharacterhandler.domain.model.AssetReferences
 import com.dndcharacterhandler.domain.model.Character
 import com.dndcharacterhandler.domain.model.CharacterBundle
+import com.dndcharacterhandler.domain.model.CharacterCatalog
+import com.dndcharacterhandler.domain.levelup.LevelUpDraft
+import com.dndcharacterhandler.domain.levelup.LevelUpEngine
 import com.dndcharacterhandler.domain.model.AppLanguage
+import com.dndcharacterhandler.domain.rules.MAX_CHARACTER_LEVEL
 import com.dndcharacterhandler.domain.rules.abilityModifier
+import com.dndcharacterhandler.domain.rules.classLabel
+import com.dndcharacterhandler.domain.rules.levelForExperience
 import com.dndcharacterhandler.domain.rules.calculateArmorClass
 import com.dndcharacterhandler.domain.rules.calculateInitiative
+import com.dndcharacterhandler.domain.repository.CharacterCatalogRepository
 import com.dndcharacterhandler.domain.repository.CharacterRepository
 import com.dndcharacterhandler.domain.usecase.GetCharacterBundleUseCase
 import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
 import com.dndcharacterhandler.presentation.components.AppImage
+import com.dndcharacterhandler.presentation.levelup.LevelUpWizard
 import com.dndcharacterhandler.presentation.components.ScreenBackground
 import com.dndcharacterhandler.presentation.components.ScreenTopActions
 import com.dndcharacterhandler.presentation.localization.LocalStrings
@@ -106,6 +114,9 @@ import java.io.File
 import java.io.FileOutputStream
 import java.text.NumberFormat
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -113,9 +124,29 @@ private val hitDieSidesOptions = listOf(6, 8, 10, 12)
 
 class OverviewViewModel(
     private val characterRepository: CharacterRepository,
+    private val characterCatalogRepository: CharacterCatalogRepository,
     getCharacterBundleUseCase: GetCharacterBundleUseCase,
     selectedCharacterHolder: SelectedCharacterHolder
 ) : BaseCharacterViewModel(getCharacterBundleUseCase, selectedCharacterHolder) {
+    private val _catalog = MutableStateFlow<CharacterCatalog?>(null)
+    /** The character catalog for the level-up wizard; null while it loads. */
+    val catalog: StateFlow<CharacterCatalog?> = _catalog.asStateFlow()
+
+    init {
+        viewModelScope.launch { _catalog.value = characterCatalogRepository.getCatalog() }
+    }
+
+    /** Applies a finished level-up draft (see LevelUpWizard) in one write. */
+    fun applyLevelUp(characterBundle: CharacterBundle, draft: LevelUpDraft, russian: Boolean) {
+        val catalog = _catalog.value ?: return
+        viewModelScope.launch {
+            val updated = withContext(Dispatchers.Default) {
+                LevelUpEngine(catalog).apply(characterBundle, draft, russian, now = System.currentTimeMillis())
+            }
+            characterRepository.replaceCharacterBundle(updated)
+        }
+    }
+
     fun updateIdentity(
         characterBundle: CharacterBundle,
         name: String? = null,
@@ -427,6 +458,7 @@ fun OverviewScreen(
     onOpenSettings: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val catalog by viewModel.catalog.collectAsStateWithLifecycle()
     // Only re-sync AC when an input that actually affects it changes (keys compare structurally),
     // not on every HP/XP/name edit — or when another character is selected.
     LaunchedEffect(
@@ -440,6 +472,8 @@ fun OverviewScreen(
     }
     OverviewContent(
         characterBundle = state.character,
+        catalog = catalog,
+        onApplyLevelUp = viewModel::applyLevelUp,
         onOpenDrawer = onOpenDrawer,
         onOpenSettings = onOpenSettings,
         onUpdateIdentity = viewModel::updateIdentity,
@@ -463,6 +497,8 @@ fun OverviewScreen(
 @Composable
 private fun OverviewContent(
     characterBundle: CharacterBundle?,
+    catalog: CharacterCatalog? = null,
+    onApplyLevelUp: (CharacterBundle, LevelUpDraft, Boolean) -> Unit = { _, _, _ -> },
     onOpenDrawer: () -> Unit,
     onOpenSettings: () -> Unit,
     onUpdateIdentity: (CharacterBundle, String?, String?, String?, Int?) -> Unit,
@@ -510,6 +546,8 @@ private fun OverviewContent(
         }
     }
     var activeField by remember { mutableStateOf<OverviewEditableField?>(null) }
+    var levelUpTarget by remember(character?.id) { mutableStateOf<Int?>(null) }
+    var isLevelDownNoticeOpen by remember { mutableStateOf(false) }
     var isPortraitMenuOpen by remember { mutableStateOf(false) }
     var isPortraitViewerOpen by remember { mutableStateOf(false) }
     var isExperienceDialogOpen by remember { mutableStateOf(false) }
@@ -540,7 +578,17 @@ private fun OverviewContent(
     val displayName = character?.name?.ifBlank { text("overview_name_placeholder") }
         ?: text("overview_name_placeholder")
     val raceLabel = character?.race?.ifBlank { text("placeholder_race") } ?: text("placeholder_race")
-    val classLabel = remember(character, strings) { buildOverviewClassLabel(character, strings) }
+    val russian = strings.language == AppLanguage.RUSSIAN
+    val classLabel = remember(character, strings, catalog) {
+        val classes = character?.classes.orEmpty()
+        if (classes.isNotEmpty() && catalog != null) {
+            classLabel(classes, catalog, russian).ifBlank { buildOverviewClassLabel(character, strings) }
+        } else {
+            buildOverviewClassLabel(character, strings)
+        }
+    }
+    // Two classes and more don't fit at the usual size.
+    val isMulticlass = (character?.classes?.size ?: 0) > 1
     val levelLabel = strings.format("overview_level_format", character?.level ?: 1)
     val xpInfo = remember(character) { buildXpInfo(character) }
 
@@ -621,6 +669,7 @@ private fun OverviewContent(
                     OverviewSubtitleRow(
                         raceLabel = raceLabel,
                         classLabel = classLabel,
+                        compactClass = isMulticlass,
                         levelLabel = levelLabel,
                         modifier = Modifier
                             .offset(y = (-34).dp)
@@ -644,6 +693,9 @@ private fun OverviewContent(
                 Box(modifier = Modifier.offset(y = (-24).dp)) {
                     OverviewXpBlock(
                         xpInfo = xpInfo,
+                        canLevelUp = character != null &&
+                            character.level < MAX_CHARACTER_LEVEL && levelForExperience(character.experience) > character.level,
+                        onLevelUp = { character?.let { levelUpTarget = levelForExperience(it.experience) } },
                         onClick = {
                             experienceEditMode = OverviewExperienceEditMode.ADD
                             experienceDraft = ""
@@ -740,6 +792,30 @@ private fun OverviewContent(
         }
     }
 
+    val wizardTarget = levelUpTarget
+    if (wizardTarget != null && characterBundle != null && catalog != null) {
+        LevelUpWizard(
+            bundle = characterBundle,
+            catalog = catalog,
+            targetLevel = wizardTarget,
+            onDismiss = { levelUpTarget = null },
+            onApply = { draft ->
+                onApplyLevelUp(characterBundle, draft, russian)
+                levelUpTarget = null
+            }
+        )
+    }
+
+    if (isLevelDownNoticeOpen) {
+        AlertDialog(
+            onDismissRequest = { isLevelDownNoticeOpen = false },
+            text = { Text(text("levelup_level_down_unavailable")) },
+            confirmButton = {
+                TextButton(onClick = { isLevelDownNoticeOpen = false }) { Text(text("common_close")) }
+            }
+        )
+    }
+
     if (activeField != null && characterBundle != null) {
         val field = activeField!!
         if (field == OverviewEditableField.LEVEL) {
@@ -761,7 +837,15 @@ private fun OverviewContent(
                                     .clip(RoundedCornerShape(12.dp))
                                     .background(if (isSelected) Color(0xFF3A3244) else Color.Transparent)
                                     .clickable {
-                                        onUpdateIdentity(characterBundle, null, null, null, level)
+                                        val current = characterBundle.character.level
+                                        when {
+                                            // Going up walks the wizard through every level, as Foundry does.
+                                            level > current && catalog != null -> levelUpTarget = level
+                                            // The wizard can't take levels back yet.
+                                            level < current && characterBundle.character.classes.isNotEmpty() ->
+                                                isLevelDownNoticeOpen = true
+                                            else -> onUpdateIdentity(characterBundle, null, null, null, level)
+                                        }
                                         activeField = null
                                     }
                                     .padding(horizontal = 12.dp, vertical = 12.dp),
@@ -1392,6 +1476,7 @@ private fun ExperienceModeButton(
 private fun OverviewSubtitleRow(
     raceLabel: String,
     classLabel: String,
+    compactClass: Boolean,
     levelLabel: String,
     modifier: Modifier = Modifier,
     onEditRace: () -> Unit,
@@ -1405,7 +1490,7 @@ private fun OverviewSubtitleRow(
     ) {
         SubtitleToken(text = raceLabel, onClick = onEditRace)
         SubtitleDivider()
-        SubtitleToken(text = classLabel, onClick = onEditClass)
+        SubtitleToken(text = classLabel, onClick = onEditClass, compact = compactClass)
         SubtitleDivider()
         SubtitleToken(text = levelLabel, onClick = onEditLevel)
     }
@@ -1414,13 +1499,15 @@ private fun OverviewSubtitleRow(
 @Composable
 private fun SubtitleToken(
     text: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    compact: Boolean = false
 ) {
     val token = LocalDesignTokens.current.typography.subtitleToken
     Text(
         text = text,
         modifier = Modifier.clickable(onClick = onClick),
-        style = MaterialTheme.typography.bodyLarge.copy(fontSize = token.fontSizeSp.sp),
+        // Several classes ("Fighter 5 / Rogue 2") step down to the body size of the type scale.
+        style = if (compact) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.bodyLarge.copy(fontSize = token.fontSizeSp.sp),
         color = Color(0xFFAAA29A),
         textAlign = TextAlign.Center
     )
@@ -1727,6 +1814,8 @@ private fun OverviewActionButton(
 @Composable
 private fun OverviewXpBlock(
     xpInfo: XpProgressInfo,
+    canLevelUp: Boolean = false,
+    onLevelUp: () -> Unit = {},
     onClick: () -> Unit
 ) {
     val formatter = remember { NumberFormat.getIntegerInstance() }
@@ -1746,9 +1835,10 @@ private fun OverviewXpBlock(
             style = MaterialTheme.typography.bodyLarge.copy(fontSize = token.fontSizeSp.sp),
             color = Color(0xFFECE4DB)
         )
+        Row(verticalAlignment = Alignment.CenterVertically) {
         Canvas(
             modifier = Modifier
-                .fillMaxWidth()
+                .weight(1f)
                 .height(16.dp)
         ) {
             val stroke = 11.dp.toPx()
@@ -1766,6 +1856,17 @@ private fun OverviewXpBlock(
                 strokeWidth = stroke,
                 cap = StrokeCap.Round
             )
+        }
+        if (canLevelUp) {
+            Text(
+                text = text("levelup_badge"),
+                modifier = Modifier
+                    .padding(start = 12.dp)
+                    .clickable(onClick = onLevelUp),
+                style = MaterialTheme.typography.titleMedium,
+                color = LocalDesignTokens.current.colors.accent.inspiration
+            )
+        }
         }
     }
 }
@@ -2297,7 +2398,7 @@ private fun OverviewScreenPreview() {
         speed = 30,
         initiative = 3,
         initiativeBonus = 0,
-        experience = 23500,
+        experience = 36000,
         strength = 8,
         dexterity = 16,
         constitution = 14,
