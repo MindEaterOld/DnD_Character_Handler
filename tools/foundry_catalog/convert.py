@@ -19,6 +19,7 @@ from foundry_text import description_text, split_name, table_text
 HERE = os.path.dirname(os.path.abspath(__file__))
 EXPORT = os.path.join(HERE, 'export')
 LEGACY = os.path.join(HERE, 'legacy')
+TRANSLATIONS = os.path.join(HERE, 'translations')
 REPO = os.path.dirname(os.path.dirname(HERE))
 SRD_2024 = os.path.join(REPO, 'external', '5e-database', 'src', '2024', 'en')
 DEFAULT_OUT = os.path.join(REPO, 'app', 'src', 'main', 'assets', 'character_catalog.json')
@@ -561,6 +562,57 @@ def attach_legacy(result, catalog):
     return unmatched
 
 
+ENTITY_KINDS = ('classes', 'subclasses', 'species', 'backgrounds', 'features')
+
+
+def apply_translations(result):
+    """Merges translations/en.json (id -> {"name", "text"}) over the catalog: hand-made English
+    that survives every re-import. Returns the ids it doesn't know."""
+    overlay = load_json(os.path.join(TRANSLATIONS, 'en.json'), {})
+    entries = {e['id']: e for kind in ENTITY_KINDS for e in result[kind]}
+    unknown = []
+    for entry_id, translation in overlay.items():
+        entry = entries.get(entry_id)
+        if entry is None:
+            unknown.append(entry_id)
+            continue
+        if translation.get('name'):
+            entry['name']['en'] = translation['name']
+        if translation.get('text') and 'text' in entry:
+            entry['text']['en'] = translation['text']
+    return unknown
+
+
+def write_missing(result):
+    """translations/missing_en.json: what still has no English name or text, to translate from."""
+    owners = {e['id']: e['name'] for kind in ENTITY_KINDS for e in result[kind]}
+    missing = []
+    for kind in ENTITY_KINDS:
+        for entry in result[kind]:
+            gaps = []
+            if not entry['name']['en']:
+                gaps.append('name')
+            if 'text' in entry and entry['text']['ru'] and not entry['text']['en']:
+                gaps.append('text')
+            if not gaps:
+                continue
+            owner = next((owners[g['owner']] for g in entry.get('grantedBy', []) if g['owner'] in owners), None)
+            missing.append({
+                'id': entry['id'],
+                'kind': entry.get('kind', kind),
+                'book': entry['book'],
+                'owner': (owner['en'] or owner['ru']) if owner else '',
+                'ru': entry['name']['ru'],
+                'en': entry['name']['en'],
+                'missing': gaps,
+            })
+    missing.sort(key=lambda m: (m['book'] != 'PHB 2024', m['book'], m['kind'], m['owner'], m['ru']))
+    with open(os.path.join(TRANSLATIONS, 'missing_en.json'), 'w', encoding='utf-8', newline='\n') as f:
+        json.dump(missing, f, ensure_ascii=False, indent=1)
+        f.write('\n')
+    return missing
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--out', default=DEFAULT_OUT)
@@ -570,6 +622,8 @@ def main():
     catalog = Catalog()
     result = build(catalog)
     unmatched = attach_legacy(result, catalog)
+    unknown_translations = apply_translations(result)
+    missing = write_missing(result)
     books = sorted({e['book'] for kind in ('classes', 'subclasses', 'species', 'backgrounds', 'features') for e in result[kind] if e['book']})
     output = {
         'version': 1,
@@ -591,6 +645,11 @@ def main():
     for warning, count in catalog.warnings.most_common():
         print(f'   warning: {warning} x{count}')
     print('books:', books)
+    names_missing = sum(1 for m in missing if 'name' in m['missing'])
+    texts_missing = sum(1 for m in missing if 'text' in m['missing'])
+    print(f'English still missing: {names_missing} names, {texts_missing} texts (translations/missing_en.json)')
+    for entry_id in unknown_translations:
+        print('   warning: translations/en.json has an unknown id', entry_id)
     print('wrote', args.out, os.path.getsize(args.out), 'bytes')
 
 

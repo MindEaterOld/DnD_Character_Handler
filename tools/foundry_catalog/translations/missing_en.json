@@ -1,0 +1,8314 @@
+[
+ {
+  "id": "fZm3Di2wqEdQcn3E",
+  "kind": "backgroundFeature",
+  "book": "PHB 2024",
+  "owner": "Acolyte",
+  "ru": "Посвящённый в магию Жреца",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "Jq3SiadRnqntVs3n",
+  "kind": "backgroundFeature",
+  "book": "PHB 2024",
+  "owner": "Genie Touched",
+  "ru": "Посвящённый в магию Волшебника",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "SVlRXCWWKrbGis1m",
+  "kind": "backgroundFeature",
+  "book": "PHB 2024",
+  "owner": "Moonwell Pilgrim",
+  "ru": "Посвящённый в магию Друида",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "phbbgEntertainer",
+  "kind": "backgrounds",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Артист",
+  "en": "Entertainer",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbbgNoble000000",
+  "kind": "backgrounds",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Благородный",
+  "en": "Noble",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbbgWayfarer000",
+  "kind": "backgrounds",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Бродяга",
+  "en": "Wayfarer",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbbgSailor00000",
+  "kind": "backgrounds",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Моряк",
+  "en": "Sailor",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbbgHermit00000",
+  "kind": "backgrounds",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Отшельник",
+  "en": "Hermit",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbbgScribe00000",
+  "kind": "backgrounds",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Писарь",
+  "en": "Scribe",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbbgGuide000000",
+  "kind": "backgrounds",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Проводник",
+  "en": "Guide",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbbgArtisan0000",
+  "kind": "backgrounds",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Ремесленник",
+  "en": "Artisan",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbbgGuard000000",
+  "kind": "backgrounds",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Стражник",
+  "en": "Guard",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbbgMerchant000",
+  "kind": "backgrounds",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Торговец",
+  "en": "Merchant",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbbgFarmer00000",
+  "kind": "backgrounds",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Фермер",
+  "en": "Farmer",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbbgCharlatan00",
+  "kind": "backgrounds",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Шарлатан",
+  "en": "Charlatan",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbmnvLungingAtt",
+  "kind": "classOption",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Атака с выпадом",
+  "en": "Lunging Attack",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbmnvManeuverin",
+  "kind": "classOption",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Атака с манёвром",
+  "en": "Maneuvering Attack",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbmnvFeintingAt",
+  "kind": "classOption",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Атака с финтом",
+  "en": "Feinting Attack",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbmnvTripAttack",
+  "kind": "classOption",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Атака-подсечка",
+  "en": "Trip Attack",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbmnvAmbush0000",
+  "kind": "classOption",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Засада",
+  "en": "Ambush",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbmnvCommanding",
+  "kind": "classOption",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Командирский напор",
+  "en": "Commanding Presence",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbmnvRiposte000",
+  "kind": "classOption",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Контратака",
+  "en": "Riposte",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbmnvSweepingAt",
+  "kind": "classOption",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Круговая атака",
+  "en": "Sweeping Attack",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbmnvDisarmingA",
+  "kind": "classOption",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Обезоруживающая атака",
+  "en": "Disarming Attack",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbmnvDistractin",
+  "kind": "classOption",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Отвлекающий удар",
+  "en": "Distracting Strike",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbmnvParry00000",
+  "kind": "classOption",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Парирование",
+  "en": "Parry",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbmnvEvasiveFoo",
+  "kind": "classOption",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Перебежка",
+  "en": "Evasive Footwork",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbmnvRally00000",
+  "kind": "classOption",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Поддержка",
+  "en": "Rally",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbmnvBaitandSwi",
+  "kind": "classOption",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Подмена",
+  "en": "Bait and Switch",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "x7SxrKyQaQZww3KF",
+  "kind": "classOption",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Потусторонний прыжок",
+  "en": "Otherwordly Leap",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbmnvGoadingAtt",
+  "kind": "classOption",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Провоцирующая атака",
+  "en": "Goading Attack",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbmnvTacticalAs",
+  "kind": "classOption",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Тактическая оценка",
+  "en": "Tactical Assessment",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbmnvPushingAtt",
+  "kind": "classOption",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Толкающая атака",
+  "en": "Pushing Attack",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbmnvPrecisionA",
+  "kind": "classOption",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Точная атака",
+  "en": "Precision Attack",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbmnvMenacingAt",
+  "kind": "classOption",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Угрожающая атака",
+  "en": "Menacing Attack",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbmnvCommanders",
+  "kind": "classOption",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Удар командира",
+  "en": "Commander's Strike",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "196gZosfn9vZUoqX",
+  "kind": "classOption",
+  "book": "PHB 2024",
+  "owner": "Blessed Strikes",
+  "ru": "Божественный удар",
+  "en": "Divine Strike",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "tHO7Hh7d3lJjddHo",
+  "kind": "classOption",
+  "book": "PHB 2024",
+  "owner": "Divine Order",
+  "ru": "Защитник",
+  "en": "Protector",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "bsBLpozW0aIjzYmh",
+  "kind": "classOption",
+  "book": "PHB 2024",
+  "owner": "Divine Order",
+  "ru": "Чудотворец",
+  "en": "Thaumaturge",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "IuQ8Qk3ag6gU6nHg",
+  "kind": "classOption",
+  "book": "PHB 2024",
+  "owner": "Elemental Fury",
+  "ru": "Мощные заклинания",
+  "en": "Elemental Fury: Potent Spellcasting",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "ijDg3Rx0MGP6dBPg",
+  "kind": "classOption",
+  "book": "PHB 2024",
+  "owner": "Elemental Fury",
+  "ru": "Удар природы",
+  "en": "Primal Strike",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftElementalAd",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Адепт стихии",
+  "en": "Elemental Adept",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftActor000000",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Актёр",
+  "en": "Actor",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftAthlete0000",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Атлет",
+  "en": "Athlete",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftWarCaster00",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Боевой заклинатель",
+  "en": "War Caster",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbfstUnarmedFig",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Бой без оружия",
+  "en": "Unarmed Fighting",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbfstBlindFight",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Бой вслепую",
+  "en": "Blind Fighting",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbfstThrownWeap",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Бой метательным оружием",
+  "en": "Thrown Weapon Fighting",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftSpeedy00000",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Быстрый",
+  "en": "Speedy",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftInspiringLe",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Вдохновляющий лидер",
+  "en": "Inspiring Leader",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftMountedComb",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Верховой боец",
+  "en": "Mounted Combatant",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftMartialWeap",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Воинская подготовка",
+  "en": "Martial Weapon Training",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftDurable0000",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Выносливый",
+  "en": "Durable",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbBoonofRecover",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Дар восстановления здоровья",
+  "en": "Boon of Recovery",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbBoonofSpeed00",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Дар скорости",
+  "en": "Boon of Speed",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbBoonofFortitu",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Дар стойкости",
+  "en": "Boon of Fortitude",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbBoonofSkill00",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Дар умения в навыках",
+  "en": "Boon of Skill",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbBoonofEnergyR",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Дар устойчивости к энергии",
+  "en": "Boon of Energy Resistance",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbfstDueling000",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Дуэль",
+  "en": "Dueling",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftSkulker0000",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Лазутчик",
+  "en": "Skulker",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftLightlyArmo",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Легкобронированный",
+  "en": "Lightly Armored",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftMageSlayer0",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Магоубийца",
+  "en": "Mage Slayer",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftGreatWeapon",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Мастер большого оружия",
+  "en": "Great Weapon Master",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftPolearmMast",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Мастер древкового оружия",
+  "en": "Polearm Master",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftCrusher0000",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Мастер дробящего урона",
+  "en": "Crusher",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftPiercer0000",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Мастер колющего урона",
+  "en": "Piercer",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftWeaponMaste",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Мастер оружия",
+  "en": "Weapon Master",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftSlasher0000",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Мастер режущего урона",
+  "en": "Slasher",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftMediumArmor",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Мастер средней брони",
+  "en": "Medium Armor Master",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftHeavyArmorM",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Мастер тяжёлой брони",
+  "en": "Heavy Armor Master",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftShieldMaste",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Мастер щита",
+  "en": "Shield Master",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftSpellSniper",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Меткий заклинатель",
+  "en": "Spell Sniper",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftSharpshoote",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Меткий стрелок",
+  "en": "Sharpshooter",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftObservant00",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Наблюдательный",
+  "en": "Observant",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftDualWielder",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Обоерукий",
+  "en": "Dual Wielder",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftDefensiveDu",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Обороняющийся дуэлянт",
+  "en": "Defensive Duelist",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftKeenMind000",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Острый ум",
+  "en": "Keen Mind",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftShadowTouch",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Отмеченный тенями",
+  "en": "Shadow-Touched",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftFeyTouched0",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Отмеченный феями",
+  "en": "Fey-Touched",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftPoisoner000",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Отравитель",
+  "en": "Poisoner",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbfstProtection",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Охрана",
+  "en": "Protection",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbfstIntercepti",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Перехват",
+  "en": "Interception",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftRitualCaste",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Ритуальный заклинатель",
+  "en": "Ritual Caster",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftCharger0000",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Сорвиголова",
+  "en": "Charger",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftModeratelyA",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Среднебронированный",
+  "en": "Moderately Armored",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftResilient00",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Стойкий",
+  "en": "Resilient",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftSentinel000",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Страж",
+  "en": "Sentinel",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftTelekinetic",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Телекинетик",
+  "en": "Telekinetic",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftTelepathic0",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Телепат",
+  "en": "Telepathic",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftHeavilyArmo",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Тяжелобронированный",
+  "en": "Heavily Armored",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftChef0000000",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Шеф-повар",
+  "en": "Chef",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftCrossbowExp",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Эксперт в арбалетах",
+  "en": "Crossbow Expert",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftSkillExpert",
+  "kind": "feat",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Эксперт в навыке",
+  "en": "Skill Expert",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "djKP83vxLd2TERod",
+  "kind": "featureOption",
+  "book": "PHB 2024",
+  "owner": "Blessed Strikes",
+  "ru": "Могущественное колдовство",
+  "en": "Potent Spellcasting",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "bvGUZA5cbKZoG8VN",
+  "kind": "featureOption",
+  "book": "PHB 2024",
+  "owner": "Elemental Adept",
+  "ru": "Адепт стихии (Звук)",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "NNP9HeHqOtAuBRE5",
+  "kind": "featureOption",
+  "book": "PHB 2024",
+  "owner": "Elemental Adept",
+  "ru": "Адепт стихии (Кислота)",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "EaZ6PwBI0PlHxShD",
+  "kind": "featureOption",
+  "book": "PHB 2024",
+  "owner": "Elemental Adept",
+  "ru": "Адепт стихии (Огонь)",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "lHbavh4fXQwSNwtM",
+  "kind": "featureOption",
+  "book": "PHB 2024",
+  "owner": "Elemental Adept",
+  "ru": "Адепт стихии (Холод)",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "pXHKMPclGSzRCgkw",
+  "kind": "featureOption",
+  "book": "PHB 2024",
+  "owner": "Elemental Adept",
+  "ru": "Адепт стихии (Электричество)",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "zSPORpsk3Sow6X7G",
+  "kind": "featureOption",
+  "book": "PHB 2024",
+  "owner": "Elemental Affinity",
+  "ru": "Родство со стихией: Кислота",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "nufoXpmYFEkbEPqz",
+  "kind": "featureOption",
+  "book": "PHB 2024",
+  "owner": "Elemental Affinity",
+  "ru": "Родство со стихией: Огонь",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "wcBbg5UUe1Vy6lLd",
+  "kind": "featureOption",
+  "book": "PHB 2024",
+  "owner": "Elemental Affinity",
+  "ru": "Родство со стихией: Холод",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "pWbZEvGMc41dNmwi",
+  "kind": "featureOption",
+  "book": "PHB 2024",
+  "owner": "Elemental Affinity",
+  "ru": "Родство со стихией: Электричество",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "U7M7q0x0LEG0Qyie",
+  "kind": "featureOption",
+  "book": "PHB 2024",
+  "owner": "Elemental Affinity",
+  "ru": "Родство со стихией: Яд",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "JZJ8JR2xXNuVBQnR",
+  "kind": "featureOption",
+  "book": "PHB 2024",
+  "owner": "Primal Order",
+  "ru": "Ведун",
+  "en": "Magician",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "3tcUxH6eQRIBg9Kb",
+  "kind": "featureOption",
+  "book": "PHB 2024",
+  "owner": "Primal Order",
+  "ru": "Страж",
+  "en": "Warden",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "B46GsjzTsyLLgbwI",
+  "kind": "other",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Засушливые земли",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "phbWeaponMastery",
+  "kind": "other",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Оружейное мастерство",
+  "en": "Weapon Mastery",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "6SrcvXPl6pUYURMd",
+  "kind": "other",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Полярные земли",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "yXNpyh8YEPaXBAZT",
+  "kind": "other",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Тропические земли",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "27UXbJtDnWPwWrSU",
+  "kind": "other",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Умеренные земли",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "phbspAasimar0000",
+  "kind": "species",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Аасимар",
+  "en": "Aasimar",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbspGnome000000",
+  "kind": "species",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Гном",
+  "en": "Gnome",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbspTiefling000",
+  "kind": "species",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Тифлинг",
+  "en": "Tiefling",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbspElf00000000",
+  "kind": "species",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Эльф",
+  "en": "Elf",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "sCXRx51KSLQzDTp0",
+  "kind": "speciesTrait",
+  "book": "PHB 2024",
+  "owner": "Dragonborn",
+  "ru": "Наследие белого дракона",
+  "en": "White Draconic Ancestry",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "cU8RAJUNmwH9rD3Y",
+  "kind": "speciesTrait",
+  "book": "PHB 2024",
+  "owner": "Dragonborn",
+  "ru": "Наследие бронзового дракона",
+  "en": "Bronze Draconic Ancestry",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "8JdmnESQLjlr47iB",
+  "kind": "speciesTrait",
+  "book": "PHB 2024",
+  "owner": "Dragonborn",
+  "ru": "Наследие зеленого дракона",
+  "en": "Green Draconic Ancestry",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "cyt1hAhojAY6MxIz",
+  "kind": "speciesTrait",
+  "book": "PHB 2024",
+  "owner": "Dragonborn",
+  "ru": "Наследие золотого дракона",
+  "en": "Gold Draconic Ancestry",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "Vd2V9Yjtz3O7ANWa",
+  "kind": "speciesTrait",
+  "book": "PHB 2024",
+  "owner": "Dragonborn",
+  "ru": "Наследие красного дракона",
+  "en": "Red Draconic Ancestry",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "yf1jXKzJSIY1RtDh",
+  "kind": "speciesTrait",
+  "book": "PHB 2024",
+  "owner": "Dragonborn",
+  "ru": "Наследие латунного дракона",
+  "en": "Brass Draconic Ancestry",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "WWavBCXR0RqDq0WY",
+  "kind": "speciesTrait",
+  "book": "PHB 2024",
+  "owner": "Dragonborn",
+  "ru": "Наследие медного дракона",
+  "en": "Copper Draconic Ancestry",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "2vfAIGfsWM8uZBwb",
+  "kind": "speciesTrait",
+  "book": "PHB 2024",
+  "owner": "Dragonborn",
+  "ru": "Наследие серебряного дракона",
+  "en": "Silver Draconic Ancestry",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "b5E9noCxF9zvzwyG",
+  "kind": "speciesTrait",
+  "book": "PHB 2024",
+  "owner": "Dragonborn",
+  "ru": "Наследие синего дракона",
+  "en": "Blue Draconic Ancestry",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "zkR029BiViLV4eOw",
+  "kind": "speciesTrait",
+  "book": "PHB 2024",
+  "owner": "Dragonborn",
+  "ru": "Наследие черного дракона",
+  "en": "Black Draconic Ancestry",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "JXTcQQTyhjMlZI9w",
+  "kind": "speciesTrait",
+  "book": "PHB 2024",
+  "owner": "Elf",
+  "ru": "Дроу",
+  "en": "Drow",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "PCoC1h16TF6ZPm7p",
+  "kind": "speciesTrait",
+  "book": "PHB 2024",
+  "owner": "Gnome",
+  "ru": "Лесной гном",
+  "en": "Forest Gnome",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "z8MAIYnHaBPO1sO2",
+  "kind": "speciesTrait",
+  "book": "PHB 2024",
+  "owner": "Gnome",
+  "ru": "Скальный гном",
+  "en": "Rock Gnome",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "BSrrVQ6bOnSEKgkx",
+  "kind": "speciesTrait",
+  "book": "PHB 2024",
+  "owner": "Goliath",
+  "ru": "Гром бури (Штормовой великан)",
+  "en": "Storm's Thunder (Storm Giant)",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "r8mLJQzIfDMNExNL",
+  "kind": "speciesTrait",
+  "book": "PHB 2024",
+  "owner": "Goliath",
+  "ru": "Дыхание мороза (Морозный великан)",
+  "en": "Frost's Chill (Frost Giant)",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "AGZbYjWT9mggwXNy",
+  "kind": "speciesTrait",
+  "book": "PHB 2024",
+  "owner": "Goliath",
+  "ru": "Крепость камня (Каменный великан)",
+  "en": "Stone's Endurance (Stone Giant)",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "jJvLYtDbyV1fa03g",
+  "kind": "speciesTrait",
+  "book": "PHB 2024",
+  "owner": "Goliath",
+  "ru": "Огненное клеймо (Огненный великан)",
+  "en": "Fire's Burn (Fire Giant)",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "QAsvSTMTTzw7mYvP",
+  "kind": "speciesTrait",
+  "book": "PHB 2024",
+  "owner": "Goliath",
+  "ru": "Падение с холма (Холмовой великан)",
+  "en": "Hill's Tumble (Hill Giant)",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "RSW38jObGiCyujgn",
+  "kind": "speciesTrait",
+  "book": "PHB 2024",
+  "owner": "Goliath",
+  "ru": "Прогулка по облакам (Облачный великан)",
+  "en": "Cloud's Jaunt (Cloud Giant)",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "GWthOaWlxH6VuJad",
+  "kind": "speciesTrait",
+  "book": "PHB 2024",
+  "owner": "Tiefling",
+  "ru": "Демоническое наследие",
+  "en": "Abyss Fiendish Legacy",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "0NSFgl1BYp09P7Lf",
+  "kind": "speciesTrait",
+  "book": "PHB 2024",
+  "owner": "Tiefling",
+  "ru": "Дьявольское наследие",
+  "en": "Infernal Fiendish Legacy",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "Ret8vQDY36TzqWcn",
+  "kind": "speciesTrait",
+  "book": "PHB 2024",
+  "owner": "Tiefling",
+  "ru": "Хтоническое наследие",
+  "en": "Chthonic Fiendish Legacy",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "ch5PqeMQdjpQDLCU",
+  "kind": "subclassFeature",
+  "book": "PHB 2024",
+  "owner": "Beast Master",
+  "ru": "Исключительная дрессировка",
+  "en": "Exeptional Training",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbscrSpellsCloc",
+  "kind": "subclassFeature",
+  "book": "PHB 2024",
+  "owner": "Clockwork Sorcery",
+  "ru": "Заводные заклинания",
+  "en": "Clockwork Spells",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbscrAberrantSo",
+  "kind": "subclasses",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Аберрантное чародейство",
+  "en": "Aberrant Sorcery",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbrgeAssassin00",
+  "kind": "subclasses",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Ассасин",
+  "en": "Assassin",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbmnkMercyWarri",
+  "kind": "subclasses",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Воин Милосердия",
+  "en": "Warrior of Mercy",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbmnkElementsWa",
+  "kind": "subclasses",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Воин Стихий",
+  "en": "Warrior of the Elements",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbmnkShadowWarr",
+  "kind": "subclasses",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Воин Тени",
+  "en": "Warrior of Shadow",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbclcWarDomain0",
+  "kind": "subclasses",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Домен войны",
+  "en": "War Domain",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbclcTrickeryDo",
+  "kind": "subclasses",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Домен обмана",
+  "en": "Trickery Domain",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbclcLightDomai",
+  "kind": "subclasses",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Домен света",
+  "en": "Light Domain",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbscrClockworkS",
+  "kind": "subclasses",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Заводное чародейство",
+  "en": "Clockwork Sorcery",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbwzdIllusionis",
+  "kind": "subclasses",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Иллюзионист",
+  "en": "Illusionist",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbrgeSoulknife0",
+  "kind": "subclasses",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Клинок душ",
+  "en": "Soulknife",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbpdnOathOfVeng",
+  "kind": "subclasses",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Клятва возмездия",
+  "en": "Oath of Vengeance",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbpdnOathOfTheA",
+  "kind": "subclasses",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Клятва древних",
+  "en": "Oath of the Ancients",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbpdnOathOfGlor",
+  "kind": "subclasses",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Клятва славы",
+  "en": "Oath of Glory",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbbrdValor00000",
+  "kind": "subclasses",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Коллегия Отваги",
+  "en": "College of Valor",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbbrdGlamour000",
+  "kind": "subclasses",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Коллегия Очарования",
+  "en": "College of Glamour",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbbrdDance00000",
+  "kind": "subclasses",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Коллегия Танца",
+  "en": "College of Dance",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbdrdCirstars00",
+  "kind": "subclasses",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Круг Звёзд",
+  "en": "Circle of the Stars",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbdrdCirmoon000",
+  "kind": "subclasses",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Круг Луны",
+  "en": "Circle of the Moon",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbdrdCirsea0000",
+  "kind": "subclasses",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Круг Моря",
+  "en": "Circle of the Sea",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbwzdAbjurer000",
+  "kind": "subclasses",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Мастер Преграждения",
+  "en": "Abjurer",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftrBattleMast",
+  "kind": "subclasses",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Мастер битвы",
+  "en": "Battle Master",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbrgeArcaneTric",
+  "kind": "subclasses",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Мистический трикстер",
+  "en": "Arcane Trickster",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbrgrBeastMaste",
+  "kind": "subclasses",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Повелитель зверей",
+  "en": "Beast Master",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbwlkArchfeyPat",
+  "kind": "subclasses",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Покровительство Архифеи",
+  "en": "Archfey Patron",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbwlkGreatOldOn",
+  "kind": "subclasses",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Покровительство Великого Древнего",
+  "en": "Great Old One Patron",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbwlkCelestialP",
+  "kind": "subclasses",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Покровительство Небожителя",
+  "en": "Celestial Patron",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftrEldritchKn",
+  "kind": "subclasses",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Потусторонний рыцарь",
+  "en": "Eldritch Knight",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbwzdDiviner000",
+  "kind": "subclasses",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Прорицатель",
+  "en": "Diviner",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbftrPsiWarrior",
+  "kind": "subclasses",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Пси-воин",
+  "en": "Psi Warrior",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbbrbWorldTree0",
+  "kind": "subclasses",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Путь Мирового Древа",
+  "en": "Path of the World Tree",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbbrbWildHeart0",
+  "kind": "subclasses",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Путь дикого сердца",
+  "en": "Path of the Wild Heart",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbbrbZealot0000",
+  "kind": "subclasses",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Путь фанатика",
+  "en": "Path of the Zealot",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbrgrFeyWander0",
+  "kind": "subclasses",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Странник фей",
+  "en": "Fey Wanderer",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbrgrGloomStalk",
+  "kind": "subclasses",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Сумрачный охотник",
+  "en": "Gloom Stalker",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "phbscrWildMagicS",
+  "kind": "subclasses",
+  "book": "PHB 2024",
+  "owner": "",
+  "ru": "Чародейство дикой магии",
+  "en": "Wild Magic Sorcery",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "abohVampireSurvi",
+  "kind": "backgrounds",
+  "book": "ABoH",
+  "owner": "",
+  "ru": "Выживший среди вампиров",
+  "en": "Vampire Survivor",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "abohCarouser0000",
+  "kind": "backgrounds",
+  "book": "ABoH",
+  "owner": "",
+  "ru": "Кутила",
+  "en": "Carouser",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "abohVampireDevot",
+  "kind": "backgrounds",
+  "book": "ABoH",
+  "owner": "",
+  "ru": "Слуга вампиров",
+  "en": "Vampire Devotee",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "abohBomber000000",
+  "kind": "feat",
+  "book": "ABoH",
+  "owner": "",
+  "ru": "Бомбардир",
+  "en": "Bomber",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "abohRebuke000000",
+  "kind": "feat",
+  "book": "ABoH",
+  "owner": "",
+  "ru": "Возмездие",
+  "en": "Rebuke",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "abohDeliciousPai",
+  "kind": "feat",
+  "book": "ABoH",
+  "owner": "",
+  "ru": "Восхитительная боль",
+  "en": "Delicious Pain",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "abohPutrefy00000",
+  "kind": "feat",
+  "book": "ABoH",
+  "owner": "",
+  "ru": "Гниение",
+  "en": "Putrefy",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "abohBoonOfLoomin",
+  "kind": "feat",
+  "book": "ABoH",
+  "owner": "",
+  "ru": "Дар надвигающихся теней",
+  "en": "Boon of Looming Shadows",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "abohBoonOfBlazin",
+  "kind": "feat",
+  "book": "ABoH",
+  "owner": "",
+  "ru": "Дар пылающей зари",
+  "en": "Boon of Blazing Dawn",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "abohBoonOfMistyE",
+  "kind": "feat",
+  "book": "ABoH",
+  "owner": "",
+  "ru": "Дар туманного бегства",
+  "en": "Boon of Misty Escape",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "abohTreacheousAl",
+  "kind": "feat",
+  "book": "ABoH",
+  "owner": "",
+  "ru": "Коварное обаяние",
+  "en": "Treacheous Allure",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "abohBloodlust000",
+  "kind": "feat",
+  "book": "ABoH",
+  "owner": "",
+  "ru": "Кровожадность",
+  "en": "Bloodlust",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "abohVampireTouch",
+  "kind": "feat",
+  "book": "ABoH",
+  "owner": "",
+  "ru": "Отмеченный вампиром",
+  "en": "Vampire Touched",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "abohCloyingMists",
+  "kind": "feat",
+  "book": "ABoH",
+  "owner": "",
+  "ru": "Приторные туманы",
+  "en": "Cloying Mists",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "abohLightBringer",
+  "kind": "feat",
+  "book": "ABoH",
+  "owner": "",
+  "ru": "Светоносец",
+  "en": "Light Bringer",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "abohLoveBites000",
+  "kind": "feat",
+  "book": "ABoH",
+  "owner": "",
+  "ru": "Укус любовника",
+  "en": "Love Bites",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "abohTirelessReve",
+  "kind": "feat",
+  "book": "ABoH",
+  "owner": "Carouser",
+  "ru": "Неутомимый гуляка",
+  "en": "Tireless Reveler",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "abohVampiresPlay",
+  "kind": "feat",
+  "book": "ABoH",
+  "owner": "Vampire Devotee",
+  "ru": "Вампирская игрушка",
+  "en": "Vampire's Plaything",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "abohVampireHunte",
+  "kind": "feat",
+  "book": "ABoH",
+  "owner": "Vampire Survivor",
+  "ru": "Охотник на вампиров",
+  "en": "Vampire Hunter",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "abohDhampir00000",
+  "kind": "species",
+  "book": "ABoH",
+  "owner": "",
+  "ru": "Дампир",
+  "en": "Dhampir",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "abohSpiderClimb0",
+  "kind": "speciesTrait",
+  "book": "ABoH",
+  "owner": "Dhampir",
+  "ru": "Паучьи лапы",
+  "en": "Spider Climb",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "abohVampiricBite",
+  "kind": "speciesTrait",
+  "book": "ABoH",
+  "owner": "Dhampir",
+  "ru": "Укус вампира",
+  "en": "Vampiric Bite",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "srPmLxgH0cQBUgsU",
+  "kind": "backgrounds",
+  "book": "DMG 2024",
+  "owner": "",
+  "ru": "Своя предыстория",
+  "en": "Custom Background",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "oD0GHvYX57ftQMBr",
+  "kind": "classOption",
+  "book": "EE",
+  "owner": "Alchemist",
+  "ru": "Безупречные эликсиры",
+  "en": "Perfected Elixirs",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "ikABTC2n0nqSh1MU",
+  "kind": "classOption",
+  "book": "EE",
+  "owner": "Armorer",
+  "ru": "Перегрузка",
+  "en": "Overcharge",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "eda012JKbMQeMaoZ",
+  "kind": "classOption",
+  "book": "EE",
+  "owner": "Artillerist",
+  "ru": "Инфузированная пушка",
+  "en": "Infused Cannon",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "ZHVFSDF8KqR9lYRc",
+  "kind": "classOption",
+  "book": "EE",
+  "owner": "Battle Smith",
+  "ru": "Стальной авангард",
+  "en": "Steel Vanguard",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "YSR25KaSTVTPN1qM",
+  "kind": "classOption",
+  "book": "EE",
+  "owner": "Cartographer",
+  "ru": "Странствия повсюду",
+  "en": "Travel Anywhere",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "lOcMLb1FkSLo1sI0",
+  "kind": "classOption",
+  "book": "EE",
+  "owner": "Forge Adept",
+  "ru": "Легендарное оружие",
+  "en": "Weapon of Legend",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "giIcsozvn0LOUxM8",
+  "kind": "classOption",
+  "book": "EE",
+  "owner": "Maverick",
+  "ru": "Продвинутый гений",
+  "en": "Improved Genius",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "isWEBcaUyYhFfTAE",
+  "kind": "classOption",
+  "book": "EE",
+  "owner": "Warrior of the Living Weapon",
+  "ru": "Закалённое сердце",
+  "en": "Forged Heart",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "PJimcACD0JxUV8ye",
+  "kind": "classOption",
+  "book": "EE",
+  "owner": "Warrior of the Living Weapon",
+  "ru": "Затронутый оборотнем",
+  "en": "Weretouched",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "17ULx2Are9VnCKZZ",
+  "kind": "classOption",
+  "book": "EE",
+  "owner": "Warrior of the Living Weapon",
+  "ru": "Клинок странника",
+  "en": "Traveler's Blade",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "5SOvxkcRLNWEpgP3",
+  "kind": "classOption",
+  "book": "EE",
+  "owner": "Warrior of the Living Weapon",
+  "ru": "Кошмарный покров",
+  "en": "Nightmare Shroud",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "Du9EaqxYCRWGHvPY",
+  "kind": "feat",
+  "book": "EE",
+  "owner": "",
+  "ru": "Адаптация к воде",
+  "en": "Aquatic Adaptation",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "yRxkS6wg80muLUGQ",
+  "kind": "feat",
+  "book": "EE",
+  "owner": "",
+  "ru": "Метаморфоза подменыша",
+  "en": "Changeling Metamorphosis",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "ullwkRnpuEHSX03l",
+  "kind": "feat",
+  "book": "EE",
+  "owner": "",
+  "ru": "Певец разума",
+  "en": "Thoughtsinger",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "2bKeflMDf755F1AO",
+  "kind": "feat",
+  "book": "EE",
+  "owner": "",
+  "ru": "Покрытие джаггернаута",
+  "en": "Juggernaut Plating",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "1Smkq8hoxcHW4kZ6",
+  "kind": "feat",
+  "book": "EE",
+  "owner": "",
+  "ru": "Посланник-специалист",
+  "en": "Envoy Specialist",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "EfOtFzatZvVlVyyn",
+  "kind": "feat",
+  "book": "EE",
+  "owner": "",
+  "ru": "Превосходный оборот",
+  "en": "Superior Shifting",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "4mVjahFpIIYFi5of",
+  "kind": "feat",
+  "book": "EE",
+  "owner": "",
+  "ru": "Разносторонние личности",
+  "en": "Focused Personas",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "ZfJ3twRWQmFGFq90",
+  "kind": "feat",
+  "book": "EE",
+  "owner": "",
+  "ru": "Узы куори",
+  "en": "Quori Bond",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "p5z5IAnzJWBzCYBO",
+  "kind": "feat",
+  "book": "EE",
+  "owner": "",
+  "ru": "Уул Дакаан",
+  "en": "Uul Dhakaah",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "uEwDSDNaTAjOOphF",
+  "kind": "feat",
+  "book": "EE",
+  "owner": "",
+  "ru": "Хеш'дарское обучение",
+  "en": "Khesh'dar Training",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "ZknWbei7EaVglUbw",
+  "kind": "feat",
+  "book": "EE",
+  "owner": "",
+  "ru": "Эреналская полужизнь",
+  "en": "Aereni Half-Life",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "3XN1E7fBROe7eTYZ",
+  "kind": "feat",
+  "book": "EE",
+  "owner": "",
+  "ru": "Эреналская экспертность",
+  "en": "Aereni Expertise",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "iFR8wO87kOXQXKeK",
+  "kind": "featureOption",
+  "book": "EE",
+  "owner": "Quori Bond",
+  "ru": "Узы ду'улора",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "FsQNprO3yPI1YsZR",
+  "kind": "featureOption",
+  "book": "EE",
+  "owner": "Quori Bond",
+  "ru": "Узы каларак",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "UC0qfKihXzyt9zUH",
+  "kind": "featureOption",
+  "book": "EE",
+  "owner": "Quori Bond",
+  "ru": "Узы хашалак",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "FZFQFamC6atkfRPt",
+  "kind": "featureOption",
+  "book": "EE",
+  "owner": "Quori Bond",
+  "ru": "Узы цукора",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "2DXThpbzGmKXTP6g",
+  "kind": "item",
+  "book": "EE",
+  "owner": "",
+  "ru": "Эликсир жизненной силы",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "73MITIjy2d7qrnl4",
+  "kind": "item",
+  "book": "EE",
+  "owner": "",
+  "ru": "Эликсир панацеи",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "dv3562BW7nFSnhBG",
+  "kind": "item",
+  "book": "EE",
+  "owner": "Gnoll",
+  "ru": "Укус",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "ZAvRCJjD0g9orF1A",
+  "kind": "species",
+  "book": "EE",
+  "owner": "",
+  "ru": "Аасимар (Эберрон)",
+  "en": "Aasimar (Eberron)",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "JpOgY1GAp3AY8jQb",
+  "kind": "species",
+  "book": "EE",
+  "owner": "",
+  "ru": "Гибельный",
+  "en": "Ruinbound",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "UJlJQIHxOd6axQM0",
+  "kind": "species",
+  "book": "EE",
+  "owner": "",
+  "ru": "Гнолл",
+  "en": "Gnoll",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "1oNZ6ik9cibqPy7f",
+  "kind": "species",
+  "book": "EE",
+  "owner": "",
+  "ru": "Дакаанец-гаал'дар (хобгоблин)",
+  "en": "Dhakaani Ghaal'dar (Hobgoblin)",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "GJf0oWNYFXUVrsBh",
+  "kind": "species",
+  "book": "EE",
+  "owner": "",
+  "ru": "Дакаанец-голин'дар (гоблин)",
+  "en": "Dhakaani Golin'dar (Goblin)",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "sucOjkME4W5CnUbf",
+  "kind": "species",
+  "book": "EE",
+  "owner": "",
+  "ru": "Дакаанец-гуул'дар (багбер)",
+  "en": "Dhakaani Guul'dar (Bugbear)",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "pkCSmIsvi4c5RcLj",
+  "kind": "species",
+  "book": "EE",
+  "owner": "",
+  "ru": "Йоргун'таал (полуорк)",
+  "en": "Jhorgun'taal (Half-Orc)",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "m2za2oezQZSVVh1T",
+  "kind": "species",
+  "book": "EE",
+  "owner": "",
+  "ru": "Сахваджин",
+  "en": "Sahuagin",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hqK8UKPtFYRClgDX",
+  "kind": "species",
+  "book": "EE",
+  "owner": "",
+  "ru": "Сухопутный каламерец (мерфолк)",
+  "en": "Kalamer Landwalker (Merfolk)",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "v7K1hSy0jCSsWQ1n",
+  "kind": "speciesTrait",
+  "book": "EE",
+  "owner": "Aasimar (Eberron)",
+  "ru": "Мабарский аасимар",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "OALLubLbxhiZ7fSR",
+  "kind": "speciesTrait",
+  "book": "EE",
+  "owner": "Aasimar (Eberron)",
+  "ru": "Стандартный аасимар",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "t6kOk6GC7wI23oj5",
+  "kind": "speciesTrait",
+  "book": "EE",
+  "owner": "Aasimar (Eberron)",
+  "ru": "Фернийский аасимар",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "LXcUs9I8uXvWUPDp",
+  "kind": "speciesTrait",
+  "book": "EE",
+  "owner": "Dhakaani Ghaal'dar (Hobgoblin)",
+  "ru": "Дисциплина",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "cojL1iOAmbg91e9c",
+  "kind": "speciesTrait",
+  "book": "EE",
+  "owner": "Dhakaani Ghaal'dar (Hobgoblin)",
+  "ru": "Сила в единстве",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "34RQYJeZlW1myRLH",
+  "kind": "speciesTrait",
+  "book": "EE",
+  "owner": "Dhakaani Golin'dar (Goblin)",
+  "ru": "Естественная скрытность",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "AsWZptI0Iy58dqFY",
+  "kind": "speciesTrait",
+  "book": "EE",
+  "owner": "Dhakaani Golin'dar (Goblin)",
+  "ru": "Проворство",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "0MzBZV42dgLxQvMo",
+  "kind": "speciesTrait",
+  "book": "EE",
+  "owner": "Dhakaani Guul'dar (Bugbear)",
+  "ru": "Длиннорукий",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "LFeodcxpQGzH8ZeW",
+  "kind": "speciesTrait",
+  "book": "EE",
+  "owner": "Dhakaani Guul'dar (Bugbear)",
+  "ru": "Могучее телосложение",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "lDTKwewco2B1ho79",
+  "kind": "speciesTrait",
+  "book": "EE",
+  "owner": "Dhakaani Guul'dar (Bugbear)",
+  "ru": "Плечом к плечу",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "xdtdzRfYQ4pKBAhn",
+  "kind": "speciesTrait",
+  "book": "EE",
+  "owner": "Dhakaani Guul'dar (Bugbear)",
+  "ru": "Храбрый",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "JMtgmS1QGi5s4yWV",
+  "kind": "speciesTrait",
+  "book": "EE",
+  "owner": "Gnoll",
+  "ru": "Буйство",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "rKvT8OC8PQ5qU8OU",
+  "kind": "speciesTrait",
+  "book": "EE",
+  "owner": "Kalamer Landwalker (Merfolk)",
+  "ru": "Амфибия",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "wXBmD5XtoidqQnaC",
+  "kind": "speciesTrait",
+  "book": "EE",
+  "owner": "Kalamer Landwalker (Merfolk)",
+  "ru": "Благословение моря",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "ocjGKWNKUcPEt3qQ",
+  "kind": "speciesTrait",
+  "book": "EE",
+  "owner": "Ruinbound",
+  "ru": "Неестественная стойкость",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "TSbYM6wHCBFWy2VK",
+  "kind": "speciesTrait",
+  "book": "EE",
+  "owner": "Ruinbound",
+  "ru": "Персональный симбионт",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "xeUelOa0bZ2QCEMl",
+  "kind": "speciesTrait",
+  "book": "EE",
+  "owner": "Ruinbound",
+  "ru": "Симбиотическое мастерство",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "JYRk4D0R50X16ydt",
+  "kind": "speciesTrait",
+  "book": "EE",
+  "owner": "Sahuagin",
+  "ru": "Быстрый пловец",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "AM857qxtvprAS7nu",
+  "kind": "speciesTrait",
+  "book": "EE",
+  "owner": "Sahuagin",
+  "ru": "Кровавое бешенство",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "yBX9YjgrV4AVLal4",
+  "kind": "speciesTrait",
+  "book": "EE",
+  "owner": "Sahuagin",
+  "ru": "Ограниченная амфибийность",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "p7T9qFfyjhT3zQ9T",
+  "kind": "speciesTrait",
+  "book": "EE",
+  "owner": "Sahuagin",
+  "ru": "Природная броня",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "fGaBIU3YloblYWYw",
+  "kind": "speciesTrait",
+  "book": "EE",
+  "owner": "Мабарский аасимар",
+  "ru": "Откровение Мабара",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "ZfqbsOIZG18vi3rA",
+  "kind": "speciesTrait",
+  "book": "EE",
+  "owner": "Фернийский аасимар",
+  "ru": "Откровение Фернии",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "nw6VFnXQYNtja3YS",
+  "kind": "subclassFeature",
+  "book": "EE",
+  "owner": "Circle of Warforged",
+  "ru": "Адамантиновая шкура",
+  "en": "Adamantine Hide",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "liHtYi890dSSH2M8",
+  "kind": "subclassFeature",
+  "book": "EE",
+  "owner": "Circle of Warforged",
+  "ru": "Безупречное творение",
+  "en": "Construction Perfection",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "OaZ5xniYSWgXodcp",
+  "kind": "subclassFeature",
+  "book": "EE",
+  "owner": "Circle of Warforged",
+  "ru": "Заклинания Круга кованых",
+  "en": "Circle of the Forged Spells",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "f8IcZtASzPgXyRR0",
+  "kind": "subclassFeature",
+  "book": "EE",
+  "owner": "Circle of Warforged",
+  "ru": "Заряженный стихией",
+  "en": "Elementally Imbued",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "EkG1jKvOP4IkW3Lu",
+  "kind": "subclassFeature",
+  "book": "EE",
+  "owner": "Circle of Warforged",
+  "ru": "Стальная шкура",
+  "en": "Skin of Steel",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "eHgKH4KySrJcQNnx",
+  "kind": "subclassFeature",
+  "book": "EE",
+  "owner": "College of Dirge Singer",
+  "ru": "Боевой гимн",
+  "en": "Battle Hymn",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "LvNCgMoOhRGHxEZp",
+  "kind": "subclassFeature",
+  "book": "EE",
+  "owner": "College of Dirge Singer",
+  "ru": "Властный голос",
+  "en": "Commanding Voice",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "kQ6oet8nIfqDxyLJ",
+  "kind": "subclassFeature",
+  "book": "EE",
+  "owner": "College of Dirge Singer",
+  "ru": "Масштабное вдохновение",
+  "en": "Broad Inspiration",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "gVqZ0hTdt4LjEaEK",
+  "kind": "subclassFeature",
+  "book": "EE",
+  "owner": "College of Dirge Singer",
+  "ru": "Хранитель истории",
+  "en": "Keeper of History",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "4DUPikYR779f8dyM",
+  "kind": "subclassFeature",
+  "book": "EE",
+  "owner": "Forge Adept",
+  "ru": "Безупречное оружие",
+  "en": "Perfect Weapon",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efabatBattleRead",
+  "kind": "subclassFeature",
+  "book": "EE",
+  "owner": "Forge Adept",
+  "ru": "Боевая готовность",
+  "en": "Battle Ready",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "jIh64d0VRzgsmRbS",
+  "kind": "subclassFeature",
+  "book": "EE",
+  "owner": "Forge Adept",
+  "ru": "Гаал'шаарат",
+  "en": "Ghaal'Shaarat",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "NJyxkzP7UOBilh40",
+  "kind": "subclassFeature",
+  "book": "EE",
+  "owner": "Forge Adept",
+  "ru": "Дополнительная атака",
+  "en": "Extra Attack",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "jBStATmvZqncnHNA",
+  "kind": "subclassFeature",
+  "book": "EE",
+  "owner": "Forge Adept",
+  "ru": "Заклинания Мастера кузнечного дела",
+  "en": "Forge Adept Spells",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "C1T7twXmrUDCTjrj",
+  "kind": "subclassFeature",
+  "book": "EE",
+  "owner": "Forge Adept",
+  "ru": "Руны войны",
+  "en": "Runes of War",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "M36REfkNADmK7GqL",
+  "kind": "subclassFeature",
+  "book": "EE",
+  "owner": "Forge Adept",
+  "ru": "Умение в инструментах",
+  "en": "Tool Proficiency",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "mpIcdlbnnnixNUh2",
+  "kind": "subclassFeature",
+  "book": "EE",
+  "owner": "Maverick",
+  "ru": "Волшебный прототип",
+  "en": "Arcane Prototype",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "Bre7sOGTG2WVKQ0w",
+  "kind": "subclassFeature",
+  "book": "EE",
+  "owner": "Maverick",
+  "ru": "Заклинания Инакомыслящего",
+  "en": "Maverick Spells",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "ji7WyQGVqH1l767H",
+  "kind": "subclassFeature",
+  "book": "EE",
+  "owner": "Maverick",
+  "ru": "Работа в процессе",
+  "en": "Work in Process",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "uUQbzaGDcGlIsKic",
+  "kind": "subclassFeature",
+  "book": "EE",
+  "owner": "Maverick",
+  "ru": "Тонкая настройка",
+  "en": "Fine Tuning",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "tjnJ6PHLujOsxNNT",
+  "kind": "subclassFeature",
+  "book": "EE",
+  "owner": "Maverick",
+  "ru": "Умение в инструментах",
+  "en": "Tool Proficiency",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "CJ8ghZHFCXCPCM5Q",
+  "kind": "subclassFeature",
+  "book": "EE",
+  "owner": "Maverick",
+  "ru": "Финальный прорыв",
+  "en": "Final Breakthrough",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "Om1n8Gg5ZKCdkkGc",
+  "kind": "subclassFeature",
+  "book": "EE",
+  "owner": "Mind Domain",
+  "ru": "Заклинания Домена разума",
+  "en": "Mind Domain Spells",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "fR4iI7lXeSsC82oj",
+  "kind": "subclassFeature",
+  "book": "EE",
+  "owner": "Mind Domain",
+  "ru": "Искривление реальности",
+  "en": "Bend Reality",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "9hQsEXHwgdkLMmBV",
+  "kind": "subclassFeature",
+  "book": "EE",
+  "owner": "Mind Domain",
+  "ru": "Психическая отдача",
+  "en": "Psychic Feedback",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "uXHB5PkOIIyLEw5A",
+  "kind": "subclassFeature",
+  "book": "EE",
+  "owner": "Mind Domain",
+  "ru": "Психическая сила",
+  "en": "Psychic Force",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "mSpZ0lUbi7lYveCP",
+  "kind": "subclassFeature",
+  "book": "EE",
+  "owner": "Mind Domain",
+  "ru": "Якорь сознаний",
+  "en": "Gestalt Anchor",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "KJs5OLcsRmLr93jk",
+  "kind": "subclassFeature",
+  "book": "EE",
+  "owner": "Warrior of the Living Weapon",
+  "ru": "Воинский облик",
+  "en": "Martial Form",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "cGPyLdNt0YxFCuoh",
+  "kind": "subclassFeature",
+  "book": "EE",
+  "owner": "Warrior of the Living Weapon",
+  "ru": "Изменчивый удар",
+  "en": "Mutable Strike",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "p6xRc3P0xwzTS3Nn",
+  "kind": "subclassFeature",
+  "book": "EE",
+  "owner": "Warrior of the Living Weapon",
+  "ru": "Пробуждённый удар",
+  "en": "Manifest Blow",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "XH57hTQgzEJiDkqc",
+  "kind": "subclassFeature",
+  "book": "EE",
+  "owner": "Warrior of the Living Weapon",
+  "ru": "Рефлексивная адаптация",
+  "en": "Reflexive Adaptation",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "QfRISfmISKhEEX4q",
+  "kind": "subclassFeature",
+  "book": "EE",
+  "owner": "Warrior of the Living Weapon",
+  "ru": "Совершенный облик",
+  "en": "Perfect Form",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "ewogcMQPGLuk5qVf",
+  "kind": "subclasses",
+  "book": "EE",
+  "owner": "",
+  "ru": "Воин живого оружия",
+  "en": "Warrior of the Living Weapon",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "J0xtlUKBlfDHHLMy",
+  "kind": "subclasses",
+  "book": "EE",
+  "owner": "",
+  "ru": "Домен разума",
+  "en": "Mind Domain",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "DzkfbxyAkFSLnKl5",
+  "kind": "subclasses",
+  "book": "EE",
+  "owner": "",
+  "ru": "Инакомыслящий",
+  "en": "Maverick",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "aY0YhMPA1RLTd6T2",
+  "kind": "subclasses",
+  "book": "EE",
+  "owner": "",
+  "ru": "Коллегия плакальщиков",
+  "en": "College of Dirge Singer",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "4TUI4MIhGwvom6cI",
+  "kind": "subclasses",
+  "book": "EE",
+  "owner": "",
+  "ru": "Круг кованых",
+  "en": "Circle of Warforged",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "HqF0grfRNc1dXb6t",
+  "kind": "subclasses",
+  "book": "EE",
+  "owner": "",
+  "ru": "Мастер кузнечного дела",
+  "en": "Forge Adept",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaAberrantHeir0",
+  "kind": "backgrounds",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Аберрантный наследник",
+  "en": "Aberrant Heir",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaHouseAgent000",
+  "kind": "backgrounds",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Агент дома",
+  "en": "House Agent",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaArchaeologist",
+  "kind": "backgrounds",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Археолог",
+  "en": "Archaeologist",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaHouseVadalisH",
+  "kind": "backgrounds",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Наследник дома Вадалис",
+  "en": "House Vadalis Heir",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaHouseGhalland",
+  "kind": "backgrounds",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Наследник дома Галланда",
+  "en": "House Ghallanda Heir",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaHouseDeneithH",
+  "kind": "backgrounds",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Наследник дома Денейт",
+  "en": "House Deneith Heir",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaHouseJorascoH",
+  "kind": "backgrounds",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Наследник дома Джораско",
+  "en": "House Jorasco Heir",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaHouseCannithH",
+  "kind": "backgrounds",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Наследник дома Каннит",
+  "en": "House Cannith Heir",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaHouseKundarak",
+  "kind": "backgrounds",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Наследник дома Кундарак",
+  "en": "House Kundarak Heir",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaHouseLyrandar",
+  "kind": "backgrounds",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Наследник дома Лирандар",
+  "en": "House Lyrandar Heir",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaHouseMedaniHe",
+  "kind": "backgrounds",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Наследник дома Медани",
+  "en": "House Medani Heir",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaHouseOrienHei",
+  "kind": "backgrounds",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Наследник дома Ориен",
+  "en": "House Orien Heir",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaHouseSivisHei",
+  "kind": "backgrounds",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Наследник дома Сивис",
+  "en": "House Sivis Heir",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaHouseTharashk",
+  "kind": "backgrounds",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Наследник дома Тарашк",
+  "en": "House Tharashk Heir",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaHouseThuranni",
+  "kind": "backgrounds",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Наследник дома Туранни",
+  "en": "House Thuranni Heir",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaHousePhiarlan",
+  "kind": "backgrounds",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Наследник дома Фаэрлан",
+  "en": "House Phiarlan Heir",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaInquisitive00",
+  "kind": "backgrounds",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Сыщик",
+  "en": "Inquisitive",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaMagicItemAdep",
+  "kind": "classFeature",
+  "book": "EFA",
+  "owner": "Artificer",
+  "ru": "Адепт магических предметов",
+  "en": "Magic Item Adept",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaSpellcasting0",
+  "kind": "classFeature",
+  "book": "EFA",
+  "owner": "Artificer",
+  "ru": "Заклинания",
+  "en": "Spellcasting",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaAdvancedArtif",
+  "kind": "classFeature",
+  "book": "EFA",
+  "owner": "Artificer",
+  "ru": "Изобретательность",
+  "en": "Advanced Artifice",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaTinkersMagic0",
+  "kind": "classFeature",
+  "book": "EFA",
+  "owner": "Artificer",
+  "ru": "Магия механика",
+  "en": "Tinker's Magic",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaMagicItemMast",
+  "kind": "classFeature",
+  "book": "EFA",
+  "owner": "Artificer",
+  "ru": "Мастер магических предметов",
+  "en": "Magic Item Master",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaFlashofGenius",
+  "kind": "classFeature",
+  "book": "EFA",
+  "owner": "Artificer",
+  "ru": "Проблеск гениальности",
+  "en": "Flash of Genius",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaReplicateMagi",
+  "kind": "classFeature",
+  "book": "EFA",
+  "owner": "Artificer",
+  "ru": "Реплики магических предметов",
+  "en": "Replicate Magic Item",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaMagicItemTink",
+  "kind": "classFeature",
+  "book": "EFA",
+  "owner": "Artificer",
+  "ru": "Творец магических предметов",
+  "en": "Magic Item Tinker",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaSpellStoringI",
+  "kind": "classFeature",
+  "book": "EFA",
+  "owner": "Artificer",
+  "ru": "Хранящий заклинания предмет",
+  "en": "Spell-Storing Item",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP2AlchemyJug0",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Алхимический кувшин",
+  "en": "Alchemy Jug",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP2BagofHoldin",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Бездонная сумка",
+  "en": "Bag of Holding",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP2WrapsofUnar",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Бинты безоружной силы +1",
+  "en": "Wraps of Unarmed Power, +1",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP10WrapsofUna",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Бинты безоружной силы +2",
+  "en": "Wraps of Unarmed Power, +2",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP6Armor100000",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Броня +1",
+  "en": "Armor, +1",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP14Armor20000",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Броня +2",
+  "en": "Armor, +2",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP10ArmorofRes",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Броня устойчивости",
+  "en": "Armor of Resistance",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP2RopeofClimb",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Верёвка лазания",
+  "en": "Rope of Climbing",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP2ReturningWe",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Возвращающееся оружие",
+  "en": "Returning Weapon",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP2WandoftheWa",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Жезл боевого мага +1",
+  "en": "Wand of the War Mage, +1",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP10WandoftheW",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Жезл боевого мага +2",
+  "en": "Wand of the War Mage, +2",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP6WandofMagic",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Жезл волшебных стрел",
+  "en": "Wand of Magic Missiles",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP2WandofMagic",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Жезл обнаружения магии",
+  "en": "Wand of Magic Detection",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP6WandofWeb00",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Жезл паутины",
+  "en": "Wand of Web",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP2WandofSecre",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Жезл секретов",
+  "en": "Wand of Secrets",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP10DaggerofVe",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Кинжал яда",
+  "en": "Dagger of Venom",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP14RingoftheR",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Кольцо барана",
+  "en": "Ring of the Ram",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP6SpellRefuel",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Кольцо восстановления заклинаний",
+  "en": "Spell-Refueling Ring",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP14RingofProt",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Кольцо защиты",
+  "en": "Ring of Protection",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP6RingofSwimm",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Кольцо плавания",
+  "en": "Ring of Swimming",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP10RingofFeat",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Кольцо плавного падения",
+  "en": "Ring of Feather Falling",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP10RingofJump",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Кольцо прыжков",
+  "en": "Ring of Jumping",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP14RingofFree",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Кольцо свободы действий",
+  "en": "Ring of Free Action",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP10RingofMind",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Кольцо скрытого разума",
+  "en": "Ring of Mind Shielding",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP6RingofWater",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Кольцо хождения по воде",
+  "en": "Ring of Water Walking",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP10UncommonWo",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Необычный чудесный предмет (не проклятый)",
+  "en": "Uncommon Wondrous Item that isn’t cursed",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP2GogglesofNi",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Ночные очки",
+  "en": "Goggles of Night",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP2Commonmagic",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Обычный магический предмет (не зелье, не свиток и не проклятый)",
+  "en": "Common magic item that isn’t a Potion, a Scroll, or cursed",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP6NecklaceofA",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Ожерелье адаптации",
+  "en": "Necklace of Adaptation",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP2Weapon10000",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Оружие +1",
+  "en": "Weapon, +1",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP10Weapon2000",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Оружие +2",
+  "en": "Weapon, +2",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP6DazzlingWea",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Ослепительное оружие",
+  "en": "Dazzling Weapon",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP6RepulsionSh",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Отторгающий щит",
+  "en": "Repulsion Shield",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP6EyesofMinut",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Очки детального зрения",
+  "en": "Eyes of Minute Seeing",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP6EyesofCharm",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Очки обворожения",
+  "en": "Eyes of Charming",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP6GlovesofThi",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Перчатки воровства",
+  "en": "Gloves of Thievery",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP6CloakoftheM",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Плащ ската",
+  "en": "Cloak of the Manta Ray",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP2RepeatingSh",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Повторный выстрел",
+  "en": "Repeating Shot",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP2SendingSton",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Посыльные камни",
+  "en": "Sending Stones",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP6WeaponofWar",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Предупреждающее оружие",
+  "en": "Weapon of Warning",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP14RareWondro",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Редкий чудесный предмет (не проклятый)",
+  "en": "Rare Wondrous Item that isn’t cursed",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP6BootsoftheW",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Сапоги извилистого пути",
+  "en": "Boots of the Winding Path",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP2ManifoldToo",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Универсальный инструмент",
+  "en": "Manifold Tool",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP6MindSharpen",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Усилитель разума",
+  "en": "Mind Sharpener",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP6PipesofHaun",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Флейта ужаса",
+  "en": "Pipes of Haunting",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP6LanternofRe",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Фонарь разоблачения",
+  "en": "Lantern of Revealing",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP2CapofWaterB",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Шапка дыхания под водой",
+  "en": "Cap of Water Breathing",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP6HelmofAware",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Шлем осведомлённости",
+  "en": "Helm of Awareness",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP2Shield10000",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Щит +1",
+  "en": "Shield, +1",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP10Shield2000",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Щит +2",
+  "en": "Shield, +2",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP14ArrowCatch",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Щит ловли стрел",
+  "en": "Arrow-Catching Shield",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP6SentinelShi",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Щит-часовой",
+  "en": "Sentinel Shield",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP10ElvenChain",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Эльфийская кольчуга",
+  "en": "Elven Chain",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP6BootsofElve",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Эльфийские сапоги",
+  "en": "Boots of Elvenkind",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP6CloakofElve",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Эльфийский плащ",
+  "en": "Cloak of Elvenkind",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaP14FlameTongu",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Язык пламени",
+  "en": "Flame Tongue",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaSoulofArtific",
+  "kind": "classOption",
+  "book": "EFA",
+  "owner": "Alchemist",
+  "ru": "Душа творения",
+  "en": "Soul of Artifice",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaGreaterAberra",
+  "kind": "feat",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Высшая аберрантная метка",
+  "en": "Greater Aberrant Mark",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaGreaterStorm0",
+  "kind": "feat",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Высшая метка бури",
+  "en": "Greater Mark of Storm",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaGreaterSentin",
+  "kind": "feat",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Высшая метка дозорного",
+  "en": "Greater Mark of Sentinel",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaGreaterHandli",
+  "kind": "feat",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Высшая метка дрессировки",
+  "en": "Greater Mark of Handling",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaGreaterHealin",
+  "kind": "feat",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Высшая метка исцеления",
+  "en": "Greater Mark of Healing",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaGreaterDetect",
+  "kind": "feat",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Высшая метка обнаружения",
+  "en": "Greater Mark of Detection",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaGreaterWardin",
+  "kind": "feat",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Высшая метка охраны",
+  "en": "Greater Mark of Warding",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaGreaterScribi",
+  "kind": "feat",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Высшая метка письма",
+  "en": "Greater Mark of Scribing",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaGreaterFindin",
+  "kind": "feat",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Высшая метка поиска",
+  "en": "Greater Mark of Finding",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaGreaterPassag",
+  "kind": "feat",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Высшая метка прохода",
+  "en": "Greater Mark of Passage",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaGreaterHospit",
+  "kind": "feat",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Высшая метка радушия",
+  "en": "Greater Mark of Hospitality",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaGreaterMaking",
+  "kind": "feat",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Высшая метка творения",
+  "en": "Greater Mark of Making",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaGreaterShadow",
+  "kind": "feat",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Высшая метка тени",
+  "en": "Greater Mark of Shadow",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaBoonofSiberys",
+  "kind": "feat",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Дар Сиберис",
+  "en": "Boon of Siberys",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaPotentDragonm",
+  "kind": "feat",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Могущественная метка дракона",
+  "en": "Potent Dragonmark",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaAberrantDrago",
+  "kind": "feat",
+  "book": "EFA",
+  "owner": "Aberrant Heir",
+  "ru": "Аберрантная метка дракона",
+  "en": "Aberrant Dragonmark",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaMarkMaking000",
+  "kind": "feat",
+  "book": "EFA",
+  "owner": "House Cannith Heir",
+  "ru": "Метка творения",
+  "en": "Mark of Making",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaMarkSentinel0",
+  "kind": "feat",
+  "book": "EFA",
+  "owner": "House Deneith Heir",
+  "ru": "Метка дозорного",
+  "en": "Mark of Sentinel",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaMarkHospitali",
+  "kind": "feat",
+  "book": "EFA",
+  "owner": "House Ghallanda Heir",
+  "ru": "Метка радушия",
+  "en": "Mark of Hospitality",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaMarkHealing00",
+  "kind": "feat",
+  "book": "EFA",
+  "owner": "House Jorasco Heir",
+  "ru": "Метка исцеления",
+  "en": "Mark of Healing",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaMarkWarding00",
+  "kind": "feat",
+  "book": "EFA",
+  "owner": "House Kundarak Heir",
+  "ru": "Метка охраны",
+  "en": "Mark of Warding",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaMarkStorm0000",
+  "kind": "feat",
+  "book": "EFA",
+  "owner": "House Lyrandar Heir",
+  "ru": "Метка бури",
+  "en": "Mark of Storm",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaMarkDetection",
+  "kind": "feat",
+  "book": "EFA",
+  "owner": "House Medani Heir",
+  "ru": "Метка обнаружения",
+  "en": "Mark of Detection",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaMarkPassage00",
+  "kind": "feat",
+  "book": "EFA",
+  "owner": "House Orien Heir",
+  "ru": "Метка прохода",
+  "en": "Mark of Passage",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaMarkShadow000",
+  "kind": "feat",
+  "book": "EFA",
+  "owner": "House Phiarlan Heir",
+  "ru": "Метка тени",
+  "en": "Mark of Shadow",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaMarkScribing0",
+  "kind": "feat",
+  "book": "EFA",
+  "owner": "House Sivis Heir",
+  "ru": "Метка письма",
+  "en": "Mark of Scribing",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaMarkFinding00",
+  "kind": "feat",
+  "book": "EFA",
+  "owner": "House Tharashk Heir",
+  "ru": "Метка поиска",
+  "en": "Mark of Finding",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaMarkHandling0",
+  "kind": "feat",
+  "book": "EFA",
+  "owner": "House Vadalis Heir",
+  "ru": "Метка дрессировки",
+  "en": "Mark of Handling",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "7QXGBbuUpyHPerFc",
+  "kind": "item",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Дредноут",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "NYgrddc7Htr5x1nD",
+  "kind": "item",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Лазутчик",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "NEvtMxotladx4acT",
+  "kind": "item",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Страж",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "4b4Sa64G7smsrshi",
+  "kind": "item",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Эликсир исцеления",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "WSJDc0XBCxybTVNH",
+  "kind": "item",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Эликсир полёта",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "c2kXNpDoiuHM2sJc",
+  "kind": "item",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Эликсир проворности",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "itaXye5agsK08WYK",
+  "kind": "item",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Эликсир смелости",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "pnqqcJwQcA35wOwS",
+  "kind": "item",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Эликсир стойкости",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "efaArtificerSubc",
+  "kind": "other",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Подкласс Артефактора",
+  "en": "Artificer Subclass",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaKalashtar0000",
+  "kind": "species",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Калаштар",
+  "en": "Kalashtar",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaWarforged0000",
+  "kind": "species",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Кованый",
+  "en": "Warforged",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaChangeling000",
+  "kind": "species",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Подменыш",
+  "en": "Changeling",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaKhoravar00000",
+  "kind": "species",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Хоравар",
+  "en": "Khoravar",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaShifter000000",
+  "kind": "species",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Шифтер",
+  "en": "Shifter",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "49tawnZlpSBBKMlM",
+  "kind": "speciesTrait",
+  "book": "EFA",
+  "owner": "Changeling",
+  "ru": "Перевёртыш",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "ZFi3duMRGwh0qebf",
+  "kind": "speciesTrait",
+  "book": "EFA",
+  "owner": "Kalashtar",
+  "ru": "Двойственный разум",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "LNhRSNdpWUzCHVl1",
+  "kind": "speciesTrait",
+  "book": "EFA",
+  "owner": "Kalashtar",
+  "ru": "Ментальная дисциплина",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "3yc608qQ8edrjJot",
+  "kind": "speciesTrait",
+  "book": "EFA",
+  "owner": "Kalashtar",
+  "ru": "Отстранённый от снов",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "Ri9FJMmpNt3njymP",
+  "kind": "speciesTrait",
+  "book": "EFA",
+  "owner": "Kalashtar",
+  "ru": "Связь разумов",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "O4ge1LzHjRcszHtH",
+  "kind": "speciesTrait",
+  "book": "EFA",
+  "owner": "Khoravar",
+  "ru": "Дар фей",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "OgvxXMrnIPvIOw2S",
+  "kind": "speciesTrait",
+  "book": "EFA",
+  "owner": "Khoravar",
+  "ru": "Наследие фей",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "jORqbYzD3qGRNSMK",
+  "kind": "speciesTrait",
+  "book": "EFA",
+  "owner": "Khoravar",
+  "ru": "Универсальный навык",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "BzxBRSKYuXMEdNm0",
+  "kind": "speciesTrait",
+  "book": "EFA",
+  "owner": "Khoravar",
+  "ru": "Устойчивость к летаргии",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "8d70uAtvxArJePzf",
+  "kind": "speciesTrait",
+  "book": "EFA",
+  "owner": "Shifter",
+  "ru": "Быстролапый",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "FVDAshMEtQI5qsAa",
+  "kind": "speciesTrait",
+  "book": "EFA",
+  "owner": "Shifter",
+  "ru": "Дикохищный",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "DODaMcGQ2hr84eZU",
+  "kind": "speciesTrait",
+  "book": "EFA",
+  "owner": "Shifter",
+  "ru": "Длиннозубый",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "cR3keUbFlBqxxPPD",
+  "kind": "speciesTrait",
+  "book": "EFA",
+  "owner": "Shifter",
+  "ru": "Зверошкурый",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "mCjXnmRbWVCunY6n",
+  "kind": "speciesTrait",
+  "book": "EFA",
+  "owner": "Warforged",
+  "ru": "Безустанный",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "1qDTlwdYDCWXqr7W",
+  "kind": "speciesTrait",
+  "book": "EFA",
+  "owner": "Warforged",
+  "ru": "Встроенная защита",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "9ilV1zs74Tbb9YH2",
+  "kind": "speciesTrait",
+  "book": "EFA",
+  "owner": "Warforged",
+  "ru": "Покой дозорного",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "NEw6WTuXWO9DuP2U",
+  "kind": "speciesTrait",
+  "book": "EFA",
+  "owner": "Warforged",
+  "ru": "Стойкость конструкции",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "efaalcAlchemistS",
+  "kind": "subclassFeature",
+  "book": "EFA",
+  "owner": "Alchemist",
+  "ru": "Заклинания Алхимика",
+  "en": "Alchemist Spells",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaalcAlchemical",
+  "kind": "subclassFeature",
+  "book": "EFA",
+  "owner": "Alchemist",
+  "ru": "Знаток алхимии",
+  "en": "Alchemical Savant",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "5WbR0bkzgmHIkefy",
+  "kind": "subclassFeature",
+  "book": "EFA",
+  "owner": "Alchemist",
+  "ru": "Орудия труда",
+  "en": "Tools of the Trade",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaalcChemicalMa",
+  "kind": "subclassFeature",
+  "book": "EFA",
+  "owner": "Alchemist",
+  "ru": "Химическое мастерство",
+  "en": "Chemical Mastery",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaalcRestorativ",
+  "kind": "subclassFeature",
+  "book": "EFA",
+  "owner": "Alchemist",
+  "ru": "Целительные реагенты",
+  "en": "Restorative Reagents",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaalcExperiment",
+  "kind": "subclassFeature",
+  "book": "EFA",
+  "owner": "Alchemist",
+  "ru": "Экспериментальный эликсир",
+  "en": "Experimental Elixir",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaarmArcaneArmo",
+  "kind": "subclassFeature",
+  "book": "EFA",
+  "owner": "Armorer",
+  "ru": "Волшебная броня",
+  "en": "Arcane Armor",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaArmorerSpells",
+  "kind": "subclassFeature",
+  "book": "EFA",
+  "owner": "Armorer",
+  "ru": "Заклинания Бронника",
+  "en": "Armorer Spells",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaarmPerfectedA",
+  "kind": "subclassFeature",
+  "book": "EFA",
+  "owner": "Armorer",
+  "ru": "Идеальный доспех",
+  "en": "Perfected Armor",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaarmArmorModel",
+  "kind": "subclassFeature",
+  "book": "EFA",
+  "owner": "Armorer",
+  "ru": "Модель брони",
+  "en": "Armor Model",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "WhWbrI65rVf2TlUR",
+  "kind": "subclassFeature",
+  "book": "EFA",
+  "owner": "Armorer",
+  "ru": "Орудия труда",
+  "en": "Tools of the Trade",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaarmImprovedAr",
+  "kind": "subclassFeature",
+  "book": "EFA",
+  "owner": "Armorer",
+  "ru": "Совершенный бронник",
+  "en": "Improved Armorer",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaartExplosiveC",
+  "kind": "subclassFeature",
+  "book": "EFA",
+  "owner": "Artillerist",
+  "ru": "Взрывоопасная пушка",
+  "en": "Explosive Cannon",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaSpellsArtille",
+  "kind": "subclassFeature",
+  "book": "EFA",
+  "owner": "Artillerist",
+  "ru": "Заклинания Артиллериста",
+  "en": "Artillerist Spells",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaartArcaneFire",
+  "kind": "subclassFeature",
+  "book": "EFA",
+  "owner": "Artillerist",
+  "ru": "Магострельное оружие",
+  "en": "Arcane Firearm",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "CX8uQYry4LigpwDt",
+  "kind": "subclassFeature",
+  "book": "EFA",
+  "owner": "Artillerist",
+  "ru": "Орудия труда",
+  "en": "Tools of the Trade",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaartEldritchCa",
+  "kind": "subclassFeature",
+  "book": "EFA",
+  "owner": "Artillerist",
+  "ru": "Потусторонняя пушка",
+  "en": "Eldritch Cannon",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efaartFortifiedP",
+  "kind": "subclassFeature",
+  "book": "EFA",
+  "owner": "Artillerist",
+  "ru": "Укреплённая позиция",
+  "en": "Fortified Position",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efabatBattleRea2",
+  "kind": "subclassFeature",
+  "book": "EFA",
+  "owner": "Battle Smith",
+  "ru": "Боевая готовность",
+  "en": "Battle Ready",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "6B2J97ozbhCXeiO0",
+  "kind": "subclassFeature",
+  "book": "EFA",
+  "owner": "Battle Smith",
+  "ru": "Дополнительная атака",
+  "en": "Extra Attack",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efabatBattleSmit",
+  "kind": "subclassFeature",
+  "book": "EFA",
+  "owner": "Battle Smith",
+  "ru": "Заклинания Боевого кузнеца",
+  "en": "Battle Smith Spells",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efabatArcaneJolt",
+  "kind": "subclassFeature",
+  "book": "EFA",
+  "owner": "Battle Smith",
+  "ru": "Магическая встряска",
+  "en": "Arcane Jolt",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "6iYKWMcmKui0rO1U",
+  "kind": "subclassFeature",
+  "book": "EFA",
+  "owner": "Battle Smith",
+  "ru": "Орудия труда",
+  "en": "Tools of the Trade",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efabatSteelDefen",
+  "kind": "subclassFeature",
+  "book": "EFA",
+  "owner": "Battle Smith",
+  "ru": "Стальной защитник",
+  "en": "Steel Defender",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efabatImprovedDe",
+  "kind": "subclassFeature",
+  "book": "EFA",
+  "owner": "Battle Smith",
+  "ru": "Улучшенный защитник",
+  "en": "Improved Steel Defender",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efacarAdventurer",
+  "kind": "subclassFeature",
+  "book": "EFA",
+  "owner": "Cartographer",
+  "ru": "Атлас приключений",
+  "en": "Adventurer's Atlas",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efacarIngeniousM",
+  "kind": "subclassFeature",
+  "book": "EFA",
+  "owner": "Cartographer",
+  "ru": "Гениальный ход",
+  "en": "Ingenious Movement",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efacarCartograph",
+  "kind": "subclassFeature",
+  "book": "EFA",
+  "owner": "Cartographer",
+  "ru": "Заклинания Картографа",
+  "en": "Cartographer Spells",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "8rqoVTfk2bNyHq9C",
+  "kind": "subclassFeature",
+  "book": "EFA",
+  "owner": "Cartographer",
+  "ru": "Магия карты",
+  "en": "Mapping Magic",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efacarGuidedPrec",
+  "kind": "subclassFeature",
+  "book": "EFA",
+  "owner": "Cartographer",
+  "ru": "Направленная точность",
+  "en": "Guided Precision",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "BX2JjGkR2DroWwtB",
+  "kind": "subclassFeature",
+  "book": "EFA",
+  "owner": "Cartographer",
+  "ru": "Орудия труда",
+  "en": "Tools of the Trade",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "efacarSuperiorAt",
+  "kind": "subclassFeature",
+  "book": "EFA",
+  "owner": "Cartographer",
+  "ru": "Превосходный атлас",
+  "en": "Superior Atlas",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "4uNIbf5OXNZtZt7k",
+  "kind": "subclasses",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Алхимик",
+  "en": "Alchemist",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "5BGZ3i2HfaWbHtFz",
+  "kind": "subclasses",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Артиллерист",
+  "en": "Artillerist",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "8uqx59PNjyjgnMCZ",
+  "kind": "subclasses",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Боевой кузнец",
+  "en": "Battle Smith",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "a5keaAi26COrk8TE",
+  "kind": "subclasses",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Бронник",
+  "en": "Armorer",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "DrGdDgMfh8UEzEVo",
+  "kind": "subclasses",
+  "book": "EFA",
+  "owner": "",
+  "ru": "Картограф",
+  "en": "Cartographer",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofHarper0000000",
+  "kind": "backgrounds",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Арфист",
+  "en": "Harper",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofLAVassal00000",
+  "kind": "backgrounds",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Вассал Альянса лордов",
+  "en": "Lords' Alliance Vassal",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofShadowmasters",
+  "kind": "backgrounds",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Изгнанник Повелителей Теней",
+  "en": "Shadowmasters Exile",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofMulhorandiPil",
+  "kind": "backgrounds",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Малхорандский расхититель гробниц",
+  "en": "Mulhorandi Tomb Raider",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofZhentarimMerc",
+  "kind": "backgrounds",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Наёмник Зентарима",
+  "en": "Zhentarim Mercenary",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofFlamingFistMe",
+  "kind": "backgrounds",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Наёмник Пламенного Кулака",
+  "en": "Flaming Fist Mercenary",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofDeadMagicDwel",
+  "kind": "backgrounds",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Обитатель зон мёртвой магии",
+  "en": "Dead Magic Dweller",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofPurpleDragonS",
+  "kind": "backgrounds",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Оруженосец Пурпурного Дракона",
+  "en": "Purple Dragon Squire",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofGenieTouched0",
+  "kind": "backgrounds",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Отмеченный гением",
+  "en": "Genie Touched",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofMoonwellPilgr",
+  "kind": "backgrounds",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Паломник к лунным колодцам",
+  "en": "Moonwell Pilgrim",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofIceFisher0000",
+  "kind": "backgrounds",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Подлёдный рыболов",
+  "en": "Ice Fisher",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofEECaretaker00",
+  "kind": "backgrounds",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Попечитель Изумрудного Анклава",
+  "en": "Emerald Enclave Caretaker",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofSpellfireInit",
+  "kind": "backgrounds",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Посвящённый в огонь заклятий",
+  "en": "Spellfire Initiate",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofDragonCultist",
+  "kind": "backgrounds",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Последователь Культа Дракона",
+  "en": "Dragon Cultist",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofRashemiWander",
+  "kind": "backgrounds",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Рашеменский странник",
+  "en": "Rashemi Wanderer",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofKnightoftheGa",
+  "kind": "backgrounds",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Рыцарь Перчатки",
+  "en": "Knight of the Gauntlet",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofMythalkeeper0",
+  "kind": "backgrounds",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Хранитель мифала",
+  "en": "Mythalkeeper",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofChondatanFree",
+  "kind": "backgrounds",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Чондатский флибустьер",
+  "en": "Chondatan Freebooter",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofSpellfireAdep",
+  "kind": "feat",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Адепт огня заклятий",
+  "en": "Spellfire Adept",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofBoonofRevelry",
+  "kind": "feat",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Дар веселья",
+  "en": "Boon of Revelry",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofBoonofFluidFo",
+  "kind": "feat",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Дар изменчивых форм",
+  "en": "Boon of Fluid Forms",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofBoonofExquisi",
+  "kind": "feat",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Дар изящного сияния",
+  "en": "Boon of Exquisite Radiance",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofBoonofBloodsh",
+  "kind": "feat",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Дар кровопролития",
+  "en": "Boon of Bloodshed",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofBoonofPoisonM",
+  "kind": "feat",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Дар мастерства над ядом",
+  "en": "Boon of Poison Mastery",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofBoonoftheFuri",
+  "kind": "feat",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Дар неистовой бури",
+  "en": "Boon of the Furious Storm",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofBoonofCommuni",
+  "kind": "feat",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Дар общения",
+  "en": "Boon of Communication",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofBoonofDespera",
+  "kind": "feat",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Дар отчаянной стойкости",
+  "en": "Boon of Desperate Resilience",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofBoonoftheSoul",
+  "kind": "feat",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Дар пожирателя душ",
+  "en": "Boon of the Soul Drinker",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofBoonofTerror0",
+  "kind": "feat",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Дар ужаса",
+  "en": "Boon of Terror",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofBoonOfFortune",
+  "kind": "feat",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Дар улыбки Фортуны",
+  "en": "Boon of Fortune's Favor",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofBoonofBountif",
+  "kind": "feat",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Дар щедрого здоровья",
+  "en": "Boon of Bountiful Health",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofBoonoftheBrig",
+  "kind": "feat",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Дар яркого солнца",
+  "en": "Boon of the Bright Sun",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofColdCaster000",
+  "kind": "feat",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Заклинатель холода",
+  "en": "Cold Caster",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofDragonscarred",
+  "kind": "feat",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Изуродованный драконом",
+  "en": "Dragonscarred",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofHarperTeamwor",
+  "kind": "feat",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Командная работа Арфистов",
+  "en": "",
+  "missing": [
+   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "hofPurpleDragonC",
+  "kind": "feat",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Комендант Пурпурного Дракона",
+  "en": "Purple Dragon Commandant",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofEnclaveMagic0",
+  "kind": "feat",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Магия Анклава",
+  "en": "Enclave Magic",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofGenieMagic000",
+  "kind": "feat",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Магия гениев",
+  "en": "Genie Magic",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofMythalTouched",
+  "kind": "feat",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Отмеченный мифалом",
+  "en": "Mythal Touched",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofLordlyResolve",
+  "kind": "feat",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Решимость лордов",
+  "en": "Lordly Resolve",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofOrdersResilie",
+  "kind": "feat",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Стойкость Ордена",
+  "en": "Order's Resilience",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofZhentarimTact",
+  "kind": "feat",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Тактика Зентарима",
+  "en": "Zhentarim Tactics",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofStreetJustice",
+  "kind": "feat",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Уличное правосудие",
+  "en": "Street Justice",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofFeyTrickster0",
+  "kind": "feat",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Фейский хитрец",
+  "en": "Fey Trickster",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofCultoftheDrag",
+  "kind": "feat",
+  "book": "HoF",
+  "owner": "Dragon Cultist",
+  "ru": "Посвящённый Культа Дракона",
+  "en": "Cult of the Dragon Initiate",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofEmeraldEnclav",
+  "kind": "feat",
+  "book": "HoF",
+  "owner": "Emerald Enclave Caretaker",
+  "ru": "Птенец Изумрудного Анклава",
+  "en": "Emerald Enclave Fledgling",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofHarperAgent00",
+  "kind": "feat",
+  "book": "HoF",
+  "owner": "Harper",
+  "ru": "Агент Арфистов",
+  "en": "Harper Agent",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofTyrooftheGaun",
+  "kind": "feat",
+  "book": "HoF",
+  "owner": "Knight of the Gauntlet",
+  "ru": "Новобранец Перчатки",
+  "en": "Tyro of the Gauntlet",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofLordsAlliance",
+  "kind": "feat",
+  "book": "HoF",
+  "owner": "Lords' Alliance Vassal",
+  "ru": "Агент Альянса лордов",
+  "en": "Lords' Alliance Agent",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofPurpleDragonR",
+  "kind": "feat",
+  "book": "HoF",
+  "owner": "Purple Dragon Squire",
+  "ru": "Новобранец Пурпурного Дракона",
+  "en": "Purple Dragon Rook",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofSpellfireSpar",
+  "kind": "feat",
+  "book": "HoF",
+  "owner": "Spellfire Initiate",
+  "ru": "Искра огня заклятий",
+  "en": "Spellfire Spark",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofZhentarimRuff",
+  "kind": "feat",
+  "book": "HoF",
+  "owner": "Zhentarim Mercenary",
+  "ru": "Разбойник Зентарима",
+  "en": "Zhentarim Ruffian",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofPdkInspiringC",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Banneret",
+  "ru": "Воодушевляющий командир",
+  "en": "Inspiring Commander",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofPdkTeamTactic",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Banneret",
+  "ru": "Групповая тактика",
+  "en": "Team Tactics",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofPdkGroupRecov",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Banneret",
+  "ru": "Групповое оздоровление",
+  "en": "Group Recovery",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofPdkKnightlyEn",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Banneret",
+  "ru": "Посланник рыцарства",
+  "en": "Knightly Envoy",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofPdkRallyingSu",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Banneret",
+  "ru": "Сплочающий порыв",
+  "en": "Rallying Surge",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofPdkSharedResi",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Banneret",
+  "ru": "Устойчивость команды",
+  "en": "Shared Resilience",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofBldExtraAttac",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Bladesinger",
+  "ru": "Дополнительная атака",
+  "en": "Extra Attack",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofBldSongofDefe",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Bladesinger",
+  "ru": "Песнь защиты",
+  "en": "Song of Defense",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofBldBladesong0",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Bladesinger",
+  "ru": "Песнь клинка",
+  "en": "Bladesong",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofBldSongofVict",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Bladesinger",
+  "ru": "Песнь победы",
+  "en": "Song of Victory",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofBldTrainingin",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Bladesinger",
+  "ru": "Учение песни и войны",
+  "en": "Training in War and Song",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofComBlessingof",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "College of the Moon",
+  "ru": "Благословение лунного света",
+  "en": "Blessing of Moonlight",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofComMoonsInspi",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "College of the Moon",
+  "ru": "Вдохновение луны",
+  "en": "Moon's Inspiration",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofComEventidesS",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "College of the Moon",
+  "ru": "Вечернее великолепие",
+  "en": "Eventide's Splendor",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofComPrimalLore",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "College of the Moon",
+  "ru": "Древние знания",
+  "en": "Primal Lore",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofKdoBlessingso",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Knowledge Domain",
+  "ru": "Благословение знаний",
+  "en": "Blessings of Knowledge",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofKdoDivineFore",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Knowledge Domain",
+  "ru": "Божественное предзнание",
+  "en": "Divine Foreknowledge",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofKdoSpellsKnow",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Knowledge Domain",
+  "ru": "Заклинания Домена знаний",
+  "en": "Knowledge Domain Spells",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofKdoMindMagic0",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Knowledge Domain",
+  "ru": "Магия разума",
+  "en": "Mind Magic",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofKdoUnfettered",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Knowledge Domain",
+  "ru": "Разум освобождённый",
+  "en": "Unfettered Mind",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofOngAuraofElem",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Oath of Noble Genies",
+  "ru": "Аура стихийной защиты",
+  "en": "Aura of Elemental Shielding",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofOngNobleScion",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Oath of Noble Genies",
+  "ru": "Благородный наследник",
+  "en": "Noble Scion",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofOngGeniesSple",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Oath of Noble Genies",
+  "ru": "Великолепие гения",
+  "en": "Genie's Splendor",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofOngGenieSpell",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Oath of Noble Genies",
+  "ru": "Заклинания гениев",
+  "en": "Genie Spells",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofOngElementalS",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Oath of Noble Genies",
+  "ru": "Стихийная кара",
+  "en": "Elemental Smite",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofOngElementalR",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Oath of Noble Genies",
+  "ru": "Стихийное возмездие",
+  "en": "Elemental Rebuke",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofSotAuraofMale",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Scion of the Three",
+  "ru": "Аура злобы",
+  "en": "Aura of Malevolence",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofSotDreadIncar",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Scion of the Three",
+  "ru": "Воплощение ужаса",
+  "en": "Dread Incarnate",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofSotBloodthirs",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Scion of the Three",
+  "ru": "Кровожадность",
+  "en": "Bloodthirst",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofSotStrikeFear",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Scion of the Three",
+  "ru": "Удар страха",
+  "en": "Strike Fear",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofSotDreadAlleg",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Scion of the Three",
+  "ru": "Ужасная преданность",
+  "en": "Dread Allegiance",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofSpfSpellfireB",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Spellfire Sorcery",
+  "ru": "Вспышка огня заклятий",
+  "en": "Spellfire Burst",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofSpfSpellfireS",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Spellfire Sorcery",
+  "ru": "Заклинания огня заклятий",
+  "en": "Spellfire Spells",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofSpfCrownofSpe",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Spellfire Sorcery",
+  "ru": "Корона огня заклятий",
+  "en": "Crown of Spellfire",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofSpfHonedSpell",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Spellfire Sorcery",
+  "ru": "Освоенный огонь заклятий",
+  "en": "Honed Spellfire",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofSpfAbsorbSpel",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Spellfire Sorcery",
+  "ru": "Поглощение заклинаний",
+  "en": "Absorb Spells",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofWiwChillingRe",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Winter Walker",
+  "ru": "Выстужающее возмездие",
+  "en": "Chilling Retribution",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofWiwWinterWalk",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Winter Walker",
+  "ru": "Заклинания Зимнего странника",
+  "en": "Winter Walker Spells",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofWiwHuntersRim",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Winter Walker",
+  "ru": "Изморозь охотника",
+  "en": "Hunter's Rime",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofWiwFrozenHaun",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Winter Walker",
+  "ru": "Ледяной призрак",
+  "en": "Frozen Haunt",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofWiwFrigidExpl",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Winter Walker",
+  "ru": "Морозный исследователь",
+  "en": "Frigid Explorer",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofWiwFortifying",
+  "kind": "subclassFeature",
+  "book": "HoF",
+  "owner": "Winter Walker",
+  "ru": "Укрепляющий дух",
+  "en": "Fortifying Soul",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofKnowledgeDoma",
+  "kind": "subclasses",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Домен знаний",
+  "en": "Knowledge Domain",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofWinterWalkerR",
+  "kind": "subclasses",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Зимний скиталец",
+  "en": "Winter Walker",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofBanneretFight",
+  "kind": "subclasses",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Знаменосец",
+  "en": "Banneret",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofOathOfNobleGe",
+  "kind": "subclasses",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Клятва благородных гениев",
+  "en": "Oath of Noble Genies",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofComCollegeoft",
+  "kind": "subclasses",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Коллегия Луны",
+  "en": "College of the Moon",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofScionoftheThr",
+  "kind": "subclasses",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Наследник Троицы",
+  "en": "Scion of the Three",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofBladesingerWi",
+  "kind": "subclasses",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Певец клинка",
+  "en": "Bladesinger",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hofSpellfireSorc",
+  "kind": "subclasses",
+  "book": "HoF",
+  "owner": "",
+  "ru": "Чародейство огня заклятий",
+  "en": "Spellfire Sorcery",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "lflLorwynExpert0",
+  "kind": "backgrounds",
+  "book": "LFL",
+  "owner": "",
+  "ru": "Лорвинский эксперт",
+  "en": "Lorwyn Expert",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "lflShadowmoorExp",
+  "kind": "backgrounds",
+  "book": "LFL",
+  "owner": "",
+  "ru": "Шэдоумурский эксперт",
+  "en": "Shadowmoor Expert",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "lflChildOfTheSun",
+  "kind": "feat",
+  "book": "LFL",
+  "owner": "Lorwyn Expert",
+  "ru": "Дитя солнца",
+  "en": "Child of the Sun",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "lflShadowmoorHex",
+  "kind": "feat",
+  "book": "LFL",
+  "owner": "Shadowmoor Expert",
+  "ru": "Проклинатель Шэдоумура",
+  "en": "Shadowmoor Hexer",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwSpiritMedium2",
+  "kind": "backgrounds",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Медиум",
+  "en": "Spirit Medium",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwHauntedOneodB",
+  "kind": "backgrounds",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Преследуемый",
+  "en": "Haunted One",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwMistWandererP",
+  "kind": "backgrounds",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Скитающийся в туманах",
+  "en": "Mist Wanderer",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwInvestigatorz",
+  "kind": "backgrounds",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Следователь",
+  "en": "Investigator",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwAberrantAnato",
+  "kind": "feat",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Аберрантная анатомия",
+  "en": "Aberrant Anatomy",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwSecondSkinkc1",
+  "kind": "feat",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Вторая кожа",
+  "en": "Second Skin",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwLivingShadow2",
+  "kind": "feat",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Живая тень",
+  "en": "Living Shadow",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwTouchofDeathA",
+  "kind": "feat",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Касание смерти",
+  "en": "Touch of Death",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwWatchersGH8OL",
+  "kind": "feat",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Наблюдатели",
+  "en": "Watchers",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwSymbioticBein",
+  "kind": "feat",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Симбионт",
+  "en": "Symbiotic Being",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwEchoingSoulGK",
+  "kind": "feat",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Эхо души",
+  "en": "Echoing Soul",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwSurvivor2zrM3",
+  "kind": "feat",
+  "book": "RHW",
+  "owner": "Haunted One",
+  "ru": "Выживший",
+  "en": "Survivor",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwSharpEyev8PBf",
+  "kind": "feat",
+  "book": "RHW",
+  "owner": "Investigator",
+  "ru": "Острый глаз",
+  "en": "Sharp Eye",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwMistWalkerlge",
+  "kind": "feat",
+  "book": "RHW",
+  "owner": "Mist Wanderer",
+  "ru": "Странник в Тумане",
+  "en": "Mist Walker",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwGatheredWhisp",
+  "kind": "feat",
+  "book": "RHW",
+  "owner": "Spirit Medium",
+  "ru": "Совет шёпотов",
+  "en": "Gathered Whispers",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwCSBruteSpir1q",
+  "kind": "item",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Дух громилы",
+  "en": "Brute Spirit",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwCSBelovedSp2V",
+  "kind": "item",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Дух любимого",
+  "en": "Beloved Spirit",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwCSAvengerSpv2",
+  "kind": "item",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Дух мстителя",
+  "en": "Avenger Spirit",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwCSTricksterO6",
+  "kind": "item",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Дух обманщика",
+  "en": "Trickster Spirit",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwCSRenegadeSXD",
+  "kind": "item",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Дух отступника",
+  "en": "Renegade Spirit",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwCSArsonistSF5",
+  "kind": "item",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Дух поджигателя",
+  "en": "Arsonist Spirit",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwCSFortuneTeZz",
+  "kind": "item",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Дух предсказателя",
+  "en": "Fortune Teller Spirit",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwCSPriestSpi36",
+  "kind": "item",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Дух священника",
+  "en": "Priest Spirit",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwCSWayfarerSqp",
+  "kind": "item",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Дух скитальца",
+  "en": "Wayfarer Spirit",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwCSSharpshooGM",
+  "kind": "item",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Дух стрелка",
+  "en": "Sharpshooter Spirit",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwCSShadeSpirvt",
+  "kind": "item",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Дух тени",
+  "en": "Shade Spirit",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwCSCowardSpi34",
+  "kind": "item",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Дух труса",
+  "en": "Coward Spirit",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwMagicalTokeX1",
+  "kind": "item",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Магический талисман",
+  "en": "Magical Token",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwFeralPounce7E",
+  "kind": "item",
+  "book": "RHW",
+  "owner": "Lupin",
+  "ru": "Дикий наскок",
+  "en": "Feral Pounce",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwPRSoulTrinkg0",
+  "kind": "item",
+  "book": "RHW",
+  "owner": "Tokens of the Departed",
+  "ru": "Духовные безделушки",
+  "en": "Soul Trinkets",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwSMBloated8heS",
+  "kind": "other",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Вздутый",
+  "en": "Bloated",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwSMMoistFP81Qo",
+  "kind": "other",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Влажный",
+  "en": "Moist",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwSMArcaneConVv",
+  "kind": "other",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Проводник магии",
+  "en": "Arcane Conduit",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwSMFerocityuzY",
+  "kind": "other",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Свирепость",
+  "en": "Ferocity",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwSMGauntb5vfDl",
+  "kind": "other",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Тощий",
+  "en": "Gaunt",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwHexbloodcXtyA",
+  "kind": "species",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Ведьмовская кровь",
+  "en": "Hexblood",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwRebornPsaya7C",
+  "kind": "species",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Возрождённый",
+  "en": "Reborn",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwDhampiryNDvuB",
+  "kind": "species",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Дампир",
+  "en": "Dhampir",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwLupinobimTmkE",
+  "kind": "species",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Люпин",
+  "en": "Lupin",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwSpiderClimb7F",
+  "kind": "speciesTrait",
+  "book": "RHW",
+  "owner": "Dhampir",
+  "ru": "Паучьи лапы",
+  "en": "Spider Climb",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwVampiricBitnE",
+  "kind": "speciesTrait",
+  "book": "RHW",
+  "owner": "Dhampir",
+  "ru": "Укус вампира",
+  "en": "Vampiric Bite",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwEerieTokenSri",
+  "kind": "speciesTrait",
+  "book": "RHW",
+  "owner": "Hexblood",
+  "ru": "Жуткий талисман",
+  "en": "Eerie Token",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwHowlA3f2I58L3",
+  "kind": "speciesTrait",
+  "book": "RHW",
+  "owner": "Lupin",
+  "ru": "Вой",
+  "en": "Howl",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwKnowledgefraL",
+  "kind": "speciesTrait",
+  "book": "RHW",
+  "owner": "Reborn",
+  "ru": "Знания прошлой жизни",
+  "en": "Knowledge from a Past Life",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwEverlasting7o",
+  "kind": "speciesTrait",
+  "book": "RHW",
+  "owner": "Reborn",
+  "ru": "Извечный",
+  "en": "Everlasting",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwEscapedDeatXY",
+  "kind": "speciesTrait",
+  "book": "RHW",
+  "owner": "Reborn",
+  "ru": "Сбежавший от смерти",
+  "en": "Escaped Death",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwCSSpiritsfrlf",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "College of Spirits",
+  "ru": "Духи с той стороны",
+  "en": "Spirits from Beyond",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwCSMysticalCK7",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "College of Spirits",
+  "ru": "Мистическая связь",
+  "en": "Mystical Connection",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwCSChannelerlK",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "College of Spirits",
+  "ru": "Спиритист",
+  "en": "Channeler",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwCSEmpoweredtO",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "College of Spirits",
+  "ru": "Усиленный спиритизм",
+  "en": "Empowered Channeling",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwCSDivineRea8I",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "Grave Domain",
+  "ru": "Божественный жнец",
+  "en": "Divine Reaper",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwCSGraveDomaZF",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "Grave Domain",
+  "ru": "Заклинания Домена упокоения",
+  "en": "Grave Domain Spells",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwCSCircleofMOG",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "Grave Domain",
+  "ru": "Круг смертности",
+  "en": "Circle of Mortality",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwCSPathtotheCb",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "Grave Domain",
+  "ru": "Путь к могиле",
+  "en": "Path to the Grave",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwCSSentinelaOa",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "Grave Domain",
+  "ru": "Страж на пороге смерти",
+  "en": "Sentinel at Death's Door",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwHWRotandVioEY",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "Hollow Warden",
+  "ru": "Боль и тлен",
+  "en": "Rot and Violence",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwHWWrathofth3C",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "Hollow Warden",
+  "ru": "Гнев дикой природы",
+  "en": "Wrath of the Wild",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwHWAncientMibA",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "Hollow Warden",
+  "ru": "Древняя мощь",
+  "en": "Ancient Might",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwHWHollowWarnt",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "Hollow Warden",
+  "ru": "Заклинания Полого дозорного",
+  "en": "Hollow Warden Spells",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwHWHungeringoi",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "Hollow Warden",
+  "ru": "Ненасытная мощь",
+  "en": "Hungering Might",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwPRVoiceofDesf",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "Phantom",
+  "ru": "Глас смерти",
+  "en": "Voice of Death",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwPRWailsfromLz",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "Phantom",
+  "ru": "Замогильные вопли",
+  "en": "Wails from the Grave",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwPRTokensoftit",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "Phantom",
+  "ru": "Знаки усопших",
+  "en": "Tokens of the Departed",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwPRGhostWalkKY",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "Phantom",
+  "ru": "Призрачная прогулка",
+  "en": "Ghost Walk",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwPRDeathsFriHo",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "Phantom",
+  "ru": "Приятель смерти",
+  "en": "Death's Friend",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwPRWhispersodr",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "Phantom",
+  "ru": "Шёпот мёртвых",
+  "en": "Whispers of the Dead",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwREReanimato6f",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "Reanimator",
+  "ru": "Заклинания Реаниматора",
+  "en": "Reanimator Spells",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwRERefinedRebY",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "Reanimator",
+  "ru": "Изощрённая реанимация",
+  "en": "Refined Reanimation",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwRESkillSet6zT",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "Reanimator",
+  "ru": "Навыки Реаниматора",
+  "en": "Reanimator's Skill Set",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwRECompanionqV",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "Reanimator",
+  "ru": "Реанимированный спутник",
+  "en": "Reanimated Companion",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwREMacabreMo23",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "Reanimator",
+  "ru": "Смертоносные модификации",
+  "en": "Macabre Modifications",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwREStrangeMok1",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "Reanimator",
+  "ru": "Странные модификации",
+  "en": "Strange Modifications",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwREImprovedRlq",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "Reanimator",
+  "ru": "Улучшенная реанимация",
+  "en": "Improved Reanimation",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwSSBeastsofIjA",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "Shadow Sorcery",
+  "ru": "Звери дурного знамения",
+  "en": "Beasts of Ill Omen",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwSSUmbralForQw",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "Shadow Sorcery",
+  "ru": "Облик тени",
+  "en": "Umbral Form",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwSSPowerofShNG",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "Shadow Sorcery",
+  "ru": "Сила тени",
+  "en": "Power of Shadow",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwSSShadowWalqT",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "Shadow Sorcery",
+  "ru": "Теневая походка",
+  "en": "Shadow Walk",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwSSShadowSpehm",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "Shadow Sorcery",
+  "ru": "Теневые заклинания",
+  "en": "Shadow Spells",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwUPSuperiorDCk",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "Undead Patron",
+  "ru": "Абсолютный ужас",
+  "en": "Superior Dread",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwUPUndeadSpeQo",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "Undead Patron",
+  "ru": "Заклинания Нежити",
+  "en": "Undead Spells",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwUPNecroticHYI",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "Undead Patron",
+  "ru": "Некротическая оболочка",
+  "en": "Necrotic Husk",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwUPFormofDreOJ",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "Undead Patron",
+  "ru": "Облик ужаса",
+  "en": "Form of Dread",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwUPGraveToucq1",
+  "kind": "subclassFeature",
+  "book": "RHW",
+  "owner": "Undead Patron",
+  "ru": "Отмеченный могилой",
+  "en": "Grave Touched",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwGraveDomain8b",
+  "kind": "subclasses",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Домен упокоения",
+  "en": "Grave Domain",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwCollegeofSpir",
+  "kind": "subclasses",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Коллегия Духов",
+  "en": "College of Spirits",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwUndeadPatronz",
+  "kind": "subclasses",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Покровительство Нежити",
+  "en": "Undead Patron",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwHollowWardenH",
+  "kind": "subclasses",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Полый дозорный",
+  "en": "Hollow Warden",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwReanimatorzXX",
+  "kind": "subclasses",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Реаниматор",
+  "en": "Reanimator",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwShadowSorcery",
+  "kind": "subclasses",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Теневое чародейство",
+  "en": "Shadow Sorcery",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rhwPhantomCGHgPv",
+  "kind": "subclasses",
+  "book": "RHW",
+  "owner": "",
+  "ru": "Фантом",
+  "en": "Phantom",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "dBePUd1uRie4TH95",
+  "kind": "classFeature",
+  "book": "TPC 2024",
+  "owner": "Pugilist",
+  "ru": "Боевой дух",
+  "en": "Fighting Spirit",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "LHO9YfEt6dnXJUJP",
+  "kind": "classFeature",
+  "book": "TPC 2024",
+  "owner": "Pugilist",
+  "ru": "Встал-встряхнулся",
+  "en": "Shake It Off",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "2pPr40racZCWIpkZ",
+  "kind": "classFeature",
+  "book": "TPC 2024",
+  "owner": "Pugilist",
+  "ru": "Геркулес",
+  "en": "Herculean",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "CHuX9UxHd0hSGNbT",
+  "kind": "classFeature",
+  "book": "TPC 2024",
+  "owner": "Pugilist",
+  "ru": "Глубокий резерв",
+  "en": "Dig Deep",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "6q6sNQCREzaXFAIf",
+  "kind": "classFeature",
+  "book": "TPC 2024",
+  "owner": "Pugilist",
+  "ru": "Глубочайший резерв",
+  "en": "Dig Deeper",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "uadrAdpmBkIGqLd1",
+  "kind": "classFeature",
+  "book": "TPC 2024",
+  "owner": "Pugilist",
+  "ru": "Дополнительная атака",
+  "en": "Extra Attack",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "r8nxIIPmDBq3wIJH",
+  "kind": "classFeature",
+  "book": "TPC 2024",
+  "owner": "Pugilist",
+  "ru": "Железная челюсть",
+  "en": "Iron Chin",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rsOsuaTliv35brPZ",
+  "kind": "classFeature",
+  "book": "TPC 2024",
+  "owner": "Pugilist",
+  "ru": "Кулачный бой",
+  "en": "Fisticuffs",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "42E9euAJtF7vwzIN",
+  "kind": "classFeature",
+  "book": "TPC 2024",
+  "owner": "Pugilist",
+  "ru": "На кураже",
+  "en": "Swagger Streak",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "xWiub748G6RHzDdV",
+  "kind": "classFeature",
+  "book": "TPC 2024",
+  "owner": "Pugilist",
+  "ru": "Напористый",
+  "en": "Pugnacious",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "P3619xrDFy6NwWPc",
+  "kind": "classFeature",
+  "book": "TPC 2024",
+  "owner": "Pugilist",
+  "ru": "Несокрушимый",
+  "en": "Unbreakable",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "QNUlDqPSrVIiMMVD",
+  "kind": "classFeature",
+  "book": "TPC 2024",
+  "owner": "Pugilist",
+  "ru": "Окровавлен но не сломлен",
+  "en": "Bloodied But Unbowed",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "vRYLseJcRs4bCPKL",
+  "kind": "classFeature",
+  "book": "TPC 2024",
+  "owner": "Pugilist",
+  "ru": "Пик физической формы",
+  "en": "Peak Physical Condition",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "nIGB0xOWjQA1pyob",
+  "kind": "classFeature",
+  "book": "TPC 2024",
+  "owner": "Pugilist",
+  "ru": "Побит, но не выбит",
+  "en": "Down But Not Out",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "YF7tB1cOtBx4Ysgh",
+  "kind": "classFeature",
+  "book": "TPC 2024",
+  "owner": "Pugilist",
+  "ru": "Размашистый удар",
+  "en": "Haymaker",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "Cyf29q2uqQxcacKy",
+  "kind": "classFeature",
+  "book": "TPC 2024",
+  "owner": "Pugilist",
+  "ru": "Тяжёлая рука",
+  "en": "Heavy Hitter",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "dCFJmUyX6ogrL4kC",
+  "kind": "classFeature",
+  "book": "TPC 2024",
+  "owner": "Pugilist",
+  "ru": "Удалые кулаки",
+  "en": "Moxie-Fueled Fists",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "n1UUoizKF3StHgmx",
+  "kind": "classFeature",
+  "book": "TPC 2024",
+  "owner": "Pugilist",
+  "ru": "Удаль",
+  "en": "Moxie",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "0mEShCFYpMBy2ToN",
+  "kind": "classFeature",
+  "book": "TPC 2024",
+  "owner": "Pugilist",
+  "ru": "Школа суровых затрещин",
+  "en": "School of Hard Knocks",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "C5c3j05y6z1xhyoK",
+  "kind": "subclassFeature",
+  "book": "TPC 2024",
+  "owner": "Dog and Hound",
+  "ru": "Лучший друг задиры",
+  "en": "Brawler's Best Friend",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "YWMeXcZugVQhFAD8",
+  "kind": "subclassFeature",
+  "book": "TPC 2024",
+  "owner": "Dog and Hound",
+  "ru": "Лучший друг собаки",
+  "en": "Hound's Best Friend",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "6U55WzEKhhv42oeY",
+  "kind": "subclassFeature",
+  "book": "TPC 2024",
+  "owner": "Dog and Hound",
+  "ru": "Совместная атака",
+  "en": "Coordinated Attack",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "pptSR4h1avgSg7Ns",
+  "kind": "subclassFeature",
+  "book": "TPC 2024",
+  "owner": "Dog and Hound",
+  "ru": "Спущенная с цепи",
+  "en": "Off the Chain",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "sMESoqihyPmceTq1",
+  "kind": "subclassFeature",
+  "book": "TPC 2024",
+  "owner": "Dog and Hound",
+  "ru": "Удалая шавка",
+  "en": "Mutt With Moxie",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "0xRLTaLXbh0WhswY",
+  "kind": "subclassFeature",
+  "book": "TPC 2024",
+  "owner": "Hand of Terror",
+  "ru": "Десница ужаса",
+  "en": "Dread Hand",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "NxwqyK2swVO0uop5",
+  "kind": "subclassFeature",
+  "book": "TPC 2024",
+  "owner": "Hand of Terror",
+  "ru": "Мерзкий рост",
+  "en": "Grotesque Growth",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "VKqEg8poYXvceXDo",
+  "kind": "subclassFeature",
+  "book": "TPC 2024",
+  "owner": "Hand of Terror",
+  "ru": "Сделка с дьяволом",
+  "en": "Deal with the Devil",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "H57Hwawz7hGMFMZ3",
+  "kind": "subclassFeature",
+  "book": "TPC 2024",
+  "owner": "Hand of Terror",
+  "ru": "Фонтан кишок",
+  "en": "Fountain of Viscera",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "DCFxa9jfF4jEoeKe",
+  "kind": "subclassFeature",
+  "book": "TPC 2024",
+  "owner": "Hand of Terror",
+  "ru": "Чёрная магия",
+  "en": "Black Magic",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "hx3oTkbSvoBuw2zI",
+  "kind": "subclassFeature",
+  "book": "TPC 2024",
+  "owner": "Piss and Vinegar",
+  "ru": "В пешие дали",
+  "en": "Mean Old Cuss",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "eKgFmvWBU5sTG1ne",
+  "kind": "subclassFeature",
+  "book": "TPC 2024",
+  "owner": "Piss and Vinegar",
+  "ru": "Грязные приёмы",
+  "en": "Dirty Tricks",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "bP7c4p28Yp8aj4ti",
+  "kind": "subclassFeature",
+  "book": "TPC 2024",
+  "owner": "Piss and Vinegar",
+  "ru": "Самые грязные приёмы",
+  "en": "Dirtier Tricks",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "rGuMAurhYN558a0C",
+  "kind": "subclassFeature",
+  "book": "TPC 2024",
+  "owner": "Piss and Vinegar",
+  "ru": "Скабрёзный салют",
+  "en": "Salty Salute",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "1zxqXkoCgCmnCVzX",
+  "kind": "subclassFeature",
+  "book": "TPC 2024",
+  "owner": "Piss and Vinegar",
+  "ru": "Скверный характер",
+  "en": "Bad Attitude",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "B7aygbSat8DyL3hx",
+  "kind": "subclassFeature",
+  "book": "TPC 2024",
+  "owner": "Squared Circle",
+  "ru": "Безупречная победа",
+  "en": "Clean Finish",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "ItJ3AwbspFw2RngK",
+  "kind": "subclassFeature",
+  "book": "TPC 2024",
+  "owner": "Squared Circle",
+  "ru": "Мышечная масса",
+  "en": "Muscle Mass",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "dBDVJXBQ2MiCyueL",
+  "kind": "subclassFeature",
+  "book": "TPC 2024",
+  "owner": "Squared Circle",
+  "ru": "Мясной щит",
+  "en": "Meat Shield",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "zDPx6FlwZEoBb5qt",
+  "kind": "subclassFeature",
+  "book": "TPC 2024",
+  "owner": "Squared Circle",
+  "ru": "Работа в партере",
+  "en": "Groundwork",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "ZmTR4KL3UOj2KdYo",
+  "kind": "subclassFeature",
+  "book": "TPC 2024",
+  "owner": "Squared Circle",
+  "ru": "Тяжеловес",
+  "en": "Heavyweight",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "kAO38b80mwzx9snh",
+  "kind": "subclassFeature",
+  "book": "TPC 2024",
+  "owner": "Street Saint",
+  "ru": "Аура стойкости",
+  "en": "Aura of Resilience",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "iXutXKCVrlbEC8Ei",
+  "kind": "subclassFeature",
+  "book": "TPC 2024",
+  "owner": "Street Saint",
+  "ru": "Возложение рук",
+  "en": "Lay on Hands",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "0Bps5s5dwJx18pJY",
+  "kind": "subclassFeature",
+  "book": "TPC 2024",
+  "owner": "Street Saint",
+  "ru": "Истерзанный, но решимый",
+  "en": "Ravaged But Resolute",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "sLeQnCFRWvZ4Corq",
+  "kind": "subclassFeature",
+  "book": "TPC 2024",
+  "owner": "Street Saint",
+  "ru": "Проведение энергии",
+  "en": "Channel Divinity",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "xIR39ZCnJM1ipZKm",
+  "kind": "subclassFeature",
+  "book": "TPC 2024",
+  "owner": "Street Saint",
+  "ru": "Священные ладони",
+  "en": "Hallowed Hands",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "gbI38aLqY7vWWWAG",
+  "kind": "subclassFeature",
+  "book": "TPC 2024",
+  "owner": "Sweet Science",
+  "ru": "Набитые кулаки",
+  "en": "Bare Knuckle Boxer",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "Jto6T0eG7vvzS0Jp",
+  "kind": "subclassFeature",
+  "book": "TPC 2024",
+  "owner": "Sweet Science",
+  "ru": "Нокаут",
+  "en": "Knock Out",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "mGLmCO9QqBByiRKZ",
+  "kind": "subclassFeature",
+  "book": "TPC 2024",
+  "owner": "Sweet Science",
+  "ru": "Перекрёстный удар",
+  "en": "Cross Counter",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "EqkzxdG9bex0H7Xw",
+  "kind": "subclassFeature",
+  "book": "TPC 2024",
+  "owner": "Sweet Science",
+  "ru": "Прерванная серия",
+  "en": "Combo Breaker",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "HiGoj6SKoM49G8L7",
+  "kind": "subclassFeature",
+  "book": "TPC 2024",
+  "owner": "Sweet Science",
+  "ru": "Серия ударов",
+  "en": "Combo Maker",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "A1KCXOqlYarLyXaQ",
+  "kind": "subclasses",
+  "book": "TPC 2024",
+  "owner": "",
+  "ru": "Борец ринга",
+  "en": "Squared Circle",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "BdKLtqT3gGH4aWtr",
+  "kind": "subclasses",
+  "book": "TPC 2024",
+  "owner": "",
+  "ru": "Бретёр",
+  "en": "Piss and Vinegar",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "CQa3gjMdW0N1vY5U",
+  "kind": "subclasses",
+  "book": "TPC 2024",
+  "owner": "",
+  "ru": "Бродяга и дворняга",
+  "en": "Dog and Hound",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "3kYEE1EFdjXoWfEd",
+  "kind": "subclasses",
+  "book": "TPC 2024",
+  "owner": "",
+  "ru": "Десница ужаса",
+  "en": "Hand of Terror",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "xRtNVuSMmXobGWXS",
+  "kind": "subclasses",
+  "book": "TPC 2024",
+  "owner": "",
+  "ru": "Знаток науки тумаков",
+  "en": "Sweet Science",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "3jJ0VSbHHgnHQ9Mq",
+  "kind": "subclasses",
+  "book": "TPC 2024",
+  "owner": "",
+  "ru": "Уличный святой",
+  "en": "Street Saint",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "QRVgN85xJBg2IVHh",
+  "kind": "subclassFeature",
+  "book": "UA",
+  "owner": "Circle of the Titan",
+  "ru": "Заклинания Круга Титана",
+  "en": "Circle of the Titan Spells",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "HOijXjM2VPI4IF1k",
+  "kind": "subclassFeature",
+  "book": "UA",
+  "owner": "Circle of the Titan",
+  "ru": "Облик титана",
+  "en": "Titan Form",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "FXZRXlfBNB75zV2S",
+  "kind": "subclassFeature",
+  "book": "UA",
+  "owner": "Circle of the Titan",
+  "ru": "Первобытный хаос",
+  "en": "Primal Havoc",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "IONpZipnYhiZko1H",
+  "kind": "subclassFeature",
+  "book": "UA",
+  "owner": "Circle of the Titan",
+  "ru": "Ужасные последствия",
+  "en": "Dire Impact",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "R4DKS0LTKcMGyA9Q",
+  "kind": "subclassFeature",
+  "book": "UA",
+  "owner": "Circle of the Titan",
+  "ru": "Чудовищный аппетит",
+  "en": "Monstrous Appetite",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "p2leoWDnpzFs92z8",
+  "kind": "subclassFeature",
+  "book": "UA",
+  "owner": "Demonic Sorcery",
+  "ru": "Взрыв Бездны",
+  "en": "Abyssal Explosion",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "RrvJnHcZ17QRxyq5",
+  "kind": "subclassFeature",
+  "book": "UA",
+  "owner": "Demonic Sorcery",
+  "ru": "Демонические заклинания",
+  "en": "Demonic Spells",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "H8pKJalnpBSPNUHI",
+  "kind": "subclassFeature",
+  "book": "UA",
+  "owner": "Demonic Sorcery",
+  "ru": "Проводник Бездны",
+  "en": "Abyssal Conduit",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "9EqX71ipDDCRyC9B",
+  "kind": "subclassFeature",
+  "book": "UA",
+  "owner": "Demonic Sorcery",
+  "ru": "Разлом Бездны",
+  "en": "Abyssal Rupture",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "8LUgMOEn88g9dpVV",
+  "kind": "subclassFeature",
+  "book": "UA",
+  "owner": "Demonic Sorcery",
+  "ru": "Царство Бездны",
+  "en": "Abyssal Realm",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "oMfIPet6mW6qtP1l",
+  "kind": "subclassFeature",
+  "book": "UA",
+  "owner": "Hell Knight",
+  "ru": "Дьявольский дар",
+  "en": "Diabolical Gift",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "7Sp3mqGUAHA2OhHl",
+  "kind": "subclassFeature",
+  "book": "UA",
+  "owner": "Hell Knight",
+  "ru": "Дьявольское невезение",
+  "en": "Devil's Misfortune",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "a44A69M23dMMlSh0",
+  "kind": "subclassFeature",
+  "book": "UA",
+  "owner": "Hell Knight",
+  "ru": "Инфернальная рана",
+  "en": "Infernal Wound",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "BAgLv1wvOzYwcyd2",
+  "kind": "subclassFeature",
+  "book": "UA",
+  "owner": "Hell Knight",
+  "ru": "Инфернальная сделка",
+  "en": "Infernal Bargain",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "zHlHLwnCmJH3T0TM",
+  "kind": "subclassFeature",
+  "book": "UA",
+  "owner": "Hell Knight",
+  "ru": "Инфернальная экипировка",
+  "en": "Infernal Equipment",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "LyEwfVwHSqhycxDb",
+  "kind": "subclassFeature",
+  "book": "UA",
+  "owner": "Hell Knight",
+  "ru": "Оружие преисподней",
+  "en": "Hell-Forged Weapon",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "xYkbL5Q8ktqSPwcD",
+  "kind": "subclassFeature",
+  "book": "UA",
+  "owner": "Hell Knight",
+  "ru": "Порыв адского пламени",
+  "en": "Hellfire Surge",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "Q8koK5bFJXRKi02N",
+  "kind": "subclassFeature",
+  "book": "UA",
+  "owner": "Hell Knight",
+  "ru": "Страшные раны",
+  "en": "Advanced Wounds",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "68PXY3O7OIfgISTa",
+  "kind": "subclasses",
+  "book": "UA",
+  "owner": "",
+  "ru": "Демоническое чародейство",
+  "en": "Demonic Sorcery",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "TAs92lA9nRHsNwlB",
+  "kind": "subclasses",
+  "book": "UA",
+  "owner": "",
+  "ru": "Круг Титана",
+  "en": "Circle of the Titan",
+  "missing": [
+   "text"
+  ]
+ },
+ {
+  "id": "skM0kMXm9D3DkWkb",
+  "kind": "subclasses",
+  "book": "UA",
+  "owner": "",
+  "ru": "Рыцарь преисподней",
+  "en": "Hell Knight",
+  "missing": [
+   "text"
+  ]
+ }
+]

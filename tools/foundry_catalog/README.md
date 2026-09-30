@@ -20,6 +20,25 @@ The raw dumps (`export/`) are not committed.
 3. `python convert.py` rewrites the asset and prints what it matched and what it couldn't.
 4. Run the unit tests (`CharacterCatalogTest` checks the shipped file).
 
+## Translations
+
+Most non-SRD entries only come in Russian. English written by hand goes into
+`translations/en.json`, keyed by the entry id (the Foundry document id, the same across re-imports):
+
+```json
+{
+  "phbftActor000000": { "name": "Actor", "text": "Your experience on stage..." }
+}
+```
+
+`convert.py` merges it over everything else on every run, so the catalog can be rebuilt from
+Foundry at any time without losing translations. Either field may be left out. Never edit
+`character_catalog.json` by hand — the next run overwrites it.
+
+`translations/missing_en.json` is rewritten on every run: the entries still without an English
+name or text (id, kind, book, owner, Russian and English name), PHB first — the list to translate
+from.
+
 ## Text format
 
 Descriptions are plain text: paragraphs on their own lines, `• ` list items, table rows as
