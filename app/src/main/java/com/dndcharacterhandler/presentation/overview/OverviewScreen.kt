@@ -1820,30 +1820,48 @@ private fun OverviewXpBlock(
 ) {
     val formatter = remember { NumberFormat.getIntegerInstance() }
     val token = LocalDesignTokens.current.typography.xpLabel
-    val progressColor = if (xpInfo.hasReachedLevelCap) Color(0xFFE0B84E) else Color(0xFFD7D1CC)
+    val colors = LocalDesignTokens.current.colors
+    val progressColor = if (xpInfo.hasReachedLevelCap) colors.accent.xpCapped else colors.progress.xpFill
+    val trackColor = colors.progress.xpTrack
 
     Column(
         modifier = Modifier.clickable(onClick = onClick),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        Text(
-            text = if (xpInfo.isMaxLevel) {
-                "${text("overview_xp")} ${formatter.format(xpInfo.currentXp)}"
-            } else {
-                "${text("overview_xp")} ${formatter.format(xpInfo.currentXp)} / ${formatter.format(xpInfo.nextLevelXp)}"
-            },
-            style = MaterialTheme.typography.bodyLarge.copy(fontSize = token.fontSizeSp.sp),
-            color = Color(0xFFECE4DB)
-        )
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        // "Level UP" sits at the right end of the EXP line, above the bar.
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = if (xpInfo.isMaxLevel) {
+                    "${text("overview_xp")} ${formatter.format(xpInfo.currentXp)}"
+                } else {
+                    "${text("overview_xp")} ${formatter.format(xpInfo.currentXp)} / ${formatter.format(xpInfo.nextLevelXp)}"
+                },
+                modifier = Modifier
+                    .weight(1f)
+                    .alignByBaseline(),
+                style = MaterialTheme.typography.bodyLarge.copy(fontSize = token.fontSizeSp.sp),
+                color = colors.text.action
+            )
+            if (canLevelUp) {
+                Text(
+                    text = text("levelup_badge"),
+                    modifier = Modifier
+                        .alignByBaseline()
+                        .padding(start = 12.dp)
+                        .clickable(onClick = onLevelUp),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = colors.accent.inspiration
+                )
+            }
+        }
         Canvas(
             modifier = Modifier
-                .weight(1f)
+                .fillMaxWidth()
                 .height(16.dp)
         ) {
             val stroke = 11.dp.toPx()
             drawLine(
-                color = Color(0x30FFFFFF),
+                color = trackColor,
                 start = Offset(stroke / 2, center.y),
                 end = Offset(size.width - stroke / 2, center.y),
                 strokeWidth = stroke,
@@ -1856,17 +1874,6 @@ private fun OverviewXpBlock(
                 strokeWidth = stroke,
                 cap = StrokeCap.Round
             )
-        }
-        if (canLevelUp) {
-            Text(
-                text = text("levelup_badge"),
-                modifier = Modifier
-                    .padding(start = 12.dp)
-                    .clickable(onClick = onLevelUp),
-                style = MaterialTheme.typography.titleMedium,
-                color = LocalDesignTokens.current.colors.accent.inspiration
-            )
-        }
         }
     }
 }
