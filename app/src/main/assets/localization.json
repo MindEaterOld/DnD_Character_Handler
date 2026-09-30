@@ -3359,6 +3359,97 @@
     "fr": "Fermer",
     "es": "Cerrar"
   },
+  "common_back": {
+    "en": "Back",
+    "ru": "\u041d\u0430\u0437\u0430\u0434",
+    "de": "Zur\u00fcck",
+    "fr": "Retour",
+    "es": "Atr\u00e1s"
+  },
+  "dice_open": {
+    "en": "Roll dice",
+    "ru": "\u0411\u0440\u043e\u0441\u0438\u0442\u044c \u043a\u0443\u0431\u044b",
+    "de": "W\u00fcrfeln",
+    "fr": "Lancer les d\u00e9s",
+    "es": "Tirar dados"
+  },
+  "dice_picker_title": {
+    "en": "Which dice to roll?",
+    "ru": "\u041a\u0430\u043a\u0438\u0435 \u043a\u0443\u0431\u044b \u0431\u0440\u043e\u0441\u0438\u0442\u044c?",
+    "de": "Welche W\u00fcrfel werfen?",
+    "fr": "Quels d\u00e9s lancer ?",
+    "es": "\u00bfQu\u00e9 dados tirar?"
+  },
+  "dice_picker_roll": {
+    "en": "Roll",
+    "ru": "\u0411\u0440\u043e\u0441\u0438\u0442\u044c",
+    "de": "Werfen",
+    "fr": "Lancer",
+    "es": "Tirar"
+  },
+  "dice_hint_grab": {
+    "en": "Press and hold anywhere to pick up the dice, move to shake them, let go to throw.",
+    "ru": "\u0417\u0430\u0436\u043c\u0438\u0442\u0435 \u043f\u0430\u043b\u0435\u0446 \u043d\u0430 \u044d\u043a\u0440\u0430\u043d\u0435 \u2014 \u043a\u0443\u0431\u044b \u043e\u043a\u0430\u0436\u0443\u0442\u0441\u044f \u0432 \u0440\u0443\u043a\u0435. \u041f\u043e\u0432\u043e\u0434\u0438\u0442\u0435, \u0447\u0442\u043e\u0431\u044b \u043f\u043e\u0442\u0440\u044f\u0441\u0442\u0438, \u0438 \u043e\u0442\u043f\u0443\u0441\u0442\u0438\u0442\u0435, \u0447\u0442\u043e\u0431\u044b \u0431\u0440\u043e\u0441\u0438\u0442\u044c.",
+    "de": "Halte den Finger auf den Bildschirm, um die W\u00fcrfel aufzunehmen, bewege ihn zum Sch\u00fctteln und lass los, um zu werfen.",
+    "fr": "Maintenez le doigt sur l'\u00e9cran pour prendre les d\u00e9s, bougez pour les secouer, rel\u00e2chez pour lancer.",
+    "es": "Mant\u00e9n el dedo en la pantalla para coger los dados, mu\u00e9velo para agitarlos y su\u00e9ltalo para tirar."
+  },
+  "dice_hint_regrab": {
+    "en": "Press and hold to roll again",
+    "ru": "\u0417\u0430\u0436\u043c\u0438\u0442\u0435 \u043f\u0430\u043b\u0435\u0446, \u0447\u0442\u043e\u0431\u044b \u043f\u0435\u0440\u0435\u0431\u0440\u043e\u0441\u0438\u0442\u044c",
+    "de": "Gedr\u00fcckt halten, um erneut zu w\u00fcrfeln",
+    "fr": "Maintenez pour relancer",
+    "es": "Mant\u00e9n pulsado para volver a tirar"
+  },
+  "dice_result_total": {
+    "en": "Total: %1$s",
+    "ru": "\u0418\u0442\u043e\u0433\u043e: %1$s",
+    "de": "Summe: %1$s",
+    "fr": "Total : %1$s",
+    "es": "Total: %1$s"
+  },
+  "dice_skin_title": {
+    "en": "Dice skin",
+    "ru": "\u0421\u043a\u0438\u043d \u043a\u0443\u0431\u043e\u0432",
+    "de": "W\u00fcrfel-Design",
+    "fr": "Apparence des d\u00e9s",
+    "es": "Aspecto de los dados"
+  },
+  "dice_skin_gold": {
+    "en": "Gold",
+    "ru": "\u0417\u043e\u043b\u043e\u0442\u043e\u0439",
+    "de": "Gold",
+    "fr": "Or",
+    "es": "Dorado"
+  },
+  "dice_skin_black": {
+    "en": "Black",
+    "ru": "\u0427\u0451\u0440\u043d\u044b\u0439",
+    "de": "Schwarz",
+    "fr": "Noir",
+    "es": "Negro"
+  },
+  "dice_skin_white": {
+    "en": "White",
+    "ru": "\u0411\u0435\u043b\u044b\u0439",
+    "de": "Wei\u00df",
+    "fr": "Blanc",
+    "es": "Blanco"
+  },
+  "dice_skin_blue": {
+    "en": "Blue",
+    "ru": "\u0421\u0438\u043d\u0438\u0439",
+    "de": "Blau",
+    "fr": "Bleu",
+    "es": "Azul"
+  },
+  "dice_skin_web": {
+    "en": "Spider web",
+    "ru": "\u041f\u0430\u0443\u0442\u0438\u043d\u0430",
+    "de": "Spinnennetz",
+    "fr": "Toile d'araign\u00e9e",
+    "es": "Telara\u00f1a"
+  },
   "common_dash": {
     "en": "—",
     "ru": "—",

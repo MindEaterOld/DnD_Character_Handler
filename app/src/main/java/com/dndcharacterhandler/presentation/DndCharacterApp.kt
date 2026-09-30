@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Casino
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
@@ -42,10 +44,20 @@ import com.dndcharacterhandler.presentation.combat.CombatScreen
 import com.dndcharacterhandler.presentation.components.BottomNavigationBar
 import com.dndcharacterhandler.presentation.components.CharacterManagerDrawer
 import com.dndcharacterhandler.presentation.components.DeleteCharacterDialog
+import com.dndcharacterhandler.presentation.components.FloatingActionButtonSize
+import com.dndcharacterhandler.presentation.components.FloatingAddButton
+import com.dndcharacterhandler.presentation.components.FloatingButtonSpacing
+import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
+import com.dndcharacterhandler.presentation.components.SingleFloatingButtonInset
 import com.dndcharacterhandler.presentation.components.SettingsDialog
+import com.dndcharacterhandler.presentation.dice.DicePickerDialog
+import com.dndcharacterhandler.presentation.dice.DiceSkin
+import com.dndcharacterhandler.presentation.dice.DiceTableOverlay
+import com.dndcharacterhandler.presentation.dice.DieType
 import com.dndcharacterhandler.presentation.features.FeaturesScreen
 import com.dndcharacterhandler.presentation.inventory.InventoryScreen
 import com.dndcharacterhandler.presentation.localization.LocalStrings
+import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.notes.NotesScreen
 import com.dndcharacterhandler.presentation.overview.OverviewLevelUpOverlay
 import com.dndcharacterhandler.presentation.overview.OverviewScreen
@@ -81,6 +93,10 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
     val snackbarHostState = remember { SnackbarHostState() }
     var isSettingsOpen by remember { mutableStateOf(false) }
     var isDeleteConfirmOpen by remember { mutableStateOf(false) }
+    var isDicePickerOpen by remember { mutableStateOf(false) }
+    var diceSelection by remember { mutableStateOf(mapOf(DieType.D20 to 1)) }
+    var diceTableSelection by remember { mutableStateOf<Map<DieType, Int>?>(null) }
+    var diceSkin by remember { mutableStateOf(DiceSkin.GOLD) }
     val openSettings: () -> Unit = { isSettingsOpen = true }
     val selectedCharacterName = managerState.characters
         .firstOrNull { it.character.id == managerState.selectedCharacterId }
@@ -158,6 +174,16 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                             .padding(padding)
                             .background(Color.Transparent)
                     ) {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                    // Dice prototype: the dice button sits right above the screen's own "+" button (or
+                    // in its place on screens without one), and lists leave room to scroll past both.
+                    val screenHasAddButton = currentRoute in routesWithAddButton
+                    val floatingButtonsInset = if (screenHasAddButton) {
+                        SingleFloatingButtonInset + FloatingActionButtonSize + FloatingButtonSpacing
+                    } else {
+                        SingleFloatingButtonInset
+                    }
+                    CompositionLocalProvider(LocalFloatingButtonsInset provides floatingButtonsInset) {
                     NavHost(
                         navController = navController,
                         startDestination = AppScreen.Overview.route
@@ -221,6 +247,19 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                             }
                         }
                     }
+                        FloatingAddButton(
+                            onClick = { isDicePickerOpen = true },
+                            icon = Icons.Outlined.Casino,
+                            contentDescription = text("dice_open"),
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(
+                                    end = 24.dp,
+                                    bottom = if (screenHasAddButton) 15.dp + FloatingActionButtonSize + FloatingButtonSpacing else 15.dp
+                                )
+                        )
+                    }
+                    }
                 }
             }
 
@@ -241,6 +280,25 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                     onClose = { levelUpTarget = null }
                 )
             }
+
+            // Covers the whole app, bottom navigation included: the screen edges are the table walls.
+            diceTableSelection?.let { selection ->
+                DiceTableOverlay(selection = selection, skin = diceSkin, onClose = { diceTableSelection = null })
+            }
+        }
+
+        if (isDicePickerOpen) {
+            DicePickerDialog(
+                initialSelection = diceSelection,
+                skin = diceSkin,
+                onSkinChange = { diceSkin = it },
+                onDismiss = { isDicePickerOpen = false },
+                onRoll = { selection ->
+                    diceSelection = selection
+                    isDicePickerOpen = false
+                    diceTableSelection = selection
+                }
+            )
         }
 
         if (isSettingsOpen) {
@@ -263,6 +321,15 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
         }
     }
 }
+
+/** Screens that show their own "+" button in the bottom-right corner. */
+private val routesWithAddButton = setOf(
+    AppScreen.Combat.route,
+    AppScreen.Inventory.route,
+    AppScreen.Spells.route,
+    AppScreen.Features.route,
+    AppScreen.Notes.route
+)
 
 private fun suggestCharacterArchiveName(characterName: String?): String {
     // Keep letters of any script (a Cyrillic name used to collapse to "_.dndchar").

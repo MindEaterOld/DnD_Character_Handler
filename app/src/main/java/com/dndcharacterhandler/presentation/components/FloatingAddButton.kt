@@ -9,34 +9,56 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
+
+/** Size of the round floating action button, for stacking other buttons above it. */
+val FloatingActionButtonSize = 58.dp
+
+/** Gap between floating buttons stacked in the bottom-right corner. */
+val FloatingButtonSpacing = 12.dp
+
+/** Bottom content padding that lets a list scroll clear of one floating button. */
+val SingleFloatingButtonInset = 110.dp
+
+/**
+ * Bottom content padding a scrolling screen needs so its last items can scroll clear of the
+ * floating buttons in the bottom-right corner. The app provides it per screen: more on screens
+ * where the dice button sits on top of the screen's own "+" button.
+ */
+val LocalFloatingButtonsInset = compositionLocalOf { SingleFloatingButtonInset }
 
 @Composable
 fun FloatingAddButton(
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    icon: ImageVector = Icons.Outlined.Add,
+    contentDescription: String? = null
 ) {
+    val colors = LocalDesignTokens.current.colors
     Surface(
         modifier = modifier
-            .size(58.dp)
+            .size(FloatingActionButtonSize)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(50),
-        color = Color(0xFF2A2630),
-        border = BorderStroke(1.dp, Color(0x70C2BBB3))
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        border = BorderStroke(1.dp, colors.border.default)
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = Icons.Outlined.Add,
-                contentDescription = null,
-                tint = Color(0xFFD2CAC2),
+                imageVector = icon,
+                contentDescription = contentDescription,
+                tint = colors.text.muted,
                 modifier = Modifier.size(30.dp)
             )
         }

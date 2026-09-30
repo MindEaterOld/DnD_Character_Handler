@@ -9,7 +9,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,7 +24,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -33,7 +31,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.DirectionsRun
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.Bedtime
-import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.FlashOn
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.LocalCafe
@@ -103,6 +100,8 @@ import com.dndcharacterhandler.domain.usecase.GetCharacterBundleUseCase
 import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
 import com.dndcharacterhandler.presentation.components.AppImage
+import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
+import com.dndcharacterhandler.presentation.components.OverlayCloseButton
 import com.dndcharacterhandler.presentation.levelup.LevelUpWizard
 import com.dndcharacterhandler.presentation.components.ScreenBackground
 import com.dndcharacterhandler.presentation.components.ScreenTopActions
@@ -649,7 +648,7 @@ private fun OverviewContent(
     ScreenBackground {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 4.dp, bottom = 12.dp),
+            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 4.dp, bottom = LocalFloatingButtonsInset.current),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             item {
@@ -1752,25 +1751,7 @@ private fun PortraitViewerContent(
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Fit
         )
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .systemBarsPadding()
-                .padding(16.dp)
-                .size(44.dp)
-                .clip(CircleShape)
-                .background(colors.surface.button)
-                .border(1.dp, colors.border.default, CircleShape)
-                .clickable(onClick = onClose),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.Close,
-                contentDescription = text("common_close"),
-                tint = colors.text.icon,
-                modifier = Modifier.size(28.dp)
-            )
-        }
+        OverlayCloseButton(onClick = onClose, modifier = Modifier.align(Alignment.TopEnd))
     }
 }
 
