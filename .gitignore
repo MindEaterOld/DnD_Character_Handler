@@ -8,3 +8,7 @@
 /.cxx/
 app/build/
 
+
+# Raw Foundry compendium dumps (see tools/foundry_catalog/README.md)
+tools/foundry_catalog/export/
+tools/foundry_catalog/__pycache__/

@@ -13,15 +13,20 @@ internal fun catalogFieldText(stored: String, english: String, russian: String, 
 }
 
 /**
- * Looks up the catalog entries a character's items were added from: by id, or — for entries saved
- * before ids were stored — by their English or Russian name.
+ * Looks up the catalog entries a character's items were added from: by id (or an older id the entry
+ * had, [aliases]), or — for entries saved before ids were stored — by their English or Russian name.
  */
 internal class CatalogIndex<T>(
     items: List<T>,
     id: (T) -> String,
-    names: (T) -> List<String>
+    names: (T) -> List<String>,
+    aliases: (T) -> List<String> = { emptyList() }
 ) {
-    private val itemsById: Map<String, T> = items.associateBy(id)
+    private val itemsById: Map<String, T> = buildMap {
+        items.forEach { item -> aliases(item).forEach { put(it, item) } }
+        // Current ids win over old ones.
+        items.forEach { item -> put(id(item), item) }
+    }
     private val itemsByName: Map<String, List<T>> = buildMap<String, MutableList<T>> {
         items.forEach { item ->
             names(item)

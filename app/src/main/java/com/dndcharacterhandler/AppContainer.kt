@@ -4,11 +4,13 @@ import android.content.Context
 import com.dndcharacterhandler.data.local.AppDatabase
 import com.dndcharacterhandler.data.localization.LocalizationRepository
 import com.dndcharacterhandler.data.preferences.LanguagePreferencesRepository
-import com.dndcharacterhandler.data.repository.AssetFeatureCatalogRepository
+import com.dndcharacterhandler.data.repository.AssetCharacterCatalogRepository
 import com.dndcharacterhandler.data.repository.AssetInventoryCatalogRepository
 import com.dndcharacterhandler.data.repository.AssetSpellCatalogRepository
+import com.dndcharacterhandler.data.repository.CatalogFeatureCatalogRepository
 import com.dndcharacterhandler.data.repository.CharacterFileRepositoryImpl
 import com.dndcharacterhandler.data.repository.CharacterRepositoryImpl
+import com.dndcharacterhandler.domain.repository.CharacterCatalogRepository
 import com.dndcharacterhandler.domain.repository.CharacterFileRepository
 import com.dndcharacterhandler.domain.repository.CharacterRepository
 import com.dndcharacterhandler.domain.repository.FeatureCatalogRepository
@@ -50,7 +52,10 @@ class AppContainer(context: Context) {
     val spellCatalogRepository: SpellCatalogRepository =
         AssetSpellCatalogRepository(appContext, localizationRepository)
 
-    val featureCatalogRepository: FeatureCatalogRepository = AssetFeatureCatalogRepository(appContext)
+    val characterCatalogRepository: CharacterCatalogRepository = AssetCharacterCatalogRepository(appContext)
+
+    val featureCatalogRepository: FeatureCatalogRepository =
+        CatalogFeatureCatalogRepository(characterCatalogRepository)
 
     val getCharacterBundleUseCase: GetCharacterBundleUseCase =
         GetCharacterBundleUseCase(characterRepository)

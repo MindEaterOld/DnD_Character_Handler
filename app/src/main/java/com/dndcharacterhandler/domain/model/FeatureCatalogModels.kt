@@ -1,5 +1,8 @@
 package com.dndcharacterhandler.domain.model
 
+/** How the add-feature catalog groups its entries. */
+enum class FeatureCatalogGroup { CLASS, SUBCLASS, OPTION, FEAT, SPECIES, BACKGROUND, OTHER }
+
 data class FeatureCatalogItem(
     val id: String,
     val name: String,
@@ -9,7 +12,12 @@ data class FeatureCatalogItem(
     val category: String = "",
     val ruName: String = "",
     val ruDescription: String = "",
-    val ruCategory: String = ""
+    val ruCategory: String = "",
+    val group: FeatureCatalogGroup = FeatureCatalogGroup.OTHER,
+    /** The book it is from, e.g. "Player's Handbook (2024)". */
+    val book: CatalogText = CatalogText(),
+    /** Ids this entry had in the catalog the app used before, so features saved with them still match. */
+    val legacyIds: List<String> = emptyList()
 ) {
     /** Display name, preferring the Russian translation when [russian] is requested and available. */
     fun displayName(russian: Boolean): String =

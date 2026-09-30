@@ -7,7 +7,12 @@ import com.dndcharacterhandler.presentation.localization.catalogFieldText
 
 /** Finds the catalog entry a character's feature was added from. */
 internal class FeatureCatalogLookup(items: List<FeatureCatalogItem>) {
-    private val index = CatalogIndex(items, id = { it.id }, names = { listOf(it.name, it.ruName) })
+    private val index = CatalogIndex(
+        items,
+        id = { it.id },
+        names = { listOf(it.name, it.ruName) },
+        aliases = { it.legacyIds }
+    )
 
     /**
      * The entry for [feature], and whether it is certain. Features saved before catalogId existed are

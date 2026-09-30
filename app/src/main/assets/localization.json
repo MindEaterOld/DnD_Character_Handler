@@ -2148,6 +2148,62 @@
     "fr": "Aucun trait trouve.",
     "es": "No se encontraron rasgos."
   },
+  "features_filter_all": {
+    "en": "All",
+    "ru": "\u0412\u0441\u0435",
+    "de": "Alle",
+    "fr": "Tout",
+    "es": "Todo"
+  },
+  "features_filter_class": {
+    "en": "Class",
+    "ru": "\u041a\u043b\u0430\u0441\u0441",
+    "de": "Klasse",
+    "fr": "Classe",
+    "es": "Clase"
+  },
+  "features_filter_subclass": {
+    "en": "Subclass",
+    "ru": "\u041f\u043e\u0434\u043a\u043b\u0430\u0441\u0441",
+    "de": "Unterklasse",
+    "fr": "Sous-classe",
+    "es": "Subclase"
+  },
+  "features_filter_option": {
+    "en": "Options",
+    "ru": "\u041e\u043f\u0446\u0438\u0438",
+    "de": "Optionen",
+    "fr": "Options",
+    "es": "Opciones"
+  },
+  "features_filter_feat": {
+    "en": "Feats",
+    "ru": "\u0427\u0435\u0440\u0442\u044b",
+    "de": "Talente",
+    "fr": "Dons",
+    "es": "Dotes"
+  },
+  "features_filter_species": {
+    "en": "Species",
+    "ru": "\u0412\u0438\u0434",
+    "de": "Spezies",
+    "fr": "Esp\u00e8ce",
+    "es": "Especie"
+  },
+  "features_filter_background": {
+    "en": "Background",
+    "ru": "\u041f\u0440\u0435\u0434\u044b\u0441\u0442\u043e\u0440\u0438\u044f",
+    "de": "Hintergrund",
+    "fr": "Historique",
+    "es": "Trasfondo"
+  },
+  "features_filter_other": {
+    "en": "Other",
+    "ru": "\u0414\u0440\u0443\u0433\u043e\u0435",
+    "de": "Sonstiges",
+    "fr": "Autre",
+    "es": "Otro"
+  },
   "features_name": {
     "en": "Name",
     "ru": "\u041d\u0430\u0437\u0432\u0430\u043d\u0438\u0435",

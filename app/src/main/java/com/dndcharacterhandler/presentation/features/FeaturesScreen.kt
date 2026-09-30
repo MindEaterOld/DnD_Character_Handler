@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -28,6 +29,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -54,12 +56,17 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.dndcharacterhandler.domain.model.AppLanguage
 import com.dndcharacterhandler.domain.model.CharacterBundle
+import com.dndcharacterhandler.domain.model.CharacterCatalog
 import com.dndcharacterhandler.domain.model.CharacterTextField
 import com.dndcharacterhandler.domain.model.Feature
+import com.dndcharacterhandler.domain.model.FeatureCatalogGroup
 import com.dndcharacterhandler.domain.model.FeatureCatalogItem
 import com.dndcharacterhandler.domain.model.FeatureSource
+import com.dndcharacterhandler.domain.repository.CharacterCatalogRepository
 import com.dndcharacterhandler.domain.repository.CharacterRepository
 import com.dndcharacterhandler.domain.repository.FeatureCatalogRepository
+import com.dndcharacterhandler.domain.rules.CatalogFormulaText
+import com.dndcharacterhandler.domain.rules.FormulaContext
 import com.dndcharacterhandler.domain.usecase.GetCharacterBundleUseCase
 import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
@@ -77,12 +84,14 @@ import kotlinx.coroutines.launch
 
 data class FeatureCatalogUiState(
     val items: List<FeatureCatalogItem> = emptyList(),
+    val catalog: CharacterCatalog = CharacterCatalog.EMPTY,
     val isLoading: Boolean = true
 )
 
 class FeaturesViewModel(
     private val characterRepository: CharacterRepository,
     private val featureCatalogRepository: FeatureCatalogRepository,
+    private val characterCatalogRepository: CharacterCatalogRepository,
     getCharacterBundleUseCase: GetCharacterBundleUseCase,
     selectedCharacterHolder: SelectedCharacterHolder
 ) : BaseCharacterViewModel(getCharacterBundleUseCase, selectedCharacterHolder) {
@@ -91,8 +100,9 @@ class FeaturesViewModel(
 
     init {
         viewModelScope.launch {
+            val catalog = characterCatalogRepository.getCatalog()
             val items = featureCatalogRepository.getItems()
-            _catalogUiState.value = FeatureCatalogUiState(items = items, isLoading = false)
+            _catalogUiState.value = FeatureCatalogUiState(items = items, catalog = catalog, isLoading = false)
         }
     }
 
@@ -170,6 +180,7 @@ fun FeaturesScreen(
     FeaturesContent(
         characterBundle = state.character,
         catalogItems = catalogState.items,
+        catalog = catalogState.catalog,
         isCatalogLoading = catalogState.isLoading,
         onOpenDrawer = onOpenDrawer,
         onOpenSettings = onOpenSettings,
@@ -185,6 +196,7 @@ fun FeaturesScreen(
 internal fun FeaturesContent(
     characterBundle: CharacterBundle?,
     catalogItems: List<FeatureCatalogItem> = emptyList(),
+    catalog: CharacterCatalog = CharacterCatalog.EMPTY,
     isCatalogLoading: Boolean = false,
     onOpenDrawer: () -> Unit = {},
     onOpenSettings: () -> Unit = {},
@@ -218,7 +230,7 @@ internal fun FeaturesContent(
                     text = text("placeholder_loading_character"),
                     modifier = Modifier.align(Alignment.Center),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Color(0xFFD7D1CC)
+                    color = LocalDesignTokens.current.colors.text.muted
                 )
             }
         }
@@ -227,6 +239,9 @@ internal fun FeaturesContent(
 
     val resolvedBundle = characterBundle
     val catalogLookup = remember(catalogItems) { FeatureCatalogLookup(catalogItems) }
+    val formulas = remember(catalog) { CatalogFormulaText(catalog) }
+    val formulaContext = remember(character, catalog) { FormulaContext.of(character, catalog) }
+    val renderText: (String) -> String = { value -> formulas.render(value, russian, formulaContext) }
     val displayedFeatures = remember(resolvedBundle.features, catalogLookup, russian) {
         resolvedBundle.features.localizedWith(catalogLookup, russian)
     }
@@ -350,6 +365,7 @@ internal fun FeaturesContent(
     editingFeature?.let { feature ->
         FeatureEditDialog(
             feature = feature,
+            renderText = renderText,
             onDismiss = { editingFeature = null },
             onSave = { updated ->
                 onUpdateFeature(resolvedBundle, updated)
@@ -427,8 +443,8 @@ private fun FeatureSummaryCard(
             .height(92.dp)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
         shape = RoundedCornerShape(10.dp),
-        border = BorderStroke(1.dp, Color(0x42FFFFFF)),
-        color = Color(0xFF17141B).copy(alpha = 0.62f)
+        border = BorderStroke(1.dp, LocalDesignTokens.current.colors.border.miniCard),
+        color = LocalDesignTokens.current.colors.surface.card.copy(alpha = 0.62f)
     ) {
         Column(
             modifier = Modifier
@@ -444,13 +460,13 @@ private fun FeatureSummaryCard(
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = Color(0xFFC2BBB3),
+                    tint = LocalDesignTokens.current.colors.text.label,
                     modifier = Modifier.size(18.dp)
                 )
                 Text(
                     text = label,
                     style = MaterialTheme.typography.bodyLarge.copy(fontSize = tokens.miniStatLabel.fontSizeSp.sp),
-                    color = Color(0xFFBEB6AE),
+                    color = LocalDesignTokens.current.colors.text.miniLabel,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -458,7 +474,7 @@ private fun FeatureSummaryCard(
             Text(
                 text = value.ifBlank { "—" },
                 style = MaterialTheme.typography.titleMedium,
-                color = Color(0xFFF7F2EA),
+                color = LocalDesignTokens.current.colors.text.primary,
                 textAlign = TextAlign.Center,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
@@ -475,8 +491,8 @@ private fun FeaturesSearchField(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
-        color = Color(0xFF17141B).copy(alpha = 0.62f),
-        border = BorderStroke(1.dp, Color(0x36FFFFFF))
+        color = LocalDesignTokens.current.colors.surface.card.copy(alpha = 0.62f),
+        border = BorderStroke(1.dp, LocalDesignTokens.current.colors.border.muted)
     ) {
         OutlinedTextField(
             value = value,
@@ -486,7 +502,7 @@ private fun FeaturesSearchField(
                 Icon(
                     imageVector = Icons.Outlined.Search,
                     contentDescription = null,
-                    tint = Color(0xFFD2CAC2),
+                    tint = LocalDesignTokens.current.colors.text.muted,
                     modifier = Modifier.size(28.dp)
                 )
             },
@@ -494,7 +510,7 @@ private fun FeaturesSearchField(
                 Text(
                     text = text("features_search_placeholder"),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Color(0xFFD2CAC2).copy(alpha = 0.72f)
+                    color = LocalDesignTokens.current.colors.text.muted.copy(alpha = 0.72f)
                 )
             },
             singleLine = true,
@@ -503,7 +519,7 @@ private fun FeaturesSearchField(
                 unfocusedBorderColor = Color.Transparent,
                 focusedContainerColor = Color.Transparent,
                 unfocusedContainerColor = Color.Transparent,
-                cursorColor = Color(0xFFFFF6EA)
+                cursorColor = LocalDesignTokens.current.colors.text.warmPrimary
             )
         )
     }
@@ -512,6 +528,7 @@ private fun FeaturesSearchField(
 @Composable
 private fun FeaturesSectionTitle(title: String) {
     val tokens = LocalDesignTokens.current.typography
+    val dividerColor = LocalDesignTokens.current.colors.border.muted
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -521,7 +538,7 @@ private fun FeaturesSectionTitle(title: String) {
         Text(
             text = title,
             style = MaterialTheme.typography.headlineMedium.copy(fontSize = tokens.headlineMedium.fontSizeSp.sp),
-            color = Color(0xFFF7F2EA),
+            color = LocalDesignTokens.current.colors.text.primary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -533,7 +550,7 @@ private fun FeaturesSectionTitle(title: String) {
         ) {
             androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize()) {
                 drawLine(
-                    color = Color(0x33FFFFFF),
+                    color = dividerColor,
                     start = androidx.compose.ui.geometry.Offset(0f, size.height / 2f),
                     end = androidx.compose.ui.geometry.Offset(size.width, size.height / 2f),
                     strokeWidth = 1.dp.toPx()
@@ -553,8 +570,8 @@ internal fun FeatureCard(
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(10.dp),
-        color = Color(0xFF17141B).copy(alpha = 0.62f),
-        border = BorderStroke(1.dp, Color(0x36FFFFFF))
+        color = LocalDesignTokens.current.colors.surface.card.copy(alpha = 0.62f),
+        border = BorderStroke(1.dp, LocalDesignTokens.current.colors.border.muted)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
@@ -563,7 +580,7 @@ internal fun FeatureCard(
             Icon(
                 imageVector = Icons.Outlined.AutoStories,
                 contentDescription = null,
-                tint = Color(0xFFD2CAC2),
+                tint = LocalDesignTokens.current.colors.text.muted,
                 modifier = Modifier
                     .padding(end = 12.dp)
                     .size(22.dp)
@@ -572,14 +589,14 @@ internal fun FeatureCard(
                 text = feature.name.ifBlank { text("features_untitled") },
                 modifier = Modifier.weight(1f),
                 style = MaterialTheme.typography.bodyLarge,
-                color = Color(0xFFF7F2EA),
+                color = LocalDesignTokens.current.colors.text.primary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
             Icon(
                 imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
                 contentDescription = null,
-                tint = Color(0xFFD2CAC2),
+                tint = LocalDesignTokens.current.colors.text.muted,
                 modifier = Modifier.padding(start = 10.dp)
             )
         }
@@ -595,16 +612,24 @@ private fun FeaturesAddEntryDialog(
     onCreateFeature: () -> Unit,
     onSelectCatalogItem: (FeatureCatalogItem) -> Unit
 ) {
+    val colors = LocalDesignTokens.current.colors
     var query by remember { mutableStateOf("") }
-    val filteredItems = remember(catalogItems, query, russian) {
+    var group by remember { mutableStateOf<FeatureCatalogGroup?>(null) }
+    val groups = remember(catalogItems) {
+        catalogGroupOrder.filter { candidate -> catalogItems.any { it.group == candidate } }
+    }
+    val filteredItems = remember(catalogItems, query, group) {
         val needle = query.trim()
         catalogItems.filter { item ->
-            needle.isBlank() ||
-                item.name.contains(needle, ignoreCase = true) ||
-                item.ruName.contains(needle, ignoreCase = true) ||
-                item.category.contains(needle, ignoreCase = true) ||
-                item.description.contains(needle, ignoreCase = true) ||
-                item.ruDescription.contains(needle, ignoreCase = true)
+            (group == null || item.group == group) && (
+                needle.isBlank() ||
+                    item.name.contains(needle, ignoreCase = true) ||
+                    item.ruName.contains(needle, ignoreCase = true) ||
+                    item.category.contains(needle, ignoreCase = true) ||
+                    item.ruCategory.contains(needle, ignoreCase = true) ||
+                    item.description.contains(needle, ignoreCase = true) ||
+                    item.ruDescription.contains(needle, ignoreCase = true)
+                )
         }
     }
 
@@ -625,19 +650,37 @@ private fun FeaturesAddEntryDialog(
                         value = query,
                         onValueChange = { query = it }
                     )
+                    if (groups.size > 1) {
+                        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            item {
+                                FilterChip(
+                                    selected = group == null,
+                                    onClick = { group = null },
+                                    label = { Text(text("features_filter_all")) }
+                                )
+                            }
+                            items(groups) { option ->
+                                FilterChip(
+                                    selected = group == option,
+                                    onClick = { group = if (group == option) null else option },
+                                    label = { Text(catalogGroupLabel(option)) }
+                                )
+                            }
+                        }
+                    }
                     when {
                         isLoading -> {
                             Text(
                                 text = text("features_catalog_loading"),
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = Color(0xFFD2CAC2)
+                                color = colors.text.muted
                             )
                         }
                         filteredItems.isEmpty() -> {
                             Text(
                                 text = text("features_catalog_empty"),
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = Color(0xFFD2CAC2)
+                                color = colors.text.muted
                             )
                         }
                         else -> {
@@ -674,7 +717,7 @@ private fun FeaturesDialogSection(title: String) {
     Text(
         text = title,
         style = MaterialTheme.typography.titleMedium,
-        color = Color(0xFFF7F2EA)
+        color = LocalDesignTokens.current.colors.text.primary
     )
 }
 
@@ -684,15 +727,17 @@ internal fun FeatureCatalogRow(
     russian: Boolean,
     onAdd: () -> Unit
 ) {
+    val colors = LocalDesignTokens.current.colors
     val subtitle = buildList {
         item.displayCategory(russian).takeIf { it.isNotBlank() }?.let(::add)
         item.level?.let { add("${text("features_level")} $it") }
     }.joinToString(" • ")
+    val book = item.book.get(russian)
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
-        color = Color(0xFF1A171D),
-        border = BorderStroke(1.dp, Color(0x30FFFFFF))
+        color = LocalDesignTokens.current.colors.surface.button,
+        border = BorderStroke(1.dp, LocalDesignTokens.current.colors.border.muted)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
@@ -702,7 +747,7 @@ internal fun FeatureCatalogRow(
                 Text(
                     text = item.displayName(russian),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Color(0xFFF7F2EA),
+                    color = LocalDesignTokens.current.colors.text.primary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -711,7 +756,17 @@ internal fun FeatureCatalogRow(
                         text = subtitle,
                         modifier = Modifier.padding(top = 4.dp),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color(0xFFD2CAC2),
+                        color = colors.text.muted,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                if (book.isNotBlank()) {
+                    Text(
+                        text = book,
+                        modifier = Modifier.padding(top = 2.dp),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = colors.text.subtle,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -729,10 +784,14 @@ internal fun FeatureEditDialog(
     feature: Feature,
     onDismiss: () -> Unit,
     onSave: (Feature) -> Unit,
-    onDelete: (() -> Unit)? = null
+    onDelete: (() -> Unit)? = null,
+    renderText: (String) -> String = { it }
 ) {
+    // Catalog texts keep their formulas ({=...}, see CatalogFormulaText); the dialog shows this
+    // character's numbers, and an untouched text is saved with its formulas so it keeps following them.
+    val shownDescription = remember(feature) { renderText(feature.description) }
     var name by remember(feature) { mutableStateOf(feature.name) }
-    var description by remember(feature) { mutableStateOf(feature.description) }
+    var description by remember(feature) { mutableStateOf(shownDescription) }
     var level by remember(feature) { mutableStateOf(feature.level?.toString().orEmpty()) }
     var source by remember(feature) { mutableStateOf(feature.source) }
     var category by remember(feature) { mutableStateOf(feature.category) }
@@ -779,7 +838,7 @@ internal fun FeatureEditDialog(
                     onSave(
                         feature.copy(
                             name = name.trim(),
-                            description = description.trim(),
+                            description = if (description == shownDescription) feature.description else description.trim(),
                             level = level.toIntOrNull(),
                             source = source,
                             category = category.trim()
@@ -816,7 +875,7 @@ private fun FeatureSourceField(
         Text(
             text = text("features_source"),
             style = MaterialTheme.typography.labelMedium,
-            color = Color(0xFFD2CAC2),
+            color = LocalDesignTokens.current.colors.text.muted,
             modifier = Modifier.padding(bottom = 4.dp)
         )
         Box {
@@ -825,8 +884,8 @@ private fun FeatureSourceField(
                     .fillMaxWidth()
                     .clickable { expanded = true },
                 shape = RoundedCornerShape(8.dp),
-                color = Color(0xFF17141B).copy(alpha = 0.62f),
-                border = BorderStroke(1.dp, Color(0x36FFFFFF))
+                color = LocalDesignTokens.current.colors.surface.card.copy(alpha = 0.62f),
+                border = BorderStroke(1.dp, LocalDesignTokens.current.colors.border.muted)
             ) {
                 Row(
                     modifier = Modifier
@@ -838,14 +897,14 @@ private fun FeatureSourceField(
                         text = featureSourceLabel(value),
                         modifier = Modifier.weight(1f),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = Color(0xFFF7F2EA),
+                        color = LocalDesignTokens.current.colors.text.primary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                     Icon(
                         imageVector = Icons.Outlined.ArrowDropDown,
                         contentDescription = null,
-                        tint = Color(0xFFD2CAC2)
+                        tint = LocalDesignTokens.current.colors.text.muted
                     )
                 }
             }
@@ -876,6 +935,28 @@ private fun featureSourceLabel(source: FeatureSource): String =
         FeatureSource.CLASS -> text("features_source_class")
         FeatureSource.OTHER -> text("features_source_other")
     }
+
+@Composable
+private fun catalogGroupLabel(group: FeatureCatalogGroup): String =
+    when (group) {
+        FeatureCatalogGroup.CLASS -> text("features_filter_class")
+        FeatureCatalogGroup.SUBCLASS -> text("features_filter_subclass")
+        FeatureCatalogGroup.OPTION -> text("features_filter_option")
+        FeatureCatalogGroup.FEAT -> text("features_filter_feat")
+        FeatureCatalogGroup.SPECIES -> text("features_filter_species")
+        FeatureCatalogGroup.BACKGROUND -> text("features_filter_background")
+        FeatureCatalogGroup.OTHER -> text("features_filter_other")
+    }
+
+private val catalogGroupOrder = listOf(
+    FeatureCatalogGroup.CLASS,
+    FeatureCatalogGroup.SUBCLASS,
+    FeatureCatalogGroup.OPTION,
+    FeatureCatalogGroup.FEAT,
+    FeatureCatalogGroup.SPECIES,
+    FeatureCatalogGroup.BACKGROUND,
+    FeatureCatalogGroup.OTHER
+)
 
 private fun newDraftFeature(): Feature =
     Feature(

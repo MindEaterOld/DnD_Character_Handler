@@ -62,6 +62,7 @@ class AppViewModelFactory(
             modelClass.isAssignableFrom(FeaturesViewModel::class.java) -> FeaturesViewModel(
                 characterRepository = container.characterRepository,
                 featureCatalogRepository = container.featureCatalogRepository,
+                characterCatalogRepository = container.characterCatalogRepository,
                 getCharacterBundleUseCase = container.getCharacterBundleUseCase,
                 selectedCharacterHolder = container.selectedCharacterHolder
             )
