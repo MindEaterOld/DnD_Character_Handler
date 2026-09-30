@@ -21,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.withFrameNanos
@@ -112,10 +113,23 @@ internal class DiceTableState(private val selection: Map<DieType, Int>, seed: Lo
  * The face that lands on top is the result.
  */
 @Composable
-internal fun DiceTableOverlay(selection: Map<DieType, Int>, skin: DiceSkin, onClose: () -> Unit) {
+internal fun DiceTableOverlay(
+    selection: Map<DieType, Int>,
+    skin: DiceSkin,
+    onClose: () -> Unit,
+    /** Called with the dice every time a throw settles; a new throw replaces the result. */
+    onSettled: (List<ThrownDie>) -> Unit = {}
+) {
     val state = remember(selection) { DiceTableState(selection) }
     val colors = LocalDesignTokens.current.colors
+    val currentOnSettled by rememberUpdatedState(onSettled)
     BackHandler(onBack = onClose)
+
+    LaunchedEffect(state) {
+        snapshotFlow { state.phase }.collect { phase ->
+            if (phase == DicePhase.SETTLED) currentOnSettled(state.results)
+        }
+    }
 
     LaunchedEffect(state) {
         // Frames are only requested while the dice move; between throws the table sits idle.

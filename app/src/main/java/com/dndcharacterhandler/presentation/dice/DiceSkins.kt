@@ -3,10 +3,14 @@ package com.dndcharacterhandler.presentation.dice
 import androidx.compose.foundation.Canvas
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
+
+/** The dice skin the player picked in the dice picker; every dice table in the app uses it. */
+internal val LocalDiceSkin = compositionLocalOf { DiceSkin.GOLD }
 
 /** Looks the player can pick for the dice. Every colour comes from the design tokens. */
 internal enum class DiceSkin(val nameKey: String) {

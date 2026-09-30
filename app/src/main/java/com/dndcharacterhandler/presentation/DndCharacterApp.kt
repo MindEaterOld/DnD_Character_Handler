@@ -52,6 +52,7 @@ import com.dndcharacterhandler.presentation.components.SingleFloatingButtonInset
 import com.dndcharacterhandler.presentation.components.SettingsDialog
 import com.dndcharacterhandler.presentation.dice.DicePickerDialog
 import com.dndcharacterhandler.presentation.dice.DiceSkin
+import com.dndcharacterhandler.presentation.dice.LocalDiceSkin
 import com.dndcharacterhandler.presentation.dice.DiceTableOverlay
 import com.dndcharacterhandler.presentation.dice.DieType
 import com.dndcharacterhandler.presentation.features.FeaturesScreen
@@ -126,7 +127,7 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
         }
     }
 
-    CompositionLocalProvider(LocalStrings provides strings) {
+    CompositionLocalProvider(LocalStrings provides strings, LocalDiceSkin provides diceSkin) {
         Box(modifier = Modifier.fillMaxSize()) {
             ModalNavigationDrawer(
                 drawerState = drawerState,

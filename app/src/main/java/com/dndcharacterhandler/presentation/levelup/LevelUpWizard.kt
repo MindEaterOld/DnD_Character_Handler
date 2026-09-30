@@ -71,10 +71,12 @@ import com.dndcharacterhandler.domain.rules.abilityScores
 import com.dndcharacterhandler.domain.rules.proficiencyBonusForLevel
 import com.dndcharacterhandler.data.localization.LocalizedStrings
 import com.dndcharacterhandler.presentation.components.OverlayCloseButton
+import com.dndcharacterhandler.presentation.dice.DiceTableOverlay
+import com.dndcharacterhandler.presentation.dice.DieType
+import com.dndcharacterhandler.presentation.dice.LocalDiceSkin
 import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
-import kotlin.random.Random
 
 /**
  * The level-up wizard: one page per step of the draft (class, hit points, features, choices,
@@ -106,6 +108,8 @@ internal fun LevelUpWizard(
     fun setAnswer(value: LevelUpAnswer) {
         draft = draft.copy(answers = draft.answers + (page.key to value))
     }
+    // Hit points are rolled on the 3D dice table, never with a hidden random number.
+    var roll by remember { mutableStateOf<HitDieRoll?>(null) }
 
     BackHandler(onBack = onDismiss)
     // A layer over the whole app rather than a dialog window: a dialog doesn't get the navigation
@@ -147,7 +151,10 @@ internal fun LevelUpWizard(
                     is LevelUpPage.ChooseClass -> chooseClassPage(strings, page, russian) { classId ->
                         draft = draft.copy(classPicks = draft.classPicks + (page.characterLevel to classId))
                     }
-                    is LevelUpPage.HitPoints -> hitPointsPage(strings, page, answer as? LevelUpAnswer.HitPoints, russian, ::setAnswer)
+                    is LevelUpPage.HitPoints -> hitPointsPage(
+                        strings, page, answer as? LevelUpAnswer.HitPoints, russian, ::setAnswer,
+                        onRoll = { roll = HitDieRoll(page.key, page.characterClass.hitDie) }
+                    )
                     is LevelUpPage.Features -> featuresPage(strings, page, answer as? LevelUpAnswer.Grants, russian, render, ::setAnswer)
                     is LevelUpPage.Traits -> traitsPage(strings, page, answer as? LevelUpAnswer.Traits, russian, ::setAnswer)
                     is LevelUpPage.Items -> itemsPage(strings, page, answer as? LevelUpAnswer.Items, russian, render, ::setAnswer)
@@ -179,7 +186,30 @@ internal fun LevelUpWizard(
             }
         }
         OverlayCloseButton(onClick = onDismiss, modifier = Modifier.align(Alignment.TopEnd))
+
+        roll?.let { current ->
+            DiceTableOverlay(
+                selection = mapOf(current.dieType to 1),
+                skin = LocalDiceSkin.current,
+                onClose = { roll = null },
+                onSettled = { dice ->
+                    val value = dice.sumOf { it.value() }
+                    draft = draft.copy(answers = draft.answers + (current.pageKey to LevelUpAnswer.HitPoints(HitPointMethod.ROLL, value)))
+                }
+            )
+        }
     }
+}
+
+/** A hit die being thrown on the dice table for the hit point page [pageKey]. */
+private data class HitDieRoll(val pageKey: String, val sides: Int) {
+    val dieType: DieType
+        get() = when (sides) {
+            6 -> DieType.D6
+            10 -> DieType.D10
+            12 -> DieType.D12
+            else -> DieType.D8
+        }
 }
 
 private fun formulaContext(bundle: CharacterBundle, summary: LevelUpSummary, catalog: CharacterCatalog): FormulaContext {
@@ -303,7 +333,8 @@ private fun LazyListScope.hitPointsPage(
     page: LevelUpPage.HitPoints,
     answer: LevelUpAnswer.HitPoints?,
     russian: Boolean,
-    onAnswer: (LevelUpAnswer) -> Unit
+    onAnswer: (LevelUpAnswer) -> Unit,
+    onRoll: () -> Unit
 ) {
     val die = page.characterClass.hitDie
     pageTitle(strings["levelup_hp_title"], strings.format("levelup_class_level", page.characterClass.name.get(russian), page.classLevel - 1, page.classLevel))
@@ -324,7 +355,7 @@ private fun LazyListScope.hitPointsPage(
                 title = if (rolled != null) strings.format("levelup_hp_rolled", rolled.value) else strings.format("levelup_hp_roll", "d$die"),
                 selected = rolled != null,
                 leading = { Icon(Icons.Outlined.Casino, contentDescription = null, tint = LocalDesignTokens.current.colors.accent.inspiration) },
-                onClick = { onAnswer(LevelUpAnswer.HitPoints(HitPointMethod.ROLL, Random.nextInt(1, die + 1))) }
+                onClick = onRoll
             )
         }
     }
