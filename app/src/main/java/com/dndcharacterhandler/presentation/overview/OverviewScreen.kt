@@ -57,6 +57,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -104,7 +105,9 @@ import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 import java.io.File
 import java.io.FileOutputStream
 import java.text.NumberFormat
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 private val hitDieSidesOptions = listOf(6, 8, 10, 12)
 
@@ -425,8 +428,9 @@ fun OverviewScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     // Only re-sync AC when an input that actually affects it changes (keys compare structurally),
-    // not on every HP/XP/name edit.
+    // not on every HP/XP/name edit — or when another character is selected.
     LaunchedEffect(
+        state.character?.character?.id,
         state.character?.character?.baseArmorClass,
         state.character?.character?.dexterity,
         state.character?.character?.armorClassMode,
@@ -481,6 +485,7 @@ private fun OverviewContent(
     val context = LocalContext.current
     val strings = LocalStrings.current
     val typographyTokens = LocalDesignTokens.current.typography
+    val portraitScope = rememberCoroutineScope()
     val portraitPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri ->
@@ -491,12 +496,17 @@ private fun OverviewContent(
                     Intent.FLAG_GRANT_READ_URI_PERMISSION
                 )
             }
-            val storedPortrait = copyPortraitToCharacterFiles(
-                context = context,
-                characterId = characterBundle.character.id,
-                sourceUri = uri
-            ) ?: uri.toString()
-            onUpdatePortrait(characterBundle, storedPortrait)
+            // Copying a large (possibly cloud-backed) image can take a while: keep it off the UI thread.
+            portraitScope.launch {
+                val storedPortrait = withContext(Dispatchers.IO) {
+                    copyPortraitToCharacterFiles(
+                        context = context,
+                        characterId = characterBundle.character.id,
+                        sourceUri = uri
+                    )
+                } ?: uri.toString()
+                onUpdatePortrait(characterBundle, storedPortrait)
+            }
         }
     }
     var activeField by remember { mutableStateOf<OverviewEditableField?>(null) }
@@ -2022,13 +2032,17 @@ private fun playAssetSound(
 ) {
     val descriptor = runCatching { context.assets.openFd(assetPath) }.getOrNull() ?: return
     val player = MediaPlayer()
-    player.setOnCompletionListener { completedPlayer ->
-        completedPlayer.release()
+    // MediaPlayer's native side only keeps a weak reference, so hold it until playback ends;
+    // otherwise it can be garbage-collected mid-prepare and the sound never plays.
+    activeSoundPlayers += player
+    val finish = { finishedPlayer: MediaPlayer ->
+        activeSoundPlayers -= finishedPlayer
+        finishedPlayer.release()
         descriptor.close()
     }
+    player.setOnCompletionListener { finish(it) }
     player.setOnErrorListener { erroredPlayer, _, _ ->
-        erroredPlayer.release()
-        descriptor.close()
+        finish(erroredPlayer)
         true
     }
     player.setOnPreparedListener { it.start() }
@@ -2037,34 +2051,38 @@ private fun playAssetSound(
     runCatching {
         player.setDataSource(descriptor.fileDescriptor, descriptor.startOffset, descriptor.length)
         player.prepareAsync()
-    }.onFailure {
-        player.release()
-        descriptor.close()
-    }
+    }.onFailure { finish(player) }
 }
+
+/** Players currently playing a one-shot sound; touched only from the main thread. */
+private val activeSoundPlayers = mutableSetOf<MediaPlayer>()
 
 private fun copyPortraitToCharacterFiles(
     context: Context,
     characterId: Long,
     sourceUri: Uri
 ): String? {
-    return runCatching {
-        val extension = guessImageExtension(context, sourceUri)
-        val directory = File(context.filesDir, "character_portraits/$characterId").apply {
-            mkdirs()
-        }
-        directory.listFiles()
-            ?.filter { it.name.startsWith("portrait.") }
-            ?.forEach { it.delete() }
-
-        val target = File(directory, "portrait.${System.currentTimeMillis()}.$extension")
+    val extension = runCatching { guessImageExtension(context, sourceUri) }.getOrDefault("jpg")
+    val directory = File(context.filesDir, "character_portraits/$characterId").apply {
+        mkdirs()
+    }
+    val target = File(directory, "portrait.${System.currentTimeMillis()}.$extension")
+    val copied = runCatching {
         context.contentResolver.openInputStream(sourceUri)?.use { input ->
             FileOutputStream(target).use { output ->
                 input.copyTo(output)
             }
-        } ?: return@runCatching null
-        target.absolutePath
-    }.getOrNull()
+        } != null
+    }.getOrDefault(false)
+    if (!copied) {
+        target.delete()
+        return null
+    }
+    // Only drop the previous portrait once the new one is safely on disk.
+    directory.listFiles()
+        ?.filter { it.name.startsWith("portrait.") && it != target }
+        ?.forEach { it.delete() }
+    return target.absolutePath
 }
 
 private fun guessImageExtension(

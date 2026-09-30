@@ -6,6 +6,8 @@ import com.dndcharacterhandler.domain.model.AppLanguage
 import com.dndcharacterhandler.domain.model.SpellCatalogItem
 import com.dndcharacterhandler.domain.repository.SpellCatalogRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
@@ -16,6 +18,7 @@ class AssetSpellCatalogRepository(
 ) : SpellCatalogRepository {
     @Volatile
     private var cachedItems: List<SpellCatalogItem>? = null
+    private val loadMutex = Mutex()
 
     @Volatile
     private var ruTextCache: JSONObject? = null
@@ -32,17 +35,17 @@ class AssetSpellCatalogRepository(
 
     override suspend fun getItems(): List<SpellCatalogItem> {
         cachedItems?.let { return it }
-        return withContext(Dispatchers.IO) {
-            cachedItems?.let { return@withContext it }
-            // Spell names are translated in localization.json ("spell_name_<index>"). The Russian one is
-            // kept on the item so screens can tell an untouched catalog spell from a user-renamed one.
-            val russianStrings = localizationRepository.getStrings(AppLanguage.RUSSIAN)
-            val items = readArray("5e-SRD-Spells.json")
-                .mapNotNull { json -> parseSpell(json, russianStrings::get) }
-                .sortedBy { it.name }
-            cachedItems = items
-            items
-        }
+        // Several ViewModels request the catalog at startup; parse the assets only once.
+        return loadMutex.withLock { cachedItems ?: loadItems().also { cachedItems = it } }
+    }
+
+    private suspend fun loadItems(): List<SpellCatalogItem> = withContext(Dispatchers.IO) {
+        // Spell names are translated in localization.json ("spell_name_<index>"). The Russian one is
+        // kept on the item so screens can tell an untouched catalog spell from a user-renamed one.
+        val russianStrings = localizationRepository.getStrings(AppLanguage.RUSSIAN)
+        readArray("5e-SRD-Spells.json")
+            .mapNotNull { json -> parseSpell(json, russianStrings::get) }
+            .sortedBy { it.name }
     }
 
     private fun readArray(assetName: String): JSONArray {

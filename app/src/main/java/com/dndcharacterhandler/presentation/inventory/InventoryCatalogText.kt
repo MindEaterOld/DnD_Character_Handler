@@ -2,28 +2,20 @@ package com.dndcharacterhandler.presentation.inventory
 
 import com.dndcharacterhandler.domain.model.InventoryCatalogItem
 import com.dndcharacterhandler.domain.model.InventoryItem
+import com.dndcharacterhandler.presentation.localization.CatalogIndex
 import com.dndcharacterhandler.presentation.localization.catalogFieldText
 
 /** Finds the catalog entry a character's inventory item was added from. */
 internal class InventoryCatalogLookup(items: List<InventoryCatalogItem>) {
-    private val byId = items.associateBy { it.id }
-    private val byName: Map<String, List<InventoryCatalogItem>> = buildMap<String, MutableList<InventoryCatalogItem>> {
-        items.forEach { item ->
-            listOf(item.name, item.ruName)
-                .map(String::trim)
-                .filter(String::isNotEmpty)
-                .distinct()
-                .forEach { name -> getOrPut(name) { mutableListOf() }.add(item) }
-        }
-    }
+    private val index = CatalogIndex(items, id = { it.id }, names = { listOf(it.name, it.ruName) })
 
     /**
      * The entry for [item], and whether it is certain. Items saved before catalogId existed are matched
      * by name (English or Russian) and category; an ambiguous match is used for display only.
      */
     fun find(item: InventoryItem): Pair<InventoryCatalogItem, Boolean>? {
-        item.catalogId?.let { id -> return byId[id]?.let { it to true } }
-        val candidates = byName[item.name.trim()].orEmpty().filter { it.category == item.category }
+        item.catalogId?.let { id -> return index.byId(id)?.let { it to true } }
+        val candidates = index.named(item.name).filter { it.category == item.category }
         return when (candidates.size) {
             0 -> null
             1 -> candidates.first() to true

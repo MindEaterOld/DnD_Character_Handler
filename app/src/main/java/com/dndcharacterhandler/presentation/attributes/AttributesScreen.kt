@@ -87,6 +87,7 @@ import com.dndcharacterhandler.presentation.SelectedCharacterHolder
 import com.dndcharacterhandler.presentation.components.CharacterScreenHeader
 import com.dndcharacterhandler.presentation.components.MiniStatCard
 import com.dndcharacterhandler.presentation.components.ScreenBackground
+import com.dndcharacterhandler.presentation.components.ScreenTopActions
 import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
@@ -342,7 +343,30 @@ fun AttributesContent(
     onOpenDrawer: () -> Unit = {},
     onOpenSettings: () -> Unit = {}
 ) {
-    val character = characterBundle?.character ?: previewFallbackCharacter()
+    if (characterBundle == null) {
+        // Same loading state as the other screens (this used to render the preview character).
+        ScreenBackground {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(start = 24.dp, end = 24.dp, top = 4.dp)
+            ) {
+                ScreenTopActions(
+                    onOpenDrawer = onOpenDrawer,
+                    onOpenSettings = onOpenSettings,
+                    modifier = Modifier.align(Alignment.TopCenter)
+                )
+                Text(
+                    text = text("placeholder_loading_character"),
+                    modifier = Modifier.align(Alignment.Center),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = LocalDesignTokens.current.colors.text.muted
+                )
+            }
+        }
+        return
+    }
+    val character = characterBundle.character
     val strings = LocalStrings.current
     val abilityScores = remember(character) { buildAbilityScores(character) }
     val proficiencyBonus = proficiencyBonusForLevel(character.level)

@@ -22,6 +22,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileInputStream
+import java.io.InputStream
 
 private sealed interface ImageSourceKind {
     data class Drawable(@DrawableRes val resId: Int) : ImageSourceKind
@@ -128,20 +129,38 @@ private fun classifyImageSource(
     return ImageSourceKind.BitmapRef(reference)
 }
 
-private fun decodeBitmap(context: Context, reference: String): android.graphics.Bitmap? =
-    when {
+/**
+ * Longest side, in pixels, that images are decoded at. Portraits are often full-size camera photos;
+ * decoding those as-is costs ~200 MB per copy and can crash with "trying to draw too large bitmap".
+ * 2048 px still looks sharp in the full-screen portrait viewer.
+ */
+private const val MaxDecodedImageSide = 2048
+
+private fun decodeBitmap(context: Context, reference: String): android.graphics.Bitmap? {
+    val open: () -> InputStream? = when {
         reference.startsWith("content://") || reference.startsWith("file://") -> {
-            context.contentResolver.openInputStream(Uri.parse(reference)).use(BitmapFactory::decodeStream)
+            { context.contentResolver.openInputStream(Uri.parse(reference)) }
         }
 
         reference.startsWith("${AssetReferences.iconsRoot}/") ||
             reference.startsWith("${AssetReferences.portraitsRoot}/") -> {
-            context.assets.open(reference).use(BitmapFactory::decodeStream)
+            { context.assets.open(reference) }
         }
 
         File(reference).exists() -> {
-            FileInputStream(reference).use(BitmapFactory::decodeStream)
+            { FileInputStream(reference) }
         }
 
-        else -> null
+        else -> return null
     }
+
+    // First pass reads only the dimensions, second pass decodes at a power-of-two scale.
+    val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+    (open() ?: return null).use { BitmapFactory.decodeStream(it, null, bounds) }
+    val longestSide = maxOf(bounds.outWidth, bounds.outHeight)
+    var sampleSize = 1
+    while (longestSide / sampleSize > MaxDecodedImageSide) sampleSize *= 2
+
+    val options = BitmapFactory.Options().apply { inSampleSize = sampleSize }
+    return (open() ?: return null).use { BitmapFactory.decodeStream(it, null, options) }
+}

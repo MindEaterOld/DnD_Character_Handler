@@ -2,20 +2,12 @@ package com.dndcharacterhandler.presentation.features
 
 import com.dndcharacterhandler.domain.model.Feature
 import com.dndcharacterhandler.domain.model.FeatureCatalogItem
+import com.dndcharacterhandler.presentation.localization.CatalogIndex
 import com.dndcharacterhandler.presentation.localization.catalogFieldText
 
 /** Finds the catalog entry a character's feature was added from. */
 internal class FeatureCatalogLookup(items: List<FeatureCatalogItem>) {
-    private val byId = items.associateBy { it.id }
-    private val byName: Map<String, List<FeatureCatalogItem>> = buildMap<String, MutableList<FeatureCatalogItem>> {
-        items.forEach { item ->
-            listOf(item.name, item.ruName)
-                .map(String::trim)
-                .filter(String::isNotEmpty)
-                .distinct()
-                .forEach { name -> getOrPut(name) { mutableListOf() }.add(item) }
-        }
-    }
+    private val index = CatalogIndex(items, id = { it.id }, names = { listOf(it.name, it.ruName) })
 
     /**
      * The entry for [feature], and whether it is certain. Features saved before catalogId existed are
@@ -23,8 +15,8 @@ internal class FeatureCatalogLookup(items: List<FeatureCatalogItem>) {
      * Score Improvement") are narrowed by category, otherwise the first one is used for display only.
      */
     fun find(feature: Feature): Pair<FeatureCatalogItem, Boolean>? {
-        feature.catalogId?.let { id -> return byId[id]?.let { it to true } }
-        val candidates = byName[feature.name.trim()].orEmpty()
+        feature.catalogId?.let { id -> return index.byId(id)?.let { it to true } }
+        val candidates = index.named(feature.name)
             .filter { it.source == feature.source && it.level == feature.level }
         if (candidates.size <= 1) return candidates.firstOrNull()?.let { it to true }
         val category = feature.category.trim()

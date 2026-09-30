@@ -760,12 +760,13 @@ private fun InventoryCatalogRow(
     russian: Boolean,
     onAdd: () -> Unit
 ) {
+    val colors = LocalDesignTokens.current.colors
     val description = item.displayDescription(russian)
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
-        color = Color(0xFF17141B).copy(alpha = 0.62f),
-        border = BorderStroke(1.dp, Color(0x36FFFFFF))
+        color = colors.surface.card.copy(alpha = 0.62f),
+        border = BorderStroke(1.dp, colors.border.muted)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
@@ -778,7 +779,7 @@ private fun InventoryCatalogRow(
                 Text(
                     text = item.displayName(russian),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Color(0xFFF7F2EA),
+                    color = colors.text.primary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -786,7 +787,7 @@ private fun InventoryCatalogRow(
                     Text(
                         text = detail,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color(0xFFC2BBB3),
+                        color = colors.text.label,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -795,7 +796,7 @@ private fun InventoryCatalogRow(
                     Text(
                         text = description.replace('\n', ' '),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color(0xFFD2CAC2),
+                        color = colors.text.muted,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -809,14 +810,14 @@ private fun InventoryCatalogRow(
                     Text(
                         text = "${formatWeight(item.weight)} ${text("inventory_unit_pounds")}",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color(0xFFC2BBB3)
+                        color = colors.text.label
                     )
                 }
                 IconButton(onClick = onAdd) {
                     Icon(
                         imageVector = Icons.Outlined.Add,
                         contentDescription = text("inventory_add_item"),
-                        tint = Color(0xFFF7F2EA)
+                        tint = colors.text.primary
                     )
                 }
             }

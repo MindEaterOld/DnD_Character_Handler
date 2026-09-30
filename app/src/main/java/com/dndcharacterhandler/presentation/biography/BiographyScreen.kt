@@ -38,7 +38,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -240,6 +239,7 @@ internal fun BiographyContent(
             }
             item {
                 BiographyHistorySection(
+                    characterId = resolvedCharacter.id,
                     history = resolvedCharacter.biography,
                     onHistoryChange = { value ->
                         onUpdateBiography(resolvedBundle, value)
@@ -381,20 +381,26 @@ private fun BiographyValueRow(
 
 @Composable
 private fun BiographyHistorySection(
+    characterId: Long,
     history: String,
     onHistoryChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     // Keep edits local while typing and persist only once the field loses focus, so we don't
     // issue one DB write per keystroke (which also re-keyed this draft mid-typing).
-    var draft by remember(history) { mutableStateOf(history) }
+    // Keyed on the character too: two characters with the same (e.g. empty) history must not
+    // share a draft.
+    val draftState = remember(characterId, history) { mutableStateOf(history) }
+    var draft by draftState
     var wasFocused by remember { mutableStateOf(false) }
 
-    // Safety net: if the screen leaves composition while editing (e.g. navigating away
-    // before a focus-lost event), persist the latest draft. updateBiography de-dupes equal values.
-    val latestDraft by rememberUpdatedState(draft)
-    DisposableEffect(Unit) {
-        onDispose { onHistoryChange(latestDraft) }
+    // Safety net: persist the draft when it is replaced (another character was selected or its
+    // saved history changed) or the screen leaves composition before a focus-lost event. Each
+    // effect keeps the callback of the character its draft belongs to, so switching characters
+    // can't write one character's text into another. updateBiography de-dupes equal values.
+    DisposableEffect(draftState) {
+        val saveForThisCharacter = onHistoryChange
+        onDispose { saveForThisCharacter(draftState.value) }
     }
 
     Column(

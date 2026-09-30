@@ -64,6 +64,8 @@ import com.dndcharacterhandler.domain.model.AttackCalculationMode
 import com.dndcharacterhandler.domain.model.ArmorClassMode
 import com.dndcharacterhandler.domain.model.CharacterBundle
 import com.dndcharacterhandler.domain.model.CombatResource
+import com.dndcharacterhandler.domain.model.AppLanguage
+import com.dndcharacterhandler.domain.model.InventoryCatalogItem
 import com.dndcharacterhandler.domain.model.InventoryCategory
 import com.dndcharacterhandler.domain.model.InventoryItem
 import com.dndcharacterhandler.domain.model.InventoryWeaponProperty
@@ -76,6 +78,7 @@ import com.dndcharacterhandler.domain.rules.calculateArmorClass
 import com.dndcharacterhandler.domain.rules.proficiencyBonusForLevel
 import com.dndcharacterhandler.domain.rules.scoreForSpellcastingAbility
 import com.dndcharacterhandler.domain.repository.CharacterRepository
+import com.dndcharacterhandler.domain.repository.InventoryCatalogRepository
 import com.dndcharacterhandler.domain.repository.SpellCatalogRepository
 import com.dndcharacterhandler.domain.usecase.GetCharacterBundleUseCase
 import com.dndcharacterhandler.presentation.BaseCharacterViewModel
@@ -89,6 +92,8 @@ import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.spells.SpellEditDialog
 import com.dndcharacterhandler.presentation.spells.SpellResolutionKind
+import com.dndcharacterhandler.presentation.inventory.InventoryCatalogLookup
+import com.dndcharacterhandler.presentation.inventory.localizedWith
 import com.dndcharacterhandler.presentation.spells.localizedWith
 import com.dndcharacterhandler.presentation.spells.newDraftSpell
 import com.dndcharacterhandler.presentation.spells.parseResolutionKind
@@ -103,16 +108,22 @@ import kotlin.math.max
 class CombatViewModel(
     private val characterRepository: CharacterRepository,
     private val spellCatalogRepository: SpellCatalogRepository,
+    private val inventoryCatalogRepository: InventoryCatalogRepository,
     getCharacterBundleUseCase: GetCharacterBundleUseCase,
     selectedCharacterHolder: SelectedCharacterHolder
 ) : BaseCharacterViewModel(getCharacterBundleUseCase, selectedCharacterHolder) {
-    // Used to show catalog spell attacks in the current language (see localizedWith).
+    // Used to show catalog spell attacks and weapons in the current language (see localizedWith).
     private val _spellCatalog = MutableStateFlow<Map<String, SpellCatalogItem>>(emptyMap())
     val spellCatalog: StateFlow<Map<String, SpellCatalogItem>> = _spellCatalog.asStateFlow()
+    private val _inventoryCatalog = MutableStateFlow<List<InventoryCatalogItem>>(emptyList())
+    val inventoryCatalog: StateFlow<List<InventoryCatalogItem>> = _inventoryCatalog.asStateFlow()
 
     init {
         viewModelScope.launch {
             _spellCatalog.value = spellCatalogRepository.getItems().associateBy { it.id }
+        }
+        viewModelScope.launch {
+            _inventoryCatalog.value = inventoryCatalogRepository.getItems()
         }
     }
 
@@ -235,9 +246,11 @@ fun CombatScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val spellCatalog by viewModel.spellCatalog.collectAsStateWithLifecycle()
+    val inventoryCatalog by viewModel.inventoryCatalog.collectAsStateWithLifecycle()
     CombatContent(
         characterBundle = state.character,
         spellCatalog = spellCatalog,
+        inventoryCatalog = inventoryCatalog,
         onOpenDrawer = onOpenDrawer,
         onOpenSettings = onOpenSettings,
         onUpdateArmorClass = viewModel::updateArmorClass,
@@ -256,6 +269,7 @@ fun CombatScreen(
 internal fun CombatContent(
     characterBundle: CharacterBundle?,
     spellCatalog: Map<String, SpellCatalogItem> = emptyMap(),
+    inventoryCatalog: List<InventoryCatalogItem> = emptyList(),
     onOpenDrawer: () -> Unit = {},
     onOpenSettings: () -> Unit = {},
     onUpdateArmorClass: (CharacterBundle, Int, ArmorClassMode, Int?) -> Unit = { _, _, _, _ -> },
@@ -329,10 +343,11 @@ internal fun CombatContent(
     val resourceRows = remember(resolvedBundle.combatResources) {
         resolvedBundle.combatResources.chunked(3)
     }
-    val weaponAttackOptions = remember(resolvedBundle.inventoryItems) {
-        resolvedBundle.inventoryItems.filter {
-            it.category == InventoryCategory.WEAPON && it.weaponDetails != null
-        }
+    val inventoryCatalogLookup = remember(inventoryCatalog) { InventoryCatalogLookup(inventoryCatalog) }
+    val weaponAttackOptions = remember(resolvedBundle.inventoryItems, inventoryCatalogLookup, strings) {
+        resolvedBundle.inventoryItems
+            .filter { it.category == InventoryCategory.WEAPON && it.weaponDetails != null }
+            .localizedWith(inventoryCatalogLookup, russian = strings.language == AppLanguage.RUSSIAN)
     }
     val spellAttackOptions = remember(resolvedBundle.spells, spellCatalog, strings) {
         resolvedBundle.spells.filter { it.isCombatSpell() }.localizedWith(spellCatalog, strings)

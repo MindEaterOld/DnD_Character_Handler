@@ -11,6 +11,8 @@ import com.dndcharacterhandler.domain.model.CharacterBundle
 import com.dndcharacterhandler.domain.model.InventoryItem
 import com.dndcharacterhandler.domain.repository.CharacterFileRepository
 import com.dndcharacterhandler.domain.repository.CharacterRepository
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
@@ -67,8 +69,12 @@ class CharacterFileRepositoryImpl(
             } catch (throwable: Throwable) {
                 // Roll back a partially-imported character so a failure after createCharacter
                 // can't leave an orphan row (and its asset directory) behind.
+                // NonCancellable: if the import was cancelled, a plain suspend call here would throw
+                // immediately and skip the cleanup.
                 createdCharacterId?.let { id ->
-                    runCatching { characterRepository.deleteCharacter(id) }
+                    withContext(NonCancellable) {
+                        runCatching { characterRepository.deleteCharacter(id) }
+                    }
                 }
                 throw throwable
             } finally {

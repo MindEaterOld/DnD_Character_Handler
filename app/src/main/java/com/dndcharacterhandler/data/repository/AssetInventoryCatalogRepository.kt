@@ -13,6 +13,8 @@ import com.dndcharacterhandler.domain.model.InventoryWeaponProperty
 import com.dndcharacterhandler.domain.model.InventoryWeaponRangeType
 import com.dndcharacterhandler.domain.repository.InventoryCatalogRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
@@ -22,21 +24,21 @@ class AssetInventoryCatalogRepository(
 ) : InventoryCatalogRepository {
     @Volatile
     private var cachedItems: List<InventoryCatalogItem>? = null
+    private val loadMutex = Mutex()
 
     override suspend fun getItems(): List<InventoryCatalogItem> {
         cachedItems?.let { return it }
-        return withContext(Dispatchers.IO) {
-            cachedItems?.let { return@withContext it }
+        // Several ViewModels request the catalog at startup; parse the assets only once.
+        return loadMutex.withLock { cachedItems ?: loadItems().also { cachedItems = it } }
+    }
 
-            val equipmentItems = readArray("5e-SRD-Equipment.json").mapNotNull(::parseEquipmentItem)
-            val magicItems = readArray("5e-SRD-Magic-Items.json").mapNotNull(::parseMagicItem)
-            val russian = readRussianText()
-            val merged = (equipmentItems + magicItems)
-                .map { item -> item.withRussianText(russian.optJSONObject(item.id)) }
-                .sortedBy { it.name }
-            cachedItems = merged
-            merged
-        }
+    private suspend fun loadItems(): List<InventoryCatalogItem> = withContext(Dispatchers.IO) {
+        val equipmentItems = readArray("5e-SRD-Equipment.json").mapNotNull(::parseEquipmentItem)
+        val magicItems = readArray("5e-SRD-Magic-Items.json").mapNotNull(::parseMagicItem)
+        val russian = readRussianText()
+        (equipmentItems + magicItems)
+            .map { item -> item.withRussianText(russian.optJSONObject(item.id)) }
+            .sortedBy { it.name }
     }
 
     /** Russian names/descriptions keyed by catalog id ("equipment:<index>", "magic:<index>"), from TTG Club. */
