@@ -1,8 +1,10 @@
 package com.dndcharacterhandler.data.repository
 
+import com.dndcharacterhandler.domain.model.AdvancementRecord
 import com.dndcharacterhandler.domain.model.Attack
 import com.dndcharacterhandler.domain.model.AttackCalculationMode
 import com.dndcharacterhandler.domain.model.CharacterBundle
+import com.dndcharacterhandler.domain.model.CharacterClassEntry
 import com.dndcharacterhandler.domain.model.CombatResource
 import com.dndcharacterhandler.domain.model.Feature
 import com.dndcharacterhandler.domain.model.FeatureSource
@@ -134,7 +136,15 @@ class CharacterArchiveCodecTest {
                 weaponProficiencies = "Simple, Martial",
                 alignment = "Chaotic Good",
                 background = "Outlander",
-                biography = "Raised in the Quivering Forest."
+                biography = "Raised in the Quivering Forest.",
+                classes = listOf(
+                    CharacterClassEntry(classId = "ranger", subclassId = "hunter", levels = 5, isOriginal = true, spentHitDice = 2),
+                    CharacterClassEntry(classId = "rogue", levels = 2)
+                ),
+                advancements = listOf(
+                    AdvancementRecord(7, "rogue", 2, "rogue", "adv1", "HitPoints", "hp=5;method=AVERAGE"),
+                    AdvancementRecord(7, "rogue", 2, "rogue", "adv2", "ItemChoice", "picks=a,b;replaced=c")
+                )
             ),
             skills = listOf(
                 Skill(name = "skill_perception", isProficient = true, isExpertise = true, hasJackOfAllTrades = false),
@@ -163,6 +173,7 @@ class CharacterArchiveCodecTest {
             ),
             combatResources = listOf(
                 CombatResource(
+                    catalogId = "phbftrCombatSupe",
                     name = "Superiority Dice",
                     currentUses = 2,
                     maximumUses = 4,

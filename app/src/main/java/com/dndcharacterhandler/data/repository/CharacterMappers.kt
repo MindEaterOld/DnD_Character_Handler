@@ -58,7 +58,8 @@ fun CharacterWithDetails.toDomain(): CharacterBundle =
                 it.currentUses,
                 it.maximumUses,
                 it.restoresOnShortRest,
-                it.restoresOnLongRest
+                it.restoresOnLongRest,
+                it.catalogId
             )
         },
         inventoryItems = inventoryItems.sortedBy { it.id }.map(InventoryItemEntity::toDomain),
@@ -171,7 +172,9 @@ fun CharacterEntity.toDomain(): Character =
         flaws = flaws,
         biography = biography,
         createdAt = createdAt,
-        updatedAt = updatedAt
+        updatedAt = updatedAt,
+        classes = ProgressionJson.decodeClasses(classesJson),
+        advancements = ProgressionJson.decodeAdvancements(advancementsJson)
     )
 
 fun InventoryItemEntity.toDomain(): InventoryItem =
@@ -307,7 +310,9 @@ fun Character.toEntity(): CharacterEntity =
         flaws = flaws,
         biography = biography,
         createdAt = createdAt,
-        updatedAt = updatedAt
+        updatedAt = updatedAt,
+        classesJson = ProgressionJson.encodeClasses(classes),
+        advancementsJson = ProgressionJson.encodeAdvancements(advancements)
     )
 
 fun Skill.toEntity(characterId: Long): SkillEntity =
@@ -352,7 +357,8 @@ fun CombatResource.toEntity(characterId: Long): CombatResourceEntity =
         currentUses = currentUses,
         maximumUses = maximumUses,
         restoresOnShortRest = restoresOnShortRest,
-        restoresOnLongRest = restoresOnLongRest
+        restoresOnLongRest = restoresOnLongRest,
+        catalogId = catalogId
     )
 
 fun InventoryItem.toEntity(characterId: Long): InventoryItemEntity =

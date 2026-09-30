@@ -63,6 +63,17 @@ class CatalogFormulaText(private val catalog: CharacterCatalog) {
         return TOKEN.replace(text) { match -> formula(match.groupValues[1], russian, context) }
     }
 
+    /** The character's value of a Foundry [formula] ("@scale.barbarian.rages", "@prof"), or null if it needs something unknown. */
+    fun value(formula: String, context: FormulaContext): String? {
+        var resolvedAll = true
+        val substituted = REFERENCE.replace(formula) { match ->
+            resolve(match.value, context) ?: "0".also { resolvedAll = false }
+        }
+        if (!resolvedAll) return null
+        if (DICE.containsMatchIn(substituted)) return tidySigns(substituted)
+        return evaluate(substituted)?.let(::formatNumber)
+    }
+
     private fun formula(formula: String, russian: Boolean, context: FormulaContext?): String {
         var resolvedAll = true
         val substituted = REFERENCE.replace(formula) { match ->

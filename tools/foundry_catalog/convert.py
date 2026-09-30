@@ -613,6 +613,33 @@ def write_missing(result):
     return missing
 
 
+def trait_labels():
+    """Proficiency and trait keys ("skills:ath", "tool:art:smith", "languages:standard:dwarvish"...) with
+    both labels and their children, from export/traits.json (Foundry's Trait.choices). Items keep
+    Fifthpendium's 'Кинжал [Dagger]' names; categories get the ru-ru module's translation."""
+    data = load_json(os.path.join(EXPORT, 'traits.json'), {'traits': {}, 'categories': {}})
+    labels = {}
+
+    def walk(nodes):
+        for node in nodes:
+            ru, en = split_name(node['label'])
+            if en:  # an item name, 'Русское [English]'
+                label = {'en': en, 'ru': ru}
+            else:
+                label = {'en': node['label'], 'ru': node.get('ru') or ''}
+            entry = {'name': label}
+            children = node.get('children') or []
+            if children:
+                entry['children'] = [child['key'] for child in children]
+                walk(children)
+            labels[node['key']] = entry
+
+    for nodes in data['traits'].values():
+        walk(nodes)
+    categories = {k: {'en': v.get('en') or k, 'ru': v.get('ru') or ''} for k, v in data['categories'].items()}
+    return {'labels': labels, 'categories': categories}
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--out', default=DEFAULT_OUT)
@@ -630,6 +657,7 @@ def main():
         'sources': {pid: pack.get('packageVersion') for pid, pack in {**catalog.packs, **catalog.srd_packs}.items()},
         'books': {b: {'en': BOOKS.get(b, (b, b))[0], 'ru': BOOKS.get(b, (b, b))[1]} for b in books},
         'subtypes': {k: {'en': v[0], 'ru': v[1]} for k, v in SUBTYPES.items()},
+        'traits': trait_labels(),
         **result,
     }
     with open(args.out, 'w', encoding='utf-8', newline='\n') as f:

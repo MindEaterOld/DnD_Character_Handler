@@ -30,7 +30,7 @@ import com.dndcharacterhandler.data.local.entity.SpellEntity
         FeatureEntity::class,
         NoteEntity::class
     ],
-    version = 46,
+    version = 47,
     exportSchema = false
 )
 @TypeConverters(RoomConverters::class)
@@ -92,7 +92,8 @@ abstract class AppDatabase : RoomDatabase() {
                     MIGRATION_42_43,
                     MIGRATION_43_44,
                     MIGRATION_44_45,
-                    MIGRATION_45_46
+                    MIGRATION_45_46,
+                    MIGRATION_46_47
                 ).build().also { INSTANCE = it }
             }
         }
@@ -539,6 +540,15 @@ abstract class AppDatabase : RoomDatabase() {
                 // Armor's magic bonus now adds to AC. Until now the editor always saved 1 for armor
                 // without letting the user set it, so the stored value is meaningless: reset it.
                 db.execSQL("UPDATE inventory_items SET magicalBonus = 0 WHERE category = 'ARMOR'")
+            }
+        }
+
+        private val MIGRATION_46_47 = object : Migration(46, 47) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Level-up wizard: the character's classes and the choices made at each level.
+                db.execSQL("ALTER TABLE characters ADD COLUMN classesJson TEXT NOT NULL DEFAULT '[]'")
+                db.execSQL("ALTER TABLE characters ADD COLUMN advancementsJson TEXT NOT NULL DEFAULT '[]'")
+                db.execSQL("ALTER TABLE combat_resources ADD COLUMN catalogId TEXT")
             }
         }
     }

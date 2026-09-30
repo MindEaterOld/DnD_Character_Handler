@@ -82,7 +82,11 @@ data class CharacterEntity(
     val flaws: String,
     val biography: String,
     val createdAt: Long,
-    val updatedAt: Long
+    val updatedAt: Long,
+    /** [com.dndcharacterhandler.domain.model.CharacterClassEntry] list as JSON. */
+    val classesJson: String = "[]",
+    /** [com.dndcharacterhandler.domain.model.AdvancementRecord] list as JSON. */
+    val advancementsJson: String = "[]"
 )
 
 @Entity(
@@ -160,7 +164,8 @@ data class CombatResourceEntity(
     val currentUses: Int,
     val maximumUses: Int,
     val restoresOnShortRest: Boolean,
-    val restoresOnLongRest: Boolean
+    val restoresOnLongRest: Boolean,
+    val catalogId: String? = null
 )
 
 @Entity(

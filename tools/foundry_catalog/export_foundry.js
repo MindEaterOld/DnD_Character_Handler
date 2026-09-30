@@ -84,4 +84,32 @@ for (const uuid of embedTargets) {
   embeds[uuid] = entry;
 }
 report.push({ id: 'embeds', count: embedTargets.size, status: await send('embeds.json', embeds) });
+
+// Proficiency and trait keys with their labels. Foundry runs in English, so the Russian labels of
+// the categories come from the ru-ru module's dnd5e translation, matched through the i18n keys.
+const flatten = (obj, prefix = '', out = {}) => {
+  for (const [k, v] of Object.entries(obj ?? {})) {
+    const key = prefix ? `${prefix}.${k}` : k;
+    if (v && typeof v === 'object') flatten(v, key, out); else if (typeof v === 'string') out[key] = v;
+  }
+  return out;
+};
+const en = flatten(await (await fetch('systems/dnd5e/lang/en.json')).json());
+const ru = flatten(await (await fetch('modules/ru-ru/i18n/systems/dnd5e.json')).json());
+const enToRu = {};
+for (const [key, value] of Object.entries(en)) if (ru[key] && !(value in enToRu)) enToRu[value] = ru[key];
+const traitTree = (choices, path) => Object.entries(choices ?? {}).map(([k, v]) => {
+  const key = `${path}:${k}`;
+  const node = { key, label: v.label, ru: enToRu[v.label] ?? null };
+  if (v.children) node.children = traitTree(v.children, key);
+  return node;
+});
+const traits = {};
+const categories = {};
+for (const trait of ['skills', 'saves', 'armor', 'weapon', 'tool', 'languages', 'dr', 'di', 'dv', 'ci']) {
+  traits[trait] = traitTree(await dnd5e.documents.Trait.choices(trait), trait);
+  const label = CONFIG.DND5E.traits?.[trait]?.labels?.title ?? trait;
+  categories[trait] = { en: label, ru: enToRu[label] ?? null };
+}
+report.push({ id: 'traits', status: await send('traits.json', { traits, categories }) });
 return report;

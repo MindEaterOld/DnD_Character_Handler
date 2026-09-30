@@ -28,7 +28,7 @@ import org.json.JSONObject
 import java.io.File
 
 // 18: armor/shield magicalBonus is meaningful (adds to AC).
-private const val SCHEMA_VERSION = 18
+private const val SCHEMA_VERSION = 19
 
 data class ImportedArchive(
     val characterBundle: CharacterBundle,
@@ -105,6 +105,8 @@ fun CharacterBundle.toArchiveManifest(
         put("biography", character.biography)
         put("createdAt", character.createdAt)
         put("updatedAt", character.updatedAt)
+        put("classes", ProgressionJson.classesToJson(character.classes))
+        put("advancements", ProgressionJson.advancementsToJson(character.advancements))
     }
 
     return JSONObject().apply {
@@ -147,6 +149,7 @@ fun CharacterBundle.toArchiveManifest(
                 put("maximumUses", resource.maximumUses)
                 put("restoresOnShortRest", resource.restoresOnShortRest)
                 put("restoresOnLongRest", resource.restoresOnLongRest)
+                resource.catalogId?.let { put("catalogId", it) }
             }
         }))
         put("inventoryItems", JSONArray(inventoryItems.mapIndexed { index, item ->
@@ -350,7 +353,9 @@ fun archiveManifestToCharacterBundle(
         flaws = characterJson.optString("flaws"),
         biography = characterJson.optString("biography"),
         createdAt = characterJson.optLong("createdAt"),
-        updatedAt = characterJson.optLong("updatedAt")
+        updatedAt = characterJson.optLong("updatedAt"),
+        classes = ProgressionJson.classesFromJson(characterJson.optJSONArray("classes")),
+        advancements = ProgressionJson.advancementsFromJson(characterJson.optJSONArray("advancements"))
     )
 
     return ImportedArchive(
@@ -422,7 +427,8 @@ private fun JSONArray.toCombatResourceList(): List<CombatResource> =
                 currentUses = json.optInt("currentUses"),
                 maximumUses = json.optInt("maximumUses"),
                 restoresOnShortRest = json.optBoolean("restoresOnShortRest", false),
-                restoresOnLongRest = json.optBoolean("restoresOnLongRest", false)
+                restoresOnLongRest = json.optBoolean("restoresOnLongRest", false),
+                catalogId = json.optNullableString("catalogId")
             )
         }
     }

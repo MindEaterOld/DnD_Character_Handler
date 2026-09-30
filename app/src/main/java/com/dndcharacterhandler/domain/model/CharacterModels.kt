@@ -70,7 +70,11 @@ data class Character(
     val flaws: String,
     val biography: String,
     val createdAt: Long,
-    val updatedAt: Long
+    val updatedAt: Long,
+    /** Classes taken with the level-up wizard; empty for characters whose class is only [characterClass] text. */
+    val classes: List<CharacterClassEntry> = emptyList(),
+    /** Choices the level-up wizard applied, level by level. */
+    val advancements: List<AdvancementRecord> = emptyList()
 )
 
 data class CharacterBundle(
@@ -118,7 +122,9 @@ data class CombatResource(
     val currentUses: Int,
     val maximumUses: Int,
     val restoresOnShortRest: Boolean = false,
-    val restoresOnLongRest: Boolean = false
+    val restoresOnLongRest: Boolean = false,
+    /** Catalog feature whose uses this tracks (Rage, Superiority Dice...), kept in step by level-ups. */
+    val catalogId: String? = null
 )
 enum class InventoryCategory { WEAPON, ARMOR, CONSUMABLE, OTHER }
 enum class InventoryArmorType { LIGHT, MEDIUM, HEAVY, SHIELD }

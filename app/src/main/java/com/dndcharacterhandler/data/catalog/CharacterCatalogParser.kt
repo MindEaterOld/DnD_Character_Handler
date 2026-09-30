@@ -12,6 +12,7 @@ import com.dndcharacterhandler.domain.model.CatalogSpellRef
 import com.dndcharacterhandler.domain.model.CatalogSpellcasting
 import com.dndcharacterhandler.domain.model.CatalogSubclass
 import com.dndcharacterhandler.domain.model.CatalogText
+import com.dndcharacterhandler.domain.model.CatalogTrait
 import com.dndcharacterhandler.domain.model.CatalogUses
 import com.dndcharacterhandler.domain.model.CharacterCatalog
 import com.dndcharacterhandler.domain.model.ChoiceRestriction
@@ -37,7 +38,11 @@ object CharacterCatalogParser {
             subtypes = root.optJSONObject("subtypes").entries { _, value -> value.asText() },
             legacyIds = root.optJSONObject("legacyIds").let { legacy ->
                 buildMap { legacy?.keys()?.forEach { key -> put(key, legacy.getString(key)) } }
-            }
+            },
+            traits = root.optJSONObject("traits")?.optJSONObject("labels").entries { key, value ->
+                CatalogTrait(key, value.text("name"), value.strings("children"))
+            },
+            traitCategories = root.optJSONObject("traits")?.optJSONObject("categories").entries { _, value -> value.asText() }
         )
     }
 

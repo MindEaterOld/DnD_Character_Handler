@@ -15,7 +15,11 @@ data class CharacterCatalog(
     val books: Map<String, CatalogText>,
     val subtypes: Map<String, CatalogText>,
     /** Ids of the catalog the app used before, mapped to the entries that replace them. */
-    val legacyIds: Map<String, String>
+    val legacyIds: Map<String, String>,
+    /** Proficiency and trait keys ("skills:ath", "tool:art:smith"...) with their labels and children. */
+    val traits: Map<String, CatalogTrait> = emptyMap(),
+    /** Labels of the trait kinds: "skills", "tool", "languages"... */
+    val traitCategories: Map<String, CatalogText> = emptyMap()
 ) {
     val featuresById: Map<String, CatalogFeature> by lazy { features.associateBy { it.id } }
     val classesByIdentifier: Map<String, CatalogClass> by lazy { classes.associateBy { it.identifier } }
@@ -41,6 +45,9 @@ data class CharacterCatalog(
         )
     }
 }
+
+/** A proficiency or trait: "tool:art" (Artisan's Tools) has the single tools as [children]. */
+data class CatalogTrait(val key: String, val name: CatalogText, val children: List<String>)
 
 /** A catalog text in English and Russian; either may be missing, and then the other one is shown. */
 data class CatalogText(val en: String = "", val ru: String = "") {
