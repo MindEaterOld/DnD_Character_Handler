@@ -91,6 +91,7 @@ import com.dndcharacterhandler.domain.model.AppLanguage
 import com.dndcharacterhandler.domain.rules.MAX_CHARACTER_LEVEL
 import com.dndcharacterhandler.domain.rules.abilityModifier
 import com.dndcharacterhandler.domain.rules.classLabel
+import com.dndcharacterhandler.domain.rules.classWizardTarget
 import com.dndcharacterhandler.domain.rules.levelForExperience
 import com.dndcharacterhandler.domain.rules.calculateArmorClass
 import com.dndcharacterhandler.domain.rules.calculateInitiative
@@ -429,7 +430,6 @@ private data class OverviewStat(
 private enum class OverviewEditableField {
     NAME,
     RACE,
-    CLASS,
     LEVEL
 }
 
@@ -700,10 +700,8 @@ private fun OverviewContent(
                             draftText = character?.race.orEmpty()
                             activeField = OverviewEditableField.RACE
                         },
-                        onEditClass = {
-                            draftText = character?.characterClass.orEmpty()
-                            activeField = OverviewEditableField.CLASS
-                        },
+                        // The class is chosen in the level-up wizard, not typed in.
+                        onEditClass = { character?.let(::classWizardTarget)?.let(onOpenLevelUp) },
                         onEditLevel = {
                             activeField = OverviewEditableField.LEVEL
                         }
@@ -878,7 +876,6 @@ private fun OverviewContent(
                     when (field) {
                         OverviewEditableField.NAME -> text("overview_rename_title")
                         OverviewEditableField.RACE -> text("overview_edit_race_title")
-                        OverviewEditableField.CLASS -> text("overview_edit_class_title")
                         OverviewEditableField.LEVEL -> text("overview_level_picker_title")
                     }
                 )
@@ -893,7 +890,6 @@ private fun OverviewContent(
                             when (field) {
                                 OverviewEditableField.NAME -> text("overview_name_placeholder")
                                 OverviewEditableField.RACE -> text("placeholder_race")
-                                OverviewEditableField.CLASS -> text("placeholder_class")
                                 OverviewEditableField.LEVEL -> text("overview_level_picker_title")
                             }
                         )
@@ -906,7 +902,6 @@ private fun OverviewContent(
                         when (field) {
                             OverviewEditableField.NAME -> onUpdateIdentity(characterBundle, draftText, null, null, null)
                             OverviewEditableField.RACE -> onUpdateIdentity(characterBundle, null, draftText, null, null)
-                            OverviewEditableField.CLASS -> onUpdateIdentity(characterBundle, null, null, draftText, null)
                             OverviewEditableField.LEVEL -> Unit
                         }
                         activeField = null

@@ -17,6 +17,16 @@ const val MAX_CHARACTER_LEVEL = 20
 fun levelForExperience(experience: Int): Int =
     ExperienceThresholds.indexOfLast { experience >= it }.coerceAtLeast(0) + 1
 
+/**
+ * The level the wizard opens with when the player taps the class: the current level for a character
+ * whose class is still only text (the wizard sets it up), the next level otherwise; null at level 20.
+ */
+fun classWizardTarget(character: Character): Int? = when {
+    character.classes.isEmpty() -> character.level.coerceIn(1, MAX_CHARACTER_LEVEL)
+    character.level < MAX_CHARACTER_LEVEL -> character.level + 1
+    else -> null
+}
+
 /** Hit dice of one size: how many the character has and how many are spent. */
 data class HitDicePool(val sides: Int, val total: Int, val spent: Int) {
     val available: Int get() = (total - spent).coerceAtLeast(0)

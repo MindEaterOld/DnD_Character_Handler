@@ -229,7 +229,8 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                                 FeaturesScreen(
                                     viewModel = appState.featuresViewModel,
                                     onOpenDrawer = { scope.launch { drawerState.open() } },
-                                    onOpenSettings = openSettings
+                                    onOpenSettings = openSettings,
+                                    onOpenLevelUp = { levelUpTarget = it }
                                 )
                             }
                             composable(AppScreen.Biography.route) {

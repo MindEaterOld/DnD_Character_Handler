@@ -66,6 +66,7 @@ import com.dndcharacterhandler.domain.repository.CharacterCatalogRepository
 import com.dndcharacterhandler.domain.repository.CharacterRepository
 import com.dndcharacterhandler.domain.repository.FeatureCatalogRepository
 import com.dndcharacterhandler.domain.rules.CatalogFormulaText
+import com.dndcharacterhandler.domain.rules.classWizardTarget
 import com.dndcharacterhandler.domain.rules.FormulaContext
 import com.dndcharacterhandler.domain.usecase.GetCharacterBundleUseCase
 import com.dndcharacterhandler.presentation.BaseCharacterViewModel
@@ -104,21 +105,6 @@ class FeaturesViewModel(
             val catalog = characterCatalogRepository.getCatalog()
             val items = featureCatalogRepository.getItems()
             _catalogUiState.value = FeatureCatalogUiState(items = items, catalog = catalog, isLoading = false)
-        }
-    }
-
-    fun updateClass(characterBundle: CharacterBundle, value: String) {
-        val current = characterBundle.character
-        val sanitized = value.trim()
-        if (sanitized == current.characterClass) return
-        viewModelScope.launch {
-            characterRepository.updateIdentity(
-                characterId = current.id,
-                name = current.name,
-                race = current.race,
-                characterClass = sanitized,
-                level = current.level
-            )
         }
     }
 
@@ -174,7 +160,8 @@ class FeaturesViewModel(
 fun FeaturesScreen(
     viewModel: FeaturesViewModel,
     onOpenDrawer: () -> Unit,
-    onOpenSettings: () -> Unit
+    onOpenSettings: () -> Unit,
+    onOpenLevelUp: (targetLevel: Int) -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val catalogState by viewModel.catalogUiState.collectAsStateWithLifecycle()
@@ -187,7 +174,7 @@ fun FeaturesScreen(
         onOpenSettings = onOpenSettings,
         onUpdateFeature = viewModel::updateFeature,
         onDeleteFeature = viewModel::deleteFeature,
-        onUpdateClass = viewModel::updateClass,
+        onOpenLevelUp = onOpenLevelUp,
         onUpdateRace = viewModel::updateRace,
         onUpdateBackground = viewModel::updateBackground
     )
@@ -203,7 +190,7 @@ internal fun FeaturesContent(
     onOpenSettings: () -> Unit = {},
     onUpdateFeature: (CharacterBundle, Feature) -> Unit = { _, _ -> },
     onDeleteFeature: (CharacterBundle, Feature) -> Unit = { _, _ -> },
-    onUpdateClass: (CharacterBundle, String) -> Unit = { _, _ -> },
+    onOpenLevelUp: (Int) -> Unit = {},
     onUpdateRace: (CharacterBundle, String) -> Unit = { _, _ -> },
     onUpdateBackground: (CharacterBundle, String) -> Unit = { _, _ -> }
 ) {
@@ -288,10 +275,8 @@ internal fun FeaturesContent(
                             label = text("placeholder_class"),
                             value = character.characterClass,
                             icon = Icons.Outlined.Shield,
-                            onClick = {
-                                summaryDraft = character.characterClass
-                                editingSummaryField = FeatureSummaryField.CLASS
-                            }
+                            // The class is chosen in the level-up wizard, not typed in.
+                            onClick = { classWizardTarget(character)?.let(onOpenLevelUp) }
                         )
                         FeatureSummaryCard(
                             modifier = Modifier.weight(1f),
@@ -385,12 +370,10 @@ internal fun FeaturesContent(
 
     editingSummaryField?.let { field ->
         val titleKey = when (field) {
-            FeatureSummaryField.CLASS -> "overview_edit_class_title"
             FeatureSummaryField.RACE -> "overview_edit_race_title"
             FeatureSummaryField.BACKGROUND -> "biography_background"
         }
         val labelKey = when (field) {
-            FeatureSummaryField.CLASS -> "placeholder_class"
             FeatureSummaryField.RACE -> "placeholder_race"
             FeatureSummaryField.BACKGROUND -> "biography_background"
         }
@@ -409,7 +392,6 @@ internal fun FeaturesContent(
                 Button(
                     onClick = {
                         when (field) {
-                            FeatureSummaryField.CLASS -> onUpdateClass(resolvedBundle, summaryDraft)
                             FeatureSummaryField.RACE -> onUpdateRace(resolvedBundle, summaryDraft)
                             FeatureSummaryField.BACKGROUND -> onUpdateBackground(resolvedBundle, summaryDraft)
                         }
@@ -428,7 +410,7 @@ internal fun FeaturesContent(
     }
 }
 
-private enum class FeatureSummaryField { CLASS, RACE, BACKGROUND }
+private enum class FeatureSummaryField { RACE, BACKGROUND }
 
 @Composable
 private fun FeatureSummaryCard(

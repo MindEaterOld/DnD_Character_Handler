@@ -36,7 +36,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -250,21 +249,31 @@ private fun LazyListScope.setupPage(
     onChange: (LevelUpSetup) -> Unit
 ) {
     pageTitle(strings["levelup_setup_title"], strings["levelup_setup_hint"])
-    item(key = "keep") {
-        val keep = setup?.keepExistingLevels ?: page.suggestKeep
+    // How the character got to its level: built by the wizard now, or already filled in by hand.
+    val keep = setup?.keepExistingLevels ?: page.suggestKeep
+    fun pickMode(value: Boolean) {
+        // No class yet: remember the mode with an empty class, which the wizard doesn't accept.
+        onChange((setup ?: LevelUpSetup(classId = "", keepExistingLevels = value)).copy(keepExistingLevels = value))
+    }
+    item(key = "rebuild") {
         ChoiceCard(
-            title = strings.format("levelup_setup_keep", page.currentLevel),
-            subtitle = strings[if (keep) "levelup_setup_keep_hint" else "levelup_setup_rebuild_hint"],
-            selected = keep,
-            trailing = {
-                Switch(checked = keep, onCheckedChange = { value ->
-                    // No class yet: remember the switch with an empty class, which the wizard doesn't accept.
-                    onChange((setup ?: LevelUpSetup(classId = "", keepExistingLevels = value)).copy(keepExistingLevels = value))
-                })
-            },
-            onClick = null
+            title = strings["levelup_setup_rebuild"],
+            subtitle = strings["levelup_setup_rebuild_hint"],
+            selected = !keep,
+            leading = { RadioButton(selected = !keep, onClick = null) },
+            onClick = { pickMode(false) }
         )
     }
+    item(key = "keep") {
+        ChoiceCard(
+            title = strings.format("levelup_setup_keep", page.currentLevel),
+            subtitle = strings["levelup_setup_keep_hint"],
+            selected = keep,
+            leading = { RadioButton(selected = keep, onClick = null) },
+            onClick = { pickMode(true) }
+        )
+    }
+    item(key = "class_title") { SectionLabel(strings["levelup_class_pick"]) }
     items(page.classes, key = { it.id }) { characterClass ->
         val selected = setup?.classId == characterClass.id
         ChoiceCard(
