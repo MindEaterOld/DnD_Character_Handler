@@ -38,7 +38,9 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
@@ -813,7 +815,8 @@ internal fun FeatureEditDialog(
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = text(if (feature.id == 0L) "features_add_feature" else "features_edit_feature"),
+                    // Short, so it stays on one line next to the cross.
+                    text = text(if (feature.id == 0L) "features_editor_add" else "features_editor_edit"),
                     modifier = Modifier.weight(1f)
                 )
                 IconButton(onClick = onDismiss) {
@@ -875,11 +878,17 @@ internal fun FeatureEditDialog(
             // Delete in the bottom-left corner, apart from Save on the right.
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 if (onDelete != null) {
-                    IconButton(onClick = onDelete) {
+                    // A round tonal button as tall as Save: the danger red, faint behind the icon.
+                    FilledIconButton(
+                        onClick = onDelete,
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = colors.accent.dangerHpZero.copy(alpha = 0.16f),
+                            contentColor = colors.accent.dangerHpZero
+                        )
+                    ) {
                         Icon(
                             imageVector = Icons.Outlined.Delete,
-                            contentDescription = text("inventory_delete_action"),
-                            tint = colors.accent.dangerHpZero
+                            contentDescription = text("inventory_delete_action")
                         )
                     }
                 }

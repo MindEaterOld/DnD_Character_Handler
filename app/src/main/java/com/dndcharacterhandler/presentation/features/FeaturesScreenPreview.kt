@@ -29,6 +29,7 @@ fun FeaturesScreenPreview() {
             "features_search_placeholder" to "Search Features",
             "features_untitled" to "Untitled Feature",
             "features_edit_feature" to "Edit Feature",
+            "features_editor_edit" to "Edit",
             "features_name" to "Name",
             "features_description" to "Description",
             "features_level" to "Level",

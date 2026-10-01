@@ -2106,6 +2106,20 @@
     "fr": "Modifier le trait",
     "es": "Editar rasgo"
   },
+  "features_editor_edit": {
+    "en": "Edit",
+    "ru": "\u0418\u0437\u043c\u0435\u043d\u0438\u0442\u044c",
+    "de": "Bearbeiten",
+    "fr": "Modifier",
+    "es": "Editar"
+  },
+  "features_editor_add": {
+    "en": "Add",
+    "ru": "\u0414\u043e\u0431\u0430\u0432\u0438\u0442\u044c",
+    "de": "Hinzuf\u00fcgen",
+    "fr": "Ajouter",
+    "es": "A\u00f1adir"
+  },
   "features_edit_action": {
     "en": "Edit",
     "ru": "\u0418\u0437\u043c\u0435\u043d\u0438\u0442\u044c",
