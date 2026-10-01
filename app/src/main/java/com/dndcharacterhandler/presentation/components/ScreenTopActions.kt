@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.outlined.Casino
+import com.dndcharacterhandler.presentation.dice.D20Outline
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -41,7 +41,7 @@ fun ScreenTopActions(
         }
         ScreenTopActionButton(onClick = onOpenDice) {
             Icon(
-                imageVector = Icons.Outlined.Casino,
+                imageVector = D20Outline,
                 contentDescription = text("dice_open"),
                 tint = colors.text.icon,
                 modifier = Modifier.size(28.dp)
