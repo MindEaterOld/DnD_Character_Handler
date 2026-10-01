@@ -20,8 +20,6 @@ import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -29,7 +27,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,6 +47,7 @@ import com.dndcharacterhandler.domain.usecase.GetCharacterBundleUseCase
 import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
 import com.dndcharacterhandler.presentation.components.CharacterScreenHeader
+import com.dndcharacterhandler.presentation.components.EditDialog
 import com.dndcharacterhandler.presentation.components.FloatingAddButton
 import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
 import com.dndcharacterhandler.presentation.components.ScreenBackground
@@ -349,56 +347,44 @@ private fun NoteEditDialog(
     var content by remember(note) { mutableStateOf(note.content) }
     var isPinned by remember(note) { mutableStateOf(note.isPinned) }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text("notes_edit_note")) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                OutlinedTextField(
-                    value = title,
-                    onValueChange = { title = it },
-                    label = { Text(text("notes_title")) },
-                    singleLine = true
+    EditDialog(
+        title = text("notes_edit_note"),
+        onDismiss = onDismiss,
+        onConfirm = {
+            onSave(
+                note.copy(
+                    title = title.trim(),
+                    content = content.trim(),
+                    isPinned = isPinned
                 )
-                OutlinedTextField(
-                    value = content,
-                    onValueChange = { content = it },
-                    label = { Text(text("notes_content")) },
-                    minLines = 4
+            )
+        }
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            OutlinedTextField(
+                value = title,
+                onValueChange = { title = it },
+                label = { Text(text("notes_title")) },
+                singleLine = true
+            )
+            OutlinedTextField(
+                value = content,
+                onValueChange = { content = it },
+                label = { Text(text("notes_content")) },
+                minLines = 4
+            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(
+                    checked = isPinned,
+                    onCheckedChange = { isPinned = it }
                 )
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(
-                        checked = isPinned,
-                        onCheckedChange = { isPinned = it }
-                    )
-                    Text(
-                        text = text("notes_pinned"),
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = {
-                    onSave(
-                        note.copy(
-                            title = title.trim(),
-                            content = content.trim(),
-                            isPinned = isPinned
-                        )
-                    )
-                }
-            ) {
-                Text(text("common_save"))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text("common_cancel"))
+                Text(
+                    text = text("notes_pinned"),
+                    style = MaterialTheme.typography.bodyLarge
+                )
             }
         }
-    )
+    }
 }
 
 private fun newDraftNote(): Note {

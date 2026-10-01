@@ -33,9 +33,7 @@ import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Shield
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults
-import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -100,6 +98,7 @@ import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
 import com.dndcharacterhandler.presentation.components.AutoSizeText
 import com.dndcharacterhandler.presentation.components.CardEditButton
+import com.dndcharacterhandler.presentation.components.EditDialog
 import com.dndcharacterhandler.presentation.components.CharacterScreenHeader
 import com.dndcharacterhandler.presentation.components.ExpandableCard
 import com.dndcharacterhandler.presentation.components.FloatingAddButton
@@ -410,36 +409,24 @@ internal fun FeaturesContent(
             FeatureSummaryField.RACE -> "placeholder_race"
             FeatureSummaryField.BACKGROUND -> "biography_background"
         }
-        AlertDialog(
-            onDismissRequest = { editingSummaryField = null },
-            title = { Text(text(titleKey)) },
-            text = {
-                OutlinedTextField(
-                    value = summaryDraft,
-                    onValueChange = { summaryDraft = it },
-                    label = { Text(text(labelKey)) },
-                    singleLine = true
-                )
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        when (field) {
-                            FeatureSummaryField.RACE -> onUpdateRace(resolvedBundle, summaryDraft)
-                            FeatureSummaryField.BACKGROUND -> onUpdateBackground(resolvedBundle, summaryDraft)
-                        }
-                        editingSummaryField = null
-                    }
-                ) {
-                    Text(text("common_save"))
+        EditDialog(
+            title = text(titleKey),
+            onDismiss = { editingSummaryField = null },
+            onConfirm = {
+                when (field) {
+                    FeatureSummaryField.RACE -> onUpdateRace(resolvedBundle, summaryDraft)
+                    FeatureSummaryField.BACKGROUND -> onUpdateBackground(resolvedBundle, summaryDraft)
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = { editingSummaryField = null }) {
-                    Text(text("common_cancel"))
-                }
+                editingSummaryField = null
             }
-        )
+        ) {
+            OutlinedTextField(
+                value = summaryDraft,
+                onValueChange = { summaryDraft = it },
+                label = { Text(text(labelKey)) },
+                singleLine = true
+            )
+        }
     }
 }
 
@@ -597,83 +584,78 @@ private fun FeaturesAddEntryDialog(
         }
     }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text("features_add_feature")) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FeaturesDialogSection(text("features_add_create_section"))
-                    TextButton(onClick = onCreateFeature) {
-                        Text(text("features_create_action"))
-                    }
-                }
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FeaturesDialogSection(text("features_add_catalog_section"))
-                    FeaturesSearchField(
-                        value = query,
-                        onValueChange = { query = it }
-                    )
-                    if (groups.size > 1) {
-                        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            item {
-                                FilterChip(
-                                    selected = group == null,
-                                    onClick = { group = null },
-                                    label = { Text(text("features_filter_all")) }
-                                )
-                            }
-                            items(groups) { option ->
-                                FilterChip(
-                                    selected = group == option,
-                                    onClick = { group = if (group == option) null else option },
-                                    label = { Text(catalogGroupLabel(option)) }
-                                )
-                            }
-                        }
-                    }
-                    when {
-                        isLoading -> {
-                            Text(
-                                text = text("features_catalog_loading"),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = colors.text.muted
-                            )
-                        }
-                        filteredItems.isEmpty() -> {
-                            Text(
-                                text = text("features_catalog_empty"),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = colors.text.muted
-                            )
-                        }
-                        else -> {
-                            LazyColumn(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .heightIn(max = 280.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                items(filteredItems, key = { it.id }) { item ->
-                                    FeatureCatalogRow(
-                                        item = item,
-                                        russian = russian,
-                                        onAdd = { onSelectCatalogItem(item) }
-                                    )
-                                }
-                            }
-                        }
-                    }
+    // A picker: the cross closes it, a tap on an entry does the work; the catalog list scrolls by itself.
+    EditDialog(
+        title = text("features_add_feature"),
+        onDismiss = onDismiss,
+        scrollable = false
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                FeaturesDialogSection(text("features_add_create_section"))
+                TextButton(onClick = onCreateFeature) {
+                    Text(text("features_create_action"))
                 }
             }
-        },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text("common_cancel"))
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                FeaturesDialogSection(text("features_add_catalog_section"))
+                FeaturesSearchField(
+                    value = query,
+                    onValueChange = { query = it }
+                )
+                if (groups.size > 1) {
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        item {
+                            FilterChip(
+                                selected = group == null,
+                                onClick = { group = null },
+                                label = { Text(text("features_filter_all")) }
+                            )
+                        }
+                        items(groups) { option ->
+                            FilterChip(
+                                selected = group == option,
+                                onClick = { group = if (group == option) null else option },
+                                label = { Text(catalogGroupLabel(option)) }
+                            )
+                        }
+                    }
+                }
+                when {
+                    isLoading -> {
+                        Text(
+                            text = text("features_catalog_loading"),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = colors.text.muted
+                        )
+                    }
+                    filteredItems.isEmpty() -> {
+                        Text(
+                            text = text("features_catalog_empty"),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = colors.text.muted
+                        )
+                    }
+                    else -> {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = 280.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(filteredItems, key = { it.id }) { item ->
+                                FeatureCatalogRow(
+                                    item = item,
+                                    russian = russian,
+                                    onAdd = { onSelectCatalogItem(item) }
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
-    )
+    }
 }
 
 @Composable
@@ -761,100 +743,54 @@ internal fun FeatureEditDialog(
     var source by remember(feature) { mutableStateOf(feature.source) }
     var category by remember(feature) { mutableStateOf(feature.category) }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        // Closing without saving is the cross in the corner, not a Cancel button.
-        title = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    // Short, so it stays on one line next to the cross.
-                    text = text(if (feature.id == 0L) "features_editor_add" else "features_editor_edit"),
-                    modifier = Modifier.weight(1f)
+    EditDialog(
+        // Short, so it stays on one line next to the cross.
+        title = text(if (feature.id == 0L) "features_editor_add" else "features_editor_edit"),
+        onDismiss = onDismiss,
+        onDelete = onDelete,
+        onConfirm = {
+            onSave(
+                feature.copy(
+                    name = name.trim(),
+                    description = if (description == shownDescription) feature.description else description.trim(),
+                    level = level.toIntOrNull(),
+                    source = source,
+                    category = category.trim()
                 )
-                IconButton(onClick = onDismiss) {
-                    Icon(
-                        imageVector = Icons.Outlined.Close,
-                        contentDescription = text("common_close"),
-                        tint = colors.text.muted
-                    )
-                }
-            }
-        },
-        text = {
-            // Scrolls as a whole, so a long description never pushes the buttons away.
-            Column(
-                modifier = Modifier.verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text(text("features_name")) },
-                    singleLine = true
-                )
-                FeatureSourceField(
-                    value = source,
-                    onValueChange = { source = it }
-                )
-                // The level is at most two digits: a narrow field next to the category.
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    OutlinedTextField(
-                        value = category,
-                        onValueChange = { category = it },
-                        modifier = Modifier.weight(1f),
-                        label = { Text(text("features_category")) },
-                        singleLine = true
-                    )
-                    LevelField(value = level, onValueChange = { value -> level = value.filter(Char::isDigit).take(2) })
-                }
-                OutlinedTextField(
-                    value = description,
-                    onValueChange = { description = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text(text("features_description")) },
-                    minLines = 4,
-                    maxLines = 10
-                )
-            }
-        },
-        confirmButton = {
-            // Delete in the bottom-left corner, apart from Save on the right.
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                if (onDelete != null) {
-                    // A round tonal button as tall as Save: the danger red, faint behind the icon.
-                    FilledIconButton(
-                        onClick = onDelete,
-                        colors = IconButtonDefaults.filledIconButtonColors(
-                            containerColor = colors.accent.dangerHpZero.copy(alpha = 0.16f),
-                            contentColor = colors.accent.dangerHpZero
-                        )
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Delete,
-                            contentDescription = text("inventory_delete_action")
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.weight(1f))
-                Button(
-                    onClick = {
-                        onSave(
-                            feature.copy(
-                                name = name.trim(),
-                                description = if (description == shownDescription) feature.description else description.trim(),
-                                level = level.toIntOrNull(),
-                                source = source,
-                                category = category.trim()
-                            )
-                        )
-                    }
-                ) {
-                    Text(text("common_save"))
-                }
-            }
+            )
         }
-    )
+    ) {
+        OutlinedTextField(
+            value = name,
+            onValueChange = { name = it },
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text(text("features_name")) },
+            singleLine = true
+        )
+        FeatureSourceField(
+            value = source,
+            onValueChange = { source = it }
+        )
+        // The level is at most two digits: a narrow field next to the category.
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            OutlinedTextField(
+                value = category,
+                onValueChange = { category = it },
+                modifier = Modifier.weight(1f),
+                label = { Text(text("features_category")) },
+                singleLine = true
+            )
+            LevelField(value = level, onValueChange = { value -> level = value.filter(Char::isDigit).take(2) })
+        }
+        OutlinedTextField(
+            value = description,
+            onValueChange = { description = it },
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text(text("features_description")) },
+            minLines = 4,
+            maxLines = 10
+        )
+    }
 }
 
 /**

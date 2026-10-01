@@ -25,14 +25,11 @@ import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.Visibility
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -62,6 +59,7 @@ import com.dndcharacterhandler.domain.usecase.GetCharacterBundleUseCase
 import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
 import com.dndcharacterhandler.presentation.components.CharacterScreenHeader
+import com.dndcharacterhandler.presentation.components.EditDialog
 import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
 import com.dndcharacterhandler.presentation.components.ScreenBackground
 import com.dndcharacterhandler.presentation.components.ScreenTopActions
@@ -509,27 +507,20 @@ private fun BiographyChoiceDialog(
     onDismiss: () -> Unit,
     onSelect: (String) -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(title) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                options.forEach { option ->
-                    BiographySelectionOption(
-                        text = text(option.labelKey),
-                        selected = option.value == currentValue,
-                        onClick = { onSelect(option.value) }
-                    )
-                }
-            }
-        },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text("common_cancel"))
+    EditDialog(
+        title = title,
+        onDismiss = onDismiss
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            options.forEach { option ->
+                BiographySelectionOption(
+                    text = text(option.labelKey),
+                    selected = option.value == currentValue,
+                    onClick = { onSelect(option.value) }
+                )
             }
         }
-    )
+    }
 }
 
 @Composable
@@ -541,28 +532,18 @@ private fun BiographyTextInputDialog(
     onSave: (String) -> Unit
 ) {
     var draft by remember(title, currentValue) { mutableStateOf(currentValue) }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(title) },
-        text = {
-            OutlinedTextField(
-                value = draft,
-                onValueChange = { draft = it },
-                singleLine = keyboardType != KeyboardType.Text,
-                keyboardOptions = KeyboardOptions(keyboardType = keyboardType)
-            )
-        },
-        confirmButton = {
-            Button(onClick = { onSave(draft) }) {
-                Text(text("common_save"))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text("common_cancel"))
-            }
-        }
-    )
+    EditDialog(
+        title = title,
+        onDismiss = onDismiss,
+        onConfirm = { onSave(draft) }
+    ) {
+        OutlinedTextField(
+            value = draft,
+            onValueChange = { draft = it },
+            singleLine = keyboardType != KeyboardType.Text,
+            keyboardOptions = KeyboardOptions(keyboardType = keyboardType)
+        )
+    }
 }
 
 @Composable
@@ -583,38 +564,28 @@ private fun BiographyGenderDialog(
     var custom by remember(currentValue) {
         mutableStateOf(currentValue.takeUnless { it in genderOptions }.orEmpty())
     }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text("biography_gender")) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                genderOptions.forEach { option ->
-                    BiographySelectionOption(
-                        text = localizedGender(option),
-                        selected = selected == option,
-                        onClick = { selected = option }
-                    )
-                }
-                if (selected == GenderCustomOption) {
-                    OutlinedTextField(
-                        value = custom,
-                        onValueChange = { custom = it },
-                        singleLine = true
-                    )
-                }
+    EditDialog(
+        title = text("biography_gender"),
+        onDismiss = onDismiss,
+        onConfirm = { onSave(if (selected == GenderCustomOption) custom else selected) }
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            genderOptions.forEach { option ->
+                BiographySelectionOption(
+                    text = localizedGender(option),
+                    selected = selected == option,
+                    onClick = { selected = option }
+                )
             }
-        },
-        confirmButton = {
-            Button(onClick = { onSave(if (selected == GenderCustomOption) custom else selected) }) {
-                Text(text("common_save"))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text("common_cancel"))
+            if (selected == GenderCustomOption) {
+                OutlinedTextField(
+                    value = custom,
+                    onValueChange = { custom = it },
+                    singleLine = true
+                )
             }
         }
-    )
+    }
 }
 
 @Composable
@@ -651,40 +622,30 @@ private fun BiographyHeightDialog(
     var amount by remember(currentValue) { mutableStateOf(parseLeadingNumber(currentValue)?.let(::formatNumber).orEmpty()) }
     val cmLabel = text(HeightUnit.CM.labelKey)
     val ftLabel = text(HeightUnit.FT.labelKey)
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text("biography_height")) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                UnitSwitcher(
-                    first = cmLabel,
-                    second = ftLabel,
-                    selected = if (unit == HeightUnit.CM) cmLabel else ftLabel,
-                    onSelected = { next ->
-                        val nextUnit = if (next == cmLabel) HeightUnit.CM else HeightUnit.FT
-                        amount = convertHeightAmount(amount, unit, nextUnit)
-                        unit = nextUnit
-                    }
-                )
-                OutlinedTextField(
-                    value = amount,
-                    onValueChange = { amount = it },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
-                )
-            }
-        },
-        confirmButton = {
-            Button(onClick = { onSave(formatMeasuredValue(amount, unit.code)) }) {
-                Text(text("common_save"))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text("common_cancel"))
-            }
+    EditDialog(
+        title = text("biography_height"),
+        onDismiss = onDismiss,
+        onConfirm = { onSave(formatMeasuredValue(amount, unit.code)) }
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            UnitSwitcher(
+                first = cmLabel,
+                second = ftLabel,
+                selected = if (unit == HeightUnit.CM) cmLabel else ftLabel,
+                onSelected = { next ->
+                    val nextUnit = if (next == cmLabel) HeightUnit.CM else HeightUnit.FT
+                    amount = convertHeightAmount(amount, unit, nextUnit)
+                    unit = nextUnit
+                }
+            )
+            OutlinedTextField(
+                value = amount,
+                onValueChange = { amount = it },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+            )
         }
-    )
+    }
 }
 
 @Composable
@@ -697,40 +658,30 @@ private fun BiographyWeightDialog(
     var amount by remember(currentValue) { mutableStateOf(parseLeadingNumber(currentValue)?.let(::formatNumber).orEmpty()) }
     val lbLabel = text(WeightUnit.LB.labelKey)
     val kgLabel = text(WeightUnit.KG.labelKey)
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text("biography_weight")) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                UnitSwitcher(
-                    first = lbLabel,
-                    second = kgLabel,
-                    selected = if (unit == WeightUnit.LB) lbLabel else kgLabel,
-                    onSelected = { next ->
-                        val nextUnit = if (next == lbLabel) WeightUnit.LB else WeightUnit.KG
-                        amount = convertWeightAmount(amount, unit, nextUnit)
-                        unit = nextUnit
-                    }
-                )
-                OutlinedTextField(
-                    value = amount,
-                    onValueChange = { amount = it },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
-                )
-            }
-        },
-        confirmButton = {
-            Button(onClick = { onSave(formatMeasuredValue(amount, unit.code)) }) {
-                Text(text("common_save"))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text("common_cancel"))
-            }
+    EditDialog(
+        title = text("biography_weight"),
+        onDismiss = onDismiss,
+        onConfirm = { onSave(formatMeasuredValue(amount, unit.code)) }
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            UnitSwitcher(
+                first = lbLabel,
+                second = kgLabel,
+                selected = if (unit == WeightUnit.LB) lbLabel else kgLabel,
+                onSelected = { next ->
+                    val nextUnit = if (next == lbLabel) WeightUnit.LB else WeightUnit.KG
+                    amount = convertWeightAmount(amount, unit, nextUnit)
+                    unit = nextUnit
+                }
+            )
+            OutlinedTextField(
+                value = amount,
+                onValueChange = { amount = it },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+            )
         }
-    )
+    }
 }
 
 @Composable

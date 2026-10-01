@@ -7,12 +7,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,31 +27,25 @@ fun SettingsDialog(
     onDismiss: () -> Unit
 ) {
     val colors = LocalDesignTokens.current.colors
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text("overview_settings")) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    text = text("settings_language"),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = colors.text.label
+    EditDialog(
+        title = text("overview_settings"),
+        onDismiss = onDismiss
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                text = text("settings_language"),
+                style = MaterialTheme.typography.titleMedium,
+                color = colors.text.label
+            )
+            AppLanguage.entries.forEach { language ->
+                SettingsLanguageOption(
+                    label = text(language.localizationKey),
+                    selected = language == currentLanguage,
+                    onClick = { onLanguageSelected(language) }
                 )
-                AppLanguage.entries.forEach { language ->
-                    SettingsLanguageOption(
-                        label = text(language.localizationKey),
-                        selected = language == currentLanguage,
-                        onClick = { onLanguageSelected(language) }
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text("common_close"))
             }
         }
-    )
+    }
 }
 
 @Composable

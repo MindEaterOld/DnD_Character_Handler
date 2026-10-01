@@ -34,8 +34,6 @@ import androidx.compose.material.icons.outlined.FlashOn
 import androidx.compose.material.icons.outlined.Remove
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -87,6 +85,7 @@ import com.dndcharacterhandler.domain.usecase.GetCharacterBundleUseCase
 import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
 import com.dndcharacterhandler.presentation.components.CharacterScreenHeader
+import com.dndcharacterhandler.presentation.components.EditDialog
 import com.dndcharacterhandler.presentation.components.FloatingAddButton
 import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
 import com.dndcharacterhandler.presentation.components.MiniStatCard
@@ -565,97 +564,76 @@ internal fun CombatContent(
     if (isArmorClassDialogOpen) {
         val parsedBaseArmorClass = armorClassBaseDraft.toIntOrNull()?.coerceAtLeast(1) ?: 10
         val parsedManualArmorClass = armorClassManualDraft.toIntOrNull()?.coerceAtLeast(1)
-        AlertDialog(
-            onDismissRequest = { isArmorClassDialogOpen = false },
-            title = { Text(text("overview_edit_ac_title")) },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    OutlinedTextField(
-                        value = armorClassBaseDraft,
-                        onValueChange = { value -> armorClassBaseDraft = value.filter(Char::isDigit) },
-                        singleLine = true,
-                        label = { Text(text("overview_ac_base")) },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                    )
-
-                    Text(
-                        text = text("overview_ac_mode"),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = Color(0xFFF7F2EA)
-                    )
-
-                    ArmorClassModeOption(
-                        title = text("overview_ac_mode_automatic"),
-                        description = text("overview_ac_mode_automatic_hint"),
-                        selected = armorClassModeDraft == ArmorClassMode.AUTOMATIC,
-                        onClick = { armorClassModeDraft = ArmorClassMode.AUTOMATIC }
-                    )
-                    ArmorClassModeOption(
-                        title = text("overview_ac_mode_manual"),
-                        description = text("overview_ac_mode_manual_hint"),
-                        selected = armorClassModeDraft == ArmorClassMode.MANUAL,
-                        onClick = { armorClassModeDraft = ArmorClassMode.MANUAL }
-                    )
-
-                    if (armorClassModeDraft == ArmorClassMode.MANUAL) {
-                        OutlinedTextField(
-                            value = armorClassManualDraft,
-                            onValueChange = { value -> armorClassManualDraft = value.filter(Char::isDigit) },
-                            singleLine = true,
-                            label = { Text(text("overview_ac_manual")) },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                        )
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onUpdateArmorClass(
-                            resolvedBundle,
-                            parsedBaseArmorClass,
-                            armorClassModeDraft,
-                            parsedManualArmorClass
-                        )
-                        isArmorClassDialogOpen = false
-                    }
-                ) {
-                    Text(text("common_save"))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { isArmorClassDialogOpen = false }) {
-                    Text(text("common_cancel"))
-                }
+        EditDialog(
+            title = text("overview_edit_ac_title"),
+            onDismiss = { isArmorClassDialogOpen = false },
+            onConfirm = {
+                onUpdateArmorClass(
+                    resolvedBundle,
+                    parsedBaseArmorClass,
+                    armorClassModeDraft,
+                    parsedManualArmorClass
+                )
+                isArmorClassDialogOpen = false
             }
-        )
+        ) {
+            OutlinedTextField(
+                value = armorClassBaseDraft,
+                onValueChange = { value -> armorClassBaseDraft = value.filter(Char::isDigit) },
+                singleLine = true,
+                label = { Text(text("overview_ac_base")) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            )
+
+            Text(
+                text = text("overview_ac_mode"),
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color(0xFFF7F2EA)
+            )
+
+            ArmorClassModeOption(
+                title = text("overview_ac_mode_automatic"),
+                description = text("overview_ac_mode_automatic_hint"),
+                selected = armorClassModeDraft == ArmorClassMode.AUTOMATIC,
+                onClick = { armorClassModeDraft = ArmorClassMode.AUTOMATIC }
+            )
+            ArmorClassModeOption(
+                title = text("overview_ac_mode_manual"),
+                description = text("overview_ac_mode_manual_hint"),
+                selected = armorClassModeDraft == ArmorClassMode.MANUAL,
+                onClick = { armorClassModeDraft = ArmorClassMode.MANUAL }
+            )
+
+            if (armorClassModeDraft == ArmorClassMode.MANUAL) {
+                OutlinedTextField(
+                    value = armorClassManualDraft,
+                    onValueChange = { value -> armorClassManualDraft = value.filter(Char::isDigit) },
+                    singleLine = true,
+                    label = { Text(text("overview_ac_manual")) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
+            }
+        }
     }
 
     if (isSpellcastingAbilityDialogOpen) {
-        AlertDialog(
-            onDismissRequest = { isSpellcastingAbilityDialogOpen = false },
-            title = { Text(text("combat_edit_spellcasting_ability")) },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    spellcastingAbilityOptions.forEach { ability ->
-                        SpellcastingAbilityOption(
-                            title = text(ability.labelKey),
-                            selected = resolvedBundle.character.spellcastingAbility == ability.ability,
-                            onClick = {
-                                onUpdateSpellcastingAbility(resolvedBundle, ability.ability)
-                                isSpellcastingAbilityDialogOpen = false
-                            }
-                        )
-                    }
-                }
-            },
-            confirmButton = {},
-            dismissButton = {
-                TextButton(onClick = { isSpellcastingAbilityDialogOpen = false }) {
-                    Text(text("common_cancel"))
+        EditDialog(
+            title = text("combat_edit_spellcasting_ability"),
+            onDismiss = { isSpellcastingAbilityDialogOpen = false }
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                spellcastingAbilityOptions.forEach { ability ->
+                    SpellcastingAbilityOption(
+                        title = text(ability.labelKey),
+                        selected = resolvedBundle.character.spellcastingAbility == ability.ability,
+                        onClick = {
+                            onUpdateSpellcastingAbility(resolvedBundle, ability.ability)
+                            isSpellcastingAbilityDialogOpen = false
+                        }
+                    )
                 }
             }
-        )
+        }
     }
 
     editingCombatResource?.let { resource ->
@@ -687,35 +665,28 @@ private fun CombatAddEntryDialog(
     onCreateCustomSpellAttack: () -> Unit,
     onAddResource: () -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text("combat_add_entry_title")) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                DialogActionSection(
-                    title = text("combat_add_attacks_section"),
-                    actions = listOf(
-                        DialogActionItem(text("combat_create_weapon_attack"), onCreateWeaponAttack),
-                        DialogActionItem(text("combat_create_custom_weapon_attack"), onCreateCustomWeaponAttack),
-                        DialogActionItem(text("combat_create_spell_attack"), onCreateSpellAttack),
-                        DialogActionItem(text("combat_create_custom_spell_attack"), onCreateCustomSpellAttack)
-                    )
+    EditDialog(
+        title = text("combat_add_entry_title"),
+        onDismiss = onDismiss
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            DialogActionSection(
+                title = text("combat_add_attacks_section"),
+                actions = listOf(
+                    DialogActionItem(text("combat_create_weapon_attack"), onCreateWeaponAttack),
+                    DialogActionItem(text("combat_create_custom_weapon_attack"), onCreateCustomWeaponAttack),
+                    DialogActionItem(text("combat_create_spell_attack"), onCreateSpellAttack),
+                    DialogActionItem(text("combat_create_custom_spell_attack"), onCreateCustomSpellAttack)
                 )
-                DialogActionSection(
-                    title = text("combat_add_resources_section"),
-                    actions = listOf(
-                        DialogActionItem(text("combat_add_resource_action"), onAddResource)
-                    )
+            )
+            DialogActionSection(
+                title = text("combat_add_resources_section"),
+                actions = listOf(
+                    DialogActionItem(text("combat_add_resource_action"), onAddResource)
                 )
-            }
-        },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text("common_cancel"))
-            }
+            )
         }
-    )
+    }
 }
 
 @Composable
@@ -755,136 +726,48 @@ private fun WeaponAttackPickerDialog(
     onDismiss: () -> Unit,
     onSelect: (InventoryItem) -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text("combat_select_weapon")) },
-        text = {
-            if (weapons.isEmpty()) {
-                Text(
-                    text = text("combat_no_weapons_available"),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Color(0xFFD2CAC2)
-                )
-            } else {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    weapons.forEach { weapon ->
-                        Surface(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onSelect(weapon) },
-                            shape = RoundedCornerShape(12.dp),
-                            color = Color(0xFF1A171D),
-                            border = BorderStroke(1.dp, Color(0x20FFFFFF))
+    EditDialog(
+        title = text("combat_select_weapon"),
+        onDismiss = onDismiss
+    ) {
+        if (weapons.isEmpty()) {
+            Text(
+                text = text("combat_no_weapons_available"),
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color(0xFFD2CAC2)
+            )
+        } else {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                weapons.forEach { weapon ->
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onSelect(weapon) },
+                        shape = RoundedCornerShape(12.dp),
+                        color = Color(0xFF1A171D),
+                        border = BorderStroke(1.dp, Color(0x20FFFFFF))
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
-                            Column(
-                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-                                verticalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                Text(
-                                    text = weapon.name,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = if (weapon.isMagical) Color(0xFF7BB7FF) else Color(0xFFF7F2EA)
+                            Text(
+                                text = weapon.name,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = if (weapon.isMagical) Color(0xFF7BB7FF) else Color(0xFFF7F2EA)
+                            )
+                            weapon.weaponDetails?.let { details ->
+                                val previewRange = details.rangeLabel(
+                                    meleeLabel = text("inventory_weapon_range_melee"),
+                                    feetLabel = text("inventory_unit_feet")
                                 )
-                                weapon.weaponDetails?.let { details ->
-                                    val previewRange = details.rangeLabel(
-                                        meleeLabel = text("inventory_weapon_range_melee"),
-                                        feetLabel = text("inventory_unit_feet")
-                                    )
-                                    val previewDamage = weapon.primaryDamageLabel()
-                                    Text(
-                                        text = buildString {
-                                            append(previewRange)
-                                            previewDamage?.let {
-                                                append(" • ")
-                                                append(it)
-                                            }
-                                        },
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = Color(0xFFD2CAC2),
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text("common_cancel"))
-            }
-        }
-    )
-}
-
-@Composable
-private fun SpellAttackPickerDialog(
-    spells: List<Spell>,
-    spellAttackBonus: String,
-    spellSaveDcLabel: String,
-    spellModifier: Int,
-    onDismiss: () -> Unit,
-    onSelect: (Spell) -> Unit
-) {
-    val strings = LocalStrings.current
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text("combat_select_spell")) },
-        text = {
-            if (spells.isEmpty()) {
-                Text(
-                    text = text("combat_no_spells_available"),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Color(0xFFD2CAC2)
-                )
-            } else {
-                Column(
-                    modifier = Modifier.verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    spells.forEach { spell ->
-                        val bonusOrDc = spell.spellAttackBonusOrDcLabel(
-                            spellAttackBonus = spellAttackBonus,
-                            spellSaveDcLabel = spellSaveDcLabel,
-                            strings = strings
-                        )
-                        val damageLabel = spell.combatDamageLabel(strings = strings, spellModifier = spellModifier)
-                        val tags = spellPickerTags(spell = spell, strings = strings)
-                        Surface(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onSelect(spell) },
-                            shape = RoundedCornerShape(12.dp),
-                            color = Color(0xFF1A171D),
-                            border = BorderStroke(1.dp, Color(0x20FFFFFF))
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-                                verticalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                Text(
-                                    text = spell.name,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = Color(0xFFF7F2EA)
-                                )
-                                if (tags.isNotBlank()) {
-                                    Text(
-                                        text = tags,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = Color(0xFFAAA29A),
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
+                                val previewDamage = weapon.primaryDamageLabel()
                                 Text(
                                     text = buildString {
-                                        append(bonusOrDc)
-                                        if (damageLabel.isNotBlank()) {
-                                            if (isNotEmpty()) append(" • ")
-                                            append(damageLabel)
+                                        append(previewRange)
+                                        previewDamage?.let {
+                                            append(" • ")
+                                            append(it)
                                         }
                                     },
                                     style = MaterialTheme.typography.bodyMedium,
@@ -897,14 +780,89 @@ private fun SpellAttackPickerDialog(
                     }
                 }
             }
-        },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text("common_cancel"))
+        }
+    }
+}
+
+@Composable
+private fun SpellAttackPickerDialog(
+    spells: List<Spell>,
+    spellAttackBonus: String,
+    spellSaveDcLabel: String,
+    spellModifier: Int,
+    onDismiss: () -> Unit,
+    onSelect: (Spell) -> Unit
+) {
+    val strings = LocalStrings.current
+    EditDialog(
+        title = text("combat_select_spell"),
+        onDismiss = onDismiss,
+        scrollable = false
+    ) {
+        if (spells.isEmpty()) {
+            Text(
+                text = text("combat_no_spells_available"),
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color(0xFFD2CAC2)
+            )
+        } else {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                spells.forEach { spell ->
+                    val bonusOrDc = spell.spellAttackBonusOrDcLabel(
+                        spellAttackBonus = spellAttackBonus,
+                        spellSaveDcLabel = spellSaveDcLabel,
+                        strings = strings
+                    )
+                    val damageLabel = spell.combatDamageLabel(strings = strings, spellModifier = spellModifier)
+                    val tags = spellPickerTags(spell = spell, strings = strings)
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onSelect(spell) },
+                        shape = RoundedCornerShape(12.dp),
+                        color = Color(0xFF1A171D),
+                        border = BorderStroke(1.dp, Color(0x20FFFFFF))
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(
+                                text = spell.name,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = Color(0xFFF7F2EA)
+                            )
+                            if (tags.isNotBlank()) {
+                                Text(
+                                    text = tags,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Color(0xFFAAA29A),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                            Text(
+                                text = buildString {
+                                    append(bonusOrDc)
+                                    if (damageLabel.isNotBlank()) {
+                                        if (isNotEmpty()) append(" • ")
+                                        append(damageLabel)
+                                    }
+                                },
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color(0xFFD2CAC2),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
+                }
             }
         }
-    )
+    }
 }
 
 private data class DialogActionItem(
@@ -1367,79 +1325,61 @@ private fun CombatResourceEditDialog(
     var restoresOnShortRest by remember(resource) { mutableStateOf(resource.restoresOnShortRest) }
     var restoresOnLongRest by remember(resource) { mutableStateOf(resource.restoresOnLongRest) }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text("combat_edit_resource")) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text(text("features_name")) },
-                    singleLine = true
-                )
-                OutlinedTextField(
-                    value = currentUses,
-                    onValueChange = { currentUses = it.filter(Char::isDigit) },
-                    label = { Text(text("combat_resource_current")) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                )
-                OutlinedTextField(
-                    value = maximumUses,
-                    onValueChange = { maximumUses = it.filter(Char::isDigit) },
-                    label = { Text(text("combat_resource_maximum")) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                )
-                ResourceCheckboxRow(
-                    checked = restoresOnShortRest,
-                    label = text("combat_resource_short_rest"),
-                    onCheckedChange = { restoresOnShortRest = it }
-                )
-                ResourceCheckboxRow(
-                    checked = restoresOnLongRest,
-                    label = text("combat_resource_long_rest"),
-                    onCheckedChange = { restoresOnLongRest = it }
-                )
+    EditDialog(
+        title = text("combat_edit_resource"),
+        onDismiss = onDismiss,
+        onDelete = onDelete,
+        onConfirm = {
+            val parsedMax = maximumUses.toIntOrNull()?.coerceAtLeast(0) ?: 0
+            val parsedCurrent = if (parsedMax <= 0) {
+                (currentUses.toIntOrNull() ?: 0).coerceAtLeast(0)
+            } else {
+                (currentUses.toIntOrNull() ?: 0).coerceIn(0, parsedMax)
             }
-        },
-        confirmButton = {
-            Button(
-                onClick = {
-                    val parsedMax = maximumUses.toIntOrNull()?.coerceAtLeast(0) ?: 0
-                    val parsedCurrent = if (parsedMax <= 0) {
-                        (currentUses.toIntOrNull() ?: 0).coerceAtLeast(0)
-                    } else {
-                        (currentUses.toIntOrNull() ?: 0).coerceIn(0, parsedMax)
-                    }
-                    onSave(
-                        resource.copy(
-                            name = name.trim(),
-                            currentUses = parsedCurrent,
-                            maximumUses = parsedMax,
-                            restoresOnShortRest = restoresOnShortRest,
-                            restoresOnLongRest = restoresOnLongRest
-                        )
-                    )
-                }
-            ) {
-                Text(text("common_save"))
-            }
-        },
-        dismissButton = {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (onDelete != null) {
-                    TextButton(onClick = onDelete) {
-                        Text(text("inventory_delete_action"))
-                    }
-                }
-                TextButton(onClick = onDismiss) {
-                    Text(text("common_cancel"))
-                }
-            }
+            onSave(
+                resource.copy(
+                    name = name.trim(),
+                    currentUses = parsedCurrent,
+                    maximumUses = parsedMax,
+                    restoresOnShortRest = restoresOnShortRest,
+                    restoresOnLongRest = restoresOnLongRest
+                )
+            )
         }
-    )
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text(text("features_name")) },
+                singleLine = true
+            )
+            OutlinedTextField(
+                value = currentUses,
+                onValueChange = { currentUses = it.filter(Char::isDigit) },
+                label = { Text(text("combat_resource_current")) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            )
+            OutlinedTextField(
+                value = maximumUses,
+                onValueChange = { maximumUses = it.filter(Char::isDigit) },
+                label = { Text(text("combat_resource_maximum")) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            )
+            ResourceCheckboxRow(
+                checked = restoresOnShortRest,
+                label = text("combat_resource_short_rest"),
+                onCheckedChange = { restoresOnShortRest = it }
+            )
+            ResourceCheckboxRow(
+                checked = restoresOnLongRest,
+                label = text("combat_resource_long_rest"),
+                onCheckedChange = { restoresOnLongRest = it }
+            )
+        }
+    }
 }
 
 @Composable
@@ -1540,57 +1480,129 @@ private fun AttackEditDialog(
     var isAlternateDamageDieDialogOpen by remember { mutableStateOf(false) }
     var isAlternateDamageTypeDialogOpen by remember { mutableStateOf(false) }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text(if (attack.id == 0L) "combat_add_attack" else "combat_edit_attack")) },
-        text = {
-            Column(
-                modifier = Modifier.verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text(text("features_name")) },
-                    singleLine = true
+    EditDialog(
+        title = text(if (attack.id == 0L) "combat_add_attack" else "combat_edit_attack"),
+        onDismiss = onDismiss,
+        onDelete = onDelete,
+        onConfirm = {
+            val parsedMagicalBonus = magicalBonus.toIntOrNull() ?: 0
+            onSave(
+                attack.copy(
+                    name = name.trim(),
+                    isProficient = isProficient,
+                    calculationMode = calculationMode,
+                    ability = ability,
+                    normalRange = normalRange.toIntOrNull(),
+                    longRange = longRange.toIntOrNull(),
+                    damageDiceCount = damageDiceCount,
+                    damageDieType = damageDieType,
+                    alternateDamageDiceCount = alternateDamageDiceCount.takeIf { hasAlternateDamage },
+                    alternateDamageDieType = alternateDamageDieType.takeIf { hasAlternateDamage },
+                    alternateDamageType = alternateDamageType.takeIf { hasAlternateDamage },
+                    magicalBonus = parsedMagicalBonus,
+                    applyAbilityModifierToDamage = applyAbilityModifierToDamage,
+                    manualAttackBonusOrSaveDc = if (calculationMode == AttackCalculationMode.MANUAL) {
+                        manualAttackBonusOrSaveDc.trim()
+                    } else {
+                        ""
+                    },
+                    manualDamage = if (calculationMode == AttackCalculationMode.MANUAL) {
+                        manualDamage.trim()
+                    } else {
+                        ""
+                    },
+                    primaryDamageType = damageType
                 )
+            )
+        },
+        scrollable = false
+    ) {
+        Column(
+            modifier = Modifier.verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text(text("features_name")) },
+                singleLine = true
+            )
+            CombatCompactSelectionField(
+                label = text("combat_attack_calculation_mode"),
+                value = text(calculationMode.localizationKey),
+                onClick = { calculationMode = calculationMode.toggle() }
+            )
+            if (calculationMode == AttackCalculationMode.AUTOMATIC) {
+                CombatDialogSection(text("combat_attack_section_attack"))
                 CombatCompactSelectionField(
-                    label = text("combat_attack_calculation_mode"),
-                    value = text(calculationMode.localizationKey),
-                    onClick = { calculationMode = calculationMode.toggle() }
+                    label = text("combat_attack_ability"),
+                    value = strings[ability.labelKey],
+                    onClick = { isAbilityDialogOpen = true }
                 )
-                if (calculationMode == AttackCalculationMode.AUTOMATIC) {
-                    CombatDialogSection(text("combat_attack_section_attack"))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    CombatCompactTextField(
+                        modifier = Modifier.weight(1f),
+                        value = normalRange,
+                        onValueChange = { normalRange = it.filter(Char::isDigit) },
+                        label = text("combat_attack_range"),
+                        suffixText = feetLabel
+                    )
+                    CombatCompactTextField(
+                        modifier = Modifier.weight(1f),
+                        value = longRange,
+                        onValueChange = { longRange = it.filter(Char::isDigit) },
+                        label = text("combat_attack_long_range"),
+                        suffixText = feetLabel
+                    )
+                }
+                ResourceCheckboxRow(
+                    checked = isProficient,
+                    label = text("combat_attack_proficient"),
+                    onCheckedChange = { checked -> isProficient = checked }
+                )
+                CombatDialogSection(text("combat_attack_section_damage"))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.Top
+                ) {
+                    CombatCompactNumberStepperField(
+                        label = text("inventory_field_damage_dice_count"),
+                        value = damageDiceCount,
+                        onValueChange = { damageDiceCount = it },
+                        minValue = 0,
+                        modifier = Modifier.weight(1.25f)
+                    )
                     CombatCompactSelectionField(
-                        label = text("combat_attack_ability"),
-                        value = strings[ability.labelKey],
-                        onClick = { isAbilityDialogOpen = true }
+                        modifier = Modifier.weight(1f),
+                        label = text("inventory_field_damage_die_type"),
+                        value = damageDieType,
+                        onClick = { isDamageDieDialogOpen = true }
                     )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        CombatCompactTextField(
-                            modifier = Modifier.weight(1f),
-                            value = normalRange,
-                            onValueChange = { normalRange = it.filter(Char::isDigit) },
-                            label = text("combat_attack_range"),
-                            suffixText = feetLabel
-                        )
-                        CombatCompactTextField(
-                            modifier = Modifier.weight(1f),
-                            value = longRange,
-                            onValueChange = { longRange = it.filter(Char::isDigit) },
-                            label = text("combat_attack_long_range"),
-                            suffixText = feetLabel
-                        )
-                    }
-                    ResourceCheckboxRow(
-                        checked = isProficient,
-                        label = text("combat_attack_proficient"),
-                        onCheckedChange = { checked -> isProficient = checked }
+                    CombatCompactTextField(
+                        modifier = Modifier.weight(1f),
+                        value = magicalBonus,
+                        onValueChange = { magicalBonus = sanitizeSignedNumberInput(it) },
+                        label = text("combat_attack_magical_bonus"),
+                        prefixText = "+",
+                        keyboardType = KeyboardType.Number
                     )
-                    CombatDialogSection(text("combat_attack_section_damage"))
+                }
+                CombatCompactSelectionField(
+                    label = text("combat_attack_damage_type"),
+                    value = strings[damageTypeLocalizationKeyForCombat(damageType)],
+                    onClick = { isDamageTypeDialogOpen = true }
+                )
+                ResourceCheckboxRow(
+                    checked = applyAbilityModifierToDamage,
+                    label = text("combat_attack_main_hand"),
+                    onCheckedChange = { applyAbilityModifierToDamage = it }
+                )
+                CombatDialogSection(text("combat_attack_section_alternate_damage"))
+                if (hasAlternateDamage) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -1598,146 +1610,57 @@ private fun AttackEditDialog(
                     ) {
                         CombatCompactNumberStepperField(
                             label = text("inventory_field_damage_dice_count"),
-                            value = damageDiceCount,
-                            onValueChange = { damageDiceCount = it },
+                            value = alternateDamageDiceCount,
+                            onValueChange = { alternateDamageDiceCount = it },
                             minValue = 0,
                             modifier = Modifier.weight(1.25f)
                         )
                         CombatCompactSelectionField(
                             modifier = Modifier.weight(1f),
                             label = text("inventory_field_damage_die_type"),
-                            value = damageDieType,
-                            onClick = { isDamageDieDialogOpen = true }
-                        )
-                        CombatCompactTextField(
-                            modifier = Modifier.weight(1f),
-                            value = magicalBonus,
-                            onValueChange = { magicalBonus = sanitizeSignedNumberInput(it) },
-                            label = text("combat_attack_magical_bonus"),
-                            prefixText = "+",
-                            keyboardType = KeyboardType.Number
+                            value = alternateDamageDieType,
+                            onClick = { isAlternateDamageDieDialogOpen = true }
                         )
                     }
                     CombatCompactSelectionField(
                         label = text("combat_attack_damage_type"),
-                        value = strings[damageTypeLocalizationKeyForCombat(damageType)],
-                        onClick = { isDamageTypeDialogOpen = true }
+                        value = strings[damageTypeLocalizationKeyForCombat(alternateDamageType)],
+                        onClick = { isAlternateDamageTypeDialogOpen = true }
                     )
-                    ResourceCheckboxRow(
-                        checked = applyAbilityModifierToDamage,
-                        label = text("combat_attack_main_hand"),
-                        onCheckedChange = { applyAbilityModifierToDamage = it }
-                    )
-                    CombatDialogSection(text("combat_attack_section_alternate_damage"))
-                    if (hasAlternateDamage) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.Top
-                        ) {
-                            CombatCompactNumberStepperField(
-                                label = text("inventory_field_damage_dice_count"),
-                                value = alternateDamageDiceCount,
-                                onValueChange = { alternateDamageDiceCount = it },
-                                minValue = 0,
-                                modifier = Modifier.weight(1.25f)
-                            )
-                            CombatCompactSelectionField(
-                                modifier = Modifier.weight(1f),
-                                label = text("inventory_field_damage_die_type"),
-                                value = alternateDamageDieType,
-                                onClick = { isAlternateDamageDieDialogOpen = true }
-                            )
-                        }
-                        CombatCompactSelectionField(
-                            label = text("combat_attack_damage_type"),
-                            value = strings[damageTypeLocalizationKeyForCombat(alternateDamageType)],
-                            onClick = { isAlternateDamageTypeDialogOpen = true }
-                        )
-                        TextButton(onClick = { hasAlternateDamage = false }) {
-                            Text(text("combat_attack_remove_alternate_damage"))
-                        }
-                    } else {
-                        TextButton(
-                            onClick = {
-                                hasAlternateDamage = true
-                                alternateDamageType = damageType
-                            }
-                        ) {
-                            Text(text("combat_attack_add_alternate_damage"))
-                        }
+                    TextButton(onClick = { hasAlternateDamage = false }) {
+                        Text(text("combat_attack_remove_alternate_damage"))
                     }
                 } else {
-                    CombatDialogSection(text("combat_attack_section_attack"))
-                    CombatCompactTextField(
-                        value = manualAttackBonusOrSaveDc,
-                        onValueChange = { manualAttackBonusOrSaveDc = it },
-                        label = text("combat_attack_bonus_or_dc")
-                    )
-                    CombatDialogSection(text("combat_attack_section_damage"))
-                    CombatCompactTextField(
-                        value = manualDamage,
-                        onValueChange = { manualDamage = it },
-                        label = text("combat_attack_damage")
-                    )
-                    CombatCompactSelectionField(
-                        label = text("combat_attack_damage_type"),
-                        value = strings[damageTypeLocalizationKeyForCombat(damageType)],
-                        onClick = { isDamageTypeDialogOpen = true }
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = {
-                    val parsedMagicalBonus = magicalBonus.toIntOrNull() ?: 0
-                    onSave(
-                        attack.copy(
-                            name = name.trim(),
-                            isProficient = isProficient,
-                            calculationMode = calculationMode,
-                            ability = ability,
-                            normalRange = normalRange.toIntOrNull(),
-                            longRange = longRange.toIntOrNull(),
-                            damageDiceCount = damageDiceCount,
-                            damageDieType = damageDieType,
-                            alternateDamageDiceCount = alternateDamageDiceCount.takeIf { hasAlternateDamage },
-                            alternateDamageDieType = alternateDamageDieType.takeIf { hasAlternateDamage },
-                            alternateDamageType = alternateDamageType.takeIf { hasAlternateDamage },
-                            magicalBonus = parsedMagicalBonus,
-                            applyAbilityModifierToDamage = applyAbilityModifierToDamage,
-                            manualAttackBonusOrSaveDc = if (calculationMode == AttackCalculationMode.MANUAL) {
-                                manualAttackBonusOrSaveDc.trim()
-                            } else {
-                                ""
-                            },
-                            manualDamage = if (calculationMode == AttackCalculationMode.MANUAL) {
-                                manualDamage.trim()
-                            } else {
-                                ""
-                            },
-                            primaryDamageType = damageType
-                        )
-                    )
-                }
-            ) {
-                Text(text("common_save"))
-            }
-        },
-        dismissButton = {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (onDelete != null) {
-                    TextButton(onClick = onDelete) {
-                        Text(text("inventory_delete_action"))
+                    TextButton(
+                        onClick = {
+                            hasAlternateDamage = true
+                            alternateDamageType = damageType
+                        }
+                    ) {
+                        Text(text("combat_attack_add_alternate_damage"))
                     }
                 }
-                TextButton(onClick = onDismiss) {
-                    Text(text("common_cancel"))
-                }
+            } else {
+                CombatDialogSection(text("combat_attack_section_attack"))
+                CombatCompactTextField(
+                    value = manualAttackBonusOrSaveDc,
+                    onValueChange = { manualAttackBonusOrSaveDc = it },
+                    label = text("combat_attack_bonus_or_dc")
+                )
+                CombatDialogSection(text("combat_attack_section_damage"))
+                CombatCompactTextField(
+                    value = manualDamage,
+                    onValueChange = { manualDamage = it },
+                    label = text("combat_attack_damage")
+                )
+                CombatCompactSelectionField(
+                    label = text("combat_attack_damage_type"),
+                    value = strings[damageTypeLocalizationKeyForCombat(damageType)],
+                    onClick = { isDamageTypeDialogOpen = true }
+                )
             }
         }
-    )
+    }
 
     if (isAbilityDialogOpen) {
         SelectionDialog(
@@ -2295,38 +2218,32 @@ private fun <T> SelectionDialog(
     onDismiss: () -> Unit,
     onSelect: (T) -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(title) },
-        text = {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                items(options) { option ->
-                    val isSelected = option == selected
-                    Surface(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onSelect(option) },
-                        shape = RoundedCornerShape(10.dp),
-                        color = if (isSelected) Color(0x22FFF6EA) else Color.Transparent,
-                        border = BorderStroke(1.dp, if (isSelected) Color(0x70FFFFFF) else Color(0x20FFFFFF))
-                    ) {
-                        Text(
-                            text = labelForOption(option),
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = Color(0xFFF7F2EA)
-                        )
-                    }
+    EditDialog(
+        title = title,
+        onDismiss = onDismiss,
+        scrollable = false
+    ) {
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            items(options) { option ->
+                val isSelected = option == selected
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onSelect(option) },
+                    shape = RoundedCornerShape(10.dp),
+                    color = if (isSelected) Color(0x22FFF6EA) else Color.Transparent,
+                    border = BorderStroke(1.dp, if (isSelected) Color(0x70FFFFFF) else Color(0x20FFFFFF))
+                ) {
+                    Text(
+                        text = labelForOption(option),
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color(0xFFF7F2EA)
+                    )
                 }
             }
-        },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text("common_cancel"))
-            }
         }
-    )
+    }
 }
 
 private fun decodeProficiencyIds(value: String): Set<String> =

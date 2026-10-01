@@ -29,8 +29,6 @@ import androidx.compose.material.icons.outlined.Build
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.Visibility
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -87,6 +85,7 @@ import com.dndcharacterhandler.domain.usecase.GetCharacterBundleUseCase
 import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
 import com.dndcharacterhandler.presentation.components.CharacterScreenHeader
+import com.dndcharacterhandler.presentation.components.EditDialog
 import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
 import com.dndcharacterhandler.presentation.components.MiniStatCard
 import com.dndcharacterhandler.presentation.components.ScreenBackground
@@ -582,146 +581,120 @@ fun AttributesContent(
     }
 
     if (isPassiveDialogOpen && characterBundle != null) {
-        AlertDialog(
-            onDismissRequest = { isPassiveDialogOpen = false },
-            title = { Text(text("attributes_passive_perception_bonus_title")) },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(LocalStrings.current.format("attributes_base_value", passivePerception))
-                    OutlinedTextField(
-                        value = passiveDraft,
-                        onValueChange = { passiveDraft = it },
-                        label = { Text(text("attributes_additional_bonus")) },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
-                    )
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        onUpdatePassivePerceptionBonus(characterBundle, passiveDraft.toIntOrNull() ?: 0)
-                        isPassiveDialogOpen = false
-                    }
-                ) {
-                    Text(text("common_save"))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { isPassiveDialogOpen = false }) {
-                    Text(text("common_cancel"))
-                }
+        EditDialog(
+            title = text("attributes_passive_perception_bonus_title"),
+            onDismiss = { isPassiveDialogOpen = false },
+            onConfirm = {
+                onUpdatePassivePerceptionBonus(characterBundle, passiveDraft.toIntOrNull() ?: 0)
+                isPassiveDialogOpen = false
             }
-        )
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(LocalStrings.current.format("attributes_base_value", passivePerception))
+                OutlinedTextField(
+                    value = passiveDraft,
+                    onValueChange = { passiveDraft = it },
+                    label = { Text(text("attributes_additional_bonus")) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+                )
+            }
+        }
     }
 
     if (isDarkvisionDialogOpen && characterBundle != null) {
-        val closeDarkvisionDialog = {
-            if (character.darkvisionMode == DarkvisionMode.MANUAL) {
-                onUpdateDarkvisionManualFeet(characterBundle, darkvisionManualDraft.toIntOrNull() ?: 0)
+        // The cross closes without saving the typed feet, as in every pop-up; Save keeps them.
+        EditDialog(
+            title = text("attributes_darkvision_title"),
+            onDismiss = { isDarkvisionDialogOpen = false },
+            onConfirm = {
+                if (character.darkvisionMode == DarkvisionMode.MANUAL) {
+                    onUpdateDarkvisionManualFeet(characterBundle, darkvisionManualDraft.toIntOrNull() ?: 0)
+                }
+                isDarkvisionDialogOpen = false
             }
-            isDarkvisionDialogOpen = false
+        ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                DarkvisionModeChip(
+                    label = text("attributes_darkvision_mode_auto"),
+                    selected = character.darkvisionMode == DarkvisionMode.AUTO,
+                    onClick = { onUpdateDarkvisionMode(characterBundle, DarkvisionMode.AUTO) }
+                )
+                DarkvisionModeChip(
+                    label = text("attributes_darkvision_mode_manual"),
+                    selected = character.darkvisionMode == DarkvisionMode.MANUAL,
+                    onClick = { onUpdateDarkvisionMode(characterBundle, DarkvisionMode.MANUAL) }
+                )
+            }
+            when (character.darkvisionMode) {
+                DarkvisionMode.AUTO -> {
+                    if (darkvisionFeatures.isEmpty()) {
+                        Text(
+                            text = text("attributes_darkvision_none"),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = LocalDesignTokens.current.colors.text.muted
+                        )
+                        TextButton(onClick = { isDarkvisionCatalogOpen = true }) {
+                            Text(text("attributes_darkvision_add"))
+                        }
+                    } else {
+                        darkvisionFeatures.forEach { feature ->
+                            FeatureCard(
+                                feature = feature,
+                                expanded = feature.id in expandedDarkvision,
+                                onExpandedChange = { open ->
+                                    expandedDarkvision = if (open) expandedDarkvision + feature.id else expandedDarkvision - feature.id
+                                },
+                                onEdit = { editingFeature = feature }
+                            )
+                        }
+                    }
+                }
+                DarkvisionMode.MANUAL -> {
+                    Text(
+                        text = text("attributes_darkvision_manual_hint"),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = LocalDesignTokens.current.colors.text.muted
+                    )
+                    OutlinedTextField(
+                        value = darkvisionManualDraft,
+                        onValueChange = { darkvisionManualDraft = it.filter(Char::isDigit) },
+                        label = { Text(text("attributes_darkvision_feet")) },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    )
+                }
+            }
         }
-        AlertDialog(
-            onDismissRequest = closeDarkvisionDialog,
-            title = { Text(text("attributes_darkvision_title")) },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        DarkvisionModeChip(
-                            label = text("attributes_darkvision_mode_auto"),
-                            selected = character.darkvisionMode == DarkvisionMode.AUTO,
-                            onClick = { onUpdateDarkvisionMode(characterBundle, DarkvisionMode.AUTO) }
-                        )
-                        DarkvisionModeChip(
-                            label = text("attributes_darkvision_mode_manual"),
-                            selected = character.darkvisionMode == DarkvisionMode.MANUAL,
-                            onClick = { onUpdateDarkvisionMode(characterBundle, DarkvisionMode.MANUAL) }
-                        )
-                    }
-                    when (character.darkvisionMode) {
-                        DarkvisionMode.AUTO -> {
-                            if (darkvisionFeatures.isEmpty()) {
-                                Text(
-                                    text = text("attributes_darkvision_none"),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = Color(0xFFD2CAC2)
-                                )
-                                TextButton(onClick = { isDarkvisionCatalogOpen = true }) {
-                                    Text(text("attributes_darkvision_add"))
-                                }
-                            } else {
-                                darkvisionFeatures.forEach { feature ->
-                                    FeatureCard(
-                                        feature = feature,
-                                        expanded = feature.id in expandedDarkvision,
-                                        onExpandedChange = { open ->
-                                            expandedDarkvision = if (open) expandedDarkvision + feature.id else expandedDarkvision - feature.id
-                                        },
-                                        onEdit = { editingFeature = feature }
-                                    )
-                                }
-                            }
-                        }
-                        DarkvisionMode.MANUAL -> {
-                            Text(
-                                text = text("attributes_darkvision_manual_hint"),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color(0xFFD2CAC2)
-                            )
-                            OutlinedTextField(
-                                value = darkvisionManualDraft,
-                                onValueChange = { darkvisionManualDraft = it.filter(Char::isDigit) },
-                                label = { Text(text("attributes_darkvision_feet")) },
-                                singleLine = true,
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                            )
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                Button(onClick = closeDarkvisionDialog) {
-                    Text(text("common_save"))
-                }
-            }
-        )
     }
 
     if (isDarkvisionCatalogOpen && characterBundle != null) {
-        AlertDialog(
-            onDismissRequest = { isDarkvisionCatalogOpen = false },
-            title = { Text(text("attributes_darkvision_add")) },
-            text = {
-                if (darkvisionCatalogItems.isEmpty()) {
-                    Text(
-                        text = text("features_catalog_empty"),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color(0xFFD2CAC2)
-                    )
-                } else {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        val russian = LocalStrings.current.language == AppLanguage.RUSSIAN
-                        darkvisionCatalogItems.forEach { item ->
-                            FeatureCatalogRow(
-                                item = item,
-                                russian = russian,
-                                onAdd = {
-                                    onUpsertFeature(characterBundle, item.toFeature(russian))
-                                    isDarkvisionCatalogOpen = false
-                                }
-                            )
-                        }
+        EditDialog(
+            title = text("attributes_darkvision_add"),
+            onDismiss = { isDarkvisionCatalogOpen = false }
+        ) {
+            if (darkvisionCatalogItems.isEmpty()) {
+                Text(
+                    text = text("features_catalog_empty"),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = LocalDesignTokens.current.colors.text.muted
+                )
+            } else {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    val russian = LocalStrings.current.language == AppLanguage.RUSSIAN
+                    darkvisionCatalogItems.forEach { item ->
+                        FeatureCatalogRow(
+                            item = item,
+                            russian = russian,
+                            onAdd = {
+                                onUpsertFeature(characterBundle, item.toFeature(russian))
+                                isDarkvisionCatalogOpen = false
+                            }
+                        )
                     }
                 }
-            },
-            confirmButton = {},
-            dismissButton = {
-                TextButton(onClick = { isDarkvisionCatalogOpen = false }) {
-                    Text(text("common_cancel"))
-                }
             }
-        )
+        }
     }
 
     editingFeature?.let { feature ->
@@ -747,398 +720,329 @@ fun AttributesContent(
 
     val currentEditingAbility = editingAbility
     if (currentEditingAbility != null && characterBundle != null) {
-        AlertDialog(
-            onDismissRequest = { editingAbility = null },
-            title = { Text(LocalStrings.current.format("attributes_edit_ability_title", LocalStrings.current[currentEditingAbility.displayNameKey])) },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(LocalStrings.current.format("attributes_edit_ability_hint", LocalStrings.current[currentEditingAbility.displayNameKey]))
-                    OutlinedTextField(
-                        value = abilityDraft,
-                        onValueChange = { abilityDraft = it },
-                        label = { Text(LocalStrings.current.format("attributes_ability_score_label", LocalStrings.current[currentEditingAbility.shortNameKey])) },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+        EditDialog(
+            title = LocalStrings.current.format("attributes_edit_ability_title", LocalStrings.current[currentEditingAbility.displayNameKey]),
+            onDismiss = { editingAbility = null },
+            onConfirm = {
+                onUpdateAbilityScore(
+                    characterBundle,
+                    currentEditingAbility.type,
+                    abilityDraft.toIntOrNull() ?: currentEditingAbility.value,
+                    saveProficientDraft
+                )
+                editingAbility = null
+            }
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(LocalStrings.current.format("attributes_edit_ability_hint", LocalStrings.current[currentEditingAbility.displayNameKey]))
+                OutlinedTextField(
+                    value = abilityDraft,
+                    onValueChange = { abilityDraft = it },
+                    label = { Text(LocalStrings.current.format("attributes_ability_score_label", LocalStrings.current[currentEditingAbility.shortNameKey])) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(
+                        checked = saveProficientDraft,
+                        onCheckedChange = { saveProficientDraft = it }
                     )
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(
-                            checked = saveProficientDraft,
-                            onCheckedChange = { saveProficientDraft = it }
-                        )
-                        Text(
-                            text = LocalStrings.current.format(
-                                "attributes_save_proficiency_label",
-                                LocalStrings.current[currentEditingAbility.displayNameKey]
-                            ),
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        onUpdateAbilityScore(
-                            characterBundle,
-                            currentEditingAbility.type,
-                            abilityDraft.toIntOrNull() ?: currentEditingAbility.value,
-                            saveProficientDraft
-                        )
-                        editingAbility = null
-                    }
-                ) {
-                    Text(text("common_save"))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { editingAbility = null }) {
-                    Text(text("common_cancel"))
+                    Text(
+                        text = LocalStrings.current.format(
+                            "attributes_save_proficiency_label",
+                            LocalStrings.current[currentEditingAbility.displayNameKey]
+                        ),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
                 }
             }
-        )
+        }
     }
 
     val currentEditingSkill = editingSkill
     if (currentEditingSkill != null && characterBundle != null) {
-        AlertDialog(
-            onDismissRequest = { editingSkill = null },
-            title = { Text(strings[currentEditingSkill.nameKey]) },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(
-                            checked = skillProficientDraft,
-                            onCheckedChange = {
-                                skillProficientDraft = it
-                                if (!it) skillExpertiseDraft = false
-                                if (it) skillJackDraft = false
-                            }
-                        )
-                        Text(text("attributes_has_proficiency"), style = MaterialTheme.typography.bodyMedium)
-                    }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(
-                            checked = skillExpertiseDraft,
-                            enabled = skillProficientDraft,
-                            onCheckedChange = { skillExpertiseDraft = it }
-                        )
-                        Text(text("attributes_has_expertise"), style = MaterialTheme.typography.bodyMedium)
-                    }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(
-                            checked = skillJackDraft,
-                            enabled = !skillProficientDraft,
-                            onCheckedChange = { skillJackDraft = it }
-                        )
-                        Text(text("attributes_jack_of_all_trades"), style = MaterialTheme.typography.bodyMedium)
-                    }
+        EditDialog(
+            title = strings[currentEditingSkill.nameKey],
+            onDismiss = { editingSkill = null },
+            onConfirm = {
+                onUpdateSkillTraining(
+                    characterBundle,
+                    currentEditingSkill.nameKey,
+                    skillProficientDraft,
+                    skillExpertiseDraft,
+                    skillJackDraft
+                )
+                editingSkill = null
+            }
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(
+                        checked = skillProficientDraft,
+                        onCheckedChange = {
+                            skillProficientDraft = it
+                            if (!it) skillExpertiseDraft = false
+                            if (it) skillJackDraft = false
+                        }
+                    )
+                    Text(text("attributes_has_proficiency"), style = MaterialTheme.typography.bodyMedium)
                 }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        onUpdateSkillTraining(
-                            characterBundle,
-                            currentEditingSkill.nameKey,
-                            skillProficientDraft,
-                            skillExpertiseDraft,
-                            skillJackDraft
-                        )
-                        editingSkill = null
-                    }
-                ) {
-                    Text(text("common_save"))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(
+                        checked = skillExpertiseDraft,
+                        enabled = skillProficientDraft,
+                        onCheckedChange = { skillExpertiseDraft = it }
+                    )
+                    Text(text("attributes_has_expertise"), style = MaterialTheme.typography.bodyMedium)
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = { editingSkill = null }) {
-                    Text(text("common_cancel"))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(
+                        checked = skillJackDraft,
+                        enabled = !skillProficientDraft,
+                        onCheckedChange = { skillJackDraft = it }
+                    )
+                    Text(text("attributes_jack_of_all_trades"), style = MaterialTheme.typography.bodyMedium)
                 }
             }
-        )
+        }
     }
 
     if (isArmorDialogOpen && characterBundle != null) {
-        AlertDialog(
-            onDismissRequest = { isArmorDialogOpen = false },
-            title = { Text(text("attributes_armor_dialog_title")) },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    armorProficiencyOptions.forEach { option ->
-                        ProficiencyCheckboxRow(
-                            label = strings[option.labelKey],
-                            checked = option.id in armorDraft,
-                            onCheckedChange = { checked ->
-                                armorDraft = armorDraft.toggled(option.id, checked)
-                            }
-                        )
-                    }
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        onUpdateArmorProficiencies(characterBundle, armorDraft)
-                        isArmorDialogOpen = false
-                    }
-                ) {
-                    Text(text("common_save"))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { isArmorDialogOpen = false }) {
-                    Text(text("common_cancel"))
+        EditDialog(
+            title = text("attributes_armor_dialog_title"),
+            onDismiss = { isArmorDialogOpen = false },
+            onConfirm = {
+                onUpdateArmorProficiencies(characterBundle, armorDraft)
+                isArmorDialogOpen = false
+            }
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                armorProficiencyOptions.forEach { option ->
+                    ProficiencyCheckboxRow(
+                        label = strings[option.labelKey],
+                        checked = option.id in armorDraft,
+                        onCheckedChange = { checked ->
+                            armorDraft = armorDraft.toggled(option.id, checked)
+                        }
+                    )
                 }
             }
-        )
+        }
     }
 
     if (isWeaponDialogOpen && characterBundle != null) {
-        AlertDialog(
-            onDismissRequest = { isWeaponDialogOpen = false },
-            title = { Text(text("attributes_weapon_dialog_title")) },
-            text = {
-                LazyColumn(
-                    modifier = Modifier.height(420.dp),
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
-                ) {
-                    item {
+        EditDialog(
+            title = text("attributes_weapon_dialog_title"),
+            onDismiss = { isWeaponDialogOpen = false },
+            onConfirm = {
+                onUpdateWeaponProficiencies(characterBundle, weaponDraft)
+                isWeaponDialogOpen = false
+            },
+            scrollable = false
+        ) {
+            LazyColumn(
+                modifier = Modifier.height(420.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                item {
+                    ProficiencyCheckboxRow(
+                        label = text("attributes_weapon_simple"),
+                        checked = WeaponGroupSimpleId in weaponDraft,
+                        onCheckedChange = { checked ->
+                            weaponDraft = if (checked) {
+                                (weaponDraft - simpleWeaponOptions.map { it.id }.toSet()) + WeaponGroupSimpleId
+                            } else {
+                                weaponDraft - WeaponGroupSimpleId
+                            }
+                        }
+                    )
+                    TextButton(onClick = { simpleWeaponsExpanded = !simpleWeaponsExpanded }) {
+                        Text(text("attributes_show_simple_weapons"))
+                    }
+                }
+                if (simpleWeaponsExpanded) {
+                    simpleWeaponOptions.forEach { option ->
+                        item {
+                        val groupChecked = WeaponGroupSimpleId in weaponDraft
                         ProficiencyCheckboxRow(
-                            label = text("attributes_weapon_simple"),
-                            checked = WeaponGroupSimpleId in weaponDraft,
+                            label = strings[option.labelKey],
+                            checked = groupChecked || option.id in weaponDraft,
+                            enabled = !groupChecked,
                             onCheckedChange = { checked ->
-                                weaponDraft = if (checked) {
-                                    (weaponDraft - simpleWeaponOptions.map { it.id }.toSet()) + WeaponGroupSimpleId
-                                } else {
-                                    weaponDraft - WeaponGroupSimpleId
-                                }
+                                weaponDraft = weaponDraft.toggled(option.id, checked)
                             }
                         )
-                        TextButton(onClick = { simpleWeaponsExpanded = !simpleWeaponsExpanded }) {
-                            Text(text("attributes_show_simple_weapons"))
-                        }
-                    }
-                    if (simpleWeaponsExpanded) {
-                        simpleWeaponOptions.forEach { option ->
-                            item {
-                            val groupChecked = WeaponGroupSimpleId in weaponDraft
-                            ProficiencyCheckboxRow(
-                                label = strings[option.labelKey],
-                                checked = groupChecked || option.id in weaponDraft,
-                                enabled = !groupChecked,
-                                onCheckedChange = { checked ->
-                                    weaponDraft = weaponDraft.toggled(option.id, checked)
-                                }
-                            )
-                            }
-                        }
-                    }
-                    item {
-                        ProficiencyCheckboxRow(
-                            label = text("attributes_weapon_martial"),
-                            checked = WeaponGroupMartialId in weaponDraft,
-                            onCheckedChange = { checked ->
-                                weaponDraft = if (checked) {
-                                    (weaponDraft - martialWeaponOptions.map { it.id }.toSet()) + WeaponGroupMartialId
-                                } else {
-                                    weaponDraft - WeaponGroupMartialId
-                                }
-                            }
-                        )
-                        TextButton(onClick = { martialWeaponsExpanded = !martialWeaponsExpanded }) {
-                            Text(text("attributes_show_martial_weapons"))
-                        }
-                    }
-                    if (martialWeaponsExpanded) {
-                        martialWeaponOptions.forEach { option ->
-                            item {
-                            val groupChecked = WeaponGroupMartialId in weaponDraft
-                            ProficiencyCheckboxRow(
-                                label = strings[option.labelKey],
-                                checked = groupChecked || option.id in weaponDraft,
-                                enabled = !groupChecked,
-                                onCheckedChange = { checked ->
-                                    weaponDraft = weaponDraft.toggled(option.id, checked)
-                                }
-                            )
-                            }
                         }
                     }
                 }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        onUpdateWeaponProficiencies(characterBundle, weaponDraft)
-                        isWeaponDialogOpen = false
+                item {
+                    ProficiencyCheckboxRow(
+                        label = text("attributes_weapon_martial"),
+                        checked = WeaponGroupMartialId in weaponDraft,
+                        onCheckedChange = { checked ->
+                            weaponDraft = if (checked) {
+                                (weaponDraft - martialWeaponOptions.map { it.id }.toSet()) + WeaponGroupMartialId
+                            } else {
+                                weaponDraft - WeaponGroupMartialId
+                            }
+                        }
+                    )
+                    TextButton(onClick = { martialWeaponsExpanded = !martialWeaponsExpanded }) {
+                        Text(text("attributes_show_martial_weapons"))
                     }
-                ) {
-                    Text(text("common_save"))
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = { isWeaponDialogOpen = false }) {
-                    Text(text("common_cancel"))
+                if (martialWeaponsExpanded) {
+                    martialWeaponOptions.forEach { option ->
+                        item {
+                        val groupChecked = WeaponGroupMartialId in weaponDraft
+                        ProficiencyCheckboxRow(
+                            label = strings[option.labelKey],
+                            checked = groupChecked || option.id in weaponDraft,
+                            enabled = !groupChecked,
+                            onCheckedChange = { checked ->
+                                weaponDraft = weaponDraft.toggled(option.id, checked)
+                            }
+                        )
+                        }
+                    }
                 }
             }
-        )
+        }
     }
 
     if (isToolsDialogOpen && characterBundle != null) {
-        AlertDialog(
-            onDismissRequest = { isToolsDialogOpen = false },
-            title = { Text(text("attributes_tools_dialog_title")) },
-            text = {
-                LazyColumn(
-                    modifier = Modifier.height(420.dp),
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
-                ) {
-                    toolProficiencyCategories.forEach { category ->
-                        item {
-                            TextButton(
-                                onClick = {
-                                    expandedToolCategories = expandedToolCategories.toggled(category.id, category.id !in expandedToolCategories)
-                                }
-                            ) {
-                                Text(strings[category.labelKey])
-                            }
-                        }
-                        if (category.id in expandedToolCategories) {
-                            category.options.forEach { option ->
-                                item {
-                                    ProficiencyCheckboxRow(
-                                        label = strings[option.labelKey],
-                                        checked = option.id in toolDraft,
-                                        onCheckedChange = { checked ->
-                                            toolDraft = toolDraft.toggled(option.id, checked)
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    }
+        EditDialog(
+            title = text("attributes_tools_dialog_title"),
+            onDismiss = { isToolsDialogOpen = false },
+            onConfirm = {
+                val customTools = customToolDrafts
+                    .map { it.trim() }
+                    .filter { it.isNotEmpty() }
+                    .map { CustomToolPrefix + it }
+                    .toSet()
+                onUpdateToolProficiencies(characterBundle, toolDraft + customTools)
+                isToolsDialogOpen = false
+            },
+            scrollable = false
+        ) {
+            LazyColumn(
+                modifier = Modifier.height(420.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                toolProficiencyCategories.forEach { category ->
                     item {
                         TextButton(
-                            onClick = { customToolDrafts = customToolDrafts + "" }
+                            onClick = {
+                                expandedToolCategories = expandedToolCategories.toggled(category.id, category.id !in expandedToolCategories)
+                            }
                         ) {
-                            Text(text("attributes_add_custom_tool"))
+                            Text(strings[category.labelKey])
                         }
                     }
-                    customToolDrafts.forEachIndexed { index, value ->
-                        item {
-                            OutlinedTextField(
-                                value = value,
-                                onValueChange = { nextValue ->
-                                    customToolDrafts = customToolDrafts.toMutableList().also { it[index] = nextValue }
-                                },
-                                label = { Text(text("attributes_custom_tool")) },
-                                singleLine = true
-                            )
+                    if (category.id in expandedToolCategories) {
+                        category.options.forEach { option ->
+                            item {
+                                ProficiencyCheckboxRow(
+                                    label = strings[option.labelKey],
+                                    checked = option.id in toolDraft,
+                                    onCheckedChange = { checked ->
+                                        toolDraft = toolDraft.toggled(option.id, checked)
+                                    }
+                                )
+                            }
                         }
                     }
                 }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        val customTools = customToolDrafts
-                            .map { it.trim() }
-                            .filter { it.isNotEmpty() }
-                            .map { CustomToolPrefix + it }
-                            .toSet()
-                        onUpdateToolProficiencies(characterBundle, toolDraft + customTools)
-                        isToolsDialogOpen = false
+                item {
+                    TextButton(
+                        onClick = { customToolDrafts = customToolDrafts + "" }
+                    ) {
+                        Text(text("attributes_add_custom_tool"))
                     }
-                ) {
-                    Text(text("common_save"))
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = { isToolsDialogOpen = false }) {
-                    Text(text("common_cancel"))
+                customToolDrafts.forEachIndexed { index, value ->
+                    item {
+                        OutlinedTextField(
+                            value = value,
+                            onValueChange = { nextValue ->
+                                customToolDrafts = customToolDrafts.toMutableList().also { it[index] = nextValue }
+                            },
+                            label = { Text(text("attributes_custom_tool")) },
+                            singleLine = true
+                        )
+                    }
                 }
             }
-        )
+        }
     }
 
     if (isLanguagesDialogOpen && characterBundle != null) {
-        AlertDialog(
-            onDismissRequest = { isLanguagesDialogOpen = false },
-            title = { Text(text("attributes_languages_dialog_title")) },
-            text = {
-                LazyColumn(
-                    modifier = Modifier.height(420.dp),
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
-                ) {
-                    languageProficiencyCategories.forEach { category ->
-                        item {
-                            TextButton(
-                                onClick = {
-                                    expandedLanguageCategories = expandedLanguageCategories.toggled(
-                                        category.id,
-                                        category.id !in expandedLanguageCategories
-                                    )
-                                }
-                            ) {
-                                Text(strings[category.labelKey])
-                            }
-                        }
-                        if (category.id in expandedLanguageCategories) {
-                            category.options.forEach { option ->
-                                item {
-                                    ProficiencyCheckboxRow(
-                                        label = strings[option.labelKey],
-                                        checked = option.id in languageDraft,
-                                        onCheckedChange = { checked ->
-                                            languageDraft = languageDraft.toggled(option.id, checked)
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    }
+        EditDialog(
+            title = text("attributes_languages_dialog_title"),
+            onDismiss = { isLanguagesDialogOpen = false },
+            onConfirm = {
+                val customLanguages = customLanguageDrafts
+                    .map { it.trim() }
+                    .filter { it.isNotEmpty() }
+                    .map { CustomLanguagePrefix + it }
+                    .toSet()
+                onUpdateLanguageProficiencies(characterBundle, languageDraft + customLanguages)
+                isLanguagesDialogOpen = false
+            },
+            scrollable = false
+        ) {
+            LazyColumn(
+                modifier = Modifier.height(420.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                languageProficiencyCategories.forEach { category ->
                     item {
                         TextButton(
-                            onClick = { customLanguageDrafts = customLanguageDrafts + "" }
+                            onClick = {
+                                expandedLanguageCategories = expandedLanguageCategories.toggled(
+                                    category.id,
+                                    category.id !in expandedLanguageCategories
+                                )
+                            }
                         ) {
-                            Text(text("attributes_add_custom_language"))
+                            Text(strings[category.labelKey])
                         }
                     }
-                    customLanguageDrafts.forEachIndexed { index, value ->
-                        item {
-                            OutlinedTextField(
-                                value = value,
-                                onValueChange = { nextValue ->
-                                    customLanguageDrafts = customLanguageDrafts.toMutableList().also { it[index] = nextValue }
-                                },
-                                label = { Text(text("attributes_custom_language")) },
-                                singleLine = true
-                            )
+                    if (category.id in expandedLanguageCategories) {
+                        category.options.forEach { option ->
+                            item {
+                                ProficiencyCheckboxRow(
+                                    label = strings[option.labelKey],
+                                    checked = option.id in languageDraft,
+                                    onCheckedChange = { checked ->
+                                        languageDraft = languageDraft.toggled(option.id, checked)
+                                    }
+                                )
+                            }
                         }
                     }
                 }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        val customLanguages = customLanguageDrafts
-                            .map { it.trim() }
-                            .filter { it.isNotEmpty() }
-                            .map { CustomLanguagePrefix + it }
-                            .toSet()
-                        onUpdateLanguageProficiencies(characterBundle, languageDraft + customLanguages)
-                        isLanguagesDialogOpen = false
+                item {
+                    TextButton(
+                        onClick = { customLanguageDrafts = customLanguageDrafts + "" }
+                    ) {
+                        Text(text("attributes_add_custom_language"))
                     }
-                ) {
-                    Text(text("common_save"))
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = { isLanguagesDialogOpen = false }) {
-                    Text(text("common_cancel"))
+                customLanguageDrafts.forEachIndexed { index, value ->
+                    item {
+                        OutlinedTextField(
+                            value = value,
+                            onValueChange = { nextValue ->
+                                customLanguageDrafts = customLanguageDrafts.toMutableList().also { it[index] = nextValue }
+                            },
+                            label = { Text(text("attributes_custom_language")) },
+                            singleLine = true
+                        )
+                    }
                 }
             }
-        )
+        }
     }
 }
 

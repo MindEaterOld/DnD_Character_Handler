@@ -31,7 +31,6 @@ import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -85,6 +84,7 @@ import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
 import com.dndcharacterhandler.presentation.components.CharacterScreenHeader
 import com.dndcharacterhandler.presentation.components.CardEditButton
+import com.dndcharacterhandler.presentation.components.EditDialog
 import com.dndcharacterhandler.presentation.components.FloatingAddButton
 import com.dndcharacterhandler.presentation.components.LimitProgressBar
 import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
@@ -564,51 +564,37 @@ private fun InventoryCurrencyDialog(
     var silverDraft by remember(silverPieces) { mutableStateOf(silverPieces.toString()) }
     var goldDraft by remember(goldPieces) { mutableStateOf(goldPieces.toString()) }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text("inventory_currency_edit_title")) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                // In the cards' order: gold first.
-                OutlinedTextField(
-                    value = goldDraft,
-                    onValueChange = { goldDraft = it.filter(Char::isDigit) },
-                    label = { Text(text("inventory_currency_gp")) },
-                    singleLine = true
-                )
-                OutlinedTextField(
-                    value = silverDraft,
-                    onValueChange = { silverDraft = it.filter(Char::isDigit) },
-                    label = { Text(text("inventory_currency_sp")) },
-                    singleLine = true
-                )
-                OutlinedTextField(
-                    value = copperDraft,
-                    onValueChange = { copperDraft = it.filter(Char::isDigit) },
-                    label = { Text(text("inventory_currency_cp")) },
-                    singleLine = true
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    onSave(
-                        copperDraft.toIntOrNull() ?: 0,
-                        silverDraft.toIntOrNull() ?: 0,
-                        goldDraft.toIntOrNull() ?: 0
-                    )
-                }
-            ) {
-                Text(text("common_save"))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text("common_cancel"))
-            }
+    EditDialog(
+        title = text("inventory_currency_edit_title"),
+        onDismiss = onDismiss,
+        onConfirm = {
+            onSave(
+                copperDraft.toIntOrNull() ?: 0,
+                silverDraft.toIntOrNull() ?: 0,
+                goldDraft.toIntOrNull() ?: 0
+            )
         }
-    )
+    ) {
+        // In the cards' order: gold first.
+        OutlinedTextField(
+            value = goldDraft,
+            onValueChange = { goldDraft = it.filter(Char::isDigit) },
+            label = { Text(text("inventory_currency_gp")) },
+            singleLine = true
+        )
+        OutlinedTextField(
+            value = silverDraft,
+            onValueChange = { silverDraft = it.filter(Char::isDigit) },
+            label = { Text(text("inventory_currency_sp")) },
+            singleLine = true
+        )
+        OutlinedTextField(
+            value = copperDraft,
+            onValueChange = { copperDraft = it.filter(Char::isDigit) },
+            label = { Text(text("inventory_currency_cp")) },
+            singleLine = true
+        )
+    }
 }
 
 @Composable
@@ -808,86 +794,76 @@ private fun InventoryAddEntryDialog(
         }
     }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(
-                text = text("inventory_add_item"),
-                style = MaterialTheme.typography.titleLarge
-            )
-        },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    InventoryDialogSection(text("inventory_add_create_section"))
-                    TextButton(onClick = onCreateItem) {
-                        Text(text("inventory_create_action"))
-                    }
+    // A picker: the cross closes it, a tap on an entry does the work; the catalog list scrolls by itself.
+    EditDialog(
+        title = text("inventory_add_item"),
+        onDismiss = onDismiss,
+        scrollable = false
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                InventoryDialogSection(text("inventory_add_create_section"))
+                TextButton(onClick = onCreateItem) {
+                    Text(text("inventory_create_action"))
                 }
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    InventoryDialogSection(text("inventory_add_catalog_section"))
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        InventoryToggleButton(
-                            modifier = Modifier.weight(1f),
-                            label = text("inventory_catalog_tab_items"),
-                            selected = shownKind == InventoryCatalogKind.ITEM,
-                            onClick = { shownKind = InventoryCatalogKind.ITEM }
-                        )
-                        InventoryToggleButton(
-                            modifier = Modifier.weight(1f),
-                            label = text("inventory_catalog_tab_enchantments"),
-                            selected = shownKind == InventoryCatalogKind.ENCHANTMENT,
-                            onClick = { shownKind = InventoryCatalogKind.ENCHANTMENT }
+            }
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                InventoryDialogSection(text("inventory_add_catalog_section"))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    InventoryToggleButton(
+                        modifier = Modifier.weight(1f),
+                        label = text("inventory_catalog_tab_items"),
+                        selected = shownKind == InventoryCatalogKind.ITEM,
+                        onClick = { shownKind = InventoryCatalogKind.ITEM }
+                    )
+                    InventoryToggleButton(
+                        modifier = Modifier.weight(1f),
+                        label = text("inventory_catalog_tab_enchantments"),
+                        selected = shownKind == InventoryCatalogKind.ENCHANTMENT,
+                        onClick = { shownKind = InventoryCatalogKind.ENCHANTMENT }
+                    )
+                }
+                InventorySearchField(
+                    value = query,
+                    onValueChange = { query = it }
+                )
+                when {
+                    isLoading -> {
+                        Text(
+                            text = text("inventory_catalog_loading"),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = LocalDesignTokens.current.colors.text.muted
                         )
                     }
-                    InventorySearchField(
-                        value = query,
-                        onValueChange = { query = it }
-                    )
-                    when {
-                        isLoading -> {
-                            Text(
-                                text = text("inventory_catalog_loading"),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color(0xFFD2CAC2)
-                            )
-                        }
 
-                        filteredItems.isEmpty() -> {
-                            Text(
-                                text = text("inventory_catalog_empty"),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color(0xFFD2CAC2)
-                            )
-                        }
+                    filteredItems.isEmpty() -> {
+                        Text(
+                            text = text("inventory_catalog_empty"),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = LocalDesignTokens.current.colors.text.muted
+                        )
+                    }
 
-                        else -> {
-                            LazyColumn(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .heightIn(max = 280.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                items(filteredItems, key = { it.id }) { item ->
-                                    InventoryCatalogRow(
-                                        item = item,
-                                        russian = russian,
-                                        onAdd = { onAddCatalogEntry(item) }
-                                    )
-                                }
+                    else -> {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = 280.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(filteredItems, key = { it.id }) { item ->
+                                InventoryCatalogRow(
+                                    item = item,
+                                    russian = russian,
+                                    onAdd = { onAddCatalogEntry(item) }
+                                )
                             }
                         }
                     }
                 }
             }
-        },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text("common_cancel"))
-            }
         }
-    )
+    }
 
     choosingBaseFor?.let { magicItem ->
         InventoryBaseItemDialog(
@@ -919,77 +895,65 @@ private fun InventoryBaseItemDialog(
     var variant by remember(magicItem) { mutableStateOf(magicItem.bonusVariants.firstOrNull()) }
     val sortedBases = remember(bases, russian) { bases.sortedBy { it.displayName(russian) } }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(
-                text = magicItem.displayName(russian),
-                style = MaterialTheme.typography.titleLarge
-            )
-        },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                if (magicItem.bonusVariants.isNotEmpty()) {
-                    InventoryDialogSection(text("inventory_enchant_bonus"))
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        magicItem.bonusVariants.forEach { option ->
-                            InventoryToggleButton(
-                                modifier = Modifier.weight(1f),
-                                label = "+${option.bonus}",
-                                selected = option == variant,
-                                onClick = { variant = option }
+    // A picker: a tap on a base does the work; the list of bases scrolls by itself.
+    EditDialog(
+        title = magicItem.displayName(russian),
+        onDismiss = onDismiss,
+        scrollable = false
+    ) {
+        if (magicItem.bonusVariants.isNotEmpty()) {
+            InventoryDialogSection(text("inventory_enchant_bonus"))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                magicItem.bonusVariants.forEach { option ->
+                    InventoryToggleButton(
+                        modifier = Modifier.weight(1f),
+                        label = "+${option.bonus}",
+                        selected = option == variant,
+                        onClick = { variant = option }
+                    )
+                }
+            }
+        }
+        InventoryDialogSection(text("inventory_enchant_choose_base"))
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(max = 300.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            items(sortedBases, key = { it.id }) { base ->
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(10.dp),
+                    color = colors.surface.card.copy(alpha = 0.62f),
+                    border = BorderStroke(1.dp, colors.border.muted),
+                    onClick = { onSelect(base, variant) }
+                ) {
+                    Column(
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
+                        Text(
+                            text = magicItem.composedName(base, variant, russian),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = colors.text.primary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        base.displayDetailLine(russian)?.let { detail ->
+                            Text(
+                                text = detail,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = colors.text.label,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
                     }
                 }
-                InventoryDialogSection(text("inventory_enchant_choose_base"))
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(max = 300.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    items(sortedBases, key = { it.id }) { base ->
-                        Surface(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(10.dp),
-                            color = colors.surface.card.copy(alpha = 0.62f),
-                            border = BorderStroke(1.dp, colors.border.muted),
-                            onClick = { onSelect(base, variant) }
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-                                verticalArrangement = Arrangement.spacedBy(2.dp)
-                            ) {
-                                Text(
-                                    text = magicItem.composedName(base, variant, russian),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = colors.text.primary,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                                base.displayDetailLine(russian)?.let { detail ->
-                                    Text(
-                                        text = detail,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = colors.text.label,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text("common_cancel"))
             }
         }
-    )
+    }
 }
 
 @Composable
@@ -1024,42 +988,33 @@ private fun InventoryCategoryPickerDialog(
     onDismiss: () -> Unit,
     onSelectCategory: (InventoryCategory) -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(
-                text = text("inventory_select_item_type"),
-                style = MaterialTheme.typography.titleLarge
-            )
-        },
-        text = {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(InventoryCategory.entries) { category ->
-                    Surface(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onSelectCategory(category) },
-                        shape = RoundedCornerShape(10.dp),
-                        color = Color(0x14FFFFFF),
-                        border = BorderStroke(1.dp, Color(0x30FFFFFF))
-                    ) {
-                        Text(
-                            text = category.title(),
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = Color(0xFFF7F2EA)
-                        )
-                    }
+    val colors = LocalDesignTokens.current.colors
+    // A picker: a tap on a type does the work; the list scrolls by itself.
+    EditDialog(
+        title = text("inventory_select_item_type"),
+        onDismiss = onDismiss,
+        scrollable = false
+    ) {
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            items(InventoryCategory.entries) { category ->
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onSelectCategory(category) },
+                    shape = RoundedCornerShape(10.dp),
+                    color = Color(0x14FFFFFF),
+                    border = BorderStroke(1.dp, colors.border.muted)
+                ) {
+                    Text(
+                        text = category.title(),
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = colors.text.primary
+                    )
                 }
             }
-        },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text("common_cancel"))
-            }
         }
-    )
+    }
 }
 
 /**
@@ -1260,243 +1215,217 @@ private fun InventoryItemEditDialog(
         mutableStateOf(inventoryItem.weaponDetails?.baseWeaponId.orEmpty().replace('-', '_'))
     }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(title) },
-        text = {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(max = 420.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                item {
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        InventoryDialogSection(text("inventory_section_description"))
-                        OutlinedTextField(
-                            value = name,
-                            onValueChange = { name = it },
-                            label = { Text(text("inventory_field_name")) },
-                            singleLine = true
-                        )
-                        OutlinedTextField(
-                            value = description,
-                            onValueChange = { description = it },
-                            label = { Text(text("inventory_field_description")) },
-                            minLines = 3,
-                            maxLines = 6,
-                            modifier = Modifier.fillMaxWidth()
-                        )
+    // A long form with sections: its own LazyColumn scrolls it, so the dialog doesn't.
+    EditDialog(
+        title = title,
+        onDismiss = onDismiss,
+        confirmLabel = confirmLabel,
+        onDelete = onDelete,
+        scrollable = false,
+        onConfirm = {
+            val primaryDamage = WeaponDamageEditorState(
+                diceCount = primaryDamageCount,
+                dieType = primaryDamageDieType,
+                damageType = primaryDamageType
+            ).toWeaponDamage()
+            val alternateDamage = WeaponDamageEditorState(
+                diceCount = alternateDamageCount,
+                dieType = alternateDamageDieType,
+                damageType = alternateDamageType
+            ).toWeaponDamage()
+
+            val updatedArmorDetails = if (inventoryItem.armorDetails != null) {
+                InventoryArmorDetails(
+                    armorType = armorType,
+                    armorClass = armorClass.toIntOrNull()?.coerceAtLeast(1) ?: (inventoryItem.armorDetails.armorClass),
+                    appliesDexterityBonus = appliesDexterityBonus,
+                    maxDexterityBonus = if (appliesDexterityBonus) maxDexterityBonus.toIntOrNull() else null,
+                    strengthMinimum = strengthMinimum.toIntOrNull()?.coerceAtLeast(0) ?: 0,
+                    hasStealthDisadvantage = hasStealthDisadvantage
+                )
+            } else {
+                null
+            }
+
+            val updatedWeaponDetails = if (inventoryItem.weaponDetails != null) {
+                InventoryWeaponDetails(
+                    weaponClass = weaponKind.weaponClass,
+                    rangeType = weaponKind.rangeType,
+                    baseWeaponId = baseWeaponId.ifBlank { null },
+                    normalRange = weaponNormalRange.toIntOrNull(),
+                    longRange = weaponLongRange.toIntOrNull(),
+                    damages = listOfNotNull(primaryDamage),
+                    twoHandedDamage = if (hasAlternateDamage) alternateDamage else null,
+                    properties = weaponProperties
+                )
+            } else {
+                null
+            }
+
+            onSave(
+                inventoryItem.copy(
+                    name = name.trim().ifBlank { inventoryItem.name },
+                    description = description.trim(),
+                    isMagical = isMagical,
+                    magicalBonus = if (isMagical && inventoryItem.category.allowsMagicalBonus()) {
+                        magicalBonus.toIntOrNull() ?: 1
+                    } else {
+                        1
+                    },
+                    quantity = quantity.toIntOrNull()?.coerceAtLeast(1) ?: inventoryItem.quantity,
+                    weight = weight.toDoubleOrNull()?.coerceAtLeast(0.0) ?: inventoryItem.weight,
+                    costQuantity = costQuantity.toIntOrNull(),
+                    costUnit = costUnit.trim().ifBlank { defaultCurrencyUnit() },
+                    armorDetails = updatedArmorDetails,
+                    weaponDetails = updatedWeaponDetails
+                )
+            )
+        }
+    ) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(max = 420.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    InventoryDialogSection(text("inventory_section_description"))
+                    OutlinedTextField(
+                        value = name,
+                        onValueChange = { name = it },
+                        label = { Text(text("inventory_field_name")) },
+                        singleLine = true
+                    )
+                    OutlinedTextField(
+                        value = description,
+                        onValueChange = { description = it },
+                        label = { Text(text("inventory_field_description")) },
+                        minLines = 3,
+                        maxLines = 6,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.weight(1f),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(
-                                modifier = Modifier.weight(1f),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Checkbox(
-                                    checked = isMagical,
-                                    onCheckedChange = {
-                                        isMagical = it
-                                        if (it && magicalBonus.isBlank()) magicalBonus = "1"
-                                    }
-                                )
-                                Text(text("inventory_field_magical"))
-                            }
-                            if (isMagical && inventoryItem.category.allowsMagicalBonus()) {
-                                CompactTextField(
-                                    value = magicalBonus,
-                                    onValueChange = { magicalBonus = sanitizeSignedIntegerInput(it) },
-                                    label = text("inventory_field_magical_bonus"),
-                                    prefixText = "+",
-                                    modifier = Modifier.widthIn(max = 112.dp)
-                                )
-                            }
-                        }
-                        CompactNumberStepperField(
-                            label = text("inventory_field_quantity"),
-                            value = quantity.toIntOrNull() ?: 1,
-                            onValueChange = { quantity = it.toString() },
-                            minValue = 1,
-                            modifier = Modifier.widthIn(max = 118.dp)
-                        )
-                    }
-                }
-
-                if (inventoryItem.armorDetails != null) {
-                    item {
-                        InventoryDialogSection(text("inventory_section_armor"))
-                    }
-                    item {
-                        EnumSelectorRow(
-                            label = text("inventory_field_armor_type"),
-                            options = InventoryArmorType.entries,
-                            selected = armorType,
-                            labelForOption = { strings[it.localizationKey()] },
-                            onSelected = { armorType = it }
-                        )
-                    }
-                    item {
-                        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                            OutlinedTextField(
-                                value = armorClass,
-                                onValueChange = { armorClass = it.filter(Char::isDigit) },
-                                label = { Text(text("inventory_field_armor_class")) },
-                                singleLine = true
-                            )
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Checkbox(
-                                    checked = appliesDexterityBonus,
-                                    onCheckedChange = { appliesDexterityBonus = it }
-                                )
-                                Text(text("inventory_field_applies_dex"))
-                            }
-                            if (appliesDexterityBonus) {
-                                OutlinedTextField(
-                                    value = maxDexterityBonus,
-                                    onValueChange = { maxDexterityBonus = it.filter(Char::isDigit) },
-                                    label = { Text(text("inventory_field_max_dex_bonus")) },
-                                    singleLine = true
-                                )
-                            }
-                            OutlinedTextField(
-                                value = strengthMinimum,
-                                onValueChange = { strengthMinimum = it.filter(Char::isDigit) },
-                                label = { Text(text("inventory_field_strength_minimum")) },
-                                singleLine = true
-                            )
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Checkbox(
-                                    checked = hasStealthDisadvantage,
-                                    onCheckedChange = { hasStealthDisadvantage = it }
-                                )
-                                Text(text("inventory_field_stealth_disadvantage"))
-                            }
-                        }
-                    }
-                }
-
-                if (inventoryItem.weaponDetails != null) {
-                    item {
-                        InventoryDialogSection(text("inventory_section_weapon"))
-                    }
-                    item {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.Top
-                        ) {
-                            InventoryDialogReadOnlyField(
-                                label = text("inventory_field_category"),
-                                value = inventoryItem.category.title(),
-                                modifier = Modifier.weight(1f)
-                            )
-                            SelectionField(
-                                label = text("inventory_field_weapon_type"),
-                                value = "${strings[weaponKind.weaponClass.localizationKey()]} ${strings[weaponKind.rangeType.localizationKey()]}",
-                                onClick = { isWeaponTypeDialogOpen = true },
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
-                    }
-                    item {
-                        SelectionField(
-                            label = text("inventory_field_base_weapon"),
-                            value = strings[baseWeaponLabelKey(baseWeaponId)],
-                            onClick = { isBaseWeaponDialogOpen = true }
-                        )
-                    }
-                    item {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.Top
-                        ) {
-                            CompactTextField(
-                                value = weaponNormalRange,
-                                onValueChange = { weaponNormalRange = it.filter(Char::isDigit) },
-                                label = text("inventory_field_normal_range"),
-                                suffixText = text("inventory_unit_feet"),
-                                modifier = Modifier.weight(1f)
-                            )
-                            CompactTextField(
-                                value = weaponLongRange,
-                                onValueChange = { weaponLongRange = it.filter(Char::isDigit) },
-                                label = text("inventory_field_long_range"),
-                                suffixText = text("inventory_unit_feet"),
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
-                    }
-                    item {
-                        SelectionTagField(
-                            label = text("inventory_field_weapon_properties"),
-                            tags = weaponProperties.map { strings[it.localizationKey()] },
-                            placeholder = text("common_none"),
-                            onClick = { isWeaponPropertiesDialogOpen = true }
-                        )
-                    }
-                    item {
-                        WeaponDamageEditor(
-                            title = text("inventory_field_damage"),
-                            diceCount = primaryDamageCount,
-                            onDiceCountChange = { primaryDamageCount = it.filter(Char::isDigit) },
-                            dieType = primaryDamageDieType,
-                            onDieTypeChange = { primaryDamageDieType = it },
-                            damageType = primaryDamageType,
-                            onDamageTypeChange = { primaryDamageType = it }
-                        )
-                    }
-                    if (hasAlternateDamage) {
-                        item {
-                            WeaponDamageEditor(
-                                title = text("inventory_field_two_handed_damage"),
-                                diceCount = alternateDamageCount,
-                                onDiceCountChange = { alternateDamageCount = it.filter(Char::isDigit) },
-                                dieType = alternateDamageDieType,
-                                onDieTypeChange = { alternateDamageDieType = it },
-                                damageType = alternateDamageType,
-                                onDamageTypeChange = { alternateDamageType = it }
-                            )
-                        }
-                        item {
-                            TextButton(
-                                onClick = {
-                                    hasAlternateDamage = false
-                                    alternateDamageCount = "1"
-                                    alternateDamageDieType = "d4"
-                                    alternateDamageType = defaultDamageType()
+                            Checkbox(
+                                checked = isMagical,
+                                onCheckedChange = {
+                                    isMagical = it
+                                    if (it && magicalBonus.isBlank()) magicalBonus = "1"
                                 }
-                            ) {
-                                Text(text("inventory_remove_alternate_damage"))
-                            }
+                            )
+                            Text(text("inventory_field_magical"))
                         }
-                    } else {
-                        item {
-                            TextButton(
-                                onClick = {
-                                    hasAlternateDamage = true
-                                    if (alternateDamageCount.isBlank()) alternateDamageCount = "1"
-                                    if (alternateDamageDieType.isBlank()) {
-                                        alternateDamageDieType = "d4"
-                                    }
-                                    if (alternateDamageType.isBlank()) {
-                                        alternateDamageType = defaultDamageType()
-                                    }
-                                }
-                            ) {
-                                Text(text("inventory_add_alternate_damage"))
-                            }
+                        if (isMagical && inventoryItem.category.allowsMagicalBonus()) {
+                            CompactTextField(
+                                value = magicalBonus,
+                                onValueChange = { magicalBonus = sanitizeSignedIntegerInput(it) },
+                                label = text("inventory_field_magical_bonus"),
+                                prefixText = "+",
+                                modifier = Modifier.widthIn(max = 112.dp)
+                            )
                         }
                     }
+                    CompactNumberStepperField(
+                        label = text("inventory_field_quantity"),
+                        value = quantity.toIntOrNull() ?: 1,
+                        onValueChange = { quantity = it.toString() },
+                        minValue = 1,
+                        modifier = Modifier.widthIn(max = 118.dp)
+                    )
                 }
+            }
 
+            if (inventoryItem.armorDetails != null) {
                 item {
-                    InventoryDialogSection(text("inventory_section_inventory"))
+                    InventoryDialogSection(text("inventory_section_armor"))
                 }
+                item {
+                    EnumSelectorRow(
+                        label = text("inventory_field_armor_type"),
+                        options = InventoryArmorType.entries,
+                        selected = armorType,
+                        labelForOption = { strings[it.localizationKey()] },
+                        onSelected = { armorType = it }
+                    )
+                }
+                item {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        OutlinedTextField(
+                            value = armorClass,
+                            onValueChange = { armorClass = it.filter(Char::isDigit) },
+                            label = { Text(text("inventory_field_armor_class")) },
+                            singleLine = true
+                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Checkbox(
+                                checked = appliesDexterityBonus,
+                                onCheckedChange = { appliesDexterityBonus = it }
+                            )
+                            Text(text("inventory_field_applies_dex"))
+                        }
+                        if (appliesDexterityBonus) {
+                            OutlinedTextField(
+                                value = maxDexterityBonus,
+                                onValueChange = { maxDexterityBonus = it.filter(Char::isDigit) },
+                                label = { Text(text("inventory_field_max_dex_bonus")) },
+                                singleLine = true
+                            )
+                        }
+                        OutlinedTextField(
+                            value = strengthMinimum,
+                            onValueChange = { strengthMinimum = it.filter(Char::isDigit) },
+                            label = { Text(text("inventory_field_strength_minimum")) },
+                            singleLine = true
+                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Checkbox(
+                                checked = hasStealthDisadvantage,
+                                onCheckedChange = { hasStealthDisadvantage = it }
+                            )
+                            Text(text("inventory_field_stealth_disadvantage"))
+                        }
+                    }
+                }
+            }
 
+            if (inventoryItem.weaponDetails != null) {
+                item {
+                    InventoryDialogSection(text("inventory_section_weapon"))
+                }
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.Top
+                    ) {
+                        InventoryDialogReadOnlyField(
+                            label = text("inventory_field_category"),
+                            value = inventoryItem.category.title(),
+                            modifier = Modifier.weight(1f)
+                        )
+                        SelectionField(
+                            label = text("inventory_field_weapon_type"),
+                            value = "${strings[weaponKind.weaponClass.localizationKey()]} ${strings[weaponKind.rangeType.localizationKey()]}",
+                            onClick = { isWeaponTypeDialogOpen = true },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+                item {
+                    SelectionField(
+                        label = text("inventory_field_base_weapon"),
+                        value = strings[baseWeaponLabelKey(baseWeaponId)],
+                        onClick = { isBaseWeaponDialogOpen = true }
+                    )
+                }
                 item {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -1504,112 +1433,117 @@ private fun InventoryItemEditDialog(
                         verticalAlignment = Alignment.Top
                     ) {
                         CompactTextField(
-                            value = weight,
-                            onValueChange = { weight = sanitizeDecimalInput(it) },
-                            label = text("inventory_field_weight"),
-                            suffixText = text("inventory_unit_pounds"),
+                            value = weaponNormalRange,
+                            onValueChange = { weaponNormalRange = it.filter(Char::isDigit) },
+                            label = text("inventory_field_normal_range"),
+                            suffixText = text("inventory_unit_feet"),
                             modifier = Modifier.weight(1f)
                         )
                         CompactTextField(
-                            value = costQuantity,
-                            onValueChange = { costQuantity = it.filter(Char::isDigit) },
-                            label = text("inventory_field_cost_quantity"),
-                            modifier = Modifier.weight(1f)
-                        )
-                        CompactSelectionField(
-                            label = text("inventory_field_cost_unit"),
-                            value = currencyShortLabel(costUnit.ifBlank { defaultCurrencyUnit() }, strings),
-                            onClick = { isCurrencyUnitDialogOpen = true },
+                            value = weaponLongRange,
+                            onValueChange = { weaponLongRange = it.filter(Char::isDigit) },
+                            label = text("inventory_field_long_range"),
+                            suffixText = text("inventory_unit_feet"),
                             modifier = Modifier.weight(1f)
                         )
                     }
                 }
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    val primaryDamage = WeaponDamageEditorState(
-                        diceCount = primaryDamageCount,
-                        dieType = primaryDamageDieType,
-                        damageType = primaryDamageType
-                    ).toWeaponDamage()
-                    val alternateDamage = WeaponDamageEditorState(
-                        diceCount = alternateDamageCount,
-                        dieType = alternateDamageDieType,
-                        damageType = alternateDamageType
-                    ).toWeaponDamage()
-
-                    val updatedArmorDetails = if (inventoryItem.armorDetails != null) {
-                        InventoryArmorDetails(
-                            armorType = armorType,
-                            armorClass = armorClass.toIntOrNull()?.coerceAtLeast(1) ?: (inventoryItem.armorDetails.armorClass),
-                            appliesDexterityBonus = appliesDexterityBonus,
-                            maxDexterityBonus = if (appliesDexterityBonus) maxDexterityBonus.toIntOrNull() else null,
-                            strengthMinimum = strengthMinimum.toIntOrNull()?.coerceAtLeast(0) ?: 0,
-                            hasStealthDisadvantage = hasStealthDisadvantage
-                        )
-                    } else {
-                        null
-                    }
-
-                    val updatedWeaponDetails = if (inventoryItem.weaponDetails != null) {
-                        InventoryWeaponDetails(
-                            weaponClass = weaponKind.weaponClass,
-                            rangeType = weaponKind.rangeType,
-                            baseWeaponId = baseWeaponId.ifBlank { null },
-                            normalRange = weaponNormalRange.toIntOrNull(),
-                            longRange = weaponLongRange.toIntOrNull(),
-                            damages = listOfNotNull(primaryDamage),
-                            twoHandedDamage = if (hasAlternateDamage) alternateDamage else null,
-                            properties = weaponProperties
-                        )
-                    } else {
-                        null
-                    }
-
-                    onSave(
-                        inventoryItem.copy(
-                            name = name.trim().ifBlank { inventoryItem.name },
-                            description = description.trim(),
-                            isMagical = isMagical,
-                            magicalBonus = if (isMagical && inventoryItem.category.allowsMagicalBonus()) {
-                                magicalBonus.toIntOrNull() ?: 1
-                            } else {
-                                1
-                            },
-                            quantity = quantity.toIntOrNull()?.coerceAtLeast(1) ?: inventoryItem.quantity,
-                            weight = weight.toDoubleOrNull()?.coerceAtLeast(0.0) ?: inventoryItem.weight,
-                            costQuantity = costQuantity.toIntOrNull(),
-                            costUnit = costUnit.trim().ifBlank { defaultCurrencyUnit() },
-                            armorDetails = updatedArmorDetails,
-                            weaponDetails = updatedWeaponDetails
-                        )
+                item {
+                    SelectionTagField(
+                        label = text("inventory_field_weapon_properties"),
+                        tags = weaponProperties.map { strings[it.localizationKey()] },
+                        placeholder = text("common_none"),
+                        onClick = { isWeaponPropertiesDialogOpen = true }
                     )
                 }
-            ) {
-                Text(confirmLabel)
-            }
-        },
-        dismissButton = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (onDelete != null) {
-                    TextButton(onClick = onDelete) {
-                        Text(text("inventory_delete_action"))
+                item {
+                    WeaponDamageEditor(
+                        title = text("inventory_field_damage"),
+                        diceCount = primaryDamageCount,
+                        onDiceCountChange = { primaryDamageCount = it.filter(Char::isDigit) },
+                        dieType = primaryDamageDieType,
+                        onDieTypeChange = { primaryDamageDieType = it },
+                        damageType = primaryDamageType,
+                        onDamageTypeChange = { primaryDamageType = it }
+                    )
+                }
+                if (hasAlternateDamage) {
+                    item {
+                        WeaponDamageEditor(
+                            title = text("inventory_field_two_handed_damage"),
+                            diceCount = alternateDamageCount,
+                            onDiceCountChange = { alternateDamageCount = it.filter(Char::isDigit) },
+                            dieType = alternateDamageDieType,
+                            onDieTypeChange = { alternateDamageDieType = it },
+                            damageType = alternateDamageType,
+                            onDamageTypeChange = { alternateDamageType = it }
+                        )
+                    }
+                    item {
+                        TextButton(
+                            onClick = {
+                                hasAlternateDamage = false
+                                alternateDamageCount = "1"
+                                alternateDamageDieType = "d4"
+                                alternateDamageType = defaultDamageType()
+                            }
+                        ) {
+                            Text(text("inventory_remove_alternate_damage"))
+                        }
                     }
                 } else {
-                    Box {}
+                    item {
+                        TextButton(
+                            onClick = {
+                                hasAlternateDamage = true
+                                if (alternateDamageCount.isBlank()) alternateDamageCount = "1"
+                                if (alternateDamageDieType.isBlank()) {
+                                    alternateDamageDieType = "d4"
+                                }
+                                if (alternateDamageType.isBlank()) {
+                                    alternateDamageType = defaultDamageType()
+                                }
+                            }
+                        ) {
+                            Text(text("inventory_add_alternate_damage"))
+                        }
+                    }
                 }
-                TextButton(onClick = onDismiss) {
-                    Text(text("common_cancel"))
+            }
+
+            item {
+                InventoryDialogSection(text("inventory_section_inventory"))
+            }
+
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.Top
+                ) {
+                    CompactTextField(
+                        value = weight,
+                        onValueChange = { weight = sanitizeDecimalInput(it) },
+                        label = text("inventory_field_weight"),
+                        suffixText = text("inventory_unit_pounds"),
+                        modifier = Modifier.weight(1f)
+                    )
+                    CompactTextField(
+                        value = costQuantity,
+                        onValueChange = { costQuantity = it.filter(Char::isDigit) },
+                        label = text("inventory_field_cost_quantity"),
+                        modifier = Modifier.weight(1f)
+                    )
+                    CompactSelectionField(
+                        label = text("inventory_field_cost_unit"),
+                        value = currencyShortLabel(costUnit.ifBlank { defaultCurrencyUnit() }, strings),
+                        onClick = { isCurrencyUnitDialogOpen = true },
+                        modifier = Modifier.weight(1f)
+                    )
                 }
             }
         }
-    )
+    }
 
     if (isWeaponTypeDialogOpen) {
         SelectionDialog(
@@ -2081,38 +2015,34 @@ private fun <T> SelectionDialog(
     onDismiss: () -> Unit,
     onSelect: (T) -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(title) },
-        text = {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                items(options) { option ->
-                    val isSelected = option == selected
-                    Surface(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onSelect(option) },
-                        shape = RoundedCornerShape(10.dp),
-                        color = if (isSelected) Color(0x22FFF6EA) else Color.Transparent,
-                        border = BorderStroke(1.dp, if (isSelected) Color(0x70FFFFFF) else Color(0x20FFFFFF))
-                    ) {
-                        Text(
-                            text = labelForOption(option),
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = Color(0xFFF7F2EA)
-                        )
-                    }
+    val colors = LocalDesignTokens.current.colors
+    // A picker: a tap on an option does the work; the list scrolls by itself.
+    EditDialog(
+        title = title,
+        onDismiss = onDismiss,
+        scrollable = false
+    ) {
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            items(options) { option ->
+                val isSelected = option == selected
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onSelect(option) },
+                    shape = RoundedCornerShape(10.dp),
+                    color = if (isSelected) Color(0x22FFF6EA) else Color.Transparent,
+                    border = BorderStroke(1.dp, if (isSelected) Color(0x70FFFFFF) else Color(0x20FFFFFF))
+                ) {
+                    Text(
+                        text = labelForOption(option),
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = colors.text.primary
+                    )
                 }
             }
-        },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text("common_cancel"))
-            }
         }
-    )
+    }
 }
 
 @Composable
@@ -2124,42 +2054,35 @@ private fun <T> MultiSelectionDialog(
     onDismiss: () -> Unit,
     onToggle: (T) -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(title) },
-        text = {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                items(options) { option ->
-                    val isSelected = option in selected
-                    Surface(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onToggle(option) },
-                        shape = RoundedCornerShape(10.dp),
-                        color = if (isSelected) Color(0x22FFF6EA) else Color.Transparent,
-                        border = BorderStroke(1.dp, if (isSelected) Color(0x70FFFFFF) else Color(0x20FFFFFF))
-                    ) {
-                        Text(
-                            text = labelForOption(option),
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = Color(0xFFF7F2EA)
-                        )
-                    }
+    val colors = LocalDesignTokens.current.colors
+    // Each tap toggles an option right away; Save (as the cross) just closes. The list scrolls by itself.
+    EditDialog(
+        title = title,
+        onDismiss = onDismiss,
+        onConfirm = onDismiss,
+        scrollable = false
+    ) {
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            items(options) { option ->
+                val isSelected = option in selected
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onToggle(option) },
+                    shape = RoundedCornerShape(10.dp),
+                    color = if (isSelected) Color(0x22FFF6EA) else Color.Transparent,
+                    border = BorderStroke(1.dp, if (isSelected) Color(0x70FFFFFF) else Color(0x20FFFFFF))
+                ) {
+                    Text(
+                        text = labelForOption(option),
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = colors.text.primary
+                    )
                 }
             }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text("common_save"))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text("common_cancel"))
-            }
         }
-    )
+    }
 }
 
 @OptIn(ExperimentalLayoutApi::class)

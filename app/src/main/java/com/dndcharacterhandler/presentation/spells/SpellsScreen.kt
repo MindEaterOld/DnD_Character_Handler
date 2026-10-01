@@ -34,8 +34,6 @@ import androidx.compose.material.icons.outlined.AutoStories
 import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.FlashOn
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -88,6 +86,7 @@ import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
 import com.dndcharacterhandler.presentation.components.CharacterScreenHeader
 import com.dndcharacterhandler.presentation.components.CardEditButton
+import com.dndcharacterhandler.presentation.components.EditDialog
 import com.dndcharacterhandler.presentation.components.ExpandableCard
 import com.dndcharacterhandler.presentation.components.FloatingAddButton
 import com.dndcharacterhandler.presentation.components.LimitProgressBar
@@ -730,66 +729,61 @@ private fun SpellsAddEntryDialog(
         }
     }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text("spells_add_spell")) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    DialogSection(text("spells_add_create_section"))
-                    TextButton(onClick = onCreateSpell) {
-                        Text(text("spells_create_action"))
-                    }
+    // A picker: the cross closes it, a tap on an entry does the work; the catalog list scrolls by itself.
+    EditDialog(
+        title = text("spells_add_spell"),
+        onDismiss = onDismiss,
+        scrollable = false
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                DialogSection(text("spells_add_create_section"))
+                TextButton(onClick = onCreateSpell) {
+                    Text(text("spells_create_action"))
                 }
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    DialogSection(text("spells_add_catalog_section"))
-                    SpellsSearchField(
-                        value = query,
-                        onValueChange = { query = it }
-                    )
-                    when {
-                        isLoading -> {
-                            Text(
-                                text = text("spells_catalog_loading"),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color(0xFFD2CAC2)
-                            )
-                        }
+            }
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                DialogSection(text("spells_add_catalog_section"))
+                SpellsSearchField(
+                    value = query,
+                    onValueChange = { query = it }
+                )
+                when {
+                    isLoading -> {
+                        Text(
+                            text = text("spells_catalog_loading"),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = LocalDesignTokens.current.colors.text.muted
+                        )
+                    }
 
-                        filteredItems.isEmpty() -> {
-                            Text(
-                                text = text("spells_catalog_empty"),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color(0xFFD2CAC2)
-                            )
-                        }
+                    filteredItems.isEmpty() -> {
+                        Text(
+                            text = text("spells_catalog_empty"),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = LocalDesignTokens.current.colors.text.muted
+                        )
+                    }
 
-                        else -> {
-                            LazyColumn(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .heightIn(max = 280.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                items(filteredItems, key = { it.id }) { item ->
-                                    SpellCatalogRow(
-                                        item = item,
-                                        onAdd = { onSelectCatalogItem(item) }
-                                    )
-                                }
+                    else -> {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = 280.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(filteredItems, key = { it.id }) { item ->
+                                SpellCatalogRow(
+                                    item = item,
+                                    onAdd = { onSelectCatalogItem(item) }
+                                )
                             }
                         }
                     }
                 }
             }
-        },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text("common_cancel"))
-            }
         }
-    )
+    }
 }
 
 @Composable
@@ -903,432 +897,407 @@ internal fun SpellEditDialog(
     var selectingHealDie by remember { mutableStateOf(false) }
     var selectingAltDie by remember { mutableStateOf(false) }
     var selectingAltDamageType by remember { mutableStateOf(false) }
-    val scrollState = rememberScrollState()
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text(if (spell.id == 0L) "spells_create_spell" else "spells_edit_spell")) },
-        text = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(scrollState),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+    EditDialog(
+        title = text(if (spell.id == 0L) "spells_create_spell" else "spells_edit_spell"),
+        onDismiss = onDismiss,
+        confirmLabel = text(if (spell.id == 0L) "spells_create_action" else "common_save"),
+        onDelete = onDelete,
+        onConfirm = {
+            onSave(
+                spell.copy(
+                    name = name.trim(),
+                    level = level,
+                    school = school,
+                    isPrepared = level == 0 || isAlwaysPrepared || isPrepared,
+                    isAlwaysPrepared = level != 0 && isAlwaysPrepared,
+                    description = description.trim(),
+                    higherLevelDescription = higherLevelDescription.trim(),
+                    range = encodeRange(rangeKind, rangeFeet, rangeSpecial),
+                    castingTime = encodeCastingTime(castingKind, castingAmount),
+                    duration = encodeDuration(durationKind, durationAmount, requiresConcentration),
+                    components = buildComponentsString(
+                        hasVerbalComponent,
+                        hasSomaticComponent,
+                        hasMaterialComponent
+                    ),
+                    material = if (hasMaterialComponent) material.trim() else "",
+                    materialCost = if (hasMaterialComponent) materialCost.trim() else "",
+                    isRitual = isRitual,
+                    requiresConcentration = requiresConcentration,
+                    attackType = if (resolutionKind == SpellResolutionKind.ATTACK) "attack" else "",
+                    damageType = if (resolutionKind == SpellResolutionKind.HEAL) "" else damageType.trim(),
+                    damageBase = if (resolutionKind == SpellResolutionKind.HEAL) "" else formatDice(damageDiceCount, damageDieType),
+                    damageBonusValue = if (resolutionKind != SpellResolutionKind.HEAL && !damageBonusIsModifier) (damageBonusValue.toIntOrNull() ?: 0) else 0,
+                    damageBonusIsModifier = resolutionKind != SpellResolutionKind.HEAL && damageBonusIsModifier,
+                    altDamageBase = if (resolutionKind != SpellResolutionKind.HEAL && hasAltDamage) formatDice(altDamageCount, altDamageDieType) else "",
+                    altDamageType = if (resolutionKind != SpellResolutionKind.HEAL && hasAltDamage) altDamageType else "",
+                    altDamageBonusValue = if (resolutionKind != SpellResolutionKind.HEAL && hasAltDamage && !altDamageBonusIsModifier) (altDamageBonusValue.toIntOrNull() ?: 0) else 0,
+                    altDamageBonusIsModifier = resolutionKind != SpellResolutionKind.HEAL && hasAltDamage && altDamageBonusIsModifier,
+                    damage = if (resolutionKind == SpellResolutionKind.HEAL) "" else spell.damage,
+                    saveAbility = if (resolutionKind == SpellResolutionKind.SAVE) saveAbility else "",
+                    saveEffect = if (resolutionKind == SpellResolutionKind.SAVE) saveEffect else "",
+                    areaOfEffect = encodeArea(areaShape, areaSize),
+                    healBase = if (resolutionKind == SpellResolutionKind.HEAL) formatDice(healDiceCount, healDieType) else "",
+                    healBonusValue = if (resolutionKind == SpellResolutionKind.HEAL && !healBonusIsModifier) (healBonusValue.toIntOrNull() ?: 0) else 0,
+                    healBonusIsModifier = resolutionKind == SpellResolutionKind.HEAL && healBonusIsModifier,
+                    healing = if (resolutionKind == SpellResolutionKind.HEAL) spell.healing else "",
+                    availableClasses = spell.availableClasses
+                )
+            )
+        }
+    ) {
+        DialogSection(text("spells_section_description"))
+        OutlinedTextField(
+            value = name,
+            onValueChange = { name = it },
+            label = { Text(text("spells_name")) },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            CompactSelectionField(
+                label = text("spells_level"),
+                value = spellLevelTitle(level),
+                onClick = { selectingLevel = true },
+                modifier = Modifier.weight(1f)
+            )
+            CompactSelectionField(
+                label = text("spells_school"),
+                value = spellSchoolLabel(school),
+                onClick = { selectingSchool = true },
+                modifier = Modifier.weight(1f)
+            )
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Checkbox(
+                checked = level == 0 || isAlwaysPrepared || isPrepared,
+                onCheckedChange = { if (level != 0 && !isAlwaysPrepared) isPrepared = it },
+                enabled = level != 0 && !isAlwaysPrepared
+            )
+            Text(
+                text = text("spells_prepared"),
+                style = MaterialTheme.typography.bodyLarge,
+                color = LocalDesignTokens.current.colors.text.primary
+            )
+        }
+        // Domain, species and feat spells: prepared by a feature, not counted toward the limit.
+        if (level != 0) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(checked = isAlwaysPrepared, onCheckedChange = { isAlwaysPrepared = it })
+                Text(
+                    text = text("spells_always_prepared"),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = LocalDesignTokens.current.colors.text.primary
+                )
+            }
+        }
+
+        DialogSection(text("spells_section_casting"))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            CompactSelectionField(
+                label = text("spells_range"),
+                value = rangeKindLabel(rangeKind, strings),
+                onClick = { selectingRange = true },
+                modifier = Modifier.weight(1f)
+            )
+            when (rangeKind) {
+                SpellRangeKind.RANGED -> CompactTextField(
+                    value = rangeFeet,
+                    onValueChange = { rangeFeet = it.filter(Char::isDigit) },
+                    label = text("spells_range_feet"),
+                    modifier = Modifier.width(72.dp)
+                )
+                SpellRangeKind.SPECIAL -> CompactTextField(
+                    value = rangeSpecial,
+                    onValueChange = { rangeSpecial = it },
+                    label = text("spells_range_special"),
+                    modifier = Modifier.weight(1f)
+                )
+                else -> Unit
+            }
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            CompactSelectionField(
+                label = text("spells_casting_time"),
+                value = castingKindLabel(castingKind, strings),
+                onClick = { selectingCasting = true },
+                modifier = Modifier.weight(1f)
+            )
+            when (castingKind) {
+                CastingTimeKind.MINUTES, CastingTimeKind.HOURS -> CompactTextField(
+                    value = castingAmount,
+                    onValueChange = { castingAmount = it.filter(Char::isDigit) },
+                    label = castingUnitLabel(castingKind, strings),
+                    modifier = Modifier.width(72.dp)
+                )
+                else -> Unit
+            }
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            CompactSelectionField(
+                label = text("spells_duration"),
+                value = durationKindLabel(durationKind, strings),
+                onClick = { selectingDuration = true },
+                modifier = Modifier.weight(1f)
+            )
+            if (durationKind.isTimed) {
+                CompactTextField(
+                    value = durationAmount,
+                    onValueChange = { durationAmount = it.filter(Char::isDigit) },
+                    label = durationUnitLabel(durationKind, strings),
+                    modifier = Modifier.width(72.dp)
+                )
+            }
+        }
+        DialogSection(text("spells_components"))
+        SpellComponentToggle(
+            label = text("spells_component_verbal"),
+            checked = hasVerbalComponent,
+            onCheckedChange = { hasVerbalComponent = it }
+        )
+        SpellComponentToggle(
+            label = text("spells_component_somatic"),
+            checked = hasSomaticComponent,
+            onCheckedChange = { hasSomaticComponent = it }
+        )
+        SpellComponentToggle(
+            label = text("spells_component_material"),
+            checked = hasMaterialComponent,
+            onCheckedChange = { hasMaterialComponent = it }
+        )
+        if (hasMaterialComponent) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                DialogSection(text("spells_section_description"))
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text(text("spells_name")) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                CompactTextField(
+                    value = material,
+                    onValueChange = { material = it },
+                    label = text("spells_material"),
+                    modifier = Modifier.weight(1f)
                 )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    CompactSelectionField(
-                        label = text("spells_level"),
-                        value = spellLevelTitle(level),
-                        onClick = { selectingLevel = true },
-                        modifier = Modifier.weight(1f)
-                    )
-                    CompactSelectionField(
-                        label = text("spells_school"),
-                        value = spellSchoolLabel(school),
-                        onClick = { selectingSchool = true },
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(
-                        checked = level == 0 || isAlwaysPrepared || isPrepared,
-                        onCheckedChange = { if (level != 0 && !isAlwaysPrepared) isPrepared = it },
-                        enabled = level != 0 && !isAlwaysPrepared
-                    )
-                    Text(
-                        text = text("spells_prepared"),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = LocalDesignTokens.current.colors.text.primary
-                    )
-                }
-                // Domain, species and feat spells: prepared by a feature, not counted toward the limit.
-                if (level != 0) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(checked = isAlwaysPrepared, onCheckedChange = { isAlwaysPrepared = it })
-                        Text(
-                            text = text("spells_always_prepared"),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = LocalDesignTokens.current.colors.text.primary
-                        )
-                    }
-                }
+                CompactTextField(
+                    value = materialCost,
+                    onValueChange = { materialCost = it.filter(Char::isDigit) },
+                    label = text("spells_material_cost"),
+                    modifier = Modifier.width(60.dp)
+                )
+            }
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Checkbox(
+                checked = isRitual,
+                onCheckedChange = { isRitual = it }
+            )
+            Text(
+                text = text("spells_ritual"),
+                style = MaterialTheme.typography.bodyLarge,
+                color = LocalDesignTokens.current.colors.text.primary
+            )
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Checkbox(
+                checked = requiresConcentration,
+                onCheckedChange = { requiresConcentration = it }
+            )
+            Text(
+                text = text("spells_concentration"),
+                style = MaterialTheme.typography.bodyLarge,
+                color = LocalDesignTokens.current.colors.text.primary
+            )
+        }
 
-                DialogSection(text("spells_section_casting"))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    CompactSelectionField(
-                        label = text("spells_range"),
-                        value = rangeKindLabel(rangeKind, strings),
-                        onClick = { selectingRange = true },
-                        modifier = Modifier.weight(1f)
-                    )
-                    when (rangeKind) {
-                        SpellRangeKind.RANGED -> CompactTextField(
-                            value = rangeFeet,
-                            onValueChange = { rangeFeet = it.filter(Char::isDigit) },
-                            label = text("spells_range_feet"),
-                            modifier = Modifier.width(72.dp)
-                        )
-                        SpellRangeKind.SPECIAL -> CompactTextField(
-                            value = rangeSpecial,
-                            onValueChange = { rangeSpecial = it },
-                            label = text("spells_range_special"),
-                            modifier = Modifier.weight(1f)
-                        )
-                        else -> Unit
-                    }
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    CompactSelectionField(
-                        label = text("spells_casting_time"),
-                        value = castingKindLabel(castingKind, strings),
-                        onClick = { selectingCasting = true },
-                        modifier = Modifier.weight(1f)
-                    )
-                    when (castingKind) {
-                        CastingTimeKind.MINUTES, CastingTimeKind.HOURS -> CompactTextField(
-                            value = castingAmount,
-                            onValueChange = { castingAmount = it.filter(Char::isDigit) },
-                            label = castingUnitLabel(castingKind, strings),
-                            modifier = Modifier.width(72.dp)
-                        )
-                        else -> Unit
-                    }
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    CompactSelectionField(
-                        label = text("spells_duration"),
-                        value = durationKindLabel(durationKind, strings),
-                        onClick = { selectingDuration = true },
-                        modifier = Modifier.weight(1f)
-                    )
-                    if (durationKind.isTimed) {
-                        CompactTextField(
-                            value = durationAmount,
-                            onValueChange = { durationAmount = it.filter(Char::isDigit) },
-                            label = durationUnitLabel(durationKind, strings),
-                            modifier = Modifier.width(72.dp)
-                        )
-                    }
-                }
-                DialogSection(text("spells_components"))
-                SpellComponentToggle(
-                    label = text("spells_component_verbal"),
-                    checked = hasVerbalComponent,
-                    onCheckedChange = { hasVerbalComponent = it }
-                )
-                SpellComponentToggle(
-                    label = text("spells_component_somatic"),
-                    checked = hasSomaticComponent,
-                    onCheckedChange = { hasSomaticComponent = it }
-                )
-                SpellComponentToggle(
-                    label = text("spells_component_material"),
-                    checked = hasMaterialComponent,
-                    onCheckedChange = { hasMaterialComponent = it }
-                )
-                if (hasMaterialComponent) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        CompactTextField(
-                            value = material,
-                            onValueChange = { material = it },
-                            label = text("spells_material"),
-                            modifier = Modifier.weight(1f)
-                        )
-                        CompactTextField(
-                            value = materialCost,
-                            onValueChange = { materialCost = it.filter(Char::isDigit) },
-                            label = text("spells_material_cost"),
-                            modifier = Modifier.width(60.dp)
-                        )
-                    }
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(
-                        checked = isRitual,
-                        onCheckedChange = { isRitual = it }
-                    )
-                    Text(
-                        text = text("spells_ritual"),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = Color(0xFFF7F2EA)
-                    )
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(
-                        checked = requiresConcentration,
-                        onCheckedChange = { requiresConcentration = it }
-                    )
-                    Text(
-                        text = text("spells_concentration"),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = Color(0xFFF7F2EA)
-                    )
-                }
+        DialogSection(text("spells_section_effect"))
+        OutlinedTextField(
+            value = description,
+            onValueChange = { description = it },
+            label = { Text(text("spells_description")) },
+            minLines = 4,
+            modifier = Modifier.fillMaxWidth()
+        )
+        OutlinedTextField(
+            value = higherLevelDescription,
+            onValueChange = { higherLevelDescription = it },
+            label = { Text(text("spells_higher_level")) },
+            minLines = 3,
+            modifier = Modifier.fillMaxWidth()
+        )
 
-                DialogSection(text("spells_section_effect"))
-                OutlinedTextField(
-                    value = description,
-                    onValueChange = { description = it },
-                    label = { Text(text("spells_description")) },
-                    minLines = 4,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                OutlinedTextField(
-                    value = higherLevelDescription,
-                    onValueChange = { higherLevelDescription = it },
-                    label = { Text(text("spells_higher_level")) },
-                    minLines = 3,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                DialogSection(text("spells_section_combat"))
+        DialogSection(text("spells_section_combat"))
+        CompactSelectionField(
+            label = text("spells_attack_type"),
+            value = resolutionKindLabel(resolutionKind, strings),
+            onClick = { selectingResolution = true },
+            modifier = Modifier.fillMaxWidth()
+        )
+        if (resolutionKind == SpellResolutionKind.SAVE) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
                 CompactSelectionField(
-                    label = text("spells_attack_type"),
-                    value = resolutionKindLabel(resolutionKind, strings),
-                    onClick = { selectingResolution = true },
-                    modifier = Modifier.fillMaxWidth()
+                    label = text("spells_save_ability"),
+                    value = saveAbilityLabel(saveAbility, strings),
+                    onClick = { selectingSaveAbility = true },
+                    modifier = Modifier.weight(1f)
                 )
-                if (resolutionKind == SpellResolutionKind.SAVE) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        CompactSelectionField(
-                            label = text("spells_save_ability"),
-                            value = saveAbilityLabel(saveAbility, strings),
-                            onClick = { selectingSaveAbility = true },
-                            modifier = Modifier.weight(1f)
-                        )
-                        CompactSelectionField(
-                            label = text("spells_save_effect"),
-                            value = saveEffectLabel(saveEffect, strings),
-                            onClick = { selectingSaveEffect = true },
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
-                if (resolutionKind != SpellResolutionKind.HEAL) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        CompactTextField(
-                            value = if (damageDiceCount == 0) "" else damageDiceCount.toString(),
-                            onValueChange = { damageDiceCount = it.filter(Char::isDigit).toIntOrNull() ?: 0 },
-                            label = text("inventory_field_damage_dice_count"),
-                            modifier = Modifier.weight(1f)
-                        )
-                        CompactSelectionField(
-                            label = text("inventory_field_damage_die_type"),
-                            value = damageDieType,
-                            onClick = { selectingDamageDie = true },
-                            modifier = Modifier.weight(1f)
-                        )
-                        if (!damageBonusIsModifier) {
-                            CompactTextField(
-                                value = if (damageBonusValue.isBlank()) "" else "+$damageBonusValue",
-                                onValueChange = { damageBonusValue = it.filter(Char::isDigit) },
-                                label = text("spells_damage_bonus"),
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
-                    }
-                    SpellComponentToggle(
-                        label = text("spells_bonus_modifier"),
-                        checked = damageBonusIsModifier,
-                        onCheckedChange = { damageBonusIsModifier = it }
-                    )
-                    CompactSelectionField(
-                        label = text("spells_damage_type"),
-                        value = damageTypeLabel(damageType, strings),
-                        onClick = { selectingDamageType = true },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    if (hasAltDamage) {
-                        DialogSection(text("combat_attack_section_alternate_damage"))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            CompactTextField(
-                                value = if (altDamageCount == 0) "" else altDamageCount.toString(),
-                                onValueChange = { altDamageCount = it.filter(Char::isDigit).toIntOrNull() ?: 0 },
-                                label = text("inventory_field_damage_dice_count"),
-                                modifier = Modifier.weight(1f)
-                            )
-                            CompactSelectionField(
-                                label = text("inventory_field_damage_die_type"),
-                                value = altDamageDieType,
-                                onClick = { selectingAltDie = true },
-                                modifier = Modifier.weight(1f)
-                            )
-                            if (!altDamageBonusIsModifier) {
-                                CompactTextField(
-                                    value = if (altDamageBonusValue.isBlank()) "" else "+$altDamageBonusValue",
-                                    onValueChange = { altDamageBonusValue = it.filter(Char::isDigit) },
-                                    label = text("spells_damage_bonus"),
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                        }
-                        SpellComponentToggle(
-                            label = text("spells_bonus_modifier"),
-                            checked = altDamageBonusIsModifier,
-                            onCheckedChange = { altDamageBonusIsModifier = it }
-                        )
-                        CompactSelectionField(
-                            label = text("spells_damage_type"),
-                            value = damageTypeLabel(altDamageType, strings),
-                            onClick = { selectingAltDamageType = true },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        TextButton(onClick = { hasAltDamage = false }) {
-                            Text(text("combat_attack_remove_alternate_damage"))
-                        }
-                    } else {
-                        TextButton(onClick = { hasAltDamage = true }) {
-                            Text(text("combat_attack_add_alternate_damage"))
-                        }
-                    }
-                }
-                if (resolutionKind == SpellResolutionKind.HEAL) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        CompactTextField(
-                            value = if (healDiceCount == 0) "" else healDiceCount.toString(),
-                            onValueChange = { healDiceCount = it.filter(Char::isDigit).toIntOrNull() ?: 0 },
-                            label = text("inventory_field_damage_dice_count"),
-                            modifier = Modifier.weight(1f)
-                        )
-                        CompactSelectionField(
-                            label = text("inventory_field_damage_die_type"),
-                            value = healDieType,
-                            onClick = { selectingHealDie = true },
-                            modifier = Modifier.weight(1f)
-                        )
-                        if (!healBonusIsModifier) {
-                            CompactTextField(
-                                value = if (healBonusValue.isBlank()) "" else "+$healBonusValue",
-                                onValueChange = { healBonusValue = it.filter(Char::isDigit) },
-                                label = text("spells_damage_bonus"),
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
-                    }
-                    SpellComponentToggle(
-                        label = text("spells_bonus_modifier"),
-                        checked = healBonusIsModifier,
-                        onCheckedChange = { healBonusIsModifier = it }
-                    )
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    CompactSelectionField(
-                        label = text("spells_area_of_effect"),
-                        value = areaShapeLabel(areaShape, strings),
-                        onClick = { selectingArea = true },
+                CompactSelectionField(
+                    label = text("spells_save_effect"),
+                    value = saveEffectLabel(saveEffect, strings),
+                    onClick = { selectingSaveEffect = true },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+        if (resolutionKind != SpellResolutionKind.HEAL) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                CompactTextField(
+                    value = if (damageDiceCount == 0) "" else damageDiceCount.toString(),
+                    onValueChange = { damageDiceCount = it.filter(Char::isDigit).toIntOrNull() ?: 0 },
+                    label = text("inventory_field_damage_dice_count"),
+                    modifier = Modifier.weight(1f)
+                )
+                CompactSelectionField(
+                    label = text("inventory_field_damage_die_type"),
+                    value = damageDieType,
+                    onClick = { selectingDamageDie = true },
+                    modifier = Modifier.weight(1f)
+                )
+                if (!damageBonusIsModifier) {
+                    CompactTextField(
+                        value = if (damageBonusValue.isBlank()) "" else "+$damageBonusValue",
+                        onValueChange = { damageBonusValue = it.filter(Char::isDigit) },
+                        label = text("spells_damage_bonus"),
                         modifier = Modifier.weight(1f)
                     )
-                    if (areaShape != AreaShape.NONE) {
-                        CompactTextField(
-                            value = areaSize,
-                            onValueChange = { areaSize = it.filter(Char::isDigit) },
-                            label = text("spells_range_feet"),
-                            modifier = Modifier.width(72.dp)
-                        )
-                    }
                 }
             }
-        },
-        confirmButton = {
-            Button(
-                onClick = {
-                    onSave(
-                        spell.copy(
-                            name = name.trim(),
-                            level = level,
-                            school = school,
-                            isPrepared = level == 0 || isAlwaysPrepared || isPrepared,
-                            isAlwaysPrepared = level != 0 && isAlwaysPrepared,
-                            description = description.trim(),
-                            higherLevelDescription = higherLevelDescription.trim(),
-                            range = encodeRange(rangeKind, rangeFeet, rangeSpecial),
-                            castingTime = encodeCastingTime(castingKind, castingAmount),
-                            duration = encodeDuration(durationKind, durationAmount, requiresConcentration),
-                            components = buildComponentsString(
-                                hasVerbalComponent,
-                                hasSomaticComponent,
-                                hasMaterialComponent
-                            ),
-                            material = if (hasMaterialComponent) material.trim() else "",
-                            materialCost = if (hasMaterialComponent) materialCost.trim() else "",
-                            isRitual = isRitual,
-                            requiresConcentration = requiresConcentration,
-                            attackType = if (resolutionKind == SpellResolutionKind.ATTACK) "attack" else "",
-                            damageType = if (resolutionKind == SpellResolutionKind.HEAL) "" else damageType.trim(),
-                            damageBase = if (resolutionKind == SpellResolutionKind.HEAL) "" else formatDice(damageDiceCount, damageDieType),
-                            damageBonusValue = if (resolutionKind != SpellResolutionKind.HEAL && !damageBonusIsModifier) (damageBonusValue.toIntOrNull() ?: 0) else 0,
-                            damageBonusIsModifier = resolutionKind != SpellResolutionKind.HEAL && damageBonusIsModifier,
-                            altDamageBase = if (resolutionKind != SpellResolutionKind.HEAL && hasAltDamage) formatDice(altDamageCount, altDamageDieType) else "",
-                            altDamageType = if (resolutionKind != SpellResolutionKind.HEAL && hasAltDamage) altDamageType else "",
-                            altDamageBonusValue = if (resolutionKind != SpellResolutionKind.HEAL && hasAltDamage && !altDamageBonusIsModifier) (altDamageBonusValue.toIntOrNull() ?: 0) else 0,
-                            altDamageBonusIsModifier = resolutionKind != SpellResolutionKind.HEAL && hasAltDamage && altDamageBonusIsModifier,
-                            damage = if (resolutionKind == SpellResolutionKind.HEAL) "" else spell.damage,
-                            saveAbility = if (resolutionKind == SpellResolutionKind.SAVE) saveAbility else "",
-                            saveEffect = if (resolutionKind == SpellResolutionKind.SAVE) saveEffect else "",
-                            areaOfEffect = encodeArea(areaShape, areaSize),
-                            healBase = if (resolutionKind == SpellResolutionKind.HEAL) formatDice(healDiceCount, healDieType) else "",
-                            healBonusValue = if (resolutionKind == SpellResolutionKind.HEAL && !healBonusIsModifier) (healBonusValue.toIntOrNull() ?: 0) else 0,
-                            healBonusIsModifier = resolutionKind == SpellResolutionKind.HEAL && healBonusIsModifier,
-                            healing = if (resolutionKind == SpellResolutionKind.HEAL) spell.healing else "",
-                            availableClasses = spell.availableClasses
-                        )
+            SpellComponentToggle(
+                label = text("spells_bonus_modifier"),
+                checked = damageBonusIsModifier,
+                onCheckedChange = { damageBonusIsModifier = it }
+            )
+            CompactSelectionField(
+                label = text("spells_damage_type"),
+                value = damageTypeLabel(damageType, strings),
+                onClick = { selectingDamageType = true },
+                modifier = Modifier.fillMaxWidth()
+            )
+            if (hasAltDamage) {
+                DialogSection(text("combat_attack_section_alternate_damage"))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    CompactTextField(
+                        value = if (altDamageCount == 0) "" else altDamageCount.toString(),
+                        onValueChange = { altDamageCount = it.filter(Char::isDigit).toIntOrNull() ?: 0 },
+                        label = text("inventory_field_damage_dice_count"),
+                        modifier = Modifier.weight(1f)
                     )
-                }
-            ) {
-                Text(text(if (spell.id == 0L) "spells_create_action" else "common_save"))
-            }
-        },
-        dismissButton = {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (onDelete != null) {
-                    TextButton(onClick = onDelete) {
-                        Text(text("inventory_delete_action"))
+                    CompactSelectionField(
+                        label = text("inventory_field_damage_die_type"),
+                        value = altDamageDieType,
+                        onClick = { selectingAltDie = true },
+                        modifier = Modifier.weight(1f)
+                    )
+                    if (!altDamageBonusIsModifier) {
+                        CompactTextField(
+                            value = if (altDamageBonusValue.isBlank()) "" else "+$altDamageBonusValue",
+                            onValueChange = { altDamageBonusValue = it.filter(Char::isDigit) },
+                            label = text("spells_damage_bonus"),
+                            modifier = Modifier.weight(1f)
+                        )
                     }
                 }
-                TextButton(onClick = onDismiss) {
-                    Text(text("common_cancel"))
+                SpellComponentToggle(
+                    label = text("spells_bonus_modifier"),
+                    checked = altDamageBonusIsModifier,
+                    onCheckedChange = { altDamageBonusIsModifier = it }
+                )
+                CompactSelectionField(
+                    label = text("spells_damage_type"),
+                    value = damageTypeLabel(altDamageType, strings),
+                    onClick = { selectingAltDamageType = true },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                TextButton(onClick = { hasAltDamage = false }) {
+                    Text(text("combat_attack_remove_alternate_damage"))
+                }
+            } else {
+                TextButton(onClick = { hasAltDamage = true }) {
+                    Text(text("combat_attack_add_alternate_damage"))
                 }
             }
         }
-    )
+        if (resolutionKind == SpellResolutionKind.HEAL) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                CompactTextField(
+                    value = if (healDiceCount == 0) "" else healDiceCount.toString(),
+                    onValueChange = { healDiceCount = it.filter(Char::isDigit).toIntOrNull() ?: 0 },
+                    label = text("inventory_field_damage_dice_count"),
+                    modifier = Modifier.weight(1f)
+                )
+                CompactSelectionField(
+                    label = text("inventory_field_damage_die_type"),
+                    value = healDieType,
+                    onClick = { selectingHealDie = true },
+                    modifier = Modifier.weight(1f)
+                )
+                if (!healBonusIsModifier) {
+                    CompactTextField(
+                        value = if (healBonusValue.isBlank()) "" else "+$healBonusValue",
+                        onValueChange = { healBonusValue = it.filter(Char::isDigit) },
+                        label = text("spells_damage_bonus"),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+            SpellComponentToggle(
+                label = text("spells_bonus_modifier"),
+                checked = healBonusIsModifier,
+                onCheckedChange = { healBonusIsModifier = it }
+            )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            CompactSelectionField(
+                label = text("spells_area_of_effect"),
+                value = areaShapeLabel(areaShape, strings),
+                onClick = { selectingArea = true },
+                modifier = Modifier.weight(1f)
+            )
+            if (areaShape != AreaShape.NONE) {
+                CompactTextField(
+                    value = areaSize,
+                    onValueChange = { areaSize = it.filter(Char::isDigit) },
+                    label = text("spells_range_feet"),
+                    modifier = Modifier.width(72.dp)
+                )
+            }
+        }
+    }
 
     if (selectingLevel) {
         SelectionDialog(
@@ -1544,30 +1513,22 @@ private fun SpellSlotsConfigDialog(
     var shortRest by remember(restoresOnShortRest) { mutableStateOf(restoresOnShortRest) }
     var longRest by remember(restoresOnLongRest) { mutableStateOf(restoresOnLongRest) }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text("spells_edit_slots")) },
-        text = {
-            SpellSlotsConfigBody(
-                maxState = maxState,
-                remState = remState,
-                shortRest = shortRest,
-                longRest = longRest,
-                onShortRestChange = { shortRest = it },
-                onLongRestChange = { longRest = it }
-            )
-        },
-        confirmButton = {
-            Button(onClick = { onSave(maxState.toList(), remState.toList(), shortRest, longRest) }) {
-                Text(text("common_save"))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text("common_cancel"))
-            }
-        }
-    )
+    // SpellSlotsConfigBody scrolls by itself, so the dialog doesn't.
+    EditDialog(
+        title = text("spells_edit_slots"),
+        onDismiss = onDismiss,
+        onConfirm = { onSave(maxState.toList(), remState.toList(), shortRest, longRest) },
+        scrollable = false
+    ) {
+        SpellSlotsConfigBody(
+            maxState = maxState,
+            remState = remState,
+            shortRest = shortRest,
+            longRest = longRest,
+            onShortRestChange = { shortRest = it },
+            onLongRestChange = { longRest = it }
+        )
+    }
 }
 
 @Composable
@@ -1840,38 +1801,34 @@ private fun <T> SelectionDialog(
     onDismiss: () -> Unit,
     onSelect: (T) -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(title) },
-        text = {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                items(options) { option ->
-                    val isSelected = option == selected
-                    Surface(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onSelect(option) },
-                        shape = RoundedCornerShape(10.dp),
-                        color = if (isSelected) Color(0x22FFF6EA) else Color.Transparent,
-                        border = BorderStroke(1.dp, if (isSelected) Color(0x70FFFFFF) else Color(0x20FFFFFF))
-                    ) {
-                        Text(
-                            text = labelForOption(option),
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = Color(0xFFF7F2EA)
-                        )
-                    }
+    val colors = LocalDesignTokens.current.colors
+    // A picker: a tap on an option does the work; the list scrolls by itself.
+    EditDialog(
+        title = title,
+        onDismiss = onDismiss,
+        scrollable = false
+    ) {
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            items(options) { option ->
+                val isSelected = option == selected
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onSelect(option) },
+                    shape = RoundedCornerShape(10.dp),
+                    color = if (isSelected) Color(0x22FFF6EA) else Color.Transparent,
+                    border = BorderStroke(1.dp, if (isSelected) Color(0x70FFFFFF) else Color(0x20FFFFFF))
+                ) {
+                    Text(
+                        text = labelForOption(option),
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = colors.text.primary
+                    )
                 }
             }
-        },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text("common_cancel"))
-            }
         }
-    )
+    }
 }
 
 internal fun newDraftSpell(): Spell =

@@ -38,7 +38,6 @@ import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -107,6 +106,7 @@ import com.dndcharacterhandler.domain.usecase.GetCharacterBundleUseCase
 import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
 import com.dndcharacterhandler.presentation.components.AppImage
+import com.dndcharacterhandler.presentation.components.EditDialog
 import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
 import com.dndcharacterhandler.presentation.components.OverlayCloseButton
 import com.dndcharacterhandler.presentation.levelup.LevelUpWizard
@@ -589,6 +589,7 @@ private fun OverviewContent(
     val context = LocalContext.current
     val strings = LocalStrings.current
     val typographyTokens = LocalDesignTokens.current.typography
+    val colors = LocalDesignTokens.current.colors
     val portraitScope = rememberCoroutineScope()
     val portraitPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
@@ -858,109 +859,87 @@ private fun OverviewContent(
     }
 
     if (isLevelDownNoticeOpen) {
-        AlertDialog(
-            onDismissRequest = { isLevelDownNoticeOpen = false },
-            text = { Text(text("levelup_level_down_unavailable")) },
-            confirmButton = {
-                TextButton(onClick = { isLevelDownNoticeOpen = false }) { Text(text("common_close")) }
-            }
-        )
+        // A notice from Character Wizard: its name as the title, the cross closes it.
+        EditDialog(
+            title = text("levelup_title"),
+            onDismiss = { isLevelDownNoticeOpen = false }
+        ) {
+            Text(text("levelup_level_down_unavailable"))
+        }
     }
 
     if (activeField != null && characterBundle != null) {
         val field = activeField!!
         if (field == OverviewEditableField.LEVEL) {
-            AlertDialog(
-                onDismissRequest = { activeField = null },
-                title = { Text(text("overview_level_picker_title")) },
-                text = {
-                    LazyColumn(
-                        modifier = Modifier.heightIn(max = 320.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        items(20) { index ->
-                            val level = index + 1
-                            val isSelected = level == characterBundle.character.level
-                            Text(
-                                text = strings.format("overview_level_format", level),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(if (isSelected) Color(0xFF3A3244) else Color.Transparent)
-                                    .clickable {
-                                        val current = characterBundle.character.level
-                                        when {
-                                            // Going up walks the wizard through every level, as Foundry does.
-                                            level > current -> onOpenLevelUp(level)
-                                            // The wizard can't take levels back yet.
-                                            level < current && characterBundle.character.classes.isNotEmpty() ->
-                                                isLevelDownNoticeOpen = true
-                                            else -> onUpdateIdentity(characterBundle, null, null, null, level)
-                                        }
-                                        activeField = null
-                                    }
-                                    .padding(horizontal = 12.dp, vertical = 12.dp),
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = if (isSelected) Color(0xFFFFF6EA) else Color(0xFFD2CAC2)
-                            )
-                        }
-                    }
-                },
-                confirmButton = {},
-                dismissButton = {
-                    TextButton(onClick = { activeField = null }) {
-                        Text(text("common_cancel"))
-                    }
-                }
-            )
-        } else {
-        AlertDialog(
-            onDismissRequest = { activeField = null },
-            title = {
-                Text(
-                    when (field) {
-                        OverviewEditableField.NAME -> text("overview_rename_title")
-                        OverviewEditableField.RACE -> text("overview_edit_race_title")
-                        OverviewEditableField.LEVEL -> text("overview_level_picker_title")
-                    }
-                )
-            },
-            text = {
-                OutlinedTextField(
-                    value = draftText,
-                    onValueChange = { draftText = it },
-                    singleLine = true,
-                    label = {
+            EditDialog(
+                title = text("overview_level_picker_title"),
+                onDismiss = { activeField = null },
+                scrollable = false
+            ) {
+                LazyColumn(
+                    modifier = Modifier.heightIn(max = 320.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    items(20) { index ->
+                        val level = index + 1
+                        val isSelected = level == characterBundle.character.level
                         Text(
-                            when (field) {
-                                OverviewEditableField.NAME -> text("overview_name_placeholder")
-                                OverviewEditableField.RACE -> text("placeholder_race")
-                                OverviewEditableField.LEVEL -> text("overview_level_picker_title")
-                            }
+                            text = strings.format("overview_level_format", level),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(if (isSelected) colors.surface.selected else Color.Transparent)
+                                .clickable {
+                                    val current = characterBundle.character.level
+                                    when {
+                                        // Going up walks the wizard through every level, as Foundry does.
+                                        level > current -> onOpenLevelUp(level)
+                                        // The wizard can't take levels back yet.
+                                        level < current && characterBundle.character.classes.isNotEmpty() ->
+                                            isLevelDownNoticeOpen = true
+                                        else -> onUpdateIdentity(characterBundle, null, null, null, level)
+                                    }
+                                    activeField = null
+                                }
+                                .padding(horizontal = 12.dp, vertical = 12.dp),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = if (isSelected) colors.text.warmPrimary else colors.text.muted
                         )
                     }
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        when (field) {
-                            OverviewEditableField.NAME -> onUpdateIdentity(characterBundle, draftText, null, null, null)
-                            OverviewEditableField.RACE -> onUpdateIdentity(characterBundle, null, draftText, null, null)
-                            OverviewEditableField.LEVEL -> Unit
-                        }
-                        activeField = null
-                    }
-                ) {
-                    Text(text("common_save"))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { activeField = null }) {
-                    Text(text("common_cancel"))
                 }
             }
-        )
+        } else {
+        EditDialog(
+            title = when (field) {
+                OverviewEditableField.NAME -> text("overview_rename_title")
+                OverviewEditableField.RACE -> text("overview_edit_race_title")
+                OverviewEditableField.LEVEL -> text("overview_level_picker_title")
+            },
+            onDismiss = { activeField = null },
+            onConfirm = {
+                when (field) {
+                    OverviewEditableField.NAME -> onUpdateIdentity(characterBundle, draftText, null, null, null)
+                    OverviewEditableField.RACE -> onUpdateIdentity(characterBundle, null, draftText, null, null)
+                    OverviewEditableField.LEVEL -> Unit
+                }
+                activeField = null
+            }
+        ) {
+            OutlinedTextField(
+                value = draftText,
+                onValueChange = { draftText = it },
+                singleLine = true,
+                label = {
+                    Text(
+                        when (field) {
+                            OverviewEditableField.NAME -> text("overview_name_placeholder")
+                            OverviewEditableField.RACE -> text("placeholder_race")
+                            OverviewEditableField.LEVEL -> text("overview_level_picker_title")
+                        }
+                    )
+                }
+            )
+        }
         }
     }
 
@@ -973,70 +952,56 @@ private fun OverviewContent(
             OverviewExperienceEditMode.SET -> draftValue
         }
 
-        AlertDialog(
-            onDismissRequest = { isExperienceDialogOpen = false },
-            title = { Text(text("overview_exp_dialog_title")) },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text(
-                        text = strings.format("overview_exp_current", formatter.format(currentExperience)),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = Color(0xFFD2CAC2)
-                    )
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        ExperienceModeButton(
-                            modifier = Modifier.weight(1f),
-                            label = text("overview_exp_add"),
-                            selected = experienceEditMode == OverviewExperienceEditMode.ADD,
-                            onClick = { experienceEditMode = OverviewExperienceEditMode.ADD }
-                        )
-                        ExperienceModeButton(
-                            modifier = Modifier.weight(1f),
-                            label = text("overview_exp_set"),
-                            selected = experienceEditMode == OverviewExperienceEditMode.SET,
-                            onClick = { experienceEditMode = OverviewExperienceEditMode.SET }
-                        )
-                    }
-                    OutlinedTextField(
-                        value = experienceDraft,
-                        onValueChange = { value ->
-                            experienceDraft = value.filter(Char::isDigit)
-                        },
-                        singleLine = true,
-                        label = {
-                            Text(
-                                if (experienceEditMode == OverviewExperienceEditMode.ADD) {
-                                    text("overview_exp_add")
-                                } else {
-                                    text("overview_exp_set")
-                                }
-                            )
-                        },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                    )
-                    Text(
-                        text = strings.format("overview_exp_result", formatter.format(resultExperience)),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = Color(0xFFF7F2EA)
-                    )
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onUpdateExperience(characterBundle, resultExperience)
-                        isExperienceDialogOpen = false
-                    }
-                ) {
-                    Text(text("common_save"))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { isExperienceDialogOpen = false }) {
-                    Text(text("common_cancel"))
-                }
+        EditDialog(
+            title = text("overview_exp_dialog_title"),
+            onDismiss = { isExperienceDialogOpen = false },
+            onConfirm = {
+                onUpdateExperience(characterBundle, resultExperience)
+                isExperienceDialogOpen = false
             }
-        )
+        ) {
+            Text(
+                text = strings.format("overview_exp_current", formatter.format(currentExperience)),
+                style = MaterialTheme.typography.bodyLarge,
+                color = colors.text.muted
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                ExperienceModeButton(
+                    modifier = Modifier.weight(1f),
+                    label = text("overview_exp_add"),
+                    selected = experienceEditMode == OverviewExperienceEditMode.ADD,
+                    onClick = { experienceEditMode = OverviewExperienceEditMode.ADD }
+                )
+                ExperienceModeButton(
+                    modifier = Modifier.weight(1f),
+                    label = text("overview_exp_set"),
+                    selected = experienceEditMode == OverviewExperienceEditMode.SET,
+                    onClick = { experienceEditMode = OverviewExperienceEditMode.SET }
+                )
+            }
+            OutlinedTextField(
+                value = experienceDraft,
+                onValueChange = { value ->
+                    experienceDraft = value.filter(Char::isDigit)
+                },
+                singleLine = true,
+                label = {
+                    Text(
+                        if (experienceEditMode == OverviewExperienceEditMode.ADD) {
+                            text("overview_exp_add")
+                        } else {
+                            text("overview_exp_set")
+                        }
+                    )
+                },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            )
+            Text(
+                text = strings.format("overview_exp_result", formatter.format(resultExperience)),
+                style = MaterialTheme.typography.bodyLarge,
+                color = colors.text.primary
+            )
+        }
     }
 
     if (isHpDialogOpen && characterBundle != null) {
@@ -1046,131 +1011,103 @@ private fun OverviewContent(
             calculateHpPreview(current.currentHp, current.maxHp, current.temporaryHp, draftValue, hpEditMode)
         }
 
-        AlertDialog(
-            onDismissRequest = { isHpDialogOpen = false },
-            title = { Text(text("overview_hp_dialog_title")) },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text(
-                        text = strings.format(
-                            "overview_hp_current",
-                            formatHpPlain(current.currentHp, current.maxHp, current.temporaryHp)
-                        ),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = Color(0xFFD2CAC2)
-                    )
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        ExperienceModeButton(
-                            modifier = Modifier.weight(1f),
-                            label = text("overview_hp_damage"),
-                            selected = hpEditMode == OverviewHpEditMode.DAMAGE,
-                            onClick = { hpEditMode = OverviewHpEditMode.DAMAGE }
-                        )
-                        ExperienceModeButton(
-                            modifier = Modifier.weight(1f),
-                            label = text("overview_hp_heal"),
-                            selected = hpEditMode == OverviewHpEditMode.HEAL,
-                            onClick = { hpEditMode = OverviewHpEditMode.HEAL }
-                        )
-                    }
-                    ExperienceModeButton(
-                        modifier = Modifier.fillMaxWidth(),
-                        label = text("overview_hp_temporary"),
-                        selected = hpEditMode == OverviewHpEditMode.TEMPORARY,
-                        onClick = { hpEditMode = OverviewHpEditMode.TEMPORARY }
-                    )
-                    OutlinedTextField(
-                        value = hpDraft,
-                        onValueChange = { value ->
-                            hpDraft = value.filter(Char::isDigit)
-                        },
-                        singleLine = true,
-                        label = {
-                            Text(
-                                when (hpEditMode) {
-                                    OverviewHpEditMode.DAMAGE -> text("overview_hp_damage")
-                                    OverviewHpEditMode.HEAL -> text("overview_hp_heal")
-                                    OverviewHpEditMode.TEMPORARY -> text("overview_hp_temporary")
-                                }
-                            )
-                        },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                    )
-                    Text(
-                        text = strings.format(
-                            "overview_hp_result",
-                            formatHpPlain(result.currentHp, result.maxHp, result.temporaryHp)
-                        ),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = Color(0xFFF7F2EA)
-                    )
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        if (
-                            hpEditMode == OverviewHpEditMode.DAMAGE &&
-                            draftValue > 0 &&
-                            current.currentHp > 0 &&
-                            result.currentHp == 0
-                        ) {
-                            playAssetSound(context, "sounds/wilhelm_scream.mp3")
-                        }
-                        when (hpEditMode) {
-                            OverviewHpEditMode.DAMAGE -> onDamageHitPoints(characterBundle, draftValue)
-                            OverviewHpEditMode.HEAL -> onHealHitPoints(characterBundle, draftValue)
-                            OverviewHpEditMode.TEMPORARY -> onAddTemporaryHitPoints(characterBundle, draftValue)
-                        }
-                        isHpDialogOpen = false
-                    }
+        EditDialog(
+            title = text("overview_hp_dialog_title"),
+            onDismiss = { isHpDialogOpen = false },
+            onConfirm = {
+                if (
+                    hpEditMode == OverviewHpEditMode.DAMAGE &&
+                    draftValue > 0 &&
+                    current.currentHp > 0 &&
+                    result.currentHp == 0
                 ) {
-                    Text(text("common_save"))
+                    playAssetSound(context, "sounds/wilhelm_scream.mp3")
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = { isHpDialogOpen = false }) {
-                    Text(text("common_cancel"))
+                when (hpEditMode) {
+                    OverviewHpEditMode.DAMAGE -> onDamageHitPoints(characterBundle, draftValue)
+                    OverviewHpEditMode.HEAL -> onHealHitPoints(characterBundle, draftValue)
+                    OverviewHpEditMode.TEMPORARY -> onAddTemporaryHitPoints(characterBundle, draftValue)
                 }
+                isHpDialogOpen = false
             }
-        )
+        ) {
+            Text(
+                text = strings.format(
+                    "overview_hp_current",
+                    formatHpPlain(current.currentHp, current.maxHp, current.temporaryHp)
+                ),
+                style = MaterialTheme.typography.bodyLarge,
+                color = colors.text.muted
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                ExperienceModeButton(
+                    modifier = Modifier.weight(1f),
+                    label = text("overview_hp_damage"),
+                    selected = hpEditMode == OverviewHpEditMode.DAMAGE,
+                    onClick = { hpEditMode = OverviewHpEditMode.DAMAGE }
+                )
+                ExperienceModeButton(
+                    modifier = Modifier.weight(1f),
+                    label = text("overview_hp_heal"),
+                    selected = hpEditMode == OverviewHpEditMode.HEAL,
+                    onClick = { hpEditMode = OverviewHpEditMode.HEAL }
+                )
+            }
+            ExperienceModeButton(
+                modifier = Modifier.fillMaxWidth(),
+                label = text("overview_hp_temporary"),
+                selected = hpEditMode == OverviewHpEditMode.TEMPORARY,
+                onClick = { hpEditMode = OverviewHpEditMode.TEMPORARY }
+            )
+            OutlinedTextField(
+                value = hpDraft,
+                onValueChange = { value ->
+                    hpDraft = value.filter(Char::isDigit)
+                },
+                singleLine = true,
+                label = {
+                    Text(
+                        when (hpEditMode) {
+                            OverviewHpEditMode.DAMAGE -> text("overview_hp_damage")
+                            OverviewHpEditMode.HEAL -> text("overview_hp_heal")
+                            OverviewHpEditMode.TEMPORARY -> text("overview_hp_temporary")
+                        }
+                    )
+                },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            )
+            Text(
+                text = strings.format(
+                    "overview_hp_result",
+                    formatHpPlain(result.currentHp, result.maxHp, result.temporaryHp)
+                ),
+                style = MaterialTheme.typography.bodyLarge,
+                color = colors.text.primary
+            )
+        }
     }
 
     if (isMaxHpDialogOpen && characterBundle != null) {
         val draftValue = maxHpDraft.toIntOrNull()?.coerceAtLeast(1) ?: 1
 
-        AlertDialog(
-            onDismissRequest = { isMaxHpDialogOpen = false },
-            title = { Text(text("overview_hp_max_dialog_title")) },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    OutlinedTextField(
-                        value = maxHpDraft,
-                        onValueChange = { value ->
-                            maxHpDraft = value.filter(Char::isDigit)
-                        },
-                        singleLine = true,
-                        label = { Text(text("overview_hp_max")) },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                    )
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onUpdateMaxHitPoints(characterBundle, draftValue)
-                        isMaxHpDialogOpen = false
-                    }
-                ) {
-                    Text(text("common_save"))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { isMaxHpDialogOpen = false }) {
-                    Text(text("common_cancel"))
-                }
+        EditDialog(
+            title = text("overview_hp_max_dialog_title"),
+            onDismiss = { isMaxHpDialogOpen = false },
+            onConfirm = {
+                onUpdateMaxHitPoints(characterBundle, draftValue)
+                isMaxHpDialogOpen = false
             }
-        )
+        ) {
+            OutlinedTextField(
+                value = maxHpDraft,
+                onValueChange = { value ->
+                    maxHpDraft = value.filter(Char::isDigit)
+                },
+                singleLine = true,
+                label = { Text(text("overview_hp_max")) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            )
+        }
     }
 
     if (activeMiniStatField != null && characterBundle != null) {
@@ -1184,136 +1121,114 @@ private fun OverviewContent(
         val parsedBaseArmorClass = armorClassBaseDraft.toIntOrNull()?.coerceAtLeast(1) ?: 10
         val parsedManualArmorClass = armorClassManualDraft.toIntOrNull()?.coerceAtLeast(1)
 
-        AlertDialog(
-            onDismissRequest = { activeMiniStatField = null },
-            title = {
-                Text(
-                    when (field) {
-                        OverviewMiniStatField.ARMOR_CLASS -> text("overview_edit_ac_title")
-                        OverviewMiniStatField.INITIATIVE -> text("overview_edit_initiative_title")
-                        OverviewMiniStatField.SPEED -> text("overview_edit_speed_title")
-                    }
-                )
+        EditDialog(
+            title = when (field) {
+                OverviewMiniStatField.ARMOR_CLASS -> text("overview_edit_ac_title")
+                OverviewMiniStatField.INITIATIVE -> text("overview_edit_initiative_title")
+                OverviewMiniStatField.SPEED -> text("overview_edit_speed_title")
             },
-            text = {
-                if (field == OverviewMiniStatField.ARMOR_CLASS) {
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        OutlinedTextField(
-                            value = armorClassBaseDraft,
-                            onValueChange = { value ->
-                                armorClassBaseDraft = value.filter(Char::isDigit)
-                            },
-                            singleLine = true,
-                            label = { Text(text("overview_ac_base")) },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                        )
-
-                        Text(
-                            text = text("overview_ac_mode"),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = Color(0xFFF7F2EA)
-                        )
-
-                        ArmorClassModeOption(
-                            title = text("overview_ac_mode_automatic"),
-                            description = text("overview_ac_mode_automatic_hint"),
-                            selected = armorClassModeDraft == ArmorClassMode.AUTOMATIC,
-                            onClick = { armorClassModeDraft = ArmorClassMode.AUTOMATIC }
-                        )
-                        ArmorClassModeOption(
-                            title = text("overview_ac_mode_manual"),
-                            description = text("overview_ac_mode_manual_hint"),
-                            selected = armorClassModeDraft == ArmorClassMode.MANUAL,
-                            onClick = { armorClassModeDraft = ArmorClassMode.MANUAL }
-                        )
-
-                        if (armorClassModeDraft == ArmorClassMode.MANUAL) {
-                            OutlinedTextField(
-                                value = armorClassManualDraft,
-                                onValueChange = { value ->
-                                    armorClassManualDraft = value.filter(Char::isDigit)
-                                },
-                                singleLine = true,
-                                label = { Text(text("overview_ac_manual")) },
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                            )
-                        }
-                    }
-                } else {
-                    if (field == OverviewMiniStatField.INITIATIVE) {
-                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            Text(
-                                text = strings.format(
-                                    "overview_initiative_base_value",
-                                    signed(abilityModifier(characterBundle.character.dexterity))
-                                ),
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = Color(0xFFD2CAC2)
-                            )
-                            OutlinedTextField(
-                                value = miniStatDraft,
-                                onValueChange = { value ->
-                                    miniStatDraft = sanitizeSignedIntegerInput(value)
-                                },
-                                singleLine = true,
-                                label = { Text(text("overview_initiative_bonus")) },
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
-                            )
-                            Text(
-                                text = strings.format(
-                                    "overview_initiative_result",
-                                    signed(calculateInitiative(characterBundle.character.dexterity, parsedValue))
-                                ),
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = Color(0xFFF7F2EA)
-                            )
-                        }
-                    } else {
-                        OutlinedTextField(
-                            value = miniStatDraft,
-                            onValueChange = { value ->
-                                miniStatDraft = value.filter(Char::isDigit)
-                            },
-                            singleLine = true,
-                            label = {
-                                Text(
-                                    when (field) {
-                                        OverviewMiniStatField.ARMOR_CLASS -> text("overview_ac_full")
-                                        OverviewMiniStatField.INITIATIVE -> text("overview_initiative")
-                                        OverviewMiniStatField.SPEED -> text("overview_speed")
-                                    }
-                                )
-                            },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                        )
-                    }
+            onDismiss = { activeMiniStatField = null },
+            onConfirm = {
+                when (field) {
+                    OverviewMiniStatField.ARMOR_CLASS -> onUpdateArmorClass(
+                        characterBundle,
+                        parsedBaseArmorClass,
+                        armorClassModeDraft,
+                        parsedManualArmorClass
+                    )
+                    OverviewMiniStatField.INITIATIVE -> onUpdateInitiative(characterBundle, parsedValue)
+                    OverviewMiniStatField.SPEED -> onUpdateSpeed(characterBundle, parsedValue)
                 }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        when (field) {
-                            OverviewMiniStatField.ARMOR_CLASS -> onUpdateArmorClass(
-                                characterBundle,
-                                parsedBaseArmorClass,
-                                armorClassModeDraft,
-                                parsedManualArmorClass
-                            )
-                            OverviewMiniStatField.INITIATIVE -> onUpdateInitiative(characterBundle, parsedValue)
-                            OverviewMiniStatField.SPEED -> onUpdateSpeed(characterBundle, parsedValue)
-                        }
-                        activeMiniStatField = null
-                    }
-                ) {
-                    Text(text("common_save"))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { activeMiniStatField = null }) {
-                    Text(text("common_cancel"))
-                }
+                activeMiniStatField = null
             }
-        )
+        ) {
+            if (field == OverviewMiniStatField.ARMOR_CLASS) {
+                OutlinedTextField(
+                    value = armorClassBaseDraft,
+                    onValueChange = { value ->
+                        armorClassBaseDraft = value.filter(Char::isDigit)
+                    },
+                    singleLine = true,
+                    label = { Text(text("overview_ac_base")) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
+
+                Text(
+                    text = text("overview_ac_mode"),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = colors.text.primary
+                )
+
+                ArmorClassModeOption(
+                    title = text("overview_ac_mode_automatic"),
+                    description = text("overview_ac_mode_automatic_hint"),
+                    selected = armorClassModeDraft == ArmorClassMode.AUTOMATIC,
+                    onClick = { armorClassModeDraft = ArmorClassMode.AUTOMATIC }
+                )
+                ArmorClassModeOption(
+                    title = text("overview_ac_mode_manual"),
+                    description = text("overview_ac_mode_manual_hint"),
+                    selected = armorClassModeDraft == ArmorClassMode.MANUAL,
+                    onClick = { armorClassModeDraft = ArmorClassMode.MANUAL }
+                )
+
+                if (armorClassModeDraft == ArmorClassMode.MANUAL) {
+                    OutlinedTextField(
+                        value = armorClassManualDraft,
+                        onValueChange = { value ->
+                            armorClassManualDraft = value.filter(Char::isDigit)
+                        },
+                        singleLine = true,
+                        label = { Text(text("overview_ac_manual")) },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    )
+                }
+            } else if (field == OverviewMiniStatField.INITIATIVE) {
+                Text(
+                    text = strings.format(
+                        "overview_initiative_base_value",
+                        signed(abilityModifier(characterBundle.character.dexterity))
+                    ),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = colors.text.muted
+                )
+                OutlinedTextField(
+                    value = miniStatDraft,
+                    onValueChange = { value ->
+                        miniStatDraft = sanitizeSignedIntegerInput(value)
+                    },
+                    singleLine = true,
+                    label = { Text(text("overview_initiative_bonus")) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+                )
+                Text(
+                    text = strings.format(
+                        "overview_initiative_result",
+                        signed(calculateInitiative(characterBundle.character.dexterity, parsedValue))
+                    ),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = colors.text.primary
+                )
+            } else {
+                OutlinedTextField(
+                    value = miniStatDraft,
+                    onValueChange = { value ->
+                        miniStatDraft = value.filter(Char::isDigit)
+                    },
+                    singleLine = true,
+                    label = {
+                        Text(
+                            when (field) {
+                                OverviewMiniStatField.ARMOR_CLASS -> text("overview_ac_full")
+                                OverviewMiniStatField.INITIATIVE -> text("overview_initiative")
+                                OverviewMiniStatField.SPEED -> text("overview_speed")
+                            }
+                        )
+                    },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
+            }
+        }
     }
 
     if (isShortRestDialogOpen && characterBundle != null) {
@@ -1324,151 +1239,129 @@ private fun OverviewContent(
         val spendCount = hitDiceSpendCount.coerceIn(0, availableHitDice)
         var isHitDieMenuOpen by remember { mutableStateOf(false) }
 
-        AlertDialog(
-            onDismissRequest = { isShortRestDialogOpen = false },
-            title = { Text(text("overview_short_rest")) },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text(
-                        text = text("overview_hit_dice_remaining_hint"),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = Color(0xFFD2CAC2)
-                    )
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "$availableHitDice/$totalHitDice",
-                            style = MaterialTheme.typography.headlineMedium.copy(
-                                fontSize = typographyTokens.shortRestDiceCount.fontSizeSp.sp
-                            ),
-                            color = Color(0xFFF7F2EA)
-                        )
-                        Box(modifier = Modifier.padding(start = 12.dp)) {
-                            Surface(
-                                shape = RoundedCornerShape(14.dp),
-                                color = Color(0xFF1A171D),
-                                border = BorderStroke(1.dp, Color(0x50FFFFFF)),
-                                onClick = { isHitDieMenuOpen = true }
-                            ) {
-                                Text(
-                                    text = "d${current.hitDieSides}",
-                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 9.dp),
-                                    style = MaterialTheme.typography.bodyLarge.copy(
-                                        fontSize = typographyTokens.shortRestDieToken.fontSizeSp.sp
-                                    ),
-                                    color = Color(0xFFF7F2EA)
-                                )
-                            }
-                            DropdownMenu(
-                                expanded = isHitDieMenuOpen,
-                                onDismissRequest = { isHitDieMenuOpen = false }
-                            ) {
-                                hitDieSidesOptions.forEach { sides ->
-                                    DropdownMenuItem(
-                                        text = { Text("d$sides") },
-                                        onClick = {
-                                            onUpdateHitDieSides(characterBundle, sides)
-                                            isHitDieMenuOpen = false
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    }
-                    Text(
-                        text = text("overview_hit_dice_spend_hint"),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = Color(0xFFD2CAC2)
-                    )
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        TextButton(
-                            onClick = { hitDiceSpendCount = (spendCount - 1).coerceAtLeast(0) },
-                            enabled = spendCount > 0
-                        ) {
-                            Text(
-                                text = "-",
-                                style = MaterialTheme.typography.headlineMedium.copy(
-                                    fontSize = typographyTokens.shortRestCounterButton.fontSizeSp.sp
-                                )
-                            )
-                        }
-                        Text(
-                            text = spendCount.toString(),
-                            modifier = Modifier.padding(horizontal = 28.dp),
-                            style = MaterialTheme.typography.headlineMedium.copy(
-                                fontSize = typographyTokens.shortRestCounterValue.fontSizeSp.sp
-                            ),
-                            color = Color(0xFFF7F2EA),
-                            textAlign = TextAlign.Center
-                        )
-                        TextButton(
-                            onClick = { hitDiceSpendCount = (spendCount + 1).coerceAtMost(availableHitDice) },
-                            enabled = spendCount < availableHitDice
-                        ) {
-                            Text(
-                                text = "+",
-                                style = MaterialTheme.typography.headlineMedium.copy(
-                                    fontSize = typographyTokens.shortRestCounterButton.fontSizeSp.sp
-                                )
-                            )
-                        }
-                    }
+        EditDialog(
+            title = text("overview_short_rest"),
+            onDismiss = { isShortRestDialogOpen = false },
+            onConfirm = {
+                if (spendCount > 0) {
+                    onSpendHitDice(characterBundle, spendCount)
                 }
+                onShortRest(characterBundle)
+                hitDiceSpendCount = 0
+                isShortRestDialogOpen = false
             },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        if (spendCount > 0) {
-                            onSpendHitDice(characterBundle, spendCount)
-                        }
-                        onShortRest(characterBundle)
-                        hitDiceSpendCount = 0
-                        isShortRestDialogOpen = false
-                    }
+            confirmLabel = text("overview_short_rest")
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Text(
+                    text = text("overview_hit_dice_remaining_hint"),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = colors.text.muted
+                )
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text("overview_short_rest"))
+                    Text(
+                        text = "$availableHitDice/$totalHitDice",
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontSize = typographyTokens.shortRestDiceCount.fontSizeSp.sp
+                        ),
+                        color = colors.text.primary
+                    )
+                    Box(modifier = Modifier.padding(start = 12.dp)) {
+                        Surface(
+                            shape = RoundedCornerShape(14.dp),
+                            color = colors.surface.button,
+                            border = BorderStroke(1.dp, colors.border.default),
+                            onClick = { isHitDieMenuOpen = true }
+                        ) {
+                            Text(
+                                text = "d${current.hitDieSides}",
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 9.dp),
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontSize = typographyTokens.shortRestDieToken.fontSizeSp.sp
+                                ),
+                                color = colors.text.primary
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = isHitDieMenuOpen,
+                            onDismissRequest = { isHitDieMenuOpen = false }
+                        ) {
+                            hitDieSidesOptions.forEach { sides ->
+                                DropdownMenuItem(
+                                    text = { Text("d$sides") },
+                                    onClick = {
+                                        onUpdateHitDieSides(characterBundle, sides)
+                                        isHitDieMenuOpen = false
+                                    }
+                                )
+                            }
+                        }
+                    }
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = { isShortRestDialogOpen = false }) {
-                    Text(text("common_cancel"))
+                Text(
+                    text = text("overview_hit_dice_spend_hint"),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = colors.text.muted
+                )
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TextButton(
+                        onClick = { hitDiceSpendCount = (spendCount - 1).coerceAtLeast(0) },
+                        enabled = spendCount > 0
+                    ) {
+                        Text(
+                            text = "-",
+                            style = MaterialTheme.typography.headlineMedium.copy(
+                                fontSize = typographyTokens.shortRestCounterButton.fontSizeSp.sp
+                            )
+                        )
+                    }
+                    Text(
+                        text = spendCount.toString(),
+                        modifier = Modifier.padding(horizontal = 28.dp),
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontSize = typographyTokens.shortRestCounterValue.fontSizeSp.sp
+                        ),
+                        color = colors.text.primary,
+                        textAlign = TextAlign.Center
+                    )
+                    TextButton(
+                        onClick = { hitDiceSpendCount = (spendCount + 1).coerceAtMost(availableHitDice) },
+                        enabled = spendCount < availableHitDice
+                    ) {
+                        Text(
+                            text = "+",
+                            style = MaterialTheme.typography.headlineMedium.copy(
+                                fontSize = typographyTokens.shortRestCounterButton.fontSizeSp.sp
+                            )
+                        )
+                    }
                 }
             }
-        )
+        }
     }
 
     if (isLongRestDialogOpen && characterBundle != null) {
-        AlertDialog(
-            onDismissRequest = { isLongRestDialogOpen = false },
-            title = { Text(text("overview_long_rest")) },
-            text = {
-                Text(
-                    text = text("overview_long_rest_confirm"),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Color(0xFFD2CAC2)
-                )
+        EditDialog(
+            title = text("overview_long_rest"),
+            onDismiss = { isLongRestDialogOpen = false },
+            onConfirm = {
+                onLongRest(characterBundle)
+                isLongRestDialogOpen = false
             },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onLongRest(characterBundle)
-                        isLongRestDialogOpen = false
-                    }
-                ) {
-                    Text(text("overview_long_rest_confirm_button"))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { isLongRestDialogOpen = false }) {
-                    Text(text("common_cancel"))
-                }
-            }
-        )
+            confirmLabel = text("overview_long_rest_confirm_button")
+        ) {
+            Text(
+                text = text("overview_long_rest_confirm"),
+                style = MaterialTheme.typography.bodyLarge,
+                color = colors.text.muted
+            )
+        }
     }
 
     if (isPortraitMenuOpen && characterBundle != null) {
@@ -1692,32 +1585,25 @@ private fun PortraitMenuDialog(
     onChangePortrait: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text("overview_portrait_menu_title")) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                PortraitMenuOption(
-                    label = text("overview_portrait_show"),
-                    icon = Icons.Outlined.Visibility,
-                    enabled = hasPortrait,
-                    onClick = onShowPortrait
-                )
-                PortraitMenuOption(
-                    label = text("overview_portrait_change"),
-                    icon = Icons.Outlined.Image,
-                    enabled = true,
-                    onClick = onChangePortrait
-                )
-            }
-        },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text("common_cancel"))
-            }
+    EditDialog(
+        title = text("overview_portrait_menu_title"),
+        onDismiss = onDismiss
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            PortraitMenuOption(
+                label = text("overview_portrait_show"),
+                icon = Icons.Outlined.Visibility,
+                enabled = hasPortrait,
+                onClick = onShowPortrait
+            )
+            PortraitMenuOption(
+                label = text("overview_portrait_change"),
+                icon = Icons.Outlined.Image,
+                enabled = true,
+                onClick = onChangePortrait
+            )
         }
-    )
+    }
 }
 
 @Composable

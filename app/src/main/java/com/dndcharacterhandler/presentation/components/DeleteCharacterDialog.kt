@@ -1,9 +1,7 @@
 package com.dndcharacterhandler.presentation.components
 
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.localization.text
@@ -24,28 +22,17 @@ fun DeleteCharacterDialog(
     } else {
         strings["drawer_delete_confirm_message_unnamed"]
     }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text("drawer_delete_confirm_title")) },
-        text = {
-            Text(
-                text = message,
-                style = MaterialTheme.typography.bodyLarge,
-                color = colors.text.muted
-            )
-        },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text(
-                    text = text("drawer_delete_confirm_button"),
-                    color = colors.accent.dangerHpZero
-                )
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text("common_cancel"))
-            }
-        }
-    )
+    EditDialog(
+        title = text("drawer_delete_confirm_title"),
+        onDismiss = onDismiss,
+        onConfirm = onConfirm,
+        confirmLabel = text("drawer_delete_confirm_button"),
+        confirmIsDanger = true
+    ) {
+        Text(
+            text = message,
+            style = MaterialTheme.typography.bodyLarge,
+            color = colors.text.muted
+        )
+    }
 }

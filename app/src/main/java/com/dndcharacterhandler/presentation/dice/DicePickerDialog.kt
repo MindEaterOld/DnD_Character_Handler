@@ -17,12 +17,10 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Remove
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.dndcharacterhandler.presentation.components.EditDialog
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 
@@ -55,47 +54,38 @@ internal fun DicePickerDialog(
     var choosingSkin by remember { mutableStateOf(false) }
     val bodies = counts.entries.sumOf { (type, count) -> type.bodyCount * count }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                if (choosingSkin) {
-                    IconButton(onClick = { choosingSkin = false }) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = text("common_back"))
-                    }
-                }
-                Text(
-                    text = text(if (choosingSkin) "dice_skin_title" else "dice_picker_title"),
-                    modifier = Modifier.weight(1f)
-                )
-                if (!choosingSkin) {
-                    IconButton(onClick = { choosingSkin = true }) {
-                        Icon(Icons.Outlined.Settings, contentDescription = text("dice_skin_title"))
-                    }
+    EditDialog(
+        title = text(if (choosingSkin) "dice_skin_title" else "dice_picker_title"),
+        onDismiss = onDismiss,
+        onConfirm = { onRoll(counts.filterValues { it > 0 }) },
+        confirmLabel = text("dice_picker_roll"),
+        confirmEnabled = bodies > 0,
+        // The gear turns to the skins; on the skins the arrow before the title turns back.
+        titleLeading = if (choosingSkin) {
+            {
+                IconButton(onClick = { choosingSkin = false }) {
+                    Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = text("common_back"))
                 }
             }
+        } else {
+            null
         },
-        text = {
-            if (choosingSkin) {
-                DiceSkinList(selected = skin, onSelect = onSkinChange)
-            } else {
-                DiceCountList(counts = counts, bodies = bodies, onCountsChange = { counts = it })
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = { onRoll(counts.filterValues { it > 0 }) },
-                enabled = bodies > 0
-            ) {
-                Text(text("dice_picker_roll"))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text("common_cancel"))
+        titleActions = if (choosingSkin) {
+            null
+        } else {
+            {
+                IconButton(onClick = { choosingSkin = true }) {
+                    Icon(Icons.Outlined.Settings, contentDescription = text("dice_skin_title"))
+                }
             }
         }
-    )
+    ) {
+        if (choosingSkin) {
+            DiceSkinList(selected = skin, onSelect = onSkinChange)
+        } else {
+            DiceCountList(counts = counts, bodies = bodies, onCountsChange = { counts = it })
+        }
+    }
 }
 
 @Composable
