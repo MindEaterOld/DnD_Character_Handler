@@ -30,7 +30,8 @@ import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
  * title, a subtitle and a chevron) always shows; [body] and [actions] show when [expanded].
  *
  * A tap on the card runs [onClick], or unfolds the card when there's none; the chevron always
- * unfolds it. [onLongClick] is a shortcut (the Features screen opens the editor with it).
+ * unfolds it. [onLongClick] is a shortcut (the Features, Spells and Inventory screens open the
+ * editor with it). [trailing] sits before the chevron (a spell's prepared dot).
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -44,6 +45,7 @@ fun ExpandableCard(
     selected: Boolean = false,
     enabled: Boolean = true,
     leading: (@Composable () -> Unit)? = null,
+    trailing: (@Composable () -> Unit)? = null,
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
     actions: (@Composable RowScope.() -> Unit)? = null
@@ -81,6 +83,7 @@ fun ExpandableCard(
                         )
                     }
                 }
+                trailing?.invoke()
                 if (canExpand) {
                     IconButton(onClick = { onExpandedChange(!expanded) }) {
                         Icon(

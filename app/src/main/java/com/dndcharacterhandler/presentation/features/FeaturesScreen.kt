@@ -97,6 +97,7 @@ import com.dndcharacterhandler.domain.usecase.GetCharacterBundleUseCase
 import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
 import com.dndcharacterhandler.presentation.components.AutoSizeText
+import com.dndcharacterhandler.presentation.components.CardEditButton
 import com.dndcharacterhandler.presentation.components.CharacterScreenHeader
 import com.dndcharacterhandler.presentation.components.ExpandableCard
 import com.dndcharacterhandler.presentation.components.FloatingAddButton
@@ -647,13 +648,7 @@ internal fun FeatureCard(
             )
         },
         onLongClick = onEdit,
-        actions = {
-            TextButton(onClick = onEdit) {
-                Icon(Icons.Outlined.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(text("features_edit_action"))
-            }
-        }
+        actions = { CardEditButton(onClick = onEdit) }
     )
 }
 

@@ -34,6 +34,7 @@ fun InventoryScreenPreview() {
             "placeholder_loading_character" to "Loading character",
             "inventory_search_placeholder" to "Search Inventory",
             "inventory_carry_weight" to "Carry Weight",
+            "common_edit" to "Edit",
             "inventory_unit_pounds" to "lb",
             "inventory_category_weapon" to "Weapon",
             "inventory_category_armor" to "Armor",
@@ -254,7 +255,9 @@ fun InventoryScreenPreview() {
                     spells = emptyList(),
                     features = emptyList(),
                     notes = emptyList()
-                )
+                ),
+                // The longsword unfolded: its description and the Edit button.
+                initiallyExpanded = setOf(1L)
             )
         }
     }

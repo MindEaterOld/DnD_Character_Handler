@@ -42,7 +42,7 @@ fun FeaturesScreenPreview() {
             "common_save" to "Save",
             "common_cancel" to "Cancel",
             "features_level" to "Level",
-            "features_edit_action" to "Edit",
+            "common_edit" to "Edit",
             "features_no_description" to "No description"
         )
     )

@@ -85,6 +85,8 @@ import com.dndcharacterhandler.domain.usecase.GetCharacterBundleUseCase
 import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
 import com.dndcharacterhandler.presentation.components.CharacterScreenHeader
+import com.dndcharacterhandler.presentation.components.CardEditButton
+import com.dndcharacterhandler.presentation.components.ExpandableCard
 import com.dndcharacterhandler.presentation.components.FloatingAddButton
 import com.dndcharacterhandler.presentation.components.LimitProgressBar
 import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
@@ -278,6 +280,8 @@ internal fun SpellsContent(
     catalogState: SpellCatalogUiState = SpellCatalogUiState(),
     /** How many spells the classes may prepare; null for a character without catalog classes. */
     preparedLimit: Int? = null,
+    /** Spells shown unfolded at first (the screen preview uses it). */
+    initiallyExpanded: Set<Long> = emptySet(),
     onOpenDrawer: () -> Unit = {},
     onOpenDice: () -> Unit = {},
     onUpdateSpell: (CharacterBundle, Spell) -> Unit = { _, _ -> },
@@ -294,6 +298,8 @@ internal fun SpellsContent(
     var isSlotsDialogOpen by remember { mutableStateOf(false) }
     var isAddEntryDialogOpen by remember { mutableStateOf(false) }
     var isSpellcastingAbilityDialogOpen by remember { mutableStateOf(false) }
+    // Unfolded cards, kept while scrolling; several can be open at once to compare them.
+    var expandedSpells by remember(characterBundle?.character?.id) { mutableStateOf(initiallyExpanded) }
 
     if (character == null) {
         ScreenBackground {
@@ -428,9 +434,13 @@ internal fun SpellsContent(
                         }
                     } else {
                         items(spellsAtLevel, key = { "${level}_${it.id}_${it.name}" }) { spell ->
-                            SpellRow(
+                            SpellCard(
                                 spell = spell,
-                                onClick = { editingSpell = spell },
+                                expanded = spell.id in expandedSpells,
+                                onExpandedChange = { open ->
+                                    expandedSpells = if (open) expandedSpells + spell.id else expandedSpells - spell.id
+                                },
+                                onEdit = { editingSpell = spell },
                                 onTogglePrepared = { onTogglePrepared(resolvedBundle, spell) }
                             )
                         }
@@ -701,45 +711,41 @@ private fun SpellSlotDiamond(
     }
 }
 
+/**
+ * A spell of the character as an unfolding card, like a feature's: its name, school, range and
+ * tags, and the prepared dot; unfolded, its text (and what a higher slot adds) and an Edit button.
+ * A long press edits right away.
+ */
 @Composable
-private fun SpellRow(
+private fun SpellCard(
     spell: Spell,
-    onClick: () -> Unit,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    onEdit: () -> Unit,
     onTogglePrepared: () -> Unit
 ) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(10.dp),
-        color = Color(0xFF17141B).copy(alpha = 0.62f),
-        border = BorderStroke(1.dp, Color(0x36FFFFFF))
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = spell.name.ifBlank { text("spells_untitled") },
-                modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.bodyLarge,
-                color = Color(0xFFF7F2EA),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            SelectableDot(
-                selected = spell.isPrepared,
-                onClick = onTogglePrepared,
-                modifier = Modifier.padding(start = 8.dp)
-            )
-            Icon(
-                imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
-                contentDescription = null,
-                tint = Color(0xFFD2CAC2),
-                modifier = Modifier.padding(start = 8.dp)
-            )
-        }
-    }
+    val strings = LocalStrings.current
+    val subtitle = listOfNotNull(
+        spell.school.takeIf { it.isNotBlank() }?.let { spellSchoolLabel(it, strings) },
+        spellRangeDisplayLabel(spell.range, strings),
+        if (spell.requiresConcentration) strings["spells_concentration"] else null,
+        if (spell.isRitual) strings["spells_ritual"] else null,
+        if (spell.isAlwaysPrepared) strings["spells_always_prepared"] else null
+    ).joinToString(" • ")
+    val body = listOfNotNull(
+        spell.description.trim().takeIf { it.isNotEmpty() },
+        spell.higherLevelDescription.trim().takeIf { it.isNotEmpty() }?.let { "${strings["spells_higher_level"]}. $it" }
+    ).joinToString("\n\n")
+    ExpandableCard(
+        title = spell.name.ifBlank { text("spells_untitled") },
+        expanded = expanded,
+        onExpandedChange = onExpandedChange,
+        subtitle = subtitle,
+        body = body,
+        trailing = { SelectableDot(selected = spell.isPrepared, onClick = onTogglePrepared) },
+        onLongClick = onEdit,
+        actions = { CardEditButton(onClick = onEdit) }
+    )
 }
 
 @Composable

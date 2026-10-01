@@ -2122,13 +2122,6 @@
     "fr": "Ajouter",
     "es": "A\u00f1adir"
   },
-  "features_edit_action": {
-    "en": "Edit",
-    "ru": "\u0418\u0437\u043c\u0435\u043d\u0438\u0442\u044c",
-    "de": "Bearbeiten",
-    "fr": "Modifier",
-    "es": "Editar"
-  },
   "features_no_description": {
     "en": "No description",
     "ru": "\u041e\u043f\u0438\u0441\u0430\u043d\u0438\u044f \u043d\u0435\u0442",
@@ -3620,6 +3613,20 @@
     "de": "Schlie\u00dfen",
     "fr": "Fermer",
     "es": "Cerrar"
+  },
+  "common_edit": {
+    "en": "Edit",
+    "ru": "\u0418\u0437\u043c\u0435\u043d\u0438\u0442\u044c",
+    "de": "Bearbeiten",
+    "fr": "Modifier",
+    "es": "Editar"
+  },
+  "inventory_no_description": {
+    "en": "No description.",
+    "ru": "\u041e\u043f\u0438\u0441\u0430\u043d\u0438\u044f \u043d\u0435\u0442.",
+    "de": "Keine Beschreibung.",
+    "fr": "Aucune description.",
+    "es": "Sin descripci\u00f3n."
   },
   "common_back": {
     "en": "Back",

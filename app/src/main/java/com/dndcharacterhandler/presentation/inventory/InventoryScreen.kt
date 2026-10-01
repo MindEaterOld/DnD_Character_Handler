@@ -4,6 +4,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,6 +25,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.ExpandLess
+import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.AlertDialog
@@ -78,6 +82,7 @@ import com.dndcharacterhandler.domain.usecase.GetCharacterBundleUseCase
 import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
 import com.dndcharacterhandler.presentation.components.CharacterScreenHeader
+import com.dndcharacterhandler.presentation.components.CardEditButton
 import com.dndcharacterhandler.presentation.components.FloatingAddButton
 import com.dndcharacterhandler.presentation.components.LimitProgressBar
 import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
@@ -327,10 +332,14 @@ internal fun InventoryContent(
     onAddItem: () -> Unit = {},
     onEditCurrency: () -> Unit = {},
     onToggleEquipped: (CharacterBundle, InventoryItem) -> Unit = { _, _ -> },
-    onEditItem: (InventoryItem) -> Unit = {}
+    onEditItem: (InventoryItem) -> Unit = {},
+    /** Items shown unfolded at first (the screen preview uses it). */
+    initiallyExpanded: Set<Long> = emptySet()
 ) {
     val character = characterBundle?.character
     var query by remember { mutableStateOf("") }
+    // Unfolded rows, kept while scrolling; several can be open at once.
+    var expandedItems by remember(characterBundle?.character?.id) { mutableStateOf(initiallyExpanded) }
 
     if (character == null) {
         ScreenBackground {
@@ -424,7 +433,11 @@ internal fun InventoryContent(
                                 items = categoryItems,
                                 dexterityScore = character.dexterity,
                                 onToggleEquipped = { item -> onToggleEquipped(characterBundle, item) },
-                                onEditItem = onEditItem
+                                onEditItem = onEditItem,
+                                expanded = expandedItems,
+                                onExpandedChange = { item, open ->
+                                    expandedItems = if (open) expandedItems + item.id else expandedItems - item.id
+                                }
                             )
                         }
                     }
@@ -1103,15 +1116,18 @@ private fun InventoryCategoryPickerDialog(
 }
 
 /**
- * Items as the inventory lists them: a card of rows with weight, quantity and tags. Without
- * [onToggleEquipped] and [onEditItem] it only shows them (Character Wizard's starting equipment).
+ * Items as the inventory lists them: a card of rows with weight, quantity and tags; a row unfolds
+ * its description and an Edit button, as the Features cards do. Without [onToggleEquipped] and
+ * [onEditItem] it only shows them (Character Wizard's starting equipment).
  */
 @Composable
 internal fun InventorySectionCard(
     items: List<InventoryItem>,
     dexterityScore: Int,
     onToggleEquipped: ((InventoryItem) -> Unit)? = null,
-    onEditItem: ((InventoryItem) -> Unit)? = null
+    onEditItem: ((InventoryItem) -> Unit)? = null,
+    expanded: Set<Long> = emptySet(),
+    onExpandedChange: (InventoryItem, Boolean) -> Unit = { _, _ -> }
 ) {
     val colors = LocalDesignTokens.current.colors
     Surface(
@@ -1127,7 +1143,9 @@ internal fun InventorySectionCard(
                         item = item,
                         dexterityScore = dexterityScore,
                         onToggleEquipped = onToggleEquipped?.let { toggle -> { toggle(item) } },
-                        onClick = onEditItem?.let { edit -> { edit(item) } }
+                        onEdit = onEditItem?.let { edit -> { edit(item) } },
+                        expanded = item.id in expanded,
+                        onExpandedChange = { open -> onExpandedChange(item, open) }
                     )
                     if (index != items.lastIndex) {
                         Box(
@@ -1143,21 +1161,32 @@ internal fun InventorySectionCard(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun InventoryItemRow(
     item: InventoryItem,
     dexterityScore: Int,
     onToggleEquipped: (() -> Unit)?,
-    onClick: (() -> Unit)?
+    onEdit: (() -> Unit)?,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit
 ) {
     val strings = LocalStrings.current
     val colors = LocalDesignTokens.current.colors
     val propertyTags = remember(item, dexterityScore, strings.language) { item.propertyTags(dexterityScore, strings) }
+    // A tap unfolds the row, a long press edits; Character Wizard's rows only show the item.
+    val canExpand = onEdit != null
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+            .then(
+                if (canExpand) {
+                    Modifier.combinedClickable(onClick = { onExpandedChange(!expanded) }, onLongClick = onEdit)
+                } else {
+                    Modifier
+                }
+            )
             .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
@@ -1197,6 +1226,15 @@ private fun InventoryItemRow(
                     onClick = onToggleEquipped
                 )
             }
+            if (canExpand) {
+                IconButton(onClick = { onExpandedChange(!expanded) }, modifier = Modifier.size(36.dp)) {
+                    Icon(
+                        imageVector = if (expanded) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
+                        contentDescription = null,
+                        tint = colors.text.muted
+                    )
+                }
+            }
         }
 
         if (propertyTags.isNotEmpty()) {
@@ -1204,6 +1242,17 @@ private fun InventoryItemRow(
                 tags = propertyTags,
                 modifier = Modifier.padding(start = 38.dp)
             )
+        }
+        if (expanded && onEdit != null) {
+            Text(
+                text = item.description.trim().ifBlank { text("inventory_no_description") },
+                modifier = Modifier.padding(start = 38.dp, top = 2.dp),
+                style = MaterialTheme.typography.bodyMedium,
+                color = colors.text.muted
+            )
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                CardEditButton(onClick = onEdit)
+            }
         }
     }
 }

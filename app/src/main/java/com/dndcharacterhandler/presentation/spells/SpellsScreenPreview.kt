@@ -27,6 +27,12 @@ fun SpellsScreenPreview() {
             "placeholder_loading_character" to "Loading character",
             "spells_search_placeholder" to "Search Spells",
             "spells_prepared_limit" to "Prepared spells",
+            "common_edit" to "Edit",
+            "spells_higher_level" to "At Higher Levels",
+            "spells_school_evocation" to "Evocation",
+            "spells_school_conjuration" to "Conjuration",
+            "spells_school_abjuration" to "Abjuration",
+            "inventory_unit_feet" to "ft",
             "spells_spellcasting_class" to "Spellcasting Class",
             "combat_spell_bonus" to "Spell Bonus",
             "combat_spell_dc" to "Spell DC",
@@ -76,7 +82,11 @@ fun SpellsScreenPreview() {
         Spell(id = 4, name = "Magic Missile", level = 1, school = "Evocation", isPrepared = true, description = ""),
         Spell(id = 5, name = "Misty Step", level = 2, school = "Conjuration", isPrepared = true, description = ""),
         Spell(id = 6, name = "Scorching Ray", level = 2, school = "Evocation", isPrepared = false, description = ""),
-        Spell(id = 7, name = "Fireball", level = 3, school = "Evocation", isPrepared = true, description = "")
+        Spell(
+            id = 7, name = "Fireball", level = 3, school = "Evocation", isPrepared = true, range = "150 feet",
+            description = "A bright streak flashes from you to a point you choose within range and then blossoms into an explosion. Each creature in a 20-foot-radius Sphere makes a Dexterity saving throw, taking 8d6 Fire damage on a failed save or half as much on a successful one.",
+            higherLevelDescription = "The damage increases by 1d6 for each spell slot level above 3."
+        )
     )
 
     CompositionLocalProvider(LocalStrings provides strings) {
@@ -92,8 +102,9 @@ fun SpellsScreenPreview() {
                     features = emptyList(),
                     notes = emptyList()
                 ),
-                // A wizard of 3rd level: six spells to prepare.
-                preparedLimit = 6
+                // A wizard of 3rd level: six spells to prepare; Fireball unfolded.
+                preparedLimit = 6,
+                initiallyExpanded = setOf(7L)
             )
         }
     }
