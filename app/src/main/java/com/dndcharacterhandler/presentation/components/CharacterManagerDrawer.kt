@@ -61,17 +61,20 @@ fun CharacterManagerDrawer(
     onCreateCharacter: () -> Unit,
     onExportCharacter: () -> Unit,
     onDeleteCharacter: () -> Unit,
-    onImportCharacter: () -> Unit
+    onImportCharacter: () -> Unit,
+    onClose: () -> Unit
 ) {
     val tokens = LocalDesignTokens.current.typography
+    val colors = LocalDesignTokens.current.colors
 
+    // The whole screen wide: with no scrim to tap beside it, it closes with the cross, Back or a swipe.
     Box(
         modifier = Modifier
             .fillMaxHeight()
-            .fillMaxWidth(0.68f)
+            .fillMaxWidth()
             .background(
                 Brush.radialGradient(
-                    colors = listOf(Color(0xFF1A161D), Color(0xFF0E0B11), Color(0xFF09070D)),
+                    colors = listOf(colors.background.radialStart, colors.background.radialMiddle, colors.background.radialEnd),
                     radius = 1300f
                 )
             )
@@ -80,17 +83,19 @@ fun CharacterManagerDrawer(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 28.dp),
+                .padding(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 28.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             item {
                 Text(
                     text = text("drawer_characters"),
+                    // Clear of the close button.
+                    modifier = Modifier.padding(end = 60.dp),
                     style = MaterialTheme.typography.headlineMedium.copy(
                         fontSize = tokens.characterName.fontSizeSp.sp,
                         lineHeight = (tokens.characterName.lineHeightSp ?: tokens.characterName.fontSizeSp).sp
                     ),
-                    color = Color(0xFFF7F2EA)
+                    color = colors.text.primary
                 )
                 DrawerOrnamentDivider(modifier = Modifier.padding(top = 4.dp, bottom = 10.dp))
             }
@@ -143,6 +148,7 @@ fun CharacterManagerDrawer(
                 Spacer(modifier = Modifier.height(12.dp))
             }
         }
+        OverlayCloseButton(onClick = onClose, modifier = Modifier.align(Alignment.TopEnd))
     }
 }
 
@@ -155,6 +161,7 @@ private fun DrawerCharacterCard(
     val character = characterBundle.character
     val strings = LocalStrings.current
     val tokens = LocalDesignTokens.current.typography
+    val colors = LocalDesignTokens.current.colors
     val characterName = character.name.ifBlank { text("placeholder_loading_character") }
     val classLabel = buildDrawerClassLabel(characterBundle, strings)
 
@@ -164,8 +171,8 @@ private fun DrawerCharacterCard(
             .height(96.dp)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(8.dp),
-        color = Color(0xFF17141B).copy(alpha = 0.72f),
-        border = BorderStroke(1.dp, if (selected) Color(0xFFC6A36C) else Color(0x42FFFFFF))
+        color = colors.surface.card.copy(alpha = 0.72f),
+        border = BorderStroke(1.dp, if (selected) MaterialTheme.colorScheme.primary else colors.border.miniCard)
     ) {
         Row(
             modifier = Modifier
@@ -188,7 +195,7 @@ private fun DrawerCharacterCard(
                 Text(
                     text = characterName,
                     style = MaterialTheme.typography.titleLarge,
-                    color = Color(0xFFF7F2EA),
+                    color = colors.text.primary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -196,7 +203,7 @@ private fun DrawerCharacterCard(
                     text = classLabel,
                     modifier = Modifier.padding(top = 3.dp),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Color(0xFFD2CAC2),
+                    color = colors.text.muted,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -204,7 +211,7 @@ private fun DrawerCharacterCard(
                     text = strings.format("drawer_level", character.level),
                     modifier = Modifier.padding(top = 2.dp),
                     style = MaterialTheme.typography.bodyLarge.copy(fontSize = tokens.subtitleToken.fontSizeSp.sp),
-                    color = Color(0xFFC6A36C)
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
         }
@@ -213,6 +220,7 @@ private fun DrawerCharacterCard(
 
 @Composable
 private fun DrawerSelectionDot(selected: Boolean) {
+    val colors = LocalDesignTokens.current.colors
     Box(
         modifier = Modifier
             .size(20.dp)
@@ -222,11 +230,11 @@ private fun DrawerSelectionDot(selected: Boolean) {
     ) {
         Canvas(modifier = Modifier.size(18.dp)) {
             drawCircle(
-                color = if (selected) Color(0xFFFFD86B) else Color.Transparent,
+                color = if (selected) colors.accent.inspiration else Color.Transparent,
                 radius = 6.dp.toPx()
             )
             drawCircle(
-                color = if (selected) Color(0xFFFFD86B) else Color(0xFFC2BBB3),
+                color = if (selected) colors.accent.inspiration else colors.text.label,
                 radius = 7.dp.toPx(),
                 style = Stroke(width = 1.5.dp.toPx())
             )
@@ -241,6 +249,7 @@ private fun DrawerPortrait(
     modifier: Modifier = Modifier
 ) {
     val portraitReference = portraitUri ?: AssetReferences.portraitPlaceholderPath("portrait_placeholder.png")
+    val colors = LocalDesignTokens.current.colors
 
     Box(
         modifier = modifier.size(70.dp),
@@ -248,12 +257,12 @@ private fun DrawerPortrait(
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             drawCircle(
-                color = Color(0x55A19892),
+                color = colors.ornament.stroke,
                 radius = size.minDimension / 2f - 4.dp.toPx(),
                 style = Stroke(width = 1.dp.toPx())
             )
             drawCircle(
-                color = Color(0x42FFFFFF),
+                color = colors.border.miniCard,
                 radius = size.minDimension / 2f - 9.dp.toPx(),
                 style = Stroke(width = 1.dp.toPx())
             )
@@ -263,7 +272,7 @@ private fun DrawerPortrait(
                 .size(56.dp)
                 .clip(CircleShape),
             shape = CircleShape,
-            color = Color(0xFF141118)
+            color = colors.surface.portrait
         ) {
             AppImage(
                 imageRef = portraitReference,
@@ -274,7 +283,7 @@ private fun DrawerPortrait(
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(Color(0xFF2D2730)),
+                            .background(colors.ornament.dot),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
@@ -282,7 +291,7 @@ private fun DrawerPortrait(
                             style = MaterialTheme.typography.headlineMedium.copy(
                                 fontSize = LocalDesignTokens.current.typography.portraitInitial.fontSizeSp.sp
                             ),
-                            color = Color(0xFFF7F2EA)
+                            color = colors.text.primary
                         )
                     }
                 }
@@ -297,10 +306,11 @@ private fun DrawerActionCard(
     icon: ImageVector,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    iconTint: Color = Color(0xFFF1ECE5),
+    iconTint: Color = LocalDesignTokens.current.colors.text.action,
     dashed: Boolean = false
 ) {
     val tokens = LocalDesignTokens.current.typography
+    val colors = LocalDesignTokens.current.colors
 
     Surface(
         modifier = modifier
@@ -308,8 +318,8 @@ private fun DrawerActionCard(
             .height(60.dp)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(8.dp),
-        color = Color(0xFF17141B).copy(alpha = 0.48f),
-        border = BorderStroke(1.dp, if (dashed) Color(0xFF706359) else Color(0x42FFFFFF))
+        color = colors.surface.card.copy(alpha = 0.48f),
+        border = BorderStroke(1.dp, if (dashed) MaterialTheme.colorScheme.outline else colors.border.miniCard)
     ) {
         Row(
             modifier = Modifier
@@ -327,7 +337,7 @@ private fun DrawerActionCard(
                 text = label,
                 modifier = Modifier.padding(start = 14.dp),
                 style = MaterialTheme.typography.titleMedium.copy(fontSize = tokens.titleMedium.fontSizeSp.sp),
-                color = Color(0xFFD2CAC2),
+                color = colors.text.muted,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -337,6 +347,7 @@ private fun DrawerActionCard(
 
 @Composable
 private fun DrawerOrnamentDivider(modifier: Modifier = Modifier) {
+    val colors = LocalDesignTokens.current.colors
     Canvas(
         modifier = modifier
             .fillMaxWidth()
@@ -346,26 +357,26 @@ private fun DrawerOrnamentDivider(modifier: Modifier = Modifier) {
         val ornamentCenterX = size.width / 2f
         val gap = 16.dp.toPx()
         drawLine(
-            color = Color(0x55A19892),
+            color = colors.ornament.stroke,
             start = Offset(0f, centerY),
             end = Offset(ornamentCenterX - gap, centerY),
             strokeWidth = 1.dp.toPx(),
             cap = StrokeCap.Round
         )
         drawLine(
-            color = Color(0x55A19892),
+            color = colors.ornament.stroke,
             start = Offset(ornamentCenterX + gap, centerY),
             end = Offset(size.width, centerY),
             strokeWidth = 1.dp.toPx(),
             cap = StrokeCap.Round
         )
         drawCircle(
-            color = Color(0xFFF7F2EA),
+            color = colors.text.primary,
             radius = 2.dp.toPx(),
             center = Offset(ornamentCenterX, centerY)
         )
         drawCircle(
-            color = Color(0x55A19892),
+            color = colors.ornament.stroke,
             radius = 7.dp.toPx(),
             center = Offset(ornamentCenterX, centerY),
             style = Stroke(width = 1.dp.toPx())

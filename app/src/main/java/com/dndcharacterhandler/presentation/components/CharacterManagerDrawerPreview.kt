@@ -77,7 +77,8 @@ fun CharacterManagerDrawerPreview() {
                 onCreateCharacter = {},
                 onExportCharacter = {},
                 onDeleteCharacter = {},
-                onImportCharacter = {}
+                onImportCharacter = {},
+                onClose = {}
             )
         }
     }

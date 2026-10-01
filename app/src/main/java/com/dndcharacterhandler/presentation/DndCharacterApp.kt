@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation
 
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -127,6 +128,9 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
         }
     }
 
+    // The full-width drawer has no scrim to tap: Back closes it too.
+    BackHandler(enabled = drawerState.isOpen) { scope.launch { drawerState.close() } }
+
     CompositionLocalProvider(LocalStrings provides strings, LocalDiceSkin provides diceSkin) {
         Box(modifier = Modifier.fillMaxSize()) {
             ModalNavigationDrawer(
@@ -134,8 +138,15 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                 drawerContent = {
                     CharacterManagerDrawer(
                         state = managerState,
-                        onSelectCharacter = appState.characterManagerViewModel::selectCharacter,
-                        onCreateCharacter = appState.characterManagerViewModel::createCharacter,
+                        // The drawer covers the screen: picking a character shows it.
+                        onSelectCharacter = { id ->
+                            appState.characterManagerViewModel.selectCharacter(id)
+                            scope.launch { drawerState.close() }
+                        },
+                        onCreateCharacter = {
+                            appState.characterManagerViewModel.createCharacter()
+                            scope.launch { drawerState.close() }
+                        },
                         onExportCharacter = {
                             exportLauncher.launch(suggestCharacterArchiveName(selectedCharacterName))
                         },
@@ -146,7 +157,8 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                         },
                         onImportCharacter = {
                             importLauncher.launch(arrayOf("application/octet-stream", "application/zip", "*/*"))
-                        }
+                        },
+                        onClose = { scope.launch { drawerState.close() } }
                     )
                 }
             ) {
