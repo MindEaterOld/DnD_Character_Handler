@@ -75,6 +75,8 @@ import com.dndcharacterhandler.domain.model.AdvancementStep
 import com.dndcharacterhandler.domain.model.AppLanguage
 import com.dndcharacterhandler.domain.model.CatalogEquipmentRef
 import com.dndcharacterhandler.domain.model.InventoryItem
+import com.dndcharacterhandler.domain.model.NewItemIds
+import com.dndcharacterhandler.domain.model.startingItems
 import com.dndcharacterhandler.domain.model.CatalogFeature
 import com.dndcharacterhandler.domain.model.CatalogText
 import com.dndcharacterhandler.domain.model.CharacterBundle
@@ -87,6 +89,8 @@ import com.dndcharacterhandler.domain.rules.abilityScores
 import com.dndcharacterhandler.domain.rules.proficiencyBonusForLevel
 import com.dndcharacterhandler.data.localization.LocalizedStrings
 import com.dndcharacterhandler.presentation.components.OverlayCloseButton
+import com.dndcharacterhandler.presentation.components.SizeToggle
+import com.dndcharacterhandler.presentation.components.labelKey
 import com.dndcharacterhandler.presentation.dice.DiceTableOverlay
 import com.dndcharacterhandler.presentation.dice.DieIcon
 import com.dndcharacterhandler.presentation.dice.dieTypeOf
@@ -232,6 +236,7 @@ internal fun LevelUpWizard(
                         answer = answer as? LevelUpAnswer.Origin,
                         onAnswer = ::setAnswer
                     )
+                    is LevelUpPage.Size -> sizePage(strings, page, answer as? LevelUpAnswer.Size, russian, ::setAnswer)
                     is LevelUpPage.Equipment -> equipmentPage(
                         strings, page, answer as? LevelUpAnswer.Equipment, russian, engine, equipmentItem, dexterity, ::setAnswer
                     )
@@ -961,7 +966,11 @@ private fun LazyListScope.equipmentPage(
     page.options.forEachIndexed { index, option ->
         val selected = answer?.option == index
         item(key = "option_$index") {
-            val items = remember(option, equipmentItem) { option.items.map { equipmentItem(it.item, it.count) } }
+            // A pack shows as a container with its contents.
+            val items = remember(option, equipmentItem) {
+                val ids = NewItemIds()
+                option.items.flatMap { engine.startingItems(it.item, it.count, russian, equipmentItem, ids) }
+            }
             EquipmentOptionCard(
                 title = if (option.isWealth) {
                     strings["levelup_equipment_gold"]
@@ -993,6 +1002,24 @@ private fun LazyListScope.equipmentPage(
                 }
             }
         }
+    }
+}
+
+/** The species' size, where it may be one of several: the figures of the Biography screen. */
+private fun LazyListScope.sizePage(
+    strings: LocalizedStrings,
+    page: LevelUpPage.Size,
+    answer: LevelUpAnswer.Size?,
+    russian: Boolean,
+    onAnswer: (LevelUpAnswer) -> Unit
+) {
+    pageTitle(strings["levelup_size_title"], page.source.get(russian))
+    item(key = "sizes") {
+        SizeToggle(
+            selected = answer?.size,
+            sizes = page.sizes,
+            onSelect = { onAnswer(LevelUpAnswer.Size(it)) }
+        )
     }
 }
 
@@ -1030,6 +1057,7 @@ private fun LazyListScope.summaryPage(
                 title = strings["levelup_summary_origin"],
                 body = listOfNotNull(
                     summary.species?.let { strings.format("levelup_summary_species", it.name.get(russian)) },
+                    summary.size?.let { strings.format("levelup_summary_size", strings[it.labelKey]) },
                     summary.background?.let { strings.format("levelup_summary_background", it.name.get(russian)) }
                 ).joinToString("\n")
             )
@@ -1071,7 +1099,10 @@ private fun LazyListScope.summaryPage(
     summaryList(strings, "granted_spells", "levelup_spells_granted", summary.spellsGranted.map { it.name.get(russian) })
     if (summary.equipment.isNotEmpty() || summary.coins.values.any { it > 0 }) {
         item(key = "equipment") {
-            val items = remember(summary.equipment, equipmentItem) { summary.equipment.map { equipmentItem(it.item, it.count) } }
+            val items = remember(summary.equipment, equipmentItem) {
+                val ids = NewItemIds()
+                summary.equipment.flatMap { catalog.startingItems(it.item, it.count, russian, equipmentItem, ids) }
+            }
             val colors = LocalDesignTokens.current.colors
             Surface(
                 modifier = Modifier.fillMaxWidth(),

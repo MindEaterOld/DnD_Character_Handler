@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,9 +28,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Backpack
 import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.Inventory2
+import androidx.compose.material.icons.outlined.MoveToInbox
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
@@ -68,6 +71,14 @@ import com.dndcharacterhandler.domain.model.InventoryCatalogBonusVariant
 import com.dndcharacterhandler.domain.model.InventoryCatalogItem
 import com.dndcharacterhandler.domain.model.InventoryCatalogKind
 import com.dndcharacterhandler.domain.model.InventoryCategory
+import com.dndcharacterhandler.domain.model.InventoryCatalogSource
+import com.dndcharacterhandler.domain.model.InventoryContainerDetails
+import com.dndcharacterhandler.domain.model.NewItemIds
+import com.dndcharacterhandler.domain.model.containerItems
+import com.dndcharacterhandler.domain.model.containerNamed
+import com.dndcharacterhandler.domain.model.equipmentNameKey
+import com.dndcharacterhandler.domain.model.matchedEquipmentItem
+import com.dndcharacterhandler.domain.rules.InventoryTree
 import com.dndcharacterhandler.domain.model.InventoryItem
 import com.dndcharacterhandler.domain.model.InventoryWeaponDamage
 import com.dndcharacterhandler.domain.model.InventoryWeaponDetails
@@ -77,12 +88,14 @@ import com.dndcharacterhandler.domain.model.InventoryWeaponClass
 import com.dndcharacterhandler.domain.rules.abilityModifier
 import com.dndcharacterhandler.domain.rules.appliedDexterityModifier
 import com.dndcharacterhandler.domain.rules.armorMagicBonus
+import com.dndcharacterhandler.domain.repository.CharacterCatalogRepository
 import com.dndcharacterhandler.domain.repository.CharacterRepository
 import com.dndcharacterhandler.domain.repository.InventoryCatalogRepository
 import com.dndcharacterhandler.domain.usecase.GetCharacterBundleUseCase
 import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
 import com.dndcharacterhandler.presentation.components.CharacterScreenHeader
+import com.dndcharacterhandler.presentation.components.CardActionButton
 import com.dndcharacterhandler.presentation.components.CardEditButton
 import com.dndcharacterhandler.presentation.components.EditDialog
 import com.dndcharacterhandler.presentation.components.FloatingAddButton
@@ -122,6 +135,7 @@ private val CompactEditorFieldHeight = 46.dp
 class InventoryViewModel(
     private val characterRepository: CharacterRepository,
     private val inventoryCatalogRepository: InventoryCatalogRepository,
+    private val characterCatalogRepository: CharacterCatalogRepository,
     getCharacterBundleUseCase: GetCharacterBundleUseCase,
     selectedCharacterHolder: SelectedCharacterHolder
 ) : BaseCharacterViewModel(getCharacterBundleUseCase, selectedCharacterHolder) {
@@ -135,7 +149,10 @@ class InventoryViewModel(
         }
     }
 
-    /** Adds [item] from the catalog; a magic item or enchantment with a [base] takes the base's stats. */
+    /**
+     * Adds [item] from the catalog; a magic item or enchantment with a [base] takes the base's stats.
+     * A bag or a pack Foundry knows comes as a container, a pack with what it holds.
+     */
     fun addCatalogItem(
         characterBundle: CharacterBundle,
         item: InventoryCatalogItem,
@@ -144,10 +161,33 @@ class InventoryViewModel(
         russian: Boolean
     ) {
         viewModelScope.launch {
-            characterRepository.upsertInventoryItem(
-                characterId = characterBundle.character.id,
-                item = if (base != null) item.appliedTo(base, variant, russian) else item.toInventoryItem(russian)
-            )
+            val characterId = characterBundle.character.id
+            val catalog = if (base == null) characterCatalogRepository.getCatalog() else null
+            val container = catalog?.containerNamed(item.name)
+            if (catalog != null && container != null) {
+                val itemsByName = _catalogUiState.value.items
+                    .filter { it.source == InventoryCatalogSource.EQUIPMENT }
+                    .associateBy { equipmentNameKey(it.name) }
+                val items = catalog.containerItems(
+                    container, russian, { ref, count -> matchedEquipmentItem(itemsByName, ref, count, russian) }, NewItemIds()
+                )
+                characterRepository.addInventoryItems(characterId, items)
+            } else {
+                characterRepository.upsertInventoryItem(
+                    characterId = characterId,
+                    item = if (base != null) item.appliedTo(base, variant, russian) else item.toInventoryItem(russian)
+                )
+            }
+        }
+    }
+
+    /** Puts [item] into the container [containerId], or takes it out to carry it as is (null). */
+    fun moveInventoryItem(characterBundle: CharacterBundle, item: InventoryItem, containerId: Long?) {
+        if (item.id == 0L || item.containerId == containerId) return
+        // The stored item, not the one re-localized for display.
+        val stored = characterBundle.inventoryItems.firstOrNull { it.id == item.id } ?: item
+        viewModelScope.launch {
+            characterRepository.upsertInventoryItem(characterBundle.character.id, stored.copy(containerId = containerId))
         }
     }
 
@@ -233,6 +273,7 @@ fun InventoryScreen(
     var isCategoryPickerOpen by remember { mutableStateOf(false) }
     var editingItem by remember { mutableStateOf<InventoryItem?>(null) }
     var creatingItem by remember { mutableStateOf<InventoryItem?>(null) }
+    var movingItem by remember { mutableStateOf<InventoryItem?>(null) }
     var isCurrencyDialogOpen by remember { mutableStateOf(false) }
 
     InventoryContent(
@@ -245,10 +286,23 @@ fun InventoryScreen(
         onToggleEquipped = { characterBundle, item ->
             viewModel.toggleItemEquipped(characterBundle, item)
         },
-        onEditItem = { editingItem = it }
+        onEditItem = { editingItem = it },
+        onMoveItem = { movingItem = it }
     )
 
     val characterBundle = state.character
+    val moving = movingItem
+    if (moving != null && characterBundle != null) {
+        InventoryMoveDialog(
+            item = moving,
+            tree = InventoryTree(characterBundle.inventoryItems),
+            onDismiss = { movingItem = null },
+            onMove = { containerId ->
+                viewModel.moveInventoryItem(characterBundle, moving, containerId)
+                movingItem = null
+            }
+        )
+    }
     if (isAddItemDialogOpen && characterBundle != null) {
         InventoryAddEntryDialog(
             catalogItems = catalogState.items,
@@ -335,6 +389,7 @@ internal fun InventoryContent(
     onEditCurrency: () -> Unit = {},
     onToggleEquipped: (CharacterBundle, InventoryItem) -> Unit = { _, _ -> },
     onEditItem: (InventoryItem) -> Unit = {},
+    onMoveItem: (InventoryItem) -> Unit = {},
     /** Items shown unfolded at first (the screen preview uses it). */
     initiallyExpanded: Set<Long> = emptySet()
 ) {
@@ -371,17 +426,20 @@ internal fun InventoryContent(
     val displayedItems = remember(characterBundle.inventoryItems, catalogLookup, russian) {
         characterBundle.inventoryItems.localizedWith(catalogLookup, russian)
     }
-    val items = remember(displayedItems, query) {
+    val tree = remember(displayedItems) { InventoryTree(displayedItems) }
+    val searching = query.isNotBlank()
+    // What lies in a container shows inside it; a search looks inside the containers too.
+    val items = remember(tree, query) {
         val needle = query.trim()
-        displayedItems.filter { item ->
-            needle.isBlank() ||
-                item.name.contains(needle, ignoreCase = true) ||
-                item.category.name.contains(needle, ignoreCase = true)
+        if (needle.isBlank()) {
+            tree.topLevel
+        } else {
+            displayedItems.filter { item ->
+                item.name.contains(needle, ignoreCase = true) || item.category.name.contains(needle, ignoreCase = true)
+            }
         }
     }
-    val totalWeight = remember(characterBundle.inventoryItems) {
-        characterBundle.inventoryItems.sumOf { it.weight * it.quantity }
-    }
+    val totalWeight = remember(characterBundle.inventoryItems) { InventoryTree(characterBundle.inventoryItems).carriedWeight }
     val carryLimit = (character.strength.coerceAtLeast(1) * 15).toDouble()
     val listState = rememberLazyListState()
 
@@ -434,8 +492,11 @@ internal fun InventoryContent(
                             InventorySectionCard(
                                 items = categoryItems,
                                 dexterityScore = character.dexterity,
+                                inventory = tree,
                                 onToggleEquipped = { item -> onToggleEquipped(characterBundle, item) },
                                 onEditItem = onEditItem,
+                                onMoveItem = onMoveItem,
+                                showLocation = searching,
                                 expanded = expandedItems,
                                 onExpandedChange = { item, open ->
                                     expandedItems = if (open) expandedItems + item.id else expandedItems - item.id
@@ -1023,19 +1084,28 @@ private fun InventoryCategoryPickerDialog(
 
 /**
  * Items as the inventory lists them: a card of rows with weight, quantity and tags; a row unfolds
- * its description and an Edit button, as the Features cards do. Without [onToggleEquipped] and
- * [onEditItem] it only shows them (Character Wizard's starting equipment).
+ * its description and its Move and Edit buttons, as the Features cards do, and a container unfolds
+ * what it holds. Without [onToggleEquipped] and [onEditItem] it only shows them (Character Wizard's
+ * starting equipment, where a pack lists its contents under it).
  */
 @Composable
 internal fun InventorySectionCard(
     items: List<InventoryItem>,
     dexterityScore: Int,
+    /** The whole inventory, for what containers hold; without it [items] are all, and their top level is shown. */
+    inventory: InventoryTree? = null,
     onToggleEquipped: ((InventoryItem) -> Unit)? = null,
     onEditItem: ((InventoryItem) -> Unit)? = null,
+    onMoveItem: ((InventoryItem) -> Unit)? = null,
+    /** Rows say which container they lie in (search results). */
+    showLocation: Boolean = false,
     expanded: Set<Long> = emptySet(),
     onExpandedChange: (InventoryItem, Boolean) -> Unit = { _, _ -> }
 ) {
     val colors = LocalDesignTokens.current.colors
+    val tree = inventory ?: remember(items) { InventoryTree(items) }
+    val rows = if (inventory == null) tree.topLevel else items
+    val actions = InventoryRowActions(onToggleEquipped, onEditItem, onMoveItem, expanded, onExpandedChange)
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
@@ -1043,25 +1113,39 @@ internal fun InventorySectionCard(
         border = BorderStroke(1.dp, colors.border.muted)
     ) {
         Column {
-            items.forEachIndexed { index, item ->
-                key(item.renderKey()) {
-                    InventoryItemRow(
-                        item = item,
-                        dexterityScore = dexterityScore,
-                        onToggleEquipped = onToggleEquipped?.let { toggle -> { toggle(item) } },
-                        onEdit = onEditItem?.let { edit -> { edit(item) } },
-                        expanded = item.id in expanded,
-                        onExpandedChange = { open -> onExpandedChange(item, open) }
-                    )
-                    if (index != items.lastIndex) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(1.dp)
-                                .background(colors.ornament.outer)
-                        )
-                    }
-                }
+            InventoryRows(rows, tree, dexterityScore, actions, showLocation)
+        }
+    }
+}
+
+/** What the rows can do; null actions: Character Wizard's rows only show the items. */
+private class InventoryRowActions(
+    val onToggleEquipped: ((InventoryItem) -> Unit)?,
+    val onEdit: ((InventoryItem) -> Unit)?,
+    val onMove: ((InventoryItem) -> Unit)?,
+    val expanded: Set<Long>,
+    val onExpandedChange: (InventoryItem, Boolean) -> Unit
+)
+
+@Composable
+private fun InventoryRows(
+    rows: List<InventoryItem>,
+    tree: InventoryTree,
+    dexterityScore: Int,
+    actions: InventoryRowActions,
+    showLocation: Boolean
+) {
+    val colors = LocalDesignTokens.current.colors
+    rows.forEachIndexed { index, item ->
+        key(item.renderKey()) {
+            InventoryItemRow(item, tree, dexterityScore, actions, showLocation)
+            if (index != rows.lastIndex) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(colors.ornament.outer)
+                )
             }
         }
     }
@@ -1071,15 +1155,35 @@ internal fun InventorySectionCard(
 @Composable
 private fun InventoryItemRow(
     item: InventoryItem,
+    tree: InventoryTree,
     dexterityScore: Int,
-    onToggleEquipped: (() -> Unit)?,
-    onEdit: (() -> Unit)?,
-    expanded: Boolean,
-    onExpandedChange: (Boolean) -> Unit
+    actions: InventoryRowActions,
+    showLocation: Boolean
 ) {
     val strings = LocalStrings.current
     val colors = LocalDesignTokens.current.colors
     val propertyTags = remember(item, dexterityScore, strings.language) { item.propertyTags(dexterityScore, strings) }
+    val isContainer = item.category == InventoryCategory.CONTAINER
+    val contents = tree.contentsOf(item)
+    val location = tree.containerOf(item)
+    val tags = buildList {
+        if (showLocation && location != null) add(strings.format("inventory_tag_inside", location.name))
+        if (isContainer) {
+            val load = formatWeight(tree.contentsWeight(item))
+            val capacity = item.containerDetails?.capacity
+            when {
+                capacity != null -> add(strings.format("inventory_container_load", load, formatWeight(capacity)))
+                contents.isNotEmpty() -> add(strings.format("inventory_container_load_open", load))
+            }
+            if (item.containerDetails?.weightlessContents == true) add(strings["inventory_container_weightless"])
+        }
+        addAll(propertyTags)
+    }
+    val onToggleEquipped = actions.onToggleEquipped?.let { toggle -> { toggle(item) } }
+    val onEdit = actions.onEdit?.let { edit -> { edit(item) } }
+    val onMove = actions.onMove?.let { move -> { move(item) } }
+    val expanded = item.id in actions.expanded
+    val onExpandedChange: (Boolean) -> Unit = { open -> actions.onExpandedChange(item, open) }
     // A tap unfolds the row, a long press edits; Character Wizard's rows only show the item.
     val canExpand = onEdit != null
 
@@ -1098,7 +1202,7 @@ private fun InventoryItemRow(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
-                imageVector = Icons.Outlined.Inventory2,
+                imageVector = if (isContainer) Icons.Outlined.Backpack else Icons.Outlined.Inventory2,
                 contentDescription = null,
                 tint = colors.text.muted,
                 modifier = Modifier.size(26.dp)
@@ -1127,10 +1231,15 @@ private fun InventoryItemRow(
                 color = colors.text.muted
             )
             if (onToggleEquipped != null) {
-                SelectableDot(
-                    selected = item.isEquipped,
-                    onClick = onToggleEquipped
-                )
+                // Containers aren't worn, nor what lies in them: the column stays.
+                if (isContainer || location != null) {
+                    Spacer(modifier = Modifier.size(22.dp))
+                } else {
+                    SelectableDot(
+                        selected = item.isEquipped,
+                        onClick = onToggleEquipped
+                    )
+                }
             }
             if (canExpand) {
                 IconButton(onClick = { onExpandedChange(!expanded) }, modifier = Modifier.size(36.dp)) {
@@ -1143,10 +1252,19 @@ private fun InventoryItemRow(
             }
         }
 
-        if (propertyTags.isNotEmpty()) {
+        if (tags.isNotEmpty()) {
             InventoryPropertyTags(
-                tags = propertyTags,
+                tags = tags,
                 modifier = Modifier.padding(start = 38.dp)
+            )
+        }
+        if (!canExpand && contents.isNotEmpty()) {
+            // Character Wizard: what the pack holds, in a line.
+            Text(
+                text = contentsLine(tree, item),
+                modifier = Modifier.padding(start = 38.dp),
+                style = MaterialTheme.typography.bodyMedium,
+                color = colors.text.muted
             )
         }
         if (expanded && onEdit != null) {
@@ -1156,12 +1274,92 @@ private fun InventoryItemRow(
                 style = MaterialTheme.typography.bodyMedium,
                 color = colors.text.muted
             )
+            if (isContainer) {
+                if (contents.isEmpty()) {
+                    Text(
+                        text = text("inventory_container_empty"),
+                        modifier = Modifier.padding(start = 38.dp),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = colors.text.subtle
+                    )
+                } else {
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 24.dp, top = 4.dp),
+                        shape = RoundedCornerShape(8.dp),
+                        color = colors.ornament.outer,
+                        border = BorderStroke(1.dp, colors.border.muted)
+                    ) {
+                        Column {
+                            InventoryRows(contents, tree, dexterityScore, actions, showLocation = false)
+                        }
+                    }
+                }
+            }
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                if (onMove != null) {
+                    CardActionButton(label = text("inventory_move"), icon = Icons.Outlined.MoveToInbox, onClick = onMove)
+                }
                 CardEditButton(onClick = onEdit)
             }
         }
     }
 }
+
+/** What [container] holds, in a line: "Tinderbox, Torch ×10, Waterskin (Water ×4)". */
+private fun contentsLine(tree: InventoryTree, container: InventoryItem): String =
+    tree.contentsOf(container).joinToString(", ") { item ->
+        val inner = tree.contentsOf(item).takeIf { it.isNotEmpty() && item.id != container.id }?.let { " (${contentsLine(tree, item)})" }.orEmpty()
+        item.name + (if (item.quantity > 1) " ×${item.quantity}" else "") + inner
+    }
+
+/**
+ * Where to put [item]: carried as is, or into a container it can go in (not itself or one inside
+ * it), each named with the containers it lies in. A tap moves it.
+ */
+@Composable
+private fun InventoryMoveDialog(
+    item: InventoryItem,
+    tree: InventoryTree,
+    onDismiss: () -> Unit,
+    onMove: (Long?) -> Unit
+) {
+    val colors = LocalDesignTokens.current.colors
+    val current = tree.containerOf(item)?.id
+    val options: List<Pair<Long?, String>> = listOf<Pair<Long?, String>>(null to text("inventory_move_carried")) +
+        tree.containersFor(item).map { container -> container.id to containerPath(tree, container) }
+    EditDialog(
+        title = LocalStrings.current.format("inventory_move_title", item.name),
+        onDismiss = onDismiss,
+        scrollable = false
+    ) {
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            items(options) { (containerId, label) ->
+                val selected = containerId == current
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onMove(containerId) },
+                    shape = RoundedCornerShape(10.dp),
+                    color = if (selected) colors.surface.selected else colors.ornament.outer,
+                    border = BorderStroke(1.dp, if (selected) colors.border.selected else colors.border.muted)
+                ) {
+                    Text(
+                        text = label,
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = colors.text.primary
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** "Backpack › Waterskin": the container and the ones it lies in. */
+private fun containerPath(tree: InventoryTree, container: InventoryItem): String =
+    generateSequence(container) { tree.containerOf(it) }.take(8).toList().asReversed().joinToString(" › ") { it.name }
 
 @Composable
 private fun InventoryItemEditDialog(
@@ -1188,6 +1386,8 @@ private fun InventoryItemEditDialog(
     var maxDexterityBonus by remember(inventoryItem) { mutableStateOf(inventoryItem.armorDetails?.maxDexterityBonus?.toString().orEmpty()) }
     var strengthMinimum by remember(inventoryItem) { mutableStateOf(inventoryItem.armorDetails?.strengthMinimum?.toString().orEmpty()) }
     var hasStealthDisadvantage by remember(inventoryItem) { mutableStateOf(inventoryItem.armorDetails?.hasStealthDisadvantage ?: false) }
+    var capacity by remember(inventoryItem) { mutableStateOf(inventoryItem.containerDetails?.capacity?.let(::formatEditableNumber).orEmpty()) }
+    var weightlessContents by remember(inventoryItem) { mutableStateOf(inventoryItem.containerDetails?.weightlessContents ?: false) }
 
     // Derived purely from inventoryItem and only used to seed the remember(...) drafts below;
     // memoize so the dice-string parsing isn't redone on every recomposition of the open dialog.
@@ -1281,7 +1481,12 @@ private fun InventoryItemEditDialog(
                     costQuantity = costQuantity.toIntOrNull(),
                     costUnit = costUnit.trim().ifBlank { defaultCurrencyUnit() },
                     armorDetails = updatedArmorDetails,
-                    weaponDetails = updatedWeaponDetails
+                    weaponDetails = updatedWeaponDetails,
+                    containerDetails = if (inventoryItem.category == InventoryCategory.CONTAINER) {
+                        InventoryContainerDetails(capacity.toDoubleOrNull()?.takeIf { it > 0.0 }, weightlessContents)
+                    } else {
+                        inventoryItem.containerDetails
+                    }
                 )
             )
         }
@@ -1510,6 +1715,30 @@ private fun InventoryItemEditDialog(
                             }
                         ) {
                             Text(text("inventory_add_alternate_damage"))
+                        }
+                    }
+                }
+            }
+
+            if (inventoryItem.category == InventoryCategory.CONTAINER) {
+                item {
+                    InventoryDialogSection(text("inventory_section_container"))
+                }
+                item {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        CompactTextField(
+                            value = capacity,
+                            onValueChange = { capacity = sanitizeDecimalInput(it) },
+                            label = text("inventory_field_capacity"),
+                            suffixText = text("inventory_unit_pounds"),
+                            modifier = Modifier.widthIn(max = 160.dp)
+                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Checkbox(
+                                checked = weightlessContents,
+                                onCheckedChange = { weightlessContents = it }
+                            )
+                            Text(text("inventory_field_weightless_contents"))
                         }
                     }
                 }
@@ -2192,6 +2421,7 @@ private fun InventoryCategory.titleKey(): String =
         InventoryCategory.WEAPON -> "inventory_category_weapon"
         InventoryCategory.ARMOR -> "inventory_category_armor"
         InventoryCategory.CONSUMABLE -> "inventory_category_consumable"
+        InventoryCategory.CONTAINER -> "inventory_category_container"
         InventoryCategory.OTHER -> "inventory_category_other"
     }
 
@@ -2401,7 +2631,8 @@ private fun defaultInventoryItem(category: InventoryCategory, defaultName: Strin
             )
         } else {
             null
-        }
+        },
+        containerDetails = if (category == InventoryCategory.CONTAINER) InventoryContainerDetails() else null
     )
 }
 

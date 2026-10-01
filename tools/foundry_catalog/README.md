@@ -13,6 +13,11 @@ on — is built from the Foundry VTT compendiums of the D&D world:
   duration are written in the app's (SRD) wording ("60 feet", "1 bonus action", "Up to 1 minute");
   attack, save, damage, healing and area come from the spells' activities; the higher-level paragraph
   has its own field.
+- **Containers** (`containers`): the bags, cases and equipment packs of the SRD 5.2 equipment pack,
+  with their capacity (lb; a Bag of Holding's contents weigh nothing), weight, price, text and what
+  they hold — a pack's tinderbox, rations and its waterskin with the water. Contents point at the
+  standalone item of their kind, so their names come in both languages; Character Wizard's packs
+  and the inventory's bags are built from them.
 - `legacy/feature_catalog_extra.json` and the 5e-database SRD files: English texts the app shipped
   before, and the old catalog ids that saved features still carry (mapped in `legacyIds`).
 
@@ -46,6 +51,10 @@ Proficiency and language labels missing from the ru-ru module get their Russian 
 "Чондатанский"`); `convert.py` lists any label still without one, and `CharacterCatalogTest`
 fails on it. The Faerûn languages follow the Russian *Heroes of Faerûn* («Стандартные языки
 Фаэруна»).
+
+Russian names of container contents the Fifthpendium has no item for (a waterskin's water, the
+pockets of Heward's Handy Haversack) go into `translations/ru_equipment.json`, keyed by the Foundry
+identifier (`"water-pint": "Вода (пинта)"`); `convert.py` warns about any still missing.
 
 `translations/missing_en.json` is rewritten on every run: the entries still without an English
 name or text (id, kind, book, owner, Russian and English name), PHB first — the list to translate

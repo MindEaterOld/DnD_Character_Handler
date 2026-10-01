@@ -3,7 +3,9 @@ package com.dndcharacterhandler.domain.levelup
 import com.dndcharacterhandler.data.catalog.CharacterCatalogParser
 import com.dndcharacterhandler.domain.model.CharacterBundle
 import com.dndcharacterhandler.domain.model.CharacterCatalog
+import com.dndcharacterhandler.domain.model.CreatureSize
 import com.dndcharacterhandler.domain.model.Feature
+import com.dndcharacterhandler.domain.model.InventoryCategory
 import com.dndcharacterhandler.domain.model.defaultCharacterBundle
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -64,6 +66,7 @@ class LevelUpEngineTest {
                 is LevelUpPage.BaseAbilities -> LevelUpAnswer.BaseAbilities(AbilityMethod.KEEP, page.currentScores)
                 is LevelUpPage.Species, is LevelUpPage.Background -> LevelUpAnswer.Origin(null)
                 is LevelUpPage.Equipment -> LevelUpAnswer.Equipment(0)
+                is LevelUpPage.Size -> LevelUpAnswer.Size(page.sizes.first())
                 else -> error("unexpected open page $page")
             }
             draft = draft.copy(answers = draft.answers + (page.key to answer))
@@ -248,6 +251,50 @@ class LevelUpEngineTest {
         assertEquals(12, character.goldPieces)
         assertTrue(character.advancements.any { it.type == "Species" && it.sourceId == elf.id })
         assertTrue(character.advancements.any { it.type == "Abilities" && it.value.startsWith("method=STANDARD_ARRAY") })
+    }
+
+    @Test
+    fun theSpeciesSetsTheSizeOrOffersItsSizes() {
+        val bundle = newCharacter()
+        fun build(identifier: String, pick: CreatureSize? = null): Pair<List<LevelUpPage>, CharacterBundle> {
+            val species = catalog.species.first { it.identifier == identifier && it.book == "PHB 2024" }
+            val start = LevelUpDraft(
+                targetLevel = 1,
+                setup = LevelUpSetup(fighter.id, keepExistingLevels = false),
+                answers = mapOf("species" to LevelUpAnswer.Origin(species.id))
+            )
+            val draft = complete(bundle, start) { page -> if (page is LevelUpPage.Size && pick != null) LevelUpAnswer.Size(pick) else null }
+            return engine.run(bundle, draft).pages to engine.apply(bundle, draft, russian = false, now = 1)
+        }
+        // A gnome is Small: nothing to pick.
+        val (gnomePages, gnome) = build("gnome")
+        assertTrue(gnomePages.none { it is LevelUpPage.Size })
+        assertEquals(CreatureSize.SMALL, gnome.character.size)
+        // A human is Small or Medium.
+        val (humanPages, human) = build("human", CreatureSize.SMALL)
+        assertEquals(setOf(CreatureSize.SMALL, CreatureSize.MEDIUM), humanPages.filterIsInstance<LevelUpPage.Size>().single().sizes.toSet())
+        assertEquals(CreatureSize.SMALL, human.character.size)
+        assertTrue(human.character.advancements.any { it.type == "Size" && it.value == "size=sm" })
+    }
+
+    @Test
+    fun aStartingPackComesAsAContainerWithItsContents() {
+        val bundle = newCharacter()
+        // The Fighter's option A has the Dungeoneer's Pack.
+        val draft = complete(bundle, LevelUpDraft(targetLevel = 1, setup = LevelUpSetup(fighter.id, keepExistingLevels = false)))
+        val items = engine.apply(bundle, draft, russian = false, now = 1).inventoryItems
+        val pack = items.single { it.name == "Dungeoneer's Pack" }
+        assertEquals(InventoryCategory.CONTAINER, pack.category)
+        assertEquals(30.0, pack.containerDetails?.capacity)
+        assertEquals(5.0, pack.weight, 0.0)
+        val contents = items.filter { it.containerId == pack.id }.associate { it.name to it.quantity }
+        assertEquals(contents.toString(), 10, contents["Torch"])
+        assertTrue(contents.toString(), contents.keys.containsAll(listOf("Tinderbox", "Rope", "Crowbar", "Rations")))
+        // Its waterskin is a container with the water in it.
+        val waterskin = items.single { it.name == "Waterskin" && it.containerId == pack.id }
+        assertEquals(InventoryCategory.CONTAINER, waterskin.category)
+        assertEquals(4, items.single { it.containerId == waterskin.id }.quantity)
+        assertTrue("new items link up through negative ids", pack.id < 0 && waterskin.id < 0 && pack.id != waterskin.id)
     }
 
     @Test

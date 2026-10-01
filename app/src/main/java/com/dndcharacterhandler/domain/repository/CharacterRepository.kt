@@ -2,6 +2,7 @@ package com.dndcharacterhandler.domain.repository
 
 import com.dndcharacterhandler.domain.model.CharacterBundle
 import com.dndcharacterhandler.domain.model.CombatResource
+import com.dndcharacterhandler.domain.model.CreatureSize
 import com.dndcharacterhandler.domain.model.InventoryItem
 import com.dndcharacterhandler.domain.model.ArmorClassMode
 import com.dndcharacterhandler.domain.model.Attack
@@ -31,6 +32,7 @@ interface CharacterRepository {
     suspend fun updateInspiration(characterId: Long, hasInspiration: Boolean)
     suspend fun updatePassivePerceptionBonus(characterId: Long, bonus: Int)
     suspend fun updateDarkvision(characterId: Long, mode: DarkvisionMode, manualFeet: Int)
+    suspend fun updateSize(characterId: Long, size: CreatureSize)
     suspend fun updateAbilityScore(
         characterId: Long,
         ability: SpellcastingAbility,
@@ -42,6 +44,8 @@ interface CharacterRepository {
     suspend fun updateTextField(characterId: Long, field: CharacterTextField, value: String)
     suspend fun updateCurrency(characterId: Long, copperPieces: Int, silverPieces: Int, goldPieces: Int)
     suspend fun upsertInventoryItem(characterId: Long, item: InventoryItem): Long
+    /** New items at once, linked through negative ids (a container and its contents, see NewItemIds). */
+    suspend fun addInventoryItems(characterId: Long, items: List<InventoryItem>)
     suspend fun deleteInventoryItem(characterId: Long, itemId: Long)
     suspend fun toggleInventoryItemEquipped(characterId: Long, itemId: Long)
     suspend fun upsertSpell(characterId: Long, spell: Spell): Long

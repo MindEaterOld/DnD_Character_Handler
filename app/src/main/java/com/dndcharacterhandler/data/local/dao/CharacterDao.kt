@@ -16,6 +16,7 @@ import com.dndcharacterhandler.data.local.entity.SkillEntity
 import com.dndcharacterhandler.data.local.entity.SpellAttackEntity
 import com.dndcharacterhandler.data.local.entity.SpellEntity
 import com.dndcharacterhandler.domain.model.ArmorClassMode
+import com.dndcharacterhandler.domain.model.CreatureSize
 import com.dndcharacterhandler.domain.model.DarkvisionMode
 import com.dndcharacterhandler.domain.model.SpellcastingAbility
 import kotlinx.coroutines.flow.Flow
@@ -170,6 +171,9 @@ interface CharacterDao {
     )
     suspend fun updateDarkvision(characterId: Long, mode: DarkvisionMode, manualFeet: Int, updatedAt: Long)
 
+    @Query("UPDATE characters SET size = :size, updatedAt = :updatedAt WHERE id = :characterId")
+    suspend fun updateSize(characterId: Long, size: CreatureSize, updatedAt: Long)
+
     @Query(
         """
         UPDATE characters
@@ -322,7 +326,7 @@ interface CharacterDao {
     suspend fun upsertCombatResourceEntity(resource: CombatResourceEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertInventoryItems(items: List<InventoryItemEntity>)
+    suspend fun insertInventoryItems(items: List<InventoryItemEntity>): List<Long>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertInventoryItem(item: InventoryItemEntity): Long
@@ -386,6 +390,13 @@ interface CharacterDao {
 
     @Query("DELETE FROM inventory_items WHERE id = :itemId AND characterOwnerId = :characterId")
     suspend fun deleteInventoryItemById(characterId: Long, itemId: Long)
+
+    @Query("UPDATE inventory_items SET containerId = :containerId WHERE id = :itemId")
+    suspend fun updateInventoryItemContainer(itemId: Long, containerId: Long?)
+
+    /** Moves what lies in [fromContainerId] into [toContainerId] (null: out of any container). */
+    @Query("UPDATE inventory_items SET containerId = :toContainerId WHERE characterOwnerId = :characterId AND containerId = :fromContainerId")
+    suspend fun moveInventoryContents(characterId: Long, fromContainerId: Long, toContainerId: Long?)
 
     @Query("UPDATE inventory_items SET isEquipped = :isEquipped WHERE id = :itemId AND characterOwnerId = :characterId")
     suspend fun updateInventoryItemEquipped(characterId: Long, itemId: Long, isEquipped: Boolean)

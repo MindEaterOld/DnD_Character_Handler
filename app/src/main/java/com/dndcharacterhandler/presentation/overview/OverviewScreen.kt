@@ -85,7 +85,8 @@ import com.dndcharacterhandler.domain.model.CharacterBundle
 import com.dndcharacterhandler.domain.model.CharacterCatalog
 import com.dndcharacterhandler.domain.levelup.LevelUpDraft
 import com.dndcharacterhandler.domain.levelup.LevelUpEngine
-import com.dndcharacterhandler.domain.levelup.plainEquipmentItem
+import com.dndcharacterhandler.domain.model.equipmentNameKey
+import com.dndcharacterhandler.domain.model.matchedEquipmentItem
 import com.dndcharacterhandler.domain.model.CatalogEquipmentRef
 import com.dndcharacterhandler.domain.model.InventoryCatalogItem
 import com.dndcharacterhandler.domain.model.InventoryItem
@@ -154,7 +155,7 @@ class OverviewViewModel(
     private suspend fun loadEquipmentItems(): Map<String, InventoryCatalogItem> =
         inventoryCatalogRepository.getItems()
             .filter { it.source == InventoryCatalogSource.EQUIPMENT }
-            .associateBy { startingEquipmentKey(it.name) }
+            .associateBy { equipmentNameKey(it.name) }
 
     /** Applies a finished level-up draft (see LevelUpWizard) in one write. */
     fun applyLevelUp(characterBundle: CharacterBundle, draft: LevelUpDraft, russian: Boolean) {
@@ -166,7 +167,7 @@ class OverviewViewModel(
                 LevelUpEngine(catalog).apply(
                     characterBundle, draft, russian,
                     now = System.currentTimeMillis(),
-                    equipmentItem = { item, count -> startingEquipmentItem(items, item, count, russian) }
+                    equipmentItem = { item, count -> matchedEquipmentItem(items, item, count, russian) }
                 )
             }
             characterRepository.replaceCharacterBundle(updated)
@@ -524,23 +525,6 @@ fun OverviewScreen(
  * The level-up wizard over the whole app (the bottom navigation included), for the character the
  * overview shows. It waits for the catalog to load; applying goes through [OverviewViewModel.applyLevelUp].
  */
-/**
- * Starting equipment as the app's own catalog item (with damage, AC, weight) where the English names
- * match, and a plain named item otherwise.
- */
-internal fun startingEquipmentItem(
-    items: Map<String, InventoryCatalogItem>,
-    item: CatalogEquipmentRef,
-    count: Int,
-    russian: Boolean
-): InventoryItem =
-    items[startingEquipmentKey(item.name.en)]?.toInventoryItem(russian)?.copy(quantity = count)
-        ?: plainEquipmentItem(item, count, russian)
-
-/** "Thieves’ Tools" and "Thieves' Tools", "Alchemists Supplies" and "Alchemist's Supplies" alike. */
-private fun startingEquipmentKey(name: String): String =
-    name.lowercase().replace("’", "").replace("'", "").replace(Regex("\\s+"), " ").trim()
-
 @Composable
 fun OverviewLevelUpOverlay(viewModel: OverviewViewModel, targetLevel: Int, onClose: () -> Unit) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -550,7 +534,7 @@ fun OverviewLevelUpOverlay(viewModel: OverviewViewModel, targetLevel: Int, onClo
     val russian = LocalStrings.current.language == AppLanguage.RUSSIAN
     val equipment by viewModel.equipmentItems.collectAsStateWithLifecycle()
     val equipmentItem: (CatalogEquipmentRef, Int) -> InventoryItem = remember(equipment, russian) {
-        { item, count -> startingEquipmentItem(equipment, item, count, russian) }
+        { item, count -> matchedEquipmentItem(equipment, item, count, russian) }
     }
     LevelUpWizard(
         bundle = bundle,

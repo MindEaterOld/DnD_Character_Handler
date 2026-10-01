@@ -15,11 +15,14 @@ import com.dndcharacterhandler.domain.model.CharacterCatalog
 import com.dndcharacterhandler.domain.model.CharacterClassEntry
 import com.dndcharacterhandler.domain.model.ClassRestriction
 import com.dndcharacterhandler.domain.model.CombatResource
+import com.dndcharacterhandler.domain.model.CreatureSize
 import com.dndcharacterhandler.domain.model.EquipmentNode
 import com.dndcharacterhandler.domain.model.Feature
 import com.dndcharacterhandler.domain.model.FeatureSource
-import com.dndcharacterhandler.domain.model.InventoryCategory
 import com.dndcharacterhandler.domain.model.InventoryItem
+import com.dndcharacterhandler.domain.model.NewItemIds
+import com.dndcharacterhandler.domain.model.plainEquipmentItem
+import com.dndcharacterhandler.domain.model.startingItems
 import com.dndcharacterhandler.domain.model.Spell
 import com.dndcharacterhandler.domain.model.toSpellCatalogItem
 import com.dndcharacterhandler.domain.rules.CatalogFormulaText
@@ -44,20 +47,6 @@ fun spellNameKeys(spell: CatalogSpellRef): Set<String> = buildSet {
     listOf(spell.name.en, spell.name.ru).filter { it.isNotBlank() }.forEach { add(spellNameKey(it)) }
     Regex("^\\S+[’']s (.+)$").matchEntire(spell.name.en.trim())?.let { add(spellNameKey(it.groupValues[1])) }
 }
-
-/** An inventory item with just the name, for equipment the app's item catalog doesn't know. */
-fun plainEquipmentItem(item: CatalogEquipmentRef, count: Int, russian: Boolean): InventoryItem = InventoryItem(
-    name = item.name.get(russian),
-    category = when (item.type) {
-        "weapon" -> InventoryCategory.WEAPON
-        "consumable" -> InventoryCategory.CONSUMABLE
-        else -> InventoryCategory.OTHER
-    },
-    weight = 0.0,
-    quantity = count,
-    isEquipped = false,
-    icon = ""
-)
 
 /**
  * The level-up wizard, as Foundry's advancement runs it: every level gained walks the steps of the
@@ -100,6 +89,7 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
         is LevelUpPage.Subclass -> draft.answers[page.key] is LevelUpAnswer.Subclass
         is LevelUpPage.BaseAbilities -> (draft.answers[page.key] as? LevelUpAnswer.BaseAbilities)?.let(::validAbilities) == true
         is LevelUpPage.Species, is LevelUpPage.Background -> draft.answers[page.key] is LevelUpAnswer.Origin
+        is LevelUpPage.Size -> (draft.answers[page.key] as? LevelUpAnswer.Size)?.size in page.sizes
         is LevelUpPage.Equipment -> (draft.answers[page.key] as? LevelUpAnswer.Equipment)?.let { answer ->
             val option = page.options.getOrNull(answer.option) ?: return@let false
             option.choices.indices.all { index -> pickFor(option.choices[index], answer.picks.getOrNull(index)) != null }
@@ -117,6 +107,15 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
             AbilityMethod.KEEP -> true
         }
     }
+
+    /** The inventory items a starting-equipment pick gives: a pack comes as a container with its contents. */
+    fun startingItems(
+        item: CatalogEquipmentRef,
+        count: Int,
+        russian: Boolean,
+        equipmentItem: (CatalogEquipmentRef, Int) -> InventoryItem,
+        ids: NewItemIds = NewItemIds()
+    ): List<InventoryItem> = catalog.startingItems(item, count, russian, equipmentItem, ids)
 
     /** The pick of an equipment choice: the player's, or the suggested one. */
     fun pickFor(choice: EquipmentChoice, picked: String?): EquipmentPick? =
@@ -255,6 +254,21 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
             newFeatures += taken
             simulation.grantSpells(step.spells.mapNotNull { catalog.spells[it] })
             simulation.record(context, sourceId, step.id, "ItemGrant", "features=${taken.joinToString(",") { it.id }}")
+        }
+        // The size: set when the species has one, picked when it may be one of several.
+        steps.filterIsInstance<AdvancementStep.Size>().forEach { step ->
+            val sizes = step.sizes.mapNotNull(CreatureSize::ofFoundry).distinct()
+            val size = when {
+                sizes.size == 1 -> sizes.single()
+                sizes.size > 1 -> {
+                    val page = LevelUpPage.Size(key = "$sourceId:${step.id}", source = name, sizes = sizes)
+                    simulation.pages += page
+                    (draft.answers[page.key] as? LevelUpAnswer.Size)?.size?.takeIf { it in sizes }
+                }
+                else -> null
+            } ?: return@forEach
+            simulation.size = size
+            simulation.record(context, sourceId, step.id, "Size", "size=${size.foundryKey}")
         }
         processChoices(simulation, draft, context, StepSource(sourceId, name, steps, allowFeat = false), newFeatures, arrival = true)
         processNewFeatureSteps(simulation, draft, context, newFeatures, mutableSetOf())
@@ -851,6 +865,7 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
         var species: CatalogSpecies? = null
         var background: CatalogBackground? = null
         var baseScores: Map<String, Int>? = null
+        var size: CreatureSize? = null
         val equipment = mutableListOf<EquipmentPick>()
         val coins = mutableMapOf<String, Int>()
 
@@ -965,7 +980,8 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
             background = background,
             baseScores = baseScores,
             equipment = equipment.toList(),
-            coins = coins.toMap()
+            coins = coins.toMap(),
+            size = size
         )
 
         fun applyTo(
@@ -1004,7 +1020,11 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
                     category = species?.name?.get(russian).orEmpty()
                 )
             }
-            val inventory = bundle.inventoryItems + equipment.map { pick -> equipmentItem(pick.item, pick.count) }
+            // A pack comes as a container with its contents.
+            val newItemIds = NewItemIds()
+            val inventory = bundle.inventoryItems + equipment.flatMap { pick ->
+                catalog.startingItems(pick.item, pick.count, russian, equipmentItem, newItemIds)
+            }
             // Spells: the swapped ones out, the picked ones in; granted spells (domain, circle,
             // species spells) are always prepared.
             val forgottenNames = spellsForgotten.flatMap(::spellNameKeys).toSet()
@@ -1091,6 +1111,7 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
                 race = species?.name?.get(russian) ?: character.race,
                 background = background?.name?.get(russian) ?: character.background,
                 speed = species?.movement?.get("walk")?.toInt() ?: character.speed,
+                size = size ?: character.size,
                 goldPieces = character.goldPieces + gold,
                 silverPieces = character.silverPieces + silver,
                 copperPieces = character.copperPieces + (coins["cp"] ?: 0),

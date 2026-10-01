@@ -173,4 +173,28 @@ for (const option of registry.options) {
   spellLists[option.value] = { label: option.label, group: option.group, uuids: [...(registry.forType(type, key)?.uuids ?? [])] };
 }
 report.push({ id: 'spellLists', count: Object.keys(spellLists).length, status: await send('spellLists.json', spellLists) });
+
+// Containers for the inventory: bags, cases and the equipment packs, with what they can carry and
+// what they hold (the items of the pack whose system.container is the container's id; a pack's
+// waterskin is a container of its own, with its water).
+const CONTAINER_PACKS = ['ag-fifthpendium.equipment', 'dnd5e.equipment24'];
+for (const id of CONTAINER_PACKS) {
+  const pack = game.packs.get(id);
+  if (!pack) { report.push({ id, missing: true }); continue; }
+  const docs = (await pack.getDocuments()).filter(d => d.type === 'container' || d.system.container);
+  const documents = docs.map(d => ({
+    id: d.id,
+    name: d.name,
+    type: d.type,
+    identifier: d.system.identifier ?? null,
+    container: d.system.container ?? null,
+    quantity: d.system.quantity ?? 1,
+    weight: d.system.weight?.value ?? 0,
+    price: d.system.price ? { value: d.system.price.value, denomination: d.system.price.denomination } : null,
+    capacity: d.type === 'container' ? { weight: d.system.capacity?.weight?.value ?? null, count: d.system.capacity?.count ?? null } : null,
+    weightlessContents: d.type === 'container' && (d.system.properties?.has('weightlessContents') ?? false),
+    description: d.type === 'container' ? (d.system.description?.value ?? '') : ''
+  }));
+  report.push({ id, count: documents.length, status: await send(`containers.${id}.json`, { pack: id, documents }) });
+}
 return report;

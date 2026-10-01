@@ -1995,6 +1995,91 @@
     "fr": "Autre",
     "es": "Otro"
   },
+  "inventory_category_container": {
+    "en": "Container",
+    "ru": "\u041a\u043e\u043d\u0442\u0435\u0439\u043d\u0435\u0440\u044b",
+    "de": "Beh\u00e4lter",
+    "fr": "Contenant",
+    "es": "Contenedor"
+  },
+  "inventory_section_container": {
+    "en": "Container",
+    "ru": "\u041a\u043e\u043d\u0442\u0435\u0439\u043d\u0435\u0440",
+    "de": "Beh\u00e4lter",
+    "fr": "Contenant",
+    "es": "Contenedor"
+  },
+  "inventory_field_capacity": {
+    "en": "Capacity",
+    "ru": "\u0412\u043c\u0435\u0441\u0442\u0438\u043c\u043e\u0441\u0442\u044c",
+    "de": "Kapazit\u00e4t",
+    "fr": "Capacit\u00e9",
+    "es": "Capacidad"
+  },
+  "inventory_field_weightless_contents": {
+    "en": "Contents weigh nothing",
+    "ru": "\u0421\u043e\u0434\u0435\u0440\u0436\u0438\u043c\u043e\u0435 \u043d\u0438\u0447\u0435\u0433\u043e \u043d\u0435 \u0432\u0435\u0441\u0438\u0442",
+    "de": "Inhalt wiegt nichts",
+    "fr": "Le contenu ne p\u00e8se rien",
+    "es": "El contenido no pesa"
+  },
+  "inventory_container_load": {
+    "en": "Inside %1$s/%2$s lb",
+    "ru": "\u0412\u043d\u0443\u0442\u0440\u0438 %1$s/%2$s \u0444\u043d\u0442",
+    "de": "Inhalt %1$s/%2$s Pfd.",
+    "fr": "Contenu %1$s/%2$s lb",
+    "es": "Dentro %1$s/%2$s lb"
+  },
+  "inventory_container_load_open": {
+    "en": "Inside %1$s lb",
+    "ru": "\u0412\u043d\u0443\u0442\u0440\u0438 %1$s \u0444\u043d\u0442",
+    "de": "Inhalt %1$s Pfd.",
+    "fr": "Contenu %1$s lb",
+    "es": "Dentro %1$s lb"
+  },
+  "inventory_container_weightless": {
+    "en": "Weightless contents",
+    "ru": "\u0421\u043e\u0434\u0435\u0440\u0436\u0438\u043c\u043e\u0435 \u0431\u0435\u0437 \u0432\u0435\u0441\u0430",
+    "de": "Inhalt ohne Gewicht",
+    "fr": "Contenu sans poids",
+    "es": "Contenido sin peso"
+  },
+  "inventory_container_empty": {
+    "en": "Empty",
+    "ru": "\u041f\u0443\u0441\u0442\u043e",
+    "de": "Leer",
+    "fr": "Vide",
+    "es": "Vac\u00edo"
+  },
+  "inventory_move": {
+    "maxChars": 14,
+    "en": "Move",
+    "ru": "\u041f\u0435\u0440\u0435\u043b\u043e\u0436\u0438\u0442\u044c",
+    "de": "Verschieben",
+    "fr": "D\u00e9placer",
+    "es": "Mover"
+  },
+  "inventory_move_title": {
+    "en": "Move: %1$s",
+    "ru": "\u041f\u0435\u0440\u0435\u043b\u043e\u0436\u0438\u0442\u044c: %1$s",
+    "de": "Verschieben: %1$s",
+    "fr": "D\u00e9placer : %1$s",
+    "es": "Mover: %1$s"
+  },
+  "inventory_move_carried": {
+    "en": "Carried",
+    "ru": "\u041f\u0440\u0438 \u0441\u0435\u0431\u0435",
+    "de": "Am K\u00f6rper",
+    "fr": "Sur soi",
+    "es": "Encima"
+  },
+  "inventory_tag_inside": {
+    "en": "In %1$s",
+    "ru": "\u0412\u043d\u0443\u0442\u0440\u0438: %1$s",
+    "de": "In %1$s",
+    "fr": "Dans %1$s",
+    "es": "En %1$s"
+  },
   "inventory_empty": {
     "en": "No items found.",
     "ru": "Предметы не найдены.",
@@ -2309,6 +2394,38 @@
     "de": "Aussehen",
     "fr": "Apparence",
     "es": "Apariencia"
+  },
+  "size_label": {
+    "maxChars": 40,
+    "en": "Size",
+    "ru": "\u0420\u0430\u0437\u043c\u0435\u0440",
+    "de": "Gr\u00f6\u00dfe",
+    "fr": "Taille",
+    "es": "Tama\u00f1o"
+  },
+  "size_small": {
+    "maxChars": 12,
+    "en": "Small",
+    "ru": "\u041c\u0430\u043b\u0435\u043d\u044c\u043a\u0438\u0439",
+    "de": "Klein",
+    "fr": "Petit",
+    "es": "Peque\u00f1o"
+  },
+  "size_medium": {
+    "maxChars": 12,
+    "en": "Medium",
+    "ru": "\u0421\u0440\u0435\u0434\u043d\u0438\u0439",
+    "de": "Mittel",
+    "fr": "Moyen",
+    "es": "Mediano"
+  },
+  "size_large": {
+    "maxChars": 12,
+    "en": "Large",
+    "ru": "\u0411\u043e\u043b\u044c\u0448\u043e\u0439",
+    "de": "Gro\u00df",
+    "fr": "Grand",
+    "es": "Grande"
   },
   "biography_character_history": {
     "en": "Character History",
@@ -3384,6 +3501,20 @@
     "de": "Hintergrund: %1$s",
     "fr": "Historique : %1$s",
     "es": "Trasfondo: %1$s"
+  },
+  "levelup_size_title": {
+    "en": "Size",
+    "ru": "\u0420\u0430\u0437\u043c\u0435\u0440",
+    "de": "Gr\u00f6\u00dfe",
+    "fr": "Taille",
+    "es": "Tama\u00f1o"
+  },
+  "levelup_summary_size": {
+    "en": "Size: %1$s",
+    "ru": "\u0420\u0430\u0437\u043c\u0435\u0440: %1$s",
+    "de": "Gr\u00f6\u00dfe: %1$s",
+    "fr": "Taille : %1$s",
+    "es": "Tama\u00f1o: %1$s"
   },
   "levelup_summary_base_scores": {
     "en": "Starting ability scores",

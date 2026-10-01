@@ -20,10 +20,19 @@ data class CharacterCatalog(
     val traits: Map<String, CatalogTrait> = emptyMap(),
     /** Labels of the trait kinds: "skills", "tool", "languages"... */
     val traitCategories: Map<String, CatalogText> = emptyMap(),
-    /** Equipment the advancements and starting equipment point at, by id. */
-    val equipment: Map<String, CatalogEquipmentRef> = emptyMap()
+    /** Equipment the advancements, starting equipment and containers point at, by id. */
+    val equipment: Map<String, CatalogEquipmentRef> = emptyMap(),
+    /** Bags, cases and equipment packs, by the id of their [equipment] entry. */
+    val containers: Map<String, CatalogContainer> = emptyMap()
 ) {
     val featuresById: Map<String, CatalogFeature> by lazy { features.associateBy { it.id } }
+
+    /** Containers sold by themselves (not a pack's waterskin), by [equipmentNameKey] of their English name. */
+    val containersByName: Map<String, CatalogContainer> by lazy {
+        containers.values.filter { it.inside == null }.mapNotNull { container ->
+            equipment[container.id]?.name?.en?.takeIf { it.isNotBlank() }?.let { equipmentNameKey(it) to container }
+        }.toMap()
+    }
     val classesByIdentifier: Map<String, CatalogClass> by lazy { classes.associateBy { it.identifier } }
     val subclassesByIdentifier: Map<String, CatalogSubclass> by lazy { subclasses.associateBy { it.identifier } }
 
@@ -114,7 +123,27 @@ data class CatalogBackground(
     val wealth: String = ""
 )
 
-data class CatalogEquipmentRef(val id: String, val name: CatalogText, val type: String)
+/** An item from Foundry's equipment; [weight] (lb) is known for what containers hold. */
+data class CatalogEquipmentRef(val id: String, val name: CatalogText, val type: String, val weight: Double? = null)
+
+/**
+ * A container from Foundry's equipment (a backpack, a pouch, an equipment pack): what it carries
+ * ([capacity] lb; nothing weighs inside a Bag of Holding), its own weight, price and text, and what
+ * it comes with. [inside] is the container it comes in (a pack's waterskin), null for one sold alone.
+ */
+data class CatalogContainer(
+    val id: String,
+    val capacity: Double?,
+    val weightlessContents: Boolean,
+    val weight: Double,
+    val price: Int?,
+    val priceUnit: String?,
+    val text: CatalogText,
+    val inside: String?,
+    val contents: List<CatalogContainerItem>
+)
+
+data class CatalogContainerItem(val itemId: String, val count: Int)
 
 /** Starting equipment as Foundry lays it out: groups of all ([Group.any] false) or one of their children. */
 sealed interface EquipmentNode {

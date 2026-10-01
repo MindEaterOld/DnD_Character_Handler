@@ -3,6 +3,8 @@ package com.dndcharacterhandler.data.catalog
 import com.dndcharacterhandler.domain.model.AdvancementStep
 import com.dndcharacterhandler.domain.model.CatalogBackground
 import com.dndcharacterhandler.domain.model.CatalogClass
+import com.dndcharacterhandler.domain.model.CatalogContainer
+import com.dndcharacterhandler.domain.model.CatalogContainerItem
 import com.dndcharacterhandler.domain.model.CatalogEquipmentRef
 import com.dndcharacterhandler.domain.model.EquipmentNode
 import com.dndcharacterhandler.domain.model.CatalogFeature
@@ -77,7 +79,21 @@ object CharacterCatalogParser {
             },
             traitCategories = root.optJSONObject("traits")?.optJSONObject("categories").entries { _, value -> value.asText() },
             equipment = root.optJSONObject("equipment").entries { id, value ->
-                CatalogEquipmentRef(id, value.text("name"), value.optString("type"))
+                CatalogEquipmentRef(id, value.text("name"), value.optString("type"), value.optDouble("weight").takeIf { !it.isNaN() })
+            },
+            containers = root.optJSONObject("containers").entries { id, value ->
+                val price = value.optJSONObject("price")
+                CatalogContainer(
+                    id = id,
+                    capacity = value.optDouble("capacity").takeIf { !it.isNaN() },
+                    weightlessContents = value.optBoolean("weightless"),
+                    weight = value.optDouble("weight", 0.0),
+                    price = price?.optDouble("value")?.takeIf { !it.isNaN() && it % 1.0 == 0.0 }?.toInt(),
+                    priceUnit = price?.optString("unit")?.ifBlank { null },
+                    text = value.text("text"),
+                    inside = value.optString("inside").ifBlank { null },
+                    contents = value.objects("contents").map { CatalogContainerItem(it.getString("item"), it.optInt("count", 1)) }
+                )
             }
         )
     }

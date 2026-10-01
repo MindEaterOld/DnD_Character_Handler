@@ -855,6 +855,82 @@ def slot_level_text(text, lang):
     return re.sub(r'\{=([^}]*@item\.level[^}]*)\}', lambda m: '(' + ' '.join(m.group(1).replace('@item.level', words).split()) + ')', text)
 
 
+# Pack contents named otherwise than the standalone item of their kind.
+CONTAINER_ALIASES = {
+    'hooded-lantern': 'lantern-hooded',
+    'bullseye-lantern': 'lantern-bullseye',
+    'fine-clothes': 'clothes-fine',
+    'map-or-scroll-case': 'case-map-or-scroll',
+}
+# Foundry's helpers stored in a container, not items: the Folding Boat's activation.
+CONTAINER_SKIPPED = {'boat-utility'}
+
+
+def container_catalog(catalog, equipment):
+    """Bags, cases and equipment packs for the inventory, keyed by short id: what they carry
+    (capacity in lb, weightless for a Bag of Holding), their weight, price and text, and what they
+    hold. Contents point at the standalone item of their kind (phbagTinderbox00 for a pack's
+    tinderbox), which both packs have, so they get the Russian name too: the Russian pack has the
+    containers but not their contents. Everything they point at goes into [equipment]."""
+    en_docs = load_json(os.path.join(EXPORT, 'containers.dnd5e.equipment24.json'), {'documents': []})['documents']
+    ru_docs = {d['id']: d for d in load_json(os.path.join(EXPORT, 'containers.ag-fifthpendium.equipment.json'), {'documents': []})['documents']}
+    if not en_docs:
+        print('   warning: no containers exported (export/containers.*.json): packs come as plain items')
+        return {}
+    ru_index = {uuid.split('.')[-1]: e for uuid, e in catalog.equipment_index.items() if uuid.startswith('Compendium.ag-fifthpendium')}
+    en_index = {uuid.split('.')[-1]: e for uuid, e in catalog.equipment_index.items() if uuid.startswith('Compendium.dnd5e.')}
+    canonical = {}
+    for short, entry in en_index.items():
+        if entry.get('identifier') and short in ru_index:
+            canonical.setdefault(entry['identifier'], short)
+    ru_names = load_json(os.path.join(TRANSLATIONS, 'ru_equipment.json'), {})
+    contents = collections.defaultdict(list)
+    for doc in en_docs:
+        if doc['container'] and doc['identifier'] not in CONTAINER_SKIPPED:
+            contents[doc['container']].append(doc)
+
+    def add_equipment(short, doc):
+        identifier = CONTAINER_ALIASES.get(doc['identifier'], doc['identifier'])
+        ru_entry = ru_index.get(short) or ru_index.get(canonical.get(identifier) or '')
+        ru = split_name(ru_entry['name'])[0] if ru_entry else ru_names.get(identifier, '')
+        if not ru:
+            catalog.warnings['container item without a Russian name (translations/ru_equipment.json)'] += 1
+        names = {'en': (en_index.get(short) or doc)['name'], 'ru': ru}
+        entry = equipment.setdefault(short, {'name': names, 'type': doc['type']})
+        if number(doc['weight']):
+            entry.setdefault('weight', number(doc['weight']))
+
+    containers = {}
+    for doc in en_docs:
+        if doc['type'] != 'container':
+            continue
+        entry = {'weight': number(doc['weight']) or 0}
+        capacity = number((doc.get('capacity') or {}).get('weight'))
+        if capacity:
+            entry['capacity'] = capacity
+        if doc['weightlessContents']:
+            entry['weightless'] = True
+        price = doc.get('price') or {}
+        if number(price.get('value')):
+            entry['price'] = {'value': number(price['value']), 'unit': price.get('denomination') or 'gp'}
+        ru_doc = ru_docs.get(doc['id'])
+        entry['text'] = {'en': catalog.text(doc['description'], 'en'), 'ru': catalog.text(ru_doc['description'], 'ru') if ru_doc else ''}
+        if doc['container']:
+            # A pack's waterskin: not a container to offer by itself.
+            entry['inside'] = doc['container']
+        items = []
+        for item in contents[doc['id']]:
+            identifier = CONTAINER_ALIASES.get(item['identifier'], item['identifier'])
+            short = item['id'] if item['type'] == 'container' else canonical.get(identifier) or item['id']
+            add_equipment(short, item)
+            items.append({'item': short, 'count': item['quantity'] or 1})
+        if items:
+            entry['contents'] = items
+        add_equipment(doc['id'], doc)
+        containers[doc['id']] = entry
+    return containers
+
+
 def spell_catalog(catalog, referenced):
     """Every spell Character Wizard can offer: the PHB's (Russian Fifthpendium, English SRD 5.2) and
     the supplements' (the options packs), with the spell lists of the classes, subclasses and
@@ -976,6 +1052,7 @@ def main():
     catalog = Catalog()
     result = build(catalog)
     result['spells'] = spell_catalog(catalog, result['spells'])
+    result['containers'] = container_catalog(catalog, result['equipment'])
     unmatched = attach_legacy(result, catalog)
     unknown_translations = apply_translations(result)
     missing = write_missing(result)

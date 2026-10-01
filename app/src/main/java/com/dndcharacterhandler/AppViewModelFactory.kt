@@ -50,6 +50,7 @@ class AppViewModelFactory(
             modelClass.isAssignableFrom(InventoryViewModel::class.java) -> InventoryViewModel(
                 characterRepository = container.characterRepository,
                 inventoryCatalogRepository = container.inventoryCatalogRepository,
+                characterCatalogRepository = container.characterCatalogRepository,
                 getCharacterBundleUseCase = container.getCharacterBundleUseCase,
                 selectedCharacterHolder = container.selectedCharacterHolder
             )

@@ -11,6 +11,8 @@ import com.dndcharacterhandler.domain.model.FeatureSource
 import com.dndcharacterhandler.domain.model.InventoryArmorDetails
 import com.dndcharacterhandler.domain.model.InventoryArmorType
 import com.dndcharacterhandler.domain.model.InventoryCategory
+import com.dndcharacterhandler.domain.model.InventoryContainerDetails
+import com.dndcharacterhandler.domain.model.CreatureSize
 import com.dndcharacterhandler.domain.model.InventoryItem
 import com.dndcharacterhandler.domain.model.InventoryWeaponClass
 import com.dndcharacterhandler.domain.model.InventoryWeaponDamage
@@ -73,6 +75,37 @@ class CharacterArchiveCodecTest {
             imported.characterBundle.character.armorClassMode
         )
         assertEquals(InventoryCategory.OTHER, imported.characterBundle.inventoryItems[0].category)
+    }
+
+    @Test
+    fun containersKeepWhatLiesInThemAndTheSizeStays() {
+        val base = defaultCharacterBundle(now = 0)
+        fun item(id: Long, name: String, category: InventoryCategory = InventoryCategory.OTHER, containerId: Long? = null) =
+            InventoryItem(id = id, name = name, category = category, weight = 1.0, quantity = 1, isEquipped = false, icon = "",
+                containerDetails = if (category == InventoryCategory.CONTAINER) InventoryContainerDetails(30.0, weightlessContents = true) else null,
+                containerId = containerId)
+        val original = base.copy(
+            character = base.character.copy(size = CreatureSize.SMALL),
+            inventoryItems = listOf(
+                item(5, "Backpack", InventoryCategory.CONTAINER),
+                item(6, "Tinderbox", containerId = 5),
+                item(7, "Waterskin", InventoryCategory.CONTAINER, containerId = 5),
+                item(8, "Water", containerId = 7),
+                item(9, "Rope")
+            )
+        )
+
+        val restored = roundTrip(original)
+
+        assertEquals(CreatureSize.SMALL, restored.character.size)
+        val items = restored.inventoryItems.associateBy { it.name }
+        val backpack = items.getValue("Backpack")
+        assertEquals(InventoryContainerDetails(30.0, weightlessContents = true), backpack.containerDetails)
+        assertEquals(backpack.id, items.getValue("Tinderbox").containerId)
+        assertEquals(backpack.id, items.getValue("Waterskin").containerId)
+        assertEquals(items.getValue("Waterskin").id, items.getValue("Water").containerId)
+        assertEquals(null, items.getValue("Rope").containerId)
+        assertTrue("ids are new", restored.inventoryItems.none { it.id > 0 })
     }
 
     @Test

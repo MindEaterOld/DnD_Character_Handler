@@ -9,6 +9,7 @@ import com.dndcharacterhandler.domain.model.CharacterProficiencyField
 import com.dndcharacterhandler.domain.model.CharacterTextField
 import com.dndcharacterhandler.domain.model.DarkvisionMode
 import com.dndcharacterhandler.domain.model.CombatResource
+import com.dndcharacterhandler.domain.model.CreatureSize
 import com.dndcharacterhandler.domain.model.Feature
 import com.dndcharacterhandler.domain.model.InventoryItem
 import com.dndcharacterhandler.domain.model.Note
@@ -164,6 +165,12 @@ class CharacterRepositoryImpl(
         }
     }
 
+    override suspend fun updateSize(characterId: Long, size: CreatureSize) {
+        writeMutex.withLock {
+            characterDao.updateSize(characterId, size, System.currentTimeMillis())
+        }
+    }
+
     override suspend fun updateAbilityScore(
         characterId: Long,
         ability: SpellcastingAbility,
@@ -246,6 +253,16 @@ class CharacterRepositoryImpl(
                 updatedAt = System.currentTimeMillis()
             )
         }
+
+    override suspend fun addInventoryItems(characterId: Long, items: List<InventoryItem>) {
+        writeMutex.withLock {
+            writeCoordinator.addInventoryItemsForCharacter(
+                characterId = characterId,
+                items = items.map { it.toEntity(characterId) },
+                updatedAt = System.currentTimeMillis()
+            )
+        }
+    }
 
     override suspend fun deleteInventoryItem(characterId: Long, itemId: Long) {
         writeMutex.withLock {

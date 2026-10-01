@@ -5,6 +5,15 @@ enum class AttackCalculationMode { AUTOMATIC, MANUAL }
 enum class DarkvisionMode { AUTO, MANUAL }
 enum class SpellcastingAbility { STRENGTH, DEXTERITY, CONSTITUTION, INTELLIGENCE, WISDOM, CHARISMA }
 
+/** The character's size, as its species gives it (Foundry's "sm", "med", "lg"). */
+enum class CreatureSize(val foundryKey: String) {
+    SMALL("sm"), MEDIUM("med"), LARGE("lg");
+
+    companion object {
+        fun ofFoundry(key: String): CreatureSize? = entries.firstOrNull { it.foundryKey == key }
+    }
+}
+
 data class Character(
     val id: Long = 0,
     val name: String,
@@ -64,6 +73,7 @@ data class Character(
     val eyes: String,
     val hair: String,
     val skin: String,
+    val size: CreatureSize = CreatureSize.MEDIUM,
     val personalityTraits: String,
     val ideals: String,
     val bonds: String,
@@ -126,7 +136,7 @@ data class CombatResource(
     /** Catalog feature whose uses this tracks (Rage, Superiority Dice...), kept in step by level-ups. */
     val catalogId: String? = null
 )
-enum class InventoryCategory { WEAPON, ARMOR, CONSUMABLE, OTHER }
+enum class InventoryCategory { WEAPON, ARMOR, CONSUMABLE, CONTAINER, OTHER }
 enum class InventoryArmorType { LIGHT, MEDIUM, HEAVY, SHIELD }
 enum class InventoryWeaponClass { SIMPLE, MARTIAL }
 enum class InventoryWeaponRangeType { MELEE, RANGED }
@@ -167,6 +177,15 @@ data class InventoryWeaponDetails(
     val properties: Set<InventoryWeaponProperty> = emptySet()
 )
 
+/**
+ * What a container (a backpack, a pouch, an equipment pack) carries: at most [capacity] lb, when it
+ * says; the contents of a Bag of Holding ([weightlessContents]) weigh nothing.
+ */
+data class InventoryContainerDetails(
+    val capacity: Double? = null,
+    val weightlessContents: Boolean = false
+)
+
 data class InventoryItem(
     val id: Long = 0,
     val name: String,
@@ -182,9 +201,25 @@ data class InventoryItem(
     val costUnit: String? = null,
     val armorDetails: InventoryArmorDetails? = null,
     val weaponDetails: InventoryWeaponDetails? = null,
+    /** Set for a [InventoryCategory.CONTAINER]. */
+    val containerDetails: InventoryContainerDetails? = null,
+    /**
+     * The container item this one lies in, or null when the character carries it as is. Items new
+     * to a bundle may point at a container through its negative local id (see [NewItemIds]).
+     */
+    val containerId: Long? = null,
     /** [InventoryCatalogItem.id] this item was added from, or null for hand-made items. */
     val catalogId: String? = null
 )
+
+/**
+ * Ids for items new to a bundle, so their contents can point at them through [InventoryItem.containerId]
+ * before they are saved: -1, -2... Saving gives them real ids and remaps the references.
+ */
+class NewItemIds {
+    private var last = 0L
+    fun next(): Long = --last
+}
 data class Spell(
     val id: Long = 0,
     val catalogId: String? = null,

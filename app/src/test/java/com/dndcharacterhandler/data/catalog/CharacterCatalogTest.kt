@@ -4,6 +4,7 @@ import com.dndcharacterhandler.data.repository.featureCatalogItems
 import com.dndcharacterhandler.domain.model.AdvancementStep
 import com.dndcharacterhandler.domain.model.CharacterCatalog
 import com.dndcharacterhandler.domain.model.ClassRestriction
+import com.dndcharacterhandler.domain.model.containerNamed
 import com.dndcharacterhandler.domain.model.FeatureCatalogGroup
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -148,6 +149,23 @@ class CharacterCatalogTest {
         assertNotNull(invocation)
         // Entries only published in Russian still show a name in English mode.
         assertTrue(items.all { it.name.isNotBlank() })
+    }
+
+    @Test
+    fun packsAreContainersWithTheirContentsInBothLanguages() {
+        val explorers = catalog.containerNamed("Explorer's Pack")
+        assertNotNull(explorers)
+        assertEquals(30.0, explorers!!.capacity)
+        assertEquals("Комплект первопроходца", catalog.equipment.getValue(explorers.id).name.ru)
+        val contents = explorers.contents.map { catalog.equipment.getValue(it.itemId).name.en }
+        assertTrue(contents.toString(), contents.containsAll(listOf("Bedroll", "Rope", "Tinderbox", "Torch", "Rations", "Waterskin")))
+        assertTrue(catalog.containerNamed("Bag of Holding")!!.weightlessContents)
+        // A pack's own waterskin isn't offered by itself.
+        assertEquals(null, catalog.containersByName.values.firstOrNull { it.inside != null })
+        catalog.containers.values.flatMap { it.contents }.forEach { content ->
+            val name = catalog.equipment.getValue(content.itemId).name
+            assertTrue("${content.itemId} has both names: $name", name.en.isNotBlank() && name.ru.isNotBlank())
+        }
     }
 
     @Test

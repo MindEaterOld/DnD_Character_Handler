@@ -13,6 +13,7 @@ import com.dndcharacterhandler.domain.model.FeatureSource
 import com.dndcharacterhandler.domain.model.InventoryArmorDetails
 import com.dndcharacterhandler.domain.model.InventoryArmorType
 import com.dndcharacterhandler.domain.model.InventoryCategory
+import com.dndcharacterhandler.domain.model.InventoryContainerDetails
 import com.dndcharacterhandler.domain.model.InventoryItem
 import com.dndcharacterhandler.domain.model.InventoryWeaponClass
 import com.dndcharacterhandler.domain.model.InventoryWeaponDamage
@@ -20,6 +21,7 @@ import com.dndcharacterhandler.domain.model.InventoryWeaponDetails
 import com.dndcharacterhandler.domain.model.InventoryWeaponProperty
 import com.dndcharacterhandler.domain.model.InventoryWeaponRangeType
 import com.dndcharacterhandler.domain.model.Note
+import com.dndcharacterhandler.domain.model.CreatureSize
 import com.dndcharacterhandler.domain.model.Skill
 import com.dndcharacterhandler.domain.model.Spell
 import com.dndcharacterhandler.domain.model.SpellcastingAbility
@@ -28,7 +30,9 @@ import org.json.JSONObject
 import java.io.File
 
 // 18: armor/shield magicalBonus is meaningful (adds to AC).
-private const val SCHEMA_VERSION = 20
+// 21: the character's size; containers (containerDetails) and the container an item lies in
+//     (containerIndex: its index in inventoryItems).
+private const val SCHEMA_VERSION = 21
 
 data class ImportedArchive(
     val characterBundle: CharacterBundle,
@@ -98,6 +102,7 @@ fun CharacterBundle.toArchiveManifest(
         put("eyes", character.eyes)
         put("hair", character.hair)
         put("skin", character.skin)
+        put("size", character.size.name)
         put("personalityTraits", character.personalityTraits)
         put("ideals", character.ideals)
         put("bonds", character.bonds)
@@ -152,6 +157,7 @@ fun CharacterBundle.toArchiveManifest(
                 resource.catalogId?.let { put("catalogId", it) }
             }
         }))
+        val itemIndex = inventoryItems.mapIndexedNotNull { index, item -> item.id.takeIf { it != 0L }?.let { it to index } }.toMap()
         put("inventoryItems", JSONArray(inventoryItems.mapIndexed { index, item ->
             JSONObject().apply {
                 put("name", item.name)
@@ -167,6 +173,13 @@ fun CharacterBundle.toArchiveManifest(
                 put("costUnit", item.costUnit)
                 put("armorDetails", item.armorDetails?.toJson())
                 put("weaponDetails", item.weaponDetails?.toJson())
+                item.containerDetails?.let { details ->
+                    put("containerDetails", JSONObject().apply {
+                        put("capacity", details.capacity)
+                        put("weightlessContents", details.weightlessContents)
+                    })
+                }
+                item.containerId?.let(itemIndex::get)?.takeIf { it != index }?.let { put("containerIndex", it) }
                 // Optional and additive: older app versions just ignore it.
                 item.catalogId?.let { put("catalogId", it) }
             }
@@ -349,6 +362,7 @@ fun archiveManifestToCharacterBundle(
         eyes = characterJson.optString("eyes"),
         hair = characterJson.optString("hair"),
         skin = characterJson.optString("skin"),
+        size = characterJson.optString("size").toEnumOrDefault(CreatureSize.MEDIUM),
         personalityTraits = characterJson.optString("personalityTraits"),
         ideals = characterJson.optString("ideals"),
         bonds = characterJson.optString("bonds"),
@@ -438,11 +452,18 @@ private fun JSONArray.toCombatResourceList(): List<CombatResource> =
 private fun JSONArray.toInventoryItemList(
     resolveAssetReference: (String?) -> String?,
     schemaVersion: Int
-): List<InventoryItem> =
-    (0 until length()).map { index ->
+): List<InventoryItem> {
+    fun containerIndexOf(index: Int): Int? =
+        getJSONObject(index).optNullableInt("containerIndex")?.takeIf { it in 0 until length() && it != index }
+    // Containers something lies in get a negative id for their contents to point at; saving gives
+    // every item a real one.
+    val containers = (0 until length()).mapNotNull(::containerIndexOf).toSet()
+    return (0 until length()).map { index ->
         getJSONObject(index).let { json ->
             val category = json.optString("category").toEnumOrDefault(InventoryCategory.OTHER)
+            val containerIndex = containerIndexOf(index)
             InventoryItem(
+                id = if (index in containers) -(index + 1L) else 0L,
                 name = json.optString("name"),
                 description = json.optString("description"),
                 isMagical = json.optBoolean("isMagical", false),
@@ -461,10 +482,18 @@ private fun JSONArray.toInventoryItemList(
                 costUnit = json.optNullableString("costUnit"),
                 armorDetails = json.optJSONObject("armorDetails")?.toArmorDetails(),
                 weaponDetails = json.optJSONObject("weaponDetails")?.toWeaponDetails(),
+                containerDetails = json.optJSONObject("containerDetails")?.let { details ->
+                    InventoryContainerDetails(
+                        capacity = if (details.isNull("capacity")) null else details.optDouble("capacity").takeIf { !it.isNaN() },
+                        weightlessContents = details.optBoolean("weightlessContents")
+                    )
+                } ?: if (category == InventoryCategory.CONTAINER) InventoryContainerDetails() else null,
+                containerId = containerIndex?.let { -(it + 1L) },
                 catalogId = json.optNullableString("catalogId")
             )
         }
     }
+}
 
 private fun InventoryArmorDetails.toJson(): JSONObject =
     JSONObject().apply {

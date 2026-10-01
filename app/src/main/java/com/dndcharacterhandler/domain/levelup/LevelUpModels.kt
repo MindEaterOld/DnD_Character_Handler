@@ -10,6 +10,7 @@ import com.dndcharacterhandler.domain.model.CatalogSpellRef
 import com.dndcharacterhandler.domain.model.CatalogSubclass
 import com.dndcharacterhandler.domain.model.CatalogText
 import com.dndcharacterhandler.domain.model.CharacterClassEntry
+import com.dndcharacterhandler.domain.model.CreatureSize
 import com.dndcharacterhandler.domain.rules.MulticlassRequirement
 import com.dndcharacterhandler.domain.rules.SpellSlotTable
 
@@ -65,6 +66,9 @@ sealed interface LevelUpAnswer {
 
     /** One of the starting equipment options, and the pick for each of its choices (by option id). */
     data class Equipment(val option: Int, val picks: List<String> = emptyList()) : LevelUpAnswer
+
+    /** The species' size, where it may be one of several. */
+    data class Size(val size: CreatureSize) : LevelUpAnswer
 }
 
 /** Everything chosen so far; pages are rebuilt from it after every answer. */
@@ -234,6 +238,11 @@ sealed interface LevelUpPage {
         override val characterLevel = 1
     }
 
+    /** The species' size, where it may be one of several (a human is Small or Medium). */
+    data class Size(override val key: String, val source: CatalogText, val sizes: List<CreatureSize>) : LevelUpPage {
+        override val characterLevel = 1
+    }
+
     /** Starting equipment of the first class or of the background. */
     data class Equipment(
         override val key: String,
@@ -294,7 +303,9 @@ data class LevelUpSummary(
     /** Ability scores the new character starts with, before bonuses; null when they stay. */
     val baseScores: Map<String, Int>? = null,
     val equipment: List<EquipmentPick> = emptyList(),
-    val coins: Map<String, Int> = emptyMap()
+    val coins: Map<String, Int> = emptyMap(),
+    /** The size the species gives; null when it stays. */
+    val size: CreatureSize? = null
 )
 
 /** The pages for a draft, and whether every one of them is answered. */

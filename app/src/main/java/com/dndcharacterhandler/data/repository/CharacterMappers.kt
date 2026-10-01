@@ -17,6 +17,8 @@ import com.dndcharacterhandler.domain.model.CharacterBundle
 import com.dndcharacterhandler.domain.model.CombatResource
 import com.dndcharacterhandler.domain.model.Feature
 import com.dndcharacterhandler.domain.model.InventoryArmorDetails
+import com.dndcharacterhandler.domain.model.InventoryCategory
+import com.dndcharacterhandler.domain.model.InventoryContainerDetails
 import com.dndcharacterhandler.domain.model.InventoryItem
 import com.dndcharacterhandler.domain.model.InventoryWeaponDamage
 import com.dndcharacterhandler.domain.model.InventoryWeaponDetails
@@ -167,6 +169,7 @@ fun CharacterEntity.toDomain(): Character =
         eyes = eyes,
         hair = hair,
         skin = skin,
+        size = size,
         personalityTraits = personalityTraits,
         ideals = ideals,
         bonds = bonds,
@@ -242,6 +245,12 @@ fun InventoryItemEntity.toDomain(): InventoryItem =
         } else {
             null
         },
+        containerDetails = if (category == InventoryCategory.CONTAINER) {
+            InventoryContainerDetails(capacity = containerCapacity, weightlessContents = containerWeightlessContents)
+        } else {
+            null
+        },
+        containerId = containerId,
         catalogId = catalogId
     )
 
@@ -305,6 +314,7 @@ fun Character.toEntity(): CharacterEntity =
         eyes = eyes,
         hair = hair,
         skin = skin,
+        size = size,
         personalityTraits = personalityTraits,
         ideals = ideals,
         bonds = bonds,
@@ -396,6 +406,9 @@ fun InventoryItem.toEntity(characterId: Long): InventoryItemEntity =
             ?.map(InventoryWeaponProperty::name)
             ?.sorted()
             ?.joinToString(","),
+        containerCapacity = containerDetails?.capacity,
+        containerWeightlessContents = containerDetails?.weightlessContents ?: false,
+        containerId = containerId,
         catalogId = catalogId
     )
 

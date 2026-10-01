@@ -53,6 +53,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.dndcharacterhandler.domain.model.Character
 import com.dndcharacterhandler.domain.model.CharacterBundle
+import com.dndcharacterhandler.domain.model.CreatureSize
 import com.dndcharacterhandler.domain.model.CharacterTextField
 import com.dndcharacterhandler.domain.repository.CharacterRepository
 import com.dndcharacterhandler.domain.usecase.GetCharacterBundleUseCase
@@ -63,6 +64,7 @@ import com.dndcharacterhandler.presentation.components.EditDialog
 import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
 import com.dndcharacterhandler.presentation.components.ScreenBackground
 import com.dndcharacterhandler.presentation.components.ScreenTopActions
+import com.dndcharacterhandler.presentation.components.SizeToggle
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 import kotlinx.coroutines.launch
@@ -81,6 +83,13 @@ class BiographyViewModel(
                 field = CharacterTextField.BIOGRAPHY,
                 value = value
             )
+        }
+    }
+
+    fun updateSize(characterBundle: CharacterBundle, size: CreatureSize) {
+        if (characterBundle.character.size == size) return
+        viewModelScope.launch {
+            characterRepository.updateSize(characterBundle.character.id, size)
         }
     }
 
@@ -147,7 +156,8 @@ fun BiographyScreen(
         onOpenDrawer = onOpenDrawer,
         onOpenDice = onOpenDice,
         onUpdateBiography = viewModel::updateBiography,
-        onUpdateField = viewModel::updateBiographyField
+        onUpdateField = viewModel::updateBiographyField,
+        onUpdateSize = viewModel::updateSize
     )
 }
 
@@ -157,7 +167,8 @@ internal fun BiographyContent(
     onOpenDrawer: () -> Unit,
     onOpenDice: () -> Unit,
     onUpdateBiography: (CharacterBundle, String) -> Unit = { _, _ -> },
-    onUpdateField: (CharacterBundle, BiographyField, String) -> Unit = { _, _, _ -> }
+    onUpdateField: (CharacterBundle, BiographyField, String) -> Unit = { _, _, _ -> },
+    onUpdateSize: (CharacterBundle, CreatureSize) -> Unit = { _, _ -> }
 ) {
     val colors = LocalDesignTokens.current.colors
     val character = characterBundle?.character
@@ -225,6 +236,13 @@ internal fun BiographyContent(
                 BiographySection(
                     modifier = Modifier.padding(top = 14.dp),
                     title = text("biography_appearance"),
+                    top = {
+                        SizeToggle(
+                            selected = resolvedCharacter.size,
+                            onSelect = { onUpdateSize(resolvedBundle, it) },
+                            modifier = Modifier.padding(bottom = 4.dp)
+                        )
+                    },
                     rows = listOf(
                         BiographyRow(BiographyField.AGE, Icons.Outlined.Inventory2, text("biography_age"), resolvedCharacter.age),
                         BiographyRow(BiographyField.GENDER, Icons.Outlined.Badge, text("biography_gender"), localizedGender(resolvedCharacter.gender)),
@@ -270,6 +288,8 @@ private fun BiographySection(
     rows: List<BiographyRow>,
     modifier: Modifier = Modifier,
     valueWeight: Float = 1f,
+    /** Shown between the title and the rows (the size of the appearance section). */
+    top: (@Composable () -> Unit)? = null,
     onRowClick: (BiographyRow) -> Unit = {}
 ) {
     val colors = LocalDesignTokens.current.colors
@@ -278,6 +298,7 @@ private fun BiographySection(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         BiographySectionTitle(title)
+        top?.invoke()
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(10.dp),

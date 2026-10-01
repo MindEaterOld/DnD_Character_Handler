@@ -8,6 +8,7 @@ import androidx.room.Relation
 import androidx.room.Embedded
 import com.dndcharacterhandler.domain.model.ArmorClassMode
 import com.dndcharacterhandler.domain.model.AttackCalculationMode
+import com.dndcharacterhandler.domain.model.CreatureSize
 import com.dndcharacterhandler.domain.model.DarkvisionMode
 import com.dndcharacterhandler.domain.model.FeatureSource
 import com.dndcharacterhandler.domain.model.InventoryArmorType
@@ -76,6 +77,7 @@ data class CharacterEntity(
     val eyes: String,
     val hair: String,
     val skin: String,
+    val size: CreatureSize = CreatureSize.MEDIUM,
     val personalityTraits: String,
     val ideals: String,
     val bonds: String,
@@ -210,6 +212,10 @@ data class InventoryItemEntity(
     val weaponTwoHandedDamageDice: String?,
     val weaponTwoHandedDamageType: String?,
     val weaponProperties: String?,
+    val containerCapacity: Double? = null,
+    val containerWeightlessContents: Boolean = false,
+    /** The inventory item this one lies in (no foreign key: a deleted container's contents are moved out by the app). */
+    val containerId: Long? = null,
     val catalogId: String? = null
 )
 
