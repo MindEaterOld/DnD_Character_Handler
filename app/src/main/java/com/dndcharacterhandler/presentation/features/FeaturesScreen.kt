@@ -2,6 +2,8 @@ package com.dndcharacterhandler.presentation.features
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -23,18 +24,23 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.AutoStories
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.ArrowDropDown
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
@@ -790,6 +796,7 @@ internal fun FeatureEditDialog(
     onDelete: (() -> Unit)? = null,
     renderText: (String) -> String = { it }
 ) {
+    val colors = LocalDesignTokens.current.colors
     // Catalog texts keep their formulas ({=...}, see CatalogFormulaText); the dialog shows this
     // character's numbers, and an untouched text is saved with its formulas so it keeps following them.
     val shownDescription = remember(feature) { renderText(feature.description) }
@@ -801,12 +808,17 @@ internal fun FeatureEditDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(text("features_edit_feature")) },
+        title = { Text(text(if (feature.id == 0L) "features_add_feature" else "features_edit_feature")) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            // Scrolls as a whole, so a long description never pushes the buttons away.
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
+                    modifier = Modifier.fillMaxWidth(),
                     label = { Text(text("features_name")) },
                     singleLine = true
                 )
@@ -814,117 +826,100 @@ internal fun FeatureEditDialog(
                     value = source,
                     onValueChange = { source = it }
                 )
-                OutlinedTextField(
-                    value = category,
-                    onValueChange = { category = it },
-                    label = { Text(text("features_category")) },
-                    singleLine = true
-                )
-                OutlinedTextField(
-                    value = level,
-                    onValueChange = { value -> level = value.filter(Char::isDigit) },
-                    label = { Text(text("features_level")) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                )
+                // The level is at most two digits: a narrow field next to the category.
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    OutlinedTextField(
+                        value = category,
+                        onValueChange = { category = it },
+                        modifier = Modifier.weight(1f),
+                        label = { Text(text("features_category")) },
+                        singleLine = true
+                    )
+                    OutlinedTextField(
+                        value = level,
+                        onValueChange = { value -> level = value.filter(Char::isDigit).take(2) },
+                        modifier = Modifier.width(96.dp),
+                        label = { Text(text("features_level")) },
+                        singleLine = true,
+                        textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    )
+                }
                 OutlinedTextField(
                     value = description,
                     onValueChange = { description = it },
+                    modifier = Modifier.fillMaxWidth(),
                     label = { Text(text("features_description")) },
-                    minLines = 4
+                    minLines = 4,
+                    maxLines = 10
                 )
             }
         },
         confirmButton = {
-            Button(
-                onClick = {
-                    onSave(
-                        feature.copy(
-                            name = name.trim(),
-                            description = if (description == shownDescription) feature.description else description.trim(),
-                            level = level.toIntOrNull(),
-                            source = source,
-                            category = category.trim()
-                        )
-                    )
-                }
-            ) {
-                Text(text("common_save"))
-            }
-        },
-        dismissButton = {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            // One row: the destructive action apart on the left, Cancel and Save together on the right.
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 if (onDelete != null) {
-                    TextButton(onClick = onDelete) {
-                        Text(text("inventory_delete_action"))
+                    IconButton(onClick = onDelete) {
+                        Icon(
+                            imageVector = Icons.Outlined.Delete,
+                            contentDescription = text("inventory_delete_action"),
+                            tint = colors.accent.dangerHpZero
+                        )
                     }
                 }
+                Spacer(modifier = Modifier.weight(1f))
                 TextButton(onClick = onDismiss) {
                     Text(text("common_cancel"))
+                }
+                Button(
+                    onClick = {
+                        onSave(
+                            feature.copy(
+                                name = name.trim(),
+                                description = if (description == shownDescription) feature.description else description.trim(),
+                                level = level.toIntOrNull(),
+                                source = source,
+                                category = category.trim()
+                            )
+                        )
+                    }
+                ) {
+                    Text(text("common_save"))
                 }
             }
         }
     )
 }
 
+/** The source as a dropdown that looks like the other fields of the dialog. */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun FeatureSourceField(
     value: FeatureSource,
     onValueChange: (FeatureSource) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-
-    Column {
-        Text(
-            text = text("features_source"),
-            style = MaterialTheme.typography.labelMedium,
-            color = LocalDesignTokens.current.colors.text.muted,
-            modifier = Modifier.padding(bottom = 4.dp)
+    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
+        OutlinedTextField(
+            value = featureSourceLabel(value),
+            onValueChange = {},
+            modifier = Modifier
+                .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                .fillMaxWidth(),
+            readOnly = true,
+            singleLine = true,
+            label = { Text(text("features_source")) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) }
         )
-        Box {
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { expanded = true },
-                shape = RoundedCornerShape(8.dp),
-                color = LocalDesignTokens.current.colors.surface.card.copy(alpha = 0.62f),
-                border = BorderStroke(1.dp, LocalDesignTokens.current.colors.border.muted)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 14.dp, vertical = 14.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = featureSourceLabel(value),
-                        modifier = Modifier.weight(1f),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = LocalDesignTokens.current.colors.text.primary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Icon(
-                        imageVector = Icons.Outlined.ArrowDropDown,
-                        contentDescription = null,
-                        tint = LocalDesignTokens.current.colors.text.muted
-                    )
-                }
-            }
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                modifier = Modifier.widthIn(min = 220.dp)
-            ) {
-                featureSourceOrder.forEach { option ->
-                    DropdownMenuItem(
-                        text = { Text(featureSourceLabel(option)) },
-                        onClick = {
-                            onValueChange(option)
-                            expanded = false
-                        }
-                    )
-                }
+        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            featureSourceOrder.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(featureSourceLabel(option)) },
+                    onClick = {
+                        onValueChange(option)
+                        expanded = false
+                    }
+                )
             }
         }
     }
