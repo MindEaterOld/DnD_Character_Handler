@@ -306,7 +306,6 @@ internal fun FeaturesContent(
                                 .height(SummaryCardHeight),
                             label = text("placeholder_class"),
                             value = character.characterClass,
-                            icon = Icons.Outlined.Shield,
                             // The class is chosen in the level-up wizard, not typed in.
                             onClick = { classWizardTarget(character)?.let(onOpenLevelUp) }
                         )
@@ -316,7 +315,6 @@ internal fun FeaturesContent(
                                 .height(SummaryCardHeight),
                             label = text("placeholder_race"),
                             value = character.race,
-                            icon = Icons.Outlined.Person,
                             onClick = {
                                 summaryDraft = character.race
                                 editingSummaryField = FeatureSummaryField.RACE
@@ -328,7 +326,6 @@ internal fun FeaturesContent(
                                 .height(SummaryCardHeight),
                             label = text("biography_background"),
                             value = character.background,
-                            icon = Icons.Outlined.AutoStories,
                             onClick = {
                                 summaryDraft = character.background
                                 editingSummaryField = FeatureSummaryField.BACKGROUND
@@ -454,17 +451,16 @@ internal fun FeaturesContent(
 private enum class FeatureSummaryField { RACE, BACKGROUND }
 
 /** The class, species and background cards, their label on the border included. */
-private val SummaryCardHeight = 104.dp
+private val SummaryCardHeight = 80.dp
 
 /**
- * Class, species or background: the label sits in a gap of the top border, like an outlined text
- * field's, and the card shows the icon and the value.
+ * Class, species or background: the label sits centred in a gap of the top border, like an
+ * outlined text field's, and the card shows the value.
  */
 @Composable
 private fun FeatureSummaryCard(
     label: String,
     value: String,
-    icon: ImageVector,
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null
 ) {
@@ -509,14 +505,8 @@ private fun FeatureSummaryCard(
                     .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
                     .padding(horizontal = 10.dp, vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterVertically)
+                verticalArrangement = Arrangement.Center
             ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = colors.text.label,
-                    modifier = Modifier.size(20.dp)
-                )
                 Text(
                     text = value.ifBlank { "—" },
                     style = MaterialTheme.typography.titleMedium,
@@ -528,7 +518,7 @@ private fun FeatureSummaryCard(
             }
         }
     ) { measurables, constraints ->
-        // The label starts where an outlined field's does and straddles the top border.
+        // The label is centred, clear of the rounded corners, and straddles the top border.
         val inset = 12.dp.roundToPx()
         val labelPlaceable = measurables[0].measure(
             Constraints(maxWidth = (constraints.maxWidth - 2 * inset).coerceAtLeast(0))
@@ -537,10 +527,11 @@ private fun FeatureSummaryCard(
         val width = constraints.maxWidth
         val height = constraints.maxHeight
         val cardPlaceable = measurables[1].measure(Constraints.fixed(width, (height - top).coerceAtLeast(0)))
-        notch = Rect(inset.toFloat(), 0f, (inset + labelPlaceable.width).toFloat(), labelPlaceable.height.toFloat())
+        val labelX = (width - labelPlaceable.width) / 2
+        notch = Rect(labelX.toFloat(), 0f, (labelX + labelPlaceable.width).toFloat(), labelPlaceable.height.toFloat())
         layout(width, height) {
             cardPlaceable.place(0, top)
-            labelPlaceable.place(inset, 0)
+            labelPlaceable.place(labelX, 0)
         }
     }
 }
