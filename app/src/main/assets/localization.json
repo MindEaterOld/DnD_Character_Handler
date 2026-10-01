@@ -3377,11 +3377,11 @@
     "es": "Opci\u00f3n %1$s"
   },
   "levelup_equipment_gold": {
-    "en": "Gold instead: %1$s",
-    "ru": "\u0417\u043e\u043b\u043e\u0442\u043e \u0432\u043c\u0435\u0441\u0442\u043e \u0441\u043d\u0430\u0440\u044f\u0436\u0435\u043d\u0438\u044f: %1$s",
-    "de": "Gold statt Ausr\u00fcstung: %1$s",
-    "fr": "De l'or \u00e0 la place : %1$s",
-    "es": "Oro en su lugar: %1$s"
+    "en": "Gold instead",
+    "ru": "\u0417\u043e\u043b\u043e\u0442\u043e \u0432\u043c\u0435\u0441\u0442\u043e \u0441\u043d\u0430\u0440\u044f\u0436\u0435\u043d\u0438\u044f",
+    "de": "Gold statt Ausr\u00fcstung",
+    "fr": "De l'or \u00e0 la place",
+    "es": "Oro en su lugar"
   },
   "levelup_equipment_choose": {
     "en": "Of your choice",
@@ -3424,13 +3424,6 @@
     "de": "Ausr\u00fcstung",
     "fr": "\u00c9quipement",
     "es": "Equipo"
-  },
-  "levelup_summary_coins": {
-    "en": "Coins: %1$s",
-    "ru": "\u0414\u0435\u043d\u044c\u0433\u0438: %1$s",
-    "de": "M\u00fcnzen: %1$s",
-    "fr": "Pi\u00e8ces : %1$s",
-    "es": "Monedas: %1$s"
   },
   "levelup_level_down_unavailable": {
     "en": "Character Wizard can't take levels back yet: that comes later. For now the level can only go up.",

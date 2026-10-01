@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -72,6 +73,8 @@ import com.dndcharacterhandler.domain.levelup.STANDARD_ARRAY
 import com.dndcharacterhandler.domain.levelup.TraitOption
 import com.dndcharacterhandler.domain.model.AdvancementStep
 import com.dndcharacterhandler.domain.model.AppLanguage
+import com.dndcharacterhandler.domain.model.CatalogEquipmentRef
+import com.dndcharacterhandler.domain.model.InventoryItem
 import com.dndcharacterhandler.domain.model.CatalogFeature
 import com.dndcharacterhandler.domain.model.CatalogText
 import com.dndcharacterhandler.domain.model.CharacterBundle
@@ -89,6 +92,9 @@ import com.dndcharacterhandler.presentation.dice.DieIcon
 import com.dndcharacterhandler.presentation.dice.dieTypeOf
 import com.dndcharacterhandler.presentation.dice.DieType
 import com.dndcharacterhandler.presentation.dice.LocalDiceSkin
+import com.dndcharacterhandler.presentation.inventory.CurrencyCoinCluster
+import com.dndcharacterhandler.presentation.inventory.CurrencyType
+import com.dndcharacterhandler.presentation.inventory.InventorySectionCard
 import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
@@ -102,6 +108,8 @@ internal fun LevelUpWizard(
     bundle: CharacterBundle,
     catalog: CharacterCatalog,
     targetLevel: Int,
+    /** Starting equipment as the inventory will hold it (the app's item catalog where it matches). */
+    equipmentItem: (CatalogEquipmentRef, Int) -> InventoryItem,
     onDismiss: () -> Unit,
     onApply: (LevelUpDraft) -> Unit
 ) {
@@ -119,6 +127,9 @@ internal fun LevelUpWizard(
     // Texts show the numbers of the character as it will be after the level-up.
     val context = remember(summary, bundle) { summary?.let { formulaContext(bundle, it, catalog) } }
     val render: (CatalogText) -> String = { value -> formulas.render(value.get(russian), russian, context) }
+    // The armour tags show the Dexterity the character will have.
+    val dexterity = (summary?.baseScores ?: bundle.character.abilityScores())["dex"]
+        ?.plus(summary?.abilityIncreases?.get("dex") ?: 0) ?: bundle.character.dexterity
     val answer = draft.answers[page.key]
     fun setAnswer(value: LevelUpAnswer) {
         draft = draft.copy(answers = draft.answers + (page.key to value))
@@ -215,8 +226,10 @@ internal fun LevelUpWizard(
                         answer = answer as? LevelUpAnswer.Origin,
                         onAnswer = ::setAnswer
                     )
-                    is LevelUpPage.Equipment -> equipmentPage(strings, page, answer as? LevelUpAnswer.Equipment, russian, engine, ::setAnswer)
-                    is LevelUpPage.Summary -> summaryPage(strings, page.summary, russian, catalog)
+                    is LevelUpPage.Equipment -> equipmentPage(
+                        strings, page, answer as? LevelUpAnswer.Equipment, russian, engine, equipmentItem, dexterity, ::setAnswer
+                    )
+                    is LevelUpPage.Summary -> summaryPage(strings, page.summary, russian, catalog, equipmentItem, dexterity)
                 }
             }
             Row(
@@ -824,12 +837,18 @@ private fun LazyListScope.originPage(
     }
 }
 
+/**
+ * The starting equipment options: each one's items as the inventory lists them, its "of your
+ * choice" items and its coins; or just the gold.
+ */
 private fun LazyListScope.equipmentPage(
     strings: LocalizedStrings,
     page: LevelUpPage.Equipment,
     answer: LevelUpAnswer.Equipment?,
     russian: Boolean,
     engine: LevelUpEngine,
+    equipmentItem: (CatalogEquipmentRef, Int) -> InventoryItem,
+    dexterity: Int,
     onAnswer: (LevelUpAnswer) -> Unit
 ) {
     pageTitle(strings["levelup_equipment_title"], page.source.get(russian))
@@ -837,35 +856,33 @@ private fun LazyListScope.equipmentPage(
     page.options.forEachIndexed { index, option ->
         val selected = answer?.option == index
         item(key = "option_$index") {
-            val coins = coinsText(strings, option.coins)
-            ChoiceCard(
+            val items = remember(option, equipmentItem) { option.items.map { equipmentItem(it.item, it.count) } }
+            EquipmentOptionCard(
                 title = if (option.isWealth) {
-                    strings.format("levelup_equipment_gold", coins)
+                    strings["levelup_equipment_gold"]
                 } else {
                     strings.format("levelup_equipment_option", letters.getOrElse(index) { '?' }.toString())
                 },
-                subtitle = if (option.isWealth) null else {
-                    (option.items.map { equipmentLabel(it, russian) } +
-                        option.choices.map { strings["levelup_equipment_choose"] } +
-                        listOfNotNull(coins.takeIf { it.isNotEmpty() })).joinToString(", ")
-                },
                 selected = selected,
-                leading = { RadioButton(selected = selected, onClick = null) },
-                onClick = { if (!selected) onAnswer(LevelUpAnswer.Equipment(index)) }
-            )
-        }
-        if (selected && answer != null) {
-            option.choices.forEachIndexed { choiceIndex, choice ->
-                item(key = "choice_${index}_$choiceIndex") {
+                items = items,
+                dexterity = dexterity,
+                coins = option.coins,
+                coinsOnTitle = option.isWealth,
+                strings = strings,
+                onSelect = { if (!selected) onAnswer(LevelUpAnswer.Equipment(index)) }
+            ) {
+                // Picking one of the choices takes this option too.
+                val picks = if (selected) answer?.picks.orEmpty() else emptyList()
+                option.choices.forEachIndexed { choiceIndex, choice ->
                     EquipmentChoiceField(
                         label = strings["levelup_equipment_choose"],
                         choice = choice.options,
-                        selected = engine.pickFor(choice, answer.picks.getOrNull(choiceIndex)),
+                        selected = engine.pickFor(choice, picks.getOrNull(choiceIndex)),
                         russian = russian,
                         onPick = { id ->
-                            val picks = List(option.choices.size) { answer.picks.getOrNull(it).orEmpty() }.toMutableList()
-                            picks[choiceIndex] = id
-                            onAnswer(answer.copy(picks = picks))
+                            val updated = List(option.choices.size) { picks.getOrNull(it).orEmpty() }.toMutableList()
+                            updated[choiceIndex] = id
+                            onAnswer(LevelUpAnswer.Equipment(index, updated))
                         }
                     )
                 }
@@ -877,10 +894,14 @@ private fun LazyListScope.equipmentPage(
 private fun equipmentLabel(pick: EquipmentPick, russian: Boolean): String =
     pick.item.name.get(russian) + if (pick.count > 1) " ×${pick.count}" else ""
 
-private fun coinsText(strings: LocalizedStrings, coins: Map<String, Int>): String =
-    coins.entries.filter { it.value > 0 }.joinToString(", ") { (currency, count) -> "$count ${strings["inventory_currency_short_$currency"]}" }
-
-private fun LazyListScope.summaryPage(strings: LocalizedStrings, summary: LevelUpSummary, russian: Boolean, catalog: CharacterCatalog) {
+private fun LazyListScope.summaryPage(
+    strings: LocalizedStrings,
+    summary: LevelUpSummary,
+    russian: Boolean,
+    catalog: CharacterCatalog,
+    equipmentItem: (CatalogEquipmentRef, Int) -> InventoryItem,
+    dexterity: Int
+) {
     pageTitle(strings["levelup_summary_title"])
     if (summary.fromLevel == summary.toLevel) {
         item(key = "setup_only") { InfoCard(strings["levelup_summary_setup_only"]) }
@@ -941,9 +962,23 @@ private fun LazyListScope.summaryPage(strings: LocalizedStrings, summary: LevelU
         }
     }
     summaryList(strings, "granted_spells", "levelup_spells_granted", summary.spellsGranted.map { it.name.get(russian) })
-    summaryList(strings, "equipment", "levelup_summary_equipment", summary.equipment.map { equipmentLabel(it, russian) })
-    if (summary.coins.values.any { it > 0 }) {
-        item(key = "coins") { InfoCard(strings.format("levelup_summary_coins", coinsText(strings, summary.coins))) }
+    if (summary.equipment.isNotEmpty() || summary.coins.values.any { it > 0 }) {
+        item(key = "equipment") {
+            val items = remember(summary.equipment, equipmentItem) { summary.equipment.map { equipmentItem(it.item, it.count) } }
+            val colors = LocalDesignTokens.current.colors
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                color = colors.surface.card,
+                border = BorderStroke(1.dp, colors.border.muted)
+            ) {
+                Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(strings["levelup_summary_equipment"], style = MaterialTheme.typography.titleMedium, color = colors.text.primary)
+                    if (items.isNotEmpty()) InventorySectionCard(items, dexterity)
+                    CoinsAmount(summary.coins, strings)
+                }
+            }
+        }
     }
     if (summary.spellChoices.isNotEmpty()) {
         item(key = "spell_choices") {
@@ -1189,6 +1224,75 @@ private fun AssignedScoreRow(
                             onPick(null)
                         }
                     )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * A starting equipment option: a radio and its title, its items as an inventory block, [choices]
+ * (the "of your choice" fields) and its coins; the gold-only option has its coins on the title row.
+ */
+@Composable
+private fun EquipmentOptionCard(
+    title: String,
+    selected: Boolean,
+    items: List<InventoryItem>,
+    dexterity: Int,
+    coins: Map<String, Int>,
+    coinsOnTitle: Boolean,
+    strings: LocalizedStrings,
+    onSelect: () -> Unit,
+    choices: @Composable ColumnScope.() -> Unit
+) {
+    val colors = LocalDesignTokens.current.colors
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onSelect),
+        shape = RoundedCornerShape(12.dp),
+        color = if (selected) colors.surface.selected else colors.surface.card,
+        border = BorderStroke(1.dp, if (selected) colors.border.selected else colors.border.muted)
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                RadioButton(selected = selected, onClick = null)
+                Text(title, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge, color = colors.text.primary)
+                if (coinsOnTitle) CoinsAmount(coins, strings)
+            }
+            if (items.isNotEmpty()) InventorySectionCard(items, dexterity)
+            choices()
+            if (!coinsOnTitle) CoinsAmount(coins, strings)
+        }
+    }
+}
+
+/** Coins as an amount and the inventory's coins: "50 ⛁". Gold has its icon; other coins their short name. */
+@Composable
+private fun CoinsAmount(coins: Map<String, Int>, strings: LocalizedStrings, modifier: Modifier = Modifier) {
+    val shown = coins.filterValues { it > 0 }
+    if (shown.isEmpty()) return
+    val colors = LocalDesignTokens.current.colors
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        shown.forEach { (currency, count) ->
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(count.toString(), style = MaterialTheme.typography.titleMedium, color = colors.text.primary)
+                if (currency == "gp") {
+                    CurrencyCoinCluster(
+                        modifier = Modifier.size(24.dp),
+                        color = colors.accent.xpCapped,
+                        type = CurrencyType.GOLD
+                    )
+                } else {
+                    Text(strings["inventory_currency_short_$currency"], style = MaterialTheme.typography.bodyLarge, color = colors.text.muted)
                 }
             }
         }

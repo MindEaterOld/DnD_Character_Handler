@@ -92,7 +92,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
-private enum class CurrencyType { COPPER, SILVER, GOLD }
+internal enum class CurrencyType { COPPER, SILVER, GOLD }
 
 private data class WeaponKindOption(
     val weaponClass: InventoryWeaponClass,
@@ -111,8 +111,6 @@ private data class WeaponDamageEditorState(
 )
 
 private val CompactEditorFieldHeight = 46.dp
-private val MagicalItemTitleColor = Color(0xFF69B7FF)
-
 class InventoryViewModel(
     private val characterRepository: CharacterRepository,
     private val inventoryCatalogRepository: InventoryCatalogRepository,
@@ -528,8 +526,9 @@ private fun CurrencyCard(
     }
 }
 
+/** The coins drawn on the currency cards; Character Wizard shows starting gold with them too. */
 @Composable
-private fun CurrencyCoinCluster(
+internal fun CurrencyCoinCluster(
     modifier: Modifier = Modifier,
     color: Color,
     type: CurrencyType
@@ -1135,18 +1134,23 @@ private fun InventoryCategoryPickerDialog(
     )
 }
 
+/**
+ * Items as the inventory lists them: a card of rows with weight, quantity and tags. Without
+ * [onToggleEquipped] and [onEditItem] it only shows them (Character Wizard's starting equipment).
+ */
 @Composable
-private fun InventorySectionCard(
+internal fun InventorySectionCard(
     items: List<InventoryItem>,
     dexterityScore: Int,
-    onToggleEquipped: (InventoryItem) -> Unit,
-    onEditItem: (InventoryItem) -> Unit
+    onToggleEquipped: ((InventoryItem) -> Unit)? = null,
+    onEditItem: ((InventoryItem) -> Unit)? = null
 ) {
+    val colors = LocalDesignTokens.current.colors
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
-        color = Color(0xFF17141B).copy(alpha = 0.62f),
-        border = BorderStroke(1.dp, Color(0x36FFFFFF))
+        color = colors.surface.card.copy(alpha = 0.62f),
+        border = BorderStroke(1.dp, colors.border.muted)
     ) {
         Column {
             items.forEachIndexed { index, item ->
@@ -1154,15 +1158,15 @@ private fun InventorySectionCard(
                     InventoryItemRow(
                         item = item,
                         dexterityScore = dexterityScore,
-                        onToggleEquipped = { onToggleEquipped(item) },
-                        onClick = { onEditItem(item) }
+                        onToggleEquipped = onToggleEquipped?.let { toggle -> { toggle(item) } },
+                        onClick = onEditItem?.let { edit -> { edit(item) } }
                     )
                     if (index != items.lastIndex) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(1.dp)
-                                .background(Color(0x1FFFFFFF))
+                                .background(colors.ornament.outer)
                         )
                     }
                 }
@@ -1175,16 +1179,17 @@ private fun InventorySectionCard(
 private fun InventoryItemRow(
     item: InventoryItem,
     dexterityScore: Int,
-    onToggleEquipped: () -> Unit,
-    onClick: () -> Unit
+    onToggleEquipped: (() -> Unit)?,
+    onClick: (() -> Unit)?
 ) {
     val strings = LocalStrings.current
+    val colors = LocalDesignTokens.current.colors
     val propertyTags = remember(item, dexterityScore, strings.language) { item.propertyTags(dexterityScore, strings) }
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
             .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
@@ -1192,7 +1197,7 @@ private fun InventoryItemRow(
             Icon(
                 imageVector = Icons.Outlined.Inventory2,
                 contentDescription = null,
-                tint = Color(0xFFD2CAC2),
+                tint = colors.text.muted,
                 modifier = Modifier.size(26.dp)
             )
             Text(
@@ -1201,7 +1206,7 @@ private fun InventoryItemRow(
                     .padding(start = 12.dp)
                     .weight(1f),
                 style = MaterialTheme.typography.bodyLarge,
-                color = if (item.isMagical) MagicalItemTitleColor else Color(0xFFF7F2EA),
+                color = if (item.isMagical) colors.accent.hpTemporary else colors.text.primary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -1209,19 +1214,21 @@ private fun InventoryItemRow(
                 text = "${formatWeight(item.weight)} ${text("inventory_unit_pounds")}",
                 modifier = Modifier.padding(start = 10.dp, end = 8.dp),
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color(0xFFC2BBB3),
+                color = colors.text.label,
                 maxLines = 1
             )
             Text(
                 text = "x${item.quantity}",
                 modifier = Modifier.padding(horizontal = 12.dp),
                 style = MaterialTheme.typography.bodyLarge,
-                color = Color(0xFFD2CAC2)
+                color = colors.text.muted
             )
-            SelectableDot(
-                selected = item.isEquipped,
-                onClick = onToggleEquipped
-            )
+            if (onToggleEquipped != null) {
+                SelectableDot(
+                    selected = item.isEquipped,
+                    onClick = onToggleEquipped
+                )
+            }
         }
 
         if (propertyTags.isNotEmpty()) {

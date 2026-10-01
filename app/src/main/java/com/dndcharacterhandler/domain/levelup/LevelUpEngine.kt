@@ -30,6 +30,20 @@ import com.dndcharacterhandler.domain.rules.multiclassRequirements
 import com.dndcharacterhandler.domain.rules.proficiencyBonusForLevel
 import com.dndcharacterhandler.domain.rules.spellSlots
 
+/** An inventory item with just the name, for equipment the app's item catalog doesn't know. */
+fun plainEquipmentItem(item: CatalogEquipmentRef, count: Int, russian: Boolean): InventoryItem = InventoryItem(
+    name = item.name.get(russian),
+    category = when (item.type) {
+        "weapon" -> InventoryCategory.WEAPON
+        "consumable" -> InventoryCategory.CONSUMABLE
+        else -> InventoryCategory.OTHER
+    },
+    weight = 0.0,
+    quantity = count,
+    isEquipped = false,
+    icon = ""
+)
+
 /**
  * The level-up wizard, as Foundry's advancement runs it: every level gained walks the steps of the
  * class, its subclass and the features they grant — hit points, features, choices, ability score
@@ -100,26 +114,13 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
         russian: Boolean,
         now: Long,
         /** Turns starting equipment into inventory items (the app matches its item catalog by name). */
-        equipmentItem: (CatalogEquipmentRef, Int) -> InventoryItem = { item, count -> plainItem(item, count, russian) }
+        equipmentItem: (CatalogEquipmentRef, Int) -> InventoryItem = { item, count -> plainEquipmentItem(item, count, russian) }
     ): CharacterBundle {
         val simulation = simulate(bundle, draft)
         require(simulation.ready && simulation.pages.all { isAnswered(it, draft) }) { "The level-up draft isn't complete" }
         return simulation.applyTo(bundle, russian, now, equipmentItem)
     }
 
-    /** An inventory item with just the name, for equipment the app's item catalog doesn't know. */
-    fun plainItem(item: CatalogEquipmentRef, count: Int, russian: Boolean): InventoryItem = InventoryItem(
-        name = item.name.get(russian),
-        category = when (item.type) {
-            "weapon" -> InventoryCategory.WEAPON
-            "consumable" -> InventoryCategory.CONSUMABLE
-            else -> InventoryCategory.OTHER
-        },
-        weight = 0.0,
-        quantity = count,
-        isEquipped = false,
-        icon = ""
-    )
 
     // --- Simulation ------------------------------------------------------------------------------
 
