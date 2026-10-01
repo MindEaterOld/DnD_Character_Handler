@@ -26,6 +26,7 @@ fun SpellsScreenPreview() {
             "dice_open" to "Roll dice",
             "placeholder_loading_character" to "Loading character",
             "spells_search_placeholder" to "Search Spells",
+            "spells_prepared_limit" to "Prepared spells",
             "spells_spellcasting_class" to "Spellcasting Class",
             "combat_spell_bonus" to "Spell Bonus",
             "combat_spell_dc" to "Spell DC",
@@ -90,7 +91,9 @@ fun SpellsScreenPreview() {
                     spells = spells,
                     features = emptyList(),
                     notes = emptyList()
-                )
+                ),
+                // A wizard of 3rd level: six spells to prepare.
+                preparedLimit = 6
             )
         }
     }

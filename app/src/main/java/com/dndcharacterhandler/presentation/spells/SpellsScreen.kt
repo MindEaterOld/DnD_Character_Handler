@@ -86,6 +86,7 @@ import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
 import com.dndcharacterhandler.presentation.components.CharacterScreenHeader
 import com.dndcharacterhandler.presentation.components.FloatingAddButton
+import com.dndcharacterhandler.presentation.components.LimitProgressBar
 import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
 import com.dndcharacterhandler.presentation.components.ScreenBackground
 import com.dndcharacterhandler.presentation.components.ScreenTopActions
@@ -510,29 +511,15 @@ internal fun SpellsContent(
     }
 }
 
-/** "Prepared: 5 of 7", in the danger colour when over the limit. */
+/** The spells prepared against the limit, as the inventory shows the carried weight. */
 @Composable
 private fun PreparedSpellsRow(prepared: Int, limit: Int) {
-    val colors = LocalDesignTokens.current.colors
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(10.dp),
-        color = colors.surface.card.copy(alpha = 0.62f),
-        border = BorderStroke(1.dp, if (prepared > limit) colors.accent.dangerHpZero else colors.border.muted)
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Icon(Icons.AutoMirrored.Outlined.MenuBook, contentDescription = null, tint = colors.text.label, modifier = Modifier.size(20.dp))
-            Text(
-                text = LocalStrings.current.format("spells_prepared_count", prepared, limit),
-                style = MaterialTheme.typography.bodyLarge,
-                color = if (prepared > limit) colors.accent.dangerHpZero else colors.text.primary
-            )
-        }
-    }
+    LimitProgressBar(
+        label = text("spells_prepared_limit"),
+        value = "$prepared / $limit",
+        progress = if (limit > 0) prepared.toFloat() / limit else 1f,
+        overLimit = prepared > limit
+    )
 }
 
 @Composable

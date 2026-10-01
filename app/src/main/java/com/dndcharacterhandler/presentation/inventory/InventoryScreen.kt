@@ -79,6 +79,7 @@ import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
 import com.dndcharacterhandler.presentation.components.CharacterScreenHeader
 import com.dndcharacterhandler.presentation.components.FloatingAddButton
+import com.dndcharacterhandler.presentation.components.LimitProgressBar
 import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
 import com.dndcharacterhandler.presentation.components.ScreenBackground
 import com.dndcharacterhandler.presentation.components.SelectableDot
@@ -656,46 +657,11 @@ private fun CarryWeightBlock(
     maximum: Double
 ) {
     val safeMaximum = maximum.coerceAtLeast(1.0)
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = text("inventory_carry_weight"),
-                style = MaterialTheme.typography.bodyLarge,
-                color = Color(0xFFF7F2EA)
-            )
-            Text(
-                text = "${formatWeight(current)} / ${formatWeight(safeMaximum)} ${text("inventory_unit_pounds")}",
-                style = MaterialTheme.typography.bodyLarge,
-                color = Color(0xFFD2CAC2)
-            )
-        }
-        Canvas(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(16.dp)
-        ) {
-            val progress = (current / safeMaximum).toFloat().coerceIn(0f, 1f)
-            val stroke = 11.dp.toPx()
-            drawLine(
-                color = Color(0x30FFFFFF),
-                start = Offset(stroke / 2, center.y),
-                end = Offset(size.width - stroke / 2, center.y),
-                strokeWidth = stroke,
-                cap = StrokeCap.Round
-            )
-            drawLine(
-                color = Color(0xFFD7D1CC),
-                start = Offset(stroke / 2, center.y),
-                end = Offset((size.width - stroke) * progress + stroke / 2, center.y),
-                strokeWidth = stroke,
-                cap = StrokeCap.Round
-            )
-        }
-    }
+    LimitProgressBar(
+        label = text("inventory_carry_weight"),
+        value = "${formatWeight(current)} / ${formatWeight(safeMaximum)} ${text("inventory_unit_pounds")}",
+        progress = (current / safeMaximum).toFloat()
+    )
 }
 
 @Composable
