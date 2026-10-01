@@ -1,5 +1,7 @@
 package com.dndcharacterhandler.presentation.features
 
+import com.dndcharacterhandler.presentation.components.StatCardRow
+import com.dndcharacterhandler.presentation.components.MiniStatCard
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -298,23 +300,16 @@ internal fun FeaturesContent(
                 }
 
                 item {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        FeatureSummaryCard(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(SummaryCardHeight),
+                    StatCardRow {
+                        MiniStatCard(
+                            modifier = Modifier.weight(1f),
                             label = text("placeholder_class"),
                             value = character.characterClass,
-                            // The class is chosen in the level-up wizard, not typed in.
+                            // The class is chosen in Character Wizard, not typed in.
                             onClick = { classWizardTarget(character)?.let(onOpenLevelUp) }
                         )
-                        FeatureSummaryCard(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(SummaryCardHeight),
+                        MiniStatCard(
+                            modifier = Modifier.weight(1f),
                             label = text("placeholder_race"),
                             value = character.race,
                             onClick = {
@@ -322,10 +317,8 @@ internal fun FeaturesContent(
                                 editingSummaryField = FeatureSummaryField.RACE
                             }
                         )
-                        FeatureSummaryCard(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(SummaryCardHeight),
+                        MiniStatCard(
+                            modifier = Modifier.weight(1f),
                             label = text("biography_background"),
                             value = character.background,
                             onClick = {
@@ -452,91 +445,6 @@ internal fun FeaturesContent(
 
 private enum class FeatureSummaryField { RACE, BACKGROUND }
 
-/** The class, species and background cards, their label on the border included. */
-private val SummaryCardHeight = 80.dp
-
-/**
- * Class, species or background: the label sits centred in a gap of the top border, like an
- * outlined text field's, and the card shows the value.
- */
-@Composable
-private fun FeatureSummaryCard(
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier,
-    onClick: (() -> Unit)? = null
-) {
-    val tokens = LocalDesignTokens.current.typography
-    val colors = LocalDesignTokens.current.colors
-    val shape = RoundedCornerShape(10.dp)
-    // The label's box in the card's coordinates: the border is cut there.
-    var notch by remember { mutableStateOf(Rect.Zero) }
-    Layout(
-        modifier = modifier.drawBehind {
-            val stroke = 1.dp.toPx()
-            val top = notch.center.y
-            val radius = 10.dp.toPx()
-            drawRoundRect(
-                color = colors.surface.card.copy(alpha = 0.62f),
-                topLeft = Offset(0f, top),
-                size = Size(size.width, size.height - top),
-                cornerRadius = CornerRadius(radius)
-            )
-            clipRect(left = notch.left, top = 0f, right = notch.right, bottom = top + stroke, clipOp = ClipOp.Difference) {
-                drawRoundRect(
-                    color = colors.border.miniCard,
-                    topLeft = Offset(stroke / 2, top + stroke / 2),
-                    size = Size(size.width - stroke, size.height - top - stroke),
-                    cornerRadius = CornerRadius(radius - stroke / 2),
-                    style = Stroke(width = stroke)
-                )
-            }
-        },
-        content = {
-            Text(
-                text = label,
-                modifier = Modifier.padding(horizontal = 4.dp),
-                style = MaterialTheme.typography.bodyLarge.copy(fontSize = tokens.miniStatLabel.fontSizeSp.sp),
-                color = colors.text.miniLabel,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Column(
-                modifier = Modifier
-                    .clip(shape)
-                    .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-                    .padding(horizontal = 10.dp, vertical = 8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                // A long value ("Благородный") steps down the type scale instead of breaking a word.
-                AutoSizeText(
-                    text = value.ifBlank { "—" },
-                    style = MaterialTheme.typography.titleMedium,
-                    color = colors.text.primary,
-                    textAlign = TextAlign.Center,
-                    maxLines = 2
-                )
-            }
-        }
-    ) { measurables, constraints ->
-        // The label is centred, clear of the rounded corners, and straddles the top border.
-        val inset = 12.dp.roundToPx()
-        val labelPlaceable = measurables[0].measure(
-            Constraints(maxWidth = (constraints.maxWidth - 2 * inset).coerceAtLeast(0))
-        )
-        val top = labelPlaceable.height / 2
-        val width = constraints.maxWidth
-        val height = constraints.maxHeight
-        val cardPlaceable = measurables[1].measure(Constraints.fixed(width, (height - top).coerceAtLeast(0)))
-        val labelX = (width - labelPlaceable.width) / 2
-        notch = Rect(labelX.toFloat(), 0f, (labelX + labelPlaceable.width).toFloat(), labelPlaceable.height.toFloat())
-        layout(width, height) {
-            cardPlaceable.place(0, top)
-            labelPlaceable.place(labelX, 0)
-        }
-    }
-}
 
 @Composable
 private fun FeaturesSearchField(

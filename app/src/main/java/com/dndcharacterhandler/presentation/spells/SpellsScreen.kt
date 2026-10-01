@@ -1,5 +1,7 @@
 package com.dndcharacterhandler.presentation.spells
 
+import com.dndcharacterhandler.presentation.components.StatCardRow
+import com.dndcharacterhandler.presentation.components.MiniStatCard
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -362,28 +364,22 @@ internal fun SpellsContent(
                 }
 
                 item {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        SpellStatCard(
+                    StatCardRow {
+                        MiniStatCard(
                             modifier = Modifier.weight(1f),
-                            label = text("spells_spellcasting_class"),
-                            value = character.characterClass.ifBlank { "-" },
-                            icon = Icons.AutoMirrored.Outlined.MenuBook
+                            label = text("placeholder_class"),
+                            value = character.characterClass
                         )
-                        SpellStatCard(
+                        MiniStatCard(
                             modifier = Modifier.weight(1f),
-                            label = text("combat_spell_bonus"),
+                            label = text("stat_card_spell_bonus"),
                             value = spellAttackBonus,
-                            icon = Icons.Outlined.FlashOn,
                             onClick = { isSpellcastingAbilityDialogOpen = true }
                         )
-                        SpellStatCard(
+                        MiniStatCard(
                             modifier = Modifier.weight(1f),
-                            label = text("combat_spell_dc"),
+                            label = text("stat_card_spell_dc"),
                             value = spellSaveDc,
-                            icon = Icons.Outlined.Bolt,
                             onClick = { isSpellcastingAbilityDialogOpen = true }
                         )
                     }
@@ -530,59 +526,6 @@ private fun PreparedSpellsRow(prepared: Int, limit: Int) {
         progress = if (limit > 0) prepared.toFloat() / limit else 1f,
         overLimit = prepared > limit
     )
-}
-
-@Composable
-private fun SpellStatCard(
-    label: String,
-    value: String,
-    icon: ImageVector,
-    modifier: Modifier = Modifier,
-    onClick: (() -> Unit)? = null
-) {
-    Surface(
-        modifier = modifier.then(
-            if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier
-        ),
-        shape = RoundedCornerShape(10.dp),
-        color = Color(0xFF17141B).copy(alpha = 0.62f),
-        border = BorderStroke(1.dp, Color(0x36FFFFFF))
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 10.dp, vertical = 10.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color(0xFFD2CAC2),
-                textAlign = TextAlign.Center,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = Color(0xFFDCC7B1),
-                    modifier = Modifier.size(18.dp)
-                )
-                Text(
-                    text = value,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = Color(0xFFF7F2EA),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-        }
-    }
 }
 
 @Composable

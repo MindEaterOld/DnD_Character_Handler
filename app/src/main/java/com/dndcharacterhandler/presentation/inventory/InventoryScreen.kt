@@ -1,5 +1,7 @@
 package com.dndcharacterhandler.presentation.inventory
 
+import com.dndcharacterhandler.presentation.components.StatCardRow
+import com.dndcharacterhandler.presentation.components.MiniStatCard
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -460,6 +462,7 @@ internal fun InventoryContent(
     }
 }
 
+/** Copper, silver and gold as stat cards, each with its coins; a tap edits them. */
 @Composable
 private fun CurrencyCardRow(
     copperPieces: Int,
@@ -468,75 +471,18 @@ private fun CurrencyCardRow(
     onClick: () -> Unit
 ) {
     val accent = LocalDesignTokens.current.colors.accent
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        CurrencyCard(
-            modifier = Modifier.weight(1f),
-            value = copperPieces.toString(),
-            color = accent.coinCopper,
-            type = CurrencyType.COPPER,
-            onClick = onClick
-        )
-        CurrencyCard(
-            modifier = Modifier.weight(1f),
-            value = silverPieces.toString(),
-            color = accent.coinSilver,
-            type = CurrencyType.SILVER,
-            onClick = onClick
-        )
-        CurrencyCard(
-            modifier = Modifier.weight(1f),
-            value = goldPieces.toString(),
-            color = accent.coinGold,
-            type = CurrencyType.GOLD,
-            onClick = onClick
-        )
-    }
-}
-
-@Composable
-private fun CurrencyCard(
-    modifier: Modifier = Modifier,
-    value: String,
-    color: Color,
-    type: CurrencyType,
-    onClick: () -> Unit
-) {
-    val tokens = LocalDesignTokens.current.typography
-    val colors = LocalDesignTokens.current.colors
-    Surface(
-        modifier = modifier
-            .height(52.dp)
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(8.dp),
-        color = colors.surface.card.copy(alpha = 0.72f),
-        border = BorderStroke(1.dp, colors.border.miniCard)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 14.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            CurrencyCoinCluster(
-                modifier = Modifier.size(24.dp),
-                color = color,
-                type = type
-            )
-            Text(
-                text = value,
-                modifier = Modifier
-                    .padding(start = 10.dp)
-                    .weight(1f),
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontSize = tokens.titleMedium.fontSizeSp.sp,
-                    lineHeight = (tokens.titleMedium.lineHeightSp ?: tokens.titleMedium.fontSizeSp).sp
-                ),
-                color = colors.text.primary,
-                maxLines = 1,
-                textAlign = TextAlign.Center
+    StatCardRow {
+        listOf(
+            Triple("stat_card_copper", copperPieces, CurrencyType.COPPER to accent.coinCopper),
+            Triple("stat_card_silver", silverPieces, CurrencyType.SILVER to accent.coinSilver),
+            Triple("stat_card_gold", goldPieces, CurrencyType.GOLD to accent.coinGold)
+        ).forEach { (label, amount, coin) ->
+            MiniStatCard(
+                modifier = Modifier.weight(1f),
+                label = text(label),
+                value = amount.toString(),
+                icon = { CurrencyCoinCluster(modifier = Modifier.size(24.dp), color = coin.second, type = coin.first) },
+                onClick = onClick
             )
         }
     }

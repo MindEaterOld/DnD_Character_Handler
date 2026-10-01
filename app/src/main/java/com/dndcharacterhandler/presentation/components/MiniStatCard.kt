@@ -1,87 +1,160 @@
 package com.dndcharacterhandler.presentation.components
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.ClipOp
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 
+/** Every stat card is this tall, its label on the border included. */
+val MiniStatCardHeight = 80.dp
+
 /**
- * Compact stat card used in the top row of the combat and attributes screens:
- * a centered label above an icon + value row.
+ * The row of stat cards at the top of a screen (Features, Spells, Inventory, Combat, Attributes):
+ * three cards of equal width whose values share one size, the largest that fits them all.
+ */
+@Composable
+fun StatCardRow(modifier: Modifier = Modifier, content: @Composable RowScope.() -> Unit) {
+    val sizes = remember { AutoSizeGroup() }
+    CompositionLocalProvider(LocalAutoSizeGroup provides sizes) {
+        Row(
+            modifier = modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            content = content
+        )
+    }
+}
+
+/**
+ * A stat card: its [label] centred in a gap of the top border, like an outlined field's, and its
+ * [value] (with an optional [icon] before it) inside, stepping down the type scale when long.
+ * The one card of its kind: use it, in a [StatCardRow], wherever a screen shows such stats.
  */
 @Composable
 fun MiniStatCard(
     label: String,
     value: String,
-    icon: ImageVector,
     modifier: Modifier = Modifier,
+    icon: (@Composable () -> Unit)? = null,
     onClick: (() -> Unit)? = null
 ) {
-    val tokens = LocalDesignTokens.current.typography
-    Surface(
+    val typography = LocalDesignTokens.current.typography
+    val colors = LocalDesignTokens.current.colors
+    val shape = RoundedCornerShape(10.dp)
+    // The label's box in the card's coordinates: the border is cut there.
+    var notch by remember { mutableStateOf(Rect.Zero) }
+    Layout(
         modifier = modifier
-            .height(92.dp)
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
-        shape = RoundedCornerShape(10.dp),
-        border = BorderStroke(1.dp, Color(0x42FFFFFF)),
-        color = Color(0xFF17141B).copy(alpha = 0.62f)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 12.dp, vertical = 10.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterVertically)
-        ) {
+            .height(MiniStatCardHeight)
+            .drawBehind {
+                val stroke = 1.dp.toPx()
+                val top = notch.center.y
+                val radius = 10.dp.toPx()
+                drawRoundRect(
+                    color = colors.surface.card.copy(alpha = 0.62f),
+                    topLeft = Offset(0f, top),
+                    size = Size(size.width, size.height - top),
+                    cornerRadius = CornerRadius(radius)
+                )
+                clipRect(left = notch.left, top = 0f, right = notch.right, bottom = top + stroke, clipOp = ClipOp.Difference) {
+                    drawRoundRect(
+                        color = colors.border.miniCard,
+                        topLeft = Offset(stroke / 2, top + stroke / 2),
+                        size = Size(size.width - stroke, size.height - top - stroke),
+                        cornerRadius = CornerRadius(radius - stroke / 2),
+                        style = Stroke(width = stroke)
+                    )
+                }
+            },
+        content = {
             Text(
                 text = label,
-                style = MaterialTheme.typography.bodyLarge.copy(fontSize = tokens.miniStatLabel.fontSizeSp.sp),
-                color = Color(0xFFBEB6AE),
+                modifier = Modifier.padding(horizontal = 4.dp),
+                style = MaterialTheme.typography.bodyLarge.copy(fontSize = typography.miniStatLabel.fontSizeSp.sp),
+                color = colors.text.miniLabel,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Center
+                overflow = TextOverflow.Ellipsis
             )
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                modifier = Modifier
+                    .clip(shape)
+                    .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+                    .padding(horizontal = 10.dp, vertical = 6.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = Color(0xFFD8D1CA),
-                    modifier = Modifier.size(24.dp)
-                )
-                Text(
-                    text = value,
+                icon?.invoke()
+                AutoSizeText(
+                    text = value.ifBlank { "—" },
+                    modifier = Modifier.weight(1f, fill = false),
                     style = MaterialTheme.typography.headlineMedium.copy(
-                        fontSize = tokens.miniStatValue.fontSizeSp.sp,
-                        lineHeight = (tokens.miniStatValue.lineHeightSp ?: tokens.miniStatValue.fontSizeSp).sp
+                        fontSize = typography.miniStatValue.fontSizeSp.sp,
+                        lineHeight = (typography.miniStatValue.lineHeightSp ?: typography.miniStatValue.fontSizeSp).sp
                     ),
-                    color = Color(0xFFF7F2EA),
+                    color = colors.text.primary,
                     textAlign = TextAlign.Center,
-                    maxLines = 1
+                    maxLines = 2
                 )
             }
         }
+    ) { measurables, constraints ->
+        // The label is centred, clear of the rounded corners, and straddles the top border.
+        val inset = 12.dp.roundToPx()
+        val labelPlaceable = measurables[0].measure(
+            Constraints(maxWidth = (constraints.maxWidth - 2 * inset).coerceAtLeast(0))
+        )
+        val top = labelPlaceable.height / 2
+        val width = constraints.maxWidth
+        val height = constraints.maxHeight
+        val cardPlaceable = measurables[1].measure(Constraints.fixed(width, (height - top).coerceAtLeast(0)))
+        val labelX = (width - labelPlaceable.width) / 2
+        notch = Rect(labelX.toFloat(), 0f, (labelX + labelPlaceable.width).toFloat(), labelPlaceable.height.toFloat())
+        layout(width, height) {
+            cardPlaceable.place(0, top)
+            labelPlaceable.place(labelX, 0)
+        }
     }
+}
+
+/** The usual icon of a stat card: an outlined symbol before the value. */
+@Composable
+fun MiniStatCardIcon(imageVector: ImageVector) {
+    Icon(
+        imageVector = imageVector,
+        contentDescription = null,
+        tint = LocalDesignTokens.current.colors.text.label,
+        modifier = Modifier.size(24.dp)
+    )
 }

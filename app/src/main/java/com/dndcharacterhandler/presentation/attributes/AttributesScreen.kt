@@ -1,5 +1,7 @@
 package com.dndcharacterhandler.presentation.attributes
 
+import com.dndcharacterhandler.presentation.components.StatCardRow
+import com.dndcharacterhandler.presentation.components.MiniStatCardIcon
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -435,28 +437,25 @@ fun AttributesContent(
             }
 
             item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
+                StatCardRow {
                     MiniStatCard(
                         modifier = Modifier.weight(1f),
-                        label = text("attributes_proficiency_bonus"),
+                        label = text("stat_card_proficiency"),
                         value = signed(proficiencyBonus),
-                        icon = Icons.Outlined.AutoAwesome
+                        icon = { MiniStatCardIcon(Icons.Outlined.AutoAwesome) }
                     )
                     MiniStatCard(
                         modifier = Modifier.weight(1f),
-                        label = text("attributes_passive_perception"),
+                        label = text("stat_card_passive_perception"),
                         value = passivePerception.toString(),
-                        icon = Icons.Outlined.Visibility,
+                        icon = { MiniStatCardIcon(Icons.Outlined.Visibility) },
                         onClick = { if (characterBundle != null) isPassiveDialogOpen = true }
                     )
                     MiniStatCard(
                         modifier = Modifier.weight(1f),
-                        label = text("attributes_darkvision"),
+                        label = text("stat_card_darkvision"),
                         value = darkvisionValue,
-                        icon = Icons.Outlined.DarkMode,
+                        icon = { MiniStatCardIcon(Icons.Outlined.DarkMode) },
                         onClick = { if (characterBundle != null) isDarkvisionDialogOpen = true }
                     )
                 }

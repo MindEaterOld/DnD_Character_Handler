@@ -442,27 +442,6 @@
     "fr": "Survie",
     "es": "Supervivencia"
   },
-  "attributes_proficiency_bonus": {
-    "en": "Proficiency Bonus",
-    "ru": "Бонус мастерства",
-    "de": "Übungsbonus",
-    "fr": "Bonus de maîtrise",
-    "es": "Bonificador por competencia"
-  },
-  "attributes_passive_perception": {
-    "en": "Passive Perception",
-    "ru": "Пассивная внимательность",
-    "de": "Passive Wahrnehmung",
-    "fr": "Perception passive",
-    "es": "Percepción pasiva"
-  },
-  "attributes_darkvision": {
-    "en": "Darkvision",
-    "ru": "Тёмное зрение",
-    "de": "Dunkelsicht",
-    "fr": "Vision dans le noir",
-    "es": "Visión en la oscuridad"
-  },
   "attributes_darkvision_title": {
     "en": "Darkvision",
     "ru": "Тёмное зрение",
@@ -1638,20 +1617,6 @@
     "de": "Zauberrettungswurf-SG",
     "fr": "DD de sauvegarde des sorts",
     "es": "CD de salvaci\u00f3n de conjuro"
-  },
-  "combat_spell_bonus": {
-    "en": "Spell Bonus",
-    "ru": "\u0411\u043e\u043d\u0443\u0441 \u0437\u0430\u043a\u043b\u0438\u043d\u0430\u043d\u0438\u0439",
-    "de": "Zauberbonus",
-    "fr": "Bonus de sort",
-    "es": "Bono de conjuro"
-  },
-  "combat_spell_dc": {
-    "en": "Spell DC",
-    "ru": "СЛ заклинаний",
-    "de": "Zauber-SG",
-    "fr": "DD des sorts",
-    "es": "CD de conjuro"
   },
   "combat_spellcasting_ability_title": {
     "en": "Spellcasting Ability",
@@ -3621,6 +3586,78 @@
     "fr": "Modifier",
     "es": "Editar"
   },
+  "stat_card_spell_bonus": {
+    "maxChars": 11,
+    "en": "Spell Bonus",
+    "ru": "\u0411\u043e\u043d\u0443\u0441 \u0437\u0430\u043a\u043b.",
+    "de": "Zauberbonus",
+    "fr": "Bonus sort",
+    "es": "Bono conj."
+  },
+  "stat_card_spell_dc": {
+    "maxChars": 11,
+    "en": "Spell DC",
+    "ru": "\u0421\u041b \u0437\u0430\u043a\u043b.",
+    "de": "Zauber-SG",
+    "fr": "DD sort",
+    "es": "CD conj."
+  },
+  "stat_card_armor_class": {
+    "maxChars": 11,
+    "en": "Armor Class",
+    "ru": "\u041a\u043b\u0430\u0441\u0441 \u0431\u0440\u043e\u043d\u0438",
+    "de": "R\u00fcstungskl.",
+    "fr": "Classe arm.",
+    "es": "Clase arm."
+  },
+  "stat_card_proficiency": {
+    "maxChars": 11,
+    "en": "Proficiency",
+    "ru": "\u0411\u043e\u043d\u0443\u0441 \u043c\u0430\u0441\u0442.",
+    "de": "\u00dcbungsbonus",
+    "fr": "Bonus ma\u00eet.",
+    "es": "Competencia"
+  },
+  "stat_card_passive_perception": {
+    "maxChars": 11,
+    "en": "Pass. Perc.",
+    "ru": "\u041f\u0430\u0441\u0441. \u0432\u043d\u0438\u043c.",
+    "de": "Wahrnehmung",
+    "fr": "Perception",
+    "es": "Percepci\u00f3n"
+  },
+  "stat_card_darkvision": {
+    "maxChars": 11,
+    "en": "Darkvision",
+    "ru": "\u0422\u0451\u043c\u043d\u043e\u0435 \u0437\u0440.",
+    "de": "Dunkelsicht",
+    "fr": "Vision noir",
+    "es": "Visi\u00f3n osc."
+  },
+  "stat_card_copper": {
+    "maxChars": 11,
+    "en": "Copper",
+    "ru": "\u041c\u0435\u0434\u044c",
+    "de": "Kupfer",
+    "fr": "Cuivre",
+    "es": "Cobre"
+  },
+  "stat_card_silver": {
+    "maxChars": 11,
+    "en": "Silver",
+    "ru": "\u0421\u0435\u0440\u0435\u0431\u0440\u043e",
+    "de": "Silber",
+    "fr": "Argent",
+    "es": "Plata"
+  },
+  "stat_card_gold": {
+    "maxChars": 11,
+    "en": "Gold",
+    "ru": "\u0417\u043e\u043b\u043e\u0442\u043e",
+    "de": "Gold",
+    "fr": "Or",
+    "es": "Oro"
+  },
   "inventory_no_description": {
     "en": "No description.",
     "ru": "\u041e\u043f\u0438\u0441\u0430\u043d\u0438\u044f \u043d\u0435\u0442.",
@@ -4509,13 +4546,6 @@
     "de": "Zauber suchen",
     "fr": "Rechercher des sorts",
     "es": "Buscar conjuros"
-  },
-  "spells_spellcasting_class": {
-    "en": "Spellcasting Class",
-    "ru": "Класс заклинаний",
-    "de": "Zauberklasse",
-    "fr": "Classe de lanceur",
-    "es": "Clase lanzadora"
   },
   "spells_add_spell": {
     "en": "Add Spell",

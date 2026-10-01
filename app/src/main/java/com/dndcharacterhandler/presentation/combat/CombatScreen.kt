@@ -1,5 +1,7 @@
 package com.dndcharacterhandler.presentation.combat
 
+import com.dndcharacterhandler.presentation.components.StatCardRow
+import com.dndcharacterhandler.presentation.components.MiniStatCardIcon
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -374,15 +376,12 @@ internal fun CombatContent(
                 }
 
                 item {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
+                    StatCardRow {
                         MiniStatCard(
                             modifier = Modifier.weight(1f),
                             value = character.armorClass.toString(),
-                            label = text("overview_ac_full"),
-                            icon = Icons.Outlined.Shield,
+                            label = text("stat_card_armor_class"),
+                            icon = { MiniStatCardIcon(Icons.Outlined.Shield) },
                             onClick = {
                                 armorClassBaseDraft = character.baseArmorClass.toString()
                                 armorClassManualDraft = if (character.armorClassMode == ArmorClassMode.MANUAL) {
@@ -397,15 +396,13 @@ internal fun CombatContent(
                         MiniStatCard(
                             modifier = Modifier.weight(1f),
                             value = spellAttackBonus,
-                            label = text("combat_spell_bonus"),
-                            icon = Icons.Outlined.FlashOn,
+                            label = text("stat_card_spell_bonus"),
                             onClick = { isSpellcastingAbilityDialogOpen = true }
                         )
                         MiniStatCard(
                             modifier = Modifier.weight(1f),
                             value = spellSaveDc,
-                            label = text("combat_spell_dc"),
-                            icon = Icons.Outlined.Bolt,
+                            label = text("stat_card_spell_dc"),
                             onClick = { isSpellcastingAbilityDialogOpen = true }
                         )
                     }
