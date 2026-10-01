@@ -95,6 +95,7 @@ import com.dndcharacterhandler.presentation.dice.LocalDiceSkin
 import com.dndcharacterhandler.presentation.inventory.CurrencyCoinCluster
 import com.dndcharacterhandler.presentation.inventory.CurrencyType
 import com.dndcharacterhandler.presentation.inventory.InventorySectionCard
+import com.dndcharacterhandler.presentation.spells.spellRangeDisplayLabel
 import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
@@ -138,6 +139,8 @@ internal fun LevelUpWizard(
     var roll by remember { mutableStateOf<HitDieRoll?>(null) }
     // So are a new character's ability scores: the index of the 4d6 throw on the table.
     var abilityRoll by remember { mutableStateOf<Int?>(null) }
+    // The search of a spell page, kept while its spells are picked.
+    var spellQuery by remember(page.key) { mutableStateOf("") }
 
     BackHandler(onBack = onDismiss)
     // A layer over the whole app rather than a dialog window: a dialog doesn't get the navigation
@@ -186,6 +189,9 @@ internal fun LevelUpWizard(
                     is LevelUpPage.Features -> featuresPage(strings, page, answer as? LevelUpAnswer.Grants, russian, render, ::setAnswer)
                     is LevelUpPage.Traits -> traitsPage(strings, page, answer as? LevelUpAnswer.Traits, russian, ::setAnswer)
                     is LevelUpPage.Items -> itemsPage(strings, page, answer as? LevelUpAnswer.Items, russian, render, ::setAnswer)
+                    is LevelUpPage.Spells -> spellsPage(
+                        strings, page, answer as? LevelUpAnswer.Items, russian, spellQuery, { spellQuery = it }, ::setAnswer
+                    )
                     is LevelUpPage.AbilityScores -> abilityScoresPage(strings, page, answer, russian, render, ::setAnswer)
                     is LevelUpPage.Subclass -> subclassPage(strings, page, answer as? LevelUpAnswer.Subclass, russian, render, ::setAnswer)
                     is LevelUpPage.BaseAbilities -> baseAbilitiesPage(
@@ -598,6 +604,105 @@ private fun LazyListScope.itemsPage(
     }
 }
 
+/**
+ * Spells to pick, grouped by level, with a search: each one's school, range and tags, and its text
+ * unfolding; a known one may be swapped where the step allows it.
+ */
+private fun LazyListScope.spellsPage(
+    strings: LocalizedStrings,
+    page: LevelUpPage.Spells,
+    answer: LevelUpAnswer.Items?,
+    russian: Boolean,
+    query: String,
+    onQueryChange: (String) -> Unit,
+    onAnswer: (LevelUpAnswer) -> Unit
+) {
+    val picks = answer?.picks.orEmpty()
+    val replaced = answer?.replacedId
+    val required = page.required + if (replaced != null) 1 else 0
+    pageTitle(page.step.title.get(russian).ifBlank { page.source.get(russian) }, page.source.get(russian))
+    if (page.replaceable.isNotEmpty()) {
+        item(key = "replace_title") { SectionLabel(strings["levelup_items_replace"]) }
+        item(key = "replace_none") {
+            ChoiceCard(
+                title = strings["levelup_items_replace_none"],
+                selected = replaced == null,
+                leading = { RadioButton(selected = replaced == null, onClick = null) },
+                onClick = { onAnswer(LevelUpAnswer.Items(picks, replacedId = null)) }
+            )
+        }
+        items(page.replaceable, key = { "replace_" + it.id }) { spell ->
+            ChoiceCard(
+                title = spell.name.get(russian),
+                subtitle = spellLevelLabel(strings, spell.level ?: 0),
+                selected = replaced == spell.id,
+                leading = { RadioButton(selected = replaced == spell.id, onClick = null) },
+                onClick = { onAnswer(LevelUpAnswer.Items(picks - spell.id, replacedId = spell.id)) }
+            )
+        }
+    }
+    item(key = "count") { SectionLabel(strings.format("levelup_pick_count", picks.size, required)) }
+    // Long lists (a spellbook, every class's cantrips) get a search.
+    if (page.options.size > 12) {
+        item(key = "search") {
+            OutlinedTextField(
+                value = query,
+                onValueChange = onQueryChange,
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text(strings["spells_search_placeholder"]) },
+                singleLine = true
+            )
+        }
+    }
+    val needle = query.trim()
+    val shown = page.options.filter { option ->
+        needle.isEmpty() || option.spell.id in picks ||
+            listOf(option.spell.name.en, option.spell.name.ru).any { it.contains(needle, ignoreCase = true) }
+    }
+    shown.groupBy { it.spell.level ?: 0 }.toSortedMap().forEach { (level, options) ->
+        // One level only (cantrips, a Mystic Arcanum): the title says it already.
+        if (shown.map { it.spell.level }.distinct().size > 1) {
+            item(key = "level_$level") { SectionLabel(spellLevelLabel(strings, level)) }
+        }
+        items(options, key = { "spell_" + it.spell.id }) { option ->
+            val spell = option.spell
+            val selected = spell.id in picks
+            val blocked = option.known && spell.id != replaced
+            ExpandableCard(
+                title = spell.name.get(russian),
+                subtitle = listOfNotNull(
+                    spellSchoolLabel(strings, spell.school),
+                    spellRangeDisplayLabel(spell.range, strings),
+                    if (spell.concentration) strings["spells_concentration"] else null,
+                    if (spell.ritual) strings["spells_ritual"] else null,
+                    if (option.known) strings["levelup_already_have"] else null
+                ).joinToString(" • "),
+                body = spell.text.get(russian),
+                selected = selected,
+                enabled = !blocked && (selected || picks.size < required),
+                leading = { Checkbox(checked = selected, onCheckedChange = null, enabled = !blocked) },
+                onClick = { onAnswer(LevelUpAnswer.Items(if (selected) picks - spell.id else picks + spell.id, replaced)) }
+            )
+        }
+    }
+}
+
+private fun spellLevelLabel(strings: LocalizedStrings, level: Int): String =
+    strings[if (level == 0) "spells_level_cantrips" else "spells_level_$level"]
+
+/** Foundry's school keys -> the app's school labels. */
+private fun spellSchoolLabel(strings: LocalizedStrings, school: String): String? = when (school) {
+    "abj" -> "spells_school_abjuration"
+    "con" -> "spells_school_conjuration"
+    "div" -> "spells_school_divination"
+    "enc" -> "spells_school_enchantment"
+    "evo" -> "spells_school_evocation"
+    "ill" -> "spells_school_illusion"
+    "nec" -> "spells_school_necromancy"
+    "trs" -> "spells_school_transmutation"
+    else -> null
+}?.let { strings[it] }
+
 private fun LazyListScope.abilityScoresPage(
     strings: LocalizedStrings,
     page: LevelUpPage.AbilityScores,
@@ -961,6 +1066,8 @@ private fun LazyListScope.summaryPage(
             InfoCard(title = strings["levelup_summary_spell_slots"], body = slots.joinToString(" • "))
         }
     }
+    summaryList(strings, "learned_spells", "levelup_summary_spells_learned", summary.spellsLearned.map { it.name.get(russian) })
+    summaryList(strings, "forgotten_spells", "levelup_summary_spells_forgotten", summary.spellsForgotten.map { it.name.get(russian) })
     summaryList(strings, "granted_spells", "levelup_spells_granted", summary.spellsGranted.map { it.name.get(russian) })
     if (summary.equipment.isNotEmpty() || summary.coins.values.any { it > 0 }) {
         item(key = "equipment") {

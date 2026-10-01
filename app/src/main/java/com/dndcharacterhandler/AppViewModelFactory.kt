@@ -28,6 +28,7 @@ class AppViewModelFactory(
                 characterRepository = container.characterRepository,
                 characterCatalogRepository = container.characterCatalogRepository,
                 inventoryCatalogRepository = container.inventoryCatalogRepository,
+                spellCatalogRepository = container.spellCatalogRepository,
                 getCharacterBundleUseCase = container.getCharacterBundleUseCase,
                 selectedCharacterHolder = container.selectedCharacterHolder
             )

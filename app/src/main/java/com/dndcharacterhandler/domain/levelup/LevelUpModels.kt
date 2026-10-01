@@ -43,7 +43,7 @@ sealed interface LevelUpAnswer {
     /** One set of picked trait keys per choice group of the step. */
     data class Traits(val picks: List<Set<String>>) : LevelUpAnswer
 
-    /** Picked catalog features; [replacedId] is a known one given up in exchange, where allowed. */
+    /** Picked catalog features or spells; [replacedId] is a known one given up in exchange, where allowed. */
     data class Items(val picks: List<String>, val replacedId: String? = null) : LevelUpAnswer
 
     /** Optional features the player chose not to take. */
@@ -89,6 +89,8 @@ data class TraitOption(val key: String, val name: CatalogText, val alreadyHas: B
 data class TraitGroup(val count: Int, val options: List<TraitOption>)
 
 data class ItemOption(val feature: CatalogFeature, val known: Boolean)
+
+data class SpellOption(val spell: CatalogSpellRef, val known: Boolean)
 
 /** One screen of the wizard. [key] identifies its answer in [LevelUpDraft.answers]. */
 sealed interface LevelUpPage {
@@ -165,6 +167,23 @@ sealed interface LevelUpPage {
         val replaceable: List<CatalogFeature>
     ) : LevelUpPage {
         val required: Int get() = minOf(count, options.count { !it.known || it.feature.repeatable })
+    }
+
+    /**
+     * Spells to pick (cantrips, spells known, a spellbook's, a feat's) from a spell list, up to the
+     * highest spell level the class has slots for; at some levels a known one may be swapped.
+     */
+    data class Spells(
+        override val key: String,
+        override val characterLevel: Int,
+        val source: CatalogText,
+        val step: AdvancementStep.ItemChoice,
+        val count: Int,
+        val options: List<SpellOption>,
+        /** Known spells of the list that may be given up for another now. */
+        val replaceable: List<CatalogSpellRef>
+    ) : LevelUpPage {
+        val required: Int get() = minOf(count, options.count { !it.known })
     }
 
     data class AbilityScores(
@@ -264,6 +283,9 @@ data class LevelUpSummary(
     /** Damage resistances and immunities the features give; the app has no field for them. */
     val defenses: List<TraitOption>,
     val spellsGranted: List<CatalogSpellRef>,
+    /** Spells picked on the spell pages; [spellsForgotten] are the ones swapped away. */
+    val spellsLearned: List<CatalogSpellRef> = emptyList(),
+    val spellsForgotten: List<CatalogSpellRef> = emptyList(),
     val spellChoices: List<SpellChoiceNote>,
     val spellSlots: SpellSlotTable,
     val unmetRequirements: List<MulticlassRequirement>,

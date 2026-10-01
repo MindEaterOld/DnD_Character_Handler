@@ -3215,6 +3215,20 @@
     "fr": "Sorts \u00e0 choisir dans l'\u00e9cran des sorts",
     "es": "Conjuros para elegir en la pantalla de conjuros"
   },
+  "levelup_summary_spells_learned": {
+    "en": "Spells learned",
+    "ru": "\u0418\u0437\u0443\u0447\u0435\u043d\u043d\u044b\u0435 \u0437\u0430\u043a\u043b\u0438\u043d\u0430\u043d\u0438\u044f",
+    "de": "Gelernte Zauber",
+    "fr": "Sorts appris",
+    "es": "Conjuros aprendidos"
+  },
+  "levelup_summary_spells_forgotten": {
+    "en": "Spells swapped out",
+    "ru": "\u0417\u0430\u043c\u0435\u043d\u0451\u043d\u043d\u044b\u0435 \u0437\u0430\u043a\u043b\u0438\u043d\u0430\u043d\u0438\u044f",
+    "de": "Ausgetauschte Zauber",
+    "fr": "Sorts remplac\u00e9s",
+    "es": "Conjuros sustituidos"
+  },
   "levelup_abilities_title": {
     "en": "Ability Scores",
     "ru": "\u0425\u0430\u0440\u0430\u043a\u0442\u0435\u0440\u0438\u0441\u0442\u0438\u043a\u0438",

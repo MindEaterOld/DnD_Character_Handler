@@ -20,6 +20,7 @@ import com.dndcharacterhandler.domain.model.Feature
 import com.dndcharacterhandler.domain.model.FeatureSource
 import com.dndcharacterhandler.domain.model.InventoryCategory
 import com.dndcharacterhandler.domain.model.InventoryItem
+import com.dndcharacterhandler.domain.model.Spell
 import com.dndcharacterhandler.domain.rules.CatalogFormulaText
 import com.dndcharacterhandler.domain.rules.FormulaContext
 import com.dndcharacterhandler.domain.rules.MAX_CHARACTER_LEVEL
@@ -29,6 +30,43 @@ import com.dndcharacterhandler.domain.rules.classLabel
 import com.dndcharacterhandler.domain.rules.multiclassRequirements
 import com.dndcharacterhandler.domain.rules.proficiencyBonusForLevel
 import com.dndcharacterhandler.domain.rules.spellSlots
+
+/** A spell built from the catalog's own data, for spells the app's spell catalog doesn't have. */
+fun plainCatalogSpell(spell: CatalogSpellRef, prepared: Boolean, russian: Boolean): Spell = Spell(
+    name = spell.name.get(russian),
+    level = spell.level ?: 0,
+    school = SPELL_SCHOOLS[spell.school] ?: spell.school,
+    isPrepared = prepared || spell.level == 0,
+    description = spell.text.get(russian),
+    range = spell.range,
+    castingTime = spell.castingTime,
+    duration = spell.duration,
+    components = spell.components,
+    material = spell.material.get(russian),
+    isRitual = spell.ritual,
+    requiresConcentration = spell.concentration,
+    availableClasses = spell.lists.filter { it.startsWith("class:") }
+        .joinToString(", ") { list -> list.removePrefix("class:").replaceFirstChar { it.uppercase() } }
+)
+
+/** Foundry's school keys -> the app's (SRD) school names. */
+private val SPELL_SCHOOLS = mapOf(
+    "abj" to "Abjuration", "con" to "Conjuration", "div" to "Divination", "enc" to "Enchantment",
+    "evo" to "Evocation", "ill" to "Illusion", "nec" to "Necromancy", "trs" to "Transmutation"
+)
+
+/** A spell name to compare by: "Tasha’s Hideous Laughter" and "tasha's hideous laughter" alike. */
+fun spellNameKey(name: String): String =
+    name.lowercase().replace("’", "").replace("'", "").replace(Regex("\\s+"), " ").trim()
+
+/**
+ * The names a catalog spell may go by on a sheet: English, Russian, and the English one without its
+ * author ("Hideous Laughter" for "Tasha's Hideous Laughter", as the SRD names it).
+ */
+fun spellNameKeys(spell: CatalogSpellRef): Set<String> = buildSet {
+    listOf(spell.name.en, spell.name.ru).filter { it.isNotBlank() }.forEach { add(spellNameKey(it)) }
+    Regex("^\\S+[’']s (.+)$").matchEntire(spell.name.en.trim())?.let { add(spellNameKey(it.groupValues[1])) }
+}
 
 /** An inventory item with just the name, for equipment the app's item catalog doesn't know. */
 fun plainEquipmentItem(item: CatalogEquipmentRef, count: Int, russian: Boolean): InventoryItem = InventoryItem(
@@ -74,6 +112,9 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
         is LevelUpPage.Items -> (draft.answers[page.key] as? LevelUpAnswer.Items)?.let { answer ->
             answer.picks.size == page.required + if (answer.replacedId != null) 1 else 0
         } ?: (page.required == 0)
+        is LevelUpPage.Spells -> (draft.answers[page.key] as? LevelUpAnswer.Items)?.let { answer ->
+            answer.picks.size == page.required + if (answer.replacedId != null) 1 else 0
+        } ?: (page.required == 0)
         is LevelUpPage.AbilityScores -> when (val answer = draft.answers[page.key]) {
             is LevelUpAnswer.Feat -> page.allowFeat && page.feats.any { it.id == answer.featId }
             is LevelUpAnswer.AbilityScores -> answer.increases.values.sum() == page.required
@@ -114,11 +155,13 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
         russian: Boolean,
         now: Long,
         /** Turns starting equipment into inventory items (the app matches its item catalog by name). */
-        equipmentItem: (CatalogEquipmentRef, Int) -> InventoryItem = { item, count -> plainEquipmentItem(item, count, russian) }
+        equipmentItem: (CatalogEquipmentRef, Int) -> InventoryItem = { item, count -> plainEquipmentItem(item, count, russian) },
+        /** Turns a learned spell into the character's (the app matches its spell catalog by name); the flag is "prepared". */
+        spellItem: (CatalogSpellRef, Boolean) -> Spell = { spell, prepared -> plainCatalogSpell(spell, prepared, russian) }
     ): CharacterBundle {
         val simulation = simulate(bundle, draft)
         require(simulation.ready && simulation.pages.all { isAnswered(it, draft) }) { "The level-up draft isn't complete" }
-        return simulation.applyTo(bundle, russian, now, equipmentItem)
+        return simulation.applyTo(bundle, russian, now, equipmentItem, spellItem)
     }
 
 
@@ -231,7 +274,7 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
             val taken = step.items.mapNotNull { catalog.featuresById[it] }
             taken.forEach { simulation.addFeature(it, context) }
             newFeatures += taken
-            simulation.spellsGranted += step.spells.mapNotNull { catalog.spells[it] }
+            simulation.grantSpells(step.spells.mapNotNull { catalog.spells[it] })
             simulation.record(context, sourceId, step.id, "ItemGrant", "features=${taken.joinToString(",") { it.id }}")
         }
         processChoices(simulation, draft, context, StepSource(sourceId, name, steps, allowFeat = false), newFeatures, arrival = true)
@@ -419,7 +462,7 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
             val taken = step.items.filter { id -> !(step.optional && id in declined) }.mapNotNull { catalog.featuresById[it] }
             taken.forEach { feature -> simulation.addFeature(feature, context) }
             newFeatures += taken
-            simulation.spellsGranted += step.spells.mapNotNull { catalog.spells[it] }
+            simulation.grantSpells(step.spells.mapNotNull { catalog.spells[it] })
             simulation.record(context, sourceId, step.id, "ItemGrant", "features=${taken.joinToString(",") { it.id }}")
         }
 
@@ -524,7 +567,7 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
             val taken = step.items.mapNotNull { catalog.featuresById[it] }
             taken.forEach { simulation.addFeature(it, context) }
             newFeatures += taken
-            simulation.spellsGranted += step.spells.mapNotNull { catalog.spells[it] }
+            simulation.grantSpells(step.spells.mapNotNull { catalog.spells[it] })
             simulation.record(context, feature.id, step.id, "ItemGrant", "features=${taken.joinToString(",") { it.id }}")
         }
         processChoices(simulation, draft, context, StepSource(feature.id, feature.name, steps, allowFeat = false), newFeatures, arrival)
@@ -578,6 +621,10 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
     ) {
         val count = step.counts[context.classLevel] ?: (if (arrival) step.counts[0] else null) ?: 0
         if (count <= 0) return
+        if (step.itemType == "spell" || (step.items.isEmpty() && step.spells.isNotEmpty())) {
+            processSpellChoice(simulation, draft, context, source, step, key, count)
+            return
+        }
         val pool = choicePool(step, context.classLevel)
         if (pool.isEmpty()) {
             // Spell picks (cantrips, spells known): left to the Spells screen for now. Item picks (an
@@ -600,6 +647,61 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
             context, source.id, step.id, "ItemChoice",
             "picks=${picks.joinToString(",") { it.id }}" + (answer.replacedId?.let { ";replaced=$it" } ?: "")
         )
+    }
+
+    private fun processSpellChoice(
+        simulation: Simulation,
+        draft: LevelUpDraft,
+        context: StepContext,
+        source: StepSource,
+        step: AdvancementStep.ItemChoice,
+        key: String,
+        count: Int
+    ) {
+        val pool = spellPool(simulation, step, context)
+        if (pool.isEmpty()) {
+            // No spell list to pick from (a catalog without spells): left to the Spells screen.
+            simulation.spellChoices += SpellChoiceNote(source.name, step.title, count)
+            return
+        }
+        val options = pool.map { SpellOption(it, known = simulation.knowsSpell(it)) }
+        val replaceable = if (context.classLevel in step.replacementLevels) options.filter { it.known }.map { it.spell } else emptyList()
+        simulation.pages += LevelUpPage.Spells(key, context.characterLevel, source.name, step, count, options, replaceable)
+        val answer = draft.answers[key] as? LevelUpAnswer.Items ?: return
+        val replaced = answer.replacedId?.let { id -> replaceable.firstOrNull { it.id == id } }
+        val allowed = options.filter { !it.known || it.spell.id == replaced?.id }.map { it.spell.id }.toSet()
+        val picks = answer.picks.filter { it in allowed }.mapNotNull { catalog.spells[it] }
+        replaced?.let { simulation.forgetSpell(it) }
+        // Cantrips are always at hand; other picks as the step says (a spellbook's aren't prepared).
+        picks.forEach { spell -> simulation.learnSpell(spell, prepared = step.spellPrepared >= 1 || spell.level == 0) }
+        simulation.record(
+            context, source.id, step.id, "SpellChoice",
+            "picks=${picks.joinToString(",") { it.id }}" + (replaced?.let { ";replaced=${it.id}" } ?: "")
+        )
+    }
+
+    /**
+     * What a spell step offers: its own spells, or the spells of its lists ("class:wizard"; any
+     * class's when it names none) of its level, or of every level the class has slots for.
+     */
+    private fun spellPool(simulation: Simulation, step: AdvancementStep.ItemChoice, context: StepContext): List<CatalogSpellRef> {
+        if (step.spells.isNotEmpty()) return step.spells.mapNotNull { catalog.spells[it] }
+        val lists = step.restriction?.list.orEmpty()
+        val level = step.restriction?.level?.toIntOrNull()
+        val highest = if (level == null) highestSpellLevel(simulation, context) else 0
+        return catalog.spells.values.filter { spell ->
+            val onList = if (lists.isEmpty()) spell.lists.any { it.startsWith("class:") } else spell.lists.any { it in lists }
+            val spellLevel = spell.level ?: return@filter false
+            onList && if (level != null) spellLevel == level else spellLevel in 1..highest
+        }.sortedWith(compareBy({ it.level }, { it.name.ru.ifBlank { it.name.en } }))
+    }
+
+    /** The highest level of the slots the class (with its subclass) has at this class level; at least 1. */
+    private fun highestSpellLevel(simulation: Simulation, context: StepContext): Int {
+        val entry = simulation.classes.firstOrNull { it.classId == context.characterClass.id }
+            ?: CharacterClassEntry(context.characterClass.id, levels = context.classLevel)
+        val slots = spellSlots(listOf(entry.copy(levels = context.classLevel)), catalog).combined()
+        return (slots.indexOfLast { it > 0 } + 1).coerceAtLeast(1)
     }
 
     private fun processAbilityScores(
@@ -739,7 +841,30 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
         val addedFeatures = mutableListOf<Pair<CatalogFeature, StepContext>>()
         val removedFeatureIds = mutableListOf<String>()
         val spellsGranted = mutableListOf<CatalogSpellRef>()
+        /** Spells picked on spell pages, with whether they're prepared. */
+        val spellsLearned = mutableListOf<Pair<CatalogSpellRef, Boolean>>()
+        val spellsForgotten = mutableListOf<CatalogSpellRef>()
+        private val knownSpellNames = bundle.spells.map { spellNameKey(it.name) }.toMutableSet()
         val spellChoices = mutableListOf<SpellChoiceNote>()
+
+        /** Known already: on the character's sheet or picked or granted in this draft. */
+        fun knowsSpell(spell: CatalogSpellRef): Boolean =
+            spell.id in (spellsLearned.map { it.first.id } + spellsGranted.map { it.id }) ||
+                spellNameKeys(spell).any { it in knownSpellNames }
+
+        fun learnSpell(spell: CatalogSpellRef, prepared: Boolean) {
+            if (!knowsSpell(spell)) spellsLearned += spell to prepared
+        }
+
+        fun grantSpells(spells: List<CatalogSpellRef>) {
+            spellsGranted += spells.filterNot(::knowsSpell)
+        }
+
+        fun forgetSpell(spell: CatalogSpellRef) {
+            val learned = spellsLearned.indexOfFirst { it.first.id == spell.id }
+            if (learned >= 0) spellsLearned.removeAt(learned) else spellsForgotten += spell
+            knownSpellNames -= spellNameKeys(spell)
+        }
         val unmetRequirements = mutableListOf<com.dndcharacterhandler.domain.rules.MulticlassRequirement>()
         val records = mutableListOf<AdvancementRecord>()
         /** The species and background chosen in this draft (a new character's). */
@@ -851,6 +976,8 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
             masteries = masteries.map { TraitOption(it, traitName(it), false) },
             defenses = defenses.map { TraitOption(it, traitName(it), false) },
             spellsGranted = spellsGranted.distinctBy { it.id },
+            spellsLearned = spellsLearned.map { it.first },
+            spellsForgotten = spellsForgotten.toList(),
             spellChoices = spellChoices.toList(),
             spellSlots = spellSlots(classes, catalog),
             unmetRequirements = unmetRequirements.distinctBy { it.classId },
@@ -865,7 +992,8 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
             bundle: CharacterBundle,
             russian: Boolean,
             now: Long,
-            equipmentItem: (CatalogEquipmentRef, Int) -> InventoryItem
+            equipmentItem: (CatalogEquipmentRef, Int) -> InventoryItem,
+            spellItem: (CatalogSpellRef, Boolean) -> Spell
         ): CharacterBundle {
             val newLevel = level
             val gain = hitPointGain()
@@ -897,6 +1025,12 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
                 )
             }
             val inventory = bundle.inventoryItems + equipment.map { pick -> equipmentItem(pick.item, pick.count) }
+            // Spells: the swapped ones out, the picked ones in; granted spells (domain, circle,
+            // species spells) are always prepared.
+            val forgottenNames = spellsForgotten.flatMap(::spellNameKeys).toSet()
+            val spells = bundle.spells.filterNot { spellNameKey(it.name) in forgottenNames } +
+                spellsLearned.map { (spell, prepared) -> spellItem(spell, prepared) } +
+                spellsGranted.distinctBy { it.id }.map { spell -> spellItem(spell, true) }
             // The sheet keeps gold, silver and copper: platinum goes in as gold, electrum as silver.
             val gold = (coins["gp"] ?: 0) + 10 * (coins["pp"] ?: 0)
             val silver = (coins["sp"] ?: 0) + 5 * (coins["ep"] ?: 0)
@@ -987,7 +1121,8 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
                 skills = skills,
                 features = features,
                 combatResources = resources,
-                inventoryItems = inventory
+                inventoryItems = inventory,
+                spells = spells
             )
         }
 

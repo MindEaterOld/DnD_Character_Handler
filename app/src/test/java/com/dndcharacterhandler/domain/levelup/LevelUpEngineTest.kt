@@ -56,6 +56,7 @@ class LevelUpEngineTest {
                     group.options.filter { !it.alreadyHas }.take(page.required[index]).map { it.key }.toSet()
                 })
                 is LevelUpPage.Items -> LevelUpAnswer.Items(page.options.filter { !it.known }.take(page.required).map { it.feature.id })
+                is LevelUpPage.Spells -> LevelUpAnswer.Items(page.options.filter { !it.known }.take(page.required).map { it.spell.id })
                 is LevelUpPage.AbilityScores -> LevelUpAnswer.AbilityScores(mapOf(page.abilities.first() to page.required.coerceAtMost(page.cap)))
                 is LevelUpPage.Subclass -> LevelUpAnswer.Subclass(
                     page.options.firstOrNull { it.identifier == subclass }?.id ?: page.options.first().id
@@ -311,5 +312,87 @@ class LevelUpEngineTest {
         assertEquals(35, fourth.character.speed)
         val fifth = engine.apply(fourth, complete(fourth, LevelUpDraft(5)), russian = false, now = 2)
         assertTrue("Large Form" in fifth.featureNames())
+    }
+
+    private fun pageSpells(page: LevelUpPage.Spells) = page.options.map { it.spell }
+
+    @Test
+    fun aNewWizardPicksCantripsAndTheSpellbookFromItsList() {
+        val bundle = newCharacter(intelligence = 15)
+        val draft = complete(bundle, LevelUpDraft(1, setup = LevelUpSetup(wizard.id, keepExistingLevels = false)))
+        val run = engine.run(bundle, draft)
+        val spellPages = run.pages.filterIsInstance<LevelUpPage.Spells>()
+        val cantrips = spellPages.first { it.step.restriction?.level == "0" && it.source.en == "Wizard" }
+        assertEquals(3, cantrips.count)
+        assertTrue(pageSpells(cantrips).all { it.level == 0 && "class:wizard" in it.lists })
+        assertTrue("Fire Bolt" in pageSpells(cantrips).map { it.name.en })
+        val spellbook = spellPages.first { it.step.restriction?.level == "available" }
+        assertEquals(6, spellbook.count)
+        // Only 1st-level slots at 1st level.
+        assertTrue(pageSpells(spellbook).all { it.level == 1 && "class:wizard" in it.lists })
+        assertTrue(run.pages.filterIsInstance<LevelUpPage.Summary>().single().summary.spellChoices.isEmpty())
+
+        val result = engine.apply(bundle, draft, russian = false, now = 1)
+        val learned = run.pages.filterIsInstance<LevelUpPage.Summary>().single().summary.spellsLearned
+        assertEquals(9, learned.size)
+        assertEquals(9, result.spells.size)
+        // Cantrips are at hand; the spellbook's spells wait to be prepared.
+        assertTrue(result.spells.filter { it.level == 0 }.all { it.isPrepared })
+        assertTrue(result.spells.filter { it.level == 1 }.none { it.isPrepared })
+        assertTrue(result.spells.all { it.description.isNotBlank() && it.range.isNotBlank() })
+        assertTrue(result.character.advancements.any { it.type == "SpellChoice" })
+    }
+
+    @Test
+    fun spellChoicesReachTheHighestSlotLevelTheClassHas() {
+        val warlock = catalog.classesByIdentifier.getValue("warlock")
+        val bundle = newCharacter()
+        val draft = complete(bundle, LevelUpDraft(3, setup = LevelUpSetup(warlock.id, keepExistingLevels = false)))
+        val pages = engine.run(bundle, draft).pages.filterIsInstance<LevelUpPage.Spells>()
+            .filter { it.step.restriction?.level.isNullOrBlank() || it.step.restriction?.level == "available" }
+        // Pact Magic slots are 2nd level at 3rd level.
+        val third = pages.last { it.characterLevel == 3 }
+        assertEquals(2, pageSpells(third).maxOf { it.level ?: 0 })
+        assertEquals(1, pages.first { it.characterLevel == 1 }.let(::pageSpells).maxOf { it.level ?: 0 })
+    }
+
+    @Test
+    fun aKnownSpellCanBeSwappedWhereTheStepAllows() {
+        val bard = catalog.classesByIdentifier.getValue("bard")
+        val bundle = newCharacter()
+        val firstLevel = complete(bundle, LevelUpDraft(1, setup = LevelUpSetup(bard.id, keepExistingLevels = false)))
+        val bardOne = engine.apply(bundle, firstLevel, russian = false, now = 1)
+        val draft = LevelUpDraft(2)
+        val page = engine.run(bardOne, complete(bardOne, draft)).pages.filterIsInstance<LevelUpPage.Spells>()
+            .first { it.replaceable.isNotEmpty() && it.step.restriction?.level != "0" }
+        val swapped = page.replaceable.first()
+        val newSpell = page.options.first { !it.known }.spell
+        val withSwap = complete(bardOne, draft) { candidate ->
+            if (candidate is LevelUpPage.Spells && candidate.key == page.key) {
+                LevelUpAnswer.Items(listOf(newSpell.id) + candidate.options.filter { !it.known && it.spell.id != newSpell.id }
+                    .take(candidate.required).map { it.spell.id }, replacedId = swapped.id)
+            } else {
+                null
+            }
+        }
+        val summary = engine.run(bardOne, withSwap).pages.filterIsInstance<LevelUpPage.Summary>().single().summary
+        assertEquals(listOf(swapped.id), summary.spellsForgotten.map { it.id })
+        val result = engine.apply(bardOne, withSwap, russian = false, now = 2)
+        val names = result.spells.map { it.name }
+        assertFalse(swapped.name.en in names)
+        assertTrue(newSpell.name.en in names)
+    }
+
+    @Test
+    fun domainSpellsComeAlwaysPrepared() {
+        val cleric = catalog.classesByIdentifier.getValue("cleric")
+        val bundle = newCharacter()
+        val draft = complete(bundle, LevelUpDraft(3, setup = LevelUpSetup(cleric.id, keepExistingLevels = false)), subclass = "life-domain")
+        val result = engine.apply(bundle, draft, russian = false, now = 1)
+        val domain = result.spells.filter { it.name in listOf("Aid", "Bless", "Cure Wounds", "Lesser Restoration") }
+        assertEquals(4, domain.size)
+        assertTrue(domain.all { it.isPrepared })
+        // And the cleric's cantrips: three at 1st level.
+        assertEquals(3, result.spells.count { it.level == 0 })
     }
 }
