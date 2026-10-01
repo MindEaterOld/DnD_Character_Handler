@@ -9,7 +9,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -27,6 +26,7 @@ fun CharacterScreenHeader(
     modifier: Modifier = Modifier
 ) {
     val tokens = LocalDesignTokens.current.typography
+    val colors = LocalDesignTokens.current.colors
 
     Box(
         modifier = modifier
@@ -45,7 +45,7 @@ fun CharacterScreenHeader(
             text = character.name.ifBlank { text("overview_name_placeholder") },
             modifier = Modifier.padding(horizontal = 52.dp),
             style = MaterialTheme.typography.titleLarge.copy(fontSize = tokens.titleLarge.fontSizeSp.sp),
-            color = Color(0xFFF7F2EA),
+            color = colors.text.primary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center

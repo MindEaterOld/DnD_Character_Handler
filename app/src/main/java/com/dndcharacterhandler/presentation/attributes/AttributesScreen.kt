@@ -1053,17 +1053,18 @@ private fun DarkvisionModeChip(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = LocalDesignTokens.current.colors
     Surface(
         modifier = modifier.clickable(onClick = onClick),
         shape = RoundedCornerShape(8.dp),
-        color = if (selected) Color(0xFF3A3244) else Color(0xFF17141B).copy(alpha = 0.62f),
-        border = BorderStroke(1.dp, if (selected) Color(0x66FFF6EA) else Color(0x30FFFFFF))
+        color = if (selected) colors.surface.selected else colors.surface.card.copy(alpha = 0.62f),
+        border = BorderStroke(1.dp, if (selected) colors.border.selected else colors.border.muted)
     ) {
         Text(
             text = label,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
             style = MaterialTheme.typography.bodyLarge,
-            color = Color(0xFFF7F2EA)
+            color = colors.text.primary
         )
     }
 }
@@ -1081,6 +1082,7 @@ private fun Feature.darkvisionFeet(): Int? =
 @Composable
 private fun AttributesSectionTitle(title: String) {
     val tokens = LocalDesignTokens.current.typography
+    val colors = LocalDesignTokens.current.colors
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -1090,7 +1092,7 @@ private fun AttributesSectionTitle(title: String) {
         Text(
             text = title,
             style = MaterialTheme.typography.headlineMedium.copy(fontSize = tokens.headlineMedium.fontSizeSp.sp),
-            color = Color(0xFFF7F2EA)
+            color = colors.text.primary
         )
         Canvas(
             modifier = Modifier
@@ -1100,7 +1102,7 @@ private fun AttributesSectionTitle(title: String) {
         ) {
             val centerY = size.height / 2f
             drawLine(
-                color = Color(0x55A19892),
+                color = colors.ornament.stroke,
                 start = Offset(0f, centerY),
                 end = Offset(size.width - 18.dp.toPx(), centerY),
                 strokeWidth = 1.dp.toPx(),
@@ -1118,13 +1120,14 @@ private fun AbilityScoreCard(
     onClick: () -> Unit = {}
 ) {
     val tokens = LocalDesignTokens.current.typography
+    val colors = LocalDesignTokens.current.colors
     Card(
         modifier = modifier
             .aspectRatio(0.84f)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(10.dp),
-        border = BorderStroke(1.dp, Color(0x42FFFFFF)),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF17141B).copy(alpha = 0.66f))
+        border = BorderStroke(1.dp, colors.border.miniCard),
+        colors = CardDefaults.cardColors(containerColor = colors.surface.card.copy(alpha = 0.66f))
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             FrameCorner(modifier = Modifier.align(Alignment.TopStart))
@@ -1145,17 +1148,17 @@ private fun AbilityScoreCard(
                     Text(
                         text = text(score.shortNameKey),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color(0xFFF1ECE5)
+                        color = colors.text.action
                     )
                     Text(
                         text = signed(score.modifier),
                         style = MaterialTheme.typography.headlineMedium.copy(fontSize = tokens.hpTemporary.fontSizeSp.sp),
-                        color = Color(0xFFF7F2EA)
+                        color = colors.text.primary
                     )
                     Text(
                         text = score.value.toString(),
                         style = MaterialTheme.typography.titleLarge,
-                        color = Color(0xFFC2BBB3)
+                        color = colors.text.label
                     )
                 }
                 Spacer(modifier = Modifier.height(6.dp))
@@ -1164,7 +1167,7 @@ private fun AbilityScoreCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(1.dp)
-                            .background(Color(0x2EFFFFFF))
+                            .background(colors.border.muted)
                     )
                     Row(
                         modifier = Modifier
@@ -1175,11 +1178,11 @@ private fun AbilityScoreCard(
                     ) {
                         Canvas(modifier = Modifier.size(12.dp)) {
                             drawCircle(
-                                color = if (score.saveProficient) Color(0xFFF7F2EA) else Color.Transparent,
+                                color = if (score.saveProficient) colors.text.primary else Color.Transparent,
                                 radius = 5.dp.toPx()
                             )
                             drawCircle(
-                                color = Color(0xFFC2BBB3),
+                                color = colors.text.label,
                                 radius = 5.dp.toPx(),
                                 style = Stroke(width = 1.dp.toPx())
                             )
@@ -1188,13 +1191,13 @@ private fun AbilityScoreCard(
                             text = text("attributes_saving_throw_short"),
                             modifier = Modifier.padding(start = 4.dp),
                             style = MaterialTheme.typography.labelMedium,
-                            color = Color(0xFFD2CAC2)
+                            color = colors.text.muted
                         )
                         Text(
                             text = signed(score.saveModifier(proficiencyBonus)),
                             modifier = Modifier.padding(start = 4.dp),
                             style = MaterialTheme.typography.labelMedium,
-                            color = Color(0xFFD2CAC2)
+                            color = colors.text.muted
                         )
                     }
                 }
@@ -1247,7 +1250,7 @@ private fun SkillAbilityTitle(title: String) {
         text = title,
         modifier = Modifier.fillMaxWidth(),
         style = MaterialTheme.typography.titleLarge,
-        color = Color(0xFFF7F2EA)
+        color = LocalDesignTokens.current.colors.text.primary
     )
 }
 
@@ -1271,14 +1274,15 @@ private fun SkillRowCard(
     onClick: () -> Unit = {}
 ) {
     val strings = LocalStrings.current
+    val colors = LocalDesignTokens.current.colors
     Surface(
         modifier = modifier
             .fillMaxWidth()
             .height(48.dp)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(7.dp),
-        color = Color(0xFF17141B).copy(alpha = 0.62f),
-        border = BorderStroke(1.dp, Color(0x36FFFFFF))
+        color = colors.surface.card.copy(alpha = 0.62f),
+        border = BorderStroke(1.dp, colors.border.muted)
     ) {
         Row(
             modifier = Modifier
@@ -1287,14 +1291,14 @@ private fun SkillRowCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Canvas(modifier = Modifier.size(12.dp)) {
-                val expertiseColor = Color(0xFFFFD86B)
+                val expertiseColor = colors.accent.inspiration
                 val fillColor = when {
                     skill.expertise -> expertiseColor
-                    skill.proficient -> Color(0xFFF7F2EA)
-                    skill.jackOfAllTrades -> Color(0x80F7F2EA)
+                    skill.proficient -> colors.text.primary
+                    skill.jackOfAllTrades -> colors.text.primary.copy(alpha = 0.5f)
                     else -> Color.Transparent
                 }
-                val strokeColor = if (skill.expertise) expertiseColor else Color(0xFFC2BBB3)
+                val strokeColor = if (skill.expertise) expertiseColor else colors.text.label
                 drawCircle(
                     color = fillColor,
                     radius = 5.dp.toPx()
@@ -1311,7 +1315,7 @@ private fun SkillRowCard(
                     .padding(start = 6.dp)
                     .weight(1f),
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color(0xFFD2CAC2),
+                color = colors.text.muted,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -1321,7 +1325,7 @@ private fun SkillRowCard(
                     .padding(start = 8.dp)
                     .width(24.dp),
                 style = MaterialTheme.typography.bodyLarge,
-                color = Color(0xFFF7F2EA),
+                color = colors.text.primary,
                 textAlign = TextAlign.End
             )
         }
@@ -1336,13 +1340,14 @@ private fun ProficiencyInfoCard(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null
 ) {
+    val colors = LocalDesignTokens.current.colors
     Surface(
         modifier = modifier
             .height(92.dp)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
         shape = RoundedCornerShape(10.dp),
-        color = Color(0xFF17141B).copy(alpha = 0.66f),
-        border = BorderStroke(1.dp, Color(0x42FFFFFF))
+        color = colors.surface.card.copy(alpha = 0.66f),
+        border = BorderStroke(1.dp, colors.border.miniCard)
     ) {
         Row(
             modifier = Modifier
@@ -1353,20 +1358,20 @@ private fun ProficiencyInfoCard(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = Color(0xFFC2BBB3),
+                tint = colors.text.label,
                 modifier = Modifier.size(34.dp)
             )
             Column(modifier = Modifier.padding(start = 16.dp)) {
                 Text(
                     text = label,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFFC2BBB3)
+                    color = colors.text.label
                 )
                 Text(
                     text = value,
                     modifier = Modifier.padding(top = 4.dp),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Color(0xFFF7F2EA),
+                    color = colors.text.primary,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -1391,7 +1396,7 @@ private fun ProficiencyCheckboxRow(
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
-            color = if (enabled) Color.Unspecified else Color(0x80FFFFFF)
+            color = if (enabled) Color.Unspecified else LocalDesignTokens.current.colors.text.primary.copy(alpha = 0.5f)
         )
     }
 }
@@ -1402,13 +1407,14 @@ private fun FrameCorner(
     mirrored: Boolean = false,
     upsideDown: Boolean = false
 ) {
+    val lineColor = LocalDesignTokens.current.colors.ornament.stroke
     Canvas(modifier = modifier.size(24.dp)) {
         val x0 = if (mirrored) size.width else 0f
         val x1 = if (mirrored) size.width - 10.dp.toPx() else 10.dp.toPx()
         val y0 = if (upsideDown) size.height else 0f
         val y1 = if (upsideDown) size.height - 10.dp.toPx() else 10.dp.toPx()
-        drawLine(Color(0x55A19892), Offset(x0, y1), Offset(x0, y0), strokeWidth = 1.dp.toPx())
-        drawLine(Color(0x55A19892), Offset(x0, y0), Offset(x1, y0), strokeWidth = 1.dp.toPx())
+        drawLine(lineColor, Offset(x0, y1), Offset(x0, y0), strokeWidth = 1.dp.toPx())
+        drawLine(lineColor, Offset(x0, y0), Offset(x1, y0), strokeWidth = 1.dp.toPx())
     }
 }
 

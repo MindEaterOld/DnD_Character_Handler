@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
+import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 
 /**
  * A toggleable dot: a filled inner circle inside a ring when [selected], an empty ring otherwise.
@@ -19,17 +20,18 @@ fun SelectableDot(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = LocalDesignTokens.current.colors
     Canvas(
         modifier = modifier
             .size(22.dp)
             .clickable(onClick = onClick)
     ) {
         drawCircle(
-            color = if (selected) Color(0xFFF7F2EA) else Color.Transparent,
+            color = if (selected) colors.text.primary else Color.Transparent,
             radius = size.minDimension * 0.32f
         )
         drawCircle(
-            color = Color(0xFFC2BBB3),
+            color = colors.text.label,
             radius = size.minDimension * 0.42f,
             style = Stroke(width = 1.5.dp.toPx())
         )

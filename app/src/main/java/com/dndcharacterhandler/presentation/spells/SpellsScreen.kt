@@ -317,7 +317,7 @@ internal fun SpellsContent(
                     text = text("placeholder_loading_character"),
                     modifier = Modifier.align(Alignment.Center),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Color(0xFFD7D1CC)
+                    color = LocalDesignTokens.current.colors.progress.xpFill
                 )
             }
         }
@@ -530,11 +530,12 @@ private fun SpellsSearchField(
     value: String,
     onValueChange: (String) -> Unit
 ) {
+    val colors = LocalDesignTokens.current.colors
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
-        color = Color(0xFF17141B).copy(alpha = 0.62f),
-        border = BorderStroke(1.dp, Color(0x36FFFFFF))
+        color = colors.surface.card.copy(alpha = 0.62f),
+        border = BorderStroke(1.dp, colors.border.muted)
     ) {
         OutlinedTextField(
             value = value,
@@ -544,7 +545,7 @@ private fun SpellsSearchField(
                 Icon(
                     imageVector = Icons.Outlined.Search,
                     contentDescription = null,
-                    tint = Color(0xFFD2CAC2),
+                    tint = colors.text.muted,
                     modifier = Modifier.size(28.dp)
                 )
             },
@@ -552,7 +553,7 @@ private fun SpellsSearchField(
                 Text(
                     text = text("spells_search_placeholder"),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Color(0xFFD2CAC2).copy(alpha = 0.72f)
+                    color = colors.text.muted.copy(alpha = 0.72f)
                 )
             },
             singleLine = true,
@@ -561,7 +562,7 @@ private fun SpellsSearchField(
                 unfocusedBorderColor = Color.Transparent,
                 focusedContainerColor = Color.Transparent,
                 unfocusedContainerColor = Color.Transparent,
-                cursorColor = Color(0xFFFFF6EA)
+                cursorColor = colors.text.warmPrimary
             )
         )
     }
@@ -576,6 +577,7 @@ private fun SpellLevelSectionTitle(
     onSlotClick: ((Int) -> Unit)?
 ) {
     val tokens = LocalDesignTokens.current.typography
+    val colors = LocalDesignTokens.current.colors
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -586,7 +588,7 @@ private fun SpellLevelSectionTitle(
             text = spellLevelTitle(level),
             modifier = if (onTitleClick != null) Modifier.clickable(onClick = onTitleClick) else Modifier,
             style = MaterialTheme.typography.headlineMedium.copy(fontSize = tokens.headlineMedium.fontSizeSp.sp),
-            color = Color(0xFFF7F2EA),
+            color = colors.text.primary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -598,7 +600,7 @@ private fun SpellLevelSectionTitle(
         ) {
             Canvas(modifier = Modifier.fillMaxSize()) {
                 drawLine(
-                    color = Color(0x33FFFFFF),
+                    color = colors.border.muted,
                     start = androidx.compose.ui.geometry.Offset(0f, size.height / 2f),
                     end = androidx.compose.ui.geometry.Offset(size.width, size.height / 2f),
                     strokeWidth = 1.dp.toPx()
@@ -623,17 +625,18 @@ private fun SpellSlotDiamond(
     filled: Boolean,
     onClick: (() -> Unit)? = null
 ) {
+    val onBackground = MaterialTheme.colorScheme.onBackground
     Box(
         modifier = Modifier
             .size(14.dp)
             .rotate(45f)
-            .background(if (filled) Color(0xFFF1E8DA) else Color.Transparent, RoundedCornerShape(2.dp))
+            .background(if (filled) onBackground else Color.Transparent, RoundedCornerShape(2.dp))
             .then(
                 if (onClick != null) {
                     Modifier
                         .clickable(onClick = onClick)
                         .background(
-                            if (filled) Color(0xFFF1E8DA) else Color.Transparent,
+                            if (filled) onBackground else Color.Transparent,
                             RoundedCornerShape(2.dp)
                         )
                 } else {
@@ -645,8 +648,8 @@ private fun SpellSlotDiamond(
         Surface(
             modifier = Modifier.fillMaxSize(),
             shape = RoundedCornerShape(2.dp),
-            color = if (filled) Color(0xFFF1E8DA) else Color.Transparent,
-            border = BorderStroke(1.dp, Color(0x80F1E8DA))
+            color = if (filled) onBackground else Color.Transparent,
+            border = BorderStroke(1.dp, onBackground.copy(alpha = 0.5f))
         ) {}
     }
 }
@@ -690,17 +693,18 @@ private fun SpellCard(
 
 @Composable
 private fun SpellEmptyRow(level: Int) {
+    val colors = LocalDesignTokens.current.colors
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
-        color = Color(0x0CFFFFFF),
-        border = BorderStroke(1.dp, Color(0x20FFFFFF))
+        color = colors.ornament.outer,
+        border = BorderStroke(1.dp, colors.ornament.outer)
     ) {
         Text(
             text = if (level == 0) text("spells_empty_cantrips") else text("spells_empty_level"),
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
             style = MaterialTheme.typography.bodyMedium,
-            color = Color(0xFFD2CAC2)
+            color = colors.text.muted
         )
     }
 }
@@ -789,11 +793,12 @@ private fun SpellCatalogRow(
     item: SpellCatalogItem,
     onAdd: () -> Unit
 ) {
+    val colors = LocalDesignTokens.current.colors
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
-        color = Color(0x14FFFFFF),
-        border = BorderStroke(1.dp, Color(0x30FFFFFF))
+        color = colors.ornament.outer,
+        border = BorderStroke(1.dp, colors.border.muted)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
@@ -803,7 +808,7 @@ private fun SpellCatalogRow(
                 Text(
                     text = item.localizedName(LocalStrings.current),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Color(0xFFF7F2EA),
+                    color = colors.text.primary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -811,7 +816,7 @@ private fun SpellCatalogRow(
                     text = "${spellLevelTitle(item.level)} • ${spellSchoolLabel(item.school)}",
                     modifier = Modifier.padding(top = 4.dp),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFFD2CAC2),
+                    color = colors.text.muted,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -1538,6 +1543,7 @@ private fun SpellSlotsConfigBody(
     onShortRestChange: (Boolean) -> Unit,
     onLongRestChange: (Boolean) -> Unit
 ) {
+    val colors = LocalDesignTokens.current.colors
     val scrollState = rememberScrollState()
     Column(
         modifier = Modifier
@@ -1569,7 +1575,7 @@ private fun SpellSlotsConfigBody(
             Text(
                 text = text("spells_restore_short_rest"),
                 style = MaterialTheme.typography.bodyLarge,
-                color = Color(0xFFF7F2EA)
+                color = colors.text.primary
             )
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1577,7 +1583,7 @@ private fun SpellSlotsConfigBody(
             Text(
                 text = text("spells_restore_long_rest"),
                 style = MaterialTheme.typography.bodyLarge,
-                color = Color(0xFFF7F2EA)
+                color = colors.text.primary
             )
         }
     }
@@ -1590,6 +1596,7 @@ private fun SpellSlotCell(
     onValueChange: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = LocalDesignTokens.current.colors
     OutlinedTextField(
         value = if (value == 0) "" else value.toString(),
         onValueChange = { onValueChange(it.filter(Char::isDigit).take(2).toIntOrNull() ?: 0) },
@@ -1605,15 +1612,15 @@ private fun SpellSlotCell(
         textStyle = MaterialTheme.typography.bodyLarge.copy(textAlign = TextAlign.Center),
         modifier = modifier,
         colors = OutlinedTextFieldDefaults.colors(
-            focusedTextColor = Color(0xFFF7F2EA),
-            unfocusedTextColor = Color(0xFFF7F2EA),
-            focusedContainerColor = Color(0x14FFFFFF),
-            unfocusedContainerColor = Color(0x14FFFFFF),
-            focusedBorderColor = Color(0x50FFFFFF),
-            unfocusedBorderColor = Color(0x30FFFFFF),
-            focusedLabelColor = Color(0xFFD2CAC2),
-            unfocusedLabelColor = Color(0xFFD2CAC2),
-            cursorColor = Color(0xFFFFF6EA)
+            focusedTextColor = colors.text.primary,
+            unfocusedTextColor = colors.text.primary,
+            focusedContainerColor = colors.ornament.outer,
+            unfocusedContainerColor = colors.ornament.outer,
+            focusedBorderColor = colors.border.default,
+            unfocusedBorderColor = colors.border.muted,
+            focusedLabelColor = colors.text.muted,
+            unfocusedLabelColor = colors.text.muted,
+            cursorColor = colors.text.warmPrimary
         )
     )
 }
@@ -1650,12 +1657,12 @@ private fun SpellSlotsConfigDialogPreview() {
 
     CompositionLocalProvider(LocalStrings provides strings) {
         DnDTheme {
-            Surface(color = Color(0xFF1A171D)) {
+            Surface(color = LocalDesignTokens.current.colors.surface.button) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
                         text = text("spells_edit_slots"),
                         style = MaterialTheme.typography.titleLarge,
-                        color = Color(0xFFF7F2EA),
+                        color = LocalDesignTokens.current.colors.text.primary,
                         modifier = Modifier.padding(bottom = 12.dp)
                     )
                     SpellSlotsConfigBody(
@@ -1677,7 +1684,7 @@ private fun DialogSection(title: String) {
     Text(
         text = title,
         style = MaterialTheme.typography.titleMedium,
-        color = Color(0xFFF7F2EA)
+        color = LocalDesignTokens.current.colors.text.primary
     )
 }
 
@@ -1696,7 +1703,7 @@ private fun SpellComponentToggle(
             text = label,
             modifier = Modifier.weight(1f),
             style = MaterialTheme.typography.bodyLarge,
-            color = Color(0xFFF7F2EA)
+            color = LocalDesignTokens.current.colors.text.primary
         )
         Switch(
             checked = checked,
@@ -1712,6 +1719,7 @@ private fun CompactSelectionField(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = LocalDesignTokens.current.colors
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(6.dp)
@@ -1719,15 +1727,15 @@ private fun CompactSelectionField(
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
-            color = Color(0xFFD2CAC2)
+            color = colors.text.muted
         )
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onClick),
             shape = RoundedCornerShape(10.dp),
-            color = Color(0x14FFFFFF),
-            border = BorderStroke(1.dp, Color(0x30FFFFFF))
+            color = colors.ornament.outer,
+            border = BorderStroke(1.dp, colors.border.muted)
         ) {
             Row(
                 modifier = Modifier
@@ -1740,14 +1748,14 @@ private fun CompactSelectionField(
                     text = value,
                     modifier = Modifier.weight(1f),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Color(0xFFF7F2EA),
+                    color = colors.text.primary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Icon(
                     imageVector = Icons.Outlined.ArrowDropDown,
                     contentDescription = null,
-                    tint = Color(0xFFD2CAC2)
+                    tint = colors.text.muted
                 )
             }
         }
@@ -1761,6 +1769,7 @@ private fun CompactTextField(
     label: String,
     modifier: Modifier = Modifier
 ) {
+    val colors = LocalDesignTokens.current.colors
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(6.dp)
@@ -1768,7 +1777,7 @@ private fun CompactTextField(
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
-            color = Color(0xFFD2CAC2),
+            color = colors.text.muted,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -1778,13 +1787,13 @@ private fun CompactTextField(
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = Color(0xFFF7F2EA),
-                unfocusedTextColor = Color(0xFFF7F2EA),
-                focusedContainerColor = Color(0x14FFFFFF),
-                unfocusedContainerColor = Color(0x14FFFFFF),
-                focusedBorderColor = Color(0x50FFFFFF),
-                unfocusedBorderColor = Color(0x30FFFFFF),
-                cursorColor = Color(0xFFFFF6EA)
+                focusedTextColor = colors.text.primary,
+                unfocusedTextColor = colors.text.primary,
+                focusedContainerColor = colors.ornament.outer,
+                unfocusedContainerColor = colors.ornament.outer,
+                focusedBorderColor = colors.border.default,
+                unfocusedBorderColor = colors.border.muted,
+                cursorColor = colors.text.warmPrimary
             )
         )
     }
@@ -1814,8 +1823,8 @@ private fun <T> SelectionDialog(
                         .fillMaxWidth()
                         .clickable { onSelect(option) },
                     shape = RoundedCornerShape(10.dp),
-                    color = if (isSelected) Color(0x22FFF6EA) else Color.Transparent,
-                    border = BorderStroke(1.dp, if (isSelected) Color(0x70FFFFFF) else Color(0x20FFFFFF))
+                    color = if (isSelected) colors.ornament.outer else Color.Transparent,
+                    border = BorderStroke(1.dp, if (isSelected) colors.border.selected else colors.ornament.outer)
                 ) {
                     Text(
                         text = labelForOption(option),

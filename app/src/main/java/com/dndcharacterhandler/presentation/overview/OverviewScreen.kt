@@ -734,7 +734,7 @@ private fun OverviewContent(
                             fontSize = typographyTokens.characterName.fontSizeSp.sp,
                             lineHeight = (typographyTokens.characterName.lineHeightSp ?: typographyTokens.characterName.fontSizeSp).sp
                         ),
-                        color = Color(0xFFF7F2EA),
+                        color = colors.text.primary,
                         textAlign = TextAlign.Center,
                         maxLines = 2
                     )
@@ -1396,18 +1396,19 @@ private fun ExperienceModeButton(
     selected: Boolean,
     onClick: () -> Unit
 ) {
+    val colors = LocalDesignTokens.current.colors
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
-        color = if (selected) Color(0xFF3A3244) else Color(0xFF1A171D),
-        border = BorderStroke(1.dp, if (selected) Color(0x66FFF6EA) else Color(0x30FFFFFF)),
+        color = if (selected) colors.surface.selected else colors.surface.button,
+        border = BorderStroke(1.dp, if (selected) colors.border.selected else colors.border.muted),
         onClick = onClick
     ) {
         Text(
             text = label,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
             style = MaterialTheme.typography.bodyLarge,
-            color = if (selected) Color(0xFFFFF6EA) else Color(0xFFD2CAC2),
+            color = if (selected) colors.text.warmPrimary else colors.text.muted,
             textAlign = TextAlign.Center
         )
     }
@@ -1449,7 +1450,7 @@ private fun SubtitleToken(
         modifier = Modifier.clickable(onClick = onClick),
         // Several classes ("Fighter 5 / Rogue 2") step down to the body size of the type scale.
         style = if (compact) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.bodyLarge.copy(fontSize = token.fontSizeSp.sp),
-        color = Color(0xFFAAA29A),
+        color = LocalDesignTokens.current.colors.text.subtle,
         textAlign = TextAlign.Center
     )
 }
@@ -1460,7 +1461,7 @@ private fun SubtitleDivider() {
     Text(
         text = " • ",
         style = MaterialTheme.typography.bodyLarge.copy(fontSize = token.fontSizeSp.sp),
-        color = Color(0xFFAAA29A)
+        color = LocalDesignTokens.current.colors.text.subtle
     )
 }
 
@@ -1471,6 +1472,7 @@ private fun PortraitFrame(
     onClick: () -> Unit
 ) {
     val portraitReference = portraitUri ?: AssetReferences.portraitPlaceholderPath("portrait_placeholder.png")
+    val colors = LocalDesignTokens.current.colors
 
     Box(
         modifier = Modifier
@@ -1488,25 +1490,25 @@ private fun PortraitFrame(
             val inner = outer - 26.dp.toPx()
 
             drawCircle(
-                color = Color(0x20FFFFFF),
+                color = colors.ornament.outer,
                 radius = outer + 8.dp.toPx(),
                 center = c,
                 style = Stroke(width = 1.dp.toPx())
             )
             drawCircle(
-                color = Color(0x80C7C1BB),
+                color = colors.ornament.middle,
                 radius = outer,
                 center = c,
                 style = Stroke(width = 3.dp.toPx())
             )
             drawCircle(
-                color = Color(0x42FFFFFF),
+                color = colors.ornament.innerGlow,
                 radius = middle,
                 center = c,
                 style = Stroke(width = 1.dp.toPx())
             )
             drawCircle(
-                color = Color(0xFFE9E2D9),
+                color = colors.ornament.inner,
                 radius = inner,
                 center = c,
                 style = Stroke(width = 2.dp.toPx())
@@ -1527,10 +1529,10 @@ private fun PortraitFrame(
                     lineTo(offset.x - half, offset.y)
                     close()
                 }
-                drawPath(diamond, color = Color(0x14000000))
-                drawPath(diamond, color = Color(0x55A19892), style = Stroke(width = 1.dp.toPx()))
+                drawPath(diamond, color = colors.ornament.shadow)
+                drawPath(diamond, color = colors.ornament.stroke, style = Stroke(width = 1.dp.toPx()))
                 drawCircle(
-                    color = Color(0xFF2D2730),
+                    color = colors.ornament.dot,
                     radius = 5.dp.toPx(),
                     center = offset
                 )
@@ -1542,7 +1544,7 @@ private fun PortraitFrame(
                 .size(188.dp)
                 .clip(CircleShape),
             shape = CircleShape,
-            color = Color(0xFF141118)
+            color = colors.surface.portrait
         ) {
             AppImage(
                 imageRef = portraitReference,
@@ -1560,12 +1562,17 @@ private fun PortraitFrame(
 @Composable
 private fun PortraitFallback(characterName: String) {
     val token = LocalDesignTokens.current.typography.portraitInitial
+    val colors = LocalDesignTokens.current.colors
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(
                 Brush.radialGradient(
-                    colors = listOf(Color(0xFF3B3840), Color(0xFF18151C), Color(0xFF0F0C12))
+                    colors = listOf(
+                        colors.surface.portraitFallbackStart,
+                        colors.surface.portraitFallbackMiddle,
+                        colors.surface.portraitFallbackEnd
+                    )
                 )
             ),
         contentAlignment = Alignment.Center
@@ -1573,7 +1580,7 @@ private fun PortraitFallback(characterName: String) {
         Text(
             text = characterName.take(1).ifBlank { "?" },
             style = MaterialTheme.typography.headlineMedium.copy(fontSize = token.fontSizeSp.sp),
-            color = Color(0xFFF7F2EA)
+            color = colors.text.primary
         )
     }
 }
@@ -1690,12 +1697,13 @@ private fun OverviewActionButton(
     onClick: () -> Unit
 ) {
     val token = LocalDesignTokens.current.typography.actionButtonLabel
-    val contentColor = if (selected) Color(0xFFFFD86B) else Color(0xFFF1ECE5)
+    val colors = LocalDesignTokens.current.colors
+    val contentColor = if (selected) colors.accent.inspiration else colors.text.action
     Surface(
         modifier = modifier.height(66.dp),
         shape = RoundedCornerShape(20.dp),
-        border = BorderStroke(1.dp, if (selected) Color(0x99FFD86B) else Color(0x50FFFFFF)),
-        color = if (selected) Color(0xFF2A2419) else Color(0xFF1A171D),
+        border = BorderStroke(1.dp, if (selected) colors.accent.inspiration.copy(alpha = 0.6f) else colors.border.default),
+        color = if (selected) colors.surface.inspiration else colors.surface.button,
         onClick = onClick
     ) {
         Row(
@@ -1804,13 +1812,14 @@ private fun OverviewHpCard(
     onMaxHpClick: () -> Unit
 ) {
     val tokens = LocalDesignTokens.current.typography
+    val colors = LocalDesignTokens.current.colors
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(30.dp),
-        color = Color(0xFF17141B),
-        border = BorderStroke(1.dp, Color(0x44FFFFFF))
+        color = colors.surface.card,
+        border = BorderStroke(1.dp, colors.border.panel)
     ) {
         Box(
             modifier = Modifier
@@ -1852,7 +1861,7 @@ private fun OverviewHpCard(
                             fontSize = tokens.hpCurrent.fontSizeSp.sp,
                             lineHeight = (tokens.hpCurrent.lineHeightSp ?: tokens.hpCurrent.fontSizeSp).sp
                         ),
-                        color = if (currentHp == 0) Color(0xFFE85C5C) else Color(0xFFF7F2EA),
+                        color = if (currentHp == 0) colors.accent.dangerHpZero else colors.text.primary,
                         textAlign = TextAlign.Center
                     )
                     if (temporaryHp > 0) {
@@ -1862,7 +1871,7 @@ private fun OverviewHpCard(
                                 fontSize = tokens.hpTemporary.fontSizeSp.sp,
                                 lineHeight = (tokens.hpTemporary.lineHeightSp ?: tokens.hpTemporary.fontSizeSp).sp
                             ),
-                            color = Color(0xFF69B7FF),
+                            color = colors.accent.hpTemporary,
                             textAlign = TextAlign.Center
                         )
                     }
@@ -1873,7 +1882,7 @@ private fun OverviewHpCard(
                             fontSize = tokens.hpMaximum.fontSizeSp.sp,
                             lineHeight = (tokens.hpMaximum.lineHeightSp ?: tokens.hpMaximum.fontSizeSp).sp
                         ),
-                        color = Color(0xFFF7F2EA).copy(alpha = tokens.hpMaximum.alpha ?: 0.62f),
+                        color = colors.text.primary.copy(alpha = tokens.hpMaximum.alpha ?: 0.62f),
                         textAlign = TextAlign.Center
                     )
                 }
@@ -1881,7 +1890,7 @@ private fun OverviewHpCard(
                     text = hpLabel,
                     modifier = Modifier.padding(top = 6.dp),
                     style = MaterialTheme.typography.titleMedium.copy(fontSize = tokens.hpLabel.fontSizeSp.sp),
-                    color = Color(0xFFC2BBB3)
+                    color = colors.text.label
                 )
             }
         }
@@ -1894,6 +1903,7 @@ private fun FrameCorner(
     mirrored: Boolean = false,
     upsideDown: Boolean = false
 ) {
+    val lineColor = LocalDesignTokens.current.colors.border.panel
     Canvas(modifier = modifier.size(24.dp)) {
         val left = if (mirrored) size.width else 0f
         val right = if (mirrored) size.width * 0.28f else size.width * 0.72f
@@ -1903,13 +1913,13 @@ private fun FrameCorner(
         val horizontalNear = if (mirrored) size.width * 0.8f else size.width * 0.2f
 
         drawLine(
-            color = Color(0x46FFFFFF),
+            color = lineColor,
             start = Offset(left, bottom),
             end = Offset(right, top),
             strokeWidth = 1.dp.toPx()
         )
         drawLine(
-            color = Color(0x46FFFFFF),
+            color = lineColor,
             start = Offset(left, verticalNear),
             end = Offset(horizontalNear, top),
             strokeWidth = 1.dp.toPx()
@@ -2128,10 +2138,11 @@ private fun ArmorClassModeOption(
     selected: Boolean,
     onClick: () -> Unit
 ) {
+    val colors = LocalDesignTokens.current.colors
     Surface(
         shape = RoundedCornerShape(12.dp),
-        color = Color(0xFF1A171D),
-        border = BorderStroke(1.dp, if (selected) Color(0x80FFFFFF) else Color(0x30FFFFFF)),
+        color = colors.surface.button,
+        border = BorderStroke(1.dp, if (selected) colors.border.selected else colors.border.muted),
         onClick = onClick
     ) {
         Row(
@@ -2145,11 +2156,11 @@ private fun ArmorClassModeOption(
                 modifier = Modifier.padding(start = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                Text(text = title, style = MaterialTheme.typography.bodyLarge, color = Color(0xFFF7F2EA))
+                Text(text = title, style = MaterialTheme.typography.bodyLarge, color = colors.text.primary)
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFFD2CAC2)
+                    color = colors.text.muted
                 )
             }
         }

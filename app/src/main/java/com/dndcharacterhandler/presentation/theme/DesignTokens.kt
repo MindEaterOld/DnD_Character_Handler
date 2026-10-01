@@ -77,7 +77,7 @@ data class BorderColorTokens(
     val muted: Color
 )
 
-/** Semantic accents (inspiration, HP, healing, danger) and the coins of the currency icons. */
+/** Semantic accents (inspiration, HP, healing, danger), the coins of the currency icons, magical items and damage types. */
 data class AccentColorTokens(
     val inspiration: Color,
     val xpCapped: Color,
@@ -86,7 +86,15 @@ data class AccentColorTokens(
     val dangerHpZero: Color,
     val coinCopper: Color,
     val coinSilver: Color,
-    val coinGold: Color
+    val coinGold: Color,
+    /** A magical item's name. */
+    val magical: Color,
+    /** Damage types on the Combat screen's attacks. */
+    val damageFire: Color,
+    val damageCold: Color,
+    val damageLightning: Color,
+    val damagePoison: Color,
+    val damageOther: Color
 )
 
 /** XP / progress bar fill and track. */
@@ -162,7 +170,13 @@ val DefaultDesignColors = DesignColorTokens(
         dangerHpZero = Color(0xFFE85C5C),
         coinCopper = Color(0xFFC9824B),
         coinSilver = Color(0xFFC4C8D2),
-        coinGold = Color(0xFFE0B548)
+        coinGold = Color(0xFFE0B548),
+        magical = Color(0xFF69B7FF),
+        damageFire = Color(0xFFFF8A3D),
+        damageCold = Color(0xFF7BB7FF),
+        damageLightning = Color(0xFFCFB6FF),
+        damagePoison = Color(0xFFA8D76F),
+        damageOther = Color(0xFFD5C6B2)
     ),
     progress = ProgressColorTokens(
         xpFill = Color(0xFFD7D1CC),
@@ -300,7 +314,13 @@ private fun loadColorTokens(app: JSONObject?): DesignColorTokens {
             dangerHpZero = accent.colorToken("dangerHpZero", defaults.accent.dangerHpZero),
             coinCopper = accent.colorToken("coinCopper", defaults.accent.coinCopper),
             coinSilver = accent.colorToken("coinSilver", defaults.accent.coinSilver),
-            coinGold = accent.colorToken("coinGold", defaults.accent.coinGold)
+            coinGold = accent.colorToken("coinGold", defaults.accent.coinGold),
+            magical = accent.colorToken("magical", defaults.accent.magical),
+            damageFire = accent.colorToken("damageFire", defaults.accent.damageFire),
+            damageCold = accent.colorToken("damageCold", defaults.accent.damageCold),
+            damageLightning = accent.colorToken("damageLightning", defaults.accent.damageLightning),
+            damagePoison = accent.colorToken("damagePoison", defaults.accent.damagePoison),
+            damageOther = accent.colorToken("damageOther", defaults.accent.damageOther)
         ),
         progress = ProgressColorTokens(
             xpFill = progress.colorToken("xpFill", defaults.progress.xpFill),

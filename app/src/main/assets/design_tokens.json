@@ -183,7 +183,13 @@
         "dangerHpZero": "#E85C5C",
         "coinCopper": "#C9824B",
         "coinSilver": "#C4C8D2",
-        "coinGold": "#E0B548"
+        "coinGold": "#E0B548",
+        "magical": "#69B7FF",
+        "damageFire": "#FF8A3D",
+        "damageCold": "#7BB7FF",
+        "damageLightning": "#CFB6FF",
+        "damagePoison": "#A8D76F",
+        "damageOther": "#D5C6B2"
       },
       "progress": {
         "xpFill": "#D7D1CC",

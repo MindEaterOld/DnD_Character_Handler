@@ -100,6 +100,7 @@ import com.dndcharacterhandler.presentation.spells.localizedWith
 import com.dndcharacterhandler.presentation.spells.newDraftSpell
 import com.dndcharacterhandler.presentation.spells.parseResolutionKind
 import com.dndcharacterhandler.presentation.spells.spellRangeDisplayLabel
+import com.dndcharacterhandler.presentation.theme.DesignColorTokens
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -284,6 +285,7 @@ internal fun CombatContent(
     onUpdateCombatResource: (CharacterBundle, CombatResource) -> Unit = { _, _ -> },
     onDeleteCombatResource: (CharacterBundle, CombatResource) -> Unit = { _, _ -> }
 ) {
+    val colors = LocalDesignTokens.current.colors
     val character = characterBundle?.character
     var editingAttack by remember { mutableStateOf<Attack?>(null) }
     var editingSpellAttack by remember { mutableStateOf<Spell?>(null) }
@@ -317,7 +319,7 @@ internal fun CombatContent(
                     text = text("placeholder_loading_character"),
                     modifier = Modifier.align(Alignment.Center),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Color(0xFFD7D1CC)
+                    color = colors.progress.xpFill
                 )
             }
         }
@@ -587,7 +589,7 @@ internal fun CombatContent(
             Text(
                 text = text("overview_ac_mode"),
                 style = MaterialTheme.typography.bodyLarge,
-                color = Color(0xFFF7F2EA)
+                color = colors.text.primary
             )
 
             ArmorClassModeOption(
@@ -693,11 +695,12 @@ private fun DialogActionSection(
     title: String,
     actions: List<DialogActionItem>
 ) {
+    val colors = LocalDesignTokens.current.colors
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
-            color = Color(0xFFF7F2EA)
+            color = colors.text.primary
         )
         actions.forEach { action ->
             Surface(
@@ -705,14 +708,14 @@ private fun DialogActionSection(
                     .fillMaxWidth()
                     .clickable(onClick = action.onClick),
                 shape = RoundedCornerShape(12.dp),
-                color = Color(0xFF1A171D),
-                border = BorderStroke(1.dp, Color(0x20FFFFFF))
+                color = colors.surface.button,
+                border = BorderStroke(1.dp, colors.ornament.outer)
             ) {
                 Text(
                     text = action.label,
                     modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Color(0xFFF7F2EA)
+                    color = colors.text.primary
                 )
             }
         }
@@ -725,6 +728,7 @@ private fun WeaponAttackPickerDialog(
     onDismiss: () -> Unit,
     onSelect: (InventoryItem) -> Unit
 ) {
+    val colors = LocalDesignTokens.current.colors
     EditDialog(
         title = text("combat_select_weapon"),
         onDismiss = onDismiss
@@ -733,7 +737,7 @@ private fun WeaponAttackPickerDialog(
             Text(
                 text = text("combat_no_weapons_available"),
                 style = MaterialTheme.typography.bodyLarge,
-                color = Color(0xFFD2CAC2)
+                color = colors.text.muted
             )
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -743,8 +747,8 @@ private fun WeaponAttackPickerDialog(
                             .fillMaxWidth()
                             .clickable { onSelect(weapon) },
                         shape = RoundedCornerShape(12.dp),
-                        color = Color(0xFF1A171D),
-                        border = BorderStroke(1.dp, Color(0x20FFFFFF))
+                        color = colors.surface.button,
+                        border = BorderStroke(1.dp, colors.ornament.outer)
                     ) {
                         Column(
                             modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
@@ -753,7 +757,7 @@ private fun WeaponAttackPickerDialog(
                             Text(
                                 text = weapon.name,
                                 style = MaterialTheme.typography.bodyLarge,
-                                color = if (weapon.isMagical) Color(0xFF7BB7FF) else Color(0xFFF7F2EA)
+                                color = if (weapon.isMagical) colors.accent.magical else colors.text.primary
                             )
                             weapon.weaponDetails?.let { details ->
                                 val previewRange = details.rangeLabel(
@@ -770,7 +774,7 @@ private fun WeaponAttackPickerDialog(
                                         }
                                     },
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = Color(0xFFD2CAC2),
+                                    color = colors.text.muted,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
@@ -793,6 +797,7 @@ private fun SpellAttackPickerDialog(
     onSelect: (Spell) -> Unit
 ) {
     val strings = LocalStrings.current
+    val colors = LocalDesignTokens.current.colors
     EditDialog(
         title = text("combat_select_spell"),
         onDismiss = onDismiss,
@@ -802,7 +807,7 @@ private fun SpellAttackPickerDialog(
             Text(
                 text = text("combat_no_spells_available"),
                 style = MaterialTheme.typography.bodyLarge,
-                color = Color(0xFFD2CAC2)
+                color = colors.text.muted
             )
         } else {
             Column(
@@ -822,8 +827,8 @@ private fun SpellAttackPickerDialog(
                             .fillMaxWidth()
                             .clickable { onSelect(spell) },
                         shape = RoundedCornerShape(12.dp),
-                        color = Color(0xFF1A171D),
-                        border = BorderStroke(1.dp, Color(0x20FFFFFF))
+                        color = colors.surface.button,
+                        border = BorderStroke(1.dp, colors.ornament.outer)
                     ) {
                         Column(
                             modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
@@ -832,13 +837,13 @@ private fun SpellAttackPickerDialog(
                             Text(
                                 text = spell.name,
                                 style = MaterialTheme.typography.bodyLarge,
-                                color = Color(0xFFF7F2EA)
+                                color = colors.text.primary
                             )
                             if (tags.isNotBlank()) {
                                 Text(
                                     text = tags,
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = Color(0xFFAAA29A),
+                                    color = colors.text.subtle,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
@@ -852,7 +857,7 @@ private fun SpellAttackPickerDialog(
                                     }
                                 },
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = Color(0xFFD2CAC2),
+                                color = colors.text.muted,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
@@ -876,13 +881,14 @@ private fun ArmorClassModeOption(
     selected: Boolean,
     onClick: () -> Unit
 ) {
+    val colors = LocalDesignTokens.current.colors
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
-        color = if (selected) Color(0x1FFFFFFF) else Color(0x0FFFFFFF),
-        border = BorderStroke(1.dp, if (selected) Color(0x66FFF6EA) else Color(0x20FFFFFF))
+        color = colors.ornament.outer,
+        border = BorderStroke(1.dp, if (selected) colors.border.selected else colors.ornament.outer)
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
@@ -891,12 +897,12 @@ private fun ArmorClassModeOption(
             Text(
                 text = title,
                 style = MaterialTheme.typography.bodyLarge,
-                color = Color(0xFFF7F2EA)
+                color = colors.text.primary
             )
             Text(
                 text = description,
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color(0xFFD2CAC2)
+                color = colors.text.muted
             )
         }
     }
@@ -908,19 +914,20 @@ private fun SpellcastingAbilityOption(
     selected: Boolean,
     onClick: () -> Unit
 ) {
+    val colors = LocalDesignTokens.current.colors
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
-        color = if (selected) Color(0x1FFFFFFF) else Color.Transparent,
-        border = BorderStroke(1.dp, if (selected) Color(0x66FFF6EA) else Color(0x20FFFFFF))
+        color = if (selected) colors.ornament.outer else Color.Transparent,
+        border = BorderStroke(1.dp, if (selected) colors.border.selected else colors.ornament.outer)
     ) {
         Text(
             text = title,
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
             style = MaterialTheme.typography.bodyLarge,
-            color = Color(0xFFF7F2EA)
+            color = colors.text.primary
         )
     }
 }
@@ -928,6 +935,7 @@ private fun SpellcastingAbilityOption(
 @Composable
 private fun CombatSectionTitle(title: String) {
     val tokens = LocalDesignTokens.current.typography
+    val colors = LocalDesignTokens.current.colors
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
@@ -935,7 +943,7 @@ private fun CombatSectionTitle(title: String) {
         Text(
             text = title,
             style = MaterialTheme.typography.headlineMedium.copy(fontSize = tokens.headlineMedium.fontSizeSp.sp),
-            color = Color(0xFFF7F2EA),
+            color = colors.text.primary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -947,7 +955,7 @@ private fun CombatSectionTitle(title: String) {
         ) {
             Canvas(modifier = Modifier.fillMaxSize()) {
                 drawLine(
-                    color = Color(0x33FFFFFF),
+                    color = colors.border.muted,
                     start = Offset(0f, size.height / 2f),
                     end = Offset(size.width, size.height / 2f),
                     strokeWidth = 1.dp.toPx()
@@ -975,13 +983,14 @@ private fun AttackCard(
         attackLabel = text("combat_attack_section_attack")
     )
     val damageLabel = attack.displayDamage(character = character)
+    val colors = LocalDesignTokens.current.colors
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(10.dp),
-        color = Color(0xFF17141B).copy(alpha = 0.62f),
-        border = BorderStroke(1.dp, Color(0x30FFFFFF))
+        color = colors.surface.card.copy(alpha = 0.62f),
+        border = BorderStroke(1.dp, colors.border.muted)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
@@ -996,7 +1005,7 @@ private fun AttackCard(
                 Text(
                     text = attack.name,
                     style = MaterialTheme.typography.titleLarge,
-                    color = Color(0xFFF7F2EA),
+                    color = colors.text.primary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -1009,7 +1018,7 @@ private fun AttackCard(
                 modifier = Modifier
                     .width(1.dp)
                     .height(72.dp)
-                    .background(Color(0x20FFFFFF))
+                    .background(colors.ornament.outer)
             )
 
             Column(
@@ -1022,7 +1031,7 @@ private fun AttackCard(
                     Text(
                         text = label,
                         style = MaterialTheme.typography.titleMedium,
-                        color = Color(0xFFF7F2EA),
+                        color = colors.text.primary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -1030,14 +1039,14 @@ private fun AttackCard(
                 Text(
                     text = damageLabel,
                     style = MaterialTheme.typography.titleMedium,
-                    color = Color(0xFFE9E2D9),
+                    color = colors.ornament.inner,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = attack.displayDamageTypeLabel(strings = strings),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = damageTypeColor(attack.primaryDamageType),
+                    color = damageTypeColor(attack.primaryDamageType, colors),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -1071,14 +1080,15 @@ private fun SpellAttackCard(
     val amountLabel = spell.combatAmountDiceLabel(spellModifier)
     val isHeal = resolution == SpellResolutionKind.HEAL
     val typeLabel = if (isHeal) strings["spells_resolution_heal"] else spellDamageTypeLabel(spell, strings)
-    val typeColor = if (isHeal) Color(0xFF8AD178) else damageTypeColor(spell.damageType)
+    val colors = LocalDesignTokens.current.colors
+    val typeColor = if (isHeal) colors.accent.heal else damageTypeColor(spell.damageType, colors)
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(10.dp),
-        color = Color(0xFF17141B).copy(alpha = 0.62f),
-        border = BorderStroke(1.dp, Color(0x30FFFFFF))
+        color = colors.surface.card.copy(alpha = 0.62f),
+        border = BorderStroke(1.dp, colors.border.muted)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
@@ -1093,7 +1103,7 @@ private fun SpellAttackCard(
                 Text(
                     text = spell.name,
                     style = MaterialTheme.typography.titleLarge,
-                    color = Color(0xFFF7F2EA),
+                    color = colors.text.primary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -1104,13 +1114,13 @@ private fun SpellAttackCard(
                     LevelTag(levelLabel)
                     rangeLabel?.let { range -> RangeTag(range) }
                     if (spell.isRitual) {
-                        CombatTag(value = text("spells_ritual"), textColor = Color(0xFFD2CAC2))
+                        CombatTag(value = text("spells_ritual"), textColor = colors.text.muted)
                     }
                     componentsLabel?.let { components ->
-                        CombatTag(value = components, textColor = Color(0xFFD2CAC2))
+                        CombatTag(value = components, textColor = colors.text.muted)
                     }
                     materialCostLabel?.let { cost ->
-                        CombatTag(value = cost, textColor = Color(0xFFFFD86B))
+                        CombatTag(value = cost, textColor = colors.accent.inspiration)
                     }
                 }
             }
@@ -1119,7 +1129,7 @@ private fun SpellAttackCard(
                 modifier = Modifier
                     .width(1.dp)
                     .height(72.dp)
-                    .background(Color(0x20FFFFFF))
+                    .background(colors.ornament.outer)
             )
 
             Column(
@@ -1132,7 +1142,7 @@ private fun SpellAttackCard(
                     Text(
                         text = label,
                         style = MaterialTheme.typography.titleMedium,
-                        color = Color(0xFFF7F2EA),
+                        color = colors.text.primary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -1141,7 +1151,7 @@ private fun SpellAttackCard(
                     Text(
                         text = amount,
                         style = MaterialTheme.typography.titleMedium,
-                        color = Color(0xFFE9E2D9),
+                        color = colors.ornament.inner,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -1163,7 +1173,7 @@ private fun SpellAttackCard(
                         Text(
                             text = area,
                             style = MaterialTheme.typography.bodyLarge,
-                            color = Color(0xFFD2CAC2),
+                            color = colors.text.muted,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -1176,20 +1186,20 @@ private fun SpellAttackCard(
 
 @Composable
 private fun RangeTag(value: String) {
-    CombatTag(value = value, textColor = Color(0xFFD2CAC2))
+    CombatTag(value = value, textColor = LocalDesignTokens.current.colors.text.muted)
 }
 
 @Composable
 private fun LevelTag(value: String) {
-    CombatTag(value = value, textColor = Color(0xFF69B7FF))
+    CombatTag(value = value, textColor = LocalDesignTokens.current.colors.accent.hpTemporary)
 }
 
 @Composable
 private fun CombatTag(value: String, textColor: Color) {
     Surface(
         shape = RoundedCornerShape(6.dp),
-        color = Color(0xFF2A2231),
-        border = BorderStroke(1.dp, Color(0x30FFFFFF))
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        border = BorderStroke(1.dp, LocalDesignTokens.current.colors.border.muted)
     ) {
         Text(
             text = value,
@@ -1202,17 +1212,18 @@ private fun CombatTag(value: String, textColor: Color) {
 
 @Composable
 private fun CombatEmptyCard(label: String) {
+    val colors = LocalDesignTokens.current.colors
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
-        color = Color(0xFF17141B).copy(alpha = 0.62f),
-        border = BorderStroke(1.dp, Color(0x30FFFFFF))
+        color = colors.surface.card.copy(alpha = 0.62f),
+        border = BorderStroke(1.dp, colors.border.muted)
     ) {
         Text(
             text = label,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 18.dp),
             style = MaterialTheme.typography.bodyLarge,
-            color = Color(0xFFD2CAC2)
+            color = colors.text.muted
         )
     }
 }
@@ -1248,13 +1259,14 @@ private fun CombatResourceTile(
     onEdit: (CombatResource) -> Unit,
     onAdjust: (Long, Int) -> Unit
 ) {
+    val colors = LocalDesignTokens.current.colors
     Surface(
         modifier = modifier
             .height(92.dp)
             .clickable { onEdit(resource) },
         shape = RoundedCornerShape(10.dp),
-        color = Color(0xFF17141B).copy(alpha = 0.62f),
-        border = BorderStroke(1.dp, Color(0x30FFFFFF))
+        color = colors.surface.card.copy(alpha = 0.62f),
+        border = BorderStroke(1.dp, colors.border.muted)
     ) {
         Column(
             modifier = Modifier
@@ -1272,7 +1284,7 @@ private fun CombatResourceTile(
                 Text(
                     text = resource.name,
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Color(0xFFF7F2EA),
+                    color = colors.text.primary,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     textAlign = TextAlign.Center
@@ -1297,7 +1309,7 @@ private fun CombatResourceTile(
                         "${resource.currentUses}/${resource.maximumUses}"
                     },
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Color(0xFFF7F2EA),
+                    color = colors.text.primary,
                     maxLines = 1,
                     textAlign = TextAlign.Center
                 )
@@ -1400,7 +1412,7 @@ private fun ResourceCheckboxRow(
         Text(
             text = label,
             style = MaterialTheme.typography.bodyLarge,
-            color = Color(0xFFF7F2EA)
+            color = LocalDesignTokens.current.colors.text.primary
         )
     }
 }
@@ -1411,20 +1423,21 @@ private fun StepperButton(
     enabled: Boolean,
     onClick: () -> Unit
 ) {
+    val colors = LocalDesignTokens.current.colors
     Surface(
         modifier = Modifier
             .size(26.dp)
             .clip(RoundedCornerShape(8.dp))
             .clickable(enabled = enabled, onClick = onClick),
         shape = RoundedCornerShape(8.dp),
-        color = if (enabled) Color(0xFF1E1A22) else Color(0xFF17141B),
-        border = BorderStroke(1.dp, if (enabled) Color(0x22FFFFFF) else Color(0x14FFFFFF))
+        color = if (enabled) colors.surface.button else colors.surface.card,
+        border = BorderStroke(1.dp, colors.ornament.outer)
     ) {
         Box(contentAlignment = Alignment.Center) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = if (enabled) Color(0xFFF7F2EA) else Color(0x66D2CAC2),
+                tint = if (enabled) colors.text.primary else colors.text.muted.copy(alpha = 0.4f),
                 modifier = Modifier.size(13.dp)
             )
         }
@@ -1978,14 +1991,14 @@ private fun spellSchoolLocalizationKey(value: String): String? =
         else -> null
     }
 
-private fun damageTypeColor(value: String): Color {
+private fun damageTypeColor(value: String, colors: DesignColorTokens): Color {
     val key = value.lowercase()
     return when {
-        "fire" in key -> Color(0xFFFF8A3D)
-        "cold" in key -> Color(0xFF7BB7FF)
-        "lightning" in key -> Color(0xFFCFB6FF)
-        "poison" in key -> Color(0xFFA8D76F)
-        else -> Color(0xFFD5C6B2)
+        "fire" in key -> colors.accent.damageFire
+        "cold" in key -> colors.accent.damageCold
+        "lightning" in key -> colors.accent.damageLightning
+        "poison" in key -> colors.accent.damagePoison
+        else -> colors.accent.damageOther
     }
 }
 
@@ -2008,7 +2021,7 @@ private fun CombatDialogSection(title: String) {
     Text(
         text = title,
         style = MaterialTheme.typography.titleMedium,
-        color = Color(0xFFF7F2EA)
+        color = LocalDesignTokens.current.colors.text.primary
     )
 }
 
@@ -2019,6 +2032,7 @@ private fun CombatCompactSelectionField(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = LocalDesignTokens.current.colors
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(6.dp)
@@ -2026,15 +2040,15 @@ private fun CombatCompactSelectionField(
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
-            color = Color(0xFFD2CAC2)
+            color = colors.text.muted
         )
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onClick),
             shape = RoundedCornerShape(10.dp),
-            color = Color(0x14FFFFFF),
-            border = BorderStroke(1.dp, Color(0x30FFFFFF))
+            color = colors.ornament.outer,
+            border = BorderStroke(1.dp, colors.border.muted)
         ) {
             Box(
                 modifier = Modifier
@@ -2046,7 +2060,7 @@ private fun CombatCompactSelectionField(
                 Text(
                     text = value,
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Color(0xFFF7F2EA),
+                    color = colors.text.primary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -2065,6 +2079,7 @@ private fun CombatCompactTextField(
     keyboardType: KeyboardType = KeyboardType.Text,
     modifier: Modifier = Modifier
 ) {
+    val colors = LocalDesignTokens.current.colors
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(6.dp)
@@ -2072,7 +2087,7 @@ private fun CombatCompactTextField(
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
-            color = Color(0xFFD2CAC2),
+            color = colors.text.muted,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -2081,14 +2096,14 @@ private fun CombatCompactTextField(
                 .fillMaxWidth()
                 .height(46.dp),
             shape = RoundedCornerShape(10.dp),
-            color = Color(0x14FFFFFF),
-            border = BorderStroke(1.dp, Color(0x30FFFFFF))
+            color = colors.ornament.outer,
+            border = BorderStroke(1.dp, colors.border.muted)
         ) {
             BasicTextField(
                 value = value,
                 onValueChange = onValueChange,
                 singleLine = true,
-                textStyle = MaterialTheme.typography.bodyLarge.copy(color = Color(0xFFF7F2EA)),
+                textStyle = MaterialTheme.typography.bodyLarge.copy(color = colors.text.primary),
                 keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
                 modifier = Modifier.fillMaxWidth(),
                 decorationBox = { innerTextField ->
@@ -2104,7 +2119,7 @@ private fun CombatCompactTextField(
                             Text(
                                 text = prefixText,
                                 style = MaterialTheme.typography.bodyLarge,
-                                color = Color(0xFFF7F2EA),
+                                color = colors.text.primary,
                                 maxLines = 1
                             )
                         }
@@ -2118,7 +2133,7 @@ private fun CombatCompactTextField(
                             Text(
                                 text = suffixText,
                                 style = MaterialTheme.typography.bodyLarge,
-                                color = Color(0xFFD2CAC2),
+                                color = colors.text.muted,
                                 maxLines = 1
                             )
                         }
@@ -2137,6 +2152,7 @@ private fun CombatCompactNumberStepperField(
     minValue: Int = 0,
     modifier: Modifier = Modifier
 ) {
+    val colors = LocalDesignTokens.current.colors
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(6.dp)
@@ -2144,7 +2160,7 @@ private fun CombatCompactNumberStepperField(
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
-            color = Color(0xFFD2CAC2)
+            color = colors.text.muted
         )
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -2157,8 +2173,8 @@ private fun CombatCompactNumberStepperField(
             Surface(
                 modifier = Modifier.weight(1f),
                 shape = RoundedCornerShape(10.dp),
-                color = Color(0x14FFFFFF),
-                border = BorderStroke(1.dp, Color(0x30FFFFFF))
+                color = colors.ornament.outer,
+                border = BorderStroke(1.dp, colors.border.muted)
             ) {
                 Box(
                     modifier = Modifier
@@ -2170,7 +2186,7 @@ private fun CombatCompactNumberStepperField(
                     Text(
                         text = value.toString(),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = Color(0xFFF7F2EA),
+                        color = colors.text.primary,
                         textAlign = TextAlign.Center
                     )
                 }
@@ -2187,11 +2203,12 @@ private fun AttackDialogStepperButton(
     label: String,
     onClick: () -> Unit
 ) {
+    val colors = LocalDesignTokens.current.colors
     Surface(
         modifier = Modifier.clickable(onClick = onClick),
         shape = RoundedCornerShape(10.dp),
-        color = Color(0x14FFFFFF),
-        border = BorderStroke(1.dp, Color(0x30FFFFFF))
+        color = colors.ornament.outer,
+        border = BorderStroke(1.dp, colors.border.muted)
     ) {
         Box(
             modifier = Modifier
@@ -2202,7 +2219,7 @@ private fun AttackDialogStepperButton(
             Text(
                 text = label,
                 style = MaterialTheme.typography.titleMedium,
-                color = Color(0xFFF7F2EA)
+                color = colors.text.primary
             )
         }
     }
@@ -2217,6 +2234,7 @@ private fun <T> SelectionDialog(
     onDismiss: () -> Unit,
     onSelect: (T) -> Unit
 ) {
+    val colors = LocalDesignTokens.current.colors
     EditDialog(
         title = title,
         onDismiss = onDismiss,
@@ -2230,14 +2248,14 @@ private fun <T> SelectionDialog(
                         .fillMaxWidth()
                         .clickable { onSelect(option) },
                     shape = RoundedCornerShape(10.dp),
-                    color = if (isSelected) Color(0x22FFF6EA) else Color.Transparent,
-                    border = BorderStroke(1.dp, if (isSelected) Color(0x70FFFFFF) else Color(0x20FFFFFF))
+                    color = if (isSelected) colors.ornament.outer else Color.Transparent,
+                    border = BorderStroke(1.dp, if (isSelected) colors.border.selected else colors.ornament.outer)
                 ) {
                     Text(
                         text = labelForOption(option),
                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = Color(0xFFF7F2EA)
+                        color = colors.text.primary
                     )
                 }
             }

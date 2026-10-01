@@ -359,7 +359,7 @@ internal fun InventoryContent(
                     text = text("placeholder_loading_character"),
                     modifier = Modifier.align(Alignment.Center),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Color(0xFFD7D1CC)
+                    color = LocalDesignTokens.current.colors.progress.xpFill
                 )
             }
         }
@@ -617,11 +617,12 @@ private fun InventorySearchField(
     value: String,
     onValueChange: (String) -> Unit
 ) {
+    val colors = LocalDesignTokens.current.colors
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
-        color = Color(0xFF17141B).copy(alpha = 0.62f),
-        border = BorderStroke(1.dp, Color(0x36FFFFFF))
+        color = colors.surface.card.copy(alpha = 0.62f),
+        border = BorderStroke(1.dp, colors.border.muted)
     ) {
         OutlinedTextField(
             value = value,
@@ -631,7 +632,7 @@ private fun InventorySearchField(
                 Icon(
                     imageVector = Icons.Outlined.Search,
                     contentDescription = null,
-                    tint = Color(0xFFD2CAC2),
+                    tint = colors.text.muted,
                     modifier = Modifier.size(28.dp)
                 )
             },
@@ -639,7 +640,7 @@ private fun InventorySearchField(
                 Text(
                     text = text("inventory_search_placeholder"),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Color(0xFFD2CAC2).copy(alpha = 0.72f)
+                    color = colors.text.muted.copy(alpha = 0.72f)
                 )
             },
             singleLine = true,
@@ -648,7 +649,7 @@ private fun InventorySearchField(
                 unfocusedBorderColor = Color.Transparent,
                 focusedContainerColor = Color.Transparent,
                 unfocusedContainerColor = Color.Transparent,
-                cursorColor = Color(0xFFFFF6EA)
+                cursorColor = colors.text.warmPrimary
             )
         )
     }
@@ -657,6 +658,7 @@ private fun InventorySearchField(
 @Composable
 private fun InventorySectionTitle(title: String) {
     val tokens = LocalDesignTokens.current.typography
+    val colors = LocalDesignTokens.current.colors
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
@@ -664,7 +666,7 @@ private fun InventorySectionTitle(title: String) {
         Text(
             text = title,
             style = MaterialTheme.typography.headlineMedium.copy(fontSize = tokens.headlineMedium.fontSizeSp.sp),
-            color = Color(0xFFF7F2EA),
+            color = colors.text.primary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -676,7 +678,7 @@ private fun InventorySectionTitle(title: String) {
         ) {
             Canvas(modifier = Modifier.fillMaxSize()) {
                 drawLine(
-                    color = Color(0x33FFFFFF),
+                    color = colors.border.muted,
                     start = Offset(0f, size.height / 2f),
                     end = Offset(size.width, size.height / 2f),
                     strokeWidth = 1.dp.toPx()
@@ -1004,7 +1006,7 @@ private fun InventoryCategoryPickerDialog(
                         .fillMaxWidth()
                         .clickable { onSelectCategory(category) },
                     shape = RoundedCornerShape(10.dp),
-                    color = Color(0x14FFFFFF),
+                    color = colors.ornament.outer,
                     border = BorderStroke(1.dp, colors.border.muted)
                 ) {
                     Text(
@@ -1107,7 +1109,7 @@ private fun InventoryItemRow(
                     .padding(start = 12.dp)
                     .weight(1f),
                 style = MaterialTheme.typography.bodyLarge,
-                color = if (item.isMagical) colors.accent.hpTemporary else colors.text.primary,
+                color = if (item.isMagical) colors.accent.magical else colors.text.primary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -1608,7 +1610,7 @@ private fun InventoryDialogSection(title: String) {
     Text(
         text = title,
         style = MaterialTheme.typography.titleMedium,
-        color = Color(0xFFF7F2EA)
+        color = LocalDesignTokens.current.colors.text.primary
     )
 }
 
@@ -1618,6 +1620,7 @@ private fun InventoryDialogReadOnlyField(
     value: String,
     modifier: Modifier = Modifier
 ) {
+    val colors = LocalDesignTokens.current.colors
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(6.dp)
@@ -1625,13 +1628,13 @@ private fun InventoryDialogReadOnlyField(
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
-            color = Color(0xFFD2CAC2)
+            color = colors.text.muted
         )
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(10.dp),
-            color = Color(0x14FFFFFF),
-            border = BorderStroke(1.dp, Color(0x30FFFFFF))
+            color = colors.ornament.outer,
+            border = BorderStroke(1.dp, colors.border.muted)
         ) {
             Box(
                 modifier = Modifier
@@ -1643,7 +1646,7 @@ private fun InventoryDialogReadOnlyField(
                 Text(
                     text = value,
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Color(0xFFF7F2EA),
+                    color = colors.text.primary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -1732,11 +1735,12 @@ private fun SelectionTagField(
     placeholder: String,
     onClick: () -> Unit
 ) {
+    val colors = LocalDesignTokens.current.colors
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
-            color = Color(0xFFD2CAC2)
+            color = colors.text.muted
         )
         FlowRow(
             modifier = Modifier
@@ -1749,20 +1753,20 @@ private fun SelectionTagField(
                 Text(
                     text = placeholder,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFFAAA29A)
+                    color = colors.text.subtle
                 )
             } else {
                 tags.forEach { tag ->
                     Surface(
                         shape = RoundedCornerShape(999.dp),
-                        color = Color(0x22FFF6EA),
-                        border = BorderStroke(1.dp, Color(0x30FFFFFF))
+                        color = colors.ornament.outer,
+                        border = BorderStroke(1.dp, colors.border.muted)
                     ) {
                         Text(
                             text = tag,
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
                             style = MaterialTheme.typography.labelMedium,
-                            color = Color(0xFFE6DED3)
+                            color = colors.text.primary
                         )
                     }
                 }
@@ -1778,6 +1782,7 @@ private fun SelectionField(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = LocalDesignTokens.current.colors
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(6.dp)
@@ -1785,15 +1790,15 @@ private fun SelectionField(
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
-            color = Color(0xFFD2CAC2)
+            color = colors.text.muted
         )
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onClick),
             shape = RoundedCornerShape(10.dp),
-            color = Color(0x14FFFFFF),
-            border = BorderStroke(1.dp, Color(0x30FFFFFF))
+            color = colors.ornament.outer,
+            border = BorderStroke(1.dp, colors.border.muted)
         ) {
             Box(
                 modifier = Modifier
@@ -1805,7 +1810,7 @@ private fun SelectionField(
                 Text(
                     text = value,
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Color(0xFFF7F2EA),
+                    color = colors.text.primary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -1821,6 +1826,7 @@ private fun CompactSelectionField(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = LocalDesignTokens.current.colors
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(6.dp)
@@ -1828,15 +1834,15 @@ private fun CompactSelectionField(
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
-            color = Color(0xFFD2CAC2)
+            color = colors.text.muted
         )
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onClick),
             shape = RoundedCornerShape(10.dp),
-            color = Color(0x14FFFFFF),
-            border = BorderStroke(1.dp, Color(0x30FFFFFF))
+            color = colors.ornament.outer,
+            border = BorderStroke(1.dp, colors.border.muted)
         ) {
             Box(
                 modifier = Modifier
@@ -1848,7 +1854,7 @@ private fun CompactSelectionField(
                 Text(
                     text = value,
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Color(0xFFF7F2EA),
+                    color = colors.text.primary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -1866,6 +1872,7 @@ private fun CompactTextField(
     prefixText: String? = null,
     modifier: Modifier = Modifier
 ) {
+    val colors = LocalDesignTokens.current.colors
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(6.dp)
@@ -1873,7 +1880,7 @@ private fun CompactTextField(
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
-            color = Color(0xFFD2CAC2),
+            color = colors.text.muted,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -1882,14 +1889,14 @@ private fun CompactTextField(
                 .fillMaxWidth()
                 .height(CompactEditorFieldHeight),
             shape = RoundedCornerShape(10.dp),
-            color = Color(0x14FFFFFF),
-            border = BorderStroke(1.dp, Color(0x30FFFFFF))
+            color = colors.ornament.outer,
+            border = BorderStroke(1.dp, colors.border.muted)
         ) {
             BasicTextField(
                 value = value,
                 onValueChange = onValueChange,
                 singleLine = true,
-                textStyle = MaterialTheme.typography.bodyLarge.copy(color = Color(0xFFF7F2EA)),
+                textStyle = MaterialTheme.typography.bodyLarge.copy(color = colors.text.primary),
                 modifier = Modifier.fillMaxWidth(),
                 decorationBox = { innerTextField ->
                     Row(
@@ -1904,7 +1911,7 @@ private fun CompactTextField(
                             Text(
                                 text = prefixText,
                                 style = MaterialTheme.typography.bodyLarge,
-                                color = Color(0xFFF7F2EA),
+                                color = colors.text.primary,
                                 maxLines = 1
                             )
                         }
@@ -1918,7 +1925,7 @@ private fun CompactTextField(
                             Text(
                                 text = suffixText,
                                 style = MaterialTheme.typography.bodyLarge,
-                                color = Color(0xFFD2CAC2),
+                                color = colors.text.muted,
                                 maxLines = 1
                             )
                         }
@@ -1937,6 +1944,7 @@ private fun CompactNumberStepperField(
     minValue: Int = 0,
     modifier: Modifier = Modifier
 ) {
+    val colors = LocalDesignTokens.current.colors
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(6.dp)
@@ -1944,7 +1952,7 @@ private fun CompactNumberStepperField(
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
-            color = Color(0xFFD2CAC2)
+            color = colors.text.muted
         )
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -1957,8 +1965,8 @@ private fun CompactNumberStepperField(
             Surface(
                 modifier = Modifier.weight(1f),
                 shape = RoundedCornerShape(10.dp),
-                color = Color(0x14FFFFFF),
-                border = BorderStroke(1.dp, Color(0x30FFFFFF))
+                color = colors.ornament.outer,
+                border = BorderStroke(1.dp, colors.border.muted)
             ) {
                 Box(
                     modifier = Modifier
@@ -1970,7 +1978,7 @@ private fun CompactNumberStepperField(
                     Text(
                         text = value.toString(),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = Color(0xFFF7F2EA),
+                        color = colors.text.primary,
                         textAlign = TextAlign.Center
                     )
                 }
@@ -1987,11 +1995,12 @@ private fun StepperButton(
     label: String,
     onClick: () -> Unit
 ) {
+    val colors = LocalDesignTokens.current.colors
     Surface(
         modifier = Modifier.clickable(onClick = onClick),
         shape = RoundedCornerShape(10.dp),
-        color = Color(0x14FFFFFF),
-        border = BorderStroke(1.dp, Color(0x30FFFFFF))
+        color = colors.ornament.outer,
+        border = BorderStroke(1.dp, colors.border.muted)
     ) {
         Box(
             modifier = Modifier
@@ -2002,7 +2011,7 @@ private fun StepperButton(
             Text(
                 text = label,
                 style = MaterialTheme.typography.titleMedium,
-                color = Color(0xFFF7F2EA)
+                color = colors.text.primary
             )
         }
     }
@@ -2032,8 +2041,8 @@ private fun <T> SelectionDialog(
                         .fillMaxWidth()
                         .clickable { onSelect(option) },
                     shape = RoundedCornerShape(10.dp),
-                    color = if (isSelected) Color(0x22FFF6EA) else Color.Transparent,
-                    border = BorderStroke(1.dp, if (isSelected) Color(0x70FFFFFF) else Color(0x20FFFFFF))
+                    color = if (isSelected) colors.ornament.outer else Color.Transparent,
+                    border = BorderStroke(1.dp, if (isSelected) colors.border.selected else colors.ornament.outer)
                 ) {
                     Text(
                         text = labelForOption(option),
@@ -2072,8 +2081,8 @@ private fun <T> MultiSelectionDialog(
                         .fillMaxWidth()
                         .clickable { onToggle(option) },
                     shape = RoundedCornerShape(10.dp),
-                    color = if (isSelected) Color(0x22FFF6EA) else Color.Transparent,
-                    border = BorderStroke(1.dp, if (isSelected) Color(0x70FFFFFF) else Color(0x20FFFFFF))
+                    color = if (isSelected) colors.ornament.outer else Color.Transparent,
+                    border = BorderStroke(1.dp, if (isSelected) colors.border.selected else colors.ornament.outer)
                 ) {
                     Text(
                         text = labelForOption(option),
@@ -2096,11 +2105,12 @@ private fun <T> EnumSelectorRow(
     labelForOption: (T) -> String,
     onSelected: (T) -> Unit
 ) {
+    val colors = LocalDesignTokens.current.colors
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
-            color = Color(0xFFD2CAC2)
+            color = colors.text.muted
         )
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -2110,15 +2120,15 @@ private fun <T> EnumSelectorRow(
                 val isSelected = option == selected
                 Surface(
                     shape = RoundedCornerShape(999.dp),
-                    color = if (isSelected) Color(0x22FFF6EA) else Color(0x141FFFFFF),
-                    border = BorderStroke(1.dp, if (isSelected) Color(0x70FFFFFF) else Color(0x30FFFFFF)),
+                    color = colors.ornament.outer,
+                    border = BorderStroke(1.dp, if (isSelected) colors.border.selected else colors.border.muted),
                     modifier = Modifier.clickable { onSelected(option) }
                 ) {
                     Text(
                         text = labelForOption(option),
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
                         style = MaterialTheme.typography.labelMedium,
-                        color = Color(0xFFE6DED3)
+                        color = colors.text.primary
                     )
                 }
             }
@@ -2128,17 +2138,18 @@ private fun <T> EnumSelectorRow(
 
 @Composable
 private fun EmptyInventoryMessage() {
+    val colors = LocalDesignTokens.current.colors
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
-        color = Color(0xFF17141B).copy(alpha = 0.42f),
-        border = BorderStroke(1.dp, Color(0x30FFFFFF))
+        color = colors.surface.card.copy(alpha = 0.42f),
+        border = BorderStroke(1.dp, colors.border.muted)
     ) {
         Text(
             text = text("inventory_empty"),
             modifier = Modifier.padding(18.dp),
             style = MaterialTheme.typography.bodyLarge,
-            color = Color(0xFFD2CAC2)
+            color = colors.text.muted
         )
     }
 }
@@ -2149,6 +2160,7 @@ private fun InventoryPropertyTags(
     tags: List<String>,
     modifier: Modifier = Modifier
 ) {
+    val colors = LocalDesignTokens.current.colors
     FlowRow(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -2157,14 +2169,14 @@ private fun InventoryPropertyTags(
         tags.forEach { tag ->
             Surface(
                 shape = RoundedCornerShape(999.dp),
-                color = Color(0x22FFF6EA),
-                border = BorderStroke(1.dp, Color(0x30FFFFFF))
+                color = colors.ornament.outer,
+                border = BorderStroke(1.dp, colors.border.muted)
             ) {
                 Text(
                     text = tag,
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                     style = MaterialTheme.typography.labelMedium,
-                    color = Color(0xFFE6DED3),
+                    color = colors.text.primary,
                     maxLines = 1
                 )
             }

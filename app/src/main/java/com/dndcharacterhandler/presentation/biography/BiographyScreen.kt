@@ -159,6 +159,7 @@ internal fun BiographyContent(
     onUpdateBiography: (CharacterBundle, String) -> Unit = { _, _ -> },
     onUpdateField: (CharacterBundle, BiographyField, String) -> Unit = { _, _, _ -> }
 ) {
+    val colors = LocalDesignTokens.current.colors
     val character = characterBundle?.character
     var editingField by remember { mutableStateOf<BiographyField?>(null) }
     if (character == null) {
@@ -177,7 +178,7 @@ internal fun BiographyContent(
                 text = text("placeholder_loading_character"),
                 modifier = Modifier.align(Alignment.Center),
                 style = MaterialTheme.typography.titleLarge,
-                color = Color(0xFFF7F2EA)
+                color = colors.text.primary
             )
             }
         }
@@ -271,6 +272,7 @@ private fun BiographySection(
     valueWeight: Float = 1f,
     onRowClick: (BiographyRow) -> Unit = {}
 ) {
+    val colors = LocalDesignTokens.current.colors
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -279,8 +281,8 @@ private fun BiographySection(
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(10.dp),
-            color = Color(0xFF17141B).copy(alpha = 0.62f),
-            border = BorderStroke(1.dp, Color(0x36FFFFFF))
+            color = colors.surface.card.copy(alpha = 0.62f),
+            border = BorderStroke(1.dp, colors.border.muted)
         ) {
             Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)) {
                 rows.forEachIndexed { index, row ->
@@ -294,7 +296,7 @@ private fun BiographySection(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(1.dp)
-                                .background(Color(0x2EFFFFFF))
+                                .background(colors.border.muted)
                         )
                     }
                 }
@@ -306,6 +308,7 @@ private fun BiographySection(
 @Composable
 private fun BiographySectionTitle(title: String) {
     val tokens = LocalDesignTokens.current.typography
+    val colors = LocalDesignTokens.current.colors
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -315,7 +318,7 @@ private fun BiographySectionTitle(title: String) {
         Text(
             text = title,
             style = MaterialTheme.typography.headlineMedium.copy(fontSize = tokens.headlineMedium.fontSizeSp.sp),
-            color = Color(0xFFF7F2EA)
+            color = colors.text.primary
         )
         Canvas(
             modifier = Modifier
@@ -325,7 +328,7 @@ private fun BiographySectionTitle(title: String) {
         ) {
             val centerY = size.height / 2f
             drawLine(
-                color = Color(0x55A19892),
+                color = colors.ornament.stroke,
                 start = Offset(0f, centerY),
                 end = Offset(size.width - 18.dp.toPx(), centerY),
                 strokeWidth = 1.dp.toPx(),
@@ -341,6 +344,7 @@ private fun BiographyValueRow(
     valueWeight: Float,
     onClick: () -> Unit
 ) {
+    val colors = LocalDesignTokens.current.colors
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -352,7 +356,7 @@ private fun BiographyValueRow(
             imageVector = row.icon,
             contentDescription = null,
             modifier = Modifier.size(22.dp),
-            tint = Color(0xFFC2BBB3)
+            tint = colors.text.label
         )
         Text(
             text = row.label,
@@ -360,7 +364,7 @@ private fun BiographyValueRow(
                 .padding(start = 12.dp)
                 .weight(1f),
             style = MaterialTheme.typography.bodyLarge,
-            color = Color(0xFFD2CAC2),
+            color = colors.text.muted,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -370,7 +374,7 @@ private fun BiographyValueRow(
                 .padding(start = 12.dp)
                 .weight(valueWeight),
             style = MaterialTheme.typography.bodyLarge,
-            color = Color(0xFFF7F2EA),
+            color = colors.text.primary,
             textAlign = TextAlign.End,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
@@ -385,6 +389,7 @@ private fun BiographyHistorySection(
     onHistoryChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = LocalDesignTokens.current.colors
     // Keep edits local while typing and persist only once the field loses focus, so we don't
     // issue one DB write per keystroke (which also re-keyed this draft mid-typing).
     // Keyed on the character too: two characters with the same (e.g. empty) history must not
@@ -410,8 +415,8 @@ private fun BiographyHistorySection(
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(10.dp),
-            color = Color(0xFF17141B).copy(alpha = 0.62f),
-            border = BorderStroke(1.dp, Color(0x36FFFFFF))
+            color = colors.surface.card.copy(alpha = 0.62f),
+            border = BorderStroke(1.dp, colors.border.muted)
         ) {
             OutlinedTextField(
                 value = draft,
@@ -428,10 +433,10 @@ private fun BiographyHistorySection(
                     Text(
                         text = text("biography_history_placeholder"),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = Color(0xFFD2CAC2).copy(alpha = 0.48f)
+                        color = colors.text.muted.copy(alpha = 0.48f)
                     )
                 },
-                textStyle = MaterialTheme.typography.bodyLarge.copy(color = Color(0xFFD2CAC2)),
+                textStyle = MaterialTheme.typography.bodyLarge.copy(color = colors.text.muted),
                 minLines = 4,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                 shape = RoundedCornerShape(10.dp),
@@ -440,7 +445,7 @@ private fun BiographyHistorySection(
                     unfocusedBorderColor = Color.Transparent,
                     focusedContainerColor = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent,
-                    cursorColor = Color(0xFFFFF6EA)
+                    cursorColor = colors.text.warmPrimary
                 )
             )
         }
@@ -594,20 +599,21 @@ private fun BiographySelectionOption(
     selected: Boolean,
     onClick: () -> Unit
 ) {
+    val colors = LocalDesignTokens.current.colors
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(10.dp))
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(10.dp),
-        color = if (selected) Color(0xFF3A3244) else Color(0xFF1A171D),
-        border = BorderStroke(1.dp, if (selected) Color(0x66FFF6EA) else Color(0x30FFFFFF))
+        color = if (selected) colors.surface.selected else colors.surface.button,
+        border = BorderStroke(1.dp, if (selected) colors.border.selected else colors.border.muted)
     ) {
         Text(
             text = text,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
             style = MaterialTheme.typography.bodyLarge,
-            color = if (selected) Color(0xFFFFF6EA) else Color(0xFFD2CAC2)
+            color = if (selected) colors.text.warmPrimary else colors.text.muted
         )
     }
 }
@@ -691,17 +697,18 @@ private fun UnitSwitcher(
     selected: String,
     onSelected: (String) -> Unit
 ) {
+    val colors = LocalDesignTokens.current.colors
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         listOf(first, second).forEach { option ->
             Text(
                 text = option,
                 modifier = Modifier
                     .clip(RoundedCornerShape(10.dp))
-                    .background(if (selected == option) Color(0xFF3A3244) else Color.Transparent)
+                    .background(if (selected == option) colors.surface.selected else Color.Transparent)
                     .clickable { onSelected(option) }
                     .padding(horizontal = 16.dp, vertical = 10.dp),
                 style = MaterialTheme.typography.bodyLarge,
-                color = Color(0xFFF7F2EA)
+                color = colors.text.primary
             )
         }
     }

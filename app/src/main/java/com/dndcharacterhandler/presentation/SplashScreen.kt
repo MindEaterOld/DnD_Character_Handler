@@ -14,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -23,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dndcharacterhandler.R
 import com.dndcharacterhandler.presentation.theme.DnDTheme
+import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 import kotlinx.coroutines.delay
 
 /** Required CC-BY-4.0 attribution for the SRD 5.2 content bundled in the catalog. */
@@ -46,10 +46,11 @@ fun SplashScreen(onTimeout: () -> Unit) {
 
 @Composable
 private fun SplashContent() {
+    val colors = LocalDesignTokens.current.colors
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF120E18)) // colors.materialTheme.background
+            .background(MaterialTheme.colorScheme.background)
             .pointerInput(Unit) {
                 // Consume all gestures so the app composed beneath the splash isn't interactive.
                 awaitPointerEventScope {
@@ -70,7 +71,7 @@ private fun SplashContent() {
         Text(
             text = SRD_ATTRIBUTION,
             style = MaterialTheme.typography.labelMedium,
-            color = Color(0xFFD2CAC2), // colors.overview.textMuted
+            color = colors.text.muted,
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .align(Alignment.BottomCenter)

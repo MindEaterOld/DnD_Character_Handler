@@ -109,6 +109,7 @@ internal fun NotesContent(
     onUpdateNote: (CharacterBundle, Note) -> Unit = { _, _ -> },
     onTogglePinned: (CharacterBundle, Note) -> Unit = { _, _ -> }
 ) {
+    val colors = LocalDesignTokens.current.colors
     val character = characterBundle?.character
     var query by remember { mutableStateOf("") }
     var editingNote by remember { mutableStateOf<Note?>(null) }
@@ -129,7 +130,7 @@ internal fun NotesContent(
                     text = text("placeholder_loading_character"),
                     modifier = Modifier.align(Alignment.Center),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Color(0xFFD7D1CC)
+                    color = colors.progress.xpFill
                 )
             }
         }
@@ -208,11 +209,12 @@ private fun NotesSearchField(
     value: String,
     onValueChange: (String) -> Unit
 ) {
+    val colors = LocalDesignTokens.current.colors
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
-        color = Color(0xFF17141B).copy(alpha = 0.62f),
-        border = BorderStroke(1.dp, Color(0x36FFFFFF))
+        color = colors.surface.card.copy(alpha = 0.62f),
+        border = BorderStroke(1.dp, colors.border.muted)
     ) {
         OutlinedTextField(
             value = value,
@@ -222,7 +224,7 @@ private fun NotesSearchField(
                 Icon(
                     imageVector = Icons.Outlined.Search,
                     contentDescription = null,
-                    tint = Color(0xFFD2CAC2),
+                    tint = colors.text.muted,
                     modifier = Modifier.size(28.dp)
                 )
             },
@@ -230,7 +232,7 @@ private fun NotesSearchField(
                 Text(
                     text = text("notes_search_placeholder"),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Color(0xFFD2CAC2).copy(alpha = 0.72f)
+                    color = colors.text.muted.copy(alpha = 0.72f)
                 )
             },
             singleLine = true,
@@ -239,7 +241,7 @@ private fun NotesSearchField(
                 unfocusedBorderColor = Color.Transparent,
                 focusedContainerColor = Color.Transparent,
                 unfocusedContainerColor = Color.Transparent,
-                cursorColor = Color(0xFFFFF6EA)
+                cursorColor = colors.text.warmPrimary
             )
         )
     }
@@ -248,6 +250,7 @@ private fun NotesSearchField(
 @Composable
 private fun NotesSectionTitle(title: String) {
     val tokens = LocalDesignTokens.current.typography
+    val colors = LocalDesignTokens.current.colors
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -257,7 +260,7 @@ private fun NotesSectionTitle(title: String) {
         Text(
             text = title,
             style = MaterialTheme.typography.headlineMedium.copy(fontSize = tokens.headlineMedium.fontSizeSp.sp),
-            color = Color(0xFFF7F2EA),
+            color = colors.text.primary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -269,7 +272,7 @@ private fun NotesSectionTitle(title: String) {
         ) {
             androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize()) {
                 drawLine(
-                    color = Color(0x33FFFFFF),
+                    color = colors.border.muted,
                     start = androidx.compose.ui.geometry.Offset(0f, size.height / 2f),
                     end = androidx.compose.ui.geometry.Offset(size.width, size.height / 2f),
                     strokeWidth = 1.dp.toPx()
@@ -285,13 +288,14 @@ private fun NoteCard(
     onClick: () -> Unit,
     onTogglePinned: () -> Unit
 ) {
+    val colors = LocalDesignTokens.current.colors
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(10.dp),
-        color = Color(0xFF17141B).copy(alpha = 0.62f),
-        border = BorderStroke(1.dp, Color(0x36FFFFFF))
+        color = colors.surface.card.copy(alpha = 0.62f),
+        border = BorderStroke(1.dp, colors.border.muted)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 14.dp),
@@ -301,7 +305,7 @@ private fun NoteCard(
                 Icon(
                     imageVector = Icons.Outlined.PushPin,
                     contentDescription = text("notes_pin"),
-                    tint = Color(0xFFF7F2EA),
+                    tint = colors.text.primary,
                     modifier = Modifier
                         .padding(end = 12.dp)
                         .size(28.dp)
@@ -312,7 +316,7 @@ private fun NoteCard(
                 Text(
                     text = note.title.ifBlank { text("notes_untitled") },
                     style = MaterialTheme.typography.titleLarge,
-                    color = Color(0xFFF7F2EA),
+                    color = colors.text.primary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -321,7 +325,7 @@ private fun NoteCard(
                         text = note.content,
                         modifier = Modifier.padding(top = 8.dp),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = Color(0xFFD2CAC2),
+                        color = colors.text.muted,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -330,7 +334,7 @@ private fun NoteCard(
             Icon(
                 imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
                 contentDescription = null,
-                tint = Color(0xFFD2CAC2),
+                tint = colors.text.muted,
                 modifier = Modifier.padding(start = 10.dp)
             )
         }
