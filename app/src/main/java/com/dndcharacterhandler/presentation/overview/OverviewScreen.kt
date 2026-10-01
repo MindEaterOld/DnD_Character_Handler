@@ -31,7 +31,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.DirectionsRun
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.Bedtime
-import androidx.compose.material.icons.outlined.FlashOn
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.LocalCafe
 import androidx.compose.material.icons.outlined.Shield
@@ -449,7 +448,7 @@ private data class OverviewAction(
 private data class OverviewStat(
     val labelKey: String,
     val value: String,
-    val icon: androidx.compose.ui.graphics.vector.ImageVector,
+    val icon: androidx.compose.ui.graphics.vector.ImageVector?,
     val field: OverviewMiniStatField
 )
 
@@ -683,7 +682,7 @@ private fun OverviewContent(
             OverviewStat(
                 labelKey = "overview_initiative",
                 value = signed(calculateInitiative(character?.dexterity ?: 10, character?.initiativeBonus ?: 0)),
-                icon = Icons.Outlined.FlashOn,
+                icon = null,
                 field = OverviewMiniStatField.INITIATIVE
             ),
             OverviewStat(
@@ -833,11 +832,12 @@ private fun OverviewContent(
                 // The app's stat cards, as on the other screens.
                 StatCardRow(modifier = Modifier.offset(y = (-34).dp)) {
                     miniStats.forEach { stat ->
+                        val statIcon = stat.icon
                         MiniStatCard(
                             modifier = Modifier.weight(1f),
                             value = stat.value,
                             label = text(stat.labelKey),
-                            icon = { MiniStatCardIcon(stat.icon) },
+                            icon = if (statIcon == null) null else ({ MiniStatCardIcon(statIcon) }),
                             onClick = {
                                 activeMiniStatField = stat.field
                                 miniStatDraft = when (stat.field) {
