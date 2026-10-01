@@ -187,7 +187,28 @@ data class CatalogFeature(
     val advancement: List<AdvancementStep>
 )
 
-data class CatalogSpellRef(val id: String, val name: CatalogText, val level: Int?)
+/**
+ * A spell of the catalog: the PHB's and the supplements', with the spell lists it is on
+ * ("class:wizard", "subclass:light", "other:mark-healing") and what its card shows. Range, casting
+ * time and duration are in the app's (SRD) wording: "60 feet", "1 bonus action", "Up to 1 minute".
+ */
+data class CatalogSpellRef(
+    val id: String,
+    val name: CatalogText,
+    val level: Int?,
+    /** Foundry's school key: "evo", "abj"... */
+    val school: String = "",
+    val book: String = "",
+    val lists: List<String> = emptyList(),
+    val components: String = "",
+    val material: CatalogText = CatalogText(),
+    val castingTime: String = "",
+    val range: String = "",
+    val duration: String = "",
+    val ritual: Boolean = false,
+    val concentration: Boolean = false,
+    val text: CatalogText = CatalogText()
+)
 
 enum class ClassRestriction {
     /** Only for the character's first class. */
@@ -252,7 +273,9 @@ sealed interface AdvancementStep {
         val items: List<String>,
         val spells: List<String>,
         val itemType: String,
-        val restriction: ChoiceRestriction?
+        val restriction: ChoiceRestriction?,
+        /** Spells picked here are prepared: 1 prepared, 2 always prepared (Foundry's spell.prepared); 0 not. */
+        val spellPrepared: Int = 0
     ) : AdvancementStep
 
     /** A value that grows with level; [values] maps the level it changes at to the value ("2", "1d10"). */

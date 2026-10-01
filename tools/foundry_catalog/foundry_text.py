@@ -23,6 +23,14 @@ SKILLS = {
     'slt': ('Sleight of Hand', 'Ловкость рук'), 'ste': ('Stealth', 'Скрытность'), 'sur': ('Survival', 'Выживание'),
 }
 CURRENCY = {'pp': ('PP', 'пм'), 'gp': ('GP', 'зм'), 'ep': ('EP', 'эм'), 'sp': ('SP', 'см'), 'cp': ('CP', 'мм')}
+# Damage types as Foundry's damage enricher names them ("8d6 Fire" / "8d6 Огонь", the ru-ru labels).
+DAMAGE_TYPES = {
+    'acid': ('Acid', 'Кислота'), 'bludgeoning': ('Bludgeoning', 'Дробящий'), 'cold': ('Cold', 'Холод'),
+    'fire': ('Fire', 'Огонь'), 'force': ('Force', 'Сила'), 'lightning': ('Lightning', 'Молния'),
+    'necrotic': ('Necrotic', 'Некротический'), 'piercing': ('Piercing', 'Колющий'), 'poison': ('Poison', 'Яд'),
+    'psychic': ('Psychic', 'Психический'), 'radiant': ('Radiant', 'Лучистый'), 'slashing': ('Slashing', 'Режущий'),
+    'thunder': ('Thunder', 'Гром')
+}
 # English names of the rules &Reference[...] points at, by key without spaces or hyphens. The Russian
 # names are the ones Foundry shows (Fifthpendium's rules glossary), loaded by load_reference_labels.
 REFERENCES_EN = {
@@ -84,16 +92,25 @@ def formula_text(formula, lang):
 def _roll(command, body, label, lang):
     body = ' '.join(body.split())
     if command in ('r', 'roll', 'damage', 'heal', 'healing'):
-        # Drop options (type=fire, average) and flavour (#...); keep the formula.
+        # Drop options (average) and flavour (#...); keep the formula and, like Foundry's damage
+        # enricher, the damage type after it ("8d6 Fire", "8d6 Огонь").
         body = body.split('#')[0]
+        types = []
+        for option in body.split(' '):
+            if option.startswith('type='):
+                types += [t for t in re.split(r'[|,/]', option[len('type='):]) if t]
         parts = [p for p in body.split(' ') if p and '=' not in p]
-        # A trailing damage type ("1d8 slashing") is just a word after the formula.
+        # A trailing damage type ("1d8 slashing") is a word after the formula.
         while parts and re.fullmatch(r'[a-z]+', parts[-1]) and parts[-1] not in ('d', 'floor', 'ceil'):
-            parts.pop()
+            types.insert(0, parts.pop())
         formula = ' '.join(parts)
         if label:
             return label
-        return formula_text(formula, lang) if formula else ''
+        if not formula:
+            return ''
+        named = [pick(DAMAGE_TYPES[t], lang) for t in types if t in DAMAGE_TYPES] if command == 'damage' else []
+        joiner = ' or ' if lang == 'en' else ' или '
+        return formula_text(formula, lang) + (' ' + joiner.join(named) if named else '')
     if command == 'award':
         match = re.fullmatch(r'(\d+)\s*([a-z]{2})', body.lower())
         if match and match.group(2) in CURRENCY:

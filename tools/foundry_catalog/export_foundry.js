@@ -132,4 +132,40 @@ for (const key of referenceKeys) {
   references[key] = div.textContent.trim();
 }
 report.push({ id: 'references', count: referenceKeys.size, status: await send('references.json', references) });
+
+// Spells for Character Wizard's spell choices: the Russian (Fifthpendium) and English (SRD 5.2)
+// documents, trimmed to what a spell card shows, and the spell lists of the classes, subclasses
+// and dragonmarks (dnd5e.registry.spellLists) the choices draw from.
+const SPELL_PACKS = ['ag-fifthpendium.spells', 'dnd5e.spells24'];
+const spellFields = d => ({
+  uuid: d.uuid,
+  name: d.name,
+  system: {
+    identifier: d.system.identifier,
+    level: d.system.level,
+    school: d.system.school,
+    properties: [...(d.system.properties ?? [])],
+    materials: d.system.materials,
+    activation: d.system.activation,
+    range: d.system.range,
+    duration: d.system.duration,
+    target: d.system.target,
+    description: { value: d.system.description?.value ?? '' },
+    source: { book: d.system.source?.book ?? '' }
+  }
+});
+for (const id of SPELL_PACKS) {
+  const pack = game.packs.get(id);
+  if (!pack) { report.push({ id, missing: true }); continue; }
+  const docs = await pack.getDocuments();
+  report.push({ id, count: docs.length, status: await send(`spells.${id}.json`, { pack: id, documents: docs.map(d => spellFields({ ...d.toObject(), uuid: d.uuid })) }) });
+}
+const registry = dnd5e.registry.spellLists;
+await registry.ready;
+const spellLists = {};
+for (const option of registry.options) {
+  const [type, key] = option.value.split(':');
+  spellLists[option.value] = { label: option.label, group: option.group, uuids: [...(registry.forType(type, key)?.uuids ?? [])] };
+}
+report.push({ id: 'spellLists', count: Object.keys(spellLists).length, status: await send('spellLists.json', spellLists) });
 return report;

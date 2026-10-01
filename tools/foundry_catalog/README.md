@@ -1,12 +1,16 @@
 # Character catalog from Foundry
 
 `app/src/main/assets/character_catalog.json` — classes, subclasses, species, backgrounds and every
-feature, option and feat with their level progression — is built from the Foundry VTT compendiums
-of the D&D world:
+feature, option and feat with their level progression, and the spells with the spell lists they are
+on — is built from the Foundry VTT compendiums of the D&D world:
 
 - **AG Fifthpendium** (Russian): PHB 2024 classes, feats and origins, plus the D&D Beyond, Eberron,
   Forgotten Realms and Ravenloft option packs. Names come as `Ярость [Rage]`.
 - **dnd5e SRD 5.2** (English): English names and texts for the documents both share (same ids).
+- **Spells**: the Fifthpendium and SRD 5.2 spell packs (card data and both texts) and the spell
+  lists of the classes, subclasses and dragonmarks from `dnd5e.registry.spellLists`; Character
+  Wizard's spell choices draw from these lists. Range, casting time and duration are written in the
+  app's (SRD) wording ("60 feet", "1 bonus action", "Up to 1 minute").
 - `legacy/feature_catalog_extra.json` and the 5e-database SRD files: English texts the app shipped
   before, and the old catalog ids that saved features still carry (mapped in `legacyIds`).
 

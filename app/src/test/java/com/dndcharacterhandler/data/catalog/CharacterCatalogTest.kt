@@ -117,6 +117,25 @@ class CharacterCatalogTest {
     }
 
     @Test
+    fun spellsAreOnTheirListsWithCleanTexts() {
+        val wizardList = catalog.spells.values.filter { "class:wizard" in it.lists }
+        assertTrue("the wizard's list", wizardList.size > 150)
+        assertTrue(wizardList.any { it.name.en == "Fireball" && it.level == 3 })
+        catalog.spells.values.forEach { spell ->
+            assertTrue("${spell.id} has a Russian name", spell.name.ru.isNotBlank())
+            for (text in listOf(spell.text.en, spell.text.ru)) {
+                listOf("@UUID[", "[[", "&Reference[", "&reference[", "apply=", "@Embed[", "<p>", "</", "{=").forEach { markup ->
+                    assertTrue("${spell.id} still has $markup", markup !in text)
+                }
+            }
+        }
+        // Damage types read as Foundry shows them.
+        val fireball = catalog.spells.values.first { it.name.en == "Fireball" }
+        assertTrue(fireball.text.ru, "8d6 Огонь" in fireball.text.ru)
+        assertEquals("150 feet", fireball.range)
+    }
+
+    @Test
     fun addFeatureCatalogKeepsOldIdsAndGroups() {
         val items = featureCatalogItems(catalog)
         assertEquals(catalog.features.size, items.size)

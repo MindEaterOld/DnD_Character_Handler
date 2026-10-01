@@ -673,6 +673,128 @@ def write_missing(result):
     return missing
 
 
+SPELL_TEMPLATES = {
+    'sphere': '{size}-foot-radius Sphere', 'radius': '{size}-foot-radius Sphere', 'cylinder': '{size}-foot-radius Cylinder',
+    'cone': '{size}-foot Cone', 'cube': '{size}-foot Cube', 'line': '{size}-foot Line', 'wall': '{size}-foot Wall',
+    'circle': '{size}-foot-radius Circle', 'square': '{size}-foot Square', 'emanation': '{size}-foot Emanation'
+}
+
+
+def spell_lookups(html, system):
+    """The SRD texts' [[lookup @labels.description...]]: the target and the area, as the sheet shows them."""
+    template = ((system.get('target') or {}).get('template') or {})
+    area = SPELL_TEMPLATES.get(template.get('type') or '', '{size}-foot area').format(size=template.get('size') or '')
+    # A roll widget for the slot level ("Level 1: 3 darts") means nothing as text.
+    html = re.sub(r'<p>\[\[[^\]]*@item\.level[^\]]*\]\]\{[^}]*\}</p>', '', html)
+    html = html.replace('[[lookup @labels.description.affects capitalize]]', 'Each creature')
+    html = html.replace('[[lookup @labels.description.affects]]', 'each creature')
+    return html.replace('[[lookup @labels.description.template]]', area)
+
+
+def plural(count, unit):
+    return f'{count} {unit}' + ('' if str(count) == '1' else 's')
+
+
+def spell_range(system):
+    """Range in the app's (SRD) wording: "60 feet", "Self", "Touch", "1 mile", "Unlimited", "Special"."""
+    data = system.get('range') or {}
+    units, value = data.get('units') or '', data.get('value') or ''
+    if units == 'ft':
+        return f'{value} feet'
+    if units == 'mi':
+        return plural(value, 'mile')
+    return {'self': 'Self', 'touch': 'Touch', 'any': 'Unlimited', 'spec': 'Special'}.get(units, '')
+
+
+def spell_casting_time(system):
+    """"1 action", "1 bonus action", "1 reaction", "10 minutes", "8 hours"."""
+    data = system.get('activation') or {}
+    kind, value = data.get('type') or '', data.get('value') or 1
+    if kind in ('action', 'bonus', 'reaction'):
+        return {'action': '1 action', 'bonus': '1 bonus action', 'reaction': '1 reaction'}[kind]
+    if kind in ('minute', 'hour', 'day'):
+        return plural(value, kind)
+    return ''
+
+
+def spell_duration(system, concentration):
+    """"Instantaneous", "Up to 1 minute" (concentration), "8 hours", "Until dispelled", "Special"."""
+    data = system.get('duration') or {}
+    units, value = data.get('units') or '', data.get('value') or '1'
+    if units in ('round', 'minute', 'hour', 'day'):
+        base = plural(value, units)
+        return f'Up to {base}' if concentration else base
+    return {'inst': 'Instantaneous', 'perm': 'Until dispelled', 'disp': 'Until dispelled', 'spec': 'Special'}.get(units, '')
+
+
+def slot_level_text(text, lang):
+    """A formula on the slot level ("{=@item.level - 3}") in words: "(slot level - 3)"."""
+    words = 'slot level' if lang == 'en' else 'круг ячейки'
+    return re.sub(r'\{=([^}]*@item\.level[^}]*)\}', lambda m: '(' + ' '.join(m.group(1).replace('@item.level', words).split()) + ')', text)
+
+
+def spell_catalog(catalog, referenced):
+    """Every spell Character Wizard can offer: the PHB's (Russian Fifthpendium, English SRD 5.2) and
+    the supplements' (the options packs), with the spell lists of the classes, subclasses and
+    dragonmarks they are on (dnd5e.registry.spellLists), keyed by the short id the advancements use."""
+    ru_docs = {d['uuid'].split('.')[-1]: d for d in load_json(os.path.join(EXPORT, 'spells.ag-fifthpendium.spells.json'), {'documents': []})['documents']}
+    en_docs = {d['uuid'].split('.')[-1]: d for d in load_json(os.path.join(EXPORT, 'spells.dnd5e.spells24.json'), {'documents': []})['documents']}
+    for uuid, doc in catalog.docs.items():
+        if doc.get('type') == 'spell':
+            ru_docs.setdefault(uuid.split('.')[-1], {**doc, 'uuid': uuid})
+    lists = collections.defaultdict(set)
+    for key, entry in load_json(os.path.join(EXPORT, 'spellLists.json'), {}).items():
+        for uuid in entry.get('uuids') or []:
+            lists[uuid.split('.')[-1]].add(key)
+    if not ru_docs:
+        print('   warning: no spells exported (export/spells.*.json): spell choices will have no options')
+    spells = {}
+    for short in sorted(set(ru_docs) | set(referenced)):
+        doc = ru_docs.get(short) or en_docs.get(short)
+        if doc is None:
+            spells[short] = referenced[short]
+            continue
+        twin = en_docs.get(short)
+        system = doc.get('system') or {}
+        ru, en = split_name(doc['name'])
+        if twin:
+            en = twin['name']
+        elif not en and doc is en_docs.get(short):
+            en, ru = doc['name'], ''
+        properties = set(system.get('properties') or [])
+        concentration = 'concentration' in properties
+        components = ', '.join(label for key, label in (('vocal', 'V'), ('somatic', 'S'), ('material', 'M')) if key in properties)
+        materials = system.get('materials') or {}
+        twin_system = (twin or {}).get('system') or {}
+        entry = {
+            'name': {'en': en, 'ru': ru},
+            'level': system.get('level'),
+            'school': system.get('school') or '',
+            'book': catalog.book(doc) or ('PHB 2024' if short in en_docs else ''),
+            'lists': sorted(lists.get(short, ())),
+            'components': components,
+            'castingTime': spell_casting_time(system),
+            'range': spell_range(system),
+            'duration': spell_duration(system, concentration),
+            'text': {
+                'en': slot_level_text(catalog.text(spell_lookups((twin_system.get('description') or {}).get('value') or '', twin_system), 'en'), 'en') if twin else '',
+                'ru': slot_level_text(catalog.text(spell_lookups((system.get('description') or {}).get('value') or '', system), 'ru'), 'ru') if doc is not en_docs.get(short) else ''
+            }
+        }
+        if 'ritual' in properties:
+            entry['ritual'] = True
+        if concentration:
+            entry['concentration'] = True
+        material = {'en': ((twin_system.get('materials') or {}).get('value') or '').strip(),
+                    'ru': (materials.get('value') or '').strip() if doc is not en_docs.get(short) else ''}
+        if material['en'] or material['ru']:
+            entry['material'] = material
+        spells[short] = entry
+    listed = sum(1 for entry in spells.values() if entry.get('lists'))
+    print(f'spells {len(spells)} ({listed} on a spell list)')
+    return spells
+
+
 def trait_labels():
     """Proficiency and trait keys ("skills:ath", "tool:art:smith", "languages:standard:dwarvish"...) with
     both labels and their children, from export/traits.json (Foundry's Trait.choices). Items keep
@@ -720,6 +842,7 @@ def main():
 
     catalog = Catalog()
     result = build(catalog)
+    result['spells'] = spell_catalog(catalog, result['spells'])
     unmatched = attach_legacy(result, catalog)
     unknown_translations = apply_translations(result)
     missing = write_missing(result)

@@ -34,7 +34,22 @@ object CharacterCatalogParser {
             backgrounds = root.objects("backgrounds").map(::parseBackground),
             features = root.objects("features").map(::parseFeature),
             spells = root.optJSONObject("spells").entries { id, value ->
-                CatalogSpellRef(id, value.text("name"), value.optIntOrNull("level"))
+                CatalogSpellRef(
+                    id = id,
+                    name = value.text("name"),
+                    level = value.optIntOrNull("level"),
+                    school = value.optString("school"),
+                    book = value.optString("book"),
+                    lists = value.strings("lists"),
+                    components = value.optString("components"),
+                    material = value.text("material"),
+                    castingTime = value.optString("castingTime"),
+                    range = value.optString("range"),
+                    duration = value.optString("duration"),
+                    ritual = value.optBoolean("ritual"),
+                    concentration = value.optBoolean("concentration"),
+                    text = value.text("text")
+                )
             },
             books = root.optJSONObject("books").entries { _, value -> value.asText() },
             subtypes = root.optJSONObject("subtypes").entries { _, value -> value.asText() },
@@ -183,6 +198,7 @@ object CharacterCatalogParser {
                 items = json.strings("items"),
                 spells = json.strings("spells"),
                 itemType = json.optString("itemType"),
+                spellPrepared = json.optJSONObject("spell")?.optInt("prepared") ?: 0,
                 restriction = json.optJSONObject("restriction")?.let {
                     ChoiceRestriction(
                         type = it.optString("type"),
