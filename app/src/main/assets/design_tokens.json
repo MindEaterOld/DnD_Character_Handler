@@ -90,8 +90,8 @@
         "alpha": 0.62
       },
       "hpLabel": {
-        "baseStyle": "titleMedium",
-        "fontSizeSp": 16
+        "baseStyle": "titleLarge",
+        "fontSizeSp": 22
       },
       "miniStatValue": {
         "baseStyle": "headlineMedium",

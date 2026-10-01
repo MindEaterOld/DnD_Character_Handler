@@ -1817,7 +1817,7 @@ private fun OverviewHpCard(
     BorderLabelCard(
         label = hpLabel,
         modifier = Modifier.fillMaxWidth(),
-        labelStyle = MaterialTheme.typography.titleMedium.copy(fontSize = tokens.hpLabel.fontSizeSp.sp),
+        labelStyle = MaterialTheme.typography.titleLarge.copy(fontSize = tokens.hpLabel.fontSizeSp.sp),
         labelColor = colors.text.label,
         cornerRadius = 30.dp,
         fill = colors.surface.card,

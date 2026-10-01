@@ -208,7 +208,7 @@ val DefaultDesignTokens = DesignTokens(
         hpCurrent = TextSizeToken(fontSizeSp = 64f, lineHeightSp = 68f),
         hpTemporary = TextSizeToken(fontSizeSp = 40f, lineHeightSp = 44f),
         hpMaximum = TextSizeToken(fontSizeSp = 40f, lineHeightSp = 44f, alpha = 0.62f),
-        hpLabel = TextSizeToken(fontSizeSp = 16f),
+        hpLabel = TextSizeToken(fontSizeSp = 22f),
         miniStatValue = TextSizeToken(fontSizeSp = 28f, lineHeightSp = 30f),
         miniStatLabel = TextSizeToken(fontSizeSp = 12f),
         subtitleToken = TextSizeToken(fontSizeSp = 16f),

@@ -590,7 +590,7 @@
     "es": "Salv."
   },
   "ability_str_short": {
-    "maxChars": 11,
+    "maxChars": 7,
     "en": "STR",
     "ru": "СИЛ",
     "de": "STÄ",
@@ -598,7 +598,7 @@
     "es": "FUE"
   },
   "ability_dex_short": {
-    "maxChars": 11,
+    "maxChars": 7,
     "en": "DEX",
     "ru": "ЛОВ",
     "de": "GES",
@@ -606,7 +606,7 @@
     "es": "DES"
   },
   "ability_con_short": {
-    "maxChars": 11,
+    "maxChars": 7,
     "en": "CON",
     "ru": "ТЕЛ",
     "de": "KON",
@@ -614,7 +614,7 @@
     "es": "CON"
   },
   "ability_int_short": {
-    "maxChars": 11,
+    "maxChars": 7,
     "en": "INT",
     "ru": "ИНТ",
     "de": "INT",
@@ -622,7 +622,7 @@
     "es": "INT"
   },
   "ability_wis_short": {
-    "maxChars": 11,
+    "maxChars": 7,
     "en": "WIS",
     "ru": "МДР",
     "de": "WEI",
@@ -630,7 +630,7 @@
     "es": "SAB"
   },
   "ability_cha_short": {
-    "maxChars": 11,
+    "maxChars": 7,
     "en": "CHA",
     "ru": "ХАР",
     "de": "CHA",
@@ -2718,6 +2718,7 @@
     "es": "PX"
   },
   "overview_hp": {
+    "maxChars": 26,
     "en": "HP",
     "ru": "HP",
     "de": "TP",

@@ -1119,7 +1119,12 @@ private fun AbilityScoreCard(
 ) {
     val tokens = LocalDesignTokens.current.typography
     val colors = LocalDesignTokens.current.colors
-    BorderLabelCard(label = text(score.shortNameKey), modifier = modifier, onClick = onClick) {
+    BorderLabelCard(
+        label = text(score.shortNameKey),
+        modifier = modifier,
+        labelStyle = MaterialTheme.typography.titleMedium,
+        onClick = onClick
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
