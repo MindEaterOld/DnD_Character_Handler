@@ -59,11 +59,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ClipOp
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -290,7 +301,9 @@ internal fun FeaturesContent(
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         FeatureSummaryCard(
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(SummaryCardHeight),
                             label = text("placeholder_class"),
                             value = character.characterClass,
                             icon = Icons.Outlined.Shield,
@@ -298,7 +311,9 @@ internal fun FeaturesContent(
                             onClick = { classWizardTarget(character)?.let(onOpenLevelUp) }
                         )
                         FeatureSummaryCard(
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(SummaryCardHeight),
                             label = text("placeholder_race"),
                             value = character.race,
                             icon = Icons.Outlined.Person,
@@ -308,7 +323,9 @@ internal fun FeaturesContent(
                             }
                         )
                         FeatureSummaryCard(
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(SummaryCardHeight),
                             label = text("biography_background"),
                             value = character.background,
                             icon = Icons.Outlined.AutoStories,
@@ -436,6 +453,13 @@ internal fun FeaturesContent(
 
 private enum class FeatureSummaryField { RACE, BACKGROUND }
 
+/** The class, species and background cards, their label on the border included. */
+private val SummaryCardHeight = 104.dp
+
+/**
+ * Class, species or background: the label sits in a gap of the top border, like an outlined text
+ * field's, and the card shows the icon and the value.
+ */
 @Composable
 private fun FeatureSummaryCard(
     label: String,
@@ -445,47 +469,78 @@ private fun FeatureSummaryCard(
     onClick: (() -> Unit)? = null
 ) {
     val tokens = LocalDesignTokens.current.typography
-    Surface(
-        modifier = modifier
-            .height(92.dp)
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
-        shape = RoundedCornerShape(10.dp),
-        border = BorderStroke(1.dp, LocalDesignTokens.current.colors.border.miniCard),
-        color = LocalDesignTokens.current.colors.surface.card.copy(alpha = 0.62f)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 10.dp, vertical = 10.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterVertically)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+    val colors = LocalDesignTokens.current.colors
+    val shape = RoundedCornerShape(10.dp)
+    // The label's box in the card's coordinates: the border is cut there.
+    var notch by remember { mutableStateOf(Rect.Zero) }
+    Layout(
+        modifier = modifier.drawBehind {
+            val stroke = 1.dp.toPx()
+            val top = notch.center.y
+            val radius = 10.dp.toPx()
+            drawRoundRect(
+                color = colors.surface.card.copy(alpha = 0.62f),
+                topLeft = Offset(0f, top),
+                size = Size(size.width, size.height - top),
+                cornerRadius = CornerRadius(radius)
+            )
+            clipRect(left = notch.left, top = 0f, right = notch.right, bottom = top + stroke, clipOp = ClipOp.Difference) {
+                drawRoundRect(
+                    color = colors.border.miniCard,
+                    topLeft = Offset(stroke / 2, top + stroke / 2),
+                    size = Size(size.width - stroke, size.height - top - stroke),
+                    cornerRadius = CornerRadius(radius - stroke / 2),
+                    style = Stroke(width = stroke)
+                )
+            }
+        },
+        content = {
+            Text(
+                text = label,
+                modifier = Modifier.padding(horizontal = 4.dp),
+                style = MaterialTheme.typography.bodyLarge.copy(fontSize = tokens.miniStatLabel.fontSizeSp.sp),
+                color = colors.text.miniLabel,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Column(
+                modifier = Modifier
+                    .clip(shape)
+                    .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+                    .padding(horizontal = 10.dp, vertical = 8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterVertically)
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = LocalDesignTokens.current.colors.text.label,
-                    modifier = Modifier.size(18.dp)
+                    tint = colors.text.label,
+                    modifier = Modifier.size(20.dp)
                 )
                 Text(
-                    text = label,
-                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = tokens.miniStatLabel.fontSizeSp.sp),
-                    color = LocalDesignTokens.current.colors.text.miniLabel,
-                    maxLines = 1,
+                    text = value.ifBlank { "—" },
+                    style = MaterialTheme.typography.titleMedium,
+                    color = colors.text.primary,
+                    textAlign = TextAlign.Center,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            Text(
-                text = value.ifBlank { "—" },
-                style = MaterialTheme.typography.titleMedium,
-                color = LocalDesignTokens.current.colors.text.primary,
-                textAlign = TextAlign.Center,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
+        }
+    ) { measurables, constraints ->
+        // The label starts where an outlined field's does and straddles the top border.
+        val inset = 12.dp.roundToPx()
+        val labelPlaceable = measurables[0].measure(
+            Constraints(maxWidth = (constraints.maxWidth - 2 * inset).coerceAtLeast(0))
+        )
+        val top = labelPlaceable.height / 2
+        val width = constraints.maxWidth
+        val height = constraints.maxHeight
+        val cardPlaceable = measurables[1].measure(Constraints.fixed(width, (height - top).coerceAtLeast(0)))
+        notch = Rect(inset.toFloat(), 0f, (inset + labelPlaceable.width).toFloat(), labelPlaceable.height.toFloat())
+        layout(width, height) {
+            cardPlaceable.place(0, top)
+            labelPlaceable.place(inset, 0)
         }
     }
 }
