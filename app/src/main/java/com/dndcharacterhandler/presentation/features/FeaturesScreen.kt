@@ -96,6 +96,7 @@ import com.dndcharacterhandler.domain.rules.FormulaContext
 import com.dndcharacterhandler.domain.usecase.GetCharacterBundleUseCase
 import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
+import com.dndcharacterhandler.presentation.components.AutoSizeText
 import com.dndcharacterhandler.presentation.components.CharacterScreenHeader
 import com.dndcharacterhandler.presentation.components.ExpandableCard
 import com.dndcharacterhandler.presentation.components.FloatingAddButton
@@ -507,13 +508,13 @@ private fun FeatureSummaryCard(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(
+                // A long value ("Благородный") steps down the type scale instead of breaking a word.
+                AutoSizeText(
                     text = value.ifBlank { "—" },
                     style = MaterialTheme.typography.titleMedium,
                     color = colors.text.primary,
                     textAlign = TextAlign.Center,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    maxLines = 2
                 )
             }
         }
