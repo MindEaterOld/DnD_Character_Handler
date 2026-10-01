@@ -462,7 +462,7 @@ internal fun InventoryContent(
     }
 }
 
-/** Copper, silver and gold as stat cards, each with its coins; a tap edits them. */
+/** Gold, silver and copper (the most valuable first) as stat cards, each with its coins; a tap edits them. */
 @Composable
 private fun CurrencyCardRow(
     copperPieces: Int,
@@ -473,9 +473,9 @@ private fun CurrencyCardRow(
     val accent = LocalDesignTokens.current.colors.accent
     StatCardRow {
         listOf(
-            Triple("stat_card_copper", copperPieces, CurrencyType.COPPER to accent.coinCopper),
+            Triple("stat_card_gold", goldPieces, CurrencyType.GOLD to accent.coinGold),
             Triple("stat_card_silver", silverPieces, CurrencyType.SILVER to accent.coinSilver),
-            Triple("stat_card_gold", goldPieces, CurrencyType.GOLD to accent.coinGold)
+            Triple("stat_card_copper", copperPieces, CurrencyType.COPPER to accent.coinCopper)
         ).forEach { (label, amount, coin) ->
             MiniStatCard(
                 modifier = Modifier.weight(1f),
@@ -569,10 +569,11 @@ private fun InventoryCurrencyDialog(
         title = { Text(text("inventory_currency_edit_title")) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                // In the cards' order: gold first.
                 OutlinedTextField(
-                    value = copperDraft,
-                    onValueChange = { copperDraft = it.filter(Char::isDigit) },
-                    label = { Text(text("inventory_currency_cp")) },
+                    value = goldDraft,
+                    onValueChange = { goldDraft = it.filter(Char::isDigit) },
+                    label = { Text(text("inventory_currency_gp")) },
                     singleLine = true
                 )
                 OutlinedTextField(
@@ -582,9 +583,9 @@ private fun InventoryCurrencyDialog(
                     singleLine = true
                 )
                 OutlinedTextField(
-                    value = goldDraft,
-                    onValueChange = { goldDraft = it.filter(Char::isDigit) },
-                    label = { Text(text("inventory_currency_gp")) },
+                    value = copperDraft,
+                    onValueChange = { copperDraft = it.filter(Char::isDigit) },
+                    label = { Text(text("inventory_currency_cp")) },
                     singleLine = true
                 )
             }
