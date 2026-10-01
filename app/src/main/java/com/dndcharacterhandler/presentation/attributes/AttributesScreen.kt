@@ -1167,7 +1167,7 @@ private fun DarkvisionModeChip(
 
 private fun Feature.isDarkvisionFeature(): Boolean {
     val haystack = "$name $description".lowercase()
-    return "darkvision" in haystack || "тёмное зрение" in haystack || "темное зрение" in haystack
+    return "darkvision" in haystack || "ночное зрение" in haystack || "тёмное зрение" in haystack || "темное зрение" in haystack
 }
 
 private fun Feature.darkvisionFeet(): Int? =

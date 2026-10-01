@@ -3212,6 +3212,209 @@
     "fr": "Sorts \u00e0 choisir dans l'\u00e9cran des sorts",
     "es": "Conjuros para elegir en la pantalla de conjuros"
   },
+  "levelup_abilities_title": {
+    "en": "Ability Scores",
+    "ru": "\u0425\u0430\u0440\u0430\u043a\u0442\u0435\u0440\u0438\u0441\u0442\u0438\u043a\u0438",
+    "de": "Attributswerte",
+    "fr": "Caract\u00e9ristiques",
+    "es": "Caracter\u00edsticas"
+  },
+  "levelup_abilities_hint": {
+    "en": "Background bonuses are added on a later page.",
+    "ru": "\u0411\u043e\u043d\u0443\u0441\u044b \u043f\u0440\u0435\u0434\u044b\u0441\u0442\u043e\u0440\u0438\u0438 \u0434\u043e\u0431\u0430\u0432\u044f\u0442\u0441\u044f \u043d\u0430 \u0441\u043b\u0435\u0434\u0443\u044e\u0449\u0438\u0445 \u0448\u0430\u0433\u0430\u0445.",
+    "de": "Die Boni des Hintergrunds kommen auf einer sp\u00e4teren Seite hinzu.",
+    "fr": "Les bonus de l'historique s'ajoutent sur une page suivante.",
+    "es": "Las bonificaciones del trasfondo se a\u00f1aden en una p\u00e1gina posterior."
+  },
+  "levelup_abilities_standard": {
+    "en": "Standard array",
+    "ru": "\u0421\u0442\u0430\u043d\u0434\u0430\u0440\u0442\u043d\u044b\u0439 \u043d\u0430\u0431\u043e\u0440",
+    "de": "Standardreihe",
+    "fr": "S\u00e9rie standard",
+    "es": "Conjunto est\u00e1ndar"
+  },
+  "levelup_abilities_standard_hint": {
+    "en": "15, 14, 13, 12, 10, 8 \u2014 each value once",
+    "ru": "15, 14, 13, 12, 10, 8 \u2014 \u043a\u0430\u0436\u0434\u043e\u0435 \u0437\u043d\u0430\u0447\u0435\u043d\u0438\u0435 \u043e\u0434\u0438\u043d \u0440\u0430\u0437",
+    "de": "15, 14, 13, 12, 10, 8 \u2014 jeder Wert einmal",
+    "fr": "15, 14, 13, 12, 10, 8 \u2014 chaque valeur une fois",
+    "es": "15, 14, 13, 12, 10, 8 \u2014 cada valor una vez"
+  },
+  "levelup_abilities_point_buy": {
+    "en": "Point buy",
+    "ru": "\u041f\u043e\u043a\u0443\u043f\u043a\u0430 \u043e\u0447\u043a\u043e\u0432",
+    "de": "Punktekauf",
+    "fr": "Achat de points",
+    "es": "Compra de puntos"
+  },
+  "levelup_abilities_point_buy_hint": {
+    "en": "27 points for scores from 8 to 15",
+    "ru": "27 \u043e\u0447\u043a\u043e\u0432 \u043d\u0430 \u0437\u043d\u0430\u0447\u0435\u043d\u0438\u044f \u043e\u0442 8 \u0434\u043e 15",
+    "de": "27 Punkte f\u00fcr Werte von 8 bis 15",
+    "fr": "27 points pour des valeurs de 8 \u00e0 15",
+    "es": "27 puntos para valores de 8 a 15"
+  },
+  "levelup_abilities_roll": {
+    "en": "Roll 4d6",
+    "ru": "\u0411\u0440\u043e\u0441\u043e\u043a 4d6",
+    "de": "4W6 w\u00fcrfeln",
+    "fr": "Lancer 4d6",
+    "es": "Tirar 4d6"
+  },
+  "levelup_abilities_roll_hint": {
+    "en": "Six throws; the lowest die of each doesn't count",
+    "ru": "\u0428\u0435\u0441\u0442\u044c \u0431\u0440\u043e\u0441\u043a\u043e\u0432, \u0432 \u043a\u0430\u0436\u0434\u043e\u043c \u043c\u0435\u043d\u044c\u0448\u0438\u0439 \u043a\u0443\u0431\u0438\u043a \u043d\u0435 \u0432 \u0441\u0447\u0451\u0442",
+    "de": "Sechs W\u00fcrfe; der niedrigste W\u00fcrfel z\u00e4hlt jeweils nicht",
+    "fr": "Six lancers ; le d\u00e9 le plus bas de chacun ne compte pas",
+    "es": "Seis tiradas; el dado m\u00e1s bajo de cada una no cuenta"
+  },
+  "levelup_abilities_keep": {
+    "en": "Keep the current scores",
+    "ru": "\u041e\u0441\u0442\u0430\u0432\u0438\u0442\u044c \u0442\u0435\u043a\u0443\u0449\u0438\u0435",
+    "de": "Aktuelle Werte behalten",
+    "fr": "Garder les valeurs actuelles",
+    "es": "Mantener los valores actuales"
+  },
+  "levelup_abilities_keep_hint": {
+    "en": "The scores already on the sheet",
+    "ru": "\u0417\u043d\u0430\u0447\u0435\u043d\u0438\u044f, \u043a\u043e\u0442\u043e\u0440\u044b\u0435 \u0443\u0436\u0435 \u0435\u0441\u0442\u044c \u043d\u0430 \u043b\u0438\u0441\u0442\u0435",
+    "de": "Die Werte, die schon auf dem Bogen stehen",
+    "fr": "Les valeurs d\u00e9j\u00e0 sur la fiche",
+    "es": "Los valores que ya est\u00e1n en la hoja"
+  },
+  "levelup_abilities_assign": {
+    "en": "Assign the values",
+    "ru": "\u0420\u0430\u0441\u043f\u0440\u0435\u0434\u0435\u043b\u0438\u0442\u0435 \u0437\u043d\u0430\u0447\u0435\u043d\u0438\u044f",
+    "de": "Werte verteilen",
+    "fr": "R\u00e9partissez les valeurs",
+    "es": "Reparte los valores"
+  },
+  "levelup_abilities_roll_next": {
+    "en": "Throw %1$s of 6",
+    "ru": "\u0411\u0440\u043e\u0441\u043e\u043a %1$s \u0438\u0437 6",
+    "de": "Wurf %1$s von 6",
+    "fr": "Lancer %1$s sur 6",
+    "es": "Tirada %1$s de 6"
+  },
+  "levelup_abilities_rolls": {
+    "en": "Rolled: %1$s",
+    "ru": "\u0412\u044b\u043f\u0430\u043b\u043e: %1$s",
+    "de": "Gew\u00fcrfelt: %1$s",
+    "fr": "R\u00e9sultats : %1$s",
+    "es": "Resultados: %1$s"
+  },
+  "levelup_species_title": {
+    "en": "Species",
+    "ru": "\u0412\u0438\u0434",
+    "de": "Spezies",
+    "fr": "Esp\u00e8ce",
+    "es": "Especie"
+  },
+  "levelup_species_speed": {
+    "en": "Speed %1$s ft",
+    "ru": "\u0421\u043a\u043e\u0440\u043e\u0441\u0442\u044c %1$s \u0444\u0442",
+    "de": "Bewegung %1$s ft",
+    "fr": "Vitesse %1$s ft",
+    "es": "Velocidad %1$s pies"
+  },
+  "levelup_species_darkvision": {
+    "en": "Darkvision %1$s ft",
+    "ru": "\u041d\u043e\u0447\u043d\u043e\u0435 \u0437\u0440\u0435\u043d\u0438\u0435 %1$s \u0444\u0442",
+    "de": "Dunkelsicht %1$s ft",
+    "fr": "Vision dans le noir %1$s ft",
+    "es": "Visi\u00f3n en la oscuridad %1$s pies"
+  },
+  "levelup_background_title": {
+    "en": "Background",
+    "ru": "\u041f\u0440\u0435\u0434\u044b\u0441\u0442\u043e\u0440\u0438\u044f",
+    "de": "Hintergrund",
+    "fr": "Historique",
+    "es": "Trasfondo"
+  },
+  "levelup_origin_keep": {
+    "en": "Your own",
+    "ru": "\u0421\u0432\u043e\u0439 \u0432\u0430\u0440\u0438\u0430\u043d\u0442",
+    "de": "Eigene Wahl",
+    "fr": "Personnalis\u00e9",
+    "es": "Propio"
+  },
+  "levelup_origin_keep_hint": {
+    "en": "The wizard adds nothing",
+    "ru": "\u041c\u0430\u0441\u0442\u0435\u0440 \u043d\u0438\u0447\u0435\u0433\u043e \u043d\u0435 \u0434\u043e\u0431\u0430\u0432\u0438\u0442",
+    "de": "Der Assistent f\u00fcgt nichts hinzu",
+    "fr": "L'assistant n'ajoute rien",
+    "es": "El asistente no a\u00f1ade nada"
+  },
+  "levelup_equipment_title": {
+    "en": "Starting Equipment",
+    "ru": "\u0421\u0442\u0430\u0440\u0442\u043e\u0432\u043e\u0435 \u0441\u043d\u0430\u0440\u044f\u0436\u0435\u043d\u0438\u0435",
+    "de": "Startausr\u00fcstung",
+    "fr": "\u00c9quipement de d\u00e9part",
+    "es": "Equipo inicial"
+  },
+  "levelup_equipment_option": {
+    "en": "Option %1$s",
+    "ru": "\u0412\u0430\u0440\u0438\u0430\u043d\u0442 %1$s",
+    "de": "Option %1$s",
+    "fr": "Option %1$s",
+    "es": "Opci\u00f3n %1$s"
+  },
+  "levelup_equipment_gold": {
+    "en": "Gold instead: %1$s",
+    "ru": "\u0417\u043e\u043b\u043e\u0442\u043e \u0432\u043c\u0435\u0441\u0442\u043e \u0441\u043d\u0430\u0440\u044f\u0436\u0435\u043d\u0438\u044f: %1$s",
+    "de": "Gold statt Ausr\u00fcstung: %1$s",
+    "fr": "De l'or \u00e0 la place : %1$s",
+    "es": "Oro en su lugar: %1$s"
+  },
+  "levelup_equipment_choose": {
+    "en": "Of your choice",
+    "ru": "\u041d\u0430 \u0432\u044b\u0431\u043e\u0440",
+    "de": "Nach Wahl",
+    "fr": "Au choix",
+    "es": "A elegir"
+  },
+  "levelup_summary_origin": {
+    "en": "Origin",
+    "ru": "\u041f\u0440\u043e\u0438\u0441\u0445\u043e\u0436\u0434\u0435\u043d\u0438\u0435",
+    "de": "Herkunft",
+    "fr": "Origine",
+    "es": "Origen"
+  },
+  "levelup_summary_species": {
+    "en": "Species: %1$s",
+    "ru": "\u0412\u0438\u0434: %1$s",
+    "de": "Spezies: %1$s",
+    "fr": "Esp\u00e8ce : %1$s",
+    "es": "Especie: %1$s"
+  },
+  "levelup_summary_background": {
+    "en": "Background: %1$s",
+    "ru": "\u041f\u0440\u0435\u0434\u044b\u0441\u0442\u043e\u0440\u0438\u044f: %1$s",
+    "de": "Hintergrund: %1$s",
+    "fr": "Historique : %1$s",
+    "es": "Trasfondo: %1$s"
+  },
+  "levelup_summary_base_scores": {
+    "en": "Starting ability scores",
+    "ru": "\u0425\u0430\u0440\u0430\u043a\u0442\u0435\u0440\u0438\u0441\u0442\u0438\u043a\u0438 \u043f\u0440\u0438 \u0441\u043e\u0437\u0434\u0430\u043d\u0438\u0438",
+    "de": "Anfangs-Attributswerte",
+    "fr": "Caract\u00e9ristiques de d\u00e9part",
+    "es": "Caracter\u00edsticas iniciales"
+  },
+  "levelup_summary_equipment": {
+    "en": "Equipment",
+    "ru": "\u0421\u043d\u0430\u0440\u044f\u0436\u0435\u043d\u0438\u0435",
+    "de": "Ausr\u00fcstung",
+    "fr": "\u00c9quipement",
+    "es": "Equipo"
+  },
+  "levelup_summary_coins": {
+    "en": "Coins: %1$s",
+    "ru": "\u0414\u0435\u043d\u044c\u0433\u0438: %1$s",
+    "de": "M\u00fcnzen: %1$s",
+    "fr": "Pi\u00e8ces : %1$s",
+    "es": "Monedas: %1$s"
+  },
   "levelup_level_down_unavailable": {
     "en": "The wizard can't take levels back yet: that comes later. For now the level can only go up.",
     "ru": "\u0421\u043d\u0438\u043c\u0430\u0442\u044c \u0443\u0440\u043e\u0432\u043d\u0438 \u043c\u0430\u0441\u0442\u0435\u0440 \u043f\u043e\u043a\u0430 \u043d\u0435 \u0443\u043c\u0435\u0435\u0442 \u2014 \u044d\u0442\u043e \u0431\u0443\u0434\u0435\u0442 \u043f\u043e\u0437\u0436\u0435. \u0421\u0435\u0439\u0447\u0430\u0441 \u0443\u0440\u043e\u0432\u0435\u043d\u044c \u043c\u043e\u0436\u043d\u043e \u0442\u043e\u043b\u044c\u043a\u043e \u043f\u043e\u0432\u044b\u0448\u0430\u0442\u044c.",

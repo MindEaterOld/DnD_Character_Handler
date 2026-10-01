@@ -97,6 +97,8 @@ import com.dndcharacterhandler.domain.rules.calculateArmorClass
 import com.dndcharacterhandler.domain.rules.calculateInitiative
 import com.dndcharacterhandler.domain.repository.CharacterCatalogRepository
 import com.dndcharacterhandler.domain.repository.CharacterRepository
+import com.dndcharacterhandler.domain.repository.InventoryCatalogRepository
+import com.dndcharacterhandler.domain.model.InventoryCatalogSource
 import com.dndcharacterhandler.domain.usecase.GetCharacterBundleUseCase
 import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
@@ -125,6 +127,7 @@ private val hitDieSidesOptions = listOf(6, 8, 10, 12)
 class OverviewViewModel(
     private val characterRepository: CharacterRepository,
     private val characterCatalogRepository: CharacterCatalogRepository,
+    private val inventoryCatalogRepository: InventoryCatalogRepository,
     getCharacterBundleUseCase: GetCharacterBundleUseCase,
     selectedCharacterHolder: SelectedCharacterHolder
 ) : BaseCharacterViewModel(getCharacterBundleUseCase, selectedCharacterHolder) {
@@ -140,12 +143,25 @@ class OverviewViewModel(
     fun applyLevelUp(characterBundle: CharacterBundle, draft: LevelUpDraft, russian: Boolean) {
         val catalog = _catalog.value ?: return
         viewModelScope.launch {
+            // Starting equipment becomes the app's own catalog items (with damage, AC, weight) where
+            // the names match, and plain named items otherwise.
+            val items = inventoryCatalogRepository.getItems()
+                .filter { it.source == InventoryCatalogSource.EQUIPMENT }
+                .associateBy { equipmentKey(it.name) }
             val updated = withContext(Dispatchers.Default) {
-                LevelUpEngine(catalog).apply(characterBundle, draft, russian, now = System.currentTimeMillis())
+                val engine = LevelUpEngine(catalog)
+                engine.apply(characterBundle, draft, russian, now = System.currentTimeMillis()) { item, count ->
+                    items[equipmentKey(item.name.en)]?.toInventoryItem(russian)?.copy(quantity = count)
+                        ?: engine.plainItem(item, count, russian)
+                }
             }
             characterRepository.replaceCharacterBundle(updated)
         }
     }
+
+    /** "Thieves’ Tools" and "Thieves' Tools", "Alchemists Supplies" and "Alchemist's Supplies" alike. */
+    private fun equipmentKey(name: String): String =
+        name.lowercase().replace("’", "").replace("'", "").replace(Regex("\\s+"), " ").trim()
 
     fun updateIdentity(
         characterBundle: CharacterBundle,

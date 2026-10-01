@@ -27,6 +27,7 @@ class AppViewModelFactory(
             modelClass.isAssignableFrom(OverviewViewModel::class.java) -> OverviewViewModel(
                 characterRepository = container.characterRepository,
                 characterCatalogRepository = container.characterCatalogRepository,
+                inventoryCatalogRepository = container.inventoryCatalogRepository,
                 getCharacterBundleUseCase = container.getCharacterBundleUseCase,
                 selectedCharacterHolder = container.selectedCharacterHolder
             )

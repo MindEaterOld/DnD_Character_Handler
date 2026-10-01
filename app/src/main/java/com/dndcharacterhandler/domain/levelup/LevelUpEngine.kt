@@ -2,9 +2,12 @@ package com.dndcharacterhandler.domain.levelup
 
 import com.dndcharacterhandler.domain.model.AdvancementRecord
 import com.dndcharacterhandler.domain.model.AdvancementStep
+import com.dndcharacterhandler.domain.model.CatalogBackground
 import com.dndcharacterhandler.domain.model.CatalogClass
+import com.dndcharacterhandler.domain.model.CatalogEquipmentRef
 import com.dndcharacterhandler.domain.model.CatalogFeature
 import com.dndcharacterhandler.domain.model.CatalogFeatureKind
+import com.dndcharacterhandler.domain.model.CatalogSpecies
 import com.dndcharacterhandler.domain.model.CatalogSpellRef
 import com.dndcharacterhandler.domain.model.CatalogText
 import com.dndcharacterhandler.domain.model.CharacterBundle
@@ -12,8 +15,11 @@ import com.dndcharacterhandler.domain.model.CharacterCatalog
 import com.dndcharacterhandler.domain.model.CharacterClassEntry
 import com.dndcharacterhandler.domain.model.ClassRestriction
 import com.dndcharacterhandler.domain.model.CombatResource
+import com.dndcharacterhandler.domain.model.EquipmentNode
 import com.dndcharacterhandler.domain.model.Feature
 import com.dndcharacterhandler.domain.model.FeatureSource
+import com.dndcharacterhandler.domain.model.InventoryCategory
+import com.dndcharacterhandler.domain.model.InventoryItem
 import com.dndcharacterhandler.domain.rules.CatalogFormulaText
 import com.dndcharacterhandler.domain.rules.FormulaContext
 import com.dndcharacterhandler.domain.rules.MAX_CHARACTER_LEVEL
@@ -60,18 +66,60 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
             else -> page.required == 0
         }
         is LevelUpPage.Subclass -> draft.answers[page.key] is LevelUpAnswer.Subclass
+        is LevelUpPage.BaseAbilities -> (draft.answers[page.key] as? LevelUpAnswer.BaseAbilities)?.let(::validAbilities) == true
+        is LevelUpPage.Species, is LevelUpPage.Background -> draft.answers[page.key] is LevelUpAnswer.Origin
+        is LevelUpPage.Equipment -> (draft.answers[page.key] as? LevelUpAnswer.Equipment)?.let { answer ->
+            val option = page.options.getOrNull(answer.option) ?: return@let false
+            option.choices.indices.all { index -> pickFor(option.choices[index], answer.picks.getOrNull(index)) != null }
+        } == true
         is LevelUpPage.Summary -> true
     }
+
+    /** Whether new ability scores follow their method: the standard array once each, 27 points, or the rolls. */
+    fun validAbilities(answer: LevelUpAnswer.BaseAbilities): Boolean {
+        val scores = LevelUpPage.AbilityScores.ABILITIES.map { answer.scores[it] ?: return false }
+        return when (answer.method) {
+            AbilityMethod.STANDARD_ARRAY -> scores.sorted() == STANDARD_ARRAY.sorted()
+            AbilityMethod.POINT_BUY -> scores.all { it in 8..15 } && scores.sumOf { POINT_BUY_COSTS.getValue(it) } <= POINT_BUY_BUDGET
+            AbilityMethod.ROLL -> answer.rolls.size == 6 && scores.sorted() == answer.rolls.sorted()
+            AbilityMethod.KEEP -> true
+        }
+    }
+
+    /** The pick of an equipment choice: the player's, or the suggested one. */
+    fun pickFor(choice: EquipmentChoice, picked: String?): EquipmentPick? =
+        choice.options.firstOrNull { it.id == picked } ?: choice.options.firstOrNull { it.id == choice.suggested }
 
     /**
      * The character after the level-up: classes, level, hit points, ability scores, proficiencies,
      * features, resources and spell slots, plus the choices in [com.dndcharacterhandler.domain.model.Character.advancements].
      */
-    fun apply(bundle: CharacterBundle, draft: LevelUpDraft, russian: Boolean, now: Long): CharacterBundle {
+    fun apply(
+        bundle: CharacterBundle,
+        draft: LevelUpDraft,
+        russian: Boolean,
+        now: Long,
+        /** Turns starting equipment into inventory items (the app matches its item catalog by name). */
+        equipmentItem: (CatalogEquipmentRef, Int) -> InventoryItem = { item, count -> plainItem(item, count, russian) }
+    ): CharacterBundle {
         val simulation = simulate(bundle, draft)
         require(simulation.ready && simulation.pages.all { isAnswered(it, draft) }) { "The level-up draft isn't complete" }
-        return simulation.applyTo(bundle, russian, now)
+        return simulation.applyTo(bundle, russian, now, equipmentItem)
     }
+
+    /** An inventory item with just the name, for equipment the app's item catalog doesn't know. */
+    fun plainItem(item: CatalogEquipmentRef, count: Int, russian: Boolean): InventoryItem = InventoryItem(
+        name = item.name.get(russian),
+        category = when (item.type) {
+            "weapon" -> InventoryCategory.WEAPON
+            "consumable" -> InventoryCategory.CONSUMABLE
+            else -> InventoryCategory.OTHER
+        },
+        weight = 0.0,
+        quantity = count,
+        isEquipped = false,
+        icon = ""
+    )
 
     // --- Simulation ------------------------------------------------------------------------------
 
@@ -100,6 +148,7 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
                 startLevel = 0
             }
         }
+        firstClassId?.let { id -> createOrigin(simulation, draft, catalog.classes.first { it.id == id }) }
         simulation.fromLevel = startLevel
         val target = draft.targetLevel.coerceIn(startLevel, MAX_CHARACTER_LEVEL)
         var previousPick: String? = null
@@ -117,11 +166,149 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
             }
             previousPick = classId
             levelUp(simulation, draft, level, classId)
+            if (simulation.rebuild && level == 1) equipmentPages(simulation, draft, catalog.classes.first { it.id == classId })
         }
         simulation.toLevel = target
         simulation.pages += LevelUpPage.Summary(simulation.summary())
         return simulation
     }
+
+    /**
+     * A new character's origin, before its first class level: ability scores, then the species and
+     * the background with their own steps (traits, lineage choices, the background's ability
+     * increases, skills, tools, languages and origin feat).
+     */
+    private fun createOrigin(simulation: Simulation, draft: LevelUpDraft, firstClass: CatalogClass) {
+        val context = StepContext(characterLevel = 1, characterClass = firstClass, classLevel = 1, isOriginal = true)
+        simulation.pages += LevelUpPage.BaseAbilities(simulation.character.abilityScores())
+        (draft.answers["abilities"] as? LevelUpAnswer.BaseAbilities)?.takeIf(::validAbilities)?.let { answer ->
+            if (answer.method != AbilityMethod.KEEP) simulation.useBaseScores(answer.scores)
+            simulation.record(
+                context, "abilities", "abilities", "Abilities",
+                "method=${answer.method};scores=${answer.scores.entries.joinToString(",") { "${it.key}:${it.value}" }}" +
+                    if (answer.rolls.isEmpty()) "" else ";rolls=${answer.rolls.joinToString(",")}"
+            )
+        }
+
+        // Steps of later character levels (a species' spells at 3rd and 5th level) come with those levels.
+        fun firstLevel(steps: List<AdvancementStep>) = steps.filter { (it.level ?: 0) <= 1 }
+
+        simulation.pages += LevelUpPage.Species(
+            options = catalog.species.sortedWith(compareBy({ it.book != PHB }, { it.name.ru.ifBlank { it.name.en } })),
+            currentName = simulation.character.race
+        )
+        val speciesId = (draft.answers["species"] as? LevelUpAnswer.Origin)?.id
+        simulation.species = catalog.species.firstOrNull { it.id == speciesId }
+        simulation.species?.let { species ->
+            simulation.record(context, species.id, "species", "Species", "species=${species.id}")
+            processOrigin(simulation, draft, context, species.id, species.name, firstLevel(species.advancement))
+        }
+
+        simulation.pages += LevelUpPage.Background(
+            options = catalog.backgrounds.sortedWith(compareBy({ it.book != PHB }, { it.name.ru.ifBlank { it.name.en } })),
+            currentName = simulation.character.background
+        )
+        val backgroundId = (draft.answers["background"] as? LevelUpAnswer.Origin)?.id
+        simulation.background = catalog.backgrounds.firstOrNull { it.id == backgroundId }
+        simulation.background?.let { background ->
+            simulation.record(context, background.id, "background", "Background", "background=${background.id}")
+            processOrigin(simulation, draft, context, background.id, background.name, firstLevel(background.advancement))
+        }
+    }
+
+    /** A species' or background's [steps]: the features they grant, their choices, then those features' own steps. */
+    private fun processOrigin(
+        simulation: Simulation,
+        draft: LevelUpDraft,
+        context: StepContext,
+        sourceId: String,
+        name: CatalogText,
+        steps: List<AdvancementStep>
+    ) {
+        val newFeatures = mutableListOf<CatalogFeature>()
+        steps.filterIsInstance<AdvancementStep.ItemGrant>().forEach { step ->
+            val taken = step.items.mapNotNull { catalog.featuresById[it] }
+            taken.forEach { simulation.addFeature(it, context) }
+            newFeatures += taken
+            simulation.spellsGranted += step.spells.mapNotNull { catalog.spells[it] }
+            simulation.record(context, sourceId, step.id, "ItemGrant", "features=${taken.joinToString(",") { it.id }}")
+        }
+        processChoices(simulation, draft, context, StepSource(sourceId, name, steps, allowFeat = false), newFeatures, arrival = true)
+        processNewFeatureSteps(simulation, draft, context, newFeatures, mutableSetOf())
+    }
+
+    /** The starting equipment pages of a new character: its first class's, then its background's. */
+    private fun equipmentPages(simulation: Simulation, draft: LevelUpDraft, firstClass: CatalogClass) {
+        val sources = listOf(EquipmentSource(firstClass.id, firstClass.name, firstClass.startingEquipment, firstClass.wealth)) +
+            listOfNotNull(simulation.background?.let { EquipmentSource(it.id, it.name, it.startingEquipment, it.wealth) })
+        val context = StepContext(characterLevel = 1, characterClass = firstClass, classLevel = 1, isOriginal = true)
+        sources.forEach { source ->
+            val options = equipmentOptions(simulation, source.nodes, source.wealth)
+            if (options.isEmpty()) return@forEach
+            val page = LevelUpPage.Equipment(key = "equipment:${source.id}", source = source.name, options = options)
+            simulation.pages += page
+            val answer = draft.answers[page.key] as? LevelUpAnswer.Equipment ?: return@forEach
+            val option = options.getOrNull(answer.option) ?: return@forEach
+            val picks = option.choices.mapIndexedNotNull { index, choice -> pickFor(choice, answer.picks.getOrNull(index)) }
+            simulation.equipment += option.items + picks
+            option.coins.forEach { (currency, count) -> simulation.coins[currency] = (simulation.coins[currency] ?: 0) + count }
+            simulation.record(
+                context, source.id, "equipment", "StartingEquipment",
+                "option=${answer.option};picks=${picks.joinToString(",") { it.id }}"
+            )
+        }
+    }
+
+    /** The options of a starting equipment tree ("A or B"), plus "the gold instead". */
+    private fun equipmentOptions(simulation: Simulation, nodes: List<EquipmentNode>, wealth: String): List<EquipmentOption> {
+        val root = nodes.singleOrNull() as? EquipmentNode.Group
+        val groups = when {
+            root != null && root.any -> root.children
+            nodes.isNotEmpty() -> listOf(EquipmentNode.Group(any = false, children = nodes))
+            else -> emptyList()
+        }
+        val gold = wealth.trim().toIntOrNull()?.takeIf { it > 0 }
+        return groups.map { equipmentOption(simulation, it) } +
+            listOfNotNull(gold?.let { EquipmentOption(emptyList(), mapOf("gp" to it), emptyList(), isWealth = true) })
+    }
+
+    private fun equipmentOption(simulation: Simulation, node: EquipmentNode): EquipmentOption {
+        val items = mutableListOf<EquipmentPick>()
+        val coins = mutableMapOf<String, Int>()
+        val choices = mutableListOf<EquipmentChoice>()
+        fun choice(options: List<EquipmentPick>) {
+            // The tool the character was given proficiency with first (the background's own one,
+            // before an origin feat's) is the natural pick.
+            val suggested = options.singleOrNull()?.id ?: simulation.gainedTraits.firstOrNull { key -> options.any { it.id == key } }
+            if (options.isNotEmpty()) choices += EquipmentChoice(options, suggested)
+        }
+        fun collect(part: EquipmentNode) {
+            when (part) {
+                is EquipmentNode.Group -> if (part.any) choice(part.children.flatMap(::equipmentAlternatives)) else part.children.forEach(::collect)
+                is EquipmentNode.Item -> items += itemPick(part)
+                is EquipmentNode.Currency -> coins[part.currency] = (coins[part.currency] ?: 0) + part.count
+                is EquipmentNode.Category -> choice(equipmentAlternatives(part))
+            }
+        }
+        collect(node)
+        return EquipmentOption(items, coins, choices)
+    }
+
+    /** What a choice can be: an item, any tool of a kind ("tool:art:smith"), or the items of a group. */
+    private fun equipmentAlternatives(node: EquipmentNode): List<EquipmentPick> = when (node) {
+        is EquipmentNode.Item -> listOf(itemPick(node))
+        is EquipmentNode.Category -> catalog.traits["${node.category}:${node.key}"]?.children.orEmpty().map { key ->
+            EquipmentPick(key, CatalogEquipmentRef(key, traitName(key), node.category), node.count)
+        }
+        is EquipmentNode.Group -> node.children.flatMap(::equipmentAlternatives)
+        is EquipmentNode.Currency -> emptyList()
+    }
+
+    private fun itemPick(node: EquipmentNode.Item): EquipmentPick = EquipmentPick(
+        id = "item:${node.itemId}",
+        item = catalog.equipment[node.itemId] ?: CatalogEquipmentRef(node.itemId, CatalogText(node.itemId), ""),
+        count = node.count
+    )
 
     private fun classPage(simulation: Simulation, characterLevel: Int, selected: String): LevelUpPage.ChooseClass {
         val current = simulation.classes.mapNotNull { entry ->
@@ -242,6 +429,12 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
 
         // Features with steps of their own: new ones now, older ones when their class reaches the step's level.
         processFeatureSteps(simulation, draft, context, newFeatures, subclass?.id)
+
+        // The species' steps of this character level (Celestial Revelation at 3rd, Large Form at 5th).
+        simulation.knownSpecies?.takeIf { characterLevel > 1 }?.let { species ->
+            val due = species.advancement.filter { it.level == characterLevel }
+            if (due.isNotEmpty()) processOrigin(simulation, draft, context, species.id, species.name, due)
+        }
     }
 
     /**
@@ -292,7 +485,17 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
                 processNested(simulation, draft, context, feature, steps, newFeatures, arrival = false)
             }
         }
-        // New features (and the features they bring, one level deep) apply their steps on arrival.
+        processNewFeatureSteps(simulation, draft, context, newFeatures, processed)
+    }
+
+    /** New features (and the features they bring, one level deep) apply their steps on arrival. */
+    private fun processNewFeatureSteps(
+        simulation: Simulation,
+        draft: LevelUpDraft,
+        context: StepContext,
+        newFeatures: MutableList<CatalogFeature>,
+        processed: MutableSet<String>
+    ) {
         var queue = newFeatures.toList()
         repeat(2) {
             val next = mutableListOf<CatalogFeature>()
@@ -376,8 +579,9 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
         if (count <= 0) return
         val pool = choicePool(step, context.classLevel)
         if (pool.isEmpty()) {
-            // Spell picks (cantrips, spells known): left to the Spells screen for now.
-            simulation.spellChoices += SpellChoiceNote(source.name, step.title, count)
+            // Spell picks (cantrips, spells known): left to the Spells screen for now. Item picks (an
+            // artisan's tool, a holy symbol) are part of the starting equipment.
+            if (step.itemType == "spell" || step.spells.isNotEmpty()) simulation.spellChoices += SpellChoiceNote(source.name, step.title, count)
             return
         }
         val options = pool.map { ItemOption(it, known = it.id in simulation.knownFeatureIds) }
@@ -505,6 +709,8 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
 
     private class StepSource(val id: String, val name: CatalogText, val steps: List<AdvancementStep>, val allowFeat: Boolean)
 
+    private class EquipmentSource(val id: String, val name: CatalogText, val nodes: List<EquipmentNode>, val wealth: String)
+
     /** The character while the draft is walked through: what it has and gains, level by level. */
     private inner class Simulation(bundle: CharacterBundle) {
         val character = bundle.character
@@ -535,6 +741,23 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
         val spellChoices = mutableListOf<SpellChoiceNote>()
         val unmetRequirements = mutableListOf<com.dndcharacterhandler.domain.rules.MulticlassRequirement>()
         val records = mutableListOf<AdvancementRecord>()
+        /** The species and background chosen in this draft (a new character's). */
+        var species: CatalogSpecies? = null
+        var background: CatalogBackground? = null
+        var baseScores: Map<String, Int>? = null
+        val equipment = mutableListOf<EquipmentPick>()
+        val coins = mutableMapOf<String, Int>()
+
+        /** The character's species from the catalog: chosen now, or when it was created. */
+        val knownSpecies: CatalogSpecies?
+            get() = species ?: character.advancements.lastOrNull { it.type == "Species" }?.sourceId
+                ?.let { id -> catalog.species.firstOrNull { it.id == id } }
+
+        /** A new character's own ability scores: the bonuses that follow add to them. */
+        fun useBaseScores(scores: Map<String, Int>) {
+            baseScores = scores
+            abilities.putAll(scores)
+        }
 
         val level: Int get() = classes.sumOf { it.levels }.coerceAtLeast(1)
 
@@ -629,10 +852,20 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
             spellsGranted = spellsGranted.distinctBy { it.id },
             spellChoices = spellChoices.toList(),
             spellSlots = spellSlots(classes, catalog),
-            unmetRequirements = unmetRequirements.distinctBy { it.classId }
+            unmetRequirements = unmetRequirements.distinctBy { it.classId },
+            species = species,
+            background = background,
+            baseScores = baseScores,
+            equipment = equipment.toList(),
+            coins = coins.toMap()
         )
 
-        fun applyTo(bundle: CharacterBundle, russian: Boolean, now: Long): CharacterBundle {
+        fun applyTo(
+            bundle: CharacterBundle,
+            russian: Boolean,
+            now: Long,
+            equipmentItem: (CatalogEquipmentRef, Int) -> InventoryItem
+        ): CharacterBundle {
             val newLevel = level
             val gain = hitPointGain()
             val newAbilities = abilities
@@ -646,6 +879,26 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
                 if (index >= 0) features.removeAt(index)
             }
             features += addedFeatures.map { (feature, context) -> feature.toCharacterFeature(context, russian) }
+            // A species' darkvision is a sense of the species, not a feature: add one for the
+            // Attributes screen, which reads the range from the darkvision features.
+            val darkvision = species?.senses?.get("darkvision")?.toInt()?.takeIf { it > 0 }
+            if (darkvision != null && features.none { it.name.trim().lowercase() in DARKVISION_NAMES }) {
+                features += Feature(
+                    name = if (russian) "Ночное зрение" else "Darkvision",
+                    description = if (russian) {
+                        "Вы видите в тусклом свете на расстоянии $darkvision футов как при ярком свете, а в темноте — как при тусклом."
+                    } else {
+                        "You can see in dim light within $darkvision feet as if it were bright light, and in darkness as if it were dim light."
+                    },
+                    level = 1,
+                    source = FeatureSource.RACE,
+                    category = species?.name?.get(russian).orEmpty()
+                )
+            }
+            val inventory = bundle.inventoryItems + equipment.map { pick -> equipmentItem(pick.item, pick.count) }
+            // The sheet keeps gold, silver and copper: platinum goes in as gold, electrum as silver.
+            val gold = (coins["gp"] ?: 0) + 10 * (coins["pp"] ?: 0)
+            val silver = (coins["sp"] ?: 0) + 5 * (coins["ep"] ?: 0)
 
             val context = formulaContext(newLevel, newAbilities)
             val resources = syncResources(bundle.combatResources, features, addedFeatures.map { it.first.id }.toSet(), context, russian)
@@ -720,9 +973,21 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
                 spellcastingAbility = spellcastingAbility,
                 classes = updatedClasses,
                 advancements = character.advancements + records,
+                race = species?.name?.get(russian) ?: character.race,
+                background = background?.name?.get(russian) ?: character.background,
+                speed = species?.movement?.get("walk")?.toInt() ?: character.speed,
+                goldPieces = character.goldPieces + gold,
+                silverPieces = character.silverPieces + silver,
+                copperPieces = character.copperPieces + (coins["cp"] ?: 0),
                 updatedAt = now
             )
-            return bundle.copy(character = newCharacter, skills = skills, features = features, combatResources = resources)
+            return bundle.copy(
+                character = newCharacter,
+                skills = skills,
+                features = features,
+                combatResources = resources,
+                inventoryItems = inventory
+            )
         }
 
         private fun formulaContext(level: Int, abilities: Map<String, Int>) = FormulaContext(
@@ -806,6 +1071,7 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
         const val PHB = "PHB 2024"
         val SAVES = listOf("str", "dex", "con", "int", "wis", "cha")
         val DEFENSES = setOf("dr", "di", "dv", "ci")
+        val DARKVISION_NAMES = setOf("darkvision", "ночное зрение", "тёмное зрение", "темное зрение")
 
         /** App skill names -> Foundry skill codes. */
         val SKILL_KEYS = mapOf(

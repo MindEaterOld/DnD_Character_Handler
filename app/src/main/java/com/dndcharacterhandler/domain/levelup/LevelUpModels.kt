@@ -1,7 +1,10 @@
 package com.dndcharacterhandler.domain.levelup
 
 import com.dndcharacterhandler.domain.model.AdvancementStep
+import com.dndcharacterhandler.domain.model.CatalogBackground
 import com.dndcharacterhandler.domain.model.CatalogClass
+import com.dndcharacterhandler.domain.model.CatalogEquipmentRef
+import com.dndcharacterhandler.domain.model.CatalogSpecies
 import com.dndcharacterhandler.domain.model.CatalogFeature
 import com.dndcharacterhandler.domain.model.CatalogSpellRef
 import com.dndcharacterhandler.domain.model.CatalogSubclass
@@ -11,6 +14,16 @@ import com.dndcharacterhandler.domain.rules.MulticlassRequirement
 import com.dndcharacterhandler.domain.rules.SpellSlotTable
 
 enum class HitPointMethod { MAXIMUM, AVERAGE, ROLL }
+
+/** How a new character's ability scores are set: the PHB's three ways, or the scores it has. */
+enum class AbilityMethod { STANDARD_ARRAY, POINT_BUY, ROLL, KEEP }
+
+/** The PHB standard array. */
+val STANDARD_ARRAY: List<Int> = listOf(15, 14, 13, 12, 10, 8)
+
+/** Point buy: 27 points, scores 8 to 15, and what each score costs. */
+const val POINT_BUY_BUDGET = 27
+val POINT_BUY_COSTS: Map<Int, Int> = mapOf(8 to 0, 9 to 1, 10 to 2, 11 to 3, 12 to 4, 13 to 5, 14 to 7, 15 to 9)
 
 /** The first run for a character whose class so far is only text. */
 data class LevelUpSetup(
@@ -43,6 +56,15 @@ sealed interface LevelUpAnswer {
     data class Feat(val featId: String) : LevelUpAnswer
 
     data class Subclass(val subclassId: String) : LevelUpAnswer
+
+    /** A new character's ability scores before any bonus; [rolls] are the 4d6 totals when rolled. */
+    data class BaseAbilities(val method: AbilityMethod, val scores: Map<String, Int>, val rolls: List<Int> = emptyList()) : LevelUpAnswer
+
+    /** A species or background from the catalog, or null to keep the character's own (homebrew) one. */
+    data class Origin(val id: String?) : LevelUpAnswer
+
+    /** One of the starting equipment options, and the pick for each of its choices (by option id). */
+    data class Equipment(val option: Int, val picks: List<String> = emptyList()) : LevelUpAnswer
 }
 
 /** Everything chosen so far; pages are rebuilt from it after every answer. */
@@ -177,11 +199,51 @@ sealed interface LevelUpPage {
         val options: List<CatalogSubclass>
     ) : LevelUpPage
 
+    /** A new character's ability scores: standard array, point buy, 4d6 rolls, or keep the current ones. */
+    data class BaseAbilities(val currentScores: Map<String, Int>) : LevelUpPage {
+        override val key = "abilities"
+        override val characterLevel = 1
+    }
+
+    data class Species(val options: List<CatalogSpecies>, val currentName: String) : LevelUpPage {
+        override val key = "species"
+        override val characterLevel = 1
+    }
+
+    data class Background(val options: List<CatalogBackground>, val currentName: String) : LevelUpPage {
+        override val key = "background"
+        override val characterLevel = 1
+    }
+
+    /** Starting equipment of the first class or of the background. */
+    data class Equipment(
+        override val key: String,
+        val source: CatalogText,
+        val options: List<EquipmentOption>
+    ) : LevelUpPage {
+        override val characterLevel = 1
+    }
+
     data class Summary(val summary: LevelUpSummary) : LevelUpPage {
         override val key = "summary"
         override val characterLevel = 0
     }
 }
+
+/** One thing a starting equipment choice offers: an item, or a tool of a kind ("tool:art:smith"). */
+data class EquipmentPick(val id: String, val item: CatalogEquipmentRef, val count: Int)
+
+/** "One of these" inside an equipment option (an artisan's tool or a musical instrument...). */
+data class EquipmentChoice(val options: List<EquipmentPick>, val suggested: String?)
+
+/** One starting equipment option: fixed items, coins (by currency) and choices; or just gold. */
+data class EquipmentOption(
+    val items: List<EquipmentPick>,
+    val coins: Map<String, Int>,
+    val choices: List<EquipmentChoice>,
+    /** The "take the gold instead" option. */
+    val isWealth: Boolean = false
+)
 
 /** A spell pick the wizard leaves to the Spells screen for now. */
 data class SpellChoiceNote(val source: CatalogText, val title: CatalogText, val count: Int)
@@ -204,7 +266,13 @@ data class LevelUpSummary(
     val spellsGranted: List<CatalogSpellRef>,
     val spellChoices: List<SpellChoiceNote>,
     val spellSlots: SpellSlotTable,
-    val unmetRequirements: List<MulticlassRequirement>
+    val unmetRequirements: List<MulticlassRequirement>,
+    val species: CatalogSpecies? = null,
+    val background: CatalogBackground? = null,
+    /** Ability scores the new character starts with, before bonuses; null when they stay. */
+    val baseScores: Map<String, Int>? = null,
+    val equipment: List<EquipmentPick> = emptyList(),
+    val coins: Map<String, Int> = emptyMap()
 )
 
 /** The pages for a draft, and whether every one of them is answered. */

@@ -60,6 +60,9 @@ class LevelUpEngineTest {
                 is LevelUpPage.Subclass -> LevelUpAnswer.Subclass(
                     page.options.firstOrNull { it.identifier == subclass }?.id ?: page.options.first().id
                 )
+                is LevelUpPage.BaseAbilities -> LevelUpAnswer.BaseAbilities(AbilityMethod.KEEP, page.currentScores)
+                is LevelUpPage.Species, is LevelUpPage.Background -> LevelUpAnswer.Origin(null)
+                is LevelUpPage.Equipment -> LevelUpAnswer.Equipment(0)
                 else -> error("unexpected open page $page")
             }
             draft = draft.copy(answers = draft.answers + (page.key to answer))
@@ -180,5 +183,133 @@ class LevelUpEngineTest {
         assertEquals(6, result.character.classes.single().levels)
         assertNotNull(result.character.classes.single().isOriginal)
         assertEquals("Варвар", result.character.characterClass)
+    }
+
+    @Test
+    fun aNewCharacterGetsScoresSpeciesBackgroundAndStartingEquipment() {
+        val bundle = newCharacter()
+        val elf = catalog.species.first { it.identifier == "elf" && it.book == "PHB 2024" }
+        val acolyte = catalog.backgrounds.first { it.identifier == "acolyte" && it.book == "PHB 2024" }
+        val start = LevelUpDraft(
+            targetLevel = 1,
+            setup = LevelUpSetup(fighter.id, keepExistingLevels = false),
+            answers = mapOf(
+                "abilities" to LevelUpAnswer.BaseAbilities(
+                    AbilityMethod.STANDARD_ARRAY,
+                    mapOf("str" to 15, "dex" to 13, "con" to 14, "int" to 8, "wis" to 12, "cha" to 10)
+                ),
+                "species" to LevelUpAnswer.Origin(elf.id),
+                "background" to LevelUpAnswer.Origin(acolyte.id)
+            )
+        )
+        val draft = complete(bundle, start) { page ->
+            // The background's +2/+1, only to Intelligence, Wisdom or Charisma.
+            if (page is LevelUpPage.AbilityScores && !page.allowFeat) LevelUpAnswer.AbilityScores(mapOf("wis" to 2, "cha" to 1)) else null
+        }
+        val pages = engine.run(bundle, draft).pages
+        // Scores, species and background come before the first class level; the equipment after it.
+        val order = pages.map { it::class.simpleName }
+        assertEquals(listOf("Setup", "BaseAbilities", "Species"), order.take(3))
+        assertTrue(order.indexOf("Background") < order.indexOf("HitPoints"))
+        assertEquals(listOf("equipment:${fighter.id}", "equipment:${acolyte.id}"), pages.filterIsInstance<LevelUpPage.Equipment>().map { it.key })
+        val background = pages.filterIsInstance<LevelUpPage.AbilityScores>().single()
+        assertEquals(listOf("int", "wis", "cha"), background.abilities)
+        assertEquals(3, background.required)
+        // The Fighter: option A, option B, or 155 GP.
+        val fighterEquipment = pages.filterIsInstance<LevelUpPage.Equipment>().first().options
+        assertEquals(3, fighterEquipment.size)
+        assertEquals(mapOf("gp" to 155), fighterEquipment.last().coins)
+
+        val result = engine.apply(bundle, draft, russian = false, now = 1)
+        val character = result.character
+        assertEquals("Elf", character.race)
+        assertEquals("Acolyte", character.background)
+        assertEquals(30, character.speed)
+        assertEquals(
+            listOf(15, 13, 14, 8, 14, 11),
+            listOf(character.strength, character.dexterity, character.constitution, character.intelligence, character.wisdom, character.charisma)
+        )
+        // 10 + Constitution +2 at 1st level.
+        assertEquals(12, character.maxHp)
+        val darkvision = result.features.single { it.name == "Darkvision" }
+        assertTrue(darkvision.description.contains("60 feet"))
+        assertTrue("elf traits", result.featureNames().containsAll(listOf("Fey Ancestry", "Keen Senses", "Trance")))
+        assertTrue("an elven lineage", result.features.any { catalog.featuresById[it.catalogId]?.name?.en == "High Elf" })
+        assertTrue("the origin feat", result.features.any { it.catalogId == "fZm3Di2wqEdQcn3E" })
+        // Insight and Religion from the Acolyte; Keen Senses then offers Perception first.
+        val skills = result.skills.filter { it.isProficient }.map { it.name }
+        assertTrue(skills.toString(), skills.containsAll(listOf("skill_insight", "skill_religion", "skill_perception")))
+        assertTrue(character.toolProficiencies, character.toolProficiencies.contains("Calligrapher"))
+        // Option A of the Fighter and of the Acolyte: 4 + 8 GP.
+        val inventory = result.inventoryItems.associate { it.name to it.quantity }
+        assertEquals(8, inventory["Javelin"])
+        assertTrue(inventory.keys.toString(), inventory.keys.containsAll(listOf("Chain Mail", "Greatsword", "Book", "Robe")))
+        assertEquals(12, character.goldPieces)
+        assertTrue(character.advancements.any { it.type == "Species" && it.sourceId == elf.id })
+        assertTrue(character.advancements.any { it.type == "Abilities" && it.value.startsWith("method=STANDARD_ARRAY") })
+    }
+
+    @Test
+    fun abilityMethodsAreChecked() {
+        val scores = mapOf("str" to 15, "dex" to 14, "con" to 13, "int" to 12, "wis" to 10, "cha" to 8)
+        assertTrue(engine.validAbilities(LevelUpAnswer.BaseAbilities(AbilityMethod.STANDARD_ARRAY, scores)))
+        assertFalse(engine.validAbilities(LevelUpAnswer.BaseAbilities(AbilityMethod.STANDARD_ARRAY, scores + ("cha" to 15))))
+        // 9 + 9 + 9 = 27 points; one more is over the budget.
+        val bought = mapOf("str" to 15, "dex" to 15, "con" to 15, "int" to 8, "wis" to 8, "cha" to 8)
+        assertTrue(engine.validAbilities(LevelUpAnswer.BaseAbilities(AbilityMethod.POINT_BUY, bought)))
+        assertFalse(engine.validAbilities(LevelUpAnswer.BaseAbilities(AbilityMethod.POINT_BUY, bought + ("int" to 9))))
+        assertFalse(engine.validAbilities(LevelUpAnswer.BaseAbilities(AbilityMethod.POINT_BUY, bought + ("int" to 16))))
+        val rolls = listOf(17, 9, 12, 12, 14, 6)
+        val rolled = mapOf("str" to 17, "dex" to 14, "con" to 12, "int" to 9, "wis" to 12, "cha" to 6)
+        assertTrue(engine.validAbilities(LevelUpAnswer.BaseAbilities(AbilityMethod.ROLL, rolled, rolls)))
+        assertFalse(engine.validAbilities(LevelUpAnswer.BaseAbilities(AbilityMethod.ROLL, rolled + ("cha" to 18), rolls)))
+        assertFalse("six throws", engine.validAbilities(LevelUpAnswer.BaseAbilities(AbilityMethod.ROLL, rolled, rolls.take(5))))
+    }
+
+    @Test
+    fun aToolOfChoiceDefaultsToTheOneTheBackgroundTaught() {
+        val bundle = newCharacter()
+        val artisan = catalog.backgrounds.first { it.identifier == "artisan" && it.book == "PHB 2024" }
+        val start = LevelUpDraft(
+            targetLevel = 1,
+            setup = LevelUpSetup(fighter.id, keepExistingLevels = false),
+            answers = mapOf("background" to LevelUpAnswer.Origin(artisan.id))
+        )
+        val draft = complete(bundle, start) { page ->
+            when {
+                page is LevelUpPage.AbilityScores -> LevelUpAnswer.AbilityScores(mapOf("str" to 2, "int" to 1))
+                // The background's single tool (the Crafter feat then picks three more).
+                page is LevelUpPage.Traits && page.required == listOf(1) && page.groups.single().options.any { it.key == "tool:art:smith" } ->
+                    LevelUpAnswer.Traits(listOf(setOf("tool:art:smith")))
+                else -> null
+            }
+        }
+        val run = engine.run(bundle, draft)
+        val equipment = run.pages.filterIsInstance<LevelUpPage.Equipment>().single { it.key == "equipment:${artisan.id}" }
+        val choice = equipment.options.first().choices.single()
+        assertEquals("tool:art:smith", choice.suggested)
+        assertTrue("every artisan's tool", choice.options.size > 10)
+        // Not a spell choice: the artisan's tool item comes with the equipment.
+        assertTrue(run.pages.filterIsInstance<LevelUpPage.Summary>().single().summary.spellChoices.isEmpty())
+        val result = engine.apply(bundle, draft, russian = false, now = 1)
+        assertTrue(result.inventoryItems.map { it.name }.toString(), result.inventoryItems.any { it.name == "Smith's Tools" })
+        assertEquals(2, result.inventoryItems.single { it.name == "Pouch" }.quantity)
+    }
+
+    @Test
+    fun aSpeciesStepOfALaterLevelComesWithThatLevel() {
+        val bundle = newCharacter()
+        val goliath = catalog.species.first { it.identifier == "goliath" && it.book == "PHB 2024" }
+        val start = LevelUpDraft(
+            targetLevel = 4,
+            setup = LevelUpSetup(fighter.id, keepExistingLevels = false),
+            answers = mapOf("species" to LevelUpAnswer.Origin(goliath.id))
+        )
+        val fourth = engine.apply(bundle, complete(bundle, start), russian = false, now = 1)
+        assertFalse("Large Form" in fourth.featureNames())
+        assertTrue("Powerful Build" in fourth.featureNames())
+        assertEquals(35, fourth.character.speed)
+        val fifth = engine.apply(fourth, complete(fourth, LevelUpDraft(5)), russian = false, now = 2)
+        assertTrue("Large Form" in fifth.featureNames())
     }
 }

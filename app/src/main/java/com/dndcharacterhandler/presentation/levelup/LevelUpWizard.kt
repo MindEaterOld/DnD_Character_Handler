@@ -10,9 +10,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -27,13 +29,21 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.Remove
+import androidx.compose.material.icons.outlined.SwapVert
 import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -48,6 +58,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.dndcharacterhandler.domain.levelup.AbilityMethod
+import com.dndcharacterhandler.domain.levelup.EquipmentPick
 import com.dndcharacterhandler.domain.levelup.HitPointMethod
 import com.dndcharacterhandler.domain.levelup.LevelUpAnswer
 import com.dndcharacterhandler.domain.levelup.LevelUpDraft
@@ -55,6 +67,9 @@ import com.dndcharacterhandler.domain.levelup.LevelUpEngine
 import com.dndcharacterhandler.domain.levelup.LevelUpPage
 import com.dndcharacterhandler.domain.levelup.LevelUpSetup
 import com.dndcharacterhandler.domain.levelup.LevelUpSummary
+import com.dndcharacterhandler.domain.levelup.POINT_BUY_BUDGET
+import com.dndcharacterhandler.domain.levelup.POINT_BUY_COSTS
+import com.dndcharacterhandler.domain.levelup.STANDARD_ARRAY
 import com.dndcharacterhandler.domain.levelup.TraitOption
 import com.dndcharacterhandler.domain.model.AdvancementStep
 import com.dndcharacterhandler.domain.model.AppLanguage
@@ -111,6 +126,8 @@ internal fun LevelUpWizard(
     }
     // Hit points are rolled on the 3D dice table, never with a hidden random number.
     var roll by remember { mutableStateOf<HitDieRoll?>(null) }
+    // So are a new character's ability scores: the index of the 4d6 throw on the table.
+    var abilityRoll by remember { mutableStateOf<Int?>(null) }
 
     BackHandler(onBack = onDismiss)
     // A layer over the whole app rather than a dialog window: a dialog doesn't get the navigation
@@ -161,6 +178,45 @@ internal fun LevelUpWizard(
                     is LevelUpPage.Items -> itemsPage(strings, page, answer as? LevelUpAnswer.Items, russian, render, ::setAnswer)
                     is LevelUpPage.AbilityScores -> abilityScoresPage(strings, page, answer, russian, render, ::setAnswer)
                     is LevelUpPage.Subclass -> subclassPage(strings, page, answer as? LevelUpAnswer.Subclass, russian, render, ::setAnswer)
+                    is LevelUpPage.BaseAbilities -> baseAbilitiesPage(
+                        strings, page, answer as? LevelUpAnswer.BaseAbilities, ::setAnswer,
+                        onRoll = { rollIndex -> abilityRoll = rollIndex }
+                    )
+                    is LevelUpPage.Species -> originPage(
+                        strings = strings,
+                        title = strings["levelup_species_title"],
+                        currentName = page.currentName,
+                        options = page.options.map { species ->
+                            OriginChoice(
+                                id = species.id,
+                                name = species.name.get(russian),
+                                subtitle = listOfNotNull(
+                                    catalog.books[species.book]?.get(russian) ?: species.book,
+                                    species.movement["walk"]?.let { strings.format("levelup_species_speed", it.toInt()) },
+                                    species.senses["darkvision"]?.let { strings.format("levelup_species_darkvision", it.toInt()) }
+                                ).joinToString(" • "),
+                                body = render(species.text)
+                            )
+                        },
+                        answer = answer as? LevelUpAnswer.Origin,
+                        onAnswer = ::setAnswer
+                    )
+                    is LevelUpPage.Background -> originPage(
+                        strings = strings,
+                        title = strings["levelup_background_title"],
+                        currentName = page.currentName,
+                        options = page.options.map { background ->
+                            OriginChoice(
+                                id = background.id,
+                                name = background.name.get(russian),
+                                subtitle = catalog.books[background.book]?.get(russian) ?: background.book,
+                                body = render(background.text)
+                            )
+                        },
+                        answer = answer as? LevelUpAnswer.Origin,
+                        onAnswer = ::setAnswer
+                    )
+                    is LevelUpPage.Equipment -> equipmentPage(strings, page, answer as? LevelUpAnswer.Equipment, russian, engine, ::setAnswer)
                     is LevelUpPage.Summary -> summaryPage(strings, page.summary, russian, catalog)
                 }
             }
@@ -188,6 +244,25 @@ internal fun LevelUpWizard(
         }
         OverlayCloseButton(onClick = onDismiss, modifier = Modifier.align(Alignment.TopEnd))
 
+        abilityRoll?.let { rollIndex ->
+            // 4d6, the lowest die doesn't count; another throw on the open table replaces this one.
+            DiceTableOverlay(
+                selection = mapOf(DieType.D6 to 4),
+                skin = LocalDiceSkin.current,
+                onClose = { abilityRoll = null },
+                onSettled = { dice ->
+                    val values = dice.map { it.value() }
+                    val total = values.sum() - (values.minOrNull() ?: 0)
+                    val previous = (draft.answers[ABILITIES_PAGE] as? LevelUpAnswer.BaseAbilities)
+                        ?.takeIf { it.method == AbilityMethod.ROLL }?.rolls.orEmpty()
+                    val rolls = previous.toMutableList().also { list -> if (rollIndex < list.size) list[rollIndex] = total else list += total }
+                    // In throw order until all six are in; then the player swaps them around.
+                    val scores = LevelUpPage.AbilityScores.ABILITIES.zip(rolls).toMap()
+                    draft = draft.copy(answers = draft.answers + (ABILITIES_PAGE to LevelUpAnswer.BaseAbilities(AbilityMethod.ROLL, scores, rolls)))
+                }
+            )
+        }
+
         roll?.let { current ->
             DiceTableOverlay(
                 selection = mapOf(current.dieType to 1),
@@ -202,6 +277,8 @@ internal fun LevelUpWizard(
     }
 }
 
+private const val ABILITIES_PAGE = "abilities"
+
 /** A hit die being thrown on the dice table for the hit point page [pageKey]. */
 private data class HitDieRoll(val pageKey: String, val sides: Int) {
     val dieType: DieType
@@ -210,7 +287,8 @@ private data class HitDieRoll(val pageKey: String, val sides: Int) {
 
 private fun formulaContext(bundle: CharacterBundle, summary: LevelUpSummary, catalog: CharacterCatalog): FormulaContext {
     val level = summary.classes.sumOf { it.levels }.coerceAtLeast(1)
-    val scores = bundle.character.abilityScores().mapValues { (ability, score) -> score + (summary.abilityIncreases[ability] ?: 0) }
+    val base = summary.baseScores ?: bundle.character.abilityScores()
+    val scores = base.mapValues { (ability, score) -> score + (summary.abilityIncreases[ability] ?: 0) }
     return FormulaContext(
         totalLevel = level,
         classLevels = summary.classes.mapNotNull { entry ->
@@ -603,6 +681,195 @@ private fun LazyListScope.subclassPage(
     }
 }
 
+private fun LazyListScope.baseAbilitiesPage(
+    strings: LocalizedStrings,
+    page: LevelUpPage.BaseAbilities,
+    answer: LevelUpAnswer.BaseAbilities?,
+    onAnswer: (LevelUpAnswer) -> Unit,
+    onRoll: (Int) -> Unit
+) {
+    val abilities = LevelUpPage.AbilityScores.ABILITIES
+    pageTitle(strings["levelup_abilities_title"], strings["levelup_abilities_hint"])
+    val methods = listOf(
+        AbilityMethod.STANDARD_ARRAY to "levelup_abilities_standard",
+        AbilityMethod.POINT_BUY to "levelup_abilities_point_buy",
+        AbilityMethod.ROLL to "levelup_abilities_roll",
+        AbilityMethod.KEEP to "levelup_abilities_keep"
+    )
+    items(methods, key = { "method_" + it.first.name }) { (method, label) ->
+        val selected = answer?.method == method
+        ChoiceCard(
+            title = strings[label],
+            subtitle = strings[label + "_hint"],
+            selected = selected,
+            leading = { RadioButton(selected = selected, onClick = null) },
+            onClick = {
+                if (!selected) {
+                    onAnswer(
+                        when (method) {
+                            AbilityMethod.STANDARD_ARRAY -> LevelUpAnswer.BaseAbilities(method, abilities.zip(STANDARD_ARRAY).toMap())
+                            AbilityMethod.POINT_BUY -> LevelUpAnswer.BaseAbilities(method, abilities.associateWith { 8 })
+                            AbilityMethod.ROLL -> LevelUpAnswer.BaseAbilities(method, emptyMap())
+                            AbilityMethod.KEEP -> LevelUpAnswer.BaseAbilities(method, page.currentScores)
+                        }
+                    )
+                }
+            }
+        )
+    }
+    if (answer == null) return
+    val scores = answer.scores
+    fun swap(ability: String, other: String) {
+        val mine = scores[ability] ?: return
+        val theirs = scores[other] ?: return
+        onAnswer(answer.copy(scores = scores + (ability to theirs) + (other to mine)))
+    }
+    when (answer.method) {
+        AbilityMethod.STANDARD_ARRAY -> {
+            item(key = "assign") { SectionLabel(strings["levelup_abilities_assign"]) }
+            items(abilities, key = { "score_$it" }) { ability ->
+                AssignedScoreRow(strings, ability, scores, onSwap = { other -> swap(ability, other) })
+            }
+        }
+        AbilityMethod.POINT_BUY -> {
+            val spent = abilities.sumOf { POINT_BUY_COSTS[scores[it] ?: 8] ?: 0 }
+            item(key = "points") { SectionLabel(strings.format("levelup_asi_points", POINT_BUY_BUDGET - spent)) }
+            items(abilities, key = { "score_$it" }) { ability ->
+                val value = scores[ability] ?: 8
+                val nextCost = POINT_BUY_COSTS[value + 1]?.minus(POINT_BUY_COSTS[value] ?: 0)
+                ScoreRow(abilityLabel(strings, ability), value) {
+                    IconButton(onClick = { onAnswer(answer.copy(scores = scores + (ability to value - 1))) }, enabled = value > 8) {
+                        Icon(Icons.Outlined.Remove, contentDescription = null)
+                    }
+                    IconButton(
+                        onClick = { onAnswer(answer.copy(scores = scores + (ability to value + 1))) },
+                        enabled = nextCost != null && spent + nextCost <= POINT_BUY_BUDGET
+                    ) {
+                        Icon(Icons.Outlined.Add, contentDescription = null)
+                    }
+                }
+            }
+        }
+        AbilityMethod.ROLL -> {
+            val rolls = answer.rolls
+            if (rolls.isNotEmpty()) {
+                item(key = "rolls") { InfoCard(strings.format("levelup_abilities_rolls", rolls.joinToString(", "))) }
+            }
+            if (rolls.size < abilities.size) {
+                item(key = "throw") {
+                    ChoiceCard(
+                        title = strings.format("levelup_abilities_roll_next", rolls.size + 1),
+                        subtitle = strings["levelup_abilities_roll_hint"],
+                        selected = false,
+                        leading = { DieIcon(DieType.D6, LocalDiceSkin.current, Modifier.size(32.dp)) },
+                        onClick = { onRoll(rolls.size) }
+                    )
+                }
+            } else {
+                item(key = "assign") { SectionLabel(strings["levelup_abilities_assign"]) }
+                items(abilities, key = { "score_$it" }) { ability ->
+                    AssignedScoreRow(strings, ability, scores, onSwap = { other -> swap(ability, other) })
+                }
+            }
+        }
+        AbilityMethod.KEEP -> items(abilities, key = { "score_$it" }) { ability ->
+            ScoreRow(abilityLabel(strings, ability), scores[ability] ?: 10)
+        }
+    }
+}
+
+/** A species or background as offered on its page. */
+private data class OriginChoice(val id: String, val name: String, val subtitle: String, val body: String)
+
+private fun LazyListScope.originPage(
+    strings: LocalizedStrings,
+    title: String,
+    currentName: String,
+    options: List<OriginChoice>,
+    answer: LevelUpAnswer.Origin?,
+    onAnswer: (LevelUpAnswer) -> Unit
+) {
+    pageTitle(title)
+    // The character's own (homebrew) one: nothing from the catalog.
+    item(key = "own") {
+        val selected = answer != null && answer.id == null
+        ChoiceCard(
+            title = strings["levelup_origin_keep"] + currentName.trim().takeIf { it.isNotEmpty() }?.let { " — $it" }.orEmpty(),
+            subtitle = strings["levelup_origin_keep_hint"],
+            selected = selected,
+            leading = { RadioButton(selected = selected, onClick = null) },
+            onClick = { onAnswer(LevelUpAnswer.Origin(null)) }
+        )
+    }
+    items(options, key = { "origin_" + it.id }) { option ->
+        val selected = answer?.id == option.id
+        ExpandableCard(
+            title = option.name,
+            subtitle = option.subtitle,
+            body = option.body,
+            selected = selected,
+            leading = { RadioButton(selected = selected, onClick = null) },
+            onClick = { onAnswer(LevelUpAnswer.Origin(option.id)) }
+        )
+    }
+}
+
+private fun LazyListScope.equipmentPage(
+    strings: LocalizedStrings,
+    page: LevelUpPage.Equipment,
+    answer: LevelUpAnswer.Equipment?,
+    russian: Boolean,
+    engine: LevelUpEngine,
+    onAnswer: (LevelUpAnswer) -> Unit
+) {
+    pageTitle(strings["levelup_equipment_title"], page.source.get(russian))
+    val letters = if (russian) "АБВГДЕЖЗ" else "ABCDEFGH"
+    page.options.forEachIndexed { index, option ->
+        val selected = answer?.option == index
+        item(key = "option_$index") {
+            val coins = coinsText(strings, option.coins)
+            ChoiceCard(
+                title = if (option.isWealth) {
+                    strings.format("levelup_equipment_gold", coins)
+                } else {
+                    strings.format("levelup_equipment_option", letters.getOrElse(index) { '?' }.toString())
+                },
+                subtitle = if (option.isWealth) null else {
+                    (option.items.map { equipmentLabel(it, russian) } +
+                        option.choices.map { strings["levelup_equipment_choose"] } +
+                        listOfNotNull(coins.takeIf { it.isNotEmpty() })).joinToString(", ")
+                },
+                selected = selected,
+                leading = { RadioButton(selected = selected, onClick = null) },
+                onClick = { if (!selected) onAnswer(LevelUpAnswer.Equipment(index)) }
+            )
+        }
+        if (selected && answer != null) {
+            option.choices.forEachIndexed { choiceIndex, choice ->
+                item(key = "choice_${index}_$choiceIndex") {
+                    EquipmentChoiceField(
+                        label = strings["levelup_equipment_choose"],
+                        choice = choice.options,
+                        selected = engine.pickFor(choice, answer.picks.getOrNull(choiceIndex)),
+                        russian = russian,
+                        onPick = { id ->
+                            val picks = List(option.choices.size) { answer.picks.getOrNull(it).orEmpty() }.toMutableList()
+                            picks[choiceIndex] = id
+                            onAnswer(answer.copy(picks = picks))
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+private fun equipmentLabel(pick: EquipmentPick, russian: Boolean): String =
+    pick.item.name.get(russian) + if (pick.count > 1) " ×${pick.count}" else ""
+
+private fun coinsText(strings: LocalizedStrings, coins: Map<String, Int>): String =
+    coins.entries.filter { it.value > 0 }.joinToString(", ") { (currency, count) -> "$count ${strings["inventory_currency_short_$currency"]}" }
+
 private fun LazyListScope.summaryPage(strings: LocalizedStrings, summary: LevelUpSummary, russian: Boolean, catalog: CharacterCatalog) {
     pageTitle(strings["levelup_summary_title"])
     if (summary.fromLevel == summary.toLevel) {
@@ -620,6 +887,25 @@ private fun LazyListScope.summaryPage(strings: LocalizedStrings, summary: LevelU
                 "$name ${entry.levels}" + (subclass?.let { " — $it" } ?: "")
             }
         )
+    }
+    if (summary.species != null || summary.background != null) {
+        item(key = "origin") {
+            InfoCard(
+                title = strings["levelup_summary_origin"],
+                body = listOfNotNull(
+                    summary.species?.let { strings.format("levelup_summary_species", it.name.get(russian)) },
+                    summary.background?.let { strings.format("levelup_summary_background", it.name.get(russian)) }
+                ).joinToString("\n")
+            )
+        }
+    }
+    summary.baseScores?.let { scores ->
+        item(key = "base_scores") {
+            InfoCard(
+                title = strings["levelup_summary_base_scores"],
+                body = LevelUpPage.AbilityScores.ABILITIES.joinToString(", ") { "${abilityLabel(strings, it)} ${scores[it] ?: 10}" }
+            )
+        }
     }
     if (summary.toLevel > summary.fromLevel) {
         item(key = "hp") { InfoCard(strings.format("levelup_summary_hp", signed(summary.hitPointGain))) }
@@ -645,6 +931,10 @@ private fun LazyListScope.summaryPage(strings: LocalizedStrings, summary: LevelU
         }
     }
     summaryList(strings, "granted_spells", "levelup_spells_granted", summary.spellsGranted.map { it.name.get(russian) })
+    summaryList(strings, "equipment", "levelup_summary_equipment", summary.equipment.map { equipmentLabel(it, russian) })
+    if (summary.coins.values.any { it > 0 }) {
+        item(key = "coins") { InfoCard(strings.format("levelup_summary_coins", coinsText(strings, summary.coins))) }
+    }
     if (summary.spellChoices.isNotEmpty()) {
         item(key = "spell_choices") {
             InfoCard(
@@ -811,6 +1101,93 @@ private fun ExpandableCard(
         leading = leading,
         onClick = onClick
     )
+}
+
+/** An ability with its score and modifier; [trailing] holds the controls. */
+@Composable
+private fun ScoreRow(label: String, value: Int, trailing: (@Composable RowScope.() -> Unit)? = null) {
+    val colors = LocalDesignTokens.current.colors
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        color = colors.surface.card,
+        border = BorderStroke(1.dp, colors.border.muted)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp).heightIn(min = 48.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge, color = colors.text.primary)
+            Text(
+                text = "$value (${signed(abilityModifier(value))})",
+                modifier = Modifier.padding(horizontal = 8.dp),
+                style = MaterialTheme.typography.titleMedium,
+                color = colors.text.primary
+            )
+            trailing?.invoke(this)
+        }
+    }
+}
+
+/** A score of a fixed set (the standard array, the rolls): picking another ability's value swaps the two. */
+@Composable
+private fun AssignedScoreRow(strings: LocalizedStrings, ability: String, scores: Map<String, Int>, onSwap: (String) -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    ScoreRow(abilityLabel(strings, ability), scores[ability] ?: 10) {
+        Box {
+            IconButton(onClick = { open = true }) { Icon(Icons.Outlined.SwapVert, contentDescription = null) }
+            DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+                LevelUpPage.AbilityScores.ABILITIES.filter { it != ability }
+                    .sortedByDescending { scores[it] ?: 0 }
+                    .forEach { other ->
+                        DropdownMenuItem(
+                            text = { Text("${scores[other] ?: 10} — ${abilityLabel(strings, other)}") },
+                            onClick = {
+                                open = false
+                                onSwap(other)
+                            }
+                        )
+                    }
+            }
+        }
+    }
+}
+
+/** One "of your choice" item of a starting equipment option. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun EquipmentChoiceField(
+    label: String,
+    choice: List<EquipmentPick>,
+    selected: EquipmentPick?,
+    russian: Boolean,
+    onPick: (String) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
+        OutlinedTextField(
+            value = selected?.let { equipmentLabel(it, russian) }.orEmpty(),
+            onValueChange = {},
+            modifier = Modifier
+                .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                .fillMaxWidth(),
+            readOnly = true,
+            singleLine = true,
+            label = { Text(label) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) }
+        )
+        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            choice.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(equipmentLabel(option, russian)) },
+                    onClick = {
+                        onPick(option.id)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
 }
 
 @Composable
