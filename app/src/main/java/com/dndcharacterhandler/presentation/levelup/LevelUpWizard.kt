@@ -29,7 +29,6 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.Remove
-import androidx.compose.material.icons.outlined.SwapVert
 import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
@@ -256,9 +255,8 @@ internal fun LevelUpWizard(
                     val previous = (draft.answers[ABILITIES_PAGE] as? LevelUpAnswer.BaseAbilities)
                         ?.takeIf { it.method == AbilityMethod.ROLL }?.rolls.orEmpty()
                     val rolls = previous.toMutableList().also { list -> if (rollIndex < list.size) list[rollIndex] = total else list += total }
-                    // In throw order until all six are in; then the player swaps them around.
-                    val scores = LevelUpPage.AbilityScores.ABILITIES.zip(rolls).toMap()
-                    draft = draft.copy(answers = draft.answers + (ABILITIES_PAGE to LevelUpAnswer.BaseAbilities(AbilityMethod.ROLL, scores, rolls)))
+                    // Nothing is assigned for the player: once all six are in, they place each one.
+                    draft = draft.copy(answers = draft.answers + (ABILITIES_PAGE to LevelUpAnswer.BaseAbilities(AbilityMethod.ROLL, emptyMap(), rolls)))
                 }
             )
         }
@@ -707,7 +705,7 @@ private fun LazyListScope.baseAbilitiesPage(
                 if (!selected) {
                     onAnswer(
                         when (method) {
-                            AbilityMethod.STANDARD_ARRAY -> LevelUpAnswer.BaseAbilities(method, abilities.zip(STANDARD_ARRAY).toMap())
+                            AbilityMethod.STANDARD_ARRAY -> LevelUpAnswer.BaseAbilities(method, emptyMap())
                             AbilityMethod.POINT_BUY -> LevelUpAnswer.BaseAbilities(method, abilities.associateWith { 8 })
                             AbilityMethod.ROLL -> LevelUpAnswer.BaseAbilities(method, emptyMap())
                             AbilityMethod.KEEP -> LevelUpAnswer.BaseAbilities(method, page.currentScores)
@@ -719,18 +717,33 @@ private fun LazyListScope.baseAbilitiesPage(
     }
     if (answer == null) return
     val scores = answer.scores
-    fun swap(ability: String, other: String) {
-        val mine = scores[ability] ?: return
-        val theirs = scores[other] ?: return
-        onAnswer(answer.copy(scores = scores + (ability to theirs) + (other to mine)))
-    }
-    when (answer.method) {
-        AbilityMethod.STANDARD_ARRAY -> {
-            item(key = "assign") { SectionLabel(strings["levelup_abilities_assign"]) }
-            items(abilities, key = { "score_$it" }) { ability ->
-                AssignedScoreRow(strings, ability, scores, onSwap = { other -> swap(ability, other) })
+    // The standard array or the rolls, placed by the player one by one: every ability starts empty.
+    fun assignment(pool: List<Int>) {
+        val free = freeValues(pool, scores)
+        item(key = "assign") {
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                SectionLabel(strings["levelup_abilities_assign"])
+                if (free.isNotEmpty()) {
+                    Text(
+                        strings.format("levelup_abilities_free", free.joinToString(", ")),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = LocalDesignTokens.current.colors.text.muted
+                    )
+                }
             }
         }
+        items(abilities, key = { "score_$it" }) { ability ->
+            AssignedScoreRow(
+                strings = strings,
+                ability = ability,
+                value = scores[ability],
+                free = free,
+                onPick = { value -> onAnswer(answer.copy(scores = if (value == null) scores - ability else scores + (ability to value))) }
+            )
+        }
+    }
+    when (answer.method) {
+        AbilityMethod.STANDARD_ARRAY -> assignment(STANDARD_ARRAY)
         AbilityMethod.POINT_BUY -> {
             val spent = abilities.sumOf { POINT_BUY_COSTS[scores[it] ?: 8] ?: 0 }
             item(key = "points") { SectionLabel(strings.format("levelup_asi_points", POINT_BUY_BUDGET - spent)) }
@@ -766,10 +779,7 @@ private fun LazyListScope.baseAbilitiesPage(
                     )
                 }
             } else {
-                item(key = "assign") { SectionLabel(strings["levelup_abilities_assign"]) }
-                items(abilities, key = { "score_$it" }) { ability ->
-                    AssignedScoreRow(strings, ability, scores, onSwap = { other -> swap(ability, other) })
-                }
+                assignment(rolls)
             }
         }
         AbilityMethod.KEEP -> items(abilities, key = { "score_$it" }) { ability ->
@@ -1103,12 +1113,26 @@ private fun ExpandableCard(
     )
 }
 
-/** An ability with its score and modifier; [trailing] holds the controls. */
+/** Values of [pool] no ability has yet, largest first; a value rolled twice is there twice. */
+private fun freeValues(pool: List<Int>, scores: Map<String, Int>): List<Int> {
+    val left = pool.toMutableList()
+    scores.values.forEach { left.remove(it) }
+    return left.sortedDescending()
+}
+
+/** An ability with its score and modifier ("—" while it has none); [trailing] holds the controls. */
 @Composable
-private fun ScoreRow(label: String, value: Int, trailing: (@Composable RowScope.() -> Unit)? = null) {
+private fun ScoreRow(
+    label: String,
+    value: Int?,
+    onClick: (() -> Unit)? = null,
+    trailing: (@Composable RowScope.() -> Unit)? = null
+) {
     val colors = LocalDesignTokens.current.colors
     Surface(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
         shape = RoundedCornerShape(12.dp),
         color = colors.surface.card,
         border = BorderStroke(1.dp, colors.border.muted)
@@ -1119,7 +1143,7 @@ private fun ScoreRow(label: String, value: Int, trailing: (@Composable RowScope.
         ) {
             Text(label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge, color = colors.text.primary)
             Text(
-                text = "$value (${signed(abilityModifier(value))})",
+                text = value?.let { "$it (${signed(abilityModifier(it))})" } ?: "—",
                 modifier = Modifier.padding(horizontal = 8.dp),
                 style = MaterialTheme.typography.titleMedium,
                 color = colors.text.primary
@@ -1129,25 +1153,43 @@ private fun ScoreRow(label: String, value: Int, trailing: (@Composable RowScope.
     }
 }
 
-/** A score of a fixed set (the standard array, the rolls): picking another ability's value swaps the two. */
+/**
+ * An ability taking one value of a fixed set (the standard array, the rolls): a tap lists the
+ * values still [free]; a placed value can be changed or taken back.
+ */
 @Composable
-private fun AssignedScoreRow(strings: LocalizedStrings, ability: String, scores: Map<String, Int>, onSwap: (String) -> Unit) {
+private fun AssignedScoreRow(
+    strings: LocalizedStrings,
+    ability: String,
+    value: Int?,
+    free: List<Int>,
+    onPick: (Int?) -> Unit
+) {
     var open by remember { mutableStateOf(false) }
-    ScoreRow(abilityLabel(strings, ability), scores[ability] ?: 10) {
+    ScoreRow(abilityLabel(strings, ability), value, onClick = { open = true }) {
         Box {
-            IconButton(onClick = { open = true }) { Icon(Icons.Outlined.SwapVert, contentDescription = null) }
+            IconButton(onClick = { open = true }) {
+                Icon(if (open) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore, contentDescription = null)
+            }
             DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
-                LevelUpPage.AbilityScores.ABILITIES.filter { it != ability }
-                    .sortedByDescending { scores[it] ?: 0 }
-                    .forEach { other ->
-                        DropdownMenuItem(
-                            text = { Text("${scores[other] ?: 10} — ${abilityLabel(strings, other)}") },
-                            onClick = {
-                                open = false
-                                onSwap(other)
-                            }
-                        )
-                    }
+                free.distinct().forEach { option ->
+                    DropdownMenuItem(
+                        text = { Text("$option (${signed(abilityModifier(option))})") },
+                        onClick = {
+                            open = false
+                            onPick(option)
+                        }
+                    )
+                }
+                if (value != null) {
+                    DropdownMenuItem(
+                        text = { Text(strings["levelup_abilities_clear"]) },
+                        onClick = {
+                            open = false
+                            onPick(null)
+                        }
+                    )
+                }
             }
         }
     }

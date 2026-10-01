@@ -3292,6 +3292,20 @@
     "fr": "R\u00e9partissez les valeurs",
     "es": "Reparte los valores"
   },
+  "levelup_abilities_free": {
+    "en": "Still free: %1$s",
+    "ru": "\u0421\u0432\u043e\u0431\u043e\u0434\u043d\u044b: %1$s",
+    "de": "Noch frei: %1$s",
+    "fr": "Encore libres : %1$s",
+    "es": "Libres: %1$s"
+  },
+  "levelup_abilities_clear": {
+    "en": "Take back",
+    "ru": "\u0423\u0431\u0440\u0430\u0442\u044c",
+    "de": "Zur\u00fccknehmen",
+    "fr": "Retirer",
+    "es": "Quitar"
+  },
   "levelup_abilities_roll_next": {
     "en": "Throw %1$s of 6",
     "ru": "\u0411\u0440\u043e\u0441\u043e\u043a %1$s \u0438\u0437 6",
