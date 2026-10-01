@@ -30,7 +30,7 @@ fun PlaceholderScreen(
     ) {
         item {
             CharacterHeader(
-                name = character?.name?.ifBlank { text("placeholder_loading_character") }
+                name = character?.name?.ifBlank { text("overview_name_placeholder") }
                     ?: text("placeholder_loading_character"),
                 subtitle = strings.format(
                     "character_header_subtitle",

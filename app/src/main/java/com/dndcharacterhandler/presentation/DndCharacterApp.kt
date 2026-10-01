@@ -128,13 +128,19 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
         }
     }
 
+    // Without characters the drawer opens at once and stays open: the first one is created there.
+    val hasNoCharacters = managerState.isLoaded && managerState.characters.isEmpty()
+    LaunchedEffect(hasNoCharacters) {
+        if (hasNoCharacters) drawerState.snapTo(DrawerValue.Open)
+    }
     // The full-width drawer has no scrim to tap: Back closes it too.
-    BackHandler(enabled = drawerState.isOpen) { scope.launch { drawerState.close() } }
+    BackHandler(enabled = drawerState.isOpen && !hasNoCharacters) { scope.launch { drawerState.close() } }
 
     CompositionLocalProvider(LocalStrings provides strings, LocalDiceSkin provides diceSkin) {
         Box(modifier = Modifier.fillMaxSize()) {
             ModalNavigationDrawer(
                 drawerState = drawerState,
+                gesturesEnabled = !hasNoCharacters,
                 drawerContent = {
                     CharacterManagerDrawer(
                         state = managerState,
@@ -158,7 +164,7 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                         onImportCharacter = {
                             importLauncher.launch(arrayOf("application/octet-stream", "application/zip", "*/*"))
                         },
-                        onClose = { scope.launch { drawerState.close() } }
+                        onClose = if (hasNoCharacters) null else ({ scope.launch { drawerState.close() } })
                     )
                 }
             ) {

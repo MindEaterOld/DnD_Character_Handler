@@ -22,7 +22,9 @@ import kotlinx.coroutines.launch
 data class CharacterManagerUiState(
     val characters: List<CharacterBundle> = emptyList(),
     val selectedCharacterId: Long? = null,
-    val language: AppLanguage = AppLanguage.ENGLISH
+    val language: AppLanguage = AppLanguage.ENGLISH,
+    /** The character list has been read once: an empty [characters] then means there are none. */
+    val isLoaded: Boolean = false
 )
 
 class CharacterManagerViewModel(
@@ -37,10 +39,6 @@ class CharacterManagerViewModel(
     private val _events = MutableSharedFlow<String>()
     val events: SharedFlow<String> = _events.asSharedFlow()
 
-    // True only while a default-character seed is in flight, so we don't seed twice for the same
-    // empty state but still re-seed if the user later deletes their last character.
-    private var seedingInProgress = false
-
     init {
         viewModelScope.launch {
             languagePreferencesRepository.language.collectLatest { language ->
@@ -50,20 +48,10 @@ class CharacterManagerViewModel(
         viewModelScope.launch {
             characterRepository.observeCharacters().collectLatest { characters ->
                 if (characters.isEmpty()) {
-                    // Always restore the app to a usable state: seed a default character whenever
-                    // the list is empty (first launch or after deleting the last character).
-                    if (!seedingInProgress) {
-                        seedingInProgress = true
-                        try {
-                            val id = characterRepository.createCharacter(defaultCharacterBundle())
-                            applySelection(id, characters = emptyList())
-                        } catch (throwable: Throwable) {
-                            seedingInProgress = false
-                            throw throwable
-                        }
-                    }
+                    // No characters (first launch, or the last one deleted): nothing is made up; the
+                    // app opens the drawer, where the player creates or imports one.
+                    applySelection(null, characters = emptyList())
                 } else {
-                    seedingInProgress = false
                     val currentSelectedId = _uiState.value.selectedCharacterId
                         ?: languagePreferencesRepository.selectedCharacterId.first()
                     val selected = characters
@@ -83,7 +71,8 @@ class CharacterManagerViewModel(
         selectedCharacterHolder.setSelectedCharacterId(characterId)
         _uiState.value = _uiState.value.copy(
             characters = characters,
-            selectedCharacterId = characterId
+            selectedCharacterId = characterId,
+            isLoaded = true
         )
         if (changed) {
             languagePreferencesRepository.setSelectedCharacterId(characterId)

@@ -28,7 +28,7 @@ fun CharacterManagerDrawerPreview() {
             "drawer_delete_character" to "Delete Character",
             "drawer_import_character" to "Import Character",
             "drawer_level" to "Level %1\$s",
-            "placeholder_loading_character" to "Unnamed Adventurer",
+            "overview_name_placeholder" to "Character Name",
             "placeholder_race" to "Human",
             "placeholder_class" to "Wizard",
             "placeholder_subclass" to "Subclass",
@@ -79,6 +79,38 @@ fun CharacterManagerDrawerPreview() {
                 onDeleteCharacter = {},
                 onImportCharacter = {},
                 onClose = {}
+            )
+        }
+    }
+}
+
+/** The first launch: no characters, so only "New Character" and "Import", and no close button. */
+@Preview(
+    name = "Character Manager Drawer — no characters",
+    showBackground = true,
+    showSystemUi = true,
+    device = "spec:width=412dp,height=915dp"
+)
+@Composable
+fun CharacterManagerDrawerEmptyPreview() {
+    val previewStrings = LocalizedStrings(
+        language = AppLanguage.ENGLISH,
+        values = mapOf(
+            "drawer_characters" to "Characters",
+            "drawer_new_character" to "New Character",
+            "drawer_import_character" to "Import Character"
+        )
+    )
+    CompositionLocalProvider(LocalStrings provides previewStrings) {
+        DnDTheme {
+            CharacterManagerDrawer(
+                state = CharacterManagerUiState(isLoaded = true, language = AppLanguage.ENGLISH),
+                onSelectCharacter = {},
+                onCreateCharacter = {},
+                onExportCharacter = {},
+                onDeleteCharacter = {},
+                onImportCharacter = {},
+                onClose = null
             )
         }
     }

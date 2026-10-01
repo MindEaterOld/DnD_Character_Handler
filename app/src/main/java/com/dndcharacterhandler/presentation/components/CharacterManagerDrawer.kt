@@ -62,7 +62,8 @@ fun CharacterManagerDrawer(
     onExportCharacter: () -> Unit,
     onDeleteCharacter: () -> Unit,
     onImportCharacter: () -> Unit,
-    onClose: () -> Unit
+    /** Null while there are no characters: the drawer can't be closed then. */
+    onClose: (() -> Unit)?
 ) {
     val tokens = LocalDesignTokens.current.typography
     val colors = LocalDesignTokens.current.colors
@@ -118,21 +119,24 @@ fun CharacterManagerDrawer(
                 )
             }
 
-            item {
-                DrawerOrnamentDivider(modifier = Modifier.padding(top = 10.dp, bottom = 6.dp))
-                DrawerActionCard(
-                    label = text("drawer_export_character"),
-                    icon = Icons.Outlined.FileUpload,
-                    onClick = onExportCharacter
-                )
-            }
+            // Export and delete act on the selected character: none without characters.
+            if (state.characters.isNotEmpty()) {
+                item {
+                    DrawerOrnamentDivider(modifier = Modifier.padding(top = 10.dp, bottom = 6.dp))
+                    DrawerActionCard(
+                        label = text("drawer_export_character"),
+                        icon = Icons.Outlined.FileUpload,
+                        onClick = onExportCharacter
+                    )
+                }
 
-            item {
-                DrawerActionCard(
-                    label = text("drawer_delete_character"),
-                    icon = Icons.Outlined.Delete,
-                    onClick = onDeleteCharacter
-                )
+                item {
+                    DrawerActionCard(
+                        label = text("drawer_delete_character"),
+                        icon = Icons.Outlined.Delete,
+                        onClick = onDeleteCharacter
+                    )
+                }
             }
 
             item {
@@ -148,7 +152,9 @@ fun CharacterManagerDrawer(
                 Spacer(modifier = Modifier.height(12.dp))
             }
         }
-        OverlayCloseButton(onClick = onClose, modifier = Modifier.align(Alignment.TopEnd))
+        if (onClose != null) {
+            OverlayCloseButton(onClick = onClose, modifier = Modifier.align(Alignment.TopEnd))
+        }
     }
 }
 
@@ -162,7 +168,7 @@ private fun DrawerCharacterCard(
     val strings = LocalStrings.current
     val tokens = LocalDesignTokens.current.typography
     val colors = LocalDesignTokens.current.colors
-    val characterName = character.name.ifBlank { text("placeholder_loading_character") }
+    val characterName = character.name.ifBlank { text("overview_name_placeholder") }
     val classLabel = buildDrawerClassLabel(characterBundle, strings)
 
     Surface(

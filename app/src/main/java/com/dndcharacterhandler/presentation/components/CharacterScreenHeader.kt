@@ -42,7 +42,7 @@ fun CharacterScreenHeader(
             )
         }
         Text(
-            text = character.name.ifBlank { text("placeholder_loading_character") },
+            text = character.name.ifBlank { text("overview_name_placeholder") },
             modifier = Modifier.padding(horizontal = 52.dp),
             style = MaterialTheme.typography.titleLarge.copy(fontSize = tokens.titleLarge.fontSizeSp.sp),
             color = Color(0xFFF7F2EA),
