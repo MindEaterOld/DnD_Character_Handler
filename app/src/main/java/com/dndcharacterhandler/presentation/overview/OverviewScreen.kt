@@ -105,6 +105,9 @@ import com.dndcharacterhandler.domain.model.InventoryCatalogSource
 import com.dndcharacterhandler.domain.usecase.GetCharacterBundleUseCase
 import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
+import com.dndcharacterhandler.presentation.components.StatCardRow
+import com.dndcharacterhandler.presentation.components.MiniStatCardIcon
+import com.dndcharacterhandler.presentation.components.MiniStatCard
 import com.dndcharacterhandler.presentation.components.AppImage
 import com.dndcharacterhandler.presentation.components.EditDialog
 import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
@@ -671,7 +674,8 @@ private fun OverviewContent(
     val miniStats = remember(character, strings) {
         listOf(
             OverviewStat(
-                labelKey = "overview_ac",
+                // The same label as the Combat screen's card.
+                labelKey = "stat_card_armor_class",
                 value = (character?.armorClass ?: 10).toString(),
                 icon = Icons.Outlined.Shield,
                 field = OverviewMiniStatField.ARMOR_CLASS
@@ -826,18 +830,14 @@ private fun OverviewContent(
             }
 
             item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .offset(y = (-34).dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
+                // The app's stat cards, as on the other screens.
+                StatCardRow(modifier = Modifier.offset(y = (-34).dp)) {
                     miniStats.forEach { stat ->
-                        OverviewMiniStatCard(
+                        MiniStatCard(
                             modifier = Modifier.weight(1f),
                             value = stat.value,
                             label = text(stat.labelKey),
-                            icon = stat.icon,
+                            icon = { MiniStatCardIcon(stat.icon) },
                             onClick = {
                                 activeMiniStatField = stat.field
                                 miniStatDraft = when (stat.field) {
@@ -1889,85 +1889,6 @@ private fun OverviewHpCard(
 }
 
 @Composable
-private fun OverviewMiniStatCard(
-    modifier: Modifier = Modifier,
-    value: String,
-    label: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    onClick: () -> Unit
-) {
-    val tokens = LocalDesignTokens.current.typography
-    Card(
-        modifier = modifier
-            .aspectRatio(0.92f)
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(24.dp),
-        border = BorderStroke(1.dp, Color(0x42FFFFFF)),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF17141B))
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            FrameCorner(modifier = Modifier.align(Alignment.TopStart))
-            FrameCorner(
-                modifier = Modifier.align(Alignment.TopEnd),
-                mirrored = true
-            )
-            FrameCorner(
-                modifier = Modifier.align(Alignment.BottomStart),
-                upsideDown = true
-            )
-            FrameCorner(
-                modifier = Modifier.align(Alignment.BottomEnd),
-                mirrored = true,
-                upsideDown = true
-            )
-
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 12.dp, vertical = 6.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = Color(0xFFD8D1CA),
-                    modifier = Modifier.size(30.dp)
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Canvas(modifier = Modifier.size(width = 48.dp, height = 8.dp)) {
-                    drawLine(
-                        color = Color(0x38FFFFFF),
-                        start = Offset(0f, center.y),
-                        end = Offset(size.width, center.y),
-                        strokeWidth = 1.dp.toPx(),
-                        cap = StrokeCap.Round
-                    )
-                }
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = value,
-                    style = MaterialTheme.typography.headlineMedium.copy(
-                        fontSize = tokens.miniStatValue.fontSizeSp.sp,
-                        lineHeight = (tokens.miniStatValue.lineHeightSp ?: tokens.miniStatValue.fontSizeSp).sp
-                    ),
-                    color = Color(0xFFF7F2EA),
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(1.dp))
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = tokens.miniStatLabel.fontSizeSp.sp),
-                    color = Color(0xFFBEB6AE),
-                    textAlign = TextAlign.Center,
-                    maxLines = 1
-                )
-            }
-        }
-    }
-}
-
-@Composable
 private fun FrameCorner(
     modifier: Modifier = Modifier,
     mirrored: Boolean = false,
@@ -2253,7 +2174,7 @@ private fun OverviewScreenPreview() {
             "overview_inspiration" to "Inspiration",
             "overview_xp" to "EXP",
             "overview_hp" to "HP",
-            "overview_ac" to "AC",
+            "stat_card_armor_class" to "Armor Class",
             "overview_initiative" to "Initiative",
             "overview_speed" to "Speed",
             "inventory_unit_feet" to "ft",

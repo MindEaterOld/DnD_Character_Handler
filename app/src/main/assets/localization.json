@@ -2718,13 +2718,6 @@
     "fr": "pv",
     "es": "PG"
   },
-  "overview_ac": {
-    "en": "AC",
-    "ru": "\u041a\u0411",
-    "de": "RK",
-    "fr": "CA",
-    "es": "CA"
-  },
   "overview_ac_full": {
     "en": "Armor Class",
     "ru": "\u041a\u043b\u0430\u0441\u0441 \u0431\u0440\u043e\u043d\u0438",
@@ -2733,6 +2726,7 @@
     "es": "Clase de Armadura"
   },
   "overview_initiative": {
+    "maxChars": 11,
     "en": "Initiative",
     "ru": "\u0418\u043d\u0438\u0446\u0438\u0430\u0442\u0438\u0432\u0430",
     "de": "Initiative",
@@ -2740,6 +2734,7 @@
     "es": "Iniciativa"
   },
   "overview_speed": {
+    "maxChars": 11,
     "en": "Speed",
     "ru": "\u0421\u043a\u043e\u0440\u043e\u0441\u0442\u044c",
     "de": "Bewegung",
