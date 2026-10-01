@@ -696,6 +696,18 @@ def trait_labels():
 
     for nodes in data['traits'].values():
         walk(nodes)
+    # Russian written by hand where the ru-ru module has none (the Faerun languages, from the
+    # Russian "Heroes of Faerun"); it wins over the module's, like translations/en.json.
+    for key, ru in load_json(os.path.join(TRANSLATIONS, 'ru_traits.json'), {}).items():
+        if key in labels:
+            labels[key]['name']['ru'] = ru
+        else:
+            print('   warning: translations/ru_traits.json has an unknown key', key)
+    missing = sorted(key for key, entry in labels.items() if not entry['name']['ru'])
+    if missing:
+        print(f'Trait labels still without Russian ({len(missing)}): add them to translations/ru_traits.json')
+        for key in missing:
+            print('  ', key, labels[key]['name']['en'])
     categories = {k: {'en': v.get('en') or k, 'ru': v.get('ru') or ''} for k, v in data['categories'].items()}
     return {'labels': labels, 'categories': categories}
 

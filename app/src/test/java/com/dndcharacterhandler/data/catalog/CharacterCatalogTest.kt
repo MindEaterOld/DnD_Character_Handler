@@ -95,6 +95,13 @@ class CharacterCatalogTest {
     }
 
     @Test
+    fun everyProficiencyAndLanguageHasBothNames() {
+        // Picked on Character Wizard pages: an untranslated one would show in English in Russian mode.
+        val untranslated = catalog.traits.values.filter { it.name.ru.isBlank() || it.name.en.isBlank() }.map { it.key }
+        assertTrue("add them to tools/foundry_catalog/translations/ru_traits.json: $untranslated", untranslated.isEmpty())
+    }
+
+    @Test
     fun textsAreCleanOfFoundryMarkup() {
         catalog.features.forEach { feature ->
             assertTrue("${feature.id} has a Russian name", feature.name.ru.isNotBlank())

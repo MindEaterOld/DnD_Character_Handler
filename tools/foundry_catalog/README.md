@@ -35,6 +35,12 @@ Most non-SRD entries only come in Russian. English written by hand goes into
 Foundry at any time without losing translations. Either field may be left out. Never edit
 `character_catalog.json` by hand — the next run overwrites it.
 
+Proficiency and language labels missing from the ru-ru module get their Russian from
+`translations/ru_traits.json`, keyed by the trait key (`"languages:standard:faerun:chondathan":
+"Чондатанский"`); `convert.py` lists any label still without one, and `CharacterCatalogTest`
+fails on it. The Faerûn languages follow the Russian *Heroes of Faerûn* («Стандартные языки
+Фаэруна»).
+
 `translations/missing_en.json` is rewritten on every run: the entries still without an English
 name or text (id, kind, book, owner, Russian and English name), PHB first — the list to translate
 from.
