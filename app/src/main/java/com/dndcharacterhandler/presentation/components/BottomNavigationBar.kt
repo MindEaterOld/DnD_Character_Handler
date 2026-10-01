@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,13 +25,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.dndcharacterhandler.presentation.AppScreen
 import com.dndcharacterhandler.presentation.localization.text
+import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 
+/** The tab bar: an outline over the screen's own background, with no fill of its own. */
 @Composable
 fun BottomNavigationBar(
     currentRoute: String,
     screens: List<AppScreen>,
     onNavigate: (AppScreen) -> Unit
 ) {
+    val colors = LocalDesignTokens.current.colors
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -38,8 +42,8 @@ fun BottomNavigationBar(
             .padding(horizontal = 14.dp, vertical = 8.dp)
             .height(62.dp),
         shape = RoundedCornerShape(26.dp),
-        color = Color(0xFF141118),
-        border = BorderStroke(1.dp, Color(0x36FFFFFF))
+        color = Color.Transparent,
+        border = BorderStroke(1.dp, colors.border.muted)
     ) {
         Row(
             modifier = Modifier
@@ -54,7 +58,7 @@ fun BottomNavigationBar(
                     modifier = Modifier
                         .weight(1f)
                         .clip(RoundedCornerShape(18.dp))
-                        .background(if (selected) Color(0xFF2A2630) else Color.Transparent)
+                        .background(if (selected) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent)
                         .clickable { onNavigate(screen) }
                         .padding(horizontal = 2.dp, vertical = 10.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -68,7 +72,7 @@ fun BottomNavigationBar(
                             imageVector = screen.icon,
                             contentDescription = text(screen.titleKey),
                             modifier = Modifier.size(if (selected) 24.dp else 22.dp),
-                            tint = if (selected) Color(0xFFF3EEE6) else Color(0xFFB8B0A8)
+                            tint = if (selected) colors.text.icon else colors.text.miniLabel
                         )
                     }
                 }

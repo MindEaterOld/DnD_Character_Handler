@@ -3,7 +3,6 @@ package com.dndcharacterhandler.presentation
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -44,6 +43,7 @@ import com.dndcharacterhandler.presentation.biography.BiographyScreen
 import com.dndcharacterhandler.presentation.combat.CombatScreen
 import com.dndcharacterhandler.presentation.components.BottomNavigationBar
 import com.dndcharacterhandler.presentation.components.CharacterManagerDrawer
+import com.dndcharacterhandler.presentation.components.ScreenBackground
 import com.dndcharacterhandler.presentation.components.DeleteCharacterDialog
 import com.dndcharacterhandler.presentation.components.FloatingActionButtonSize
 import com.dndcharacterhandler.presentation.components.FloatingAddButton
@@ -162,8 +162,11 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                     )
                 }
             ) {
+                // The background is the screens' own gradient, under the bottom bar too: the bar has none.
+                ScreenBackground {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
+                    containerColor = Color.Transparent,
                     contentWindowInsets = WindowInsets.systemBars,
                     bottomBar = {
                         BottomNavigationBar(
@@ -184,8 +187,8 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                     Surface(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(padding)
-                            .background(Color.Transparent)
+                            .padding(padding),
+                        color = Color.Transparent
                     ) {
                     Box(modifier = Modifier.fillMaxSize()) {
                     // Dice prototype: the dice button sits right above the screen's own "+" button (or
@@ -274,6 +277,7 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                         )
                     }
                     }
+                }
                 }
             }
 
