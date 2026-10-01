@@ -6,7 +6,7 @@ import com.dndcharacterhandler.data.localization.LocalizationRepository
 import com.dndcharacterhandler.data.preferences.LanguagePreferencesRepository
 import com.dndcharacterhandler.data.repository.AssetCharacterCatalogRepository
 import com.dndcharacterhandler.data.repository.AssetInventoryCatalogRepository
-import com.dndcharacterhandler.data.repository.AssetSpellCatalogRepository
+import com.dndcharacterhandler.data.repository.CatalogSpellCatalogRepository
 import com.dndcharacterhandler.data.repository.CatalogFeatureCatalogRepository
 import com.dndcharacterhandler.data.repository.CharacterFileRepositoryImpl
 import com.dndcharacterhandler.data.repository.CharacterRepositoryImpl
@@ -49,10 +49,11 @@ class AppContainer(context: Context) {
     val inventoryCatalogRepository: InventoryCatalogRepository =
         AssetInventoryCatalogRepository(appContext)
 
-    val spellCatalogRepository: SpellCatalogRepository =
-        AssetSpellCatalogRepository(appContext, localizationRepository)
-
     val characterCatalogRepository: CharacterCatalogRepository = AssetCharacterCatalogRepository(appContext)
+
+    // Built from the character catalog: declared after it.
+    val spellCatalogRepository: SpellCatalogRepository =
+        CatalogSpellCatalogRepository(characterCatalogRepository)
 
     val featureCatalogRepository: FeatureCatalogRepository =
         CatalogFeatureCatalogRepository(characterCatalogRepository)

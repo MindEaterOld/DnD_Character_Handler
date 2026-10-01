@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.domain.rules
 
+import com.dndcharacterhandler.domain.model.AdvancementStep
 import com.dndcharacterhandler.domain.model.Character
 import com.dndcharacterhandler.domain.model.CharacterCatalog
 import com.dndcharacterhandler.domain.model.CharacterClassEntry
@@ -75,6 +76,22 @@ fun spellSlots(classes: List<CharacterClassEntry>, catalog: CharacterCatalog): S
     val pactLevels = casters.filter { it.first == "pact" }.sumOf { it.second }.coerceAtMost(MAX_CHARACTER_LEVEL)
     val (pactSlots, pactSlotLevel) = if (pactLevels > 0) PACT_SLOTS[pactLevels - 1] else (0 to 0)
     return SpellSlotTable(slots, pactSlots, pactSlotLevel)
+}
+
+/**
+ * How many spells the character may prepare: each class's (or spellcasting subclass's)
+ * "prepared-spells" scale at its level, added up; null when none of its classes casts spells.
+ */
+fun preparedSpellLimit(classes: List<CharacterClassEntry>, catalog: CharacterCatalog): Int? {
+    val limits = classes.mapNotNull { entry ->
+        val characterClass = catalog.classes.firstOrNull { it.id == entry.classId }
+        val subclass = entry.subclassId?.let { id -> catalog.subclasses.firstOrNull { it.id == id } }
+        (characterClass?.advancement.orEmpty() + subclass?.advancement.orEmpty())
+            .filterIsInstance<AdvancementStep.ScaleValue>()
+            .firstOrNull { it.identifier == "prepared-spells" }
+            ?.valueAt(entry.levels)?.trim()?.toIntOrNull()
+    }
+    return limits.takeIf { it.isNotEmpty() }?.sum()
 }
 
 /** One class's multiclass requirement: 13+ in all (or any one) of its primary abilities. */

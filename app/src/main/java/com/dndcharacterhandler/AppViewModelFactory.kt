@@ -28,7 +28,6 @@ class AppViewModelFactory(
                 characterRepository = container.characterRepository,
                 characterCatalogRepository = container.characterCatalogRepository,
                 inventoryCatalogRepository = container.inventoryCatalogRepository,
-                spellCatalogRepository = container.spellCatalogRepository,
                 getCharacterBundleUseCase = container.getCharacterBundleUseCase,
                 selectedCharacterHolder = container.selectedCharacterHolder
             )
@@ -58,6 +57,7 @@ class AppViewModelFactory(
             modelClass.isAssignableFrom(SpellsViewModel::class.java) -> SpellsViewModel(
                 characterRepository = container.characterRepository,
                 spellCatalogRepository = container.spellCatalogRepository,
+                characterCatalogRepository = container.characterCatalogRepository,
                 getCharacterBundleUseCase = container.getCharacterBundleUseCase,
                 selectedCharacterHolder = container.selectedCharacterHolder
             )

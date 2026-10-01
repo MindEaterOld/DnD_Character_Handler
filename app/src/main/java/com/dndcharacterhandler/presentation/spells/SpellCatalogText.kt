@@ -6,12 +6,17 @@ import com.dndcharacterhandler.domain.model.Spell
 import com.dndcharacterhandler.domain.model.SpellCatalogItem
 import com.dndcharacterhandler.presentation.localization.catalogFieldText
 
-/** Catalog spell name in the current language ("spell_name_<index>" keys), or [fallback] if there's no key. */
-internal fun localizedSpellNameOf(catalogId: String?, fallback: String, strings: LocalizedStrings): String {
-    if (catalogId.isNullOrBlank()) return fallback
-    val key = "spell_name_" + catalogId.removePrefix("spell:")
-    val localized = strings[key]
-    return if (localized == key) fallback else localized
+/**
+ * Catalog spell name in the current language: the catalog's English or Russian; German, French and
+ * Spanish names come from the app's keys of the SRD spell it replaces ("spell_name_<index>").
+ */
+internal fun SpellCatalogItem.localizedName(strings: LocalizedStrings): String = when (strings.language) {
+    AppLanguage.RUSSIAN -> ruName.ifBlank { name }
+    AppLanguage.ENGLISH -> name
+    else -> legacyIds.firstNotNullOfOrNull { legacy ->
+        val key = "spell_name_" + legacy.removePrefix("spell:")
+        strings[key].takeIf { it != key }
+    } ?: name
 }
 
 /** A character's copy of a catalog spell, with its text in the current language. */
@@ -30,7 +35,7 @@ internal fun Spell.localizedWith(catalogItem: SpellCatalogItem?, strings: Locali
             stored = name,
             english = catalogItem.name,
             russian = catalogItem.ruName,
-            current = localizedSpellNameOf(catalogItem.id, catalogItem.name, strings)
+            current = catalogItem.localizedName(strings)
         ),
         description = catalogText(description, catalogItem.description, catalogItem.ruDescription, russian),
         higherLevelDescription = catalogText(

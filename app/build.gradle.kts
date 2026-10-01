@@ -4,8 +4,6 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
-val generatedSpellAssetsDir = layout.buildDirectory.dir("generated/spellAssets/main")
-
 android {
     namespace = "com.dndcharacterhandler"
     compileSdk = 35
@@ -62,18 +60,8 @@ android {
                 "src/main/assets",
                 "../external/5e-database/src/2024/en"
             )
-            assets.srcDir(generatedSpellAssetsDir)
         }
     }
-}
-
-tasks.register<Copy>("copySpellCatalogAsset") {
-    from("../external/5e-database/src/2014/en/5e-SRD-Spells.json")
-    into(generatedSpellAssetsDir)
-}
-
-tasks.named("preBuild").configure {
-    dependsOn("copySpellCatalogAsset")
 }
 
 dependencies {

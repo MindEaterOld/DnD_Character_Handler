@@ -21,6 +21,7 @@ import com.dndcharacterhandler.domain.model.FeatureSource
 import com.dndcharacterhandler.domain.model.InventoryCategory
 import com.dndcharacterhandler.domain.model.InventoryItem
 import com.dndcharacterhandler.domain.model.Spell
+import com.dndcharacterhandler.domain.model.toSpellCatalogItem
 import com.dndcharacterhandler.domain.rules.CatalogFormulaText
 import com.dndcharacterhandler.domain.rules.FormulaContext
 import com.dndcharacterhandler.domain.rules.MAX_CHARACTER_LEVEL
@@ -30,30 +31,6 @@ import com.dndcharacterhandler.domain.rules.classLabel
 import com.dndcharacterhandler.domain.rules.multiclassRequirements
 import com.dndcharacterhandler.domain.rules.proficiencyBonusForLevel
 import com.dndcharacterhandler.domain.rules.spellSlots
-
-/** A spell built from the catalog's own data, for spells the app's spell catalog doesn't have. */
-fun plainCatalogSpell(spell: CatalogSpellRef, prepared: Boolean, russian: Boolean): Spell = Spell(
-    name = spell.name.get(russian),
-    level = spell.level ?: 0,
-    school = SPELL_SCHOOLS[spell.school] ?: spell.school,
-    isPrepared = prepared || spell.level == 0,
-    description = spell.text.get(russian),
-    range = spell.range,
-    castingTime = spell.castingTime,
-    duration = spell.duration,
-    components = spell.components,
-    material = spell.material.get(russian),
-    isRitual = spell.ritual,
-    requiresConcentration = spell.concentration,
-    availableClasses = spell.lists.filter { it.startsWith("class:") }
-        .joinToString(", ") { list -> list.removePrefix("class:").replaceFirstChar { it.uppercase() } }
-)
-
-/** Foundry's school keys -> the app's (SRD) school names. */
-private val SPELL_SCHOOLS = mapOf(
-    "abj" to "Abjuration", "con" to "Conjuration", "div" to "Divination", "enc" to "Enchantment",
-    "evo" to "Evocation", "ill" to "Illusion", "nec" to "Necromancy", "trs" to "Transmutation"
-)
 
 /** A spell name to compare by: "Tasha’s Hideous Laughter" and "tasha's hideous laughter" alike. */
 fun spellNameKey(name: String): String =
@@ -156,8 +133,10 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
         now: Long,
         /** Turns starting equipment into inventory items (the app matches its item catalog by name). */
         equipmentItem: (CatalogEquipmentRef, Int) -> InventoryItem = { item, count -> plainEquipmentItem(item, count, russian) },
-        /** Turns a learned spell into the character's (the app matches its spell catalog by name); the flag is "prepared". */
-        spellItem: (CatalogSpellRef, Boolean) -> Spell = { spell, prepared -> plainCatalogSpell(spell, prepared, russian) }
+        /** Turns a learned spell into the character's (the app matches its spell catalog by name); the flag is "always prepared". */
+        spellItem: (CatalogSpellRef, Boolean) -> Spell = { spell, alwaysPrepared ->
+            spell.toSpellCatalogItem(catalog).toCharacterSpell(alwaysPrepared)
+        }
     ): CharacterBundle {
         val simulation = simulate(bundle, draft)
         require(simulation.ready && simulation.pages.all { isAnswered(it, draft) }) { "The level-up draft isn't complete" }
@@ -672,8 +651,9 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
         val allowed = options.filter { !it.known || it.spell.id == replaced?.id }.map { it.spell.id }.toSet()
         val picks = answer.picks.filter { it in allowed }.mapNotNull { catalog.spells[it] }
         replaced?.let { simulation.forgetSpell(it) }
-        // Cantrips are always at hand; other picks as the step says (a spellbook's aren't prepared).
-        picks.forEach { spell -> simulation.learnSpell(spell, prepared = step.spellPrepared >= 1 || spell.level == 0) }
+        // The player prepares spells on the Spells screen; only those the step always prepares
+        // (a feat's, Foundry's spell.prepared 2) come prepared, and cantrips are always at hand.
+        picks.forEach { spell -> simulation.learnSpell(spell, alwaysPrepared = step.spellPrepared == 2) }
         simulation.record(
             context, source.id, step.id, "SpellChoice",
             "picks=${picks.joinToString(",") { it.id }}" + (replaced?.let { ";replaced=${it.id}" } ?: "")
@@ -841,7 +821,7 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
         val addedFeatures = mutableListOf<Pair<CatalogFeature, StepContext>>()
         val removedFeatureIds = mutableListOf<String>()
         val spellsGranted = mutableListOf<CatalogSpellRef>()
-        /** Spells picked on spell pages, with whether they're prepared. */
+        /** Spells picked on spell pages, with whether a feature always prepares them. */
         val spellsLearned = mutableListOf<Pair<CatalogSpellRef, Boolean>>()
         val spellsForgotten = mutableListOf<CatalogSpellRef>()
         private val knownSpellNames = bundle.spells.map { spellNameKey(it.name) }.toMutableSet()
@@ -852,8 +832,8 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
             spell.id in (spellsLearned.map { it.first.id } + spellsGranted.map { it.id }) ||
                 spellNameKeys(spell).any { it in knownSpellNames }
 
-        fun learnSpell(spell: CatalogSpellRef, prepared: Boolean) {
-            if (!knowsSpell(spell)) spellsLearned += spell to prepared
+        fun learnSpell(spell: CatalogSpellRef, alwaysPrepared: Boolean) {
+            if (!knowsSpell(spell)) spellsLearned += spell to alwaysPrepared
         }
 
         fun grantSpells(spells: List<CatalogSpellRef>) {
@@ -1029,7 +1009,7 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
             // species spells) are always prepared.
             val forgottenNames = spellsForgotten.flatMap(::spellNameKeys).toSet()
             val spells = bundle.spells.filterNot { spellNameKey(it.name) in forgottenNames } +
-                spellsLearned.map { (spell, prepared) -> spellItem(spell, prepared) } +
+                spellsLearned.map { (spell, alwaysPrepared) -> spellItem(spell, alwaysPrepared) } +
                 spellsGranted.distinctBy { it.id }.map { spell -> spellItem(spell, true) }
             // The sheet keeps gold, silver and copper: platinum goes in as gold, electrum as silver.
             val gold = (coins["gp"] ?: 0) + 10 * (coins["pp"] ?: 0)

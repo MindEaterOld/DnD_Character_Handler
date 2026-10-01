@@ -30,7 +30,7 @@ import com.dndcharacterhandler.data.local.entity.SpellEntity
         FeatureEntity::class,
         NoteEntity::class
     ],
-    version = 47,
+    version = 48,
     exportSchema = false
 )
 @TypeConverters(RoomConverters::class)
@@ -93,7 +93,8 @@ abstract class AppDatabase : RoomDatabase() {
                     MIGRATION_43_44,
                     MIGRATION_44_45,
                     MIGRATION_45_46,
-                    MIGRATION_46_47
+                    MIGRATION_46_47,
+                    MIGRATION_47_48
                 ).build().also { INSTANCE = it }
             }
         }
@@ -549,6 +550,14 @@ abstract class AppDatabase : RoomDatabase() {
                 db.execSQL("ALTER TABLE characters ADD COLUMN classesJson TEXT NOT NULL DEFAULT '[]'")
                 db.execSQL("ALTER TABLE characters ADD COLUMN advancementsJson TEXT NOT NULL DEFAULT '[]'")
                 db.execSQL("ALTER TABLE combat_resources ADD COLUMN catalogId TEXT")
+            }
+        }
+
+        private val MIGRATION_47_48 = object : Migration(47, 48) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Spells a feature prepares (domain, species, feat spells): they don't count toward the limit.
+                db.execSQL("ALTER TABLE spells ADD COLUMN isAlwaysPrepared INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE spell_attacks ADD COLUMN isAlwaysPrepared INTEGER NOT NULL DEFAULT 0")
             }
         }
     }

@@ -87,11 +87,7 @@ import com.dndcharacterhandler.domain.model.CharacterBundle
 import com.dndcharacterhandler.domain.model.CharacterCatalog
 import com.dndcharacterhandler.domain.levelup.LevelUpDraft
 import com.dndcharacterhandler.domain.levelup.LevelUpEngine
-import com.dndcharacterhandler.domain.levelup.plainCatalogSpell
 import com.dndcharacterhandler.domain.levelup.plainEquipmentItem
-import com.dndcharacterhandler.domain.levelup.spellNameKey
-import com.dndcharacterhandler.domain.levelup.spellNameKeys
-import com.dndcharacterhandler.domain.repository.SpellCatalogRepository
 import com.dndcharacterhandler.domain.model.CatalogEquipmentRef
 import com.dndcharacterhandler.domain.model.InventoryCatalogItem
 import com.dndcharacterhandler.domain.model.InventoryItem
@@ -136,7 +132,6 @@ class OverviewViewModel(
     private val characterRepository: CharacterRepository,
     private val characterCatalogRepository: CharacterCatalogRepository,
     private val inventoryCatalogRepository: InventoryCatalogRepository,
-    private val spellCatalogRepository: SpellCatalogRepository,
     getCharacterBundleUseCase: GetCharacterBundleUseCase,
     selectedCharacterHolder: SelectedCharacterHolder
 ) : BaseCharacterViewModel(getCharacterBundleUseCase, selectedCharacterHolder) {
@@ -163,20 +158,12 @@ class OverviewViewModel(
         val catalog = _catalog.value ?: return
         viewModelScope.launch {
             val items = _equipmentItems.value.ifEmpty { loadEquipmentItems() }
-            // Spells the app's catalog has keep its data (damage, saves) and follow the language.
-            val spells = spellCatalogRepository.getItems().flatMap { spell ->
-                listOf(spell.name, spell.ruName).filter { it.isNotBlank() }.map { spellNameKey(it) to spell }
-            }.toMap()
+            // Spells are the catalog's own (Foundry 2024) cards, the same the Spells screen adds.
             val updated = withContext(Dispatchers.Default) {
                 LevelUpEngine(catalog).apply(
                     characterBundle, draft, russian,
                     now = System.currentTimeMillis(),
-                    equipmentItem = { item, count -> startingEquipmentItem(items, item, count, russian) },
-                    spellItem = { spell, prepared ->
-                        spellNameKeys(spell).firstNotNullOfOrNull(spells::get)
-                            ?.let { known -> known.toSpell().copy(isPrepared = prepared || known.level == 0) }
-                            ?: plainCatalogSpell(spell, prepared, russian)
-                    }
+                    equipmentItem = { item, count -> startingEquipmentItem(items, item, count, russian) }
                 )
             }
             characterRepository.replaceCharacterBundle(updated)

@@ -192,6 +192,8 @@ data class Spell(
     val level: Int,
     val school: String,
     val isPrepared: Boolean,
+    /** Prepared by a feature (domain, species, feat spells): it doesn't count toward the prepared limit. */
+    val isAlwaysPrepared: Boolean = false,
     val description: String,
     val higherLevelDescription: String = "",
     val range: String = "",

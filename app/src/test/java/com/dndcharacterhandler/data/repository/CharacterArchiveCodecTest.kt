@@ -238,6 +238,7 @@ class CharacterArchiveCodecTest {
                     level = 1,
                     school = "Divination",
                     isPrepared = true,
+                    isAlwaysPrepared = true,
                     description = "Mark a target.",
                     higherLevelDescription = "More concentration slots.",
                     range = "90 feet",

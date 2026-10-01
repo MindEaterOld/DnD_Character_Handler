@@ -65,14 +65,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
+import com.dndcharacterhandler.domain.model.CharacterCatalog
+import com.dndcharacterhandler.domain.repository.CharacterCatalogRepository
 import com.dndcharacterhandler.data.localization.LocalizedStrings
 import com.dndcharacterhandler.domain.model.AppLanguage
 import com.dndcharacterhandler.domain.model.Character
 import com.dndcharacterhandler.domain.model.CharacterBundle
 import com.dndcharacterhandler.domain.model.Spell
 import com.dndcharacterhandler.domain.model.SpellCatalogItem
+import com.dndcharacterhandler.domain.model.byCatalogId
 import com.dndcharacterhandler.domain.model.SpellcastingAbility
 import com.dndcharacterhandler.domain.rules.abilityModifier
+import com.dndcharacterhandler.domain.rules.preparedSpellLimit
 import com.dndcharacterhandler.domain.rules.proficiencyBonusForLevel
 import com.dndcharacterhandler.domain.rules.scoreForSpellcastingAbility
 import com.dndcharacterhandler.domain.repository.CharacterRepository
@@ -103,17 +107,22 @@ data class SpellCatalogUiState(
 class SpellsViewModel(
     private val characterRepository: CharacterRepository,
     private val spellCatalogRepository: SpellCatalogRepository,
+    private val characterCatalogRepository: CharacterCatalogRepository,
     getCharacterBundleUseCase: GetCharacterBundleUseCase,
     selectedCharacterHolder: SelectedCharacterHolder
 ) : BaseCharacterViewModel(getCharacterBundleUseCase, selectedCharacterHolder) {
     private val _catalogUiState = MutableStateFlow(SpellCatalogUiState())
     val catalogUiState: StateFlow<SpellCatalogUiState> = _catalogUiState.asStateFlow()
+    private val _characterCatalog = MutableStateFlow<CharacterCatalog?>(null)
+    /** The classes' progression, for the prepared spell limit. */
+    val characterCatalog: StateFlow<CharacterCatalog?> = _characterCatalog.asStateFlow()
 
     init {
         viewModelScope.launch {
             val items = spellCatalogRepository.getItems()
             _catalogUiState.value = SpellCatalogUiState(items = items, isLoading = false)
         }
+        viewModelScope.launch { _characterCatalog.value = characterCatalogRepository.getCatalog() }
     }
 
     fun updateSpell(characterBundle: CharacterBundle, spell: Spell) {
@@ -134,7 +143,7 @@ class SpellsViewModel(
             saveEffect = spell.saveEffect.trim(),
             areaOfEffect = spell.areaOfEffect.trim(),
             healing = spell.healing.trim(),
-            isPrepared = if (spell.level == 0) true else spell.isPrepared
+            isPrepared = spell.level == 0 || spell.isAlwaysPrepared || spell.isPrepared
         )
         viewModelScope.launch {
             characterRepository.upsertSpell(
@@ -157,7 +166,7 @@ class SpellsViewModel(
     fun togglePrepared(characterBundle: CharacterBundle, spell: Spell) {
         updateSpell(
             characterBundle,
-            spell.copy(isPrepared = if (spell.level == 0) true else !spell.isPrepared)
+            spell.copy(isPrepared = spell.level == 0 || spell.isAlwaysPrepared || !spell.isPrepared)
         )
     }
 
@@ -242,9 +251,15 @@ fun SpellsScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val catalogState by viewModel.catalogUiState.collectAsStateWithLifecycle()
+    val characterCatalog by viewModel.characterCatalog.collectAsStateWithLifecycle()
+    val preparedLimit = remember(state.character?.character?.classes, characterCatalog) {
+        val classes = state.character?.character?.classes.orEmpty()
+        characterCatalog?.let { preparedSpellLimit(classes, it) }
+    }
     SpellsContent(
         characterBundle = state.character,
         catalogState = catalogState,
+        preparedLimit = preparedLimit,
         onOpenDrawer = onOpenDrawer,
         onOpenDice = onOpenDice,
         onUpdateSpell = viewModel::updateSpell,
@@ -260,6 +275,8 @@ fun SpellsScreen(
 internal fun SpellsContent(
     characterBundle: CharacterBundle?,
     catalogState: SpellCatalogUiState = SpellCatalogUiState(),
+    /** How many spells the classes may prepare; null for a character without catalog classes. */
+    preparedLimit: Int? = null,
     onOpenDrawer: () -> Unit = {},
     onOpenDice: () -> Unit = {},
     onUpdateSpell: (CharacterBundle, Spell) -> Unit = { _, _ -> },
@@ -307,7 +324,8 @@ internal fun SpellsContent(
     val spellSaveDc = (8 + proficiencyBonus + spellModifier).toString()
     val slotMaximums = remember(character.spellSlotMaximums) { character.spellSlotMaximums.toSpellSlotList() }
     val slotRemainings = remember(character.spellSlotRemaining) { character.spellSlotRemaining.toSpellSlotList() }
-    val catalogById = remember(catalogState.items) { catalogState.items.associateBy { it.id } }
+    // Older characters' spells carry SRD 2014 ids: they find their 2024 entries too.
+    val catalogById = remember(catalogState.items) { catalogState.items.byCatalogId() }
     val displayedSpells = remember(resolvedBundle.spells, catalogById, strings) {
         resolvedBundle.spells.localizedWith(catalogById, strings)
     }
@@ -361,6 +379,14 @@ internal fun SpellsContent(
                             icon = Icons.Outlined.Bolt,
                             onClick = { isSpellcastingAbilityDialogOpen = true }
                         )
+                    }
+                }
+
+                if (preparedLimit != null) {
+                    item(key = "prepared") {
+                        // Cantrips and spells a feature prepares don't count.
+                        val prepared = resolvedBundle.spells.count { it.level > 0 && it.isPrepared && !it.isAlwaysPrepared }
+                        PreparedSpellsRow(prepared = prepared, limit = preparedLimit)
                     }
                 }
 
@@ -481,6 +507,31 @@ internal fun SpellsContent(
                 isSpellcastingAbilityDialogOpen = false
             }
         )
+    }
+}
+
+/** "Prepared: 5 of 7", in the danger colour when over the limit. */
+@Composable
+private fun PreparedSpellsRow(prepared: Int, limit: Int) {
+    val colors = LocalDesignTokens.current.colors
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(10.dp),
+        color = colors.surface.card.copy(alpha = 0.62f),
+        border = BorderStroke(1.dp, if (prepared > limit) colors.accent.dangerHpZero else colors.border.muted)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Icon(Icons.AutoMirrored.Outlined.MenuBook, contentDescription = null, tint = colors.text.label, modifier = Modifier.size(20.dp))
+            Text(
+                text = LocalStrings.current.format("spells_prepared_count", prepared, limit),
+                style = MaterialTheme.typography.bodyLarge,
+                color = if (prepared > limit) colors.accent.dangerHpZero else colors.text.primary
+            )
+        }
     }
 }
 
@@ -736,7 +787,8 @@ private fun SpellsAddEntryDialog(
         catalogItems.filter { item ->
             needle.isBlank() ||
                 item.name.contains(needle, ignoreCase = true) ||
-                localizedSpellNameOf(item.id, item.name, strings).contains(needle, ignoreCase = true) ||
+                item.localizedName(strings).contains(needle, ignoreCase = true) ||
+                item.ruName.contains(needle, ignoreCase = true) ||
                 item.description.contains(needle, ignoreCase = true) ||
                 item.school.contains(needle, ignoreCase = true)
         }
@@ -821,7 +873,7 @@ private fun SpellCatalogRow(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = localizedSpellNameOf(item.id, item.name, LocalStrings.current),
+                    text = item.localizedName(LocalStrings.current),
                     style = MaterialTheme.typography.bodyLarge,
                     color = Color(0xFFF7F2EA),
                     maxLines = 1,
@@ -855,6 +907,7 @@ internal fun SpellEditDialog(
     var level by remember(spell) { mutableStateOf(spell.level.coerceIn(0, 9)) }
     var school by remember(spell) { mutableStateOf(spell.school.ifBlank { spellSchoolOptions.first() }) }
     var isPrepared by remember(spell) { mutableStateOf(if (spell.level == 0) true else spell.isPrepared) }
+    var isAlwaysPrepared by remember(spell) { mutableStateOf(spell.isAlwaysPrepared) }
     var description by remember(spell) { mutableStateOf(spell.description) }
     var higherLevelDescription by remember(spell) { mutableStateOf(spell.higherLevelDescription) }
     var rangeKind by remember(spell) { mutableStateOf(parseRangeKind(spell.range)) }
@@ -953,14 +1006,26 @@ internal fun SpellEditDialog(
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(
-                        checked = if (level == 0) true else isPrepared,
-                        onCheckedChange = { if (level != 0) isPrepared = it }
+                        checked = level == 0 || isAlwaysPrepared || isPrepared,
+                        onCheckedChange = { if (level != 0 && !isAlwaysPrepared) isPrepared = it },
+                        enabled = level != 0 && !isAlwaysPrepared
                     )
                     Text(
                         text = text("spells_prepared"),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = Color(0xFFF7F2EA)
+                        color = LocalDesignTokens.current.colors.text.primary
                     )
+                }
+                // Domain, species and feat spells: prepared by a feature, not counted toward the limit.
+                if (level != 0) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(checked = isAlwaysPrepared, onCheckedChange = { isAlwaysPrepared = it })
+                        Text(
+                            text = text("spells_always_prepared"),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = LocalDesignTokens.current.colors.text.primary
+                        )
+                    }
                 }
 
                 DialogSection(text("spells_section_casting"))
@@ -1274,7 +1339,8 @@ internal fun SpellEditDialog(
                             name = name.trim(),
                             level = level,
                             school = school,
-                            isPrepared = if (level == 0) true else isPrepared,
+                            isPrepared = level == 0 || isAlwaysPrepared || isPrepared,
+                            isAlwaysPrepared = level != 0 && isAlwaysPrepared,
                             description = description.trim(),
                             higherLevelDescription = higherLevelDescription.trim(),
                             range = encodeRange(rangeKind, rangeFeet, rangeSpecial),

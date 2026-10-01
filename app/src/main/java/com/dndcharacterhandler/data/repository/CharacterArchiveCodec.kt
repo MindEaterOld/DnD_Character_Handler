@@ -28,7 +28,7 @@ import org.json.JSONObject
 import java.io.File
 
 // 18: armor/shield magicalBonus is meaningful (adds to AC).
-private const val SCHEMA_VERSION = 19
+private const val SCHEMA_VERSION = 20
 
 data class ImportedArchive(
     val characterBundle: CharacterBundle,
@@ -178,6 +178,7 @@ fun CharacterBundle.toArchiveManifest(
                 put("level", spell.level)
                 put("school", spell.school)
                 put("isPrepared", spell.isPrepared)
+                put("isAlwaysPrepared", spell.isAlwaysPrepared)
                 put("description", spell.description)
                 put("higherLevelDescription", spell.higherLevelDescription)
                 put("range", spell.range)
@@ -215,6 +216,7 @@ fun CharacterBundle.toArchiveManifest(
                 put("level", spell.level)
                 put("school", spell.school)
                 put("isPrepared", spell.isPrepared)
+                put("isAlwaysPrepared", spell.isAlwaysPrepared)
                 put("description", spell.description)
                 put("higherLevelDescription", spell.higherLevelDescription)
                 put("range", spell.range)
@@ -546,6 +548,7 @@ private fun JSONArray.toSpellList(): List<Spell> =
                 level = json.optInt("level"),
                 school = json.optString("school"),
                 isPrepared = json.optBoolean("isPrepared"),
+                isAlwaysPrepared = json.optBoolean("isAlwaysPrepared"),
                 description = json.optString("description"),
                 higherLevelDescription = json.optString("higherLevelDescription"),
                 range = json.optString("range"),

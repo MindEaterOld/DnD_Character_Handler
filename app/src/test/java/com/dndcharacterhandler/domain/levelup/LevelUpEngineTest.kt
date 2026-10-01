@@ -336,9 +336,13 @@ class LevelUpEngineTest {
         val learned = run.pages.filterIsInstance<LevelUpPage.Summary>().single().summary.spellsLearned
         assertEquals(9, learned.size)
         assertEquals(9, result.spells.size)
-        // Cantrips are at hand; the spellbook's spells wait to be prepared.
+        // Cantrips are at hand; the spellbook's spells wait for the player to prepare them.
         assertTrue(result.spells.filter { it.level == 0 }.all { it.isPrepared })
-        assertTrue(result.spells.filter { it.level == 1 }.none { it.isPrepared })
+        assertTrue(result.spells.filter { it.level == 1 }.none { it.isPrepared || it.isAlwaysPrepared })
+        // The 2024 catalog's own cards, which follow the language on the Spells screen.
+        assertTrue(result.spells.all { spell -> spell.catalogId != null && catalog.spells.containsKey(spell.catalogId) })
+        val wizardEntry = result.character.classes.single()
+        assertEquals(4, com.dndcharacterhandler.domain.rules.preparedSpellLimit(listOf(wizardEntry), catalog))
         assertTrue(result.spells.all { it.description.isNotBlank() && it.range.isNotBlank() })
         assertTrue(result.character.advancements.any { it.type == "SpellChoice" })
     }
@@ -391,8 +395,40 @@ class LevelUpEngineTest {
         val result = engine.apply(bundle, draft, russian = false, now = 1)
         val domain = result.spells.filter { it.name in listOf("Aid", "Bless", "Cure Wounds", "Lesser Restoration") }
         assertEquals(4, domain.size)
-        assertTrue(domain.all { it.isPrepared })
+        // Prepared by the domain: they don't count toward the cleric's limit.
+        assertTrue(domain.all { it.isPrepared && it.isAlwaysPrepared })
         // And the cleric's cantrips: three at 1st level.
         assertEquals(3, result.spells.count { it.level == 0 })
+    }
+
+    @Test
+    fun preparedLimitsAddUpOverTheClasses() {
+        val cleric = catalog.classesByIdentifier.getValue("cleric")
+        val classes = listOf(
+            com.dndcharacterhandler.domain.model.CharacterClassEntry(cleric.id, levels = 5, isOriginal = true),
+            com.dndcharacterhandler.domain.model.CharacterClassEntry(wizard.id, levels = 2, isOriginal = false),
+            com.dndcharacterhandler.domain.model.CharacterClassEntry(fighter.id, levels = 1, isOriginal = false)
+        )
+        // Cleric 5: 9, Wizard 2: 5; a Fighter without a spellcasting subclass prepares none.
+        assertEquals(14, com.dndcharacterhandler.domain.rules.preparedSpellLimit(classes, catalog))
+        assertEquals(null, com.dndcharacterhandler.domain.rules.preparedSpellLimit(classes.takeLast(1), catalog))
+    }
+
+    @Test
+    fun aFeatsSpellsComeAlwaysPrepared() {
+        val bundle = newCharacter()
+        val acolyte = catalog.backgrounds.first { it.identifier == "acolyte" && it.book == "PHB 2024" }
+        val draft = complete(
+            bundle,
+            LevelUpDraft(1, setup = LevelUpSetup(fighter.id, keepExistingLevels = false), answers = mapOf("background" to LevelUpAnswer.Origin(acolyte.id)))
+        ) { page ->
+            if (page is LevelUpPage.AbilityScores && !page.allowFeat) LevelUpAnswer.AbilityScores(mapOf("wis" to 2, "cha" to 1)) else null
+        }
+        val result = engine.apply(bundle, draft, russian = false, now = 1)
+        // Magic Initiate (Cleric): two cantrips and a 1st-level spell, always prepared.
+        val leveled = result.spells.filter { it.level == 1 }
+        assertEquals(1, leveled.size)
+        assertTrue(leveled.single().isAlwaysPrepared && leveled.single().isPrepared)
+        assertEquals(2, result.spells.count { it.level == 0 })
     }
 }

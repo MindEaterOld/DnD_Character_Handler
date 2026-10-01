@@ -6,10 +6,12 @@ import com.dndcharacterhandler.domain.model.CharacterCatalog
 import com.dndcharacterhandler.domain.model.ClassRestriction
 import com.dndcharacterhandler.domain.model.FeatureCatalogGroup
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.BeforeClass
 import org.junit.Test
+import com.dndcharacterhandler.domain.model.byCatalogId
 import java.io.File
 
 /** Checks the shipped character_catalog.json (built by tools/foundry_catalog/convert.py). */
@@ -147,5 +149,32 @@ class CharacterCatalogTest {
         assertNotNull(invocation)
         // Entries only published in Russian still show a name in English mode.
         assertTrue(items.all { it.name.isNotBlank() })
+    }
+
+    @Test
+    fun spellCardsComeFromThe2024Catalog() {
+        val items = com.dndcharacterhandler.data.repository.spellCatalogItems(catalog)
+        val fireball = items.single { it.name == "Fireball" }
+        assertEquals("Огненный шар", fireball.ruName)
+        assertEquals("Evocation", fireball.school)
+        assertEquals(3, fireball.level)
+        assertEquals("8d6", fireball.damageBase)
+        assertEquals("Fire", fireball.damageType)
+        assertEquals("DEX", fireball.saveAbility)
+        assertEquals("half", fireball.saveEffect)
+        assertEquals("sphere, 20 ft", fireball.areaOfEffect)
+        assertTrue(fireball.availableClasses, "Wizard" in fireball.availableClasses && "Sorcerer" in fireball.availableClasses)
+        // The higher-level paragraph has its own field, as on the SRD cards.
+        assertTrue(fireball.higherLevelDescription.isNotBlank() && fireball.ruHigherLevel.isNotBlank())
+        assertFalse("Using a Higher-Level" in fireball.description)
+        // Characters' SRD 2014 spells find their 2024 entry.
+        assertTrue("spell:fireball" in fireball.legacyIds)
+        assertEquals(fireball, items.byCatalogId()["spell:fireball"])
+        val cure = items.single { it.name == "Cure Wounds" }
+        assertEquals("2d8", cure.healBase)
+        assertTrue(cure.healBonusIsModifier)
+        val bolt = items.single { it.name == "Fire Bolt" }
+        assertEquals("ranged", bolt.attackType)
+        assertTrue(bolt.damage.startsWith("1: 1d10"))
     }
 }
