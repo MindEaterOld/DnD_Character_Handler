@@ -413,6 +413,7 @@ fun AttributesContent(
         mutableStateOf(character.passivePerceptionBonus.toString())
     }
     var isDarkvisionDialogOpen by remember { mutableStateOf(false) }
+    var expandedDarkvision by remember { mutableStateOf(setOf<Long>()) }
     var isDarkvisionCatalogOpen by remember { mutableStateOf(false) }
     var editingFeature by remember { mutableStateOf<Feature?>(null) }
     var darkvisionManualDraft by remember(character.darkvisionManualFeet) {
@@ -654,7 +655,11 @@ fun AttributesContent(
                                 darkvisionFeatures.forEach { feature ->
                                     FeatureCard(
                                         feature = feature,
-                                        onClick = { editingFeature = feature }
+                                        expanded = feature.id in expandedDarkvision,
+                                        onExpandedChange = { open ->
+                                            expandedDarkvision = if (open) expandedDarkvision + feature.id else expandedDarkvision - feature.id
+                                        },
+                                        onEdit = { editingFeature = feature }
                                     )
                                 }
                             }

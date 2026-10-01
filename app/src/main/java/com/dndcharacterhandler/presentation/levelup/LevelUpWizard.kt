@@ -788,7 +788,7 @@ private fun FeatureCard(
     onClick = onClick
 )
 
-/** A choice with a description that unfolds with the arrow. */
+/** A choice with a description that unfolds with the arrow (the shared [ExpandableCard]). */
 @Composable
 private fun ExpandableCard(
     title: String,
@@ -799,45 +799,18 @@ private fun ExpandableCard(
     leading: (@Composable () -> Unit)?,
     onClick: (() -> Unit)?
 ) {
-    val colors = LocalDesignTokens.current.colors
     var expanded by remember { mutableStateOf(false) }
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .then(if (onClick != null && enabled) Modifier.clickable(onClick = onClick) else Modifier),
-        shape = RoundedCornerShape(12.dp),
-        color = if (selected) colors.surface.selected else colors.surface.card,
-        border = BorderStroke(1.dp, if (selected) colors.border.selected else colors.border.muted)
-    ) {
-        Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                leading?.invoke()
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(title, style = MaterialTheme.typography.bodyLarge, color = if (enabled) colors.text.primary else colors.text.subtle)
-                    if (!subtitle.isNullOrBlank()) {
-                        Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = colors.text.muted, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                    }
-                }
-                if (body.isNotBlank()) {
-                    IconButton(onClick = { expanded = !expanded }) {
-                        Icon(
-                            if (expanded) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
-                            contentDescription = null,
-                            tint = colors.text.muted
-                        )
-                    }
-                }
-            }
-            if (expanded) {
-                Text(
-                    body,
-                    modifier = Modifier.padding(top = 4.dp, bottom = 6.dp),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = colors.text.muted
-                )
-            }
-        }
-    }
+    com.dndcharacterhandler.presentation.components.ExpandableCard(
+        title = title,
+        expanded = expanded,
+        onExpandedChange = { expanded = it },
+        subtitle = subtitle,
+        body = body,
+        selected = selected,
+        enabled = enabled,
+        leading = leading,
+        onClick = onClick
+    )
 }
 
 @Composable

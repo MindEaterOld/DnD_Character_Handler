@@ -39,7 +39,10 @@ fun FeaturesScreenPreview() {
             "features_source_other" to "Other",
             "inventory_delete_action" to "Delete",
             "common_save" to "Save",
-            "common_cancel" to "Cancel"
+            "common_cancel" to "Cancel",
+            "features_level" to "Level",
+            "features_edit_action" to "Edit",
+            "features_no_description" to "No description"
         )
     )
     val character = previewFallbackCharacter()
@@ -49,7 +52,8 @@ fun FeaturesScreenPreview() {
             name = "Portent",
             description = "Replace attack rolls, saving throws, or ability checks with foreseen d20 rolls.",
             level = 2,
-            source = FeatureSource.CLASS
+            source = FeatureSource.CLASS,
+            category = "Diviner"
         ),
         Feature(
             id = 2,
@@ -100,7 +104,9 @@ fun FeaturesScreenPreview() {
                     spells = emptyList(),
                     features = features,
                     notes = emptyList()
-                )
+                ),
+                // One card unfolded, to show the description and the Edit button.
+                initiallyExpanded = setOf(1L)
             )
         }
     }

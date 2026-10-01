@@ -13,14 +13,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.AutoStories
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.ArrowDropDown
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
@@ -72,6 +75,7 @@ import com.dndcharacterhandler.domain.usecase.GetCharacterBundleUseCase
 import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
 import com.dndcharacterhandler.presentation.components.CharacterScreenHeader
+import com.dndcharacterhandler.presentation.components.ExpandableCard
 import com.dndcharacterhandler.presentation.components.FloatingAddButton
 import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
 import com.dndcharacterhandler.presentation.components.ScreenBackground
@@ -192,12 +196,16 @@ internal fun FeaturesContent(
     onDeleteFeature: (CharacterBundle, Feature) -> Unit = { _, _ -> },
     onOpenLevelUp: (Int) -> Unit = {},
     onUpdateRace: (CharacterBundle, String) -> Unit = { _, _ -> },
-    onUpdateBackground: (CharacterBundle, String) -> Unit = { _, _ -> }
+    onUpdateBackground: (CharacterBundle, String) -> Unit = { _, _ -> },
+    /** Features shown unfolded at first (the screen preview uses it). */
+    initiallyExpanded: Set<Long> = emptySet()
 ) {
     val character = characterBundle?.character
     val russian = LocalStrings.current.language == AppLanguage.RUSSIAN
     var query by remember { mutableStateOf("") }
     var editingFeature by remember { mutableStateOf<Feature?>(null) }
+    // Unfolded cards, kept while scrolling; several can be open at once to compare them.
+    var expandedFeatures by remember(characterBundle?.character?.id) { mutableStateOf(initiallyExpanded) }
     var isAddEntryDialogOpen by remember { mutableStateOf(false) }
     var editingSummaryField by remember { mutableStateOf<FeatureSummaryField?>(null) }
     var summaryDraft by remember { mutableStateOf("") }
@@ -316,7 +324,12 @@ internal fun FeaturesContent(
                     items(features, key = { it.id }) { feature ->
                         FeatureCard(
                             feature = feature,
-                            onClick = { editingFeature = feature }
+                            expanded = feature.id in expandedFeatures,
+                            onExpandedChange = { open ->
+                                expandedFeatures = if (open) expandedFeatures + feature.id else expandedFeatures - feature.id
+                            },
+                            onEdit = { editingFeature = feature },
+                            renderText = renderText
                         )
                     }
                 }
@@ -543,47 +556,54 @@ private fun FeaturesSectionTitle(title: String) {
     }
 }
 
+/**
+ * A feature of the character as an unfolding card: its name with category and level; unfolded, the
+ * description with the character's numbers ([renderText]) and an Edit button. A long press edits
+ * right away; deleting stays inside the editor.
+ */
 @Composable
 internal fun FeatureCard(
     feature: Feature,
-    onClick: () -> Unit
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    onEdit: () -> Unit,
+    renderText: (String) -> String = { it }
 ) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(10.dp),
-        color = LocalDesignTokens.current.colors.surface.card.copy(alpha = 0.62f),
-        border = BorderStroke(1.dp, LocalDesignTokens.current.colors.border.muted)
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+    val colors = LocalDesignTokens.current.colors
+    val subtitle = listOfNotNull(
+        feature.category.takeIf { it.isNotBlank() },
+        feature.level?.let { "${text("features_level")} $it" }
+    ).joinToString(" • ")
+    ExpandableCard(
+        title = feature.name.ifBlank { text("features_untitled") },
+        expanded = expanded,
+        onExpandedChange = onExpandedChange,
+        subtitle = subtitle,
+        body = renderText(feature.description).ifBlank { text("features_no_description") },
+        leading = {
             Icon(
-                imageVector = Icons.Outlined.AutoStories,
+                imageVector = featureSourceIcon(feature.source),
                 contentDescription = null,
-                tint = LocalDesignTokens.current.colors.text.muted,
-                modifier = Modifier
-                    .padding(end = 12.dp)
-                    .size(22.dp)
+                tint = colors.text.muted,
+                modifier = Modifier.size(22.dp)
             )
-            Text(
-                text = feature.name.ifBlank { text("features_untitled") },
-                modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.bodyLarge,
-                color = LocalDesignTokens.current.colors.text.primary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Icon(
-                imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
-                contentDescription = null,
-                tint = LocalDesignTokens.current.colors.text.muted,
-                modifier = Modifier.padding(start = 10.dp)
-            )
+        },
+        onLongClick = onEdit,
+        actions = {
+            TextButton(onClick = onEdit) {
+                Icon(Icons.Outlined.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(text("features_edit_action"))
+            }
         }
-    }
+    )
+}
+
+private fun featureSourceIcon(source: FeatureSource): ImageVector = when (source) {
+    FeatureSource.CLASS -> Icons.Outlined.Shield
+    FeatureSource.RACE -> Icons.Outlined.Person
+    FeatureSource.BACKGROUND -> Icons.Outlined.AutoStories
+    FeatureSource.OTHER -> Icons.Outlined.AutoAwesome
 }
 
 @Composable
