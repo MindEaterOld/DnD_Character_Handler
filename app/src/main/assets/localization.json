@@ -189,6 +189,7 @@
     "es": "Cargando personaje"
   },
   "placeholder_race": {
+    "maxChars": 11,
     "en": "Race",
     "ru": "Раса",
     "de": "Volk",
@@ -196,6 +197,7 @@
     "es": "Raza"
   },
   "placeholder_class": {
+    "maxChars": 11,
     "en": "Class",
     "ru": "Класс",
     "de": "Klasse",
@@ -2436,6 +2438,7 @@
     "es": "Alineamiento"
   },
   "biography_background": {
+    "maxChars": 11,
     "en": "Background",
     "ru": "Предыстория",
     "de": "Hintergrund",
