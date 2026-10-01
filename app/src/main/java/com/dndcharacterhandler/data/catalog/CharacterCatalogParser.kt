@@ -3,6 +3,8 @@ package com.dndcharacterhandler.data.catalog
 import com.dndcharacterhandler.domain.model.AdvancementStep
 import com.dndcharacterhandler.domain.model.CatalogBackground
 import com.dndcharacterhandler.domain.model.CatalogClass
+import com.dndcharacterhandler.domain.model.CatalogEquipmentRef
+import com.dndcharacterhandler.domain.model.EquipmentNode
 import com.dndcharacterhandler.domain.model.CatalogFeature
 import com.dndcharacterhandler.domain.model.CatalogFeatureKind
 import com.dndcharacterhandler.domain.model.CatalogGrant
@@ -42,7 +44,10 @@ object CharacterCatalogParser {
             traits = root.optJSONObject("traits")?.optJSONObject("labels").entries { key, value ->
                 CatalogTrait(key, value.text("name"), value.strings("children"))
             },
-            traitCategories = root.optJSONObject("traits")?.optJSONObject("categories").entries { _, value -> value.asText() }
+            traitCategories = root.optJSONObject("traits")?.optJSONObject("categories").entries { _, value -> value.asText() },
+            equipment = root.optJSONObject("equipment").entries { id, value ->
+                CatalogEquipmentRef(id, value.text("name"), value.optString("type"))
+            }
         )
     }
 
@@ -55,7 +60,9 @@ object CharacterCatalogParser {
         primaryAbilities = json.strings("primaryAbilities"),
         primaryAbilitiesAll = json.optBoolean("primaryAbilitiesAll"),
         spellcasting = json.spellcasting(),
-        advancement = json.advancement()
+        advancement = json.advancement(),
+        startingEquipment = json.equipmentNodes(),
+        wealth = json.optString("wealth")
     )
 
     private fun parseSubclass(json: JSONObject) = CatalogSubclass(
@@ -86,8 +93,22 @@ object CharacterCatalogParser {
         name = json.text("name"),
         text = json.text("text"),
         book = json.optString("book"),
-        advancement = json.advancement()
+        advancement = json.advancement(),
+        startingEquipment = json.equipmentNodes(),
+        wealth = json.optString("wealth")
     )
+
+    private fun JSONObject.equipmentNodes(key: String = "startingEquipment"): List<EquipmentNode> =
+        objects(key).mapNotNull { node ->
+            when (node.optString("type")) {
+                "OR" -> EquipmentNode.Group(any = true, children = node.equipmentNodes("children"))
+                "AND" -> EquipmentNode.Group(any = false, children = node.equipmentNodes("children"))
+                "item" -> EquipmentNode.Item(node.optString("item"), node.optInt("count", 1).coerceAtLeast(1))
+                "currency" -> EquipmentNode.Currency(node.optString("currency", "gp"), node.optInt("count", 1))
+                "category" -> EquipmentNode.Category(node.optString("category"), node.optString("key"), node.optInt("count", 1))
+                else -> null
+            }
+        }
 
     private fun parseFeature(json: JSONObject) = CatalogFeature(
         id = json.getString("id"),

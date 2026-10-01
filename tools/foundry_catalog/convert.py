@@ -314,8 +314,46 @@ def activation_of(doc):
     return None
 
 
+def number(value):
+    """'30' or 30 -> 30; empty or non-numeric -> None."""
+    try:
+        result = float(value)
+    except (TypeError, ValueError):
+        return None
+    return int(result) if result.is_integer() else result
+
+
+def starting_equipment(entries):
+    """Foundry's flat startingEquipment list as a tree: OR/AND groups with items, gold and categories."""
+    children = collections.defaultdict(list)
+    for entry in sorted(entries, key=lambda e: e.get('sort') or 0):
+        children[entry.get('group') or ''].append(entry)
+
+    def node(entry):
+        kind = entry.get('type')
+        if kind in ('OR', 'AND'):
+            return {'type': kind, 'children': [node(child) for child in children.get(entry['_id'], [])]}
+        count = entry.get('count') or 1
+        if kind == 'linked':
+            return {'type': 'item', 'item': (entry.get('key') or '').split('.')[-1], 'uuid': entry.get('key') or '', 'count': count}
+        if kind == 'currency':
+            return {'type': 'currency', 'currency': entry.get('key') or 'gp', 'count': count}
+        # "Any simple weapon", "an artisan's tool"...: a category to pick from.
+        return {'type': 'category', 'category': kind, 'key': entry.get('key') or '', 'count': count}
+
+    return [node(entry) for entry in children.get('', [])]
+
+
 def build(catalog):
     classes, subclasses, species, backgrounds, features = [], [], [], [], []
+
+    def add_equipment(entry, system):
+        tree = starting_equipment(system.get('startingEquipment') or [])
+        if tree:
+            entry['startingEquipment'] = tree
+        wealth = str(system.get('wealth') or '').strip()
+        if wealth:
+            entry['wealth'] = wealth
     owners = collections.defaultdict(list)  # item id -> [{owner, level, via}]
 
     def note_owner(owner, step):
@@ -351,6 +389,7 @@ def build(catalog):
                 if spellcasting.get('progression') and spellcasting['progression'] != 'none':
                     entry['spellcasting'] = {'progression': spellcasting['progression'], 'ability': spellcasting.get('ability') or ''}
                 entry['advancement'] = steps
+                add_equipment(entry, system)
                 classes.append(entry)
             elif kind == 'subclass':
                 entry = base(doc)
@@ -364,10 +403,12 @@ def build(catalog):
             elif kind == 'race':
                 entry = base(doc)
                 entry['text'] = catalog.texts(doc)
-                movement = {k: v for k, v in (system.get('movement') or {}).items() if v and k not in ('units', 'hover', 'ignoredDifficultTerrain', 'special')}
+                movement = {k: number(v) for k, v in (system.get('movement') or {}).items()
+                            if k in ('walk', 'fly', 'swim', 'climb', 'burrow') and number(v)}
                 if movement:
                     entry['movement'] = movement
-                senses = {k: v for k, v in (system.get('senses') or {}).items() if v and k not in ('units', 'special')}
+                ranges = (system.get('senses') or {}).get('ranges') or {}
+                senses = {k: number(v) for k, v in ranges.items() if number(v)}
                 if senses:
                     entry['senses'] = senses
                 creature = system.get('type') or {}
@@ -379,6 +420,7 @@ def build(catalog):
                 entry = base(doc)
                 entry['text'] = catalog.texts(doc)
                 entry['advancement'] = steps
+                add_equipment(entry, system)
                 backgrounds.append(entry)
             else:
                 entry = base(doc)
@@ -470,6 +512,23 @@ def build(catalog):
                 short_equipment.append(short)
             if short_equipment:
                 step['equipment'] = short_equipment
+    def walk(nodes):
+        for item in nodes:
+            if item['type'] == 'item':
+                short = item['item']
+                ru_entry, en_entry = ru_equipment.get(short), en_equipment.get(short)
+                if ru_entry or en_entry:
+                    ru, en = split_name(ru_entry['name']) if ru_entry else ('', '')
+                    if en_entry:
+                        en = en_entry['name']
+                    equipment[short] = {'name': {'en': en, 'ru': ru}, 'type': (ru_entry or en_entry).get('type')}
+                else:
+                    catalog.warnings['starting equipment item not in the indexes'] += 1
+                item.pop('uuid', None)
+            walk(item.get('children') or [])
+
+    for entry in classes + backgrounds:
+        walk(entry.get('startingEquipment') or [])
     return {
         'classes': classes, 'subclasses': subclasses, 'species': species, 'backgrounds': backgrounds,
         'features': features, 'spells': spells, 'equipment': equipment,

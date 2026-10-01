@@ -19,7 +19,9 @@ data class CharacterCatalog(
     /** Proficiency and trait keys ("skills:ath", "tool:art:smith"...) with their labels and children. */
     val traits: Map<String, CatalogTrait> = emptyMap(),
     /** Labels of the trait kinds: "skills", "tool", "languages"... */
-    val traitCategories: Map<String, CatalogText> = emptyMap()
+    val traitCategories: Map<String, CatalogText> = emptyMap(),
+    /** Equipment the advancements and starting equipment point at, by id. */
+    val equipment: Map<String, CatalogEquipmentRef> = emptyMap()
 ) {
     val featuresById: Map<String, CatalogFeature> by lazy { features.associateBy { it.id } }
     val classesByIdentifier: Map<String, CatalogClass> by lazy { classes.associateBy { it.identifier } }
@@ -72,7 +74,10 @@ data class CatalogClass(
     /** True when all [primaryAbilities] need 13+, false when any one of them is enough. */
     val primaryAbilitiesAll: Boolean,
     val spellcasting: CatalogSpellcasting?,
-    val advancement: List<AdvancementStep>
+    val advancement: List<AdvancementStep>,
+    val startingEquipment: List<EquipmentNode> = emptyList(),
+    /** Gold (GP) taken instead of the starting equipment, as Foundry's formula ("155"). */
+    val wealth: String = ""
 )
 
 data class CatalogSubclass(
@@ -103,8 +108,23 @@ data class CatalogBackground(
     val name: CatalogText,
     val text: CatalogText,
     val book: String,
-    val advancement: List<AdvancementStep>
+    val advancement: List<AdvancementStep>,
+    val startingEquipment: List<EquipmentNode> = emptyList(),
+    /** Gold (GP) taken instead of the starting equipment. */
+    val wealth: String = ""
 )
+
+data class CatalogEquipmentRef(val id: String, val name: CatalogText, val type: String)
+
+/** Starting equipment as Foundry lays it out: groups of all ([Group.any] false) or one of their children. */
+sealed interface EquipmentNode {
+    data class Group(val any: Boolean, val children: List<EquipmentNode>) : EquipmentNode
+    data class Item(val itemId: String, val count: Int) : EquipmentNode
+    /** Coins: [currency] is "gp", "sp"... */
+    data class Currency(val currency: String, val count: Int) : EquipmentNode
+    /** One item of a kind to pick: [category] "tool" with [key] "art" is an artisan's tool of choice. */
+    data class Category(val category: String, val key: String, val count: Int) : EquipmentNode
+}
 
 enum class CatalogFeatureKind(val key: String) {
     CLASS_FEATURE("classFeature"),
