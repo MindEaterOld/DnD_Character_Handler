@@ -180,7 +180,10 @@
         "xpCapped": "#E0B84E",
         "hpTemporary": "#69B7FF",
         "heal": "#8AD178",
-        "dangerHpZero": "#E85C5C"
+        "dangerHpZero": "#E85C5C",
+        "coinCopper": "#C9824B",
+        "coinSilver": "#C4C8D2",
+        "coinGold": "#E0B548"
       },
       "progress": {
         "xpFill": "#D7D1CC",

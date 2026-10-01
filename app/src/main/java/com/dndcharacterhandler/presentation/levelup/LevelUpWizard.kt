@@ -1288,7 +1288,7 @@ private fun CoinsAmount(coins: Map<String, Int>, strings: LocalizedStrings, modi
                 if (currency == "gp") {
                     CurrencyCoinCluster(
                         modifier = Modifier.size(24.dp),
-                        color = colors.accent.xpCapped,
+                        color = colors.accent.coinGold,
                         type = CurrencyType.GOLD
                     )
                 } else {

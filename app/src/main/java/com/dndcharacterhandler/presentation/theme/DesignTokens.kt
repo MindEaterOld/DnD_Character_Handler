@@ -77,13 +77,16 @@ data class BorderColorTokens(
     val muted: Color
 )
 
-/** Semantic accents (inspiration, HP, healing, danger). */
+/** Semantic accents (inspiration, HP, healing, danger) and the coins of the currency icons. */
 data class AccentColorTokens(
     val inspiration: Color,
     val xpCapped: Color,
     val hpTemporary: Color,
     val heal: Color,
-    val dangerHpZero: Color
+    val dangerHpZero: Color,
+    val coinCopper: Color,
+    val coinSilver: Color,
+    val coinGold: Color
 )
 
 /** XP / progress bar fill and track. */
@@ -156,7 +159,10 @@ val DefaultDesignColors = DesignColorTokens(
         xpCapped = Color(0xFFE0B84E),
         hpTemporary = Color(0xFF69B7FF),
         heal = Color(0xFF8AD178),
-        dangerHpZero = Color(0xFFE85C5C)
+        dangerHpZero = Color(0xFFE85C5C),
+        coinCopper = Color(0xFFC9824B),
+        coinSilver = Color(0xFFC4C8D2),
+        coinGold = Color(0xFFE0B548)
     ),
     progress = ProgressColorTokens(
         xpFill = Color(0xFFD7D1CC),
@@ -291,7 +297,10 @@ private fun loadColorTokens(app: JSONObject?): DesignColorTokens {
             xpCapped = accent.colorToken("xpCapped", defaults.accent.xpCapped),
             hpTemporary = accent.colorToken("hpTemporary", defaults.accent.hpTemporary),
             heal = accent.colorToken("heal", defaults.accent.heal),
-            dangerHpZero = accent.colorToken("dangerHpZero", defaults.accent.dangerHpZero)
+            dangerHpZero = accent.colorToken("dangerHpZero", defaults.accent.dangerHpZero),
+            coinCopper = accent.colorToken("coinCopper", defaults.accent.coinCopper),
+            coinSilver = accent.colorToken("coinSilver", defaults.accent.coinSilver),
+            coinGold = accent.colorToken("coinGold", defaults.accent.coinGold)
         ),
         progress = ProgressColorTokens(
             xpFill = progress.colorToken("xpFill", defaults.progress.xpFill),

@@ -453,6 +453,7 @@ private fun CurrencyCardRow(
     goldPieces: Int,
     onClick: () -> Unit
 ) {
+    val accent = LocalDesignTokens.current.colors.accent
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -460,21 +461,21 @@ private fun CurrencyCardRow(
         CurrencyCard(
             modifier = Modifier.weight(1f),
             value = copperPieces.toString(),
-            color = Color(0xFFC9824B),
+            color = accent.coinCopper,
             type = CurrencyType.COPPER,
             onClick = onClick
         )
         CurrencyCard(
             modifier = Modifier.weight(1f),
             value = silverPieces.toString(),
-            color = Color(0xFFC4C8D2),
+            color = accent.coinSilver,
             type = CurrencyType.SILVER,
             onClick = onClick
         )
         CurrencyCard(
             modifier = Modifier.weight(1f),
             value = goldPieces.toString(),
-            color = Color(0xFFE0B548),
+            color = accent.coinGold,
             type = CurrencyType.GOLD,
             onClick = onClick
         )
@@ -490,13 +491,14 @@ private fun CurrencyCard(
     onClick: () -> Unit
 ) {
     val tokens = LocalDesignTokens.current.typography
+    val colors = LocalDesignTokens.current.colors
     Surface(
         modifier = modifier
             .height(52.dp)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(8.dp),
-        color = Color(0xFF17141B).copy(alpha = 0.72f),
-        border = BorderStroke(1.dp, Color(0x42FFFFFF))
+        color = colors.surface.card.copy(alpha = 0.72f),
+        border = BorderStroke(1.dp, colors.border.miniCard)
     ) {
         Row(
             modifier = Modifier
@@ -518,7 +520,7 @@ private fun CurrencyCard(
                     fontSize = tokens.titleMedium.fontSizeSp.sp,
                     lineHeight = (tokens.titleMedium.lineHeightSp ?: tokens.titleMedium.fontSizeSp).sp
                 ),
-                color = Color(0xFFF7F2EA),
+                color = colors.text.primary,
                 maxLines = 1,
                 textAlign = TextAlign.Center
             )
