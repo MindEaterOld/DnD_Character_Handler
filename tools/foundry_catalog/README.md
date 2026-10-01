@@ -9,8 +9,11 @@ on — is built from the Foundry VTT compendiums of the D&D world:
 - **dnd5e SRD 5.2** (English): English names and texts for the documents both share (same ids).
 - **Spells**: the Fifthpendium and SRD 5.2 spell packs (card data and both texts) and the spell
   lists of the classes, subclasses and dragonmarks from `dnd5e.registry.spellLists`; Character
-  Wizard's spell choices draw from these lists. Range, casting time and duration are written in the
-  app's (SRD) wording ("60 feet", "1 bonus action", "Up to 1 minute").
+  Wizard's spell choices and the Spells screen's catalog both use them. Range, casting time and
+  duration are written in the app's (SRD) wording ("60 feet", "1 bonus action", "Up to 1 minute");
+  attack, save, damage, healing and area come from the spells' activities; the higher-level paragraph
+  has its own field. `spellLegacyIds` maps the SRD 2014 spells characters were given before
+  ("spell:fireball") to these, so their saved spells keep following the language.
 - `legacy/feature_catalog_extra.json` and the 5e-database SRD files: English texts the app shipped
   before, and the old catalog ids that saved features still carry (mapped in `legacyIds`).
 

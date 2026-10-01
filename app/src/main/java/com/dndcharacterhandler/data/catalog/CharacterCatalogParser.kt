@@ -48,8 +48,27 @@ object CharacterCatalogParser {
                     duration = value.optString("duration"),
                     ritual = value.optBoolean("ritual"),
                     concentration = value.optBoolean("concentration"),
-                    text = value.text("text")
+                    text = value.text("text"),
+                    higher = value.text("higher"),
+                    materialCost = value.optString("materialCost"),
+                    attackType = value.optString("attackType"),
+                    saveAbility = value.optString("saveAbility"),
+                    saveEffect = value.optString("saveEffect"),
+                    damageBase = value.optString("damageBase"),
+                    damageBonus = value.optString("damageBonus"),
+                    damageType = value.optString("damageType"),
+                    altDamageBase = value.optString("altDamageBase"),
+                    altDamageBonus = value.optString("altDamageBonus"),
+                    altDamageType = value.optString("altDamageType"),
+                    damage = value.optString("damage"),
+                    healBase = value.optString("healBase"),
+                    healBonus = value.optString("healBonus"),
+                    healing = value.optString("healing"),
+                    areaOfEffect = value.optString("areaOfEffect")
                 )
+            },
+            spellLegacyIds = root.optJSONObject("spellLegacyIds").let { legacy ->
+                buildMap { legacy?.keys()?.forEach { key -> put(key, legacy.getString(key)) } }
             },
             books = root.optJSONObject("books").entries { _, value -> value.asText() },
             subtypes = root.optJSONObject("subtypes").entries { _, value -> value.asText() },

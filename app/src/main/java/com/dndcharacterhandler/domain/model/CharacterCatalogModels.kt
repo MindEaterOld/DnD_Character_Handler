@@ -21,7 +21,9 @@ data class CharacterCatalog(
     /** Labels of the trait kinds: "skills", "tool", "languages"... */
     val traitCategories: Map<String, CatalogText> = emptyMap(),
     /** Equipment the advancements and starting equipment point at, by id. */
-    val equipment: Map<String, CatalogEquipmentRef> = emptyMap()
+    val equipment: Map<String, CatalogEquipmentRef> = emptyMap(),
+    /** The SRD 2014 spell ids characters were given ("spell:fireball") -> the spells replacing them. */
+    val spellLegacyIds: Map<String, String> = emptyMap()
 ) {
     val featuresById: Map<String, CatalogFeature> by lazy { features.associateBy { it.id } }
     val classesByIdentifier: Map<String, CatalogClass> by lazy { classes.associateBy { it.identifier } }
@@ -207,7 +209,28 @@ data class CatalogSpellRef(
     val duration: String = "",
     val ritual: Boolean = false,
     val concentration: Boolean = false,
-    val text: CatalogText = CatalogText()
+    val text: CatalogText = CatalogText(),
+    /** "Using a Higher-Level Spell Slot" / "Cantrip Upgrade", apart from [text]. */
+    val higher: CatalogText = CatalogText(),
+    val materialCost: String = "",
+    /** The rolls, from Foundry's activities in the SRD's wording: "ranged", "DEX", "half", "8d6", "Fire". */
+    val attackType: String = "",
+    val saveAbility: String = "",
+    val saveEffect: String = "",
+    val damageBase: String = "",
+    /** "MOD" for the spellcasting modifier, or a number. */
+    val damageBonus: String = "",
+    val damageType: String = "",
+    val altDamageBase: String = "",
+    val altDamageBonus: String = "",
+    val altDamageType: String = "",
+    /** The damage by slot (or character) level: "3: 8d6\n4: 9d6". */
+    val damage: String = "",
+    val healBase: String = "",
+    val healBonus: String = "",
+    val healing: String = "",
+    /** "sphere, 20 ft". */
+    val areaOfEffect: String = ""
 )
 
 enum class ClassRestriction {

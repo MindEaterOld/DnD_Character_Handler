@@ -151,7 +151,12 @@ const spellFields = d => ({
     duration: d.system.duration,
     target: d.system.target,
     description: { value: d.system.description?.value ?? '' },
-    source: { book: d.system.source?.book ?? '' }
+    source: { book: d.system.source?.book ?? '' },
+    // What the sheet rolls: attack type, save, damage and healing parts with their scaling.
+    activities: Object.values(d.system.activities ?? {}).map(a => ({
+      type: a.type, attack: a.attack?.type ?? null, save: a.save ?? null,
+      damage: a.damage ?? null, healing: a.healing ?? null
+    }))
   }
 });
 for (const id of SPELL_PACKS) {

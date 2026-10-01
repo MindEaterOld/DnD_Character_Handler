@@ -727,6 +727,128 @@ def spell_duration(system, concentration):
     return {'inst': 'Instantaneous', 'perm': 'Until dispelled', 'disp': 'Until dispelled', 'spec': 'Special'}.get(units, '')
 
 
+CANTRIP_SCALING = re.compile(r'^\(floor\(\(@details\.level\s*\+\s*1\)\s*/\s*6\)\s*\+\s*1\)d(\d+)$')
+AREA_SHAPES = {'radius': 'sphere', 'emanation': 'sphere'}
+HIGHER_LEVEL = {
+    'en': ('Using a Higher-Level Spell Slot.', 'Cantrip Upgrade.'),
+    'ru': ('Использование ячейки кругом выше.', 'Улучшение фокуса.')
+}
+
+
+def activities_of(system):
+    acts = system.get('activities') or []
+    return list(acts.values()) if isinstance(acts, dict) else list(acts)
+
+
+def part_dice(part):
+    """"8d6" of a damage or healing part; a cantrip's level formula reads as its 1st-level dice."""
+    custom = part.get('custom') or {}
+    if custom.get('enabled') and custom.get('formula'):
+        formula = re.sub(r'\s+', '', custom['formula'])
+        if re.fullmatch(r'\d+d\d+', formula):
+            return formula
+        scaled = CANTRIP_SCALING.match(custom['formula'].strip())
+        return f'1d{scaled.group(1)}' if scaled else ''
+    if part.get('number') and part.get('denomination'):
+        return f"{part['number']}d{part['denomination']}"
+    return ''
+
+
+def bonus_of(part):
+    """("MOD" or a number or "") of a part's bonus."""
+    bonus = str(part.get('bonus') or '').strip()
+    if '@mod' in bonus:
+        return 'MOD'
+    return bonus if re.fullmatch(r'-?\d+', bonus) else ''
+
+
+def with_bonus(dice, bonus):
+    return f'{dice} + {bonus}' if bonus else dice
+
+
+def scaling_lines(dice, bonus, part, level):
+    """The SRD's "by slot level" lines ("3: 8d6\n4: 9d6"), or a cantrip's by character level."""
+    match = re.fullmatch(r'(\d+)d(\d+)', dice or '')
+    if not match:
+        return ''
+    count, die = int(match.group(1)), match.group(2)
+    if level == 0:
+        return '\n'.join(f'{at}: {count + step}d{die}' for step, at in enumerate((1, 5, 11, 17)))
+    scaling = part.get('scaling') or {}
+    per = scaling.get('number') or 0
+    if scaling.get('mode') not in ('whole', 'half') or not per:
+        return f'{level}: {with_bonus(dice, bonus)}'
+    every = 1 if scaling['mode'] == 'whole' else 2
+    return '\n'.join(f'{slot}: {with_bonus(f"{count + per * ((slot - level) // every)}d{die}", bonus)}' for slot in range(level, 10))
+
+
+def spell_combat(system):
+    """What the app's spell card and attacks use, from Foundry's activities: attack type, save,
+    damage (and a second damage), healing, area and their scaling, in the SRD's wording."""
+    level = system.get('level') or 0
+    acts = activities_of(system)
+    combat = {}
+    attack = next((a for a in acts if a.get('type') == 'attack'), None)
+    if attack and (attack.get('attack') or {}).get('value'):
+        combat['attackType'] = attack['attack']['value']
+    save = next((a for a in acts if a.get('type') == 'save'), None)
+    if save:
+        abilities = (save.get('save') or {}).get('ability') or []
+        if abilities:
+            combat['saveAbility'] = abilities[0].upper()
+        # Foundry keeps "half" as the default even when the save deals no damage.
+        save_damage = save.get('damage') or {}
+        on_save = (save_damage.get('onSave') or 'none') if save_damage.get('parts') else 'none'
+        combat['saveEffect'] = on_save if on_save in ('half', 'none') else 'other'
+    # Damage from the rolling activity (attack, save, damage), else from the base entry.
+    rolling = [a for a in (attack, save) if a] + [a for a in acts if a.get('type') == 'damage'] + acts
+    parts = list(next((((a.get('damage') or {}).get('parts')) for a in rolling if ((a.get('damage') or {}).get('parts'))), []) or [])
+    # An attack that also calls for a save (Ice Knife): the save's damage is the second one.
+    if attack and save and len(parts) < 2 and ((attack.get('damage') or {}).get('parts')):
+        parts += ((save.get('damage') or {}).get('parts') or [])[:1]
+    all_types = [t for a in acts for p in ((a.get('damage') or {}).get('parts') or []) for t in (p.get('types') or [])]
+    for index, part in enumerate(parts[:2]):
+        dice = part_dice(part)
+        if not dice:
+            continue
+        types = part.get('types') or (all_types[:1] if index == 0 else [])
+        bonus = bonus_of(part)
+        prefix = 'damage' if index == 0 else 'altDamage'
+        combat[f'{prefix}Base'] = dice
+        if bonus:
+            combat[f'{prefix}Bonus'] = bonus
+        if types:
+            combat[f'{prefix}Type'] = types[0].capitalize()
+        if index == 0:
+            combat['damage'] = scaling_lines(dice, bonus, part, level)
+    heal = next((a for a in acts if a.get('type') == 'heal'), None)
+    if heal and heal.get('healing'):
+        part = heal['healing']
+        dice = part_dice(part)
+        if dice:
+            bonus = bonus_of(part)
+            combat['healBase'] = dice
+            if bonus:
+                combat['healBonus'] = bonus
+            combat['healing'] = scaling_lines(dice, bonus, part, level)
+    template = (system.get('target') or {}).get('template') or {}
+    if template.get('type') and template.get('size'):
+        combat['areaOfEffect'] = f"{AREA_SHAPES.get(template['type'], template['type'])}, {template['size']} ft"
+    return combat
+
+
+def split_higher_level(text, lang):
+    """(text, higher-level text): the "Using a Higher-Level Spell Slot." / "Cantrip Upgrade."
+    paragraph goes where the app shows it, under its own heading."""
+    lines = text.split('\n')
+    for index, line in enumerate(lines):
+        marker = next((m for m in HIGHER_LEVEL[lang] if line.startswith(m)), None)
+        if marker:
+            higher = '\n'.join([line[len(marker):].strip()] + lines[index + 1:]).strip()
+            return '\n'.join(lines[:index]).strip(), higher
+    return text, ''
+
+
 def slot_level_text(text, lang):
     """A formula on the slot level ("{=@item.level - 3}") in words: "(slot level - 3)"."""
     words = 'slot level' if lang == 'en' else 'круг ячейки'
@@ -766,6 +888,13 @@ def spell_catalog(catalog, referenced):
         components = ', '.join(label for key, label in (('vocal', 'V'), ('somatic', 'S'), ('material', 'M')) if key in properties)
         materials = system.get('materials') or {}
         twin_system = (twin or {}).get('system') or {}
+        texts = {
+            'en': slot_level_text(catalog.text(spell_lookups((twin_system.get('description') or {}).get('value') or '', twin_system), 'en'), 'en') if twin else '',
+            'ru': slot_level_text(catalog.text(spell_lookups((system.get('description') or {}).get('value') or '', system), 'ru'), 'ru') if doc is not en_docs.get(short) else ''
+        }
+        text, higher = {}, {}
+        for lang in ('en', 'ru'):
+            text[lang], higher[lang] = split_higher_level(texts[lang], lang)
         entry = {
             'name': {'en': en, 'ru': ru},
             'level': system.get('level'),
@@ -776,11 +905,15 @@ def spell_catalog(catalog, referenced):
             'castingTime': spell_casting_time(system),
             'range': spell_range(system),
             'duration': spell_duration(system, concentration),
-            'text': {
-                'en': slot_level_text(catalog.text(spell_lookups((twin_system.get('description') or {}).get('value') or '', twin_system), 'en'), 'en') if twin else '',
-                'ru': slot_level_text(catalog.text(spell_lookups((system.get('description') or {}).get('value') or '', system), 'ru'), 'ru') if doc is not en_docs.get(short) else ''
-            }
+            'text': text
         }
+        if higher['en'] or higher['ru']:
+            entry['higher'] = higher
+        # The rolls: Foundry's (2024) activities, from the Russian document (the same in both packs).
+        entry.update(spell_combat(system if activities_of(system) else twin_system))
+        cost = materials.get('cost') or 0
+        if cost:
+            entry['materialCost'] = str(cost)
         if 'ritual' in properties:
             entry['ritual'] = True
         if concentration:
@@ -793,6 +926,40 @@ def spell_catalog(catalog, referenced):
     listed = sum(1 for entry in spells.values() if entry.get('lists'))
     print(f'spells {len(spells)} ({listed} on a spell list)')
     return spells
+
+
+SRD_2014_SPELLS = os.path.join(REPO, 'external', '5e-database', 'src', '2014', 'en', '5e-SRD-Spells.json')
+# SRD 2014 spells the 2024 PHB renamed (Branding Smite is gone: its saved copies keep their text).
+SRD_SPELL_NAMES = {'feeblemind': 'Befuddlement', 'arcanists-magic-aura': "Nystul's Magic Aura"}
+
+
+def spell_name_keys(name):
+    key = ' '.join(name.lower().replace('’', '').replace("'", '').split())
+    keys = {key}
+    author = re.match(r"^\S+[’']s (.+)$", name.strip())
+    if author:
+        keys.add(' '.join(author.group(1).lower().replace('’', '').replace("'", '').split()))
+    return keys
+
+
+def spell_legacy_ids(spells):
+    """The SRD 2014 spells the app's characters were given ("spell:fireball") -> the catalog's
+    spells, so saved spells keep following the language (and their de/fr/es names)."""
+    srd = load_json(SRD_2014_SPELLS, [])
+    by_name = {}
+    for short, entry in spells.items():
+        for key in spell_name_keys(entry['name']['en']):
+            by_name.setdefault(key, short)
+    legacy, unmatched = {}, []
+    for spell in srd:
+        names = [spell['name']] + ([SRD_SPELL_NAMES[spell['index']]] if spell['index'] in SRD_SPELL_NAMES else [])
+        short = next((by_name[k] for name in names for k in spell_name_keys(name) if k in by_name), None)
+        if short:
+            legacy['spell:' + spell['index']] = short
+        else:
+            unmatched.append(spell['name'])
+    print(f'SRD 2014 spells mapped: {len(legacy)}/{len(srd)}' + (f'; unmatched: {unmatched}' if unmatched else ''))
+    return legacy
 
 
 def trait_labels():
@@ -843,6 +1010,7 @@ def main():
     catalog = Catalog()
     result = build(catalog)
     result['spells'] = spell_catalog(catalog, result['spells'])
+    result['spellLegacyIds'] = spell_legacy_ids(result['spells'])
     unmatched = attach_legacy(result, catalog)
     unknown_translations = apply_translations(result)
     missing = write_missing(result)
