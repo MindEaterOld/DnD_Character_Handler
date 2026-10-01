@@ -12,6 +12,10 @@ Rules:
 - **Never add new colors or font sizes (кегли) on your own.** If a new color or size seems necessary, you must first request it from the project owner and get explicit approval before adding it. No new value goes into the code without that approval.
 - When touching older code that uses non-token hex values, align it to the tokens.
 
+## Naming — Character Wizard
+
+The step-by-step character building and level-up system is called **Character Wizard**. It's a name: write it in English in every language and never translate it (not «мастер», «Assistent», «assistant», «asistente»). Use it in texts and when talking to the project owner.
+
 ## Localization — length limits (`maxChars`)
 
 Texts live in `app/src/main/assets/localization.json` (`"key": {"en", "ru", "de", "fr", "es"}`). A key shown in a fixed-width element carries `"maxChars": N`, the most characters that fit there:

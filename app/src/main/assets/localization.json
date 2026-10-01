@@ -2880,11 +2880,11 @@
     "es": "Clase del personaje"
   },
   "levelup_setup_hint": {
-    "en": "The wizard needs to know the class to walk its levels.",
-    "ru": "\u041c\u0430\u0441\u0442\u0435\u0440\u0443 \u043d\u0443\u0436\u043d\u043e \u0437\u043d\u0430\u0442\u044c \u043a\u043b\u0430\u0441\u0441, \u0447\u0442\u043e\u0431\u044b \u043f\u0440\u043e\u0439\u0442\u0438 \u0435\u0433\u043e \u0443\u0440\u043e\u0432\u043d\u0438.",
-    "de": "Der Assistent muss die Klasse kennen, um ihre Stufen durchzugehen.",
-    "fr": "L'assistant doit conna\u00eetre la classe pour en parcourir les niveaux.",
-    "es": "El asistente necesita conocer la clase para recorrer sus niveles."
+    "en": "Pick the class: Character Wizard will walk its levels.",
+    "ru": "\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u043a\u043b\u0430\u0441\u0441 \u2014 Character Wizard \u043f\u0440\u043e\u0439\u0434\u0451\u0442 \u0435\u0433\u043e \u0443\u0440\u043e\u0432\u043d\u0438.",
+    "de": "W\u00e4hle die Klasse \u2013 Character Wizard geht ihre Stufen durch.",
+    "fr": "Choisissez la classe : Character Wizard en parcourra les niveaux.",
+    "es": "Elige la clase: Character Wizard recorrer\u00e1 sus niveles."
   },
   "levelup_setup_rebuild": {
     "en": "A new character: build it from level 1",
@@ -2908,11 +2908,11 @@
     "es": "La clase se guarda y no se a\u00f1ade nada por los niveles que ya tiene."
   },
   "levelup_setup_rebuild_hint": {
-    "en": "The wizard adds hit points, saving throws, skills and the features of every level.",
-    "ru": "\u041c\u0430\u0441\u0442\u0435\u0440 \u0434\u043e\u0431\u0430\u0432\u0438\u0442 \u0445\u0438\u0442\u044b, \u0441\u043f\u0430\u0441\u0431\u0440\u043e\u0441\u043a\u0438, \u043d\u0430\u0432\u044b\u043a\u0438 \u0438 \u043e\u0441\u043e\u0431\u0435\u043d\u043d\u043e\u0441\u0442\u0438 \u0432\u0441\u0435\u0445 \u0443\u0440\u043e\u0432\u043d\u0435\u0439.",
-    "de": "Der Assistent f\u00fcgt Trefferpunkte, Rettungsw\u00fcrfe, Fertigkeiten und die Merkmale jeder Stufe hinzu.",
-    "fr": "L'assistant ajoute les points de vie, les jets de sauvegarde, les comp\u00e9tences et les aptitudes de chaque niveau.",
-    "es": "El asistente a\u00f1ade los puntos de golpe, las salvaciones, las habilidades y los rasgos de cada nivel."
+    "en": "Character Wizard adds hit points, saving throws, skills and the features of every level.",
+    "ru": "Character Wizard \u0434\u043e\u0431\u0430\u0432\u0438\u0442 \u0445\u0438\u0442\u044b, \u0441\u043f\u0430\u0441\u0431\u0440\u043e\u0441\u043a\u0438, \u043d\u0430\u0432\u044b\u043a\u0438 \u0438 \u043e\u0441\u043e\u0431\u0435\u043d\u043d\u043e\u0441\u0442\u0438 \u0432\u0441\u0435\u0445 \u0443\u0440\u043e\u0432\u043d\u0435\u0439.",
+    "de": "Character Wizard f\u00fcgt Trefferpunkte, Rettungsw\u00fcrfe, Fertigkeiten und die Merkmale jeder Stufe hinzu.",
+    "fr": "Character Wizard ajoute les points de vie, les jets de sauvegarde, les comp\u00e9tences et les aptitudes de chaque niveau.",
+    "es": "Character Wizard a\u00f1ade los puntos de golpe, las salvaciones, las habilidades y los rasgos de cada nivel."
   },
   "levelup_setup_subclass": {
     "en": "Subclass",
@@ -3356,11 +3356,11 @@
     "es": "Propio"
   },
   "levelup_origin_keep_hint": {
-    "en": "The wizard adds nothing",
-    "ru": "\u041c\u0430\u0441\u0442\u0435\u0440 \u043d\u0438\u0447\u0435\u0433\u043e \u043d\u0435 \u0434\u043e\u0431\u0430\u0432\u0438\u0442",
-    "de": "Der Assistent f\u00fcgt nichts hinzu",
-    "fr": "L'assistant n'ajoute rien",
-    "es": "El asistente no a\u00f1ade nada"
+    "en": "Character Wizard adds nothing",
+    "ru": "Character Wizard \u043d\u0438\u0447\u0435\u0433\u043e \u043d\u0435 \u0434\u043e\u0431\u0430\u0432\u0438\u0442",
+    "de": "Character Wizard f\u00fcgt nichts hinzu",
+    "fr": "Character Wizard n'ajoute rien",
+    "es": "Character Wizard no a\u00f1ade nada"
   },
   "levelup_equipment_title": {
     "en": "Starting Equipment",
@@ -3433,11 +3433,11 @@
     "es": "Monedas: %1$s"
   },
   "levelup_level_down_unavailable": {
-    "en": "The wizard can't take levels back yet: that comes later. For now the level can only go up.",
-    "ru": "\u0421\u043d\u0438\u043c\u0430\u0442\u044c \u0443\u0440\u043e\u0432\u043d\u0438 \u043c\u0430\u0441\u0442\u0435\u0440 \u043f\u043e\u043a\u0430 \u043d\u0435 \u0443\u043c\u0435\u0435\u0442 \u2014 \u044d\u0442\u043e \u0431\u0443\u0434\u0435\u0442 \u043f\u043e\u0437\u0436\u0435. \u0421\u0435\u0439\u0447\u0430\u0441 \u0443\u0440\u043e\u0432\u0435\u043d\u044c \u043c\u043e\u0436\u043d\u043e \u0442\u043e\u043b\u044c\u043a\u043e \u043f\u043e\u0432\u044b\u0448\u0430\u0442\u044c.",
-    "de": "Der Assistent kann noch keine Stufen zur\u00fccknehmen; das kommt sp\u00e4ter. Vorerst geht es nur aufw\u00e4rts.",
-    "fr": "L'assistant ne peut pas encore retirer de niveaux ; cela viendra plus tard. Pour l'instant, le niveau ne peut que monter.",
-    "es": "El asistente a\u00fan no puede quitar niveles; llegar\u00e1 m\u00e1s adelante. Por ahora el nivel solo puede subir."
+    "en": "Character Wizard can't take levels back yet: that comes later. For now the level can only go up.",
+    "ru": "\u0421\u043d\u0438\u043c\u0430\u0442\u044c \u0443\u0440\u043e\u0432\u043d\u0438 Character Wizard \u043f\u043e\u043a\u0430 \u043d\u0435 \u0443\u043c\u0435\u0435\u0442 \u2014 \u044d\u0442\u043e \u0431\u0443\u0434\u0435\u0442 \u043f\u043e\u0437\u0436\u0435. \u0421\u0435\u0439\u0447\u0430\u0441 \u0443\u0440\u043e\u0432\u0435\u043d\u044c \u043c\u043e\u0436\u043d\u043e \u0442\u043e\u043b\u044c\u043a\u043e \u043f\u043e\u0432\u044b\u0448\u0430\u0442\u044c.",
+    "de": "Character Wizard kann noch keine Stufen zur\u00fccknehmen; das kommt sp\u00e4ter. Vorerst geht es nur aufw\u00e4rts.",
+    "fr": "Character Wizard ne peut pas encore retirer de niveaux ; cela viendra plus tard. Pour l'instant, le niveau ne peut que monter.",
+    "es": "Character Wizard a\u00fan no puede quitar niveles; llegar\u00e1 m\u00e1s adelante. Por ahora el nivel solo puede subir."
   },
   "overview_exp_dialog_title": {
     "en": "Edit Experience",
