@@ -1,6 +1,7 @@
 package com.dndcharacterhandler.presentation.attributes
 
 import com.dndcharacterhandler.presentation.components.StatCardRow
+import com.dndcharacterhandler.presentation.components.BorderLabelCard
 import com.dndcharacterhandler.presentation.components.MiniStatCardIcon
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
@@ -12,7 +13,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -29,8 +29,6 @@ import androidx.compose.material.icons.outlined.Build
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.Visibility
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -1121,86 +1119,61 @@ private fun AbilityScoreCard(
 ) {
     val tokens = LocalDesignTokens.current.typography
     val colors = LocalDesignTokens.current.colors
-    Card(
-        modifier = modifier
-            .aspectRatio(0.84f)
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(10.dp),
-        border = BorderStroke(1.dp, colors.border.miniCard),
-        colors = CardDefaults.cardColors(containerColor = colors.surface.card.copy(alpha = 0.66f))
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            FrameCorner(modifier = Modifier.align(Alignment.TopStart))
-            FrameCorner(modifier = Modifier.align(Alignment.TopEnd), mirrored = true)
-            FrameCorner(modifier = Modifier.align(Alignment.BottomStart), upsideDown = true)
-            FrameCorner(modifier = Modifier.align(Alignment.BottomEnd), mirrored = true, upsideDown = true)
-            Column(
+    BorderLabelCard(label = text(score.shortNameKey), modifier = modifier, onClick = onClick) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 5.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(1.dp)
+        ) {
+            Text(
+                text = signed(score.modifier),
+                style = MaterialTheme.typography.headlineMedium.copy(fontSize = tokens.hpTemporary.fontSizeSp.sp),
+                color = colors.text.primary
+            )
+            Text(
+                text = score.value.toString(),
+                style = MaterialTheme.typography.titleLarge,
+                color = colors.text.label
+            )
+            Spacer(modifier = Modifier.height(5.dp))
+            Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 8.dp, vertical = 5.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Top
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(colors.border.muted)
+            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 2.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(1.dp)
-                ) {
-                    Text(
-                        text = text(score.shortNameKey),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = colors.text.action
+                Canvas(modifier = Modifier.size(12.dp)) {
+                    drawCircle(
+                        color = if (score.saveProficient) colors.text.primary else Color.Transparent,
+                        radius = 5.dp.toPx()
                     )
-                    Text(
-                        text = signed(score.modifier),
-                        style = MaterialTheme.typography.headlineMedium.copy(fontSize = tokens.hpTemporary.fontSizeSp.sp),
-                        color = colors.text.primary
-                    )
-                    Text(
-                        text = score.value.toString(),
-                        style = MaterialTheme.typography.titleLarge,
-                        color = colors.text.label
+                    drawCircle(
+                        color = colors.text.label,
+                        radius = 5.dp.toPx(),
+                        style = Stroke(width = 1.dp.toPx())
                     )
                 }
-                Spacer(modifier = Modifier.height(6.dp))
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(1.dp)
-                            .background(colors.border.muted)
-                    )
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 3.dp),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Canvas(modifier = Modifier.size(12.dp)) {
-                            drawCircle(
-                                color = if (score.saveProficient) colors.text.primary else Color.Transparent,
-                                radius = 5.dp.toPx()
-                            )
-                            drawCircle(
-                                color = colors.text.label,
-                                radius = 5.dp.toPx(),
-                                style = Stroke(width = 1.dp.toPx())
-                            )
-                        }
-                        Text(
-                            text = text("attributes_saving_throw_short"),
-                            modifier = Modifier.padding(start = 4.dp),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = colors.text.muted
-                        )
-                        Text(
-                            text = signed(score.saveModifier(proficiencyBonus)),
-                            modifier = Modifier.padding(start = 4.dp),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = colors.text.muted
-                        )
-                    }
-                }
+                Text(
+                    text = text("attributes_saving_throw_short"),
+                    modifier = Modifier.padding(start = 4.dp),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = colors.text.muted
+                )
+                Text(
+                    text = signed(score.saveModifier(proficiencyBonus)),
+                    modifier = Modifier.padding(start = 4.dp),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = colors.text.muted
+                )
             }
         }
     }
@@ -1398,23 +1371,6 @@ private fun ProficiencyCheckboxRow(
             style = MaterialTheme.typography.bodyMedium,
             color = if (enabled) Color.Unspecified else LocalDesignTokens.current.colors.text.primary.copy(alpha = 0.5f)
         )
-    }
-}
-
-@Composable
-private fun FrameCorner(
-    modifier: Modifier = Modifier,
-    mirrored: Boolean = false,
-    upsideDown: Boolean = false
-) {
-    val lineColor = LocalDesignTokens.current.colors.ornament.stroke
-    Canvas(modifier = modifier.size(24.dp)) {
-        val x0 = if (mirrored) size.width else 0f
-        val x1 = if (mirrored) size.width - 10.dp.toPx() else 10.dp.toPx()
-        val y0 = if (upsideDown) size.height else 0f
-        val y1 = if (upsideDown) size.height - 10.dp.toPx() else 10.dp.toPx()
-        drawLine(lineColor, Offset(x0, y1), Offset(x0, y0), strokeWidth = 1.dp.toPx())
-        drawLine(lineColor, Offset(x0, y0), Offset(x1, y0), strokeWidth = 1.dp.toPx())
     }
 }
 

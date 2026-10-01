@@ -590,6 +590,7 @@
     "es": "Salv."
   },
   "ability_str_short": {
+    "maxChars": 11,
     "en": "STR",
     "ru": "СИЛ",
     "de": "STÄ",
@@ -597,6 +598,7 @@
     "es": "FUE"
   },
   "ability_dex_short": {
+    "maxChars": 11,
     "en": "DEX",
     "ru": "ЛОВ",
     "de": "GES",
@@ -604,6 +606,7 @@
     "es": "DES"
   },
   "ability_con_short": {
+    "maxChars": 11,
     "en": "CON",
     "ru": "ТЕЛ",
     "de": "KON",
@@ -611,6 +614,7 @@
     "es": "CON"
   },
   "ability_int_short": {
+    "maxChars": 11,
     "en": "INT",
     "ru": "ИНТ",
     "de": "INT",
@@ -618,6 +622,7 @@
     "es": "INT"
   },
   "ability_wis_short": {
+    "maxChars": 11,
     "en": "WIS",
     "ru": "МДР",
     "de": "WEI",
@@ -625,6 +630,7 @@
     "es": "SAB"
   },
   "ability_cha_short": {
+    "maxChars": 11,
     "en": "CHA",
     "ru": "ХАР",
     "de": "CHA",

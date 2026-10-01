@@ -107,6 +107,7 @@ import com.dndcharacterhandler.presentation.SelectedCharacterHolder
 import com.dndcharacterhandler.presentation.components.StatCardRow
 import com.dndcharacterhandler.presentation.components.MiniStatCardIcon
 import com.dndcharacterhandler.presentation.components.MiniStatCard
+import com.dndcharacterhandler.presentation.components.BorderLabelCard
 import com.dndcharacterhandler.presentation.components.AppImage
 import com.dndcharacterhandler.presentation.components.EditDialog
 import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
@@ -1813,13 +1814,15 @@ private fun OverviewHpCard(
 ) {
     val tokens = LocalDesignTokens.current.typography
     val colors = LocalDesignTokens.current.colors
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(30.dp),
-        color = colors.surface.card,
-        border = BorderStroke(1.dp, colors.border.panel)
+    BorderLabelCard(
+        label = hpLabel,
+        modifier = Modifier.fillMaxWidth(),
+        labelStyle = MaterialTheme.typography.titleMedium.copy(fontSize = tokens.hpLabel.fontSizeSp.sp),
+        labelColor = colors.text.label,
+        cornerRadius = 30.dp,
+        fill = colors.surface.card,
+        border = colors.border.panel,
+        onClick = onClick
     ) {
         Box(
             modifier = Modifier
@@ -1847,50 +1850,40 @@ private fun OverviewHpCard(
                 upsideDown = true
             )
 
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
+            Row(
+                modifier = Modifier.align(Alignment.Center),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                Text(
+                    text = currentHp.toString(),
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontSize = tokens.hpCurrent.fontSizeSp.sp,
+                        lineHeight = (tokens.hpCurrent.lineHeightSp ?: tokens.hpCurrent.fontSizeSp).sp
+                    ),
+                    color = if (currentHp == 0) colors.accent.dangerHpZero else colors.text.primary,
+                    textAlign = TextAlign.Center
+                )
+                if (temporaryHp > 0) {
                     Text(
-                        text = currentHp.toString(),
+                        text = "+$temporaryHp",
                         style = MaterialTheme.typography.headlineMedium.copy(
-                            fontSize = tokens.hpCurrent.fontSizeSp.sp,
-                            lineHeight = (tokens.hpCurrent.lineHeightSp ?: tokens.hpCurrent.fontSizeSp).sp
+                            fontSize = tokens.hpTemporary.fontSizeSp.sp,
+                            lineHeight = (tokens.hpTemporary.lineHeightSp ?: tokens.hpTemporary.fontSizeSp).sp
                         ),
-                        color = if (currentHp == 0) colors.accent.dangerHpZero else colors.text.primary,
-                        textAlign = TextAlign.Center
-                    )
-                    if (temporaryHp > 0) {
-                        Text(
-                            text = "+$temporaryHp",
-                            style = MaterialTheme.typography.headlineMedium.copy(
-                                fontSize = tokens.hpTemporary.fontSizeSp.sp,
-                                lineHeight = (tokens.hpTemporary.lineHeightSp ?: tokens.hpTemporary.fontSizeSp).sp
-                            ),
-                            color = colors.accent.hpTemporary,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                    Text(
-                        text = " / $maxHp",
-                        modifier = Modifier.clickable(onClick = onMaxHpClick),
-                        style = MaterialTheme.typography.headlineMedium.copy(
-                            fontSize = tokens.hpMaximum.fontSizeSp.sp,
-                            lineHeight = (tokens.hpMaximum.lineHeightSp ?: tokens.hpMaximum.fontSizeSp).sp
-                        ),
-                        color = colors.text.primary.copy(alpha = tokens.hpMaximum.alpha ?: 0.62f),
+                        color = colors.accent.hpTemporary,
                         textAlign = TextAlign.Center
                     )
                 }
                 Text(
-                    text = hpLabel,
-                    modifier = Modifier.padding(top = 6.dp),
-                    style = MaterialTheme.typography.titleMedium.copy(fontSize = tokens.hpLabel.fontSizeSp.sp),
-                    color = colors.text.label
+                    text = " / $maxHp",
+                    modifier = Modifier.clickable(onClick = onMaxHpClick),
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontSize = tokens.hpMaximum.fontSizeSp.sp,
+                        lineHeight = (tokens.hpMaximum.lineHeightSp ?: tokens.hpMaximum.fontSizeSp).sp
+                    ),
+                    color = colors.text.primary.copy(alpha = tokens.hpMaximum.alpha ?: 0.62f),
+                    textAlign = TextAlign.Center
                 )
             }
         }
