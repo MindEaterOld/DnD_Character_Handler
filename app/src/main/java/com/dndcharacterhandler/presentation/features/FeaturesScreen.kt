@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.AutoStories
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Person
@@ -808,7 +809,22 @@ internal fun FeatureEditDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(text(if (feature.id == 0L) "features_add_feature" else "features_edit_feature")) },
+        // Closing without saving is the cross in the corner, not a Cancel button.
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = text(if (feature.id == 0L) "features_add_feature" else "features_edit_feature"),
+                    modifier = Modifier.weight(1f)
+                )
+                IconButton(onClick = onDismiss) {
+                    Icon(
+                        imageVector = Icons.Outlined.Close,
+                        contentDescription = text("common_close"),
+                        tint = colors.text.muted
+                    )
+                }
+            }
+        },
         text = {
             // Scrolls as a whole, so a long description never pushes the buttons away.
             Column(
@@ -856,7 +872,7 @@ internal fun FeatureEditDialog(
             }
         },
         confirmButton = {
-            // One row: the destructive action apart on the left, Cancel and Save together on the right.
+            // Delete in the bottom-left corner, apart from Save on the right.
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 if (onDelete != null) {
                     IconButton(onClick = onDelete) {
@@ -868,9 +884,6 @@ internal fun FeatureEditDialog(
                     }
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                TextButton(onClick = onDismiss) {
-                    Text(text("common_cancel"))
-                }
                 Button(
                     onClick = {
                         onSave(
