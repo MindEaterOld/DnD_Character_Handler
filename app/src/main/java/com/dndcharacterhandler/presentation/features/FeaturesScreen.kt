@@ -1,6 +1,7 @@
 package com.dndcharacterhandler.presentation.features
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -31,6 +32,7 @@ import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -854,15 +856,7 @@ internal fun FeatureEditDialog(
                         label = { Text(text("features_category")) },
                         singleLine = true
                     )
-                    OutlinedTextField(
-                        value = level,
-                        onValueChange = { value -> level = value.filter(Char::isDigit).take(2) },
-                        modifier = Modifier.width(96.dp),
-                        label = { Text(text("features_level")) },
-                        singleLine = true,
-                        textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                    )
+                    LevelField(value = level, onValueChange = { value -> level = value.filter(Char::isDigit).take(2) })
                 }
                 OutlinedTextField(
                     value = description,
@@ -911,6 +905,37 @@ internal fun FeatureEditDialog(
             }
         }
     )
+}
+
+/**
+ * The level: a narrow outlined field (two digits) with its label centred on the outline. Material
+ * puts a field's label at the start, so this one draws its own over the border, on the dialog's
+ * colour, lined up with the floating labels of the fields beside it.
+ */
+@Composable
+private fun LevelField(value: String, onValueChange: (String) -> Unit) {
+    Box(modifier = Modifier.width(72.dp)) {
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            // A label floats half above the outline: the same room up top keeps the borders level.
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .fillMaxWidth(),
+            singleLine = true,
+            textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+        )
+        Text(
+            text = text("features_level"),
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .background(AlertDialogDefaults.containerColor)
+                .padding(horizontal = 4.dp),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
 }
 
 /** The source as a dropdown that looks like the other fields of the dialog. */
