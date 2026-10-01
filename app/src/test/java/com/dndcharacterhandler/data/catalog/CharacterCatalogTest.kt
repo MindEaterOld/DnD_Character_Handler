@@ -11,7 +11,6 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.BeforeClass
 import org.junit.Test
-import com.dndcharacterhandler.domain.model.byCatalogId
 import java.io.File
 
 /** Checks the shipped character_catalog.json (built by tools/foundry_catalog/convert.py). */
@@ -167,9 +166,6 @@ class CharacterCatalogTest {
         // The higher-level paragraph has its own field, as on the SRD cards.
         assertTrue(fireball.higherLevelDescription.isNotBlank() && fireball.ruHigherLevel.isNotBlank())
         assertFalse("Using a Higher-Level" in fireball.description)
-        // Characters' SRD 2014 spells find their 2024 entry.
-        assertTrue("spell:fireball" in fireball.legacyIds)
-        assertEquals(fireball, items.byCatalogId()["spell:fireball"])
         val cure = items.single { it.name == "Cure Wounds" }
         assertEquals("2d8", cure.healBase)
         assertTrue(cure.healBonusIsModifier)

@@ -6,18 +6,9 @@ import com.dndcharacterhandler.domain.model.Spell
 import com.dndcharacterhandler.domain.model.SpellCatalogItem
 import com.dndcharacterhandler.presentation.localization.catalogFieldText
 
-/**
- * Catalog spell name in the current language: the catalog's English or Russian; German, French and
- * Spanish names come from the app's keys of the SRD spell it replaces ("spell_name_<index>").
- */
-internal fun SpellCatalogItem.localizedName(strings: LocalizedStrings): String = when (strings.language) {
-    AppLanguage.RUSSIAN -> ruName.ifBlank { name }
-    AppLanguage.ENGLISH -> name
-    else -> legacyIds.firstNotNullOfOrNull { legacy ->
-        val key = "spell_name_" + legacy.removePrefix("spell:")
-        strings[key].takeIf { it != key }
-    } ?: name
-}
+/** Catalog spell name in the current language: the catalog's Russian, or its English for the others. */
+internal fun SpellCatalogItem.localizedName(strings: LocalizedStrings): String =
+    if (strings.language == AppLanguage.RUSSIAN) ruName.ifBlank { name } else name
 
 /** A character's copy of a catalog spell, with its text in the current language. */
 internal fun SpellCatalogItem.toLocalizedSpell(strings: LocalizedStrings): Spell =

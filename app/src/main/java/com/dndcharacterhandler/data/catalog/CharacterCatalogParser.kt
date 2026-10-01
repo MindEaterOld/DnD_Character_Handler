@@ -67,9 +67,6 @@ object CharacterCatalogParser {
                     areaOfEffect = value.optString("areaOfEffect")
                 )
             },
-            spellLegacyIds = root.optJSONObject("spellLegacyIds").let { legacy ->
-                buildMap { legacy?.keys()?.forEach { key -> put(key, legacy.getString(key)) } }
-            },
             books = root.optJSONObject("books").entries { _, value -> value.asText() },
             subtypes = root.optJSONObject("subtypes").entries { _, value -> value.asText() },
             legacyIds = root.optJSONObject("legacyIds").let { legacy ->

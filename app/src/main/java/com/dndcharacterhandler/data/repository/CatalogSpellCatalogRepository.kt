@@ -31,10 +31,8 @@ class CatalogSpellCatalogRepository(
     }
 }
 
-/** Catalog spells as add-spell entries, sorted by name; each with the SRD 2014 ids it replaces. */
-internal fun spellCatalogItems(catalog: CharacterCatalog): List<SpellCatalogItem> {
-    val legacyBySpell = catalog.spellLegacyIds.entries.groupBy({ it.value }, { it.key })
-    return catalog.spells.values
-        .map { spell -> spell.toSpellCatalogItem(catalog, legacyBySpell[spell.id].orEmpty()) }
+/** Catalog spells as add-spell entries, sorted by name. */
+internal fun spellCatalogItems(catalog: CharacterCatalog): List<SpellCatalogItem> =
+    catalog.spells.values
+        .map { spell -> spell.toSpellCatalogItem(catalog) }
         .sortedBy { it.name.lowercase() }
-}

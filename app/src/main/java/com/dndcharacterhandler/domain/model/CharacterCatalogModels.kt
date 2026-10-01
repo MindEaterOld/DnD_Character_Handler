@@ -21,9 +21,7 @@ data class CharacterCatalog(
     /** Labels of the trait kinds: "skills", "tool", "languages"... */
     val traitCategories: Map<String, CatalogText> = emptyMap(),
     /** Equipment the advancements and starting equipment point at, by id. */
-    val equipment: Map<String, CatalogEquipmentRef> = emptyMap(),
-    /** The SRD 2014 spell ids characters were given ("spell:fireball") -> the spells replacing them. */
-    val spellLegacyIds: Map<String, String> = emptyMap()
+    val equipment: Map<String, CatalogEquipmentRef> = emptyMap()
 ) {
     val featuresById: Map<String, CatalogFeature> by lazy { features.associateBy { it.id } }
     val classesByIdentifier: Map<String, CatalogClass> by lazy { classes.associateBy { it.identifier } }

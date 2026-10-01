@@ -606,7 +606,9 @@ private fun CarryWeightBlock(
     LimitProgressBar(
         label = text("inventory_carry_weight"),
         value = "${formatWeight(current)} / ${formatWeight(safeMaximum)} ${text("inventory_unit_pounds")}",
-        progress = (current / safeMaximum).toFloat()
+        progress = (current / safeMaximum).toFloat(),
+        // Overloaded: red, like too many prepared spells.
+        overLimit = current > safeMaximum
     )
 }
 

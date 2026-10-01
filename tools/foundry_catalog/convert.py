@@ -928,40 +928,6 @@ def spell_catalog(catalog, referenced):
     return spells
 
 
-SRD_2014_SPELLS = os.path.join(REPO, 'external', '5e-database', 'src', '2014', 'en', '5e-SRD-Spells.json')
-# SRD 2014 spells the 2024 PHB renamed (Branding Smite is gone: its saved copies keep their text).
-SRD_SPELL_NAMES = {'feeblemind': 'Befuddlement', 'arcanists-magic-aura': "Nystul's Magic Aura"}
-
-
-def spell_name_keys(name):
-    key = ' '.join(name.lower().replace('’', '').replace("'", '').split())
-    keys = {key}
-    author = re.match(r"^\S+[’']s (.+)$", name.strip())
-    if author:
-        keys.add(' '.join(author.group(1).lower().replace('’', '').replace("'", '').split()))
-    return keys
-
-
-def spell_legacy_ids(spells):
-    """The SRD 2014 spells the app's characters were given ("spell:fireball") -> the catalog's
-    spells, so saved spells keep following the language (and their de/fr/es names)."""
-    srd = load_json(SRD_2014_SPELLS, [])
-    by_name = {}
-    for short, entry in spells.items():
-        for key in spell_name_keys(entry['name']['en']):
-            by_name.setdefault(key, short)
-    legacy, unmatched = {}, []
-    for spell in srd:
-        names = [spell['name']] + ([SRD_SPELL_NAMES[spell['index']]] if spell['index'] in SRD_SPELL_NAMES else [])
-        short = next((by_name[k] for name in names for k in spell_name_keys(name) if k in by_name), None)
-        if short:
-            legacy['spell:' + spell['index']] = short
-        else:
-            unmatched.append(spell['name'])
-    print(f'SRD 2014 spells mapped: {len(legacy)}/{len(srd)}' + (f'; unmatched: {unmatched}' if unmatched else ''))
-    return legacy
-
-
 def trait_labels():
     """Proficiency and trait keys ("skills:ath", "tool:art:smith", "languages:standard:dwarvish"...) with
     both labels and their children, from export/traits.json (Foundry's Trait.choices). Items keep
@@ -1010,7 +976,6 @@ def main():
     catalog = Catalog()
     result = build(catalog)
     result['spells'] = spell_catalog(catalog, result['spells'])
-    result['spellLegacyIds'] = spell_legacy_ids(result['spells'])
     unmatched = attach_legacy(result, catalog)
     unknown_translations = apply_translations(result)
     missing = write_missing(result)

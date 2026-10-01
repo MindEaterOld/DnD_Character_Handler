@@ -1,7 +1,5 @@
 package com.dndcharacterhandler.domain.model
 
-/** Where catalog spells come from: the Foundry PHB 2024 catalog (see tools/foundry_catalog). */
-enum class SpellCatalogSource { SRD_2014, FOUNDRY_2024 }
 
 data class SpellCatalogItem(
     val id: String,
@@ -39,10 +37,7 @@ data class SpellCatalogItem(
     val healBase: String = "",
     val healBonusValue: Int = 0,
     val healBonusIsModifier: Boolean = false,
-    val healing: String = "",
-    val source: SpellCatalogSource = SpellCatalogSource.SRD_2014,
-    /** Older ids characters' spells may carry for this spell ("spell:fireball" of the SRD 2014). */
-    val legacyIds: List<String> = emptyList()
+    val healing: String = ""
 ) {
     /**
      * The character's copy, prepared as a feature or the player decides: [alwaysPrepared] spells
@@ -99,7 +94,7 @@ private val SPELL_SCHOOLS = mapOf(
  * A catalog spell (Foundry, PHB 2024) as the app's spell card: English falls back to Russian for
  * the supplements' spells that only come in Russian; the classes are the class lists it is on.
  */
-fun CatalogSpellRef.toSpellCatalogItem(catalog: CharacterCatalog, legacyIds: List<String> = emptyList()): SpellCatalogItem {
+fun CatalogSpellRef.toSpellCatalogItem(catalog: CharacterCatalog): SpellCatalogItem {
     fun bonusValue(bonus: String) = bonus.toIntOrNull() ?: 0
     return SpellCatalogItem(
         id = id,
@@ -139,15 +134,7 @@ fun CatalogSpellRef.toSpellCatalogItem(catalog: CharacterCatalog, legacyIds: Lis
         healBase = healBase,
         healBonusValue = bonusValue(healBonus),
         healBonusIsModifier = healBonus == "MOD",
-        healing = healing,
-        source = SpellCatalogSource.FOUNDRY_2024,
-        legacyIds = legacyIds
+        healing = healing
     )
-}
-
-/** Catalog spells by id, and by the older ids characters' spells may still carry. */
-fun List<SpellCatalogItem>.byCatalogId(): Map<String, SpellCatalogItem> = buildMap {
-    this@byCatalogId.forEach { item -> item.legacyIds.forEach { put(it, item) } }
-    this@byCatalogId.forEach { item -> put(item.id, item) }
 }
 

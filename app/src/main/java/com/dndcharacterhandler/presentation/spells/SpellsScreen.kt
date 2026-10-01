@@ -73,7 +73,6 @@ import com.dndcharacterhandler.domain.model.Character
 import com.dndcharacterhandler.domain.model.CharacterBundle
 import com.dndcharacterhandler.domain.model.Spell
 import com.dndcharacterhandler.domain.model.SpellCatalogItem
-import com.dndcharacterhandler.domain.model.byCatalogId
 import com.dndcharacterhandler.domain.model.SpellcastingAbility
 import com.dndcharacterhandler.domain.rules.abilityModifier
 import com.dndcharacterhandler.domain.rules.preparedSpellLimit
@@ -332,8 +331,7 @@ internal fun SpellsContent(
     val spellSaveDc = (8 + proficiencyBonus + spellModifier).toString()
     val slotMaximums = remember(character.spellSlotMaximums) { character.spellSlotMaximums.toSpellSlotList() }
     val slotRemainings = remember(character.spellSlotRemaining) { character.spellSlotRemaining.toSpellSlotList() }
-    // Older characters' spells carry SRD 2014 ids: they find their 2024 entries too.
-    val catalogById = remember(catalogState.items) { catalogState.items.byCatalogId() }
+    val catalogById = remember(catalogState.items) { catalogState.items.associateBy { it.id } }
     val displayedSpells = remember(resolvedBundle.spells, catalogById, strings) {
         resolvedBundle.spells.localizedWith(catalogById, strings)
     }

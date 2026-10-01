@@ -72,7 +72,6 @@ import com.dndcharacterhandler.domain.model.InventoryWeaponProperty
 import com.dndcharacterhandler.domain.model.InventoryWeaponRangeType
 import com.dndcharacterhandler.domain.model.Spell
 import com.dndcharacterhandler.domain.model.SpellCatalogItem
-import com.dndcharacterhandler.domain.model.byCatalogId
 import com.dndcharacterhandler.domain.model.SpellcastingAbility
 import com.dndcharacterhandler.domain.rules.abilityModifier
 import com.dndcharacterhandler.domain.rules.calculateArmorClass
@@ -123,7 +122,7 @@ class CombatViewModel(
 
     init {
         viewModelScope.launch {
-            _spellCatalog.value = spellCatalogRepository.getItems().byCatalogId()
+            _spellCatalog.value = spellCatalogRepository.getItems().associateBy { it.id }
         }
         viewModelScope.launch {
             _inventoryCatalog.value = inventoryCatalogRepository.getItems()
