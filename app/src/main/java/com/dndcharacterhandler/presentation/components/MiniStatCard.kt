@@ -41,9 +41,13 @@ import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 /** Every stat card is this tall, its label on the border included. */
 val MiniStatCardHeight = 80.dp
 
+/** A plain number ("11", "+3", "-1", "387"), maybe with a unit ("60 фт"): the number at the full value size. */
+private val NUMBER = Regex("""^([+\-−]?\d+)(?:\s+(\S{1,4}))?$""")
+
 /**
  * The row of stat cards at the top of a screen (Features, Spells, Inventory, Combat, Attributes):
- * three cards of equal width whose values share one size, the largest that fits them all.
+ * three cards of equal width. Numbers always take the full value size; words ("Волшебник",
+ * "Бродяга") share one size, the largest that fits them all.
  */
 @Composable
 fun StatCardRow(modifier: Modifier = Modifier, content: @Composable RowScope.() -> Unit) {
@@ -116,17 +120,37 @@ fun MiniStatCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 icon?.invoke()
-                AutoSizeText(
-                    text = value.ifBlank { "—" },
-                    modifier = Modifier.weight(1f, fill = false),
-                    style = MaterialTheme.typography.headlineMedium.copy(
-                        fontSize = typography.miniStatValue.fontSizeSp.sp,
-                        lineHeight = (typography.miniStatValue.lineHeightSp ?: typography.miniStatValue.fontSizeSp).sp
-                    ),
-                    color = colors.text.primary,
-                    textAlign = TextAlign.Center,
-                    maxLines = 2
+                val valueStyle = MaterialTheme.typography.headlineMedium.copy(
+                    fontSize = typography.miniStatValue.fontSizeSp.sp,
+                    lineHeight = (typography.miniStatValue.lineHeightSp ?: typography.miniStatValue.fontSizeSp).sp
                 )
+                val shown = value.ifBlank { "—" }
+                val number = NUMBER.matchEntire(shown)
+                if (number != null) {
+                    // AC, bonuses, DCs, coins, ranges: the same size on every screen, never shrunk by a
+                    // word beside them; a unit follows in body text.
+                    Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(text = number.groupValues[1], style = valueStyle, color = colors.text.primary, maxLines = 1)
+                        number.groupValues[2].takeIf { it.isNotEmpty() }?.let { unit ->
+                            Text(
+                                text = unit,
+                                modifier = Modifier.padding(bottom = 3.dp),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = colors.text.muted,
+                                maxLines = 1
+                            )
+                        }
+                    }
+                } else {
+                    AutoSizeText(
+                        text = shown,
+                        modifier = Modifier.weight(1f, fill = false),
+                        style = valueStyle,
+                        color = colors.text.primary,
+                        textAlign = TextAlign.Center,
+                        maxLines = 2
+                    )
+                }
             }
         }
     ) { measurables, constraints ->
