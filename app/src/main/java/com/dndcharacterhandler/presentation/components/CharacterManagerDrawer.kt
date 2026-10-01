@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -25,6 +26,7 @@ import androidx.compose.material.icons.outlined.AddCircleOutline
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material.icons.outlined.FileUpload
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -62,6 +64,7 @@ fun CharacterManagerDrawer(
     onExportCharacter: () -> Unit,
     onDeleteCharacter: () -> Unit,
     onImportCharacter: () -> Unit,
+    onOpenSettings: () -> Unit,
     /** Null while there are no characters: the drawer can't be closed then. */
     onClose: (() -> Unit)?
 ) {
@@ -81,10 +84,12 @@ fun CharacterManagerDrawer(
             )
             .statusBarsPadding()
     ) {
+        Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 28.dp),
+                .weight(1f)
+                .fillMaxWidth()
+                .padding(start = 20.dp, end = 20.dp, top = 20.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             item {
@@ -151,6 +156,16 @@ fun CharacterManagerDrawer(
             item {
                 Spacer(modifier = Modifier.height(12.dp))
             }
+        }
+        // Pinned to the bottom, where the screens have their tab bar.
+        DrawerActionCard(
+            label = text("overview_settings"),
+            icon = Icons.Outlined.Settings,
+            onClick = onOpenSettings,
+            modifier = Modifier
+                .navigationBarsPadding()
+                .padding(horizontal = 20.dp, vertical = 8.dp)
+        )
         }
         if (onClose != null) {
             OverlayCloseButton(onClick = onClose, modifier = Modifier.align(Alignment.TopEnd))
@@ -352,6 +367,7 @@ private fun DrawerActionCard(
 }
 
 @Composable
+/** A plain hairline between the drawer's groups. */
 private fun DrawerOrnamentDivider(modifier: Modifier = Modifier) {
     val colors = LocalDesignTokens.current.colors
     Canvas(
@@ -360,32 +376,12 @@ private fun DrawerOrnamentDivider(modifier: Modifier = Modifier) {
             .height(18.dp)
     ) {
         val centerY = size.height / 2f
-        val ornamentCenterX = size.width / 2f
-        val gap = 16.dp.toPx()
         drawLine(
             color = colors.ornament.stroke,
             start = Offset(0f, centerY),
-            end = Offset(ornamentCenterX - gap, centerY),
-            strokeWidth = 1.dp.toPx(),
-            cap = StrokeCap.Round
-        )
-        drawLine(
-            color = colors.ornament.stroke,
-            start = Offset(ornamentCenterX + gap, centerY),
             end = Offset(size.width, centerY),
             strokeWidth = 1.dp.toPx(),
             cap = StrokeCap.Round
-        )
-        drawCircle(
-            color = colors.text.primary,
-            radius = 2.dp.toPx(),
-            center = Offset(ornamentCenterX, centerY)
-        )
-        drawCircle(
-            color = colors.ornament.stroke,
-            radius = 7.dp.toPx(),
-            center = Offset(ornamentCenterX, centerY),
-            style = Stroke(width = 1.dp.toPx())
         )
     }
 }

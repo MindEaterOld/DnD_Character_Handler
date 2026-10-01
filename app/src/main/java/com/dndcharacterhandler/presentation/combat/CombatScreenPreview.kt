@@ -24,7 +24,7 @@ fun CombatScreenPreview() {
         language = AppLanguage.ENGLISH,
         values = mapOf(
             "drawer_open_character_manager" to "Open character manager",
-            "overview_settings" to "Settings",
+            "dice_open" to "Roll dice",
             "placeholder_loading_character" to "Loading character",
             "overview_ac_full" to "Armor Class",
             "combat_spell_bonus" to "Spell Bonus",

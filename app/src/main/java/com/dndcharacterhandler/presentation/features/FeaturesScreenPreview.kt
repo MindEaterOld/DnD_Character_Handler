@@ -23,7 +23,7 @@ fun FeaturesScreenPreview() {
         language = AppLanguage.ENGLISH,
         values = mapOf(
             "drawer_open_character_manager" to "Open character manager",
-            "overview_settings" to "Settings",
+            "dice_open" to "Roll dice",
             "placeholder_loading_character" to "Loading character",
             "nav_features" to "Features",
             "features_search_placeholder" to "Search Features",

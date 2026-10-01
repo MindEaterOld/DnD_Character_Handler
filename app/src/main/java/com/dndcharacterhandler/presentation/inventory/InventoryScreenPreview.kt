@@ -30,7 +30,7 @@ fun InventoryScreenPreview() {
         language = AppLanguage.ENGLISH,
         values = mapOf(
             "drawer_open_character_manager" to "Open character manager",
-            "overview_settings" to "Settings",
+            "dice_open" to "Roll dice",
             "placeholder_loading_character" to "Loading character",
             "inventory_search_placeholder" to "Search Inventory",
             "inventory_carry_weight" to "Carry Weight",

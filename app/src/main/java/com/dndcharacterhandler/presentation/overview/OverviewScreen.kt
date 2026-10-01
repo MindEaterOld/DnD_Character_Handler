@@ -470,7 +470,7 @@ private enum class OverviewMiniStatField {
 fun OverviewScreen(
     viewModel: OverviewViewModel,
     onOpenDrawer: () -> Unit,
-    onOpenSettings: () -> Unit,
+    onOpenDice: () -> Unit,
     onOpenLevelUp: (targetLevel: Int) -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -491,7 +491,7 @@ fun OverviewScreen(
         catalog = catalog,
         onOpenLevelUp = onOpenLevelUp,
         onOpenDrawer = onOpenDrawer,
-        onOpenSettings = onOpenSettings,
+        onOpenDice = onOpenDice,
         onUpdateIdentity = viewModel::updateIdentity,
         onUpdateExperience = viewModel::updateExperience,
         onUpdatePortrait = viewModel::updatePortrait,
@@ -539,7 +539,7 @@ private fun OverviewContent(
     catalog: CharacterCatalog? = null,
     onOpenLevelUp: (Int) -> Unit = {},
     onOpenDrawer: () -> Unit,
-    onOpenSettings: () -> Unit,
+    onOpenDice: () -> Unit,
     onUpdateIdentity: (CharacterBundle, String?, String?, String?, Int?) -> Unit,
     onUpdateExperience: (CharacterBundle, Int) -> Unit,
     onUpdatePortrait: (CharacterBundle, String?) -> Unit,
@@ -670,7 +670,7 @@ private fun OverviewContent(
             item {
                 ScreenTopActions(
                     onOpenDrawer = onOpenDrawer,
-                    onOpenSettings = onOpenSettings
+                    onOpenDice = onOpenDice
                 )
             }
 
@@ -2342,7 +2342,7 @@ private fun OverviewScreenPreview() {
             "overview_initiative" to "Initiative",
             "overview_speed" to "Speed",
             "inventory_unit_feet" to "ft",
-            "overview_settings" to "Settings",
+            "dice_open" to "Roll dice",
             "overview_rename_title" to "Rename Character",
             "overview_edit_race_title" to "Edit Race",
             "overview_edit_class_title" to "Edit Class",
@@ -2458,7 +2458,7 @@ private fun OverviewScreenPreview() {
                     notes = emptyList()
                 ),
                 onOpenDrawer = {},
-                onOpenSettings = {},
+                onOpenDice = {},
                 onUpdateIdentity = { _, _, _, _, _ -> },
                 onUpdateExperience = { _, _ -> },
                 onUpdatePortrait = { _, _ -> },

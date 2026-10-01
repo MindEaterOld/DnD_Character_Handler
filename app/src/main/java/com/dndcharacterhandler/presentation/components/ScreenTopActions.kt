@@ -9,22 +9,23 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Casino
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.dndcharacterhandler.presentation.localization.text
+import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 
 @Composable
 fun ScreenTopActions(
     onOpenDrawer: () -> Unit,
-    onOpenSettings: () -> Unit,
+    onOpenDice: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = LocalDesignTokens.current.colors
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -34,15 +35,15 @@ fun ScreenTopActions(
             Icon(
                 imageVector = Icons.Filled.Menu,
                 contentDescription = text("drawer_open_character_manager"),
-                tint = Color(0xFFF3EEE6),
+                tint = colors.text.icon,
                 modifier = Modifier.size(28.dp)
             )
         }
-        ScreenTopActionButton(onClick = onOpenSettings) {
+        ScreenTopActionButton(onClick = onOpenDice) {
             Icon(
-                imageVector = Icons.Outlined.Settings,
-                contentDescription = text("overview_settings"),
-                tint = Color(0xFFF3EEE6),
+                imageVector = Icons.Outlined.Casino,
+                contentDescription = text("dice_open"),
+                tint = colors.text.icon,
                 modifier = Modifier.size(28.dp)
             )
         }

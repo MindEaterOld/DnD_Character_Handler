@@ -91,13 +91,13 @@ class NotesViewModel(
 fun NotesScreen(
     viewModel: NotesViewModel,
     onOpenDrawer: () -> Unit,
-    onOpenSettings: () -> Unit
+    onOpenDice: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     NotesContent(
         characterBundle = state.character,
         onOpenDrawer = onOpenDrawer,
-        onOpenSettings = onOpenSettings,
+        onOpenDice = onOpenDice,
         onUpdateNote = viewModel::updateNote,
         onTogglePinned = viewModel::togglePinned
     )
@@ -107,7 +107,7 @@ fun NotesScreen(
 internal fun NotesContent(
     characterBundle: CharacterBundle?,
     onOpenDrawer: () -> Unit = {},
-    onOpenSettings: () -> Unit = {},
+    onOpenDice: () -> Unit = {},
     onUpdateNote: (CharacterBundle, Note) -> Unit = { _, _ -> },
     onTogglePinned: (CharacterBundle, Note) -> Unit = { _, _ -> }
 ) {
@@ -124,7 +124,7 @@ internal fun NotesContent(
             ) {
                 ScreenTopActions(
                     onOpenDrawer = onOpenDrawer,
-                    onOpenSettings = onOpenSettings,
+                    onOpenDice = onOpenDice,
                     modifier = Modifier.align(Alignment.TopCenter)
                 )
                 Text(
@@ -161,7 +161,7 @@ internal fun NotesContent(
                     CharacterScreenHeader(
                         character = character,
                         onOpenDrawer = onOpenDrawer,
-                        onOpenSettings = onOpenSettings
+                        onOpenDice = onOpenDice
                     )
                 }
 

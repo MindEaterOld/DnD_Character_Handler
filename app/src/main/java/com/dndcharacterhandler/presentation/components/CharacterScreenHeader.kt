@@ -22,7 +22,7 @@ import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 fun CharacterScreenHeader(
     character: Character,
     onOpenDrawer: () -> Unit,
-    onOpenSettings: () -> Unit,
+    onOpenDice: () -> Unit,
     showTopActions: Boolean = true,
     modifier: Modifier = Modifier
 ) {
@@ -37,7 +37,7 @@ fun CharacterScreenHeader(
         if (showTopActions) {
             ScreenTopActions(
                 onOpenDrawer = onOpenDrawer,
-                onOpenSettings = onOpenSettings,
+                onOpenDice = onOpenDice,
                 modifier = Modifier.align(Alignment.Center)
             )
         }

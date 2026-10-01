@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Casino
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
@@ -45,9 +44,7 @@ import com.dndcharacterhandler.presentation.components.BottomNavigationBar
 import com.dndcharacterhandler.presentation.components.CharacterManagerDrawer
 import com.dndcharacterhandler.presentation.components.ScreenBackground
 import com.dndcharacterhandler.presentation.components.DeleteCharacterDialog
-import com.dndcharacterhandler.presentation.components.FloatingActionButtonSize
-import com.dndcharacterhandler.presentation.components.FloatingAddButton
-import com.dndcharacterhandler.presentation.components.FloatingButtonSpacing
+import com.dndcharacterhandler.presentation.components.NoFloatingButtonInset
 import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
 import com.dndcharacterhandler.presentation.components.SingleFloatingButtonInset
 import com.dndcharacterhandler.presentation.components.SettingsDialog
@@ -99,7 +96,8 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
     var diceSelection by remember { mutableStateOf(mapOf(DieType.D20 to 1)) }
     var diceTableSelection by remember { mutableStateOf<Map<DieType, Int>?>(null) }
     var diceSkin by remember { mutableStateOf(DiceSkin.GOLD) }
-    val openSettings: () -> Unit = { isSettingsOpen = true }
+    // The top-right button of every screen throws dice; settings are in the drawer.
+    val openDice: () -> Unit = { isDicePickerOpen = true }
     val selectedCharacterName = managerState.characters
         .firstOrNull { it.character.id == managerState.selectedCharacterId }
         ?.character
@@ -164,6 +162,7 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                         onImportCharacter = {
                             importLauncher.launch(arrayOf("application/octet-stream", "application/zip", "*/*"))
                         },
+                        onOpenSettings = { isSettingsOpen = true },
                         onClose = if (hasNoCharacters) null else ({ scope.launch { drawerState.close() } })
                     )
                 }
@@ -197,13 +196,11 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                         color = Color.Transparent
                     ) {
                     Box(modifier = Modifier.fillMaxSize()) {
-                    // Dice prototype: the dice button sits right above the screen's own "+" button (or
-                    // in its place on screens without one), and lists leave room to scroll past both.
-                    val screenHasAddButton = currentRoute in routesWithAddButton
-                    val floatingButtonsInset = if (screenHasAddButton) {
-                        SingleFloatingButtonInset + FloatingActionButtonSize + FloatingButtonSpacing
-                    } else {
+                    // Lists leave room to scroll past the screen's own "+" button, where there is one.
+                    val floatingButtonsInset = if (currentRoute in routesWithAddButton) {
                         SingleFloatingButtonInset
+                    } else {
+                        NoFloatingButtonInset
                     }
                     CompositionLocalProvider(LocalFloatingButtonsInset provides floatingButtonsInset) {
                     NavHost(
@@ -214,7 +211,7 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                             OverviewScreen(
                                 viewModel = appState.overviewViewModel,
                                 onOpenDrawer = { scope.launch { drawerState.open() } },
-                                onOpenSettings = openSettings,
+                                onOpenDice = openDice,
                                 onOpenLevelUp = { levelUpTarget = it }
                             )
                         }
@@ -222,35 +219,35 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                                 AttributesScreen(
                                     viewModel = appState.attributesViewModel,
                                     onOpenDrawer = { scope.launch { drawerState.open() } },
-                                    onOpenSettings = openSettings
+                                    onOpenDice = openDice
                                 )
                             }
                             composable(AppScreen.Combat.route) {
                                 CombatScreen(
                                     viewModel = appState.combatViewModel,
                                     onOpenDrawer = { scope.launch { drawerState.open() } },
-                                    onOpenSettings = openSettings
+                                    onOpenDice = openDice
                                 )
                             }
                             composable(AppScreen.Inventory.route) {
                                 InventoryScreen(
                                     viewModel = appState.inventoryViewModel,
                                     onOpenDrawer = { scope.launch { drawerState.open() } },
-                                    onOpenSettings = openSettings
+                                    onOpenDice = openDice
                                 )
                             }
                             composable(AppScreen.Spells.route) {
                                 SpellsScreen(
                                     viewModel = appState.spellsViewModel,
                                     onOpenDrawer = { scope.launch { drawerState.open() } },
-                                    onOpenSettings = openSettings
+                                    onOpenDice = openDice
                                 )
                             }
                             composable(AppScreen.Features.route) {
                                 FeaturesScreen(
                                     viewModel = appState.featuresViewModel,
                                     onOpenDrawer = { scope.launch { drawerState.open() } },
-                                    onOpenSettings = openSettings,
+                                    onOpenDice = openDice,
                                     onOpenLevelUp = { levelUpTarget = it }
                                 )
                             }
@@ -258,29 +255,18 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                                 BiographyScreen(
                                     viewModel = appState.biographyViewModel,
                                     onOpenDrawer = { scope.launch { drawerState.open() } },
-                                    onOpenSettings = openSettings
+                                    onOpenDice = openDice
                                 )
                             }
                             composable(AppScreen.Notes.route) {
                                 NotesScreen(
                                     viewModel = appState.notesViewModel,
                                     onOpenDrawer = { scope.launch { drawerState.open() } },
-                                    onOpenSettings = openSettings
+                                    onOpenDice = openDice
                                 )
                             }
                         }
                     }
-                        FloatingAddButton(
-                            onClick = { isDicePickerOpen = true },
-                            icon = Icons.Outlined.Casino,
-                            contentDescription = text("dice_open"),
-                            modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .padding(
-                                    end = 24.dp,
-                                    bottom = if (screenHasAddButton) 15.dp + FloatingActionButtonSize + FloatingButtonSpacing else 15.dp
-                                )
-                        )
                     }
                     }
                 }

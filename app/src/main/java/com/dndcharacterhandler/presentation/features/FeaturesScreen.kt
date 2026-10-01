@@ -186,7 +186,7 @@ class FeaturesViewModel(
 fun FeaturesScreen(
     viewModel: FeaturesViewModel,
     onOpenDrawer: () -> Unit,
-    onOpenSettings: () -> Unit,
+    onOpenDice: () -> Unit,
     onOpenLevelUp: (targetLevel: Int) -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -197,7 +197,7 @@ fun FeaturesScreen(
         catalog = catalogState.catalog,
         isCatalogLoading = catalogState.isLoading,
         onOpenDrawer = onOpenDrawer,
-        onOpenSettings = onOpenSettings,
+        onOpenDice = onOpenDice,
         onUpdateFeature = viewModel::updateFeature,
         onDeleteFeature = viewModel::deleteFeature,
         onOpenLevelUp = onOpenLevelUp,
@@ -213,7 +213,7 @@ internal fun FeaturesContent(
     catalog: CharacterCatalog = CharacterCatalog.EMPTY,
     isCatalogLoading: Boolean = false,
     onOpenDrawer: () -> Unit = {},
-    onOpenSettings: () -> Unit = {},
+    onOpenDice: () -> Unit = {},
     onUpdateFeature: (CharacterBundle, Feature) -> Unit = { _, _ -> },
     onDeleteFeature: (CharacterBundle, Feature) -> Unit = { _, _ -> },
     onOpenLevelUp: (Int) -> Unit = {},
@@ -241,7 +241,7 @@ internal fun FeaturesContent(
             ) {
                 ScreenTopActions(
                     onOpenDrawer = onOpenDrawer,
-                    onOpenSettings = onOpenSettings,
+                    onOpenDice = onOpenDice,
                     modifier = Modifier.align(Alignment.TopCenter)
                 )
                 Text(
@@ -291,7 +291,7 @@ internal fun FeaturesContent(
                     CharacterScreenHeader(
                         character = character,
                         onOpenDrawer = onOpenDrawer,
-                        onOpenSettings = onOpenSettings
+                        onOpenDice = onOpenDice
                     )
                 }
 

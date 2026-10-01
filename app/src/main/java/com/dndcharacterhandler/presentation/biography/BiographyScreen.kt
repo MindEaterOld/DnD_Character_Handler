@@ -141,13 +141,13 @@ private fun BiographyField.toCharacterTextField(): CharacterTextField =
 fun BiographyScreen(
     viewModel: BiographyViewModel,
     onOpenDrawer: () -> Unit,
-    onOpenSettings: () -> Unit
+    onOpenDice: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     BiographyContent(
         characterBundle = state.character,
         onOpenDrawer = onOpenDrawer,
-        onOpenSettings = onOpenSettings,
+        onOpenDice = onOpenDice,
         onUpdateBiography = viewModel::updateBiography,
         onUpdateField = viewModel::updateBiographyField
     )
@@ -157,7 +157,7 @@ fun BiographyScreen(
 internal fun BiographyContent(
     characterBundle: CharacterBundle?,
     onOpenDrawer: () -> Unit,
-    onOpenSettings: () -> Unit,
+    onOpenDice: () -> Unit,
     onUpdateBiography: (CharacterBundle, String) -> Unit = { _, _ -> },
     onUpdateField: (CharacterBundle, BiographyField, String) -> Unit = { _, _, _ -> }
 ) {
@@ -172,7 +172,7 @@ internal fun BiographyContent(
             ) {
             ScreenTopActions(
                 onOpenDrawer = onOpenDrawer,
-                onOpenSettings = onOpenSettings,
+                onOpenDice = onOpenDice,
                 modifier = Modifier.align(Alignment.TopCenter)
             )
             Text(
@@ -197,7 +197,7 @@ internal fun BiographyContent(
                 CharacterScreenHeader(
                     character = resolvedCharacter,
                     onOpenDrawer = onOpenDrawer,
-                    onOpenSettings = onOpenSettings
+                    onOpenDice = onOpenDice
                 )
             }
             item {

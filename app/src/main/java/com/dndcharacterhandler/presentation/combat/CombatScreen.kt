@@ -243,7 +243,7 @@ class CombatViewModel(
 fun CombatScreen(
     viewModel: CombatViewModel,
     onOpenDrawer: () -> Unit,
-    onOpenSettings: () -> Unit
+    onOpenDice: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val spellCatalog by viewModel.spellCatalog.collectAsStateWithLifecycle()
@@ -253,7 +253,7 @@ fun CombatScreen(
         spellCatalog = spellCatalog,
         inventoryCatalog = inventoryCatalog,
         onOpenDrawer = onOpenDrawer,
-        onOpenSettings = onOpenSettings,
+        onOpenDice = onOpenDice,
         onUpdateArmorClass = viewModel::updateArmorClass,
         onUpdateSpellcastingAbility = viewModel::updateSpellcastingAbility,
         onUpdateAttack = viewModel::updateAttack,
@@ -272,7 +272,7 @@ internal fun CombatContent(
     spellCatalog: Map<String, SpellCatalogItem> = emptyMap(),
     inventoryCatalog: List<InventoryCatalogItem> = emptyList(),
     onOpenDrawer: () -> Unit = {},
-    onOpenSettings: () -> Unit = {},
+    onOpenDice: () -> Unit = {},
     onUpdateArmorClass: (CharacterBundle, Int, ArmorClassMode, Int?) -> Unit = { _, _, _, _ -> },
     onUpdateSpellcastingAbility: (CharacterBundle, SpellcastingAbility) -> Unit = { _, _ -> },
     onUpdateAttack: (CharacterBundle, Attack) -> Unit = { _, _ -> },
@@ -309,7 +309,7 @@ internal fun CombatContent(
             ) {
                 ScreenTopActions(
                     onOpenDrawer = onOpenDrawer,
-                    onOpenSettings = onOpenSettings,
+                    onOpenDice = onOpenDice,
                     modifier = Modifier.align(Alignment.TopCenter)
                 )
                 Text(
@@ -368,7 +368,7 @@ internal fun CombatContent(
                     CharacterScreenHeader(
                         character = character,
                         onOpenDrawer = onOpenDrawer,
-                        onOpenSettings = onOpenSettings
+                        onOpenDice = onOpenDice
                     )
                 }
 

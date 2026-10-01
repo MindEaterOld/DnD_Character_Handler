@@ -22,16 +22,15 @@ import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 /** Size of the round floating action button, for stacking other buttons above it. */
 val FloatingActionButtonSize = 58.dp
 
-/** Gap between floating buttons stacked in the bottom-right corner. */
-val FloatingButtonSpacing = 12.dp
-
 /** Bottom content padding that lets a list scroll clear of one floating button. */
 val SingleFloatingButtonInset = 110.dp
 
+/** Bottom content padding of a screen without a floating button. */
+val NoFloatingButtonInset = 16.dp
+
 /**
  * Bottom content padding a scrolling screen needs so its last items can scroll clear of the
- * floating buttons in the bottom-right corner. The app provides it per screen: more on screens
- * where the dice button sits on top of the screen's own "+" button.
+ * floating "+" button in the bottom-right corner. The app provides it per screen.
  */
 val LocalFloatingButtonsInset = compositionLocalOf { SingleFloatingButtonInset }
 

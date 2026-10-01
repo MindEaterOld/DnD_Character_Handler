@@ -238,7 +238,7 @@ class SpellsViewModel(
 fun SpellsScreen(
     viewModel: SpellsViewModel,
     onOpenDrawer: () -> Unit,
-    onOpenSettings: () -> Unit
+    onOpenDice: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val catalogState by viewModel.catalogUiState.collectAsStateWithLifecycle()
@@ -246,7 +246,7 @@ fun SpellsScreen(
         characterBundle = state.character,
         catalogState = catalogState,
         onOpenDrawer = onOpenDrawer,
-        onOpenSettings = onOpenSettings,
+        onOpenDice = onOpenDice,
         onUpdateSpell = viewModel::updateSpell,
         onDeleteSpell = viewModel::deleteSpell,
         onTogglePrepared = viewModel::togglePrepared,
@@ -261,7 +261,7 @@ internal fun SpellsContent(
     characterBundle: CharacterBundle?,
     catalogState: SpellCatalogUiState = SpellCatalogUiState(),
     onOpenDrawer: () -> Unit = {},
-    onOpenSettings: () -> Unit = {},
+    onOpenDice: () -> Unit = {},
     onUpdateSpell: (CharacterBundle, Spell) -> Unit = { _, _ -> },
     onDeleteSpell: (CharacterBundle, Spell) -> Unit = { _, _ -> },
     onTogglePrepared: (CharacterBundle, Spell) -> Unit = { _, _ -> },
@@ -286,7 +286,7 @@ internal fun SpellsContent(
             ) {
                 ScreenTopActions(
                     onOpenDrawer = onOpenDrawer,
-                    onOpenSettings = onOpenSettings,
+                    onOpenDice = onOpenDice,
                     modifier = Modifier.align(Alignment.TopCenter)
                 )
                 Text(
@@ -332,7 +332,7 @@ internal fun SpellsContent(
                     CharacterScreenHeader(
                         character = character,
                         onOpenDrawer = onOpenDrawer,
-                        onOpenSettings = onOpenSettings
+                        onOpenDice = onOpenDice
                     )
                 }
 

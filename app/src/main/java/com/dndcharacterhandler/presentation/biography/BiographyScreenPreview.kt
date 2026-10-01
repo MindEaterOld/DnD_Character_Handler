@@ -22,7 +22,7 @@ fun BiographyScreenPreview() {
         language = AppLanguage.ENGLISH,
         values = mapOf(
             "drawer_open_character_manager" to "Open character manager",
-            "overview_settings" to "Settings",
+            "dice_open" to "Roll dice",
             "placeholder_loading_character" to "Loading character",
             "common_dash" to "—",
             "biography_identity" to "Character Identity",
@@ -86,7 +86,7 @@ fun BiographyScreenPreview() {
                     notes = emptyList()
                 ),
                 onOpenDrawer = {},
-                onOpenSettings = {}
+                onOpenDice = {}
             )
         }
     }

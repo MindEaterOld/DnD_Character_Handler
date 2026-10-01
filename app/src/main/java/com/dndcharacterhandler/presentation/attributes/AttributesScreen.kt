@@ -303,7 +303,7 @@ private fun AbilityType.toSpellcastingAbility(): SpellcastingAbility =
 fun AttributesScreen(
     viewModel: AttributesViewModel,
     onOpenDrawer: () -> Unit,
-    onOpenSettings: () -> Unit
+    onOpenDice: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val darkvisionCatalog by viewModel.darkvisionCatalog.collectAsStateWithLifecycle()
@@ -322,7 +322,7 @@ fun AttributesScreen(
         onUpsertFeature = viewModel::upsertFeature,
         onDeleteFeature = viewModel::deleteFeature,
         onOpenDrawer = onOpenDrawer,
-        onOpenSettings = onOpenSettings
+        onOpenDice = onOpenDice
     )
 }
 
@@ -342,7 +342,7 @@ fun AttributesContent(
     onUpsertFeature: (CharacterBundle, Feature) -> Unit = { _, _ -> },
     onDeleteFeature: (CharacterBundle, Feature) -> Unit = { _, _ -> },
     onOpenDrawer: () -> Unit = {},
-    onOpenSettings: () -> Unit = {}
+    onOpenDice: () -> Unit = {}
 ) {
     if (characterBundle == null) {
         // Same loading state as the other screens (this used to render the preview character).
@@ -354,7 +354,7 @@ fun AttributesContent(
             ) {
                 ScreenTopActions(
                     onOpenDrawer = onOpenDrawer,
-                    onOpenSettings = onOpenSettings,
+                    onOpenDice = onOpenDice,
                     modifier = Modifier.align(Alignment.TopCenter)
                 )
                 Text(
@@ -430,7 +430,7 @@ fun AttributesContent(
                 CharacterScreenHeader(
                     character = character,
                     onOpenDrawer = onOpenDrawer,
-                    onOpenSettings = onOpenSettings
+                    onOpenDice = onOpenDice
                 )
             }
 

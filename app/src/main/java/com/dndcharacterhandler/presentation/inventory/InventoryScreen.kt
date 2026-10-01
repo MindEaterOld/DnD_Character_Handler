@@ -218,7 +218,7 @@ data class InventoryCatalogUiState(
 fun InventoryScreen(
     viewModel: InventoryViewModel,
     onOpenDrawer: () -> Unit,
-    onOpenSettings: () -> Unit
+    onOpenDice: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val catalogState by viewModel.catalogUiState.collectAsStateWithLifecycle()
@@ -233,7 +233,7 @@ fun InventoryScreen(
         characterBundle = state.character,
         catalogItems = catalogState.items,
         onOpenDrawer = onOpenDrawer,
-        onOpenSettings = onOpenSettings,
+        onOpenDice = onOpenDice,
         onAddItem = { isAddItemDialogOpen = true },
         onEditCurrency = { isCurrencyDialogOpen = true },
         onToggleEquipped = { characterBundle, item ->
@@ -324,7 +324,7 @@ internal fun InventoryContent(
     characterBundle: CharacterBundle?,
     catalogItems: List<InventoryCatalogItem> = emptyList(),
     onOpenDrawer: () -> Unit = {},
-    onOpenSettings: () -> Unit = {},
+    onOpenDice: () -> Unit = {},
     onAddItem: () -> Unit = {},
     onEditCurrency: () -> Unit = {},
     onToggleEquipped: (CharacterBundle, InventoryItem) -> Unit = { _, _ -> },
@@ -342,7 +342,7 @@ internal fun InventoryContent(
             ) {
                 ScreenTopActions(
                     onOpenDrawer = onOpenDrawer,
-                    onOpenSettings = onOpenSettings,
+                    onOpenDice = onOpenDice,
                     modifier = Modifier.align(Alignment.TopCenter)
                 )
                 Text(
@@ -387,7 +387,7 @@ internal fun InventoryContent(
                     CharacterScreenHeader(
                         character = character,
                         onOpenDrawer = onOpenDrawer,
-                        onOpenSettings = onOpenSettings
+                        onOpenDice = onOpenDice
                     )
                 }
 

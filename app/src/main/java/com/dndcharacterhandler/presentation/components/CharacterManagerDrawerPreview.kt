@@ -27,6 +27,7 @@ fun CharacterManagerDrawerPreview() {
             "drawer_export_character" to "Export Character",
             "drawer_delete_character" to "Delete Character",
             "drawer_import_character" to "Import Character",
+            "overview_settings" to "Settings",
             "drawer_level" to "Level %1\$s",
             "overview_name_placeholder" to "Character Name",
             "placeholder_race" to "Human",
@@ -78,6 +79,7 @@ fun CharacterManagerDrawerPreview() {
                 onExportCharacter = {},
                 onDeleteCharacter = {},
                 onImportCharacter = {},
+                onOpenSettings = {},
                 onClose = {}
             )
         }
@@ -98,7 +100,8 @@ fun CharacterManagerDrawerEmptyPreview() {
         values = mapOf(
             "drawer_characters" to "Characters",
             "drawer_new_character" to "New Character",
-            "drawer_import_character" to "Import Character"
+            "drawer_import_character" to "Import Character",
+            "overview_settings" to "Settings"
         )
     )
     CompositionLocalProvider(LocalStrings provides previewStrings) {
@@ -110,6 +113,7 @@ fun CharacterManagerDrawerEmptyPreview() {
                 onExportCharacter = {},
                 onDeleteCharacter = {},
                 onImportCharacter = {},
+                onOpenSettings = {},
                 onClose = null
             )
         }
