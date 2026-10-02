@@ -4,6 +4,17 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import com.dndcharacterhandler.data.json.has
+import com.dndcharacterhandler.data.json.jsonArrayOf
+import com.dndcharacterhandler.data.json.optArray
+import com.dndcharacterhandler.data.json.optBoolean
+import com.dndcharacterhandler.data.json.optDouble
+import com.dndcharacterhandler.data.json.optInt
+import com.dndcharacterhandler.data.json.optLong
+import com.dndcharacterhandler.data.json.optObject
+import com.dndcharacterhandler.data.json.optString
+import com.dndcharacterhandler.data.json.parseJsonObject
+import com.dndcharacterhandler.data.json.strings
 import com.dndcharacterhandler.domain.model.CustomDiceSkin
 import com.dndcharacterhandler.domain.model.DiceFontIds
 import com.dndcharacterhandler.domain.model.DicePattern
@@ -12,8 +23,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
-import org.json.JSONArray
-import org.json.JSONObject
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import java.io.File
 
 /**
@@ -115,15 +129,17 @@ class DiceSkinStore(context: Context) {
     }
 }
 
+// Json, not toString(): a number JSON can't hold (NaN) fails the save rather than writing a file
+// that won't read back.
 fun encodeDiceSkins(skins: List<CustomDiceSkin>): String =
-    JSONObject().put("skins", JSONArray(skins.map(::skinToJson))).toString()
+    Json.encodeToString(JsonObject.serializer(), buildJsonObject { put("skins", JsonArray(skins.map(::skinToJson))) })
 
 fun decodeDiceSkins(json: String): List<CustomDiceSkin> {
-    val array = JSONObject(json).optJSONArray("skins") ?: return emptyList()
-    return (0 until array.length()).mapNotNull { index -> array.optJSONObject(index)?.let(::skinFromJson) }
+    val array = parseJsonObject(json).optArray("skins") ?: return emptyList()
+    return (0 until array.size).mapNotNull { index -> array.optObject(index)?.let(::skinFromJson) }
 }
 
-private fun skinToJson(skin: CustomDiceSkin): JSONObject = JSONObject().apply {
+private fun skinToJson(skin: CustomDiceSkin): JsonObject = buildJsonObject {
     put("id", skin.id)
     put("name", skin.name)
     put("bodyColor", skin.bodyColor)
@@ -136,12 +152,12 @@ private fun skinToJson(skin: CustomDiceSkin): JSONObject = JSONObject().apply {
     put("font", skin.font)
     put("numberScale", skin.numberScale.toDouble())
     put("pattern", patternToJson(skin.pattern))
-    put("faceArt", JSONArray(skin.faceArt.sorted()))
+    put("faceArt", jsonArrayOf(skin.faceArt.sorted()))
     put("numbersOverArt", skin.numbersOverArt)
     put("updatedAt", skin.updatedAt)
 }
 
-private fun skinFromJson(json: JSONObject): CustomDiceSkin? {
+private fun skinFromJson(json: JsonObject): CustomDiceSkin? {
     val id = json.optString("id").ifBlank { return null }
     return CustomDiceSkin(
         id = id,
@@ -155,27 +171,41 @@ private fun skinFromJson(json: JSONObject): CustomDiceSkin? {
         numberOutlineColor = if (json.has("numberOutlineColor")) json.optInt("numberOutlineColor") else null,
         font = json.optString("font").takeIf { it in DiceFontIds.all } ?: DiceFontIds.APP,
         numberScale = json.optDouble("numberScale", 1.0).toFloat().coerceIn(0.5f, 1.5f),
-        pattern = json.optJSONObject("pattern")?.let(::patternFromJson) ?: DicePattern.None,
-        faceArt = json.optJSONArray("faceArt")?.let { array -> (0 until array.length()).map { array.getString(it) }.toSet() }.orEmpty(),
+        pattern = json.optObject("pattern")?.let(::patternFromJson) ?: DicePattern.None,
+        faceArt = json.optArray("faceArt")?.let { array -> array.strings().toSet() }.orEmpty(),
         numbersOverArt = json.optBoolean("numbersOverArt", true),
         updatedAt = json.optLong("updatedAt")
     )
 }
 
-private fun patternToJson(pattern: DicePattern): JSONObject = JSONObject().apply {
+private fun patternToJson(pattern: DicePattern): JsonObject = buildJsonObject {
     when (pattern) {
         DicePattern.None -> put("type", "none")
-        is DicePattern.Web -> put("type", "web").put("color", pattern.color)
-        is DicePattern.Marble -> put("type", "marble").put("color", pattern.color).put("seed", pattern.seed)
-        is DicePattern.Nebula -> put("type", "nebula").put("color", pattern.color).put("glow", pattern.glow).put("seed", pattern.seed)
-        is DicePattern.Picture -> put("type", "picture")
-            .put("scale", pattern.scale.toDouble())
-            .put("rotation", pattern.rotation.toDouble())
-            .put("strength", pattern.strength.toDouble())
+        is DicePattern.Web -> {
+            put("type", "web")
+            put("color", pattern.color)
+        }
+        is DicePattern.Marble -> {
+            put("type", "marble")
+            put("color", pattern.color)
+            put("seed", pattern.seed)
+        }
+        is DicePattern.Nebula -> {
+            put("type", "nebula")
+            put("color", pattern.color)
+            put("glow", pattern.glow)
+            put("seed", pattern.seed)
+        }
+        is DicePattern.Picture -> {
+            put("type", "picture")
+            put("scale", pattern.scale.toDouble())
+            put("rotation", pattern.rotation.toDouble())
+            put("strength", pattern.strength.toDouble())
+        }
     }
 }
 
-private fun patternFromJson(json: JSONObject): DicePattern = when (json.optString("type")) {
+private fun patternFromJson(json: JsonObject): DicePattern = when (json.optString("type")) {
     "web" -> DicePattern.Web(json.optInt("color"))
     "marble" -> DicePattern.Marble(json.optInt("color"), json.optInt("seed"))
     "nebula" -> DicePattern.Nebula(json.optInt("color"), json.optInt("glow"), json.optInt("seed"))

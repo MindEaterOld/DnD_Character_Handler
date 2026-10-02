@@ -1,7 +1,12 @@
 package com.dndcharacterhandler.presentation.dice
 
-import android.graphics.Typeface
 import android.net.Uri
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.text.TextMeasurer
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dndcharacterhandler.data.dice.DiceSkinStore
@@ -90,9 +95,11 @@ class DiceSkinsViewModel(
     internal suspend fun importFaceArt(kind: DieShapeKind, uri: Uri): File? =
         store.draftFaceArtFile(kind.name).takeIf { store.importImage(uri, it, square = DiceFaceAtlas.SIZE) }
 
-    /** Saves the empty face template of [kind] to [uri]. */
-    internal suspend fun exportTemplate(kind: DieShapeKind, typeface: Typeface?, uri: Uri): Boolean {
-        val template = withContext(Dispatchers.Default) { DiceFaceAtlas.template(kind, typeface) }
-        return store.exportImage(uri, template)
+    /** Saves the empty face template of [kind] to [uri], its numbers in [numberStyle]. */
+    internal suspend fun exportTemplate(kind: DieShapeKind, numberStyle: TextStyle, fonts: FontFamily.Resolver, uri: Uri): Boolean {
+        val template = withContext(Dispatchers.Default) {
+            DiceFaceAtlas.template(kind, TextMeasurer(fonts, Density(1f), LayoutDirection.Ltr), numberStyle)
+        }
+        return store.exportImage(uri, template.asAndroidBitmap())
     }
 }

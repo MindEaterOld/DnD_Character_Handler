@@ -233,15 +233,14 @@ private fun DiceStatusPanel(state: DiceTableState, modifier: Modifier = Modifier
 private fun DiceCanvas(state: DiceTableState, skin: DiceLook, modifier: Modifier = Modifier) {
     val style = rememberDiceSkinStyle(skin)
     val shadowColor = LocalDesignTokens.current.colors.background.radialEnd
-    val numbers = rememberDieNumberPaint()
+    val numbers = rememberDieNumberText()
     val scratch = remember { DieDrawScratch() }
 
     Canvas(modifier = modifier) {
         // Reading the frame counter subscribes this draw to every simulation step.
         state.frame
-        val numberPaint = numbers.get()
         val bodies = state.world.bodies.sortedBy { it.position.y }
         bodies.forEach { drawDieShadow(state.camera, it, shadowColor, style.body.alpha) }
-        bodies.forEach { drawDie(state.camera, it, style, numberPaint, scratch) }
+        bodies.forEach { drawDie(state.camera, it, style, numbers, scratch) }
     }
 }

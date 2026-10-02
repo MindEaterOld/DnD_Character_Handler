@@ -24,6 +24,12 @@ import com.dndcharacterhandler.domain.model.Skill
 import com.dndcharacterhandler.domain.model.Spell
 import com.dndcharacterhandler.domain.model.SpellcastingAbility
 import com.dndcharacterhandler.domain.model.defaultCharacterBundle
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -41,14 +47,10 @@ class CharacterArchiveCodecTest {
 
     @Test
     fun missingCollections_importAsEmptyInsteadOfThrowing() {
-        val manifest = richBundle().toArchiveManifest(exportedAt = 0L, mapAssetReference = identityMap)
-        manifest.remove("skills")
-        manifest.remove("attacks")
-        manifest.remove("inventoryItems")
-        manifest.remove("spells")
-        manifest.remove("features")
-        manifest.remove("notes")
-        manifest.remove("combatResources")
+        val fullManifest = richBundle().toArchiveManifest(exportedAt = 0L, mapAssetReference = identityMap)
+        val manifest = JsonObject(
+            fullManifest - listOf("skills", "attacks", "inventoryItems", "spells", "features", "notes", "combatResources")
+        )
 
         val imported = archiveManifestToCharacterBundle(manifest, resolveAssetReference = identityResolve)
 
@@ -64,9 +66,11 @@ class CharacterArchiveCodecTest {
 
     @Test
     fun unknownEnumValues_fallBackToDefaults() {
-        val manifest = richBundle().toArchiveManifest(exportedAt = 0L, mapAssetReference = identityMap)
-        manifest.getJSONObject("character").put("armorClassMode", "TOTALLY_BOGUS")
-        manifest.getJSONArray("inventoryItems").getJSONObject(0).put("category", "NOPE")
+        val fullManifest = richBundle().toArchiveManifest(exportedAt = 0L, mapAssetReference = identityMap)
+        val items = fullManifest.getValue("inventoryItems").jsonArray
+        val manifest = fullManifest
+            .withValue("character", fullManifest.getValue("character").jsonObject.withValue("armorClassMode", JsonPrimitive("TOTALLY_BOGUS")))
+            .withValue("inventoryItems", JsonArray(listOf<JsonElement>(items[0].jsonObject.withValue("category", JsonPrimitive("NOPE"))) + items.drop(1)))
 
         val imported = archiveManifestToCharacterBundle(manifest, resolveAssetReference = identityResolve)
 
@@ -124,6 +128,9 @@ class CharacterArchiveCodecTest {
 
     private val identityMap: (String?, String) -> String? = { source, _ -> source }
     private val identityResolve: (String?) -> String? = { it }
+
+    /** A copy with [key] set to [value] (the manifest's JSON is read-only). */
+    private fun JsonObject.withValue(key: String, value: JsonElement): JsonObject = JsonObject(this + (key to value))
 
     private fun richBundle(): CharacterBundle {
         val base = defaultCharacterBundle(now = 1_000L)

@@ -58,11 +58,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFontFamilyResolver
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.dndcharacterhandler.domain.model.CustomDiceSkin
@@ -105,6 +106,8 @@ internal fun DiceWorkshopOverlay(viewModel: DiceSkinsViewModel, initial: CustomD
     val strings = LocalStrings.current
     val context = LocalContext.current
     val clipboard = LocalClipboardManager.current
+    val fonts = LocalFontFamilyResolver.current
+    val numberStyle = MaterialTheme.typography.headlineMedium
     val scope = rememberCoroutineScope()
     var skin by remember { mutableStateOf(initial) }
     var draftPicture by remember { mutableStateOf<File?>(null) }
@@ -160,7 +163,9 @@ internal fun DiceWorkshopOverlay(viewModel: DiceSkinsViewModel, initial: CustomD
         val kind = templateKind ?: return@rememberLauncherForActivityResult
         uri ?: return@rememberLauncherForActivityResult
         scope.launch {
-            val saved = viewModel.exportTemplate(kind, DiceFonts.typeface(context, skin.font), uri)
+            val font = DiceFonts.font(context.assets, skin.font)
+            val style = numberStyle.copy(fontFamily = font?.family ?: numberStyle.fontFamily, fontWeight = font?.weight ?: numberStyle.fontWeight)
+            val saved = viewModel.exportTemplate(kind, style, fonts, uri)
             message = strings[if (saved) "dice_workshop_template_saved" else "dice_workshop_image_failed"]
         }
     }
@@ -545,10 +550,9 @@ private fun ActionButton(label: String, icon: androidx.compose.ui.graphics.vecto
 private fun FontSample(font: String, selected: Boolean, onClick: () -> Unit) {
     val colors = LocalDesignTokens.current.colors
     val context = LocalContext.current
-    val numbers = rememberDieNumberPaint()
-    val typeface = remember(font) { DiceFonts.typeface(context, font) }
+    val diceFont = remember(font) { DiceFonts.font(context.assets, font) }
+    val style = MaterialTheme.typography.headlineMedium
     val shape = RoundedCornerShape(10.dp)
-    val ink = colors.text.primary
     Column(
         modifier = Modifier
             .clip(shape)
@@ -558,14 +562,14 @@ private fun FontSample(font: String, selected: Boolean, onClick: () -> Unit) {
             .padding(horizontal = 10.dp, vertical = 6.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Canvas(modifier = Modifier.size(width = 64.dp, height = 40.dp)) {
-            val paint = numbers.get()
-            typeface?.let { paint.typeface = it }
-            paint.textSize = size.height * 0.8f
-            paint.color = ink.toArgb()
-            paint.style = android.graphics.Paint.Style.FILL
-            drawContext.canvas.nativeCanvas.drawText("20", size.width / 2, size.height * 0.78f, paint)
-        }
+        Text(
+            text = "20",
+            modifier = Modifier.width(64.dp),
+            style = style.copy(fontFamily = diceFont?.family ?: style.fontFamily, fontWeight = diceFont?.weight ?: style.fontWeight),
+            color = colors.text.primary,
+            textAlign = TextAlign.Center,
+            maxLines = 1
+        )
         Text(
             text = DiceFonts.label(font) ?: text("dice_font_app"),
             style = MaterialTheme.typography.labelMedium,

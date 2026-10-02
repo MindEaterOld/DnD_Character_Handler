@@ -1,5 +1,14 @@
 package com.dndcharacterhandler.data.catalog
 
+import com.dndcharacterhandler.data.json.has
+import com.dndcharacterhandler.data.json.isNull
+import com.dndcharacterhandler.data.json.optArray
+import com.dndcharacterhandler.data.json.optBoolean
+import com.dndcharacterhandler.data.json.optDouble
+import com.dndcharacterhandler.data.json.optInt
+import com.dndcharacterhandler.data.json.optObject
+import com.dndcharacterhandler.data.json.optString
+import com.dndcharacterhandler.data.json.parseJsonObject
 import com.dndcharacterhandler.domain.model.AdvancementStep
 import com.dndcharacterhandler.domain.model.CatalogBackground
 import com.dndcharacterhandler.domain.model.CatalogClass
@@ -23,20 +32,25 @@ import com.dndcharacterhandler.domain.model.CharacterCatalog
 import com.dndcharacterhandler.domain.model.ChoiceRestriction
 import com.dndcharacterhandler.domain.model.ClassRestriction
 import com.dndcharacterhandler.domain.model.TraitChoice
-import org.json.JSONArray
-import org.json.JSONObject
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.doubleOrNull
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.longOrNull
 
 /** Reads character_catalog.json, the catalog tools/foundry_catalog/convert.py builds. */
 object CharacterCatalogParser {
     fun parse(json: String): CharacterCatalog {
-        val root = JSONObject(json)
+        val root = parseJsonObject(json)
         return CharacterCatalog(
             classes = root.objects("classes").map(::parseClass),
             subclasses = root.objects("subclasses").map(::parseSubclass),
             species = root.objects("species").map(::parseSpecies),
             backgrounds = root.objects("backgrounds").map(::parseBackground),
             features = root.objects("features").map(::parseFeature),
-            spells = root.optJSONObject("spells").entries { id, value ->
+            spells = root.optObject("spells").entries { id, value ->
                 CatalogSpellRef(
                     id = id,
                     name = value.text("name"),
@@ -70,20 +84,20 @@ object CharacterCatalogParser {
                     areaOfEffect = value.optString("areaOfEffect")
                 )
             },
-            books = root.optJSONObject("books").entries { _, value -> value.asText() },
-            subtypes = root.optJSONObject("subtypes").entries { _, value -> value.asText() },
-            legacyIds = root.optJSONObject("legacyIds").let { legacy ->
-                buildMap { legacy?.keys()?.forEach { key -> put(key, legacy.getString(key)) } }
+            books = root.optObject("books").entries { _, value -> value.asText() },
+            subtypes = root.optObject("subtypes").entries { _, value -> value.asText() },
+            legacyIds = root.optObject("legacyIds").let { legacy ->
+                buildMap { legacy?.keys?.forEach { key -> put(key, legacy.getString(key)) } }
             },
-            traits = root.optJSONObject("traits")?.optJSONObject("labels").entries { key, value ->
+            traits = root.optObject("traits")?.optObject("labels").entries { key, value ->
                 CatalogTrait(key, value.text("name"), value.strings("children"))
             },
-            traitCategories = root.optJSONObject("traits")?.optJSONObject("categories").entries { _, value -> value.asText() },
-            equipment = root.optJSONObject("equipment").entries { id, value ->
+            traitCategories = root.optObject("traits")?.optObject("categories").entries { _, value -> value.asText() },
+            equipment = root.optObject("equipment").entries { id, value ->
                 CatalogEquipmentRef(id, value.text("name"), value.optString("type"), value.optDouble("weight").takeIf { !it.isNaN() })
             },
-            containers = root.optJSONObject("containers").entries { id, value ->
-                val price = value.optJSONObject("price")
+            containers = root.optObject("containers").entries { id, value ->
+                val price = value.optObject("price")
                 CatalogContainer(
                     id = id,
                     capacity = value.optDouble("capacity").takeIf { !it.isNaN() },
@@ -96,16 +110,16 @@ object CharacterCatalogParser {
                     contents = value.objects("contents").map { CatalogContainerItem(it.getString("item"), it.optInt("count", 1)) }
                 )
             },
-            weaponMasteries = root.optJSONObject("weaponMasteries")?.optJSONObject("properties").entries { id, value ->
+            weaponMasteries = root.optObject("weaponMasteries")?.optObject("properties").entries { id, value ->
                 CatalogWeaponMastery(id, value.text("name"), value.text("text"))
             },
-            weaponMasteryOf = root.optJSONObject("weaponMasteries")?.optJSONObject("weapons").let { weapons ->
-                buildMap { weapons?.keys()?.forEach { key -> put(key, weapons.getString(key)) } }
+            weaponMasteryOf = root.optObject("weaponMasteries")?.optObject("weapons").let { weapons ->
+                buildMap { weapons?.keys?.forEach { key -> put(key, weapons.getString(key)) } }
             }
         )
     }
 
-    private fun parseClass(json: JSONObject) = CatalogClass(
+    private fun parseClass(json: JsonObject) = CatalogClass(
         id = json.getString("id"),
         identifier = json.optString("identifier"),
         name = json.text("name"),
@@ -119,7 +133,7 @@ object CharacterCatalogParser {
         wealth = json.optString("wealth")
     )
 
-    private fun parseSubclass(json: JSONObject) = CatalogSubclass(
+    private fun parseSubclass(json: JsonObject) = CatalogSubclass(
         id = json.getString("id"),
         identifier = json.optString("identifier"),
         classIdentifier = json.optString("classIdentifier"),
@@ -130,7 +144,7 @@ object CharacterCatalogParser {
         advancement = json.advancement()
     )
 
-    private fun parseSpecies(json: JSONObject) = CatalogSpecies(
+    private fun parseSpecies(json: JsonObject) = CatalogSpecies(
         id = json.getString("id"),
         identifier = json.optString("identifier"),
         name = json.text("name"),
@@ -141,7 +155,7 @@ object CharacterCatalogParser {
         advancement = json.advancement()
     )
 
-    private fun parseBackground(json: JSONObject) = CatalogBackground(
+    private fun parseBackground(json: JsonObject) = CatalogBackground(
         id = json.getString("id"),
         identifier = json.optString("identifier"),
         name = json.text("name"),
@@ -152,7 +166,7 @@ object CharacterCatalogParser {
         wealth = json.optString("wealth")
     )
 
-    private fun JSONObject.equipmentNodes(key: String = "startingEquipment"): List<EquipmentNode> =
+    private fun JsonObject.equipmentNodes(key: String = "startingEquipment"): List<EquipmentNode> =
         objects(key).mapNotNull { node ->
             when (node.optString("type")) {
                 "OR" -> EquipmentNode.Group(any = true, children = node.equipmentNodes("children"))
@@ -164,7 +178,7 @@ object CharacterCatalogParser {
             }
         }
 
-    private fun parseFeature(json: JSONObject) = CatalogFeature(
+    private fun parseFeature(json: JsonObject) = CatalogFeature(
         id = json.getString("id"),
         identifier = json.optString("identifier"),
         name = json.text("name"),
@@ -178,7 +192,7 @@ object CharacterCatalogParser {
         requirements = json.optString("requirements"),
         prerequisiteLevel = json.optIntOrNull("prerequisiteLevel"),
         repeatable = json.optBoolean("repeatable"),
-        uses = json.optJSONObject("uses")?.let { uses ->
+        uses = json.optObject("uses")?.let { uses ->
             CatalogUses(
                 max = uses.optString("max"),
                 recovery = uses.objects("recovery").map { recovery ->
@@ -201,7 +215,7 @@ object CharacterCatalogParser {
         advancement = json.advancement()
     )
 
-    private fun parseStep(json: JSONObject): AdvancementStep {
+    private fun parseStep(json: JsonObject): AdvancementStep {
         val id = json.optString("id")
         val level = json.optIntOrNull("level")
         val title = json.text("title")
@@ -228,17 +242,17 @@ object CharacterCatalogParser {
             )
             "ItemChoice" -> AdvancementStep.ItemChoice(
                 id, level, title, restriction,
-                counts = json.optJSONObject("counts").let { counts ->
+                counts = json.optObject("counts").let { counts ->
                     buildMap {
-                        counts?.keys()?.forEach { key -> key.toIntOrNull()?.let { put(it, counts.getInt(key)) } }
+                        counts?.keys?.forEach { key -> key.toIntOrNull()?.let { put(it, counts.getInt(key)) } }
                     }
                 },
-                replacementLevels = json.optJSONArray("replacementLevels").ints().toSet(),
+                replacementLevels = json.optArray("replacementLevels").ints().toSet(),
                 items = json.strings("items"),
                 spells = json.strings("spells"),
                 itemType = json.optString("itemType"),
-                spellPrepared = json.optJSONObject("spell")?.optInt("prepared") ?: 0,
-                restriction = json.optJSONObject("restriction")?.let {
+                spellPrepared = json.optObject("spell")?.optInt("prepared") ?: 0,
+                restriction = json.optObject("restriction")?.let {
                     ChoiceRestriction(
                         type = it.optString("type"),
                         subtype = it.optString("subtype"),
@@ -251,10 +265,10 @@ object CharacterCatalogParser {
                 id, level, title, restriction,
                 identifier = json.optString("identifier"),
                 scaleType = json.optString("scaleType"),
-                values = json.optJSONObject("values").let { values ->
+                values = json.optObject("values").let { values ->
                     buildMap {
-                        values?.keys()?.forEach { key ->
-                            key.toIntOrNull()?.let { put(it, values.get(key).let(::scalarText)) }
+                        values?.keys?.forEach { key ->
+                            key.toIntOrNull()?.let { put(it, values.getValue(key).let(::scalarText)) }
                         }
                     }
                 },
@@ -264,8 +278,8 @@ object CharacterCatalogParser {
                 id, level, title, restriction,
                 points = json.optInt("points"),
                 cap = json.optIntOrNull("cap"),
-                fixed = json.optJSONObject("fixed").let { fixed ->
-                    buildMap { fixed?.keys()?.forEach { key -> put(key, fixed.getInt(key)) } }
+                fixed = json.optObject("fixed").let { fixed ->
+                    buildMap { fixed?.keys?.forEach { key -> put(key, fixed.getInt(key)) } }
                 },
                 locked = json.strings("locked").toSet(),
                 recommendation = json.optString("recommendation").ifBlank { null }
@@ -276,45 +290,69 @@ object CharacterCatalogParser {
         }
     }
 
-    /** "2", "1d10", "30": whole numbers without the ".0" org.json gives doubles. */
-    private fun scalarText(value: Any): String = when (value) {
-        is Number -> value.toDouble().let { if (it % 1.0 == 0.0) it.toLong().toString() else it.toString() }
-        else -> value.toString()
+    /** "2", "1d10", "30": whole numbers without the ".0" of a double ("2.0" reads "2"). */
+    private fun scalarText(value: JsonElement): String = when (val number = value.number()) {
+        null -> value.stringValue()
+        else -> number.let { if (it % 1.0 == 0.0) it.toLong().toString() else it.toString() }
     }
 
-    private fun JSONObject.advancement(): List<AdvancementStep> = objects("advancement").map(::parseStep)
+    private fun JsonObject.advancement(): List<AdvancementStep> = objects("advancement").map(::parseStep)
 
-    private fun JSONObject.spellcasting(): CatalogSpellcasting? =
-        optJSONObject("spellcasting")?.let { CatalogSpellcasting(it.optString("progression"), it.optString("ability")) }
+    private fun JsonObject.spellcasting(): CatalogSpellcasting? =
+        optObject("spellcasting")?.let { CatalogSpellcasting(it.optString("progression"), it.optString("ability")) }
 
-    private fun JSONObject.text(key: String): CatalogText = optJSONObject(key)?.asText() ?: CatalogText()
+    private fun JsonObject.text(key: String): CatalogText = optObject(key)?.asText() ?: CatalogText()
 
-    private fun JSONObject.asText() = CatalogText(en = optString("en"), ru = optString("ru"))
+    private fun JsonObject.asText() = CatalogText(en = optString("en"), ru = optString("ru"))
 
-    private fun JSONObject.optIntOrNull(key: String): Int? =
-        if (has(key) && !isNull(key)) optInt(key).takeIf { opt(key) is Number } else null
+    /** Only a JSON number counts: text "12" gives null here (unlike the shared optIntOrNull). */
+    private fun JsonObject.optIntOrNull(key: String): Int? =
+        if (has(key) && !isNull(key)) optInt(key).takeIf { this[key]?.number() != null } else null
 
-    private fun JSONObject.objects(key: String): List<JSONObject> {
-        val array = optJSONArray(key) ?: return emptyList()
-        return List(array.length()) { array.getJSONObject(it) }
+    /** Every element must be an object (an error otherwise), as org.json's getJSONObject. */
+    private fun JsonObject.objects(key: String): List<JsonObject> {
+        val array = optArray(key) ?: return emptyList()
+        return List(array.size) { array[it].jsonObject }
     }
 
-    private fun JSONObject.strings(key: String): List<String> {
-        val array = optJSONArray(key) ?: return emptyList()
-        return List(array.length()) { array.getString(it) }
+    private fun JsonObject.strings(key: String): List<String> {
+        val array = optArray(key) ?: return emptyList()
+        return List(array.size) { array[it].stringValue() }
     }
 
-    private fun JSONArray?.ints(): List<Int> = if (this == null) emptyList() else List(length()) { getInt(it) }
+    private fun JsonArray?.ints(): List<Int> = if (this == null) emptyList() else List(size) { getInt(it) }
 
-    private fun JSONObject.numbers(key: String): Map<String, Double> {
-        val obj = optJSONObject(key) ?: return emptyMap()
+    private fun JsonObject.numbers(key: String): Map<String, Double> {
+        val obj = optObject(key) ?: return emptyMap()
         return buildMap {
-            obj.keys().forEach { name -> (obj.opt(name) as? Number)?.let { put(name, it.toDouble()) } }
+            obj.keys.forEach { name -> obj[name]?.number()?.let { put(name, it) } }
         }
     }
 
-    private fun <T> JSONObject?.entries(transform: (String, JSONObject) -> T): Map<String, T> {
-        if (this == null) return emptyMap()
-        return buildMap { keys().forEach { key -> optJSONObject(key)?.let { put(key, transform(key, it)) } } }
+    private fun <T> JsonObject?.entries(transform: (String, JsonObject) -> T): Map<String, T> {
+        val json = this ?: return emptyMap()
+        // json.keys: a bare `keys` inside buildMap would be the keys of the map being built.
+        return buildMap { json.keys.forEach { key -> json.optObject(key)?.let { put(key, transform(key, it)) } } }
     }
+
+    /** A JSON number's value; null for text (even "12"), a flag, null, an object or an array. */
+    private fun JsonElement.number(): Double? = (this as? JsonPrimitive)?.takeIf { !it.isString }?.doubleOrNull
+
+    /** The value as text, as org.json's getString gave it: a number's digits, "null" for a null, an object's JSON. */
+    private fun JsonElement.stringValue(): String = (this as? JsonPrimitive)?.content ?: toString()
+
+    /** A whole number as org.json's getInt read it: a number (truncated) or a number given as text. */
+    private fun JsonElement.intValue(): Int? =
+        (this as? JsonPrimitive)?.let { it.longOrNull?.toInt() ?: it.doubleOrNull?.toInt() }
+
+    /** Like org.json's getString: an error when [key] is missing. */
+    private fun JsonObject.getString(key: String): String =
+        (this[key] ?: error("No value for $key")).stringValue()
+
+    /** Like org.json's getInt: an error when [key] is missing or isn't a number. */
+    private fun JsonObject.getInt(key: String): Int =
+        (this[key] ?: error("No value for $key")).intValue() ?: error("Value at $key is not an int")
+
+    private fun JsonArray.getInt(index: Int): Int =
+        this[index].intValue() ?: error("Value at $index is not an int")
 }

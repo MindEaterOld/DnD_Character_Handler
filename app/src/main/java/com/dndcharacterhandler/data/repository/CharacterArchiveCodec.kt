@@ -1,6 +1,16 @@
 package com.dndcharacterhandler.data.repository
 
 import androidx.core.net.toUri
+import com.dndcharacterhandler.data.json.has
+import com.dndcharacterhandler.data.json.isNull
+import com.dndcharacterhandler.data.json.jsonArrayOf
+import com.dndcharacterhandler.data.json.optArray
+import com.dndcharacterhandler.data.json.optBoolean
+import com.dndcharacterhandler.data.json.optDouble
+import com.dndcharacterhandler.data.json.optInt
+import com.dndcharacterhandler.data.json.optLong
+import com.dndcharacterhandler.data.json.optObject
+import com.dndcharacterhandler.data.json.optString
 import com.dndcharacterhandler.domain.model.Attack
 import com.dndcharacterhandler.domain.model.AttackCalculationMode
 import com.dndcharacterhandler.domain.model.DarkvisionMode
@@ -25,8 +35,10 @@ import com.dndcharacterhandler.domain.model.CreatureSize
 import com.dndcharacterhandler.domain.model.Skill
 import com.dndcharacterhandler.domain.model.Spell
 import com.dndcharacterhandler.domain.model.SpellcastingAbility
-import org.json.JSONArray
-import org.json.JSONObject
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import java.io.File
 
 // 18: armor/shield magicalBonus is meaningful (adds to AC).
@@ -43,15 +55,16 @@ data class ImportedArchive(
 fun CharacterBundle.toArchiveManifest(
     exportedAt: Long,
     mapAssetReference: (String?, String) -> String?
-): JSONObject {
-    val characterObject = JSONObject().apply {
+): JsonObject {
+    // A null value leaves its key out (no JSON nulls): reading takes a missing key for null.
+    val characterObject = buildJsonObject {
         put("id", character.id)
         put("name", character.name)
         put("race", character.race)
         put("characterClass", character.characterClass)
         put("subclass", character.subclass)
         put("level", character.level)
-        put("portraitUri", mapAssetReference(character.portraitUri, "portrait"))
+        mapAssetReference(character.portraitUri, "portrait")?.let { put("portraitUri", it) }
         put("currentHp", character.currentHp)
         put("maxHp", character.maxHp)
         put("temporaryHp", character.temporaryHp)
@@ -116,32 +129,32 @@ fun CharacterBundle.toArchiveManifest(
         put("advancements", ProgressionJson.advancementsToJson(character.advancements))
     }
 
-    return JSONObject().apply {
+    return buildJsonObject {
         put("schemaVersion", SCHEMA_VERSION)
         put("exportedAt", exportedAt)
         put("character", characterObject)
-        put("skills", JSONArray(skills.map { skill ->
-            JSONObject().apply {
+        put("skills", JsonArray(skills.map { skill ->
+            buildJsonObject {
                 put("name", skill.name)
                 put("isProficient", skill.isProficient)
                 put("isExpertise", skill.isExpertise)
                 put("hasJackOfAllTrades", skill.hasJackOfAllTrades)
             }
         }))
-        put("attacks", JSONArray(attacks.mapIndexed { index, attack ->
-            JSONObject().apply {
+        put("attacks", JsonArray(attacks.mapIndexed { index, attack ->
+            buildJsonObject {
                 put("name", attack.name)
-                put("icon", mapAssetReference(attack.icon, "attack_${index}_${slugify(attack.name)}"))
+                mapAssetReference(attack.icon, "attack_${index}_${slugify(attack.name)}")?.let { put("icon", it) }
                 put("isProficient", attack.isProficient)
                 put("calculationMode", attack.calculationMode.name)
                 put("ability", attack.ability.name)
-                put("normalRange", attack.normalRange)
-                put("longRange", attack.longRange)
+                attack.normalRange?.let { put("normalRange", it) }
+                attack.longRange?.let { put("longRange", it) }
                 put("damageDiceCount", attack.damageDiceCount)
                 put("damageDieType", attack.damageDieType)
-                put("alternateDamageDiceCount", attack.alternateDamageDiceCount)
-                put("alternateDamageDieType", attack.alternateDamageDieType)
-                put("alternateDamageType", attack.alternateDamageType)
+                attack.alternateDamageDiceCount?.let { put("alternateDamageDiceCount", it) }
+                attack.alternateDamageDieType?.let { put("alternateDamageDieType", it) }
+                attack.alternateDamageType?.let { put("alternateDamageType", it) }
                 put("magicalBonus", attack.magicalBonus)
                 put("applyAbilityModifierToDamage", attack.applyAbilityModifierToDamage)
                 put("attackBonusOrSaveDc", attack.manualAttackBonusOrSaveDc)
@@ -150,8 +163,8 @@ fun CharacterBundle.toArchiveManifest(
                 attack.baseWeaponId?.let { put("baseWeaponId", it) }
             }
         }))
-        put("combatResources", JSONArray(combatResources.map { resource ->
-            JSONObject().apply {
+        put("combatResources", JsonArray(combatResources.map { resource ->
+            buildJsonObject {
                 put("name", resource.name)
                 put("currentUses", resource.currentUses)
                 put("maximumUses", resource.maximumUses)
@@ -161,8 +174,8 @@ fun CharacterBundle.toArchiveManifest(
             }
         }))
         val itemIndex = inventoryItems.mapIndexedNotNull { index, item -> item.id.takeIf { it != 0L }?.let { it to index } }.toMap()
-        put("inventoryItems", JSONArray(inventoryItems.mapIndexed { index, item ->
-            JSONObject().apply {
+        put("inventoryItems", JsonArray(inventoryItems.mapIndexed { index, item ->
+            buildJsonObject {
                 put("name", item.name)
                 put("description", item.description)
                 put("isMagical", item.isMagical)
@@ -171,14 +184,14 @@ fun CharacterBundle.toArchiveManifest(
                 put("weight", item.weight)
                 put("quantity", item.quantity)
                 put("isEquipped", item.isEquipped)
-                put("icon", mapAssetReference(item.icon, "inventory_${index}_${slugify(item.name)}"))
-                put("costQuantity", item.costQuantity)
-                put("costUnit", item.costUnit)
-                put("armorDetails", item.armorDetails?.toJson())
-                put("weaponDetails", item.weaponDetails?.toJson())
+                mapAssetReference(item.icon, "inventory_${index}_${slugify(item.name)}")?.let { put("icon", it) }
+                item.costQuantity?.let { put("costQuantity", it) }
+                item.costUnit?.let { put("costUnit", it) }
+                item.armorDetails?.let { put("armorDetails", it.toJson()) }
+                item.weaponDetails?.let { put("weaponDetails", it.toJson()) }
                 item.containerDetails?.let { details ->
-                    put("containerDetails", JSONObject().apply {
-                        put("capacity", details.capacity)
+                    put("containerDetails", buildJsonObject {
+                        details.capacity?.let { put("capacity", it) }
                         put("weightlessContents", details.weightlessContents)
                     })
                 }
@@ -187,9 +200,9 @@ fun CharacterBundle.toArchiveManifest(
                 item.catalogId?.let { put("catalogId", it) }
             }
         }))
-        put("spells", JSONArray(spells.map { spell ->
-            JSONObject().apply {
-                put("catalogId", spell.catalogId)
+        put("spells", JsonArray(spells.map { spell ->
+            buildJsonObject {
+                spell.catalogId?.let { put("catalogId", it) }
                 put("name", spell.name)
                 put("level", spell.level)
                 put("school", spell.school)
@@ -225,9 +238,9 @@ fun CharacterBundle.toArchiveManifest(
                 put("healing", spell.healing)
             }
         }))
-        put("spellAttacks", JSONArray(spellAttacks.map { spell ->
-            JSONObject().apply {
-                put("catalogId", spell.catalogId)
+        put("spellAttacks", JsonArray(spellAttacks.map { spell ->
+            buildJsonObject {
+                spell.catalogId?.let { put("catalogId", it) }
                 put("name", spell.name)
                 put("level", spell.level)
                 put("school", spell.school)
@@ -263,19 +276,19 @@ fun CharacterBundle.toArchiveManifest(
                 put("healing", spell.healing)
             }
         }))
-        put("features", JSONArray(features.map { feature ->
-            JSONObject().apply {
+        put("features", JsonArray(features.map { feature ->
+            buildJsonObject {
                 put("name", feature.name)
                 put("description", feature.description)
-                put("level", feature.level)
+                feature.level?.let { put("level", it) }
                 put("source", feature.source.name)
                 put("category", feature.category)
                 // Optional and additive: older app versions just ignore it.
                 feature.catalogId?.let { put("catalogId", it) }
             }
         }))
-        put("notes", JSONArray(notes.map { note ->
-            JSONObject().apply {
+        put("notes", JsonArray(notes.map { note ->
+            buildJsonObject {
                 put("title", note.title)
                 put("createdDate", note.createdDate)
                 put("updatedDate", note.updatedDate)
@@ -287,7 +300,7 @@ fun CharacterBundle.toArchiveManifest(
 }
 
 fun archiveManifestToCharacterBundle(
-    manifest: JSONObject,
+    manifest: JsonObject,
     resolveAssetReference: (String?) -> String?
 ): ImportedArchive {
     val schemaVersion = manifest.optInt("schemaVersion", SCHEMA_VERSION)
@@ -295,7 +308,8 @@ fun archiveManifestToCharacterBundle(
         "Unsupported character archive schema version."
     }
 
-    val characterJson = manifest.getJSONObject("character")
+    val characterJson = manifest.optObject("character")
+        ?: throw IllegalArgumentException("Character archive has no character.")
     // Guard against corrupt/hand-edited archives: optInt coerces non-numeric values to 0, which
     // would import as level 0 / 0 max HP and let spentHitDice exceed the level.
     val importedLevel = characterJson.optInt("level").coerceIn(1, 20)
@@ -374,31 +388,31 @@ fun archiveManifestToCharacterBundle(
         biography = characterJson.optString("biography"),
         createdAt = characterJson.optLong("createdAt"),
         updatedAt = characterJson.optLong("updatedAt"),
-        classes = ProgressionJson.classesFromJson(characterJson.optJSONArray("classes")),
-        advancements = ProgressionJson.advancementsFromJson(characterJson.optJSONArray("advancements"))
+        classes = ProgressionJson.classesFromJson(characterJson.optArray("classes")),
+        advancements = ProgressionJson.advancementsFromJson(characterJson.optArray("advancements"))
     )
 
     return ImportedArchive(
         characterName = character.name,
         characterBundle = CharacterBundle(
             character = character,
-            skills = manifest.optJSONArray("skills")?.toSkillList().orEmpty(),
-            attacks = manifest.optJSONArray("attacks")?.toAttackList(resolveAssetReference).orEmpty(),
-            combatResources = manifest.optJSONArray("combatResources")?.toCombatResourceList().orEmpty(),
-            inventoryItems = manifest.optJSONArray("inventoryItems")
+            skills = manifest.optArray("skills")?.toSkillList().orEmpty(),
+            attacks = manifest.optArray("attacks")?.toAttackList(resolveAssetReference).orEmpty(),
+            combatResources = manifest.optArray("combatResources")?.toCombatResourceList().orEmpty(),
+            inventoryItems = manifest.optArray("inventoryItems")
                 ?.toInventoryItemList(resolveAssetReference, schemaVersion)
                 .orEmpty(),
-            spells = manifest.optJSONArray("spells")?.toSpellList().orEmpty(),
-            spellAttacks = manifest.optJSONArray("spellAttacks")?.toSpellList().orEmpty(),
-            features = manifest.optJSONArray("features")?.toFeatureList().orEmpty(),
-            notes = manifest.optJSONArray("notes")?.toNoteList().orEmpty()
+            spells = manifest.optArray("spells")?.toSpellList().orEmpty(),
+            spellAttacks = manifest.optArray("spellAttacks")?.toSpellList().orEmpty(),
+            features = manifest.optArray("features")?.toFeatureList().orEmpty(),
+            notes = manifest.optArray("notes")?.toNoteList().orEmpty()
         )
     )
 }
 
-private fun JSONArray.toSkillList(): List<Skill> =
-    (0 until length()).map { index ->
-        getJSONObject(index).let { json ->
+private fun JsonArray.toSkillList(): List<Skill> =
+    (0 until size).map { index ->
+        objectAt(index).let { json ->
             Skill(
                 name = json.optString("name"),
                 isProficient = json.optBoolean("isProficient"),
@@ -408,9 +422,9 @@ private fun JSONArray.toSkillList(): List<Skill> =
         }
     }
 
-private fun JSONArray.toAttackList(resolveAssetReference: (String?) -> String?): List<Attack> =
-    (0 until length()).map { index ->
-        getJSONObject(index).let { json ->
+private fun JsonArray.toAttackList(resolveAssetReference: (String?) -> String?): List<Attack> =
+    (0 until size).map { index ->
+        objectAt(index).let { json ->
             Attack(
                 name = json.optString("name"),
                 icon = resolveAssetReference(json.optNullableString("icon")).orEmpty(),
@@ -440,9 +454,9 @@ private fun JSONArray.toAttackList(resolveAssetReference: (String?) -> String?):
         }
     }
 
-private fun JSONArray.toCombatResourceList(): List<CombatResource> =
-    (0 until length()).map { index ->
-        getJSONObject(index).let { json ->
+private fun JsonArray.toCombatResourceList(): List<CombatResource> =
+    (0 until size).map { index ->
+        objectAt(index).let { json ->
             CombatResource(
                 name = json.optString("name"),
                 currentUses = json.optInt("currentUses"),
@@ -454,17 +468,17 @@ private fun JSONArray.toCombatResourceList(): List<CombatResource> =
         }
     }
 
-private fun JSONArray.toInventoryItemList(
+private fun JsonArray.toInventoryItemList(
     resolveAssetReference: (String?) -> String?,
     schemaVersion: Int
 ): List<InventoryItem> {
     fun containerIndexOf(index: Int): Int? =
-        getJSONObject(index).optNullableInt("containerIndex")?.takeIf { it in 0 until length() && it != index }
+        objectAt(index).optNullableInt("containerIndex")?.takeIf { it in 0 until size && it != index }
     // Containers something lies in get a negative id for their contents to point at; saving gives
     // every item a real one.
-    val containers = (0 until length()).mapNotNull(::containerIndexOf).toSet()
-    return (0 until length()).map { index ->
-        getJSONObject(index).let { json ->
+    val containers = (0 until size).mapNotNull(::containerIndexOf).toSet()
+    return (0 until size).map { index ->
+        objectAt(index).let { json ->
             val category = json.optString("category").toEnumOrDefault(InventoryCategory.OTHER)
             val containerIndex = containerIndexOf(index)
             InventoryItem(
@@ -479,15 +493,15 @@ private fun JSONArray.toInventoryItemList(
                     json.optInt("magicalBonus", 1)
                 },
                 category = category,
-                weight = json.optDouble("weight"),
+                weight = json.optDouble("weight", 0.0).takeIf { it.isFinite() } ?: 0.0,
                 quantity = json.optInt("quantity"),
                 isEquipped = json.optBoolean("isEquipped"),
                 icon = resolveAssetReference(json.optNullableString("icon")).orEmpty(),
                 costQuantity = json.optNullableInt("costQuantity"),
                 costUnit = json.optNullableString("costUnit"),
-                armorDetails = json.optJSONObject("armorDetails")?.toArmorDetails(),
-                weaponDetails = json.optJSONObject("weaponDetails")?.toWeaponDetails(),
-                containerDetails = json.optJSONObject("containerDetails")?.let { details ->
+                armorDetails = json.optObject("armorDetails")?.toArmorDetails(),
+                weaponDetails = json.optObject("weaponDetails")?.toWeaponDetails(),
+                containerDetails = json.optObject("containerDetails")?.let { details ->
                     InventoryContainerDetails(
                         capacity = if (details.isNull("capacity")) null else details.optDouble("capacity").takeIf { !it.isNaN() },
                         weightlessContents = details.optBoolean("weightlessContents")
@@ -500,17 +514,17 @@ private fun JSONArray.toInventoryItemList(
     }
 }
 
-private fun InventoryArmorDetails.toJson(): JSONObject =
-    JSONObject().apply {
+private fun InventoryArmorDetails.toJson(): JsonObject =
+    buildJsonObject {
         put("armorType", armorType.name)
         put("armorClass", armorClass)
         put("appliesDexterityBonus", appliesDexterityBonus)
-        put("maxDexterityBonus", maxDexterityBonus)
+        maxDexterityBonus?.let { put("maxDexterityBonus", it) }
         put("strengthMinimum", strengthMinimum)
         put("hasStealthDisadvantage", hasStealthDisadvantage)
     }
 
-private fun JSONObject.toArmorDetails(): InventoryArmorDetails =
+private fun JsonObject.toArmorDetails(): InventoryArmorDetails =
     InventoryArmorDetails(
         armorType = optString("armorType").toEnumOrDefault(InventoryArmorType.LIGHT),
         armorClass = optInt("armorClass"),
@@ -520,40 +534,40 @@ private fun JSONObject.toArmorDetails(): InventoryArmorDetails =
         hasStealthDisadvantage = optBoolean("hasStealthDisadvantage")
     )
 
-private fun InventoryWeaponDetails.toJson(): JSONObject =
-    JSONObject().apply {
+private fun InventoryWeaponDetails.toJson(): JsonObject =
+    buildJsonObject {
         put("weaponClass", weaponClass.name)
         put("rangeType", rangeType.name)
-        put("baseWeaponId", baseWeaponId)
-        put("normalRange", normalRange)
-        put("longRange", longRange)
-        put("damages", JSONArray(damages.map { damage ->
-            JSONObject().apply {
+        baseWeaponId?.let { put("baseWeaponId", it) }
+        normalRange?.let { put("normalRange", it) }
+        longRange?.let { put("longRange", it) }
+        put("damages", JsonArray(damages.map { damage ->
+            buildJsonObject {
                 put("dice", damage.dice)
                 put("damageType", damage.damageType)
             }
         }))
-        put("twoHandedDamage", twoHandedDamage?.let { damage ->
-            JSONObject().apply {
+        twoHandedDamage?.let { damage ->
+            put("twoHandedDamage", buildJsonObject {
                 put("dice", damage.dice)
                 put("damageType", damage.damageType)
-            }
-        })
-        put("properties", JSONArray(properties.map(InventoryWeaponProperty::name)))
+            })
+        }
+        put("properties", jsonArrayOf(properties.map(InventoryWeaponProperty::name)))
     }
 
-private fun JSONObject.toWeaponDetails(): InventoryWeaponDetails =
+private fun JsonObject.toWeaponDetails(): InventoryWeaponDetails =
     InventoryWeaponDetails(
         weaponClass = optString("weaponClass").toEnumOrDefault(InventoryWeaponClass.SIMPLE),
         rangeType = optString("rangeType").toEnumOrDefault(InventoryWeaponRangeType.MELEE),
         baseWeaponId = optNullableString("baseWeaponId"),
         normalRange = optNullableInt("normalRange"),
         longRange = optNullableInt("longRange"),
-        damages = optJSONArray("damages")?.toWeaponDamageList().orEmpty(),
-        twoHandedDamage = optJSONObject("twoHandedDamage")?.toWeaponDamage(),
-        properties = optJSONArray("properties")
+        damages = optArray("damages")?.toWeaponDamageList().orEmpty(),
+        twoHandedDamage = optObject("twoHandedDamage")?.toWeaponDamage(),
+        properties = optArray("properties")
             ?.let { array ->
-                (0 until array.length()).mapNotNull { index ->
+                (0 until array.size).mapNotNull { index ->
                     array.optString(index)
                         .takeIf { it.isNotBlank() }
                         ?.let { runCatching { InventoryWeaponProperty.valueOf(it) }.getOrNull() }
@@ -562,20 +576,20 @@ private fun JSONObject.toWeaponDetails(): InventoryWeaponDetails =
             ?: emptySet()
     )
 
-private fun JSONArray.toWeaponDamageList(): List<InventoryWeaponDamage> =
-    (0 until length()).map { index ->
-        getJSONObject(index).toWeaponDamage()
+private fun JsonArray.toWeaponDamageList(): List<InventoryWeaponDamage> =
+    (0 until size).map { index ->
+        objectAt(index).toWeaponDamage()
     }
 
-private fun JSONObject.toWeaponDamage(): InventoryWeaponDamage =
+private fun JsonObject.toWeaponDamage(): InventoryWeaponDamage =
     InventoryWeaponDamage(
         dice = optString("dice"),
         damageType = optString("damageType")
     )
 
-private fun JSONArray.toSpellList(): List<Spell> =
-    (0 until length()).map { index ->
-        getJSONObject(index).let { json ->
+private fun JsonArray.toSpellList(): List<Spell> =
+    (0 until size).map { index ->
+        objectAt(index).let { json ->
             Spell(
                 catalogId = json.optNullableString("catalogId"),
                 name = json.optString("name"),
@@ -615,9 +629,9 @@ private fun JSONArray.toSpellList(): List<Spell> =
         }
     }
 
-private fun JSONArray.toFeatureList(): List<Feature> =
-    (0 until length()).map { index ->
-        getJSONObject(index).let { json ->
+private fun JsonArray.toFeatureList(): List<Feature> =
+    (0 until size).map { index ->
+        objectAt(index).let { json ->
             Feature(
                 name = json.optString("name"),
                 description = json.optString("description"),
@@ -636,9 +650,9 @@ private fun JSONArray.toFeatureList(): List<Feature> =
         }
     }
 
-private fun JSONArray.toNoteList(): List<Note> =
-    (0 until length()).map { index ->
-        getJSONObject(index).let { json ->
+private fun JsonArray.toNoteList(): List<Note> =
+    (0 until size).map { index ->
+        objectAt(index).let { json ->
             Note(
                 title = json.optString("title"),
                 createdDate = json.optLong("createdDate"),
@@ -649,11 +663,15 @@ private fun JSONArray.toNoteList(): List<Note> =
         }
     }
 
-private fun JSONObject.optNullableString(key: String): String? {
+/** The object at [index]; anything else there fails the import. */
+private fun JsonArray.objectAt(index: Int): JsonObject =
+    this[index] as? JsonObject ?: throw IllegalArgumentException("Character archive: entry $index is not an object.")
+
+private fun JsonObject.optNullableString(key: String): String? {
     return if (isNull(key)) null else optString(key).ifBlank { null }
 }
 
-private fun JSONObject.optNullableInt(key: String): Int? {
+private fun JsonObject.optNullableInt(key: String): Int? {
     return if (isNull(key) || !has(key)) null else optInt(key)
 }
 

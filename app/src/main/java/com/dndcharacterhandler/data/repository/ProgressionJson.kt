@@ -1,14 +1,20 @@
 package com.dndcharacterhandler.data.repository
 
+import com.dndcharacterhandler.data.json.optBoolean
+import com.dndcharacterhandler.data.json.optInt
+import com.dndcharacterhandler.data.json.optString
+import com.dndcharacterhandler.data.json.parseJsonArray
 import com.dndcharacterhandler.domain.model.AdvancementRecord
 import com.dndcharacterhandler.domain.model.CharacterClassEntry
-import org.json.JSONArray
-import org.json.JSONObject
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 
 /** JSON for a character's classes and level-up choices: stored in the database and in archives. */
 internal object ProgressionJson {
-    fun classesToJson(classes: List<CharacterClassEntry>): JSONArray = JSONArray(classes.map { entry ->
-        JSONObject().apply {
+    fun classesToJson(classes: List<CharacterClassEntry>): JsonArray = JsonArray(classes.map { entry ->
+        buildJsonObject {
             put("classId", entry.classId)
             entry.subclassId?.let { put("subclassId", it) }
             put("levels", entry.levels)
@@ -17,7 +23,7 @@ internal object ProgressionJson {
         }
     })
 
-    fun classesFromJson(array: JSONArray?): List<CharacterClassEntry> = array.objects().mapNotNull { json ->
+    fun classesFromJson(array: JsonArray?): List<CharacterClassEntry> = array.objects().mapNotNull { json ->
         val classId = json.optString("classId").ifBlank { return@mapNotNull null }
         CharacterClassEntry(
             classId = classId,
@@ -28,8 +34,8 @@ internal object ProgressionJson {
         )
     }
 
-    fun advancementsToJson(records: List<AdvancementRecord>): JSONArray = JSONArray(records.map { record ->
-        JSONObject().apply {
+    fun advancementsToJson(records: List<AdvancementRecord>): JsonArray = JsonArray(records.map { record ->
+        buildJsonObject {
             put("characterLevel", record.characterLevel)
             put("classId", record.classId)
             put("classLevel", record.classLevel)
@@ -40,7 +46,7 @@ internal object ProgressionJson {
         }
     })
 
-    fun advancementsFromJson(array: JSONArray?): List<AdvancementRecord> = array.objects().mapNotNull { json ->
+    fun advancementsFromJson(array: JsonArray?): List<AdvancementRecord> = array.objects().mapNotNull { json ->
         AdvancementRecord(
             characterLevel = json.optInt("characterLevel"),
             classId = json.optString("classId").ifBlank { return@mapNotNull null },
@@ -55,13 +61,13 @@ internal object ProgressionJson {
     fun encodeClasses(classes: List<CharacterClassEntry>): String = classesToJson(classes).toString()
 
     fun decodeClasses(text: String): List<CharacterClassEntry> =
-        runCatching { classesFromJson(JSONArray(text)) }.getOrDefault(emptyList())
+        runCatching { classesFromJson(parseJsonArray(text)) }.getOrDefault(emptyList())
 
     fun encodeAdvancements(records: List<AdvancementRecord>): String = advancementsToJson(records).toString()
 
     fun decodeAdvancements(text: String): List<AdvancementRecord> =
-        runCatching { advancementsFromJson(JSONArray(text)) }.getOrDefault(emptyList())
+        runCatching { advancementsFromJson(parseJsonArray(text)) }.getOrDefault(emptyList())
 
-    private fun JSONArray?.objects(): List<JSONObject> =
-        if (this == null) emptyList() else List(length()) { optJSONObject(it) }.filterNotNull()
+    private fun JsonArray?.objects(): List<JsonObject> =
+        if (this == null) emptyList() else filterIsInstance<JsonObject>()
 }

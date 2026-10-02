@@ -1,6 +1,11 @@
 package com.dndcharacterhandler.data.localization
 
-import org.json.JSONObject
+import com.dndcharacterhandler.data.json.has
+import com.dndcharacterhandler.data.json.optInt
+import com.dndcharacterhandler.data.json.parseJsonObject
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonObject
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
@@ -16,11 +21,11 @@ class LocalizationLimitsTest {
     fun translationsFitTheirKeysLimits() {
         val file = listOf("src/main/assets/localization.json", "app/src/main/assets/localization.json")
             .map(::File).first { it.exists() }
-        val root = JSONObject(file.readText())
+        val root = parseJsonObject(file.readText())
         val problems = mutableListOf<String>()
         var limited = 0
-        root.keys().forEach { key ->
-            val entry = root.getJSONObject(key)
+        root.keys.forEach { key ->
+            val entry = root.getValue(key).jsonObject
             if (!entry.has("maxChars")) return@forEach
             limited++
             val limit = entry.optInt("maxChars", -1)
@@ -34,4 +39,8 @@ class LocalizationLimitsTest {
         assertTrue("no key has a limit", limited > 0)
         assertTrue(problems.joinToString("\n"), problems.isEmpty())
     }
+
+    /** The text at [key]; like org.json's getString, an error when the value isn't text. */
+    private fun JsonObject.getString(key: String): String =
+        (getValue(key) as? JsonPrimitive)?.takeIf { it.isString }?.content ?: error("$key is not a string")
 }

@@ -5,6 +5,8 @@ import android.content.Context
 import android.net.Uri
 import android.webkit.MimeTypeMap
 import androidx.core.net.toUri
+import com.dndcharacterhandler.data.json.PrettyJson
+import com.dndcharacterhandler.data.json.parseJsonObject
 import com.dndcharacterhandler.data.local.dao.CharacterDao
 import com.dndcharacterhandler.domain.model.Attack
 import com.dndcharacterhandler.domain.model.CharacterBundle
@@ -13,7 +15,7 @@ import com.dndcharacterhandler.domain.repository.CharacterFileRepository
 import com.dndcharacterhandler.domain.repository.CharacterRepository
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
-import org.json.JSONObject
+import kotlinx.serialization.json.JsonObject
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.ByteArrayOutputStream
@@ -159,11 +161,14 @@ class CharacterFileRepositoryImpl(
             exportedAt = System.currentTimeMillis(),
             mapAssetReference = assetCollector::registerAsset
         )
+        // Written out before the destination opens: a manifest that can't be (a NaN number) fails
+        // the export before anything is written.
+        val manifestText = PrettyJson.encodeToString(JsonObject.serializer(), manifest)
 
         contentResolver.openOutputStream(destinationUri)?.use { outputStream ->
             ZipOutputStream(BufferedOutputStream(outputStream)).use { zipOutputStream ->
                 zipOutputStream.putNextEntry(ZipEntry("manifest.json"))
-                zipOutputStream.write(manifest.toString(2).toByteArray(Charsets.UTF_8))
+                zipOutputStream.write(manifestText.toByteArray(Charsets.UTF_8))
                 zipOutputStream.closeEntry()
 
                 assetCollector.writeAssets(zipOutputStream)
@@ -212,7 +217,8 @@ class CharacterFileRepositoryImpl(
         } ?: error("Unable to open import source.")
 
         val manifestText = manifestJson ?: error("Character archive is missing manifest.json.")
-        val manifest = JSONObject(manifestText)
+        // A byte order mark (a manifest saved by a text editor) is skipped, as the old reader did.
+        val manifest = parseJsonObject(manifestText.removePrefix("\uFEFF"))
         return archiveManifestToCharacterBundle(manifest) { rawValue ->
             resolveImportedAssetReference(rawValue, extractedAssets)
         }

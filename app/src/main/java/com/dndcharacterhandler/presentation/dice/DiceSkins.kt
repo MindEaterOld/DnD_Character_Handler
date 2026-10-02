@@ -1,9 +1,5 @@
 package com.dndcharacterhandler.presentation.dice
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Typeface
-import android.util.LruCache
 import androidx.compose.foundation.Canvas
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -13,6 +9,7 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import com.dndcharacterhandler.domain.model.CustomDiceSkin
@@ -62,7 +59,7 @@ internal sealed interface DiceTexture {
      * A material picture, each face showing its own part of it: [scale] 1 fits it to a face,
      * [rotation] in degrees, [strength] how much it covers the body colour.
      */
-    class Material(val bitmap: Bitmap, val scale: Float = 1f, val rotation: Float = 0f, val strength: Float = 1f) : DiceTexture
+    class Material(val image: ImageBitmap, val scale: Float = 1f, val rotation: Float = 0f, val strength: Float = 1f) : DiceTexture
 }
 
 /** Everything a die is painted with (see drawDie). */
@@ -77,12 +74,12 @@ internal class DiceSkinStyle(
     val numberOutline: Color? = null,
     val numberScale: Float = 1f,
     /** The numbers' font; null keeps the app's headline serif. */
-    val typeface: Typeface? = null,
+    val font: DiceFont? = null,
     /** How much faces shine where they mirror the light, in [highlight]. */
     val gloss: Float = 0f,
     val highlight: Color = Color.Unspecified,
     /** A picture of its own on every face, by die kind: the filled-in face template. */
-    val faceArt: Map<DieShapeKind, Bitmap> = emptyMap(),
+    val faceArt: Map<DieShapeKind, ImageBitmap> = emptyMap(),
     val numbersOverArt: Boolean = true
 )
 
@@ -138,13 +135,13 @@ private fun customStyle(look: DiceLook.Custom): DiceSkinStyle {
     val texture by produceState<DiceTexture?>(null, skin.pattern, skin.bodyColor, look.picture, skin.updatedAt) {
         value = withContext(Dispatchers.Default) { loadTexture(skin, look.picture) }
     }
-    val faceArt by produceState(emptyMap<DieShapeKind, Bitmap>(), look.faceArt, skin.updatedAt) {
+    val faceArt by produceState(emptyMap<DieShapeKind, ImageBitmap>(), look.faceArt, skin.updatedAt) {
         value = withContext(Dispatchers.IO) {
             look.faceArt.mapNotNull { (kind, file) -> DiceBitmaps.picture(file, skin.updatedAt)?.let { kind to it } }.toMap()
         }
     }
-    val typeface = remember(skin.font) { DiceFonts.typeface(context, skin.font) }
-    return remember(skin, texture, faceArt, typeface, density, highlight) {
+    val font = remember(skin.font) { DiceFonts.font(context.assets, skin.font) }
+    return remember(skin, texture, faceArt, font, density, highlight) {
         DiceSkinStyle(
             body = Color(skin.bodyColor).copy(alpha = skin.bodyOpacity),
             edge = Color(skin.edgeColor),
@@ -153,7 +150,7 @@ private fun customStyle(look: DiceLook.Custom): DiceSkinStyle {
             edgeWidth = skin.edgeWidth * density,
             numberOutline = skin.numberOutlineColor?.let(::Color),
             numberScale = skin.numberScale,
-            typeface = typeface,
+            font = font,
             gloss = skin.gloss,
             highlight = highlight,
             faceArt = faceArt,
@@ -181,26 +178,43 @@ private fun loadTexture(skin: CustomDiceSkin, picture: File?): DiceTexture? = wh
 
 private const val OPAQUE = 0xFF shl 24
 
-/** Dice pictures in memory: generated materials and the skins' pictures, read once each. */
+/**
+ * Dice pictures in memory: generated materials and the skins' pictures, read once each, the least
+ * used dropped past [LIMIT] bytes. Turning pixels and files into pictures is the platform's part
+ * (see DicePictures).
+ */
 internal object DiceBitmaps {
-    private val cache = object : LruCache<String, Bitmap>(48 * 1024 * 1024) {
-        override fun sizeOf(key: String, value: Bitmap): Int = value.byteCount
+    private const val LIMIT = 48L * 1024 * 1024
+    private val cache = LinkedHashMap<String, ImageBitmap>(16, 0.75f, true)
+    private var bytes = 0L
+
+    private fun get(key: String): ImageBitmap? = synchronized(cache) { cache[key] }
+
+    private fun put(key: String, image: ImageBitmap): ImageBitmap = synchronized(cache) {
+        cache.put(key, image)?.let { bytes -= it.byteCount() }
+        bytes += image.byteCount()
+        val oldest = cache.entries.iterator()
+        while (bytes > LIMIT && cache.size > 1 && oldest.hasNext()) {
+            val entry = oldest.next()
+            bytes -= entry.value.byteCount()
+            oldest.remove()
+        }
+        image
     }
 
-    fun generated(key: String, pixels: () -> IntArray): Bitmap = synchronized(cache) { cache.get(key) } ?: run {
+    private fun ImageBitmap.byteCount(): Long = width.toLong() * height * 4
+
+    fun generated(key: String, pixels: () -> IntArray): ImageBitmap = get(key) ?: run {
         val size = DicePatterns.PATTERN_SIZE
-        Bitmap.createBitmap(pixels(), size, size, Bitmap.Config.ARGB_8888).also { synchronized(cache) { cache.put(key, it) } }
+        put(key, imageOfPixels(pixels(), size))
     }
 
     /** The picture in [file]; [version] (the skin's updatedAt) tells a changed picture from the cached one. */
-    fun picture(file: File, version: Long): Bitmap? {
+    fun picture(file: File, version: Long): ImageBitmap? {
         if (!file.exists()) return null
         val key = "${file.path}:${file.lastModified()}:${file.length()}:$version"
-        synchronized(cache) { cache.get(key) }?.let { return it }
-        val bitmap = BitmapFactory.decodeFile(file.path, BitmapFactory.Options().apply { inPreferredConfig = Bitmap.Config.RGB_565 })
-            ?: return null
-        synchronized(cache) { cache.put(key, bitmap) }
-        return bitmap
+        get(key)?.let { return it }
+        return put(key, readPicture(file) ?: return null)
     }
 }
 
@@ -237,7 +251,7 @@ internal fun DieIcon(
     turn: Quat? = null
 ) {
     val style = rememberDiceSkinStyle(look)
-    val numbers = rememberDieNumberPaint()
+    val numbers = rememberDieNumberText()
     val scratch = remember { DieDrawScratch() }
     val camera = remember { DiceCamera(eyeHeight = ICON_CAMERA_HEIGHT) }
     val die = remember(kind) { DieBody(DieShapes.of(kind), Vec3.ZERO, iconOrientation(kind)) }
@@ -248,6 +262,6 @@ internal fun DieIcon(
             height = size.height,
             focalLength = 0.4 * size.minDimension * ICON_CAMERA_HEIGHT / die.shape.circumradius
         )
-        drawDie(camera, die, style, numbers.get(), scratch)
+        drawDie(camera, die, style, numbers, scratch)
     }
 }

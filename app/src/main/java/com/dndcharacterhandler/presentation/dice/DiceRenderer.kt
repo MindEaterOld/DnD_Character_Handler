@@ -1,35 +1,39 @@
 package com.dndcharacterhandler.presentation.dice
 
-import android.graphics.Bitmap
-import android.graphics.BitmapShader
-import android.graphics.LightingColorFilter
-import android.graphics.Matrix
-import android.graphics.Paint
-import android.graphics.Rect
-import android.graphics.RectF
-import android.graphics.Shader
-import android.graphics.Typeface
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.ImageShader
+import androidx.compose.ui.graphics.Matrix
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.ShaderBrush
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalFontFamilyResolver
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.font.resolveAsTypeface
+import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextMeasurer
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.pow
+import kotlin.math.roundToInt
 import kotlin.random.Random
-import android.graphics.Path as NativePath
 
 /** A camera looking straight down at the table from [eyeHeight], with the view's centre above the origin. */
 internal class DiceCamera(val eyeHeight: Double) {
@@ -56,22 +60,39 @@ internal class DiceCamera(val eyeHeight: Double) {
     }
 }
 
-/** Paint for the face numbers, in the app's headline face (the serif of the type scale). */
-internal class DieNumberPaint(private val paint: Paint, private val typeface: State<Typeface>) {
-    /** The paint; reading it inside a draw block also redraws once the font has loaded. */
-    fun get(): Paint = paint.also { it.typeface = typeface.value }
+/**
+ * The face numbers, laid out once each and reused every frame: in the app's headline style, or in
+ * a skin's font. Their size is in [DieFace.canonical] units — part of the die's geometry, not a
+ * text size of the type scale — so it goes through [density] as pixels, untouched by font scale.
+ */
+internal class DieNumberText(private val measurer: TextMeasurer, private val base: TextStyle, private val density: Density) {
+    private val layouts = HashMap<String, TextLayoutResult>()
+
+    fun layout(text: String, underline: Boolean, size: Float, font: DiceFont?): TextLayoutResult {
+        val key = "$text|$underline|${(size * 4).roundToInt()}|${font?.id}"
+        return layouts.getOrPut(key) {
+            measurer.measure(
+                text = text,
+                style = base.copy(
+                    fontSize = with(density) { size.toSp() },
+                    fontFamily = font?.family ?: base.fontFamily,
+                    fontWeight = font?.weight ?: base.fontWeight,
+                    textDecoration = if (underline) TextDecoration.Underline else null,
+                    lineHeight = with(density) { (size * 1.3f).toSp() }
+                ),
+                softWrap = false,
+                maxLines = 1
+            )
+        }
+    }
 }
 
 @Composable
-internal fun rememberDieNumberPaint(): DieNumberPaint {
-    val numberStyle = MaterialTheme.typography.headlineMedium
-    val fontFamilyResolver = LocalFontFamilyResolver.current
-    val typeface = remember(numberStyle, fontFamilyResolver) {
-        fontFamilyResolver.resolveAsTypeface(numberStyle.fontFamily, numberStyle.fontWeight ?: FontWeight.Normal)
-    }
-    return remember(typeface) {
-        DieNumberPaint(Paint(Paint.ANTI_ALIAS_FLAG).apply { textAlign = Paint.Align.CENTER }, typeface)
-    }
+internal fun rememberDieNumberText(): DieNumberText {
+    val measurer = rememberTextMeasurer(cacheSize = 0)
+    val style = MaterialTheme.typography.headlineMedium
+    val density = LocalDensity.current
+    return remember(measurer, style, density) { DieNumberText(measurer, style, density) }
 }
 
 /** Light direction for the flat shading: from the upper left of the screen. */
@@ -104,35 +125,27 @@ private val WebRings = floatArrayOf(0.24f, 0.48f, 0.72f, 0.94f)
 /** How far the silk between two threads sags toward the hub (1 = a straight line). */
 private const val WEB_SAG = 0.84f
 
+private val ThreadStroke = Stroke(width = WEB_THREAD_WIDTH, cap = StrokeCap.Round, join = StrokeJoin.Round)
+
 /** Objects reused for every die drawn, so a frame doesn't allocate them per face. */
 internal class DieDrawScratch {
-    val matrix = Matrix()
     val path = Path()
+    /** Maps a face's own frame onto its corners on screen. */
+    val faceMatrix = Matrix()
     /** Projected corners of the die being drawn. */
     var projected = FloatArray(0)
     /** Projected corners of one face, in the order [DieFace.canonical] lists them. */
     val destination = FloatArray(8)
-    val threadPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        style = Paint.Style.STROKE
-        strokeWidth = WEB_THREAD_WIDTH
-        strokeCap = Paint.Cap.ROUND
-        strokeJoin = Paint.Join.ROUND
-    }
-    /** Paints a material or a face picture, lit like its face. */
-    val picturePaint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
-    val shaderMatrix = Matrix()
-    val sourceRect = Rect()
-    val faceRect = RectF(-DiceFaceAtlas.EXTENT, -DiceFaceAtlas.EXTENT, DiceFaceAtlas.EXTENT, DiceFaceAtlas.EXTENT)
     // Texture shapes depend only on the face, so each is built once.
-    private val outlines = HashMap<DieFace, NativePath>()
-    private val webs = HashMap<DieFace, NativePath>()
-    private val shaders = HashMap<Bitmap, BitmapShader>()
+    private val outlines = HashMap<DieFace, Path>()
+    private val webs = HashMap<DieFace, Path>()
+    private val brushes = HashMap<ImageBitmap, ShaderBrush>()
 
-    fun outlineOf(face: DieFace): NativePath = outlines.getOrPut(face) { outlinePath(face) }
-    fun webOf(face: DieFace): NativePath = webs.getOrPut(face) { spiderWeb(face) }
+    fun outlineOf(face: DieFace): Path = outlines.getOrPut(face) { outlinePath(face) }
+    fun webOf(face: DieFace): Path = webs.getOrPut(face) { spiderWeb(face) }
     /** A material repeats mirrored, so a picture that isn't seamless shows no seams. */
-    fun shaderOf(bitmap: Bitmap): BitmapShader = shaders.getOrPut(bitmap) {
-        BitmapShader(bitmap, Shader.TileMode.MIRROR, Shader.TileMode.MIRROR)
+    fun brushOf(image: ImageBitmap): ShaderBrush = brushes.getOrPut(image) {
+        ShaderBrush(ImageShader(image, TileMode.Mirror, TileMode.Mirror))
     }
 }
 
@@ -160,7 +173,7 @@ internal fun DrawScope.drawDie(
     camera: DiceCamera,
     body: DieBody,
     skin: DiceSkinStyle,
-    numberPaint: Paint,
+    numbers: DieNumberText,
     scratch: DieDrawScratch
 ) {
     val shape = body.shape
@@ -172,8 +185,7 @@ internal fun DrawScope.drawDie(
         projected[2 * index] = point.x
         projected[2 * index + 1] = point.y
     }
-    skin.typeface?.let { numberPaint.typeface = it }
-    numberPaint.textSize = shape.labelSize * skin.numberScale
+    val numberSize = shape.labelSize * skin.numberScale
     val art = skin.faceArt[shape.kind]
     val seeThrough = skin.body.alpha < 0.995f
 
@@ -184,7 +196,6 @@ internal fun DrawScope.drawDie(
         val facing = toEye dot normal
         if (back != (facing <= 0)) return
         val path = scratch.path
-        val matrix = scratch.matrix
         val destination = scratch.destination
 
         // A far face is seen through the body: lit from inside, dimmer.
@@ -208,11 +219,17 @@ internal fun DrawScope.drawDie(
             destination[2 * i] = projected[2 * vertex]
             destination[2 * i + 1] = projected[2 * vertex + 1]
         }
-        val mapped = matrix.setPolyToPoly(face.canonical, 0, destination, 0, pointCount)
-        if (mapped) {
-            when {
-                art != null -> drawFaceArt(shape.kind, index, face, art, brightness, skin.body.alpha, matrix, scratch)
-                skin.texture != null -> drawTexture(face, skin.texture, brightness, skin.body.alpha, matrix, scratch)
+        val faceMatrix = scratch.faceMatrix
+        val mapped = faceTransform(face.canonical, destination, pointCount, faceMatrix)
+        if (mapped && (art != null || skin.texture != null)) {
+            withTransform({
+                transform(faceMatrix)
+                clipPath(scratch.outlineOf(face))
+            }) {
+                when {
+                    art != null -> drawFaceArt(shape.kind, index, art, brightness, skin.body.alpha)
+                    skin.texture != null -> drawTexture(face, skin.texture, brightness, skin.body.alpha, scratch)
+                }
             }
         }
         if (!back && skin.gloss > 0f) {
@@ -233,29 +250,26 @@ internal fun DrawScope.drawDie(
         val shown = fade * fade * (3 - 2 * fade) * if (back) 0.5f else 1f
         val number = skin.number.shaded(brightness)
         val outline = skin.numberOutline?.shaded(brightness)
-        drawIntoCanvas { canvas ->
-            val native = canvas.nativeCanvas
-            native.save()
-            native.concat(matrix)
+        withTransform({ transform(faceMatrix) }) {
             for (label in face.labels) {
-                native.save()
-                native.translate(label.offsetX, label.offsetY)
-                native.rotate(label.rotationDegrees)
-                numberPaint.isUnderlineText = label.underline
-                val baseline = numberPaint.textSize * 0.36f
-                if (outline != null) {
-                    numberPaint.style = Paint.Style.STROKE
-                    numberPaint.strokeWidth = numberPaint.textSize * NUMBER_OUTLINE_WIDTH
-                    numberPaint.strokeJoin = Paint.Join.ROUND
-                    numberPaint.color = outline.copy(alpha = outline.alpha * shown).toArgb()
-                    native.drawText(label.text, 0f, baseline, numberPaint)
-                    numberPaint.style = Paint.Style.FILL
+                val layout = numbers.layout(label.text, label.underline, numberSize, skin.font)
+                // Centred on the label's point, its baseline a little below it, as the dice always had.
+                val topLeft = Offset(-layout.size.width / 2f, numberSize * 0.36f - layout.firstBaseline)
+                withTransform({
+                    translate(label.offsetX, label.offsetY)
+                    rotate(label.rotationDegrees, pivot = Offset.Zero)
+                }) {
+                    if (outline != null) {
+                        drawText(
+                            layout,
+                            color = outline.copy(alpha = outline.alpha * shown),
+                            topLeft = topLeft,
+                            drawStyle = Stroke(width = numberSize * NUMBER_OUTLINE_WIDTH, join = StrokeJoin.Round)
+                        )
+                    }
+                    drawText(layout, color = number.copy(alpha = number.alpha * shown), topLeft = topLeft)
                 }
-                numberPaint.color = number.copy(alpha = number.alpha * shown).toArgb()
-                native.drawText(label.text, 0f, baseline, numberPaint)
-                native.restore()
             }
-            native.restore()
         }
     }
 
@@ -264,85 +278,142 @@ internal fun DrawScope.drawDie(
 }
 
 /** Lit like the face: the picture's colours scaled by [brightness], in 64 steps made once each. */
-private val LitFilters = arrayOfNulls<LightingColorFilter>(65)
+private val LitFilters = arrayOfNulls<ColorFilter>(65)
 
-private fun litFilter(brightness: Float): LightingColorFilter {
+private fun litFilter(brightness: Float): ColorFilter {
     val step = (brightness.coerceIn(0f, 1f) * 64).toInt()
     return LitFilters[step] ?: run {
-        val level = step * 255 / 64
-        LightingColorFilter(android.graphics.Color.rgb(level, level, level), 0).also { LitFilters[step] = it }
+        val level = step / 64f
+        ColorFilter.lighting(multiply = Color(level, level, level), add = Color.Transparent).also { LitFilters[step] = it }
     }
 }
 
+/** In the face's own frame, clipped to it. */
 private fun DrawScope.drawTexture(
     face: DieFace,
     texture: DiceTexture,
     brightness: Float,
     opacity: Float,
-    faceToScreen: Matrix,
     scratch: DieDrawScratch
 ) {
     when (texture) {
-        is DiceTexture.Web -> drawIntoCanvas { canvas ->
-            val native = canvas.nativeCanvas
-            native.save()
-            native.concat(faceToScreen)
-            native.clipPath(scratch.outlineOf(face))
+        is DiceTexture.Web -> {
             val thread = texture.thread.shaded(brightness)
-            scratch.threadPaint.color = thread.copy(alpha = thread.alpha * opacity).toArgb()
-            native.drawPath(scratch.webOf(face), scratch.threadPaint)
-            native.restore()
+            drawPath(scratch.webOf(face), color = thread.copy(alpha = thread.alpha * opacity), style = ThreadStroke)
         }
-        is DiceTexture.Material -> drawIntoCanvas { canvas ->
-            val native = canvas.nativeCanvas
-            native.save()
-            native.concat(faceToScreen)
-            native.clipPath(scratch.outlineOf(face))
+        is DiceTexture.Material -> {
             // Every face shows its own part of the material, like a die cut from a block of it.
-            val bitmap = texture.bitmap
+            val image = texture.image
             val tile = 200f / texture.scale
             val random = Random(face.vertexIndices.contentHashCode())
-            scratch.shaderMatrix.apply {
-                setScale(tile / bitmap.width, tile / bitmap.width)
-                postRotate(texture.rotation)
-                postTranslate(random.nextFloat() * tile * 2 - tile, random.nextFloat() * tile * 2 - tile)
+            val offsetX = random.nextFloat() * tile * 2 - tile
+            val offsetY = random.nextFloat() * tile * 2 - tile
+            val width = image.width.toFloat()
+            withTransform({
+                translate(offsetX, offsetY)
+                rotate(texture.rotation, pivot = Offset.Zero)
+                scale(tile / width, tile / width, pivot = Offset.Zero)
+            }) {
+                // The repeating picture, far enough every way to cover the face however it's turned.
+                drawRect(
+                    brush = scratch.brushOf(image),
+                    topLeft = Offset(-3 * width, -3 * width),
+                    size = Size(7 * width, 7 * width),
+                    alpha = (texture.strength * opacity).coerceIn(0f, 1f),
+                    colorFilter = litFilter(brightness)
+                )
             }
-            val shader = scratch.shaderOf(bitmap)
-            shader.setLocalMatrix(scratch.shaderMatrix)
-            scratch.picturePaint.shader = shader
-            scratch.picturePaint.colorFilter = litFilter(brightness)
-            scratch.picturePaint.alpha = (texture.strength * opacity * 255).toInt().coerceIn(0, 255)
-            native.drawPath(scratch.outlineOf(face), scratch.picturePaint)
-            scratch.picturePaint.shader = null
-            native.restore()
         }
     }
 }
 
-/** The face's own picture: its cell of the filled-in face template ([DiceFaceAtlas]). */
-private fun DrawScope.drawFaceArt(
-    kind: DieShapeKind,
-    index: Int,
-    face: DieFace,
-    atlas: Bitmap,
-    brightness: Float,
-    opacity: Float,
-    faceToScreen: Matrix,
-    scratch: DieDrawScratch
-) = drawIntoCanvas { canvas ->
-    val native = canvas.nativeCanvas
-    native.save()
-    native.concat(faceToScreen)
-    native.clipPath(scratch.outlineOf(face))
-    DiceFaceAtlas.cell(kind, index, atlas.width, scratch.sourceRect)
-    scratch.picturePaint.colorFilter = litFilter(brightness)
-    scratch.picturePaint.alpha = (opacity * 255).toInt().coerceIn(0, 255)
-    native.drawBitmap(atlas, scratch.sourceRect, scratch.faceRect, scratch.picturePaint)
-    native.restore()
+/** The face's own picture, in its frame: its cell of the filled-in face template ([DiceFaceAtlas]). */
+private fun DrawScope.drawFaceArt(kind: DieShapeKind, index: Int, atlas: ImageBitmap, brightness: Float, opacity: Float) {
+    val (left, top, right, bottom) = DiceFaceAtlas.cellBounds(kind, index, atlas.width)
+    val extent = DiceFaceAtlas.EXTENT.toInt()
+    drawImage(
+        image = atlas,
+        srcOffset = IntOffset(left, top),
+        srcSize = IntSize(right - left, bottom - top),
+        dstOffset = IntOffset(-extent, -extent),
+        dstSize = IntSize(2 * extent, 2 * extent),
+        alpha = opacity.coerceIn(0f, 1f),
+        colorFilter = litFilter(brightness),
+        filterQuality = FilterQuality.Medium
+    )
+}
+
+/**
+ * Sets [out] to the transform taking the face's own frame onto the screen: its corners [source]
+ * onto [destination] — projective for four corners (the die is seen in perspective), affine for
+ * three. False when the corners are degenerate (a face seen exactly edge-on).
+ */
+internal fun faceTransform(source: FloatArray, destination: FloatArray, count: Int, out: Matrix): Boolean {
+    val h = when (count) {
+        4 -> homography(source, destination) ?: return false
+        3 -> affine(source, destination) ?: return false
+        else -> return false
+    }
+    // Compose's matrix maps (x, y) to ((m00 x + m10 y + m30) / w, (m01 x + m11 y + m31) / w), w = m03 x + m13 y + m33.
+    out.reset()
+    out[0, 0] = h[0]; out[1, 0] = h[1]; out[3, 0] = h[2]
+    out[0, 1] = h[3]; out[1, 1] = h[4]; out[3, 1] = h[5]
+    out[0, 3] = h[6]; out[1, 3] = h[7]; out[3, 3] = h[8]
+    return true
+}
+
+/** The 3×3 projective map (row by row) sending four points onto four others; null if they're degenerate. */
+private fun homography(source: FloatArray, destination: FloatArray): FloatArray? {
+    // Eight equations in the eight unknowns a..h of x' = (a x + b y + c) / (g x + h y + 1), y' likewise.
+    val system = Array(8) { DoubleArray(9) }
+    for (i in 0 until 4) {
+        val x = source[2 * i].toDouble()
+        val y = source[2 * i + 1].toDouble()
+        val u = destination[2 * i].toDouble()
+        val v = destination[2 * i + 1].toDouble()
+        system[2 * i] = doubleArrayOf(x, y, 1.0, 0.0, 0.0, 0.0, -u * x, -u * y, u)
+        system[2 * i + 1] = doubleArrayOf(0.0, 0.0, 0.0, x, y, 1.0, -v * x, -v * y, v)
+    }
+    val solution = solve(system) ?: return null
+    return FloatArray(9) { if (it < 8) solution[it].toFloat() else 1f }
+}
+
+/** The affine map (as a 3×3, row by row) sending three points onto three others; null if they're in a line. */
+private fun affine(source: FloatArray, destination: FloatArray): FloatArray? {
+    val system = Array(6) { DoubleArray(7) }
+    for (i in 0 until 3) {
+        val x = source[2 * i].toDouble()
+        val y = source[2 * i + 1].toDouble()
+        system[2 * i] = doubleArrayOf(x, y, 1.0, 0.0, 0.0, 0.0, destination[2 * i].toDouble())
+        system[2 * i + 1] = doubleArrayOf(0.0, 0.0, 0.0, x, y, 1.0, destination[2 * i + 1].toDouble())
+    }
+    val s = solve(system) ?: return null
+    return floatArrayOf(s[0].toFloat(), s[1].toFloat(), s[2].toFloat(), s[3].toFloat(), s[4].toFloat(), s[5].toFloat(), 0f, 0f, 1f)
+}
+
+/** Gaussian elimination with partial pivoting on an n×(n+1) augmented system; null when it's singular. */
+private fun solve(system: Array<DoubleArray>): DoubleArray? {
+    val n = system.size
+    for (column in 0 until n) {
+        val pivot = (column until n).maxBy { abs(system[it][column]) }
+        if (abs(system[pivot][column]) < 1e-9) return null
+        val swap = system[column]; system[column] = system[pivot]; system[pivot] = swap
+        for (row in column + 1 until n) {
+            val factor = system[row][column] / system[column][column]
+            for (k in column..n) system[row][k] -= factor * system[column][k]
+        }
+    }
+    val result = DoubleArray(n)
+    for (row in n - 1 downTo 0) {
+        var sum = system[row][n]
+        for (k in row + 1 until n) sum -= system[row][k] * result[k]
+        result[row] = sum / system[row][row]
+    }
+    return result
 }
 
 /** The face's outline in its own frame. */
-private fun outlinePath(face: DieFace): NativePath = NativePath().apply {
+private fun outlinePath(face: DieFace): Path = Path().apply {
     val outline = face.outline
     moveTo(outline[0], outline[1])
     for (i in 1 until outline.size / 2) lineTo(outline[2 * i], outline[2 * i + 1])
@@ -354,7 +425,7 @@ private fun outlinePath(face: DieFace): NativePath = NativePath().apply {
  * to every corner and edge midpoint, crossed by rings that sag between the threads like real silk.
  * Every face gets its own slightly uneven web.
  */
-private fun spiderWeb(face: DieFace): NativePath {
+private fun spiderWeb(face: DieFace): Path {
     val outline = face.outline
     val corners = outline.size / 2
     val random = Random(face.vertexIndices.contentHashCode())
@@ -372,7 +443,7 @@ private fun spiderWeb(face: DieFace): NativePath {
         anchorY[2 * i + 1] = (outline[2 * i + 1] + outline[2 * next + 1]) / 2
     }
 
-    val path = NativePath()
+    val path = Path()
     for (k in 0 until anchors) {
         path.moveTo(hubX, hubY)
         path.lineTo(anchorX[k], anchorY[k])
@@ -391,7 +462,7 @@ private fun spiderWeb(face: DieFace): NativePath {
             val to = step % anchors
             val middleX = (ringX[from] + ringX[to]) / 2
             val middleY = (ringY[from] + ringY[to]) / 2
-            path.quadTo(
+            path.quadraticBezierTo(
                 hubX + (middleX - hubX) * WEB_SAG,
                 hubY + (middleY - hubY) * WEB_SAG,
                 ringX[to],

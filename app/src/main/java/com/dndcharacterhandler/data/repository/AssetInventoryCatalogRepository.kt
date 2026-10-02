@@ -1,6 +1,16 @@
 package com.dndcharacterhandler.data.repository
 
 import android.content.Context
+import com.dndcharacterhandler.data.json.has
+import com.dndcharacterhandler.data.json.isNull
+import com.dndcharacterhandler.data.json.optArray
+import com.dndcharacterhandler.data.json.optBoolean
+import com.dndcharacterhandler.data.json.optDouble
+import com.dndcharacterhandler.data.json.optInt
+import com.dndcharacterhandler.data.json.optObject
+import com.dndcharacterhandler.data.json.optString
+import com.dndcharacterhandler.data.json.parseJsonArray
+import com.dndcharacterhandler.data.json.parseJsonObject
 import com.dndcharacterhandler.domain.model.InventoryArmorDetails
 import com.dndcharacterhandler.domain.model.InventoryArmorType
 import com.dndcharacterhandler.domain.model.InventoryCatalogBonusVariant
@@ -18,8 +28,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import org.json.JSONArray
-import org.json.JSONObject
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
 
 class AssetInventoryCatalogRepository(
     private val context: Context
@@ -38,7 +49,7 @@ class AssetInventoryCatalogRepository(
         val equipmentJson = readArray("5e-SRD-Equipment.json")
         val equipmentItems = equipmentJson.mapNotNull(::parseEquipmentItem)
         val ammunitionIds = equipmentJson.objects()
-            .filter { json -> json.optJSONArray("equipment_categories").categoryNames().contains("Ammunition") }
+            .filter { json -> json.optArray("equipment_categories").categoryNames().contains("Ammunition") }
             .map { json -> "equipment:${json.optString("index")}" }
             .toSet()
         val russian = readRussianText()
@@ -49,7 +60,7 @@ class AssetInventoryCatalogRepository(
             russian = russian
         )
         (equipmentItems + magicItems)
-            .map { item -> item.withRussianText(russian.optJSONObject(item.id)) }
+            .map { item -> item.withRussianText(russian.optObject(item.id)) }
             .sortedBy { it.name }
     }
 
@@ -61,22 +72,22 @@ class AssetInventoryCatalogRepository(
      * Magic weapons/armor with a named base ("Weapon (Longsword)") keep that base's stats.
      */
     private fun parseMagicItems(
-        entries: List<JSONObject>,
+        entries: List<JsonObject>,
         equipment: List<InventoryCatalogItem>,
         ammunitionIds: Set<String>,
-        russian: JSONObject
+        russian: JsonObject
     ): List<InventoryCatalogItem> {
         val byIndex = entries.associateBy { it.optString("index") }
-        val parentOfVariant = buildMap<String, JSONObject> {
+        val parentOfVariant = buildMap<String, JsonObject> {
             entries.forEach { parent ->
-                parent.optJSONArray("variants").objects().forEach { variant -> put(variant.optString("index"), parent) }
+                parent.optArray("variants").objects().forEach { variant -> put(variant.optString("index"), parent) }
             }
         }
         return entries.mapNotNull { entry ->
             val index = entry.optString("index")
             val item = parseMagicItem(entry) ?: return@mapNotNull null
             val (baseType, baseRule) = entry.baseTypeAndRule() ?: (null to null)
-            val variants = entry.optJSONArray("variants").objects()
+            val variants = entry.optArray("variants").objects()
             when {
                 parentOfVariant[index]?.isEnchantmentTemplate() == true -> null
                 entry.isEnchantmentTemplate() -> item.copy(
@@ -92,7 +103,7 @@ class AssetInventoryCatalogRepository(
                             id = "magic:$variantIndex",
                             bonus = bonus,
                             name = byIndex[variantIndex]?.optString("name").orEmpty(),
-                            ruName = russian.optJSONObject("magic:$variantIndex")?.optString("name").orEmpty()
+                            ruName = russian.optObject("magic:$variantIndex")?.optString("name").orEmpty()
                         )
                     }.sortedBy { it.bonus }
                 )
@@ -106,17 +117,17 @@ class AssetInventoryCatalogRepository(
     }
 
     /** ("Weapon", "Any Melee Weapon") from a description starting "Weapon (Any Melee Weapon)". */
-    private fun JSONObject.baseTypeAndRule(): Pair<String, String>? {
+    private fun JsonObject.baseTypeAndRule(): Pair<String, String>? {
         val typeLine = optString("desc").lineSequence().firstOrNull()?.trim().orEmpty()
         val match = Regex("""^(Weapon|Armor) \((.+)\)$""").find(typeLine) ?: return null
         return match.groupValues[1] to match.groupValues[2]
     }
 
-    private fun JSONObject.isEnchantmentTemplate(): Boolean =
+    private fun JsonObject.isEnchantmentTemplate(): Boolean =
         baseTypeAndRule()?.second?.startsWith("Any", ignoreCase = true) == true
 
     /** "+2 bonus to attack rolls and damage rolls" / "+1 bonus to Armor Class" stated in the description. */
-    private fun JSONObject.fixedMagicBonus(): Int {
+    private fun JsonObject.fixedMagicBonus(): Int {
         val desc = optString("desc")
         val pattern = Regex("""\+(\d) bonus to (?:attack (?:rolls )?and damage rolls|Armor Class|AC)""", RegexOption.IGNORE_CASE)
         return pattern.find(desc)?.groupValues?.get(1)?.toIntOrNull() ?: 0
@@ -159,21 +170,21 @@ class AssetInventoryCatalogRepository(
             .distinct()
     }
 
-    private fun JSONArray?.objects(): List<JSONObject> {
+    private fun JsonArray?.objects(): List<JsonObject> {
         val array = this ?: return emptyList()
-        return (0 until array.length()).mapNotNull { index -> array.optJSONObject(index) }
+        return (0 until array.size).mapNotNull { index -> array.optObject(index) }
     }
 
-    private fun JSONArray?.categoryNames(): List<String> =
+    private fun JsonArray?.categoryNames(): List<String> =
         objects().map { it.optString("name") }
 
     /** Russian names/descriptions keyed by catalog id ("equipment:<index>", "magic:<index>"), from TTG Club. */
-    private fun readRussianText(): JSONObject =
+    private fun readRussianText(): JsonObject =
         runCatching {
-            JSONObject(context.assets.open("inventory_text_ru.json").bufferedReader().use { it.readText() })
-        }.getOrDefault(JSONObject())
+            parseJsonObject(context.assets.open("inventory_text_ru.json").bufferedReader().use { it.readText() })
+        }.getOrDefault(JsonObject(emptyMap()))
 
-    private fun InventoryCatalogItem.withRussianText(text: JSONObject?): InventoryCatalogItem =
+    private fun InventoryCatalogItem.withRussianText(text: JsonObject?): InventoryCatalogItem =
         if (text == null) {
             this
         } else {
@@ -184,28 +195,29 @@ class AssetInventoryCatalogRepository(
             )
         }
 
-    private fun readArray(assetName: String): JSONArray {
+    private fun readArray(assetName: String): JsonArray {
         val rawJson = context.assets.open(assetName).bufferedReader().use { it.readText() }
-        return JSONArray(rawJson)
+        return parseJsonArray(rawJson)
     }
 
-    private fun JSONArray.mapNotNull(transform: (JSONObject) -> InventoryCatalogItem?): List<InventoryCatalogItem> =
-        buildList(length()) {
-            for (index in 0 until length()) {
-                val item = transform(getJSONObject(index)) ?: continue
+    private fun JsonArray.mapNotNull(transform: (JsonObject) -> InventoryCatalogItem?): List<InventoryCatalogItem> =
+        buildList(size) {
+            // this@mapNotNull: inside buildList, a bare `size` or `this[index]` would be the list being built.
+            for (index in 0 until this@mapNotNull.size) {
+                val item = transform(this@mapNotNull[index].jsonObject) ?: continue
                 add(item)
             }
         }
 
-    private fun parseEquipmentItem(json: JSONObject): InventoryCatalogItem? {
+    private fun parseEquipmentItem(json: JsonObject): InventoryCatalogItem? {
         val id = json.optString("index").ifBlank { return null }
         val name = json.optString("name").ifBlank { return null }
-        val categories = json.optJSONArray("equipment_categories") ?: JSONArray()
+        val categories = json.optArray("equipment_categories") ?: JsonArray(emptyList())
         val category = mapCategory(name = name, categories = categories)
         val weight = json.optDoubleOrZero("weight")
         val detailLine = buildEquipmentDetailLine(json)
         val description = json.optString("description").ifBlank { detailLine }
-        val cost = json.optJSONObject("cost")
+        val cost = json.optObject("cost")
         val armorDetails = json.toArmorDetails(categories)
         val weaponDetails = json.toWeaponDetails(categories)
 
@@ -225,17 +237,13 @@ class AssetInventoryCatalogRepository(
         )
     }
 
-    private fun parseMagicItem(json: JSONObject): InventoryCatalogItem? {
+    private fun parseMagicItem(json: JsonObject): InventoryCatalogItem? {
         val id = json.optString("index").ifBlank { return null }
         val name = json.optString("name").ifBlank { return null }
-        val equipmentCategory = json.optJSONObject("equipment_category")
-        val categories = JSONArray().apply {
-            if (equipmentCategory != null) {
-                put(equipmentCategory)
-            }
-        }
+        val equipmentCategory = json.optObject("equipment_category")
+        val categories = JsonArray(listOfNotNull(equipmentCategory))
         val category = mapCategory(name = name, categories = categories)
-        val rarity = json.optJSONObject("rarity")?.optString("name").orEmpty()
+        val rarity = json.optObject("rarity")?.optString("name").orEmpty()
         val attunement = json.optBoolean("attunement", false)
         val detailLine = buildMagicItemDetailLine(
             rarity = rarity,
@@ -255,11 +263,11 @@ class AssetInventoryCatalogRepository(
         )
     }
 
-    private fun mapCategory(name: String, categories: JSONArray): InventoryCategory {
+    private fun mapCategory(name: String, categories: JsonArray): InventoryCategory {
         val categoryTokens = buildList {
             add(name.lowercase())
-            for (index in 0 until categories.length()) {
-                val value = categories.optJSONObject(index)?.optString("name").orEmpty().lowercase()
+            for (index in 0 until categories.size) {
+                val value = categories.optObject(index)?.optString("name").orEmpty().lowercase()
                 if (value.isNotBlank()) {
                     add(value)
                 }
@@ -274,8 +282,8 @@ class AssetInventoryCatalogRepository(
         }
     }
 
-    private fun JSONObject.toArmorDetails(categories: JSONArray): InventoryArmorDetails? {
-        val armorClass = optJSONObject("armor_class") ?: return null
+    private fun JsonObject.toArmorDetails(categories: JsonArray): InventoryArmorDetails? {
+        val armorClass = optObject("armor_class") ?: return null
         val armorType = categories.toArmorType() ?: return null
         return InventoryArmorDetails(
             armorType = armorType,
@@ -287,9 +295,9 @@ class AssetInventoryCatalogRepository(
         )
     }
 
-    private fun JSONArray.toArmorType(): InventoryArmorType? {
-        val names = (0 until length()).mapNotNull { index ->
-            optJSONObject(index)?.optString("name")?.takeIf { it.isNotBlank() }
+    private fun JsonArray.toArmorType(): InventoryArmorType? {
+        val names = (0 until size).mapNotNull { index ->
+            optObject(index)?.optString("name")?.takeIf { it.isNotBlank() }
         }
         return when {
             names.any { it == "Shields" } -> InventoryArmorType.SHIELD
@@ -300,10 +308,10 @@ class AssetInventoryCatalogRepository(
         }
     }
 
-    private fun JSONObject.toWeaponDetails(categories: JSONArray): InventoryWeaponDetails? {
+    private fun JsonObject.toWeaponDetails(categories: JsonArray): InventoryWeaponDetails? {
         val weaponClass = categories.toWeaponClass() ?: return null
         val rangeType = categories.toWeaponRangeType() ?: return null
-        val baseDamage = optJSONObject("damage")?.toWeaponDamage() ?: return null
+        val baseDamage = optObject("damage")?.toWeaponDamage() ?: return null
         val range = preferredWeaponRange()
         return InventoryWeaponDetails(
             weaponClass = weaponClass,
@@ -313,14 +321,14 @@ class AssetInventoryCatalogRepository(
             normalRange = range?.first,
             longRange = range?.second,
             damages = listOf(baseDamage),
-            twoHandedDamage = optJSONObject("two_handed_damage")?.toWeaponDamage(),
-            properties = optJSONArray("properties").toWeaponProperties()
+            twoHandedDamage = optObject("two_handed_damage")?.toWeaponDamage(),
+            properties = optArray("properties").toWeaponProperties()
         )
     }
 
-    private fun JSONArray.toWeaponClass(): InventoryWeaponClass? {
-        val names = (0 until length()).mapNotNull { index ->
-            optJSONObject(index)?.optString("name")?.takeIf { it.isNotBlank() }
+    private fun JsonArray.toWeaponClass(): InventoryWeaponClass? {
+        val names = (0 until size).mapNotNull { index ->
+            optObject(index)?.optString("name")?.takeIf { it.isNotBlank() }
         }
         return when {
             names.any { it == "Simple Weapons" } -> InventoryWeaponClass.SIMPLE
@@ -329,9 +337,9 @@ class AssetInventoryCatalogRepository(
         }
     }
 
-    private fun JSONArray.toWeaponRangeType(): InventoryWeaponRangeType? {
-        val names = (0 until length()).mapNotNull { index ->
-            optJSONObject(index)?.optString("name")?.takeIf { it.isNotBlank() }
+    private fun JsonArray.toWeaponRangeType(): InventoryWeaponRangeType? {
+        val names = (0 until size).mapNotNull { index ->
+            optObject(index)?.optString("name")?.takeIf { it.isNotBlank() }
         }
         return when {
             names.any { it == "Melee Weapons" || it.contains("Melee") } -> InventoryWeaponRangeType.MELEE
@@ -340,25 +348,25 @@ class AssetInventoryCatalogRepository(
         }
     }
 
-    private fun JSONObject.preferredWeaponRange(): Pair<Int?, Int?>? {
-        val thrownRange = optJSONObject("throw_range")
+    private fun JsonObject.preferredWeaponRange(): Pair<Int?, Int?>? {
+        val thrownRange = optObject("throw_range")
         if (thrownRange != null) {
             return thrownRange.optNullableInt("normal") to thrownRange.optNullableInt("long")
         }
-        val range = optJSONObject("range") ?: return null
+        val range = optObject("range") ?: return null
         return range.optNullableInt("normal") to range.optNullableInt("long")
     }
 
-    private fun JSONObject.toWeaponDamage(): InventoryWeaponDamage =
+    private fun JsonObject.toWeaponDamage(): InventoryWeaponDamage =
         InventoryWeaponDamage(
             dice = optString("damage_dice"),
-            damageType = optJSONObject("damage_type")?.optString("name").orEmpty()
+            damageType = optObject("damage_type")?.optString("name").orEmpty()
         )
 
-    private fun JSONArray?.toWeaponProperties(): Set<InventoryWeaponProperty> {
+    private fun JsonArray?.toWeaponProperties(): Set<InventoryWeaponProperty> {
         if (this == null) return emptySet()
-        return (0 until length()).mapNotNull { index ->
-            optJSONObject(index)?.optString("name")?.takeIf { it.isNotBlank() }?.toWeaponProperty()
+        return (0 until size).mapNotNull { index ->
+            optObject(index)?.optString("name")?.takeIf { it.isNotBlank() }?.toWeaponProperty()
         }.toSet()
     }
 
@@ -376,23 +384,23 @@ class AssetInventoryCatalogRepository(
             else -> null
         }
 
-    private fun buildEquipmentDetailLine(json: JSONObject): String {
+    private fun buildEquipmentDetailLine(json: JsonObject): String {
         val parts = mutableListOf<String>()
-        json.optJSONObject("cost")?.let { cost ->
+        json.optObject("cost")?.let { cost ->
             val quantity = cost.optInt("quantity")
             val unit = cost.optString("unit")
             if (quantity > 0 && unit.isNotBlank()) {
                 parts += "$quantity $unit"
             }
         }
-        json.optJSONObject("damage")?.let { damage ->
+        json.optObject("damage")?.let { damage ->
             val damageDice = damage.optString("damage_dice")
-            val damageType = damage.optJSONObject("damage_type")?.optString("name").orEmpty()
+            val damageType = damage.optObject("damage_type")?.optString("name").orEmpty()
             if (damageDice.isNotBlank()) {
                 parts += listOf(damageDice, damageType).filter { it.isNotBlank() }.joinToString(" ")
             }
         }
-        json.optJSONObject("armor_class")?.let { armorClass ->
+        json.optObject("armor_class")?.let { armorClass ->
             val base = armorClass.optInt("base")
             if (base > 0) {
                 parts += "AC $base"
@@ -400,8 +408,8 @@ class AssetInventoryCatalogRepository(
         }
 
         if (parts.isEmpty()) {
-            val categoryName = json.optJSONArray("equipment_categories")
-                ?.optJSONObject(0)
+            val categoryName = json.optArray("equipment_categories")
+                ?.optObject(0)
                 ?.optString("name")
                 .orEmpty()
             if (categoryName.isNotBlank()) {
@@ -424,13 +432,9 @@ class AssetInventoryCatalogRepository(
         return parts.joinToString(" - ")
     }
 
-    private fun JSONObject.optDoubleOrZero(name: String): Double =
-        when (val value = opt(name)) {
-            is Number -> value.toDouble()
-            is String -> value.toDoubleOrNull() ?: 0.0
-            else -> 0.0
-        }
+    /** A number, or a number given as text; 0 otherwise. */
+    private fun JsonObject.optDoubleOrZero(name: String): Double = optDouble(name, 0.0)
 
-    private fun JSONObject.optNullableInt(name: String): Int? =
+    private fun JsonObject.optNullableInt(name: String): Int? =
         if (isNull(name) || !has(name)) null else optInt(name)
 }

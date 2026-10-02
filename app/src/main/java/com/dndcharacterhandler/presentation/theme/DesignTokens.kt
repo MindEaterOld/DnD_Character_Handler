@@ -3,7 +3,12 @@ package com.dndcharacterhandler.presentation.theme
 import android.content.Context
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
-import org.json.JSONObject
+import com.dndcharacterhandler.data.json.has
+import com.dndcharacterhandler.data.json.optDouble
+import com.dndcharacterhandler.data.json.optObject
+import com.dndcharacterhandler.data.json.optString
+import com.dndcharacterhandler.data.json.parseJsonObject
+import kotlinx.serialization.json.JsonObject
 
 data class TextSizeToken(
     val fontSizeSp: Float,
@@ -224,14 +229,14 @@ val LocalDesignTokens = staticCompositionLocalOf { DefaultDesignTokens }
 
 fun loadDesignTokens(context: Context): DesignTokens {
     return runCatching {
-        val root = JSONObject(
+        val root = parseJsonObject(
             context.assets.open("design_tokens.json")
                 .bufferedReader()
                 .use { it.readText() }
         )
-        val typography = root.optJSONObject("typography") ?: JSONObject()
-        val materialTheme = typography.optJSONObject("materialTheme") ?: JSONObject()
-        val overview = typography.optJSONObject("overviewOverrides") ?: JSONObject()
+        val typography = root.optObject("typography") ?: JsonObject(emptyMap())
+        val materialTheme = typography.optObject("materialTheme") ?: JsonObject(emptyMap())
+        val overview = typography.optObject("overviewOverrides") ?: JsonObject(emptyMap())
         val defaults = DefaultDesignTokens.typography
 
         DesignTokens(
@@ -258,21 +263,21 @@ fun loadDesignTokens(context: Context): DesignTokens {
                 shortRestCounterButton = overview.textToken("shortRestCounterButton", defaults.shortRestCounterButton),
                 shortRestCounterValue = overview.textToken("shortRestCounterValue", defaults.shortRestCounterValue)
             ),
-            colors = loadColorTokens(root.optJSONObject("colors")?.optJSONObject("app"))
+            colors = loadColorTokens(root.optObject("colors")?.optObject("app"))
         )
     }.getOrDefault(DefaultDesignTokens)
 }
 
-private fun loadColorTokens(app: JSONObject?): DesignColorTokens {
+private fun loadColorTokens(app: JsonObject?): DesignColorTokens {
     if (app == null) return DefaultDesignColors
     val defaults = DefaultDesignColors
-    val text = app.optJSONObject("text") ?: JSONObject()
-    val background = app.optJSONObject("background") ?: JSONObject()
-    val surface = app.optJSONObject("surface") ?: JSONObject()
-    val border = app.optJSONObject("border") ?: JSONObject()
-    val accent = app.optJSONObject("accent") ?: JSONObject()
-    val progress = app.optJSONObject("progress") ?: JSONObject()
-    val ornament = app.optJSONObject("ornament") ?: JSONObject()
+    val text = app.optObject("text") ?: JsonObject(emptyMap())
+    val background = app.optObject("background") ?: JsonObject(emptyMap())
+    val surface = app.optObject("surface") ?: JsonObject(emptyMap())
+    val border = app.optObject("border") ?: JsonObject(emptyMap())
+    val accent = app.optObject("accent") ?: JsonObject(emptyMap())
+    val progress = app.optObject("progress") ?: JsonObject(emptyMap())
+    val ornament = app.optObject("ornament") ?: JsonObject(emptyMap())
     return DesignColorTokens(
         text = TextColorTokens(
             primary = text.colorToken("primary", defaults.text.primary),
@@ -339,7 +344,7 @@ private fun loadColorTokens(app: JSONObject?): DesignColorTokens {
 }
 
 /** Parses "#RRGGBB" (opaque) or "#AARRGGBB" hex into a [Color]; falls back on malformed values. */
-private fun JSONObject.colorToken(key: String, fallback: Color): Color {
+private fun JsonObject.colorToken(key: String, fallback: Color): Color {
     val raw = optString(key).trim().removePrefix("#")
     if (raw.isEmpty()) return fallback
     val parsed = raw.toLongOrNull(16) ?: return fallback
@@ -351,11 +356,11 @@ private fun JSONObject.colorToken(key: String, fallback: Color): Color {
     return Color(argb)
 }
 
-private fun JSONObject.textToken(
+private fun JsonObject.textToken(
     key: String,
     fallback: TextSizeToken
 ): TextSizeToken {
-    val value = optJSONObject(key) ?: return fallback
+    val value = optObject(key) ?: return fallback
     val hasLineHeight = value.has("lineHeightSp")
     val hasAlpha = value.has("alpha")
     return TextSizeToken(
