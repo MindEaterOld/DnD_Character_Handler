@@ -128,6 +128,10 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import kotlin.math.PI
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.zIndex
 import com.dndcharacterhandler.presentation.components.AppImage
 import com.dndcharacterhandler.presentation.components.EditDialog
 import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
@@ -867,21 +871,24 @@ private fun OverviewContent(
                     modifier = Modifier.offset(y = (-30).dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    OverviewHpCard(
-                        currentHp = character?.currentHp ?: 0,
-                        maxHp = character?.maxHp ?: 0,
-                        temporaryHp = character?.temporaryHp ?: 0,
-                        hpLabel = text("overview_hp"),
-                        onClick = {
-                            hpEditMode = OverviewHpEditMode.DAMAGE
-                            hpDraft = ""
-                            isHpDialogOpen = true
-                        },
-                        onMaxHpClick = {
-                            maxHpDraft = (character?.maxHp ?: 0).toString()
-                            isMaxHpDialogOpen = true
-                        }
-                    )
+                    // Over the death saves' tray, which slides out from under it.
+                    Box(modifier = Modifier.zIndex(1f)) {
+                        OverviewHpCard(
+                            currentHp = character?.currentHp ?: 0,
+                            maxHp = character?.maxHp ?: 0,
+                            temporaryHp = character?.temporaryHp ?: 0,
+                            hpLabel = text("overview_hp"),
+                            onClick = {
+                                hpEditMode = OverviewHpEditMode.DAMAGE
+                                hpDraft = ""
+                                isHpDialogOpen = true
+                            },
+                            onMaxHpClick = {
+                                maxHpDraft = (character?.maxHp ?: 0).toString()
+                                isMaxHpDialogOpen = true
+                            }
+                        )
+                    }
                     if (characterBundle != null) {
                         val dying = characterBundle.character.currentHp == 0
                         DeathSavesTray(
@@ -1879,9 +1886,9 @@ private fun OverviewXpBlock(
 }
 
 /**
- * The death saving throws under the hit points, as Foundry has them: a tab with a skull that opens
- * the tray — successes on the left, failures on the right, and a d20 with a skull on its front in
- * the middle. A tap on the die throws it on the dice table and counts the result; a tap on a circle
+ * The death saving throws under the hit points, as Foundry has them: a tab with a skull pulls the
+ * tray out like a blind and stays under it, a second tap rolls it back — successes on the left,
+ * failures on the right, and a d20 with a skull on its front in the middle. A tap on the die throws it on the dice table and counts the result; a tap on a circle
  * sets the count (on the last filled one, takes it back). The tray opens by itself at 0 hit points.
  */
 @Composable
@@ -1901,33 +1908,29 @@ private fun DeathSavesTray(
     LaunchedEffect(dying) { if (dying) open = true }
     val saves = DeathSaves(successes, failures)
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-        // The tab hangs from the hit points' card.
-        val tabShape = RoundedCornerShape(bottomStart = 10.dp, bottomEnd = 10.dp)
-        Box(
-            modifier = Modifier
-                .offset(y = (-1).dp)
-                .clip(tabShape)
-                .background(colors.surface.card)
-                .border(1.dp, colors.border.panel, tabShape)
-                .clickable { open = !open }
-                .padding(horizontal = 18.dp, vertical = 4.dp)
+        // Pulled out by the tab like a blind: the bottom edge comes down first, the tab riding on it.
+        // The tray goes on from the hit points' card: its top hides under the card's rounded bottom,
+        // so it comes out of the line where the card's sides stop being straight.
+        val trayShape = RoundedCornerShape(bottomStart = HpCardCornerRadius, bottomEnd = HpCardCornerRadius)
+        AnimatedVisibility(
+            visible = open,
+            modifier = Modifier.layout { measurable, constraints ->
+                val tucked = HpCardCornerRadius.roundToPx()
+                val placeable = measurable.measure(constraints)
+                layout(placeable.width, (placeable.height - tucked).coerceAtLeast(0)) {
+                    placeable.place(0, -tucked)
+                }
+            },
+            enter = expandVertically(expandFrom = Alignment.Bottom),
+            exit = shrinkVertically(shrinkTowards = Alignment.Bottom)
         ) {
-            Icon(
-                imageVector = SkullIcon,
-                contentDescription = text("overview_death_saves"),
-                tint = if (dying) colors.accent.dangerHpZero else colors.text.label,
-                modifier = Modifier.size(20.dp)
-            )
-        }
-        AnimatedVisibility(visible = open) {
             Column(
                 modifier = Modifier
-                    .padding(top = 6.dp)
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(14.dp))
+                    .clip(trayShape)
                     .background(colors.surface.card)
-                    .border(1.dp, colors.border.panel, RoundedCornerShape(14.dp))
-                    .padding(horizontal = 18.dp, vertical = 10.dp),
+                    .border(1.dp, colors.border.panel, trayShape)
+                    .padding(start = 18.dp, end = 18.dp, top = HpCardCornerRadius + 10.dp, bottom = 10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -1972,8 +1975,29 @@ private fun DeathSavesTray(
                 }
             }
         }
+        // The tab hangs from the tray when it is out, from the hit points' card when it is in.
+        val tabShape = RoundedCornerShape(bottomStart = 10.dp, bottomEnd = 10.dp)
+        Box(
+            modifier = Modifier
+                .offset(y = (-1).dp)
+                .clip(tabShape)
+                .background(colors.surface.card)
+                .border(1.dp, colors.border.panel, tabShape)
+                .clickable { open = !open }
+                .padding(horizontal = 18.dp, vertical = 4.dp)
+        ) {
+            Icon(
+                imageVector = SkullIcon,
+                contentDescription = text("overview_death_saves"),
+                tint = if (dying) colors.accent.dangerHpZero else colors.text.label,
+                modifier = Modifier.size(20.dp)
+            )
+        }
     }
 }
+
+/** The hit points' card corners; the death saves' tray hides this much of its top under the card. */
+private val HpCardCornerRadius = 30.dp
 
 /** Half a turn about the view: the d20 shows its front face standing on a corner. */
 private val HalfTurn = Quat.axisAngle(Vec3.UP, PI)
@@ -2019,7 +2043,7 @@ private fun OverviewHpCard(
         modifier = Modifier.fillMaxWidth(),
         labelStyle = MaterialTheme.typography.titleLarge.copy(fontSize = tokens.hpLabel.fontSizeSp.sp),
         labelColor = colors.text.label,
-        cornerRadius = 30.dp,
+        cornerRadius = HpCardCornerRadius,
         fill = colors.surface.card,
         border = colors.border.panel,
         onClick = onClick
