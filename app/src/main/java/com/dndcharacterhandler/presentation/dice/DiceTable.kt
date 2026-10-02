@@ -115,7 +115,7 @@ internal class DiceTableState(private val selection: Map<DieType, Int>, seed: Lo
 @Composable
 internal fun DiceTableOverlay(
     selection: Map<DieType, Int>,
-    skin: DiceSkin,
+    skin: DiceLook,
     onClose: () -> Unit,
     /** Called with the dice every time a throw settles; a new throw replaces the result. */
     onSettled: (List<ThrownDie>) -> Unit = {}
@@ -230,8 +230,8 @@ private fun DiceStatusPanel(state: DiceTableState, modifier: Modifier = Modifier
 }
 
 @Composable
-private fun DiceCanvas(state: DiceTableState, skin: DiceSkin, modifier: Modifier = Modifier) {
-    val skinColors = skin.colors()
+private fun DiceCanvas(state: DiceTableState, skin: DiceLook, modifier: Modifier = Modifier) {
+    val style = rememberDiceSkinStyle(skin)
     val shadowColor = LocalDesignTokens.current.colors.background.radialEnd
     val numbers = rememberDieNumberPaint()
     val scratch = remember { DieDrawScratch() }
@@ -241,7 +241,7 @@ private fun DiceCanvas(state: DiceTableState, skin: DiceSkin, modifier: Modifier
         state.frame
         val numberPaint = numbers.get()
         val bodies = state.world.bodies.sortedBy { it.position.y }
-        bodies.forEach { drawDieShadow(state.camera, it, shadowColor) }
-        bodies.forEach { drawDie(state.camera, it, skinColors, numberPaint, scratch) }
+        bodies.forEach { drawDieShadow(state.camera, it, shadowColor, style.body.alpha) }
+        bodies.forEach { drawDie(state.camera, it, style, numberPaint, scratch) }
     }
 }

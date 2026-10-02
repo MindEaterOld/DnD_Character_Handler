@@ -92,6 +92,12 @@ class AppViewModelFactory(
                 selectedCharacterHolder = container.selectedCharacterHolder
             )
 
+            modelClass.isAssignableFrom(com.dndcharacterhandler.presentation.dice.DiceSkinsViewModel::class.java) ->
+                com.dndcharacterhandler.presentation.dice.DiceSkinsViewModel(
+                    store = container.diceSkinStore,
+                    preferences = container.languagePreferencesRepository
+                )
+
             else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
         } as T
     }

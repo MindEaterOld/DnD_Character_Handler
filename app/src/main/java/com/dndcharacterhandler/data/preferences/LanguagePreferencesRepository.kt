@@ -14,6 +14,7 @@ private val Context.dataStore by preferencesDataStore(name = "settings")
 class LanguagePreferencesRepository(private val context: Context) {
     private val key = stringPreferencesKey("app_language")
     private val selectedCharacterKey = longPreferencesKey("selected_character_id")
+    private val diceSkinKey = stringPreferencesKey("dice_skin")
 
     val language: Flow<AppLanguage> = context.dataStore.data.map { preferences ->
         preferences[key]?.let { runCatching { AppLanguage.valueOf(it) }.getOrNull() } ?: AppLanguage.ENGLISH
@@ -21,6 +22,13 @@ class LanguagePreferencesRepository(private val context: Context) {
 
     val selectedCharacterId: Flow<Long?> = context.dataStore.data.map { preferences ->
         preferences[selectedCharacterKey]
+    }
+
+    /** The dice look the player picked ("builtin:GOLD", "custom:<id>"); null before any pick. */
+    val diceSkin: Flow<String?> = context.dataStore.data.map { preferences -> preferences[diceSkinKey] }
+
+    suspend fun setDiceSkin(key: String) {
+        context.dataStore.edit { preferences -> preferences[diceSkinKey] = key }
     }
 
     suspend fun setLanguage(language: AppLanguage) {

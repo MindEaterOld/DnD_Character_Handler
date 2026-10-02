@@ -46,6 +46,8 @@ class AppContainer(context: Context) {
 
     val localizationRepository: LocalizationRepository = LocalizationRepository(appContext)
 
+    val diceSkinStore: com.dndcharacterhandler.data.dice.DiceSkinStore = com.dndcharacterhandler.data.dice.DiceSkinStore(appContext)
+
     val inventoryCatalogRepository: InventoryCatalogRepository =
         AssetInventoryCatalogRepository(appContext)
 

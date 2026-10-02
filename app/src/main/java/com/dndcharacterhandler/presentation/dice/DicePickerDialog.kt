@@ -7,14 +7,19 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Brush
 import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Remove
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
@@ -29,24 +34,33 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.dndcharacterhandler.domain.model.CustomDiceSkin
+import com.dndcharacterhandler.domain.model.DicePattern
 import com.dndcharacterhandler.presentation.components.EditDialog
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
+import java.util.UUID
 
 /** Most dice bodies on the table at once (a d100 counts as two). */
 internal const val MAX_DICE_BODIES = 12
 
 /**
  * Pick how many of each die to throw. The gear in the corner turns the dialog to the dice skins;
- * a picked skin applies right away ([onSkinChange]).
+ * a picked skin applies right away ([onSkinChange]). The skins end with the player's own and
+ * "Create your own", which opens the dice workshop on a copy of the picked look ([onCreateSkin]);
+ * the pencil on one of the player's opens it on that one ([onEditSkin]).
  */
 @Composable
 internal fun DicePickerDialog(
     initialSelection: Map<DieType, Int>,
-    skin: DiceSkin,
-    onSkinChange: (DiceSkin) -> Unit,
+    skin: DiceLook,
+    customSkins: List<DiceLook.Custom>,
+    onSkinChange: (DiceLook) -> Unit,
+    onCreateSkin: (CustomDiceSkin) -> Unit,
+    onEditSkin: (CustomDiceSkin) -> Unit,
     onDismiss: () -> Unit,
     onRoll: (Map<DieType, Int>) -> Unit
 ) {
@@ -81,7 +95,14 @@ internal fun DicePickerDialog(
         }
     ) {
         if (choosingSkin) {
-            DiceSkinList(selected = skin, onSelect = onSkinChange)
+            val start = newSkinFrom(skin, text("dice_workshop_default_name"))
+            DiceSkinList(
+                selected = skin,
+                customSkins = customSkins,
+                onSelect = onSkinChange,
+                onCreate = { onCreateSkin(start) },
+                onEdit = onEditSkin
+            )
         } else {
             DiceCountList(counts = counts, bodies = bodies, onCountsChange = { counts = it })
         }
@@ -134,26 +155,37 @@ private fun DiceCountList(
 
 /** Every skin with a d20 drawn in it; tapping one picks it. */
 @Composable
-private fun DiceSkinList(selected: DiceSkin, onSelect: (DiceSkin) -> Unit) {
+private fun DiceSkinList(
+    selected: DiceLook,
+    customSkins: List<DiceLook.Custom>,
+    onSelect: (DiceLook) -> Unit,
+    onCreate: () -> Unit,
+    onEdit: (CustomDiceSkin) -> Unit
+) {
     val colors = LocalDesignTokens.current.colors
     val shape = RoundedCornerShape(14.dp)
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        DiceSkin.entries.forEach { skin ->
-            val isSelected = skin == selected
+    val looks: List<DiceLook> = DiceSkin.entries.map { DiceLook.BuiltIn(it) } + customSkins
+    // The list scrolls inside the dialog once the player has made a few skins.
+    LazyColumn(modifier = Modifier.heightIn(max = 460.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        items(looks, key = { it.key }) { look ->
+            val isSelected = look.key == selected.key
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(shape)
                     .then(if (isSelected) Modifier.background(colors.surface.selected) else Modifier)
                     .border(1.dp, if (isSelected) colors.border.selected else colors.border.muted, shape)
-                    .clickable { onSelect(skin) }
+                    .clickable { onSelect(look) }
                     .padding(horizontal = 12.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                DieSkinSwatch(skin = skin, modifier = Modifier.size(52.dp))
+                DieSkinSwatch(look = look, modifier = Modifier.size(52.dp))
                 Text(
-                    text = text(skin.nameKey),
+                    text = when (look) {
+                        is DiceLook.BuiltIn -> text(look.skin.nameKey)
+                        is DiceLook.Custom -> look.skin.name
+                    },
                     modifier = Modifier.weight(1f),
                     style = MaterialTheme.typography.titleMedium,
                     color = colors.text.primary
@@ -165,7 +197,50 @@ private fun DiceSkinList(selected: DiceSkin, onSelect: (DiceSkin) -> Unit) {
                         tint = colors.accent.inspiration
                     )
                 }
+                if (look is DiceLook.Custom) {
+                    IconButton(onClick = { onEdit(look.skin) }) {
+                        Icon(Icons.Outlined.Edit, contentDescription = text("common_edit"), tint = colors.text.muted)
+                    }
+                }
+            }
+        }
+        item(key = "create") {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(shape)
+                    .border(1.dp, colors.border.muted, shape)
+                    .clickable(onClick = onCreate)
+                    .padding(horizontal = 12.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                Icon(Icons.Outlined.Brush, contentDescription = null, tint = colors.text.label, modifier = Modifier.size(28.dp))
+                Text(
+                    text = text("dice_workshop_create"),
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = colors.text.primary
+                )
             }
         }
     }
+}
+
+/** A new skin of the player's, starting as [look]: a tweak of the gold dice is a tap away. */
+@Composable
+private fun newSkinFrom(look: DiceLook, name: String): CustomDiceSkin {
+    val id = remember(look.key) { UUID.randomUUID().toString() }
+    val style = rememberDiceSkinStyle(look)
+    if (look is DiceLook.Custom) return look.skin.copy(id = id, name = name, faceArt = emptySet(), updatedAt = 0)
+    val texture = style.texture
+    return CustomDiceSkin(
+        id = id,
+        name = name,
+        bodyColor = style.body.toArgb(),
+        edgeColor = style.edge.toArgb(),
+        numberColor = style.number.toArgb(),
+        gloss = 0f,
+        pattern = if (texture is DiceTexture.Web) DicePattern.Web(texture.thread.toArgb()) else DicePattern.None
+    )
 }

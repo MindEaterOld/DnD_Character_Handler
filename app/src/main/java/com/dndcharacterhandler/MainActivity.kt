@@ -53,6 +53,7 @@ class MainActivity : ComponentActivity() {
                         biographyViewModel = viewModelProvider.get(BiographyViewModel::class.java),
                         notesViewModel = viewModelProvider.get(NotesViewModel::class.java),
                         characterManagerViewModel = viewModelProvider.get(CharacterManagerViewModel::class.java),
+                        diceSkinsViewModel = viewModelProvider.get(com.dndcharacterhandler.presentation.dice.DiceSkinsViewModel::class.java),
                         localizationRepository = container.localizationRepository
                     )
                 }

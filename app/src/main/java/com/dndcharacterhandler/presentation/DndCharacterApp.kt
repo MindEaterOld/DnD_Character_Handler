@@ -74,6 +74,7 @@ data class DndCharacterAppState(
     val biographyViewModel: com.dndcharacterhandler.presentation.biography.BiographyViewModel,
     val notesViewModel: com.dndcharacterhandler.presentation.notes.NotesViewModel,
     val characterManagerViewModel: com.dndcharacterhandler.presentation.components.CharacterManagerViewModel,
+    val diceSkinsViewModel: com.dndcharacterhandler.presentation.dice.DiceSkinsViewModel,
     val localizationRepository: LocalizationRepository
 )
 
@@ -95,7 +96,10 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
     var isDicePickerOpen by remember { mutableStateOf(false) }
     var diceSelection by remember { mutableStateOf(mapOf(DieType.D20 to 1)) }
     var diceTableSelection by remember { mutableStateOf<Map<DieType, Int>?>(null) }
-    var diceSkin by remember { mutableStateOf(DiceSkin.GOLD) }
+    val diceSkin by appState.diceSkinsViewModel.selected.collectAsStateWithLifecycle()
+    val customDiceSkins by appState.diceSkinsViewModel.skins.collectAsStateWithLifecycle()
+    // The dice workshop: the skin it edits, and whether it's a new one.
+    var workshopSkin by remember { mutableStateOf<Pair<com.dndcharacterhandler.domain.model.CustomDiceSkin, Boolean>?>(null) }
     // The top-right button of every screen throws dice; settings are in the drawer.
     val openDice: () -> Unit = { isDicePickerOpen = true }
     val selectedCharacterName = managerState.characters
@@ -295,13 +299,31 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
             diceTableSelection?.let { selection ->
                 DiceTableOverlay(selection = selection, skin = diceSkin, onClose = { diceTableSelection = null })
             }
+
+            workshopSkin?.let { (skin, isNew) ->
+                com.dndcharacterhandler.presentation.dice.DiceWorkshopOverlay(
+                    viewModel = appState.diceSkinsViewModel,
+                    initial = skin,
+                    isNew = isNew,
+                    onClose = { workshopSkin = null }
+                )
+            }
         }
 
         if (isDicePickerOpen) {
             DicePickerDialog(
                 initialSelection = diceSelection,
                 skin = diceSkin,
-                onSkinChange = { diceSkin = it },
+                customSkins = customDiceSkins.map { appState.diceSkinsViewModel.customLook(it) },
+                onSkinChange = appState.diceSkinsViewModel::select,
+                onCreateSkin = { start ->
+                    isDicePickerOpen = false
+                    workshopSkin = start to true
+                },
+                onEditSkin = { skin ->
+                    isDicePickerOpen = false
+                    workshopSkin = skin to false
+                },
                 onDismiss = { isDicePickerOpen = false },
                 onRoll = { selection ->
                     diceSelection = selection
