@@ -32,7 +32,8 @@ import java.io.File
 // 18: armor/shield magicalBonus is meaningful (adds to AC).
 // 21: the character's size; containers (containerDetails) and the container an item lies in
 //     (containerIndex: its index in inventoryItems).
-private const val SCHEMA_VERSION = 21
+// 22: weaponMasteries; an attack's baseWeaponId.
+private const val SCHEMA_VERSION = 22
 
 data class ImportedArchive(
     val characterBundle: CharacterBundle,
@@ -91,6 +92,7 @@ fun CharacterBundle.toArchiveManifest(
         put("weaponProficiencies", character.weaponProficiencies)
         put("toolProficiencies", character.toolProficiencies)
         put("languageProficiencies", character.languageProficiencies)
+        put("weaponMasteries", character.weaponMasteries)
         put("alignment", character.alignment)
         put("background", character.background)
         put("faith", character.faith)
@@ -145,6 +147,7 @@ fun CharacterBundle.toArchiveManifest(
                 put("attackBonusOrSaveDc", attack.manualAttackBonusOrSaveDc)
                 put("damage", attack.manualDamage)
                 put("damageType", attack.primaryDamageType)
+                attack.baseWeaponId?.let { put("baseWeaponId", it) }
             }
         }))
         put("combatResources", JSONArray(combatResources.map { resource ->
@@ -351,6 +354,7 @@ fun archiveManifestToCharacterBundle(
         weaponProficiencies = characterJson.optString("weaponProficiencies"),
         toolProficiencies = characterJson.optString("toolProficiencies"),
         languageProficiencies = characterJson.optString("languageProficiencies"),
+        weaponMasteries = characterJson.optString("weaponMasteries"),
         alignment = characterJson.optString("alignment"),
         background = characterJson.optString("background"),
         faith = characterJson.optString("faith"),
@@ -430,7 +434,8 @@ private fun JSONArray.toAttackList(resolveAssetReference: (String?) -> String?):
                 applyAbilityModifierToDamage = json.optBoolean("applyAbilityModifierToDamage", true),
                 manualAttackBonusOrSaveDc = json.optString("attackBonusOrSaveDc"),
                 manualDamage = json.optString("damage"),
-                primaryDamageType = json.optString("damageType")
+                primaryDamageType = json.optString("damageType"),
+                baseWeaponId = json.optNullableString("baseWeaponId")
             )
         }
     }

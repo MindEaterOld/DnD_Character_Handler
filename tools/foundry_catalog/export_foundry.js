@@ -197,4 +197,27 @@ for (const id of CONTAINER_PACKS) {
   }));
   report.push({ id, count: documents.length, status: await send(`containers.${id}.json`, { pack: id, documents }) });
 }
+
+// Weapon mastery: each base weapon's mastery property, and the properties' rules (the Russian page
+// of the Fifthpendium's PHB journal, the English one of the SRD 5.2, both under the same page id).
+const ruLang = flatten(await (await fetch('modules/ru-ru/i18n/systems/dnd5e.json')).json());
+const enRules = [];
+for (const entry of await game.packs.get('dnd5e.content24')?.getDocuments() ?? []) enRules.push(...entry.pages.contents);
+const masteryProperties = {};
+for (const [key, mastery] of Object.entries(CONFIG.DND5E.weaponMasteries)) {
+  const ruPage = mastery.reference ? await fromUuid(mastery.reference) : null;
+  const enPage = enRules.find(p => p.id === ruPage?.id) ?? enRules.find(p => p.name === mastery.label);
+  masteryProperties[key] = {
+    en: mastery.label,
+    ru: ruPage?.name ?? ruLang[`DND5E.WEAPON.Mastery.${mastery.label}`] ?? null,
+    textEn: enPage?.text?.content ?? '',
+    textRu: ruPage?.text?.content ?? ''
+  };
+}
+const masteryWeapons = {};
+for (const doc of await game.packs.get('dnd5e.equipment24').getDocuments({ type: 'weapon' })) {
+  const base = doc.system.type?.baseItem;
+  if (base && doc.system.mastery && !(base in masteryWeapons)) masteryWeapons[base] = doc.system.mastery;
+}
+report.push({ id: 'weaponMasteries', count: Object.keys(masteryWeapons).length, status: await send('weaponMasteries.json', { properties: masteryProperties, weapons: masteryWeapons }) });
 return report;

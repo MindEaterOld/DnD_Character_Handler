@@ -80,6 +80,9 @@ import com.dndcharacterhandler.domain.model.equipmentNameKey
 import com.dndcharacterhandler.domain.model.matchedEquipmentItem
 import com.dndcharacterhandler.domain.rules.InventoryTree
 import com.dndcharacterhandler.domain.model.InventoryItem
+import com.dndcharacterhandler.domain.model.CatalogWeaponMastery
+import com.dndcharacterhandler.domain.model.CharacterCatalog
+import com.dndcharacterhandler.domain.model.decodeProficiencyIds
 import com.dndcharacterhandler.domain.model.InventoryWeaponDamage
 import com.dndcharacterhandler.domain.model.InventoryWeaponDetails
 import com.dndcharacterhandler.domain.model.InventoryWeaponProperty
@@ -141,8 +144,12 @@ class InventoryViewModel(
 ) : BaseCharacterViewModel(getCharacterBundleUseCase, selectedCharacterHolder) {
     private val _catalogUiState = MutableStateFlow(InventoryCatalogUiState())
     val catalogUiState: StateFlow<InventoryCatalogUiState> = _catalogUiState.asStateFlow()
+    private val _characterCatalog = MutableStateFlow<CharacterCatalog?>(null)
+    /** The weapons' mastery properties come from it. */
+    val characterCatalog: StateFlow<CharacterCatalog?> = _characterCatalog.asStateFlow()
 
     init {
+        viewModelScope.launch { _characterCatalog.value = characterCatalogRepository.getCatalog() }
         viewModelScope.launch {
             val items = inventoryCatalogRepository.getItems()
             _catalogUiState.value = InventoryCatalogUiState(items = items, isLoading = false)
@@ -268,6 +275,7 @@ fun InventoryScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val catalogState by viewModel.catalogUiState.collectAsStateWithLifecycle()
+    val characterCatalog by viewModel.characterCatalog.collectAsStateWithLifecycle()
     val strings = LocalStrings.current
     var isAddItemDialogOpen by remember { mutableStateOf(false) }
     var isCategoryPickerOpen by remember { mutableStateOf(false) }
@@ -279,6 +287,7 @@ fun InventoryScreen(
     InventoryContent(
         characterBundle = state.character,
         catalogItems = catalogState.items,
+        characterCatalog = characterCatalog,
         onOpenDrawer = onOpenDrawer,
         onOpenDice = onOpenDice,
         onAddItem = { isAddItemDialogOpen = true },
@@ -383,6 +392,8 @@ fun InventoryScreen(
 internal fun InventoryContent(
     characterBundle: CharacterBundle?,
     catalogItems: List<InventoryCatalogItem> = emptyList(),
+    /** Weapons' mastery properties, shown on the weapons the character has mastered. */
+    characterCatalog: CharacterCatalog? = null,
     onOpenDrawer: () -> Unit = {},
     onOpenDice: () -> Unit = {},
     onAddItem: () -> Unit = {},
@@ -440,6 +451,14 @@ internal fun InventoryContent(
         }
     }
     val totalWeight = remember(characterBundle.inventoryItems) { InventoryTree(characterBundle.inventoryItems).carriedWeight }
+    val masteries = remember(character.weaponMasteries) { decodeProficiencyIds(character.weaponMasteries) }
+    val masteryOf: (InventoryItem) -> CatalogWeaponMastery? = remember(masteries, characterCatalog) {
+        { item ->
+            item.weaponDetails?.baseWeaponId?.replace('-', '_')
+                ?.takeIf { it in masteries }
+                ?.let { characterCatalog?.masteryOf(it) }
+        }
+    }
     val carryLimit = (character.strength.coerceAtLeast(1) * 15).toDouble()
     val listState = rememberLazyListState()
 
@@ -496,6 +515,7 @@ internal fun InventoryContent(
                                 onToggleEquipped = { item -> onToggleEquipped(characterBundle, item) },
                                 onEditItem = onEditItem,
                                 onMoveItem = onMoveItem,
+                                masteryOf = masteryOf,
                                 showLocation = searching,
                                 expanded = expandedItems,
                                 onExpandedChange = { item, open ->
@@ -1097,6 +1117,8 @@ internal fun InventorySectionCard(
     onToggleEquipped: ((InventoryItem) -> Unit)? = null,
     onEditItem: ((InventoryItem) -> Unit)? = null,
     onMoveItem: ((InventoryItem) -> Unit)? = null,
+    /** The mastery property a weapon's row shows: the character has mastered that kind of weapon. */
+    masteryOf: (InventoryItem) -> CatalogWeaponMastery? = { null },
     /** Rows say which container they lie in (search results). */
     showLocation: Boolean = false,
     expanded: Set<Long> = emptySet(),
@@ -1105,7 +1127,7 @@ internal fun InventorySectionCard(
     val colors = LocalDesignTokens.current.colors
     val tree = inventory ?: remember(items) { InventoryTree(items) }
     val rows = if (inventory == null) tree.topLevel else items
-    val actions = InventoryRowActions(onToggleEquipped, onEditItem, onMoveItem, expanded, onExpandedChange)
+    val actions = InventoryRowActions(onToggleEquipped, onEditItem, onMoveItem, masteryOf, expanded, onExpandedChange)
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
@@ -1118,11 +1140,12 @@ internal fun InventorySectionCard(
     }
 }
 
-/** What the rows can do; null actions: Character Wizard's rows only show the items. */
+/** What the rows can do and know; null actions: Character Wizard's rows only show the items. */
 private class InventoryRowActions(
     val onToggleEquipped: ((InventoryItem) -> Unit)?,
     val onEdit: ((InventoryItem) -> Unit)?,
     val onMove: ((InventoryItem) -> Unit)?,
+    val masteryOf: (InventoryItem) -> CatalogWeaponMastery?,
     val expanded: Set<Long>,
     val onExpandedChange: (InventoryItem, Boolean) -> Unit
 )
@@ -1166,8 +1189,11 @@ private fun InventoryItemRow(
     val isContainer = item.category == InventoryCategory.CONTAINER
     val contents = tree.contentsOf(item)
     val location = tree.containerOf(item)
+    val russian = strings.language == AppLanguage.RUSSIAN
+    val mastery = actions.masteryOf(item)
     val tags = buildList {
         if (showLocation && location != null) add(strings.format("inventory_tag_inside", location.name))
+        mastery?.let { add(strings.format("inventory_tag_mastery", it.name.get(russian))) }
         if (isContainer) {
             val load = formatWeight(tree.contentsWeight(item))
             val capacity = item.containerDetails?.capacity
@@ -1274,6 +1300,15 @@ private fun InventoryItemRow(
                 style = MaterialTheme.typography.bodyMedium,
                 color = colors.text.muted
             )
+            mastery?.let {
+                // What the mastered weapon's property does.
+                Text(
+                    text = "${strings.format("inventory_tag_mastery", it.name.get(russian))}. ${it.text.get(russian)}",
+                    modifier = Modifier.padding(start = 38.dp, top = 2.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colors.text.primary
+                )
+            }
             if (isContainer) {
                 if (contents.isEmpty()) {
                     Text(

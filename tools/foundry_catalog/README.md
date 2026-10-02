@@ -18,6 +18,9 @@ on — is built from the Foundry VTT compendiums of the D&D world:
   they hold — a pack's tinderbox, rations and its waterskin with the water. Contents point at the
   standalone item of their kind, so their names come in both languages; Character Wizard's packs
   and the inventory's bags are built from them.
+- **Weapon mastery** (`weaponMasteries`): the eight mastery properties with their rules (Russian from
+  the Fifthpendium's PHB journal, English from SRD 5.2) and each base weapon's property; the sheet,
+  the inventory and the attacks show them for the weapons the character has mastered.
 - `legacy/feature_catalog_extra.json` and the 5e-database SRD files: English texts the app shipped
   before, and the old catalog ids that saved features still carry (mapped in `legacyIds`).
 

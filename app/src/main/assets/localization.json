@@ -728,6 +728,14 @@
     "fr": "Langues",
     "es": "Idiomas"
   },
+  "attributes_proficiency_masteries": {
+    "maxChars": 34,
+    "en": "Weapon Mastery",
+    "ru": "\u041c\u0430\u0441\u0442\u0435\u0440\u0441\u0442\u0432\u043e \u043e\u0440\u0443\u0436\u0438\u044f",
+    "de": "Waffenmeisterschaft",
+    "fr": "Ma\u00eetrise des armes",
+    "es": "Maestr\u00eda con armas"
+  },
   "attributes_armor_dialog_title": {
     "en": "Armor Proficiencies",
     "ru": "Владение броней",
@@ -2079,6 +2087,13 @@
     "de": "In %1$s",
     "fr": "Dans %1$s",
     "es": "En %1$s"
+  },
+  "inventory_tag_mastery": {
+    "en": "Mastery: %1$s",
+    "ru": "\u041c\u0430\u0441\u0442\u0435\u0440\u0441\u0442\u0432\u043e: %1$s",
+    "de": "Meisterschaft: %1$s",
+    "fr": "Ma\u00eetrise : %1$s",
+    "es": "Maestr\u00eda: %1$s"
   },
   "inventory_empty": {
     "en": "No items found.",

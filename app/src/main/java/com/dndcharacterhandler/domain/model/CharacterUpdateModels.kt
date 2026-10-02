@@ -4,6 +4,8 @@ enum class CharacterProficiencyField {
     ARMOR,
     WEAPON,
     TOOL,
+    /** The weapons the character has mastered (weapon ids, as the weapon field's). */
+    WEAPON_MASTERY,
     LANGUAGE
 }
 

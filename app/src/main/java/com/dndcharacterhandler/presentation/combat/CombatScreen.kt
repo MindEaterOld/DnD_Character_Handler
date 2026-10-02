@@ -68,6 +68,11 @@ import com.dndcharacterhandler.domain.model.AppLanguage
 import com.dndcharacterhandler.domain.model.InventoryCatalogItem
 import com.dndcharacterhandler.domain.model.InventoryCategory
 import com.dndcharacterhandler.domain.model.InventoryItem
+import com.dndcharacterhandler.domain.model.CatalogWeaponMastery
+import com.dndcharacterhandler.domain.model.CharacterCatalog
+import com.dndcharacterhandler.domain.model.WeaponGroupMartialId
+import com.dndcharacterhandler.domain.model.WeaponGroupSimpleId
+import com.dndcharacterhandler.domain.model.decodeProficiencyIds
 import com.dndcharacterhandler.domain.model.InventoryWeaponProperty
 import com.dndcharacterhandler.domain.model.InventoryWeaponRangeType
 import com.dndcharacterhandler.domain.model.Spell
@@ -77,6 +82,7 @@ import com.dndcharacterhandler.domain.rules.abilityModifier
 import com.dndcharacterhandler.domain.rules.calculateArmorClass
 import com.dndcharacterhandler.domain.rules.proficiencyBonusForLevel
 import com.dndcharacterhandler.domain.rules.scoreForSpellcastingAbility
+import com.dndcharacterhandler.domain.repository.CharacterCatalogRepository
 import com.dndcharacterhandler.domain.repository.CharacterRepository
 import com.dndcharacterhandler.domain.repository.InventoryCatalogRepository
 import com.dndcharacterhandler.domain.repository.SpellCatalogRepository
@@ -85,6 +91,7 @@ import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
 import com.dndcharacterhandler.presentation.components.CharacterScreenHeader
 import com.dndcharacterhandler.presentation.components.EditDialog
+import com.dndcharacterhandler.presentation.components.WeaponMasteryDialog
 import com.dndcharacterhandler.presentation.components.FloatingAddButton
 import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
 import com.dndcharacterhandler.presentation.components.MiniStatCard
@@ -112,6 +119,7 @@ class CombatViewModel(
     private val characterRepository: CharacterRepository,
     private val spellCatalogRepository: SpellCatalogRepository,
     private val inventoryCatalogRepository: InventoryCatalogRepository,
+    private val characterCatalogRepository: CharacterCatalogRepository,
     getCharacterBundleUseCase: GetCharacterBundleUseCase,
     selectedCharacterHolder: SelectedCharacterHolder
 ) : BaseCharacterViewModel(getCharacterBundleUseCase, selectedCharacterHolder) {
@@ -120,8 +128,12 @@ class CombatViewModel(
     val spellCatalog: StateFlow<Map<String, SpellCatalogItem>> = _spellCatalog.asStateFlow()
     private val _inventoryCatalog = MutableStateFlow<List<InventoryCatalogItem>>(emptyList())
     val inventoryCatalog: StateFlow<List<InventoryCatalogItem>> = _inventoryCatalog.asStateFlow()
+    private val _characterCatalog = MutableStateFlow<CharacterCatalog?>(null)
+    /** The weapons' mastery properties come from it. */
+    val characterCatalog: StateFlow<CharacterCatalog?> = _characterCatalog.asStateFlow()
 
     init {
+        viewModelScope.launch { _characterCatalog.value = characterCatalogRepository.getCatalog() }
         viewModelScope.launch {
             _spellCatalog.value = spellCatalogRepository.getItems().associateBy { it.id }
         }
@@ -250,10 +262,12 @@ fun CombatScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val spellCatalog by viewModel.spellCatalog.collectAsStateWithLifecycle()
     val inventoryCatalog by viewModel.inventoryCatalog.collectAsStateWithLifecycle()
+    val characterCatalog by viewModel.characterCatalog.collectAsStateWithLifecycle()
     CombatContent(
         characterBundle = state.character,
         spellCatalog = spellCatalog,
         inventoryCatalog = inventoryCatalog,
+        characterCatalog = characterCatalog,
         onOpenDrawer = onOpenDrawer,
         onOpenDice = onOpenDice,
         onUpdateArmorClass = viewModel::updateArmorClass,
@@ -273,6 +287,8 @@ internal fun CombatContent(
     characterBundle: CharacterBundle?,
     spellCatalog: Map<String, SpellCatalogItem> = emptyMap(),
     inventoryCatalog: List<InventoryCatalogItem> = emptyList(),
+    /** Weapons' mastery properties, shown on the attacks with a mastered weapon. */
+    characterCatalog: CharacterCatalog? = null,
     onOpenDrawer: () -> Unit = {},
     onOpenDice: () -> Unit = {},
     onUpdateArmorClass: (CharacterBundle, Int, ArmorClassMode, Int?) -> Unit = { _, _, _, _ -> },
@@ -422,6 +438,7 @@ internal fun CombatContent(
                             attack = attack,
                             character = character,
                             proficiencyBonus = proficiencyBonus,
+                            mastery = attackMastery(attack, resolvedBundle, characterCatalog),
                             onClick = { editingAttack = attack }
                         )
                     }
@@ -970,9 +987,15 @@ private fun AttackCard(
     attack: Attack,
     character: com.dndcharacterhandler.domain.model.Character,
     proficiencyBonus: Int,
+    /** The mastery property of the attack's weapon, when the character has mastered it. */
+    mastery: CatalogWeaponMastery? = null,
     onClick: () -> Unit
 ) {
     val strings = LocalStrings.current
+    var isMasteryOpen by remember { mutableStateOf(false) }
+    if (isMasteryOpen && mastery != null) {
+        WeaponMasteryDialog(mastery, onDismiss = { isMasteryOpen = false })
+    }
     val rangeLabel = attack.displayRange(
         meleeLabel = text("inventory_weapon_range_melee"),
         feetLabel = text("inventory_unit_feet")
@@ -1009,8 +1032,17 @@ private fun AttackCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                rangeLabel.takeIf { it.isNotBlank() }?.let { range ->
-                    RangeTag(range)
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    rangeLabel.takeIf { it.isNotBlank() }?.let { range ->
+                        RangeTag(range)
+                    }
+                    // A tap shows what the property does.
+                    mastery?.let {
+                        MasteryTag(
+                            value = it.name.get(strings.language == AppLanguage.RUSSIAN),
+                            onClick = { isMasteryOpen = true }
+                        )
+                    }
                 }
             }
 
@@ -1187,6 +1219,37 @@ private fun SpellAttackCard(
 @Composable
 private fun RangeTag(value: String) {
     CombatTag(value = value, textColor = LocalDesignTokens.current.colors.text.muted)
+}
+
+/** A weapon mastery property on an attack; a tap opens its rules. */
+@Composable
+private fun MasteryTag(value: String, onClick: () -> Unit) {
+    Surface(
+        modifier = Modifier.clickable(onClick = onClick),
+        shape = RoundedCornerShape(6.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        border = BorderStroke(1.dp, LocalDesignTokens.current.colors.border.selected)
+    ) {
+        Text(
+            text = value,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            style = MaterialTheme.typography.bodyMedium,
+            color = LocalDesignTokens.current.colors.text.primary
+        )
+    }
+}
+
+/**
+ * The mastery property of [attack]'s weapon, when the character has mastered that kind of weapon.
+ * Attacks made before they kept their weapon are matched to an inventory weapon by name.
+ */
+private fun attackMastery(attack: Attack, bundle: CharacterBundle, catalog: CharacterCatalog?): CatalogWeaponMastery? {
+    catalog ?: return null
+    val weaponId = attack.baseWeaponId ?: bundle.inventoryItems
+        .firstOrNull { it.weaponDetails != null && it.name.equals(attack.name, ignoreCase = true) }
+        ?.weaponDetails?.baseWeaponId?.replace('-', '_')
+        ?: return null
+    return if (weaponId in decodeProficiencyIds(bundle.character.weaponMasteries)) catalog.masteryOf(weaponId) else null
 }
 
 @Composable
@@ -1815,7 +1878,9 @@ private fun InventoryItem.toCombatAttack(
         applyAbilityModifierToDamage = true,
         manualAttackBonusOrSaveDc = "",
         manualDamage = "",
-        primaryDamageType = primaryDamage?.damageType.orEmpty()
+        primaryDamageType = primaryDamage?.damageType.orEmpty(),
+        // Older catalog items may store SRD ids with hyphens ("war-pick").
+        baseWeaponId = details.baseWeaponId?.replace('-', '_')
     )
 }
 
@@ -2263,9 +2328,6 @@ private fun <T> SelectionDialog(
     }
 }
 
-private fun decodeProficiencyIds(value: String): Set<String> =
-    value.split("|").mapNotNull { it.trim().takeIf(String::isNotEmpty) }.toSet()
-
 private fun com.dndcharacterhandler.domain.model.InventoryWeaponDetails.isCharacterProficient(
     weaponProficiencyIds: Set<String>
 ): Boolean {
@@ -2532,5 +2594,3 @@ private fun Attack.displayDamageTypeLabel(strings: com.dndcharacterhandler.data.
     return if (alternate != null && !alternate.equals(primary, ignoreCase = true)) "$primary / $alternate" else primary
 }
 
-private const val WeaponGroupSimpleId = "simple_weapons"
-private const val WeaponGroupMartialId = "martial_weapons"

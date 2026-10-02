@@ -30,7 +30,7 @@ import com.dndcharacterhandler.data.local.entity.SpellEntity
         FeatureEntity::class,
         NoteEntity::class
     ],
-    version = 49,
+    version = 50,
     exportSchema = false
 )
 @TypeConverters(RoomConverters::class)
@@ -95,7 +95,8 @@ abstract class AppDatabase : RoomDatabase() {
                     MIGRATION_45_46,
                     MIGRATION_46_47,
                     MIGRATION_47_48,
-                    MIGRATION_48_49
+                    MIGRATION_48_49,
+                    MIGRATION_49_50
                 ).build().also { INSTANCE = it }
             }
         }
@@ -569,6 +570,14 @@ abstract class AppDatabase : RoomDatabase() {
                 db.execSQL("ALTER TABLE inventory_items ADD COLUMN containerCapacity REAL")
                 db.execSQL("ALTER TABLE inventory_items ADD COLUMN containerWeightlessContents INTEGER NOT NULL DEFAULT 0")
                 db.execSQL("ALTER TABLE inventory_items ADD COLUMN containerId INTEGER")
+            }
+        }
+
+        private val MIGRATION_49_50 = object : Migration(49, 50) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Weapon masteries of their own; the weapon an attack was made from.
+                db.execSQL("ALTER TABLE characters ADD COLUMN weaponMasteries TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE attacks ADD COLUMN baseWeaponId TEXT")
             }
         }
     }

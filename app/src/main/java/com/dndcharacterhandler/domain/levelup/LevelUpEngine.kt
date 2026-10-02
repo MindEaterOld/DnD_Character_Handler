@@ -16,6 +16,14 @@ import com.dndcharacterhandler.domain.model.CharacterClassEntry
 import com.dndcharacterhandler.domain.model.ClassRestriction
 import com.dndcharacterhandler.domain.model.CombatResource
 import com.dndcharacterhandler.domain.model.CreatureSize
+import com.dndcharacterhandler.domain.model.CustomProficiencyPrefix
+import com.dndcharacterhandler.domain.model.decodeProficiencyIds
+import com.dndcharacterhandler.domain.model.encodeProficiencyIds
+import com.dndcharacterhandler.domain.model.foundryWeaponId
+import com.dndcharacterhandler.domain.model.proficiencyGroupForTrait
+import com.dndcharacterhandler.domain.model.proficiencyIdForTrait
+import com.dndcharacterhandler.domain.model.weaponIdForFoundry
+import com.dndcharacterhandler.domain.model.withoutCoveredWeapons
 import com.dndcharacterhandler.domain.model.EquipmentNode
 import com.dndcharacterhandler.domain.model.Feature
 import com.dndcharacterhandler.domain.model.FeatureSource
@@ -576,7 +584,9 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
     ) {
         val granted = step.grants.flatMap(::expandTrait).distinct()
         val groups = step.choices.map { choice ->
+            // Weapon Mastery offers the weapons that have a mastery property (not the DMG's firearms).
             val pool = choice.pool.flatMap(::expandTrait).distinct().filter { it !in granted }
+                .filter { step.mode != "mastery" || catalog.weaponMasteries.isEmpty() || catalog.masteryOf(it.substringAfterLast(':')) != null }
             val options = pool.map { traitKey ->
                 TraitOption(traitKey, traitName(traitKey), alreadyHas = simulation.hasTrait(traitKey, step.mode))
             }.let { options -> if (step.mode == "expertise") options.filter { simulation.isProficient(it.key) } else options }
@@ -794,6 +804,14 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
     private fun traitName(key: String): CatalogText =
         catalog.traits[key]?.name ?: CatalogText(key.substringAfterLast(':'), "")
 
+    /** The weapon trait key ("weapon:mar:longsword") for the sheet's weapon id ("longsword"). */
+    private fun masteryKey(weaponId: String): String? {
+        val foundryId = foundryWeaponId(weaponId)
+        return catalog.traits.keys.firstOrNull { key ->
+            key.startsWith("weapon:") && key.count { it == ':' } == 2 && key.substringAfterLast(':').lowercase() == foundryId
+        }
+    }
+
     private fun sortedClasses(): List<CatalogClass> =
         catalog.classes.sortedWith(compareBy({ it.book != PHB }, { it.name.ru.ifBlank { it.name.en } }))
 
@@ -823,13 +841,23 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
         val saves = SAVES.filter { ability -> character.saveProficient(ability) }.toMutableSet()
         val proficientSkills = bundle.skills.filter { it.isProficient }.mapNotNull { SKILL_KEYS[it.name] }.toMutableSet()
         val expertSkills = bundle.skills.filter { it.isExpertise }.mapNotNull { SKILL_KEYS[it.name] }.toMutableSet()
+        /** The sheet's proficiency fields as ids (see decodeProficiencyIds), by trait kind. */
+        private val sheetIds: Map<String, Set<String>> = mapOf(
+            "armor" to decodeProficiencyIds(character.armorProficiencies),
+            "weapon" to decodeProficiencyIds(character.weaponProficiencies),
+            "tool" to decodeProficiencyIds(character.toolProficiencies),
+            "languages" to decodeProficiencyIds(character.languageProficiencies)
+        )
+        /** The fields' text, for proficiencies written as names before they were ids. */
         private val proficiencyText = listOf(
             character.armorProficiencies, character.weaponProficiencies,
             character.toolProficiencies, character.languageProficiencies
         ).joinToString(" ").lowercase()
         val gainedTraits = mutableListOf<String>()
         val gainedExpertise = mutableListOf<String>()
+        /** Weapon masteries gained now; [knownMasteries] the character has, as trait keys. */
         val masteries = mutableListOf<String>()
+        private val knownMasteries: Set<String> = decodeProficiencyIds(character.weaponMasteries).mapNotNull(::masteryKey).toSet()
         val defenses = mutableListOf<String>()
         val knownFeatureIds = bundle.features.mapNotNull { it.catalogId }.toMutableSet()
         val addedFeatures = mutableListOf<Pair<CatalogFeature, StepContext>>()
@@ -922,20 +950,30 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
             val (kind, code) = key.substringBefore(':') to key.substringAfter(':')
             return when {
                 mode == "expertise" || mode == "forcedExpertise" -> kind == "skills" && code in expertSkills
-                mode == "mastery" -> key in masteries
+                mode == "mastery" -> key in masteries || key in knownMasteries
                 kind == "saves" -> code in saves
                 kind == "skills" -> code in proficientSkills
                 kind in DEFENSES -> key in defenses
-                else -> key in gainedTraits || traitName(key).let { name ->
-                    listOf(name.en, name.ru).any { it.isNotBlank() && it.lowercase() in proficiencyText }
-                }
+                else -> key in gainedTraits || onSheet(kind, key)
             }
+        }
+
+        /**
+         * Whether the sheet's field already has [key]: its id, its group (Martial weapons for a
+         * longsword), its name as a custom entry, or its name in text written before ids.
+         */
+        private fun onSheet(kind: String, key: String): Boolean {
+            val ids = sheetIds[kind].orEmpty()
+            if (proficiencyIdForTrait(key)?.let { it in ids } == true) return true
+            if (proficiencyGroupForTrait(key)?.let { it in ids } == true) return true
+            val name = traitName(key)
+            return listOf(name.en, name.ru).any { it.isNotBlank() && ((CustomProficiencyPrefix + it) in ids || it.lowercase() in proficiencyText) }
         }
 
         fun gainTrait(key: String, mode: String) {
             val (kind, code) = key.substringBefore(':') to key.substringAfter(':')
             when {
-                mode == "mastery" -> if (key !in masteries) masteries += key
+                mode == "mastery" -> if (key !in masteries && key !in knownMasteries) masteries += key
                 mode == "expertise" || mode == "forcedExpertise" -> if (kind == "skills") {
                     proficientSkills += code
                     if (expertSkills.add(code)) gainedExpertise += key
@@ -1065,13 +1103,16 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
             }
 
             val traitsByKind = gainedTraits.groupBy { it.substringBefore(':') }
-            fun appendTraits(text: String, kinds: List<String>, extra: List<String> = emptyList()): String {
-                val labels = kinds.flatMap { traitsByKind[it].orEmpty() }.map { traitName(it).get(russian) } + extra
-                return (listOf(text.trim()).filter { it.isNotEmpty() } + labels).distinct().joinToString(", ")
+            // The sheet's fields hold option ids ("martial_weapons", "elvish"); what it has no
+            // option for (a Faerûn language, a pistol) goes in by name.
+            fun withTraits(field: String, kind: String): String {
+                val ids = decodeProficiencyIds(field) + traitsByKind[kind].orEmpty().map { key ->
+                    proficiencyIdForTrait(key) ?: (CustomProficiencyPrefix + traitName(key).get(russian))
+                }
+                return encodeProficiencyIds(if (kind == "weapon") withoutCoveredWeapons(ids) else ids)
             }
-            val masteryText = if (masteries.isEmpty()) emptyList() else {
-                listOf((if (russian) "Мастерство: " else "Mastery: ") + masteries.joinToString(", ") { traitName(it).get(russian) })
-            }
+            val weaponMasteries = decodeProficiencyIds(character.weaponMasteries) +
+                masteries.map { key -> key.substringAfterLast(':').let { weaponIdForFoundry(it) ?: it } }
 
             val updatedClasses = classes.toList()
             val skills = bundle.skills.map { skill ->
@@ -1098,10 +1139,11 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
                 intelligenceSaveProficient = "int" in saves,
                 wisdomSaveProficient = "wis" in saves,
                 charismaSaveProficient = "cha" in saves,
-                armorProficiencies = appendTraits(character.armorProficiencies, listOf("armor")),
-                weaponProficiencies = appendTraits(character.weaponProficiencies, listOf("weapon"), masteryText),
-                toolProficiencies = appendTraits(character.toolProficiencies, listOf("tool")),
-                languageProficiencies = appendTraits(character.languageProficiencies, listOf("languages")),
+                armorProficiencies = withTraits(character.armorProficiencies, "armor"),
+                weaponProficiencies = withTraits(character.weaponProficiencies, "weapon"),
+                toolProficiencies = withTraits(character.toolProficiencies, "tool"),
+                languageProficiencies = withTraits(character.languageProficiencies, "languages"),
+                weaponMasteries = encodeProficiencyIds(weaponMasteries),
                 spellSlotMaximums = slotMaximums,
                 spellSlotRemaining = slotRemaining,
                 spellSlotsRestoreOnShortRest = if (onlyPact) true else character.spellSlotsRestoreOnShortRest,

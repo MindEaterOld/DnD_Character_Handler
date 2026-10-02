@@ -83,6 +83,8 @@ import com.dndcharacterhandler.domain.model.AssetReferences
 import com.dndcharacterhandler.domain.model.Character
 import com.dndcharacterhandler.domain.model.CharacterBundle
 import com.dndcharacterhandler.domain.model.CharacterCatalog
+import com.dndcharacterhandler.domain.model.CharacterProficiencyField
+import com.dndcharacterhandler.domain.rules.repairWrittenProficiencies
 import com.dndcharacterhandler.domain.levelup.LevelUpDraft
 import com.dndcharacterhandler.domain.levelup.LevelUpEngine
 import com.dndcharacterhandler.domain.model.equipmentNameKey
@@ -150,6 +152,24 @@ class OverviewViewModel(
     init {
         viewModelScope.launch { _catalog.value = characterCatalogRepository.getCatalog() }
         viewModelScope.launch { _equipmentItems.value = loadEquipmentItems() }
+        // Proficiencies Character Wizard wrote as names before the fields held ids: turned into ids once.
+        viewModelScope.launch {
+            val catalog = characterCatalogRepository.getCatalog()
+            uiState.collect { state ->
+                val character = state.character?.character ?: return@collect
+                val repaired = withContext(Dispatchers.Default) { repairWrittenProficiencies(character, catalog) } ?: return@collect
+                // The masteries first: they come out of the weapon field's text.
+                listOf(
+                    CharacterProficiencyField.WEAPON_MASTERY to (character.weaponMasteries to repaired.weaponMasteries),
+                    CharacterProficiencyField.ARMOR to (character.armorProficiencies to repaired.armorProficiencies),
+                    CharacterProficiencyField.WEAPON to (character.weaponProficiencies to repaired.weaponProficiencies),
+                    CharacterProficiencyField.TOOL to (character.toolProficiencies to repaired.toolProficiencies),
+                    CharacterProficiencyField.LANGUAGE to (character.languageProficiencies to repaired.languageProficiencies)
+                ).forEach { (field, values) ->
+                    if (values.first != values.second) characterRepository.updateProficiencyField(character.id, field, values.second)
+                }
+            }
+        }
     }
 
     private suspend fun loadEquipmentItems(): Map<String, InventoryCatalogItem> =

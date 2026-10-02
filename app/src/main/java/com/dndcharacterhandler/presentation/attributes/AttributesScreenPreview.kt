@@ -24,6 +24,14 @@ fun AttributesScreenPreview() {
             "attributes_ability_scores" to "Ability Scores",
             "attributes_skills" to "Skills",
             "attributes_proficiencies" to "Proficiencies",
+            "attributes_proficiency_armor" to "Armor",
+            "attributes_proficiency_weapons" to "Weapons",
+            "attributes_proficiency_tools" to "Tools",
+            "attributes_proficiency_languages" to "Languages",
+            "attributes_proficiency_masteries" to "Weapon Mastery",
+            "attributes_weapon_simple_short" to "Simple",
+            "attributes_weapon_martial_short" to "Martial",
+            "common_none" to "None",
             "stat_card_proficiency" to "Proficiency",
             "stat_card_passive_perception" to "Pass. Perc.",
             "stat_card_darkvision" to "Darkvision",
@@ -64,7 +72,13 @@ fun AttributesScreenPreview() {
         DnDTheme {
             AttributesContent(
                 characterBundle = CharacterBundle(
-                    character = previewFallbackCharacter(),
+                    // A Fighter's proficiencies as the sheet stores them, with three weapon masteries.
+                    character = previewFallbackCharacter().copy(
+                        armorProficiencies = "heavy_armor|light_armor|medium_armor|shields",
+                        weaponProficiencies = "martial_weapons|simple_weapons",
+                        languageProficiencies = "common|custom:Chondathan|elvish",
+                        weaponMasteries = "battleaxe|greatsword|longsword"
+                    ),
                     skills = listOf(
                         Skill(name = "skill_arcana", isProficient = true),
                         Skill(name = "skill_history", isProficient = true),

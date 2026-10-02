@@ -23,8 +23,16 @@ data class CharacterCatalog(
     /** Equipment the advancements, starting equipment and containers point at, by id. */
     val equipment: Map<String, CatalogEquipmentRef> = emptyMap(),
     /** Bags, cases and equipment packs, by the id of their [equipment] entry. */
-    val containers: Map<String, CatalogContainer> = emptyMap()
+    val containers: Map<String, CatalogContainer> = emptyMap(),
+    /** Weapon mastery properties (Sap, Topple...) by id. */
+    val weaponMasteries: Map<String, CatalogWeaponMastery> = emptyMap(),
+    /** The mastery property of each base weapon, by Foundry's weapon id ("longsword" to "sap"). */
+    val weaponMasteryOf: Map<String, String> = emptyMap()
 ) {
+    /** The mastery property of a weapon kind, by the sheet's weapon id ("light_hammer") or Foundry's. */
+    fun masteryOf(weaponId: String): CatalogWeaponMastery? =
+        weaponMasteryOf[foundryWeaponId(weaponId)]?.let(weaponMasteries::get)
+
     val featuresById: Map<String, CatalogFeature> by lazy { features.associateBy { it.id } }
 
     /** Containers sold by themselves (not a pack's waterskin), by [equipmentNameKey] of their English name. */
@@ -144,6 +152,9 @@ data class CatalogContainer(
 )
 
 data class CatalogContainerItem(val itemId: String, val count: Int)
+
+/** A weapon mastery property (Sap, Topple...): what a character who masters the weapon may do with it. */
+data class CatalogWeaponMastery(val id: String, val name: CatalogText, val text: CatalogText)
 
 /** Starting equipment as Foundry lays it out: groups of all ([Group.any] false) or one of their children. */
 sealed interface EquipmentNode {

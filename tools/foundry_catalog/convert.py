@@ -931,6 +931,24 @@ def container_catalog(catalog, equipment):
     return containers
 
 
+def weapon_masteries(catalog):
+    """Weapon mastery: each property's name and rules in both languages, and the property of each
+    base weapon (by Foundry's weapon id, "longsword": "sap")."""
+    data = load_json(os.path.join(EXPORT, 'weaponMasteries.json'), {})
+    if not data:
+        print('   warning: no weapon masteries exported (export/weaponMasteries.json)')
+        return {}
+    properties = {
+        key: {
+            'name': {'en': entry.get('en') or key, 'ru': (entry.get('ru') or '').strip()},
+            'text': {'en': catalog.text(entry.get('textEn') or '', 'en'), 'ru': catalog.text(entry.get('textRu') or '', 'ru')},
+        }
+        for key, entry in data.get('properties', {}).items()
+    }
+    weapons = {weapon: mastery for weapon, mastery in data.get('weapons', {}).items() if mastery in properties}
+    return {'properties': properties, 'weapons': weapons}
+
+
 def spell_catalog(catalog, referenced):
     """Every spell Character Wizard can offer: the PHB's (Russian Fifthpendium, English SRD 5.2) and
     the supplements' (the options packs), with the spell lists of the classes, subclasses and
@@ -1053,6 +1071,7 @@ def main():
     result = build(catalog)
     result['spells'] = spell_catalog(catalog, result['spells'])
     result['containers'] = container_catalog(catalog, result['equipment'])
+    result['weaponMasteries'] = weapon_masteries(catalog)
     unmatched = attach_legacy(result, catalog)
     unknown_translations = apply_translations(result)
     missing = write_missing(result)

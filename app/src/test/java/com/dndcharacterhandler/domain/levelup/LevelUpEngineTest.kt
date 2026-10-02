@@ -6,6 +6,7 @@ import com.dndcharacterhandler.domain.model.CharacterCatalog
 import com.dndcharacterhandler.domain.model.CreatureSize
 import com.dndcharacterhandler.domain.model.Feature
 import com.dndcharacterhandler.domain.model.InventoryCategory
+import com.dndcharacterhandler.domain.model.decodeProficiencyIds
 import com.dndcharacterhandler.domain.model.defaultCharacterBundle
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -103,7 +104,7 @@ class LevelUpEngineTest {
         assertTrue(character.strengthSaveProficient && character.constitutionSaveProficient)
         // Two Fighter skills, and one more from the Battle Master's Student of War.
         assertEquals(3, result.skills.count { it.isProficient })
-        assertTrue("heavy armor training", character.armorProficiencies.contains("Heavy"))
+        assertTrue("heavy armor training", "heavy_armor" in decodeProficiencyIds(character.armorProficiencies))
         val names = result.featureNames()
         listOf("Second Wind", "Action Surge", "Combat Superiority", "Student of War").forEach { name ->
             assertTrue("$name among $names", name in names)
@@ -243,7 +244,7 @@ class LevelUpEngineTest {
         // Insight and Religion from the Acolyte; Keen Senses then offers Perception first.
         val skills = result.skills.filter { it.isProficient }.map { it.name }
         assertTrue(skills.toString(), skills.containsAll(listOf("skill_insight", "skill_religion", "skill_perception")))
-        assertTrue(character.toolProficiencies, character.toolProficiencies.contains("Calligrapher"))
+        assertTrue(character.toolProficiencies, "calligraphers_supplies" in decodeProficiencyIds(character.toolProficiencies))
         // Option A of the Fighter and of the Acolyte: 4 + 8 GP.
         val inventory = result.inventoryItems.associate { it.name to it.quantity }
         assertEquals(8, inventory["Javelin"])
@@ -275,6 +276,41 @@ class LevelUpEngineTest {
         assertEquals(setOf(CreatureSize.SMALL, CreatureSize.MEDIUM), humanPages.filterIsInstance<LevelUpPage.Size>().single().sizes.toSet())
         assertEquals(CreatureSize.SMALL, human.character.size)
         assertTrue(human.character.advancements.any { it.type == "Size" && it.value == "size=sm" })
+    }
+
+    @Test
+    fun proficienciesGoInAsTheSheetsIdsAndMasteriesInTheirOwnField() {
+        val bundle = newCharacter()
+        val elf = catalog.species.first { it.identifier == "elf" && it.book == "PHB 2024" }
+        val soldier = catalog.backgrounds.first { it.identifier == "soldier" && it.book == "PHB 2024" }
+        val start = LevelUpDraft(
+            targetLevel = 1,
+            setup = LevelUpSetup(fighter.id, keepExistingLevels = false),
+            answers = mapOf("species" to LevelUpAnswer.Origin(elf.id), "background" to LevelUpAnswer.Origin(soldier.id))
+        )
+        val draft = complete(bundle, start) { page ->
+            if (page is LevelUpPage.AbilityScores && !page.allowFeat) LevelUpAnswer.AbilityScores(mapOf("str" to 2, "con" to 1)) else null
+        }
+        val character = engine.apply(bundle, draft, russian = true, now = 1).character
+        // The sheet reads these ids; a Fighter has every weapon and armor.
+        assertEquals(setOf("simple_weapons", "martial_weapons"), decodeProficiencyIds(character.weaponProficiencies))
+        assertEquals(setOf("light_armor", "medium_armor", "heavy_armor", "shields"), decodeProficiencyIds(character.armorProficiencies))
+        val languages = decodeProficiencyIds(character.languageProficiencies)
+        assertTrue(languages.toString(), "common" in languages && languages.size >= 3)
+        // Weapon Mastery: three weapons, the ones the sheet knows by its ids.
+        val masteries = decodeProficiencyIds(character.weaponMasteries)
+        assertEquals(masteries.toString(), 3, masteries.size)
+        assertTrue(masteries.toString(), masteries.all { catalog.masteryOf(it) != null })
+        assertFalse("no mastery text in the weapon field", character.weaponProficiencies.contains(":"))
+    }
+
+    @Test
+    fun knownProficienciesAndMasteriesAreNotOfferedAgain() {
+        val bundle = newCharacter().let { it.copy(character = it.character.copy(weaponProficiencies = "martial_weapons|simple_weapons", weaponMasteries = "longsword")) }
+        val start = LevelUpDraft(targetLevel = 1, setup = LevelUpSetup(fighter.id, keepExistingLevels = false))
+        val pages = engine.run(bundle, complete(bundle, start)).pages.filterIsInstance<LevelUpPage.Traits>()
+        val mastery = pages.first { page -> page.groups.any { group -> group.options.any { it.key == "weapon:mar:longsword" } } }
+        assertTrue(mastery.groups.flatMap { it.options }.single { it.key == "weapon:mar:longsword" }.alreadyHas)
     }
 
     @Test

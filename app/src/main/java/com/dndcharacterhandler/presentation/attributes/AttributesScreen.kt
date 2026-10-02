@@ -16,16 +16,19 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Chat
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.Build
+import androidx.compose.material.icons.outlined.MilitaryTech
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.Visibility
@@ -59,6 +62,18 @@ import androidx.lifecycle.viewModelScope
 import com.dndcharacterhandler.domain.model.AppLanguage
 import com.dndcharacterhandler.domain.model.ArmorClassMode
 import com.dndcharacterhandler.domain.model.Character
+import com.dndcharacterhandler.domain.model.CharacterCatalog
+import com.dndcharacterhandler.domain.model.CustomProficiencyPrefix
+import com.dndcharacterhandler.domain.model.ProficiencyOption
+import com.dndcharacterhandler.domain.model.WeaponGroupMartialId
+import com.dndcharacterhandler.domain.model.WeaponGroupSimpleId
+import com.dndcharacterhandler.domain.model.armorProficiencyOptions
+import com.dndcharacterhandler.domain.model.decodeProficiencyIds
+import com.dndcharacterhandler.domain.model.encodeProficiencyIds
+import com.dndcharacterhandler.domain.model.languageProficiencyCategories
+import com.dndcharacterhandler.domain.model.martialWeaponOptions
+import com.dndcharacterhandler.domain.model.simpleWeaponOptions
+import com.dndcharacterhandler.domain.model.toolProficiencyCategories
 import com.dndcharacterhandler.domain.model.CharacterBundle
 import com.dndcharacterhandler.domain.model.CharacterProficiencyField
 import com.dndcharacterhandler.domain.model.DarkvisionMode
@@ -78,6 +93,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import com.dndcharacterhandler.domain.rules.abilityModifier
 import com.dndcharacterhandler.domain.rules.calculateArmorClass
 import com.dndcharacterhandler.domain.rules.proficiencyBonusForLevel
+import com.dndcharacterhandler.domain.repository.CharacterCatalogRepository
 import com.dndcharacterhandler.domain.repository.CharacterRepository
 import com.dndcharacterhandler.domain.usecase.GetCharacterBundleUseCase
 import com.dndcharacterhandler.presentation.BaseCharacterViewModel
@@ -96,17 +112,22 @@ import kotlinx.coroutines.launch
 class AttributesViewModel(
     private val characterRepository: CharacterRepository,
     private val featureCatalogRepository: FeatureCatalogRepository,
+    private val characterCatalogRepository: CharacterCatalogRepository,
     getCharacterBundleUseCase: GetCharacterBundleUseCase,
     selectedCharacterHolder: SelectedCharacterHolder
 ) : BaseCharacterViewModel(getCharacterBundleUseCase, selectedCharacterHolder) {
     private val _darkvisionCatalog = MutableStateFlow<List<FeatureCatalogItem>>(emptyList())
     val darkvisionCatalog: StateFlow<List<FeatureCatalogItem>> = _darkvisionCatalog.asStateFlow()
+    private val _characterCatalog = MutableStateFlow<CharacterCatalog?>(null)
+    /** The weapons' mastery properties come from it. */
+    val characterCatalog: StateFlow<CharacterCatalog?> = _characterCatalog.asStateFlow()
 
     init {
         viewModelScope.launch {
             _darkvisionCatalog.value = featureCatalogRepository.getItems()
                 .filter { it.name.contains("darkvision", ignoreCase = true) }
         }
+        viewModelScope.launch { _characterCatalog.value = characterCatalogRepository.getCatalog() }
     }
 
     fun updateDarkvisionMode(characterBundle: CharacterBundle, mode: DarkvisionMode) {
@@ -228,6 +249,15 @@ class AttributesViewModel(
         )
     }
 
+    fun updateWeaponMasteries(characterBundle: CharacterBundle, selectedIds: Set<String>) {
+        updateCharacterProficiencyString(
+            characterBundle = characterBundle,
+            field = CharacterProficiencyField.WEAPON_MASTERY,
+            currentValue = characterBundle.character.weaponMasteries,
+            nextValue = encodeProficiencyIds(selectedIds)
+        )
+    }
+
     fun updateSkillTraining(
         characterBundle: CharacterBundle,
         skillName: String,
@@ -306,9 +336,11 @@ fun AttributesScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val darkvisionCatalog by viewModel.darkvisionCatalog.collectAsStateWithLifecycle()
+    val characterCatalog by viewModel.characterCatalog.collectAsStateWithLifecycle()
     AttributesContent(
         characterBundle = state.character,
         darkvisionCatalogItems = darkvisionCatalog,
+        characterCatalog = characterCatalog,
         onUpdatePassivePerceptionBonus = viewModel::updatePassivePerceptionBonus,
         onUpdateAbilityScore = viewModel::updateAbilityScore,
         onUpdateSkillTraining = viewModel::updateSkillTraining,
@@ -316,6 +348,7 @@ fun AttributesScreen(
         onUpdateWeaponProficiencies = viewModel::updateWeaponProficiencies,
         onUpdateToolProficiencies = viewModel::updateToolProficiencies,
         onUpdateLanguageProficiencies = viewModel::updateLanguageProficiencies,
+        onUpdateWeaponMasteries = viewModel::updateWeaponMasteries,
         onUpdateDarkvisionMode = viewModel::updateDarkvisionMode,
         onUpdateDarkvisionManualFeet = viewModel::updateDarkvisionManualFeet,
         onUpsertFeature = viewModel::upsertFeature,
@@ -329,6 +362,8 @@ fun AttributesScreen(
 fun AttributesContent(
     characterBundle: CharacterBundle?,
     darkvisionCatalogItems: List<FeatureCatalogItem> = emptyList(),
+    /** Weapons' mastery properties; without it the masteries show by weapon only. */
+    characterCatalog: CharacterCatalog? = null,
     onUpdatePassivePerceptionBonus: (CharacterBundle, Int) -> Unit,
     onUpdateAbilityScore: (CharacterBundle, AbilityType, Int, Boolean) -> Unit = { _, _, _, _ -> },
     onUpdateSkillTraining: (CharacterBundle, String, Boolean, Boolean, Boolean) -> Unit = { _, _, _, _, _ -> },
@@ -336,6 +371,7 @@ fun AttributesContent(
     onUpdateWeaponProficiencies: (CharacterBundle, Set<String>) -> Unit = { _, _ -> },
     onUpdateToolProficiencies: (CharacterBundle, Set<String>) -> Unit = { _, _ -> },
     onUpdateLanguageProficiencies: (CharacterBundle, Set<String>) -> Unit = { _, _ -> },
+    onUpdateWeaponMasteries: (CharacterBundle, Set<String>) -> Unit = { _, _ -> },
     onUpdateDarkvisionMode: (CharacterBundle, DarkvisionMode) -> Unit = { _, _ -> },
     onUpdateDarkvisionManualFeet: (CharacterBundle, Int) -> Unit = { _, _ -> },
     onUpsertFeature: (CharacterBundle, Feature) -> Unit = { _, _ -> },
@@ -391,6 +427,8 @@ fun AttributesContent(
     var isWeaponDialogOpen by remember { mutableStateOf(false) }
     var isToolsDialogOpen by remember { mutableStateOf(false) }
     var isLanguagesDialogOpen by remember { mutableStateOf(false) }
+    var isMasteryDialogOpen by remember { mutableStateOf(false) }
+    var masteryDraft by remember { mutableStateOf(emptySet<String>()) }
     var editingAbility by remember { mutableStateOf<AbilityScore?>(null) }
     var editingSkill by remember { mutableStateOf<SkillRow?>(null) }
     var abilityDraft by remember { mutableStateOf("") }
@@ -548,10 +586,10 @@ fun AttributesContent(
                             onClick = {
                                 if (characterBundle != null) {
                                     val selectedTools = decodeProficiencyIds(character.toolProficiencies)
-                                    toolDraft = selectedTools.filterNot { it.startsWith(CustomToolPrefix) }.toSet()
+                                    toolDraft = selectedTools.filterNot { it.startsWith(CustomProficiencyPrefix) }.toSet()
                                     customToolDrafts = selectedTools
-                                        .filter { it.startsWith(CustomToolPrefix) }
-                                        .map { it.removePrefix(CustomToolPrefix) }
+                                        .filter { it.startsWith(CustomProficiencyPrefix) }
+                                        .map { it.removePrefix(CustomProficiencyPrefix) }
                                     isToolsDialogOpen = true
                                 }
                             }
@@ -564,15 +602,26 @@ fun AttributesContent(
                             onClick = {
                                 if (characterBundle != null) {
                                     val selectedLanguages = decodeProficiencyIds(character.languageProficiencies)
-                                    languageDraft = selectedLanguages.filterNot { it.startsWith(CustomLanguagePrefix) }.toSet()
+                                    languageDraft = selectedLanguages.filterNot { it.startsWith(CustomProficiencyPrefix) }.toSet()
                                     customLanguageDrafts = selectedLanguages
-                                        .filter { it.startsWith(CustomLanguagePrefix) }
-                                        .map { it.removePrefix(CustomLanguagePrefix) }
+                                        .filter { it.startsWith(CustomProficiencyPrefix) }
+                                        .map { it.removePrefix(CustomProficiencyPrefix) }
                                     isLanguagesDialogOpen = true
                                 }
                             }
                         )
                     }
+                    ProficiencyInfoCard(
+                        icon = Icons.Outlined.MilitaryTech,
+                        label = text("attributes_proficiency_masteries"),
+                        value = formatWeaponMasteries(decodeProficiencyIds(character.weaponMasteries), characterCatalog, strings),
+                        modifier = Modifier.fillMaxWidth(),
+                        maxLines = Int.MAX_VALUE,
+                        onClick = {
+                            masteryDraft = decodeProficiencyIds(character.weaponMasteries)
+                            isMasteryDialogOpen = true
+                        }
+                    )
                 }
             }
         }
@@ -908,6 +957,37 @@ fun AttributesContent(
         }
     }
 
+    if (isMasteryDialogOpen) {
+        val russian = strings.language == AppLanguage.RUSSIAN
+        // Every weapon with a mastery property, and any mastered one the sheet has no option for.
+        val weaponIds = (simpleWeaponOptions + martialWeaponOptions).map { it.id }
+            .filter { characterCatalog?.masteryOf(it) != null || it in masteryDraft } +
+            masteryDraft.filter { id -> (simpleWeaponOptions + martialWeaponOptions).none { it.id == id } }
+        EditDialog(
+            title = text("attributes_proficiency_masteries"),
+            onDismiss = { isMasteryDialogOpen = false },
+            onConfirm = {
+                onUpdateWeaponMasteries(characterBundle, masteryDraft)
+                isMasteryDialogOpen = false
+            },
+            scrollable = false
+        ) {
+            LazyColumn(
+                modifier = Modifier.height(420.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                items(weaponIds) { id ->
+                    val property = characterCatalog?.masteryOf(id)?.name?.get(russian)
+                    ProficiencyCheckboxRow(
+                        label = weaponName(id, characterCatalog, strings) + (property?.let { " · $it" } ?: ""),
+                        checked = id in masteryDraft,
+                        onCheckedChange = { checked -> masteryDraft = masteryDraft.toggled(id, checked) }
+                    )
+                }
+            }
+        }
+    }
+
     if (isToolsDialogOpen && characterBundle != null) {
         EditDialog(
             title = text("attributes_tools_dialog_title"),
@@ -916,7 +996,7 @@ fun AttributesContent(
                 val customTools = customToolDrafts
                     .map { it.trim() }
                     .filter { it.isNotEmpty() }
-                    .map { CustomToolPrefix + it }
+                    .map { CustomProficiencyPrefix + it }
                     .toSet()
                 onUpdateToolProficiencies(characterBundle, toolDraft + customTools)
                 isToolsDialogOpen = false
@@ -982,7 +1062,7 @@ fun AttributesContent(
                 val customLanguages = customLanguageDrafts
                     .map { it.trim() }
                     .filter { it.isNotEmpty() }
-                    .map { CustomLanguagePrefix + it }
+                    .map { CustomProficiencyPrefix + it }
                     .toSet()
                 onUpdateLanguageProficiencies(characterBundle, languageDraft + customLanguages)
                 isLanguagesDialogOpen = false
@@ -1316,12 +1396,13 @@ private fun ProficiencyInfoCard(
     label: String,
     value: String,
     modifier: Modifier = Modifier,
+    maxLines: Int = 2,
     onClick: (() -> Unit)? = null
 ) {
     val colors = LocalDesignTokens.current.colors
     Surface(
         modifier = modifier
-            .height(92.dp)
+            .heightIn(min = 92.dp)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
         shape = RoundedCornerShape(10.dp),
         color = colors.surface.card.copy(alpha = 0.66f),
@@ -1329,8 +1410,9 @@ private fun ProficiencyInfoCard(
     ) {
         Row(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 18.dp),
+                .fillMaxWidth()
+                .heightIn(min = 92.dp)
+                .padding(horizontal = 18.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -1350,7 +1432,7 @@ private fun ProficiencyInfoCard(
                     modifier = Modifier.padding(top = 4.dp),
                     style = MaterialTheme.typography.bodyLarge,
                     color = colors.text.primary,
-                    maxLines = 2,
+                    maxLines = maxLines,
                     overflow = TextOverflow.Ellipsis
                 )
             }
@@ -1476,12 +1558,6 @@ private fun skillTrainingBonus(skill: Skill?, proficiencyBonus: Int): Int =
 
 private fun signed(value: Int): String = if (value >= 0) "+$value" else value.toString()
 
-private fun encodeProficiencyIds(ids: Set<String>): String =
-    ids.toList().sorted().joinToString("|")
-
-private fun decodeProficiencyIds(value: String): Set<String> =
-    value.split("|").mapNotNull { it.trim().takeIf(String::isNotEmpty) }.toSet()
-
 private fun Set<String>.toggled(id: String, checked: Boolean): Set<String> =
     if (checked) this + id else this - id
 
@@ -1491,8 +1567,33 @@ private fun formatSelectedProficiencies(
     strings: com.dndcharacterhandler.data.localization.LocalizedStrings,
     emptyText: String = strings["common_none"]
 ): String {
-    val labels = options.filter { it.id in selectedIds }.map { strings[it.labelKey] }
+    val labels = options.filter { it.id in selectedIds }.map { strings[it.labelKey] } + customLabels(selectedIds)
     return labels.takeIf { it.isNotEmpty() }?.joinToString(", ") ?: emptyText
+}
+
+/** Entries the sheet has no option for, by name ("custom:Пистолет"). */
+private fun customLabels(selectedIds: Set<String>): List<String> =
+    selectedIds.filter { it.startsWith(CustomProficiencyPrefix) }.map { it.removePrefix(CustomProficiencyPrefix) }
+
+/** A weapon's name: the sheet's option, a custom entry's name, or Foundry's name for a weapon the sheet lacks. */
+private fun weaponName(id: String, catalog: CharacterCatalog?, strings: com.dndcharacterhandler.data.localization.LocalizedStrings): String {
+    (simpleWeaponOptions + martialWeaponOptions).firstOrNull { it.id == id }?.let { return strings[it.labelKey] }
+    if (id.startsWith(CustomProficiencyPrefix)) return id.removePrefix(CustomProficiencyPrefix)
+    val name = catalog?.traits?.entries?.firstOrNull { (key, _) -> key.startsWith("weapon:") && key.substringAfterLast(':') == id }?.value?.name
+    return name?.get(strings.language == AppLanguage.RUSSIAN) ?: id
+}
+
+/** "Longsword — Sap", one weapon a line. */
+private fun formatWeaponMasteries(
+    selectedIds: Set<String>,
+    catalog: CharacterCatalog?,
+    strings: com.dndcharacterhandler.data.localization.LocalizedStrings
+): String {
+    val russian = strings.language == AppLanguage.RUSSIAN
+    val lines = selectedIds.sortedBy { weaponName(it, catalog, strings) }.map { id ->
+        weaponName(id, catalog, strings) + (catalog?.masteryOf(id)?.let { " — ${it.name.get(russian)}" } ?: "")
+    }
+    return lines.takeIf { it.isNotEmpty() }?.joinToString("\n") ?: strings["common_none"]
 }
 
 private fun formatWeaponProficiencies(
@@ -1510,6 +1611,7 @@ private fun formatWeaponProficiencies(
         } else {
             addAll(martialWeaponOptions.filter { it.id in selectedIds }.map { strings[it.labelKey] })
         }
+        addAll(customLabels(selectedIds))
     }
     return labels.takeIf { it.isNotEmpty() }?.joinToString(", ") ?: strings["common_none"]
 }
@@ -1521,7 +1623,7 @@ private fun formatToolProficiencies(
     val knownOptions = toolProficiencyCategories.flatMap { it.options }
     val labels = buildList {
         addAll(knownOptions.filter { it.id in selectedIds }.map { strings[it.labelKey] })
-        addAll(selectedIds.filter { it.startsWith(CustomToolPrefix) }.map { it.removePrefix(CustomToolPrefix) })
+        addAll(selectedIds.filter { it.startsWith(CustomProficiencyPrefix) }.map { it.removePrefix(CustomProficiencyPrefix) })
     }
     return labels.takeIf { it.isNotEmpty() }?.joinToString(", ") ?: strings["common_none"]
 }
@@ -1533,187 +1635,10 @@ private fun formatLanguageProficiencies(
     val knownOptions = languageProficiencyCategories.flatMap { it.options }
     val labels = buildList {
         addAll(knownOptions.filter { it.id in selectedIds }.map { strings[it.labelKey] })
-        addAll(selectedIds.filter { it.startsWith(CustomLanguagePrefix) }.map { it.removePrefix(CustomLanguagePrefix) })
+        addAll(selectedIds.filter { it.startsWith(CustomProficiencyPrefix) }.map { it.removePrefix(CustomProficiencyPrefix) })
     }
     return labels.takeIf { it.isNotEmpty() }?.joinToString(", ") ?: strings["common_none"]
 }
-
-private data class ProficiencyOption(val id: String, val labelKey: String)
-
-private data class ProficiencyCategory(
-    val id: String,
-    val labelKey: String,
-    val options: List<ProficiencyOption>
-)
-
-private const val CustomToolPrefix = "custom:"
-private const val CustomLanguagePrefix = "custom:"
-
-private val armorProficiencyOptions = listOf(
-    ProficiencyOption("light_armor", "Light Armor"),
-    ProficiencyOption("medium_armor", "Medium Armor"),
-    ProficiencyOption("heavy_armor", "Heavy Armor"),
-    ProficiencyOption("shields", "Shields")
-)
-
-private const val WeaponGroupSimpleId = "simple_weapons"
-private const val WeaponGroupMartialId = "martial_weapons"
-
-private val simpleWeaponOptions = listOf(
-    ProficiencyOption("club", "Club"),
-    ProficiencyOption("dagger", "Dagger"),
-    ProficiencyOption("greatclub", "Greatclub"),
-    ProficiencyOption("handaxe", "Handaxe"),
-    ProficiencyOption("javelin", "Javelin"),
-    ProficiencyOption("light_hammer", "Light Hammer"),
-    ProficiencyOption("mace", "Mace"),
-    ProficiencyOption("quarterstaff", "Quarterstaff"),
-    ProficiencyOption("sickle", "Sickle"),
-    ProficiencyOption("spear", "Spear"),
-    ProficiencyOption("light_crossbow", "Light Crossbow"),
-    ProficiencyOption("dart", "Dart"),
-    ProficiencyOption("shortbow", "Shortbow"),
-    ProficiencyOption("sling", "Sling")
-)
-
-private val martialWeaponOptions = listOf(
-    ProficiencyOption("battleaxe", "Battleaxe"),
-    ProficiencyOption("flail", "Flail"),
-    ProficiencyOption("glaive", "Glaive"),
-    ProficiencyOption("greataxe", "Greataxe"),
-    ProficiencyOption("greatsword", "Greatsword"),
-    ProficiencyOption("halberd", "Halberd"),
-    ProficiencyOption("lance", "Lance"),
-    ProficiencyOption("longsword", "Longsword"),
-    ProficiencyOption("maul", "Maul"),
-    ProficiencyOption("morningstar", "Morningstar"),
-    ProficiencyOption("musket", "Musket"),
-    ProficiencyOption("pike", "Pike"),
-    ProficiencyOption("rapier", "Rapier"),
-    ProficiencyOption("scimitar", "Scimitar"),
-    ProficiencyOption("shortsword", "Shortsword"),
-    ProficiencyOption("trident", "Trident"),
-    ProficiencyOption("war_pick", "War Pick"),
-    ProficiencyOption("warhammer", "Warhammer"),
-    ProficiencyOption("whip", "Whip"),
-    ProficiencyOption("blowgun", "Blowgun"),
-    ProficiencyOption("hand_crossbow", "Hand Crossbow"),
-    ProficiencyOption("heavy_crossbow", "Heavy Crossbow"),
-    ProficiencyOption("longbow", "Longbow"),
-    ProficiencyOption("net", "Net")
-)
-
-private val toolProficiencyCategories = listOf(
-    ProficiencyCategory(
-        id = "artisans_tools",
-        labelKey = "Artisan's Tools",
-        options = listOf(
-            ProficiencyOption("alchemists_supplies", "Alchemist's Supplies"),
-            ProficiencyOption("brewers_supplies", "Brewer's Supplies"),
-            ProficiencyOption("calligraphers_supplies", "Calligrapher's Supplies"),
-            ProficiencyOption("carpenters_tools", "Carpenter's Tools"),
-            ProficiencyOption("cartographers_tools", "Cartographer's Tools"),
-            ProficiencyOption("cobblers_tools", "Cobbler's Tools"),
-            ProficiencyOption("cooks_utensils", "Cook's Utensils"),
-            ProficiencyOption("glassblowers_tools", "Glassblower's Tools"),
-            ProficiencyOption("jewelers_tools", "Jeweler's Tools"),
-            ProficiencyOption("leatherworkers_tools", "Leatherworker's Tools"),
-            ProficiencyOption("masons_tools", "Mason's Tools"),
-            ProficiencyOption("painters_supplies", "Painter's Supplies"),
-            ProficiencyOption("potters_tools", "Potter's Tools"),
-            ProficiencyOption("smiths_tools", "Smith's Tools"),
-            ProficiencyOption("tinkers_tools", "Tinker's Tools"),
-            ProficiencyOption("weavers_tools", "Weaver's Tools"),
-            ProficiencyOption("woodcarvers_tools", "Woodcarver's Tools")
-        )
-    ),
-    ProficiencyCategory(
-        id = "gaming_sets",
-        labelKey = "Gaming Sets",
-        options = listOf(
-            ProficiencyOption("dice_set", "Dice Set"),
-            ProficiencyOption("dragonchess_set", "Dragonchess Set"),
-            ProficiencyOption("playing_card_set", "Playing Card Set"),
-            ProficiencyOption("three_dragon_ante_set", "Three-Dragon Ante Set")
-        )
-    ),
-    ProficiencyCategory(
-        id = "musical_instruments",
-        labelKey = "Musical Instruments",
-        options = listOf(
-            ProficiencyOption("bagpipes", "Bagpipes"),
-            ProficiencyOption("drum", "Drum"),
-            ProficiencyOption("dulcimer", "Dulcimer"),
-            ProficiencyOption("flute", "Flute"),
-            ProficiencyOption("lute", "Lute"),
-            ProficiencyOption("lyre", "Lyre"),
-            ProficiencyOption("horn", "Horn"),
-            ProficiencyOption("pan_flute", "Pan Flute"),
-            ProficiencyOption("shawm", "Shawm"),
-            ProficiencyOption("viol", "Viol")
-        )
-    ),
-    ProficiencyCategory(
-        id = "other_tools",
-        labelKey = "Other Tools",
-        options = listOf(
-            ProficiencyOption("disguise_kit", "Disguise Kit"),
-            ProficiencyOption("forgery_kit", "Forgery Kit"),
-            ProficiencyOption("herbalism_kit", "Herbalism Kit"),
-            ProficiencyOption("navigators_tools", "Navigator's Tools"),
-            ProficiencyOption("poisoners_kit", "Poisoner's Kit"),
-            ProficiencyOption("thieves_tools", "Thieves' Tools")
-        )
-    ),
-    ProficiencyCategory(
-        id = "vehicles",
-        labelKey = "Vehicles",
-        options = listOf(
-            ProficiencyOption("land_vehicles", "Land Vehicles"),
-            ProficiencyOption("water_vehicles", "Water Vehicles")
-        )
-    )
-)
-
-private val languageProficiencyCategories = listOf(
-    ProficiencyCategory(
-        id = "standard_languages",
-        labelKey = "Standard Languages",
-        options = listOf(
-            ProficiencyOption("common", "Common"),
-            ProficiencyOption("dwarvish", "Dwarvish"),
-            ProficiencyOption("elvish", "Elvish"),
-            ProficiencyOption("giant", "Giant"),
-            ProficiencyOption("gnomish", "Gnomish"),
-            ProficiencyOption("goblin", "Goblin"),
-            ProficiencyOption("halfling", "Halfling"),
-            ProficiencyOption("orc", "Orc")
-        )
-    ),
-    ProficiencyCategory(
-        id = "exotic_languages",
-        labelKey = "Exotic Languages",
-        options = listOf(
-            ProficiencyOption("abyssal", "Abyssal"),
-            ProficiencyOption("celestial", "Celestial"),
-            ProficiencyOption("draconic", "Draconic"),
-            ProficiencyOption("deep_speech", "Deep Speech"),
-            ProficiencyOption("infernal", "Infernal"),
-            ProficiencyOption("primordial", "Primordial"),
-            ProficiencyOption("sylvan", "Sylvan"),
-            ProficiencyOption("undercommon", "Undercommon")
-        )
-    ),
-    ProficiencyCategory(
-        id = "special_languages",
-        labelKey = "Special Languages",
-        options = listOf(
-            ProficiencyOption("druidic", "Druidic"),
-            ProficiencyOption("thieves_cant", "Thieves' Cant"),
-            ProficiencyOption("telepathy", "Telepathy")
-        )
-    )
-)
 
 internal fun previewFallbackCharacter(): Character =
     Character(

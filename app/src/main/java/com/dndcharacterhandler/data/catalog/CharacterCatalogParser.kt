@@ -6,6 +6,7 @@ import com.dndcharacterhandler.domain.model.CatalogClass
 import com.dndcharacterhandler.domain.model.CatalogContainer
 import com.dndcharacterhandler.domain.model.CatalogContainerItem
 import com.dndcharacterhandler.domain.model.CatalogEquipmentRef
+import com.dndcharacterhandler.domain.model.CatalogWeaponMastery
 import com.dndcharacterhandler.domain.model.EquipmentNode
 import com.dndcharacterhandler.domain.model.CatalogFeature
 import com.dndcharacterhandler.domain.model.CatalogFeatureKind
@@ -94,6 +95,12 @@ object CharacterCatalogParser {
                     inside = value.optString("inside").ifBlank { null },
                     contents = value.objects("contents").map { CatalogContainerItem(it.getString("item"), it.optInt("count", 1)) }
                 )
+            },
+            weaponMasteries = root.optJSONObject("weaponMasteries")?.optJSONObject("properties").entries { id, value ->
+                CatalogWeaponMastery(id, value.text("name"), value.text("text"))
+            },
+            weaponMasteryOf = root.optJSONObject("weaponMasteries")?.optJSONObject("weapons").let { weapons ->
+                buildMap { weapons?.keys()?.forEach { key -> put(key, weapons.getString(key)) } }
             }
         )
     }

@@ -50,7 +50,8 @@ fun CharacterWithDetails.toDomain(): CharacterBundle =
                 applyAbilityModifierToDamage = it.applyAbilityModifierToDamage,
                 manualAttackBonusOrSaveDc = it.attackBonusOrSaveDc,
                 manualDamage = it.damage,
-                primaryDamageType = it.damageType
+                primaryDamageType = it.damageType,
+                baseWeaponId = it.baseWeaponId
             )
         },
         combatResources = combatResources.map {
@@ -158,6 +159,7 @@ fun CharacterEntity.toDomain(): Character =
         weaponProficiencies = weaponProficiencies,
         toolProficiencies = toolProficiencies,
         languageProficiencies = languageProficiencies,
+        weaponMasteries = weaponMasteries,
         alignment = alignment,
         background = background,
         faith = faith,
@@ -303,6 +305,7 @@ fun Character.toEntity(): CharacterEntity =
         weaponProficiencies = weaponProficiencies,
         toolProficiencies = toolProficiencies,
         languageProficiencies = languageProficiencies,
+        weaponMasteries = weaponMasteries,
         alignment = alignment,
         background = background,
         faith = faith,
@@ -357,7 +360,8 @@ fun Attack.toEntity(characterId: Long): AttackEntity =
         range = "",
         attackBonusOrSaveDc = manualAttackBonusOrSaveDc,
         damage = manualDamage,
-        damageType = primaryDamageType
+        damageType = primaryDamageType,
+        baseWeaponId = baseWeaponId
     )
 
 fun CombatResource.toEntity(characterId: Long): CombatResourceEntity =

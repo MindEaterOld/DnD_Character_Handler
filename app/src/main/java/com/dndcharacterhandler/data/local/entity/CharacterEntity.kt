@@ -66,6 +66,7 @@ data class CharacterEntity(
     val weaponProficiencies: String,
     val toolProficiencies: String,
     val languageProficiencies: String,
+    val weaponMasteries: String = "",
     val alignment: String,
     val background: String,
     val faith: String,
@@ -144,7 +145,8 @@ data class AttackEntity(
     val range: String,
     val attackBonusOrSaveDc: String,
     val damage: String,
-    val damageType: String
+    val damageType: String,
+    val baseWeaponId: String? = null
 )
 
 @Entity(

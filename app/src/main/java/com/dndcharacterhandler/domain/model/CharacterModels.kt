@@ -62,6 +62,8 @@ data class Character(
     val weaponProficiencies: String,
     val toolProficiencies: String,
     val languageProficiencies: String,
+    /** Weapons whose mastery property the character can use (weapon ids, see Proficiencies). */
+    val weaponMasteries: String = "",
     val alignment: String,
     val background: String,
     val faith: String,
@@ -124,7 +126,9 @@ data class Attack(
     val applyAbilityModifierToDamage: Boolean = true,
     val manualAttackBonusOrSaveDc: String = "",
     val manualDamage: String = "",
-    val primaryDamageType: String
+    val primaryDamageType: String,
+    /** The weapon kind the attack was made from ("longsword"), for its mastery property. */
+    val baseWeaponId: String? = null
 )
 data class CombatResource(
     val id: Long = 0,
