@@ -36,6 +36,10 @@ Rules:
 - A key used by several elements gets the limit of the tightest one. If shortening it would hurt the other places, give that element its own key instead.
 - `LocalizationLimitsTest` checks every limited key; run it after changing translations.
 
+## Backlog
+
+Wishes, bugs and technical debt live in `docs/BACKLOG.md` (in Russian, for the project owner). Check it when choosing the next task or when asked "what's left"; add what you notice (a bug, a debt, an owner's wish) to its section; when something is done, move it to "Готово" with the date. Things built but not yet seen on a device go under "Проверить на устройстве".
+
 ## Git workflow
 
 - **Do not create separate branches.** Commit directly to `main` and push immediately.
