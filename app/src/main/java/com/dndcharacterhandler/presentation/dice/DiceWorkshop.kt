@@ -27,6 +27,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Casino
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Download
@@ -210,6 +211,10 @@ internal fun DiceWorkshopOverlay(viewModel: DiceSkinsViewModel, initial: CustomD
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
+                // A new look by DiceSkinGenerator's rules; the name and the face pictures stay.
+                ActionButton(text("dice_workshop_random"), Icons.Outlined.Casino) {
+                    skin = DiceSkinGenerator.generate(skin)
+                }
 
                 WorkshopSection(text("dice_workshop_section_faces")) {
                     ColorRow(text("dice_workshop_color"), Color(skin.bodyColor)) { picking = SkinColor.BODY }

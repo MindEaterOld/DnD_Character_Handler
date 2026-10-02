@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.graphics.painter.Painter
@@ -292,7 +293,8 @@ internal fun DrawScope.drawDie(
                             drawStyle = Stroke(width = numberSize * NUMBER_OUTLINE_WIDTH, join = StrokeJoin.Round)
                         )
                     }
-                    drawText(layout, color = number.copy(alpha = number.alpha * shown), topLeft = topLeft)
+                    // Fill named outright: the cached layout keeps the outline's Stroke from its last draw.
+                    drawText(layout, color = number.copy(alpha = number.alpha * shown), topLeft = topLeft, drawStyle = Fill)
                 }
             }
         }

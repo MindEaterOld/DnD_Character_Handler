@@ -9,6 +9,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
+import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.text.TextMeasurer
@@ -112,7 +113,8 @@ internal object DiceFaceAtlas {
                             drawText(
                                 layout,
                                 color = TemplateNumber,
-                                topLeft = Offset(-layout.size.width / 2f, shape.labelSize * 0.36f - layout.firstBaseline)
+                                topLeft = Offset(-layout.size.width / 2f, shape.labelSize * 0.36f - layout.firstBaseline),
+                                drawStyle = Fill
                             )
                         }
                     }

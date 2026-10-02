@@ -4133,6 +4133,13 @@
     "fr": "Lueur",
     "es": "Resplandor"
   },
+  "dice_workshop_random": {
+    "en": "Random skin",
+    "ru": "\u0421\u043b\u0443\u0447\u0430\u0439\u043d\u044b\u0439 \u0441\u043a\u0438\u043d",
+    "de": "Zuf\u00e4lliger Skin",
+    "fr": "Skin al\u00e9atoire",
+    "es": "Skin aleatorio"
+  },
   "dice_workshop_shuffle": {
     "en": "Shuffle",
     "ru": "\u041f\u0435\u0440\u0435\u043c\u0435\u0448\u0430\u0442\u044c",
