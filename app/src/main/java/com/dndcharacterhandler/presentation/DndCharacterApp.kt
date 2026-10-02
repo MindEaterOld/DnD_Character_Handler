@@ -96,6 +96,8 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
     var isDicePickerOpen by remember { mutableStateOf(false) }
     var diceSelection by remember { mutableStateOf(mapOf(DieType.D20 to 1)) }
     var diceTableSelection by remember { mutableStateOf<Map<DieType, Int>?>(null) }
+    // A throw a screen asked for (a death saving throw...), with what to do with its result.
+    var diceRollRequest by remember { mutableStateOf<com.dndcharacterhandler.presentation.dice.DiceRollRequest?>(null) }
     val diceSkin by appState.diceSkinsViewModel.selected.collectAsStateWithLifecycle()
     val customDiceSkins by appState.diceSkinsViewModel.skins.collectAsStateWithLifecycle()
     // The dice workshop: the skin it edits, and whether it's a new one.
@@ -138,7 +140,11 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
     // The full-width drawer has no scrim to tap: Back closes it too.
     BackHandler(enabled = drawerState.isOpen && !hasNoCharacters) { scope.launch { drawerState.close() } }
 
-    CompositionLocalProvider(LocalStrings provides strings, LocalDiceSkin provides diceSkin) {
+    CompositionLocalProvider(
+        LocalStrings provides strings,
+        LocalDiceSkin provides diceSkin,
+        com.dndcharacterhandler.presentation.dice.LocalDiceRoller provides { request -> diceRollRequest = request }
+    ) {
         Box(modifier = Modifier.fillMaxSize()) {
             ModalNavigationDrawer(
                 drawerState = drawerState,
@@ -298,6 +304,14 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
             // Covers the whole app, bottom navigation included: the screen edges are the table walls.
             diceTableSelection?.let { selection ->
                 DiceTableOverlay(selection = selection, skin = diceSkin, onClose = { diceTableSelection = null })
+            }
+            diceRollRequest?.let { request ->
+                DiceTableOverlay(
+                    selection = request.selection,
+                    skin = diceSkin,
+                    onClose = { diceRollRequest = null },
+                    onSettled = request.onSettled
+                )
             }
 
             workshopSkin?.let { (skin, isNew) ->

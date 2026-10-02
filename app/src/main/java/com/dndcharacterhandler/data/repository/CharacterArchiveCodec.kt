@@ -45,7 +45,8 @@ import java.io.File
 // 21: the character's size; containers (containerDetails) and the container an item lies in
 //     (containerIndex: its index in inventoryItems).
 // 22: weaponMasteries; an attack's baseWeaponId.
-private const val SCHEMA_VERSION = 22
+// 23: deathSaveSuccesses, deathSaveFailures.
+private const val SCHEMA_VERSION = 23
 
 data class ImportedArchive(
     val characterBundle: CharacterBundle,
@@ -68,6 +69,8 @@ fun CharacterBundle.toArchiveManifest(
         put("currentHp", character.currentHp)
         put("maxHp", character.maxHp)
         put("temporaryHp", character.temporaryHp)
+        put("deathSaveSuccesses", character.deathSaveSuccesses)
+        put("deathSaveFailures", character.deathSaveFailures)
         put("hitDieSides", character.hitDieSides)
         put("spentHitDice", character.spentHitDice)
         put("hasInspiration", character.hasInspiration)
@@ -324,6 +327,8 @@ fun archiveManifestToCharacterBundle(
         currentHp = characterJson.optInt("currentHp"),
         maxHp = characterJson.optInt("maxHp").coerceAtLeast(1),
         temporaryHp = characterJson.optInt("temporaryHp").coerceAtLeast(0),
+        deathSaveSuccesses = characterJson.optInt("deathSaveSuccesses").coerceIn(0, 3),
+        deathSaveFailures = characterJson.optInt("deathSaveFailures").coerceIn(0, 3),
         hitDieSides = characterJson.optInt("hitDieSides", 8).coerceInHitDieSides(),
         spentHitDice = characterJson.optInt("spentHitDice").coerceIn(0, importedLevel),
         hasInspiration = characterJson.optBoolean("hasInspiration"),

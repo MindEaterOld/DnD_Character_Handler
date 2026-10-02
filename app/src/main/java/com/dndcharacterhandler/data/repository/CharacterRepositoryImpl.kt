@@ -96,12 +96,15 @@ class CharacterRepositoryImpl(
 
     override suspend fun updateHitPoints(characterId: Long, currentHp: Int, temporaryHp: Int) {
         writeMutex.withLock {
+            val updatedAt = System.currentTimeMillis()
             characterDao.updateHitPoints(
                 characterId = characterId,
                 currentHp = currentHp.coerceAtLeast(0),
                 temporaryHp = temporaryHp.coerceAtLeast(0),
-                updatedAt = System.currentTimeMillis()
+                updatedAt = updatedAt
             )
+            // Up again: the death saving throws start over next time.
+            if (currentHp > 0) characterDao.updateDeathSaves(characterId, 0, 0, updatedAt)
         }
     }
 
@@ -162,6 +165,12 @@ class CharacterRepositoryImpl(
     override suspend fun updateDarkvision(characterId: Long, mode: DarkvisionMode, manualFeet: Int) {
         writeMutex.withLock {
             characterDao.updateDarkvision(characterId, mode, manualFeet, System.currentTimeMillis())
+        }
+    }
+
+    override suspend fun updateDeathSaves(characterId: Long, successes: Int, failures: Int) {
+        writeMutex.withLock {
+            characterDao.updateDeathSaves(characterId, successes.coerceIn(0, 3), failures.coerceIn(0, 3), System.currentTimeMillis())
         }
     }
 

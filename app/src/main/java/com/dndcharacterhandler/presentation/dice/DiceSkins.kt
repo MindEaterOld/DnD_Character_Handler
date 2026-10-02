@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
@@ -63,7 +64,7 @@ internal sealed interface DiceTexture {
 }
 
 /** Everything a die is painted with (see drawDie). */
-internal class DiceSkinStyle(
+internal data class DiceSkinStyle(
     /** Below full alpha the die is see-through. */
     val body: Color,
     val edge: Color,
@@ -248,9 +249,17 @@ internal fun DieIcon(
     look: DiceLook,
     modifier: Modifier = Modifier,
     kind: DieShapeKind = DieShapes.kindsFor(type).first(),
-    turn: Quat? = null
+    turn: Quat? = null,
+    /** Off for a die that wears a [mark] of its own (the death saving throw's skull). */
+    showNumbers: Boolean = true,
+    /** Printed in the numbers' colour on the front face (the highest number's) in place of that number. */
+    mark: Painter? = null,
+    /** How far [mark] is turned clockwise from where the front face's number points. */
+    markRotation: Float = 0f
 ) {
-    val style = rememberDiceSkinStyle(look)
+    val skinStyle = rememberDiceSkinStyle(look)
+    val style = if (showNumbers) skinStyle else skinStyle.copy(number = Color.Transparent, numberOutline = null)
+    val dieMark = mark?.let { DieMark(it, DieShapes.of(kind).faces.maxOf { face -> face.value }, skinStyle.number, markRotation) }
     val numbers = rememberDieNumberText()
     val scratch = remember { DieDrawScratch() }
     val camera = remember { DiceCamera(eyeHeight = ICON_CAMERA_HEIGHT) }
@@ -262,6 +271,6 @@ internal fun DieIcon(
             height = size.height,
             focalLength = 0.4 * size.minDimension * ICON_CAMERA_HEIGHT / die.shape.circumradius
         )
-        drawDie(camera, die, style, numbers, scratch)
+        drawDie(camera, die, style, numbers, scratch, dieMark)
     }
 }

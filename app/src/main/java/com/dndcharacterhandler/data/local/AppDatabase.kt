@@ -30,7 +30,7 @@ import com.dndcharacterhandler.data.local.entity.SpellEntity
         FeatureEntity::class,
         NoteEntity::class
     ],
-    version = 50,
+    version = 51,
     exportSchema = false
 )
 @TypeConverters(RoomConverters::class)
@@ -96,7 +96,8 @@ abstract class AppDatabase : RoomDatabase() {
                     MIGRATION_46_47,
                     MIGRATION_47_48,
                     MIGRATION_48_49,
-                    MIGRATION_49_50
+                    MIGRATION_49_50,
+                    MIGRATION_50_51
                 ).build().also { INSTANCE = it }
             }
         }
@@ -578,6 +579,14 @@ abstract class AppDatabase : RoomDatabase() {
                 // Weapon masteries of their own; the weapon an attack was made from.
                 db.execSQL("ALTER TABLE characters ADD COLUMN weaponMasteries TEXT NOT NULL DEFAULT ''")
                 db.execSQL("ALTER TABLE attacks ADD COLUMN baseWeaponId TEXT")
+            }
+        }
+
+        private val MIGRATION_50_51 = object : Migration(50, 51) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Death saving throws.
+                db.execSQL("ALTER TABLE characters ADD COLUMN deathSaveSuccesses INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE characters ADD COLUMN deathSaveFailures INTEGER NOT NULL DEFAULT 0")
             }
         }
     }

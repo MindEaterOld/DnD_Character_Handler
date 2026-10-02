@@ -33,6 +33,7 @@ interface CharacterRepository {
     suspend fun updatePassivePerceptionBonus(characterId: Long, bonus: Int)
     suspend fun updateDarkvision(characterId: Long, mode: DarkvisionMode, manualFeet: Int)
     suspend fun updateSize(characterId: Long, size: CreatureSize)
+    suspend fun updateDeathSaves(characterId: Long, successes: Int, failures: Int)
     suspend fun updateAbilityScore(
         characterId: Long,
         ability: SpellcastingAbility,

@@ -29,6 +29,8 @@ data class CharacterEntity(
     val currentHp: Int,
     val maxHp: Int,
     val temporaryHp: Int,
+    val deathSaveSuccesses: Int = 0,
+    val deathSaveFailures: Int = 0,
     val hitDieSides: Int,
     val spentHitDice: Int,
     val hasInspiration: Boolean,

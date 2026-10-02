@@ -9,6 +9,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -111,6 +112,22 @@ import com.dndcharacterhandler.presentation.components.StatCardRow
 import com.dndcharacterhandler.presentation.components.MiniStatCardIcon
 import com.dndcharacterhandler.presentation.components.MiniStatCard
 import com.dndcharacterhandler.presentation.components.BorderLabelCard
+import com.dndcharacterhandler.domain.rules.DEATH_SAVES_TO_END
+import com.dndcharacterhandler.domain.rules.DeathSaves
+import com.dndcharacterhandler.domain.rules.deathSave
+import com.dndcharacterhandler.presentation.components.SkullIcon
+import com.dndcharacterhandler.presentation.dice.DiceRollRequest
+import com.dndcharacterhandler.presentation.dice.DieIcon
+import com.dndcharacterhandler.presentation.dice.DieType
+import com.dndcharacterhandler.presentation.dice.LocalDiceRoller
+import com.dndcharacterhandler.presentation.dice.LocalDiceSkin
+import com.dndcharacterhandler.presentation.dice.Quat
+import com.dndcharacterhandler.presentation.dice.Vec3
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import kotlin.math.PI
+import androidx.compose.animation.AnimatedVisibility
 import com.dndcharacterhandler.presentation.components.AppImage
 import com.dndcharacterhandler.presentation.components.EditDialog
 import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
@@ -393,6 +410,31 @@ class OverviewViewModel(
         }
     }
 
+    fun setDeathSaves(characterBundle: CharacterBundle, successes: Int, failures: Int) {
+        val current = characterBundle.character
+        if (successes == current.deathSaveSuccesses && failures == current.deathSaveFailures) return
+        viewModelScope.launch { characterRepository.updateDeathSaves(current.id, successes, failures) }
+    }
+
+    /**
+     * A death saving throw of [roll], counted from [before] and the hit points of [characterBundle]
+     * when the throw began: another throw on the same table replaces it, a 20 included.
+     */
+    fun recordDeathSave(characterBundle: CharacterBundle, before: DeathSaves, roll: Int) {
+        val current = characterBundle.character
+        val result = deathSave(roll, before)
+        viewModelScope.launch {
+            if (result.regainsHitPoint) {
+                // Up with 1 hit point: the repository clears the saves.
+                characterRepository.updateHitPoints(current.id, current.currentHp.coerceAtLeast(1), current.temporaryHp)
+            } else {
+                // Back where the throw began, in case it replaces a 20.
+                characterRepository.updateHitPoints(current.id, current.currentHp, current.temporaryHp)
+                characterRepository.updateDeathSaves(current.id, result.saves.successes, result.saves.failures)
+            }
+        }
+    }
+
     fun toggleInspiration(characterBundle: CharacterBundle) {
         val current = characterBundle.character
         viewModelScope.launch {
@@ -537,7 +579,9 @@ fun OverviewScreen(
         onSpendHitDice = viewModel::spendHitDice,
         onToggleInspiration = viewModel::toggleInspiration,
         onShortRest = viewModel::shortRest,
-        onLongRest = viewModel::longRest
+        onLongRest = viewModel::longRest,
+        onSetDeathSaves = viewModel::setDeathSaves,
+        onDeathSave = viewModel::recordDeathSave
     )
 }
 
@@ -590,7 +634,11 @@ private fun OverviewContent(
     onSpendHitDice: (CharacterBundle, Int) -> Unit,
     onToggleInspiration: (CharacterBundle) -> Unit,
     onShortRest: (CharacterBundle) -> Unit,
-    onLongRest: (CharacterBundle) -> Unit
+    onLongRest: (CharacterBundle) -> Unit,
+    onSetDeathSaves: (CharacterBundle, Int, Int) -> Unit = { _, _, _ -> },
+    onDeathSave: (CharacterBundle, DeathSaves, Int) -> Unit = { _, _, _ -> },
+    /** The death saving throws' tray starts open (the screen preview). */
+    deathSavesOpen: Boolean = false
 ) {
     val character = characterBundle?.character
     val context = LocalContext.current
@@ -663,6 +711,7 @@ private fun OverviewContent(
         }
     }
     // Two classes and more don't fit at the usual size.
+    val rollDice = LocalDiceRoller.current
     val isMulticlass = (character?.classes?.size ?: 0) > 1
     val levelLabel = strings.format("overview_level_format", character?.level ?: 1)
     val xpInfo = remember(character) { buildXpInfo(character) }
@@ -814,7 +863,10 @@ private fun OverviewContent(
             }
 
             item {
-                Box(modifier = Modifier.offset(y = (-30).dp)) {
+                Column(
+                    modifier = Modifier.offset(y = (-30).dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     OverviewHpCard(
                         currentHp = character?.currentHp ?: 0,
                         maxHp = character?.maxHp ?: 0,
@@ -830,6 +882,25 @@ private fun OverviewContent(
                             isMaxHpDialogOpen = true
                         }
                     )
+                    if (characterBundle != null) {
+                        val dying = characterBundle.character.currentHp == 0
+                        DeathSavesTray(
+                            characterId = characterBundle.character.id,
+                            dying = dying,
+                            initiallyOpen = deathSavesOpen,
+                            successes = characterBundle.character.deathSaveSuccesses,
+                            failures = characterBundle.character.deathSaveFailures,
+                            onSetSaves = { successes, failures -> onSetDeathSaves(characterBundle, successes, failures) },
+                            onRoll = {
+                                // Counted from the saves as they are now, so a second throw on the table replaces the first.
+                                val before = DeathSaves(characterBundle.character.deathSaveSuccesses, characterBundle.character.deathSaveFailures)
+                                val snapshot = characterBundle
+                                rollDice(DiceRollRequest(mapOf(DieType.D20 to 1)) { dice ->
+                                    dice.firstOrNull()?.let { onDeathSave(snapshot, before, it.value()) }
+                                })
+                            }
+                        )
+                    }
                 }
             }
 
@@ -1807,6 +1878,131 @@ private fun OverviewXpBlock(
     }
 }
 
+/**
+ * The death saving throws under the hit points, as Foundry has them: a tab with a skull that opens
+ * the tray — successes on the left, failures on the right, and a d20 with a skull on its front in
+ * the middle. A tap on the die throws it on the dice table and counts the result; a tap on a circle
+ * sets the count (on the last filled one, takes it back). The tray opens by itself at 0 hit points.
+ */
+@Composable
+private fun DeathSavesTray(
+    characterId: Long,
+    dying: Boolean,
+    initiallyOpen: Boolean,
+    successes: Int,
+    failures: Int,
+    onSetSaves: (Int, Int) -> Unit,
+    onRoll: () -> Unit
+) {
+    val colors = LocalDesignTokens.current.colors
+    val look = LocalDiceSkin.current
+    val rollDescription = text("overview_death_saves_roll")
+    var open by remember(characterId) { mutableStateOf(initiallyOpen || dying) }
+    LaunchedEffect(dying) { if (dying) open = true }
+    val saves = DeathSaves(successes, failures)
+    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        // The tab hangs from the hit points' card.
+        val tabShape = RoundedCornerShape(bottomStart = 10.dp, bottomEnd = 10.dp)
+        Box(
+            modifier = Modifier
+                .offset(y = (-1).dp)
+                .clip(tabShape)
+                .background(colors.surface.card)
+                .border(1.dp, colors.border.panel, tabShape)
+                .clickable { open = !open }
+                .padding(horizontal = 18.dp, vertical = 4.dp)
+        ) {
+            Icon(
+                imageVector = SkullIcon,
+                contentDescription = text("overview_death_saves"),
+                tint = if (dying) colors.accent.dangerHpZero else colors.text.label,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+        AnimatedVisibility(visible = open) {
+            Column(
+                modifier = Modifier
+                    .padding(top = 6.dp)
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(colors.surface.card)
+                    .border(1.dp, colors.border.panel, RoundedCornerShape(14.dp))
+                    .padding(horizontal = 18.dp, vertical = 10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    DeathSaveMarks(
+                        label = text("overview_death_saves_successes"),
+                        count = successes,
+                        color = colors.accent.heal,
+                        modifier = Modifier.weight(1f),
+                        onSet = { onSetSaves(it, failures) }
+                    )
+                    Box(
+                        modifier = Modifier
+                            .size(72.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable(onClick = onRoll),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        // Turned half round, the front triangle stands on its point: room for the skull's crown.
+                        DieIcon(
+                            type = DieType.D20,
+                            look = look,
+                            showNumbers = false,
+                            mark = rememberVectorPainter(SkullIcon),
+                            markRotation = 180f,
+                            turn = HalfTurn,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .semantics { contentDescription = rollDescription }
+                        )
+                    }
+                    DeathSaveMarks(
+                        label = text("overview_death_saves_failures"),
+                        count = failures,
+                        color = colors.accent.dangerHpZero,
+                        modifier = Modifier.weight(1f),
+                        onSet = { onSetSaves(successes, it) }
+                    )
+                }
+                when {
+                    saves.isDead -> Text(text("overview_death_saves_dead"), style = MaterialTheme.typography.titleMedium, color = colors.accent.dangerHpZero)
+                    saves.isStable -> Text(text("overview_death_saves_stable"), style = MaterialTheme.typography.titleMedium, color = colors.accent.heal)
+                }
+            }
+        }
+    }
+}
+
+/** Half a turn about the view: the d20 shows its front face standing on a corner. */
+private val HalfTurn = Quat.axisAngle(Vec3.UP, PI)
+
+/** Three circles filled up to [count], [label] under them; a tap on one sets the count to it. */
+@Composable
+private fun DeathSaveMarks(label: String, count: Int, color: Color, modifier: Modifier = Modifier, onSet: (Int) -> Unit) {
+    val colors = LocalDesignTokens.current.colors
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            repeat(DEATH_SAVES_TO_END) { index ->
+                val filled = index < count
+                Box(
+                    modifier = Modifier
+                        .size(26.dp)
+                        .clip(CircleShape)
+                        .clickable { onSet(if (count == index + 1) index else index + 1) }
+                        .padding(2.dp)
+                        .border(1.5.dp, if (filled) color else colors.text.label, CircleShape)
+                        .padding(3.dp)
+                        .clip(CircleShape)
+                        .background(if (filled) color else Color.Transparent)
+                )
+            }
+        }
+        Text(label, style = MaterialTheme.typography.labelMedium, color = colors.text.muted, maxLines = 1)
+    }
+}
+
 @Composable
 private fun OverviewHpCard(
     currentHp: Int,
@@ -2167,6 +2363,24 @@ private fun ArmorClassModeOption(
 @Preview(showBackground = true, showSystemUi = true, device = "spec:width=412dp,height=915dp")
 @Composable
 private fun OverviewScreenPreview() {
+    OverviewPreviewContent(currentHp = 38, temporaryHp = 10)
+}
+
+/** At 0 hit points, the death saving throws' tray open: one success, two failures. */
+@Preview(showBackground = true, showSystemUi = true, device = "spec:width=412dp,height=915dp")
+@Composable
+private fun OverviewDyingPreview() {
+    OverviewPreviewContent(currentHp = 0, temporaryHp = 0, deathSaveSuccesses = 1, deathSaveFailures = 2, deathSavesOpen = true)
+}
+
+@Composable
+private fun OverviewPreviewContent(
+    currentHp: Int,
+    temporaryHp: Int,
+    deathSaveSuccesses: Int = 0,
+    deathSaveFailures: Int = 0,
+    deathSavesOpen: Boolean = false
+) {
     val previewStrings = LocalizedStrings(
         language = AppLanguage.ENGLISH,
         values = mapOf(
@@ -2182,6 +2396,12 @@ private fun OverviewScreenPreview() {
             "overview_inspiration" to "Inspiration",
             "overview_xp" to "EXP",
             "overview_hp" to "HP",
+            "overview_death_saves" to "Death saves",
+            "overview_death_saves_successes" to "Successes",
+            "overview_death_saves_failures" to "Failures",
+            "overview_death_saves_roll" to "Roll a death save",
+            "overview_death_saves_stable" to "Stable",
+            "overview_death_saves_dead" to "Dead",
             "stat_card_armor_class" to "Armor Class",
             "overview_initiative" to "Initiative",
             "overview_speed" to "Speed",
@@ -2238,9 +2458,11 @@ private fun OverviewScreenPreview() {
         subclass = "Divination",
         level = 7,
         portraitUri = null,
-        currentHp = 38,
+        currentHp = currentHp,
         maxHp = 42,
-        temporaryHp = 10,
+        temporaryHp = temporaryHp,
+        deathSaveSuccesses = deathSaveSuccesses,
+        deathSaveFailures = deathSaveFailures,
         hitDieSides = 8,
         spentHitDice = 0,
         hasInspiration = true,
@@ -2317,7 +2539,8 @@ private fun OverviewScreenPreview() {
                 onSpendHitDice = { _, _ -> },
                 onToggleInspiration = {},
                 onShortRest = {},
-                onLongRest = {}
+                onLongRest = {},
+                deathSavesOpen = deathSavesOpen
             )
         }
     }

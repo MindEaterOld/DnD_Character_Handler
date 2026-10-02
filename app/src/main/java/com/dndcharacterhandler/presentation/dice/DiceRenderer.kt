@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextMeasurer
@@ -127,6 +128,16 @@ private const val WEB_SAG = 0.84f
 
 private val ThreadStroke = Stroke(width = WEB_THREAD_WIDTH, cap = StrokeCap.Round, join = StrokeJoin.Round)
 
+/**
+ * A picture printed on the face of [faceValue] in place of its number (the death saving throw's
+ * skull on the 20), in [color] lit like the face, turned [rotationDegrees] clockwise from the face's
+ * "up". It covers a square [MARK_SCALE] numbers high.
+ */
+internal class DieMark(val painter: Painter, val faceValue: Int, val color: Color, val rotationDegrees: Float = 0f)
+
+/** A [DieMark]'s side in numbers' heights: a d20's triangle holds a skull of two. */
+private const val MARK_SCALE = 2f
+
 /** Objects reused for every die drawn, so a frame doesn't allocate them per face. */
 internal class DieDrawScratch {
     val path = Path()
@@ -167,14 +178,15 @@ internal fun DrawScope.drawDieShadow(camera: DiceCamera, body: DieBody, shadowCo
  * picture, its edges, a highlight where it shines, and finally its number. Textures, pictures and
  * numbers are painted in the face's own frame ([DieFace.canonical]), which a perspective transform
  * maps onto the face on screen. A see-through die first draws its far faces, seen through the
- * near ones: a die is convex, so that order is always right.
+ * near ones: a die is convex, so that order is always right. [mark] takes one face's number's place.
  */
 internal fun DrawScope.drawDie(
     camera: DiceCamera,
     body: DieBody,
     skin: DiceSkinStyle,
     numbers: DieNumberText,
-    scratch: DieDrawScratch
+    scratch: DieDrawScratch,
+    mark: DieMark? = null
 ) {
     val shape = body.shape
     val eye = Vec3(0.0, camera.eyeHeight, 0.0)
@@ -212,7 +224,7 @@ internal fun DrawScope.drawDie(
         drawPath(path, color = skin.body.shaded(brightness))
 
         val sight = abs(facing)
-        val showsNumber = sight > LABEL_FADE_START && (art == null || skin.numbersOverArt)
+        val showsNumber = sight > LABEL_FADE_START && (art == null || skin.numbersOverArt) && skin.number.alpha > 0f
         val pointCount = face.canonical.size / 2
         for (i in 0 until pointCount) {
             val vertex = face.vertexIndices[i]
@@ -243,11 +255,24 @@ internal fun DrawScope.drawDie(
             drawPath(path, color = if (back) edge.copy(alpha = edge.alpha * 0.6f) else edge, style = Stroke(width = skin.edgeWidth))
         }
 
-        if (!mapped || !showsNumber) return
+        val faceMark = mark?.takeIf { face.value == it.faceValue }
+        if (!mapped || !(showsNumber || faceMark != null && sight > LABEL_FADE_START)) return
         // Printed numbers are lit like their face and fade in as it turns toward the camera; the
         // far ones show faintly through the body, mirrored.
         val fade = ((sight - LABEL_FADE_START) / (LABEL_FADE_END - LABEL_FADE_START)).coerceIn(0.0, 1.0).toFloat()
         val shown = fade * fade * (3 - 2 * fade) * if (back) 0.5f else 1f
+        if (faceMark != null) {
+            val side = numberSize * MARK_SCALE
+            val color = faceMark.color.shaded(brightness)
+            withTransform({
+                transform(faceMatrix)
+                rotate(faceMark.rotationDegrees, pivot = Offset.Zero)
+                translate(-side / 2, -side / 2)
+            }) {
+                with(faceMark.painter) { draw(Size(side, side), colorFilter = ColorFilter.tint(color.copy(alpha = color.alpha * shown))) }
+            }
+            return
+        }
         val number = skin.number.shaded(brightness)
         val outline = skin.numberOutline?.shaded(brightness)
         withTransform({ transform(faceMatrix) }) {

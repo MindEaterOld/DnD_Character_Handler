@@ -25,6 +25,9 @@ data class Character(
     val currentHp: Int,
     val maxHp: Int,
     val temporaryHp: Int,
+    /** Death saving throws while at 0 hit points; both go back to 0 once the character is up again. */
+    val deathSaveSuccesses: Int = 0,
+    val deathSaveFailures: Int = 0,
     val hitDieSides: Int,
     val spentHitDice: Int,
     val hasInspiration: Boolean,

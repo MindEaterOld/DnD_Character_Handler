@@ -171,6 +171,9 @@ interface CharacterDao {
     )
     suspend fun updateDarkvision(characterId: Long, mode: DarkvisionMode, manualFeet: Int, updatedAt: Long)
 
+    @Query("UPDATE characters SET deathSaveSuccesses = :successes, deathSaveFailures = :failures, updatedAt = :updatedAt WHERE id = :characterId")
+    suspend fun updateDeathSaves(characterId: Long, successes: Int, failures: Int, updatedAt: Long)
+
     @Query("UPDATE characters SET size = :size, updatedAt = :updatedAt WHERE id = :characterId")
     suspend fun updateSize(characterId: Long, size: CreatureSize, updatedAt: Long)
 

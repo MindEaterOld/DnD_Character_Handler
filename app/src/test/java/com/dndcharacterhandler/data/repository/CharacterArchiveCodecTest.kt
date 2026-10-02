@@ -146,6 +146,8 @@ class CharacterArchiveCodecTest {
                 currentHp = 41,
                 maxHp = 52,
                 temporaryHp = 6,
+                deathSaveSuccesses = 1,
+                deathSaveFailures = 2,
                 hitDieSides = 10,
                 spentHitDice = 2,
                 hasInspiration = true,

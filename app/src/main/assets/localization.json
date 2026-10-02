@@ -2857,6 +2857,52 @@
     "fr": "pv",
     "es": "PG"
   },
+  "overview_death_saves": {
+    "en": "Death saves",
+    "ru": "Спасброски от смерти",
+    "de": "Todesrettungswürfe",
+    "fr": "Jets contre la mort",
+    "es": "Salvaciones contra la muerte"
+  },
+  "overview_death_saves_roll": {
+    "en": "Roll a death save",
+    "ru": "Бросить спасбросок от смерти",
+    "de": "Todesrettungswurf würfeln",
+    "fr": "Lancer un jet contre la mort",
+    "es": "Tirar salvación contra la muerte"
+  },
+  "overview_death_saves_successes": {
+    "maxChars": 18,
+    "en": "Successes",
+    "ru": "Успехи",
+    "de": "Erfolge",
+    "fr": "Réussites",
+    "es": "Éxitos"
+  },
+  "overview_death_saves_failures": {
+    "maxChars": 18,
+    "en": "Failures",
+    "ru": "Провалы",
+    "de": "Fehlschläge",
+    "fr": "Échecs",
+    "es": "Fallos"
+  },
+  "overview_death_saves_stable": {
+    "maxChars": 31,
+    "en": "Stable",
+    "ru": "Состояние стабильно",
+    "de": "Stabil",
+    "fr": "État stable",
+    "es": "Estable"
+  },
+  "overview_death_saves_dead": {
+    "maxChars": 31,
+    "en": "Dead",
+    "ru": "Смерть",
+    "de": "Tot",
+    "fr": "Mort",
+    "es": "Muerte"
+  },
   "overview_ac_full": {
     "en": "Armor Class",
     "ru": "\u041a\u043b\u0430\u0441\u0441 \u0431\u0440\u043e\u043d\u0438",
