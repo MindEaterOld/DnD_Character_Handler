@@ -50,6 +50,10 @@ Rules:
 - A key used by several elements gets the limit of the tightest one. If shortening it would hurt the other places, give that element its own key instead.
 - `LocalizationLimitsTest` checks every limited key; run it after changing translations.
 
+## UI layout
+
+Layout work (screens, pop-ups, cards, buttons, variant boards) follows the `/ui-layout` skill in `.claude/skills/ui-layout/`: the reuse catalogue, the tokens as the code reads them, and the pipelines to build through Android Studio, render previews to PNG and check on the emulator. New layout pipelines and pitfalls are written down there.
+
 ## Backlog
 
 Wishes, bugs and technical debt live in `docs/BACKLOG.md` (in Russian, for the project owner). Check it when choosing the next task or when asked "what's left"; add what you notice (a bug, a debt, an owner's wish) to its section; when something is done, move it to "Готово" with the date. Things built but not yet seen on a device go under "Проверить на устройстве".

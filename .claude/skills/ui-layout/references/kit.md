@@ -1,0 +1,97 @@
+# Каталог общих компонентов и скелеты
+
+Все компоненты — `app/src/main/java/com/dndcharacterhandler/presentation/components/`. Колонка «файлов» — в скольких файлах компонент реально используется (замер 2026-10-03). Перед созданием нового элемента искать здесь; отличие в размере, цвете, тексте или иконке закрывается параметром.
+
+## Каркас экрана
+
+| Компонент | Файлов | Роль |
+|---|---|---|
+| `ScreenBackground { }` | 9 | Радиальный фон окна; экран рисует только свою часть, фон бесшовно продолжается под нижней панелью и системными полосами |
+| `CharacterScreenHeader(character, onOpenDrawer, onOpenDice)` | 7 | Шапка экрана персонажа: меню, кубы, имя и подзаголовок |
+| `ScreenTopActions(onOpenDrawer, onOpenDice)` | 9 | Верхний ряд: «гамбургер» слева, d20 справа (кнопки 44dp, иконки 28) |
+| `BottomNavigationBar` | — | Панель вкладок: обводка поверх фона, без своей заливки |
+| `FloatingAddButton(onClick)` | 5 | Круглая плавающая «+» 58dp в правом нижнем углу (`padding(end = 24.dp, bottom = 15.dp)`) |
+| `LocalFloatingButtonsInset` | — | Нижнее поле списка, чтобы последние элементы выезжали из-под плавающих кнопок; приложение задаёт на экран (`SingleFloatingButtonInset` 110, `NoFloatingButtonInset` 16) |
+| `OverlayCloseButton(onClick)` | 5 | Круглый крестик полноэкранного оверлея (портрет, стол кубов), сам держится вне системных полос |
+
+## Поп-апы
+
+| Компонент | Файлов | Роль |
+|---|---|---|
+| `EditDialog(title, onDismiss, onConfirm, …)` | 14 | **Единственный поп-ап приложения.** Заголовок с крестиком в углу (закрыть без сохранения, кнопки «Отмена» нет), содержимое прокручивается целиком, внизу один ряд: «Удалить» — круглая тональная (красный 16 % за иконкой) слева, главное действие («Сохранить» по умолчанию, заливка `primary`) справа. `confirmIsDanger` — главное действие красным (подтверждение удаления). Без `onConfirm` и `onDelete` нижнего ряда нет — тап по пункту делает работу. `titleActions` — кнопки перед крестиком, `titleLeading` — перед заголовком (стрелка назад) |
+| `DeleteCharacterDialog` | — | Подтверждение удаления персонажа |
+| `SettingsDialog` | — | Настройки (язык), изменения сразу |
+| `WeaponMasteryDialog` | — | Правила свойства мастерства оружия |
+
+Черновик правки в поп-апе при смерти процесса теряется намеренно — `rememberSaveable` в поп-апы не добавлять.
+
+## Карточки и статы
+
+| Компонент | Файлов | Роль |
+|---|---|---|
+| `BorderLabelCard(label, …)` | 3 | Рамка с подписью в разрыве верхней обводки (как у outlined-поля); основа карточек статов, характеристик и HP |
+| `MiniStatCard(label, value, icon?, onClick?)` | 6 | **Карточка стата**: `BorderLabelCard` со значением, шагает вниз по шкале на длинном значении. Единственная карточка этого вида — брать её везде, где экран показывает статы |
+| `StatCardRow { }` | 6 | Ряд карточек статов наверху экрана, общий кегль значений (`AutoSizeGroup`) |
+| `MiniStatCardIcon(imageVector)` | — | Обычная иконка перед значением стата |
+| `MiniStatCardHeight` | — | Высота любой карточки стата вместе с подписью на рамке |
+| `ExpandableCard(…)` | 2 | Карточка-аккордеон: шапка (слот `leading`, заголовок, подзаголовок, шеврон), тело и действия при раскрытии (особенности, заклинания, предметы) |
+| `CardEditButton(onClick)` / `CardActionButton(label, icon, onClick)` | 3 / 1 | «Изменить» и соседние действия внизу раскрытой карточки — текстовые кнопки (исключение из правила подложки) |
+| `LimitProgressBar(…)` | 2 | Подпись «текущее / максимум» и полоса под ней (вес инвентаря, подготовленные заклинания); `overLimit` красит в опасный цвет |
+| `SizeToggle(…)` | 2 | Размер существа: три фигуры в рамке карточки стата |
+| `SelectableDot(selected, …)` | 2 | Точка-переключатель: «надето», «подготовлено» |
+
+## Текст, картинки, эффекты
+
+| Компонент | Файлов | Роль |
+|---|---|---|
+| `AutoSizeText(…)` + `LocalAutoSizeGroup` | 1 | Текст, который шагает вниз **по шкале темы** (не произвольными sp), пока не влезет в `maxLines` без разрыва слов; группа даёт ряду общий кегль |
+| `AppImage(imageRef, contentDescription, fallback)` | 2 | Картинка по ссылке проекта (`res:drawable/…`, ассеты, файл, `content://`), декодирует вне главного потока, пока грузит — `fallback` |
+| `Modifier.saturation(s)` | 1 | Насыщенность содержимого: 1 как есть, 0 — чёрно-белое (портрет погибшего); работает на любом содержимом |
+| `SkullIcon` | 1 | Череп спасбросков от смерти (`ImageVector`, тонируется `Icon`) |
+| `D20Outline` (`dice/D20Outline.kt`) | — | Контурный d20 кнопки кубов |
+
+## Кубики (`presentation/dice/`)
+
+- `DieIcon(type, look, showNumbers, mark, …)` — значок кубика в текущем скине (`LocalDiceSkin`), с меткой на передней грани вместо числа.
+- `LocalDiceRoller` + `DiceRollRequest` — любой бросок из экрана идёт на 3D-стол; тихих случайных значений не бывает.
+
+## Не использовать
+
+`ReusableComponents.kt`: `StatCard`, `AttackCard`, `InfoRow`, `InfoCard`, `NoteCard`, `SpellRow`, `FeatureRow`, `InventoryItemRow`, `SectionDivider` — ноль применений, остатки каркаса. `CharacterHeader` и `PlaceholderSection` живут только в `PlaceholderScreen`.
+
+## Скелет экрана персонажа
+
+Эталон — `features/FeaturesScreen.kt`:
+
+```
+ScreenBackground
+  Box(fillMaxSize)
+    LazyColumn(contentPadding = 24 / 24 / top 4 / bottom LocalFloatingButtonsInset, spacedBy 10)
+      item CharacterScreenHeader
+      item StatCardRow { MiniStatCard ×3 (weight 1f) }
+      item поиск / фильтр
+      section title + items(ExpandableCard, key = id)
+    FloatingAddButton(align BottomEnd, padding end 24, bottom 15)
+поп-апы (EditDialog) — вне ScreenBackground, по флагам состояния
+```
+
+## Скелет поп-апа
+
+```
+EditDialog(title, onDismiss, onConfirm?, onDelete?)
+  текст-состояние (bodyLarge, text.muted)       «Текущие HP: 0 / 13»
+  ряд переключателей режима                     выбранный — отличается заливкой
+  OutlinedTextField(label = режим)
+  итог (bodyLarge, text.primary)                «Итог: 0 / 13»
+  предупреждение (bodyLarge, accent.dangerHpZero), если действие опасно
+```
+
+Колонка содержимого `EditDialog` уже даёт `spacedBy(12.dp)` — свои отступы между рядами не добавлять.
+
+## Превью
+
+Экранные превью живут в `<экран>/<Экран>ScreenPreview.kt` (у обзора — внутри `OverviewScreen.kt`), устройство `spec:width=412dp,height=915dp`, `showSystemUi = true`:
+
+`AttributesScreenPreview`, `BiographyScreenPreview`, `CombatScreenPreview`, `FeaturesScreenPreview`, `InventoryScreenPreview`, `InventoryContainersPreview`, `NotesScreenPreview`, `SpellsScreenPreview`, `OverviewScreenPreview`, `OverviewDyingPreview`, `OverviewDeadPreview`, `CharacterManagerDrawerPreview`, `CharacterManagerDrawerEmptyPreview`, `DiceSkinsPreview`, `SplashScreenPreview`, `SpellSlotsConfigDialogPreview`.
+
+Строки в превью — рукописная карта `LocalizedStrings(language, mapOf(...))`: новый ключ экрана добавлять и туда.
