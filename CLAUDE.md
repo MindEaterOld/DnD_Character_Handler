@@ -19,6 +19,8 @@ What can be pressed as an action and what shows a value must look different at a
 - **Buttons** are always round (a circle, for an icon alone) or a rectangle with rounded corners — never sharp corners. A button has a **fill that stands out** from the background and from the cards around it; the fill is what says "press me". The fill comes from the button palette, never from a card's surface: `surface.button` (#1A171D) is next to `surface.card` (#17141B) and does not stand out.
 - **Stats and cells** (abilities, HP, AC, speed, list cells, info cards) have an **outline and no fill of their own** — the dark card surface, like the background. They stay that way even when a tap on them opens an editor.
 - So: **fill = button, outline without a fill = stat.** Never give a stat a button's fill, and never make a button outline-only (an outlined `Surface` or `OutlinedButton` as an action).
+- Only **significant, often pressed** actions are buttons with a fill (Save, the rests, Inspiration, the floating buttons, steppers). Minor actions stay plain text buttons (`TextButton`) — Cancel, a link in a list, "Edit" at the bottom of an unfolded card. That is the one exception.
+- A **toggle** (one option of a row to pick from, or an on/off button like Inspiration) is a button too: the picked option differs from the others by its fill's colour or transparency, not only by its outline.
 - **Button palette** (fills and their text/icon colours, by role) — being worked out with the project owner; until it is approved and in `design_tokens.json`, use what is approved so far:
   - main action (Save): `materialTheme.primary` #C6A36C, text `onPrimary`;
   - dangerous action (confirm deletion): `accent.dangerHpZero`, text `text.primary`;
