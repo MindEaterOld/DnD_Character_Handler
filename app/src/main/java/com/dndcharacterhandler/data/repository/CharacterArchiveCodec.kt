@@ -11,6 +11,7 @@ import com.dndcharacterhandler.data.json.optInt
 import com.dndcharacterhandler.data.json.optLong
 import com.dndcharacterhandler.data.json.optObject
 import com.dndcharacterhandler.data.json.optString
+import com.dndcharacterhandler.domain.model.PortraitFraming
 import com.dndcharacterhandler.domain.model.Attack
 import com.dndcharacterhandler.domain.model.AttackCalculationMode
 import com.dndcharacterhandler.domain.model.DarkvisionMode
@@ -46,7 +47,7 @@ import java.io.File
 //     (containerIndex: its index in inventoryItems).
 // 22: weaponMasteries; an attack's baseWeaponId.
 // 23: deathSaveSuccesses, deathSaveFailures.
-private const val SCHEMA_VERSION = 23
+private const val SCHEMA_VERSION = 24
 
 data class ImportedArchive(
     val characterBundle: CharacterBundle,
@@ -66,6 +67,9 @@ fun CharacterBundle.toArchiveManifest(
         put("subclass", character.subclass)
         put("level", character.level)
         mapAssetReference(character.portraitUri, "portrait")?.let { put("portraitUri", it) }
+        put("portraitFocusX", character.portraitFraming.focusX)
+        put("portraitFocusY", character.portraitFraming.focusY)
+        put("portraitZoom", character.portraitFraming.zoom)
         put("currentHp", character.currentHp)
         put("maxHp", character.maxHp)
         put("temporaryHp", character.temporaryHp)
@@ -324,6 +328,11 @@ fun archiveManifestToCharacterBundle(
         subclass = characterJson.optString("subclass"),
         level = importedLevel,
         portraitUri = resolveAssetReference(characterJson.optNullableString("portraitUri")),
+        portraitFraming = PortraitFraming(
+            focusX = characterJson.optDouble("portraitFocusX", 0.5).toFloat().coerceIn(0f, 1f),
+            focusY = characterJson.optDouble("portraitFocusY", 0.5).toFloat().coerceIn(0f, 1f),
+            zoom = characterJson.optDouble("portraitZoom", 1.0).toFloat().coerceIn(1f, PortraitFraming.MAX_ZOOM)
+        ),
         currentHp = characterJson.optInt("currentHp"),
         maxHp = characterJson.optInt("maxHp").coerceAtLeast(1),
         temporaryHp = characterJson.optInt("temporaryHp").coerceAtLeast(0),

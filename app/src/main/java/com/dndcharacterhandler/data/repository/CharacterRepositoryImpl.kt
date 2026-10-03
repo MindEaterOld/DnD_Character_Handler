@@ -2,6 +2,7 @@ package com.dndcharacterhandler.data.repository
 
 import com.dndcharacterhandler.data.local.AppDatabase
 import com.dndcharacterhandler.data.local.dao.CharacterDao
+import com.dndcharacterhandler.domain.model.PortraitFraming
 import com.dndcharacterhandler.domain.model.ArmorClassMode
 import com.dndcharacterhandler.domain.model.Attack
 import com.dndcharacterhandler.domain.model.CharacterBundle
@@ -91,6 +92,18 @@ class CharacterRepositoryImpl(
     override suspend fun updatePortrait(characterId: Long, portraitUri: String?) {
         writeMutex.withLock {
             characterDao.updatePortrait(characterId, portraitUri, System.currentTimeMillis())
+        }
+    }
+
+    override suspend fun updatePortraitFraming(characterId: Long, framing: PortraitFraming) {
+        writeMutex.withLock {
+            characterDao.updatePortraitFraming(
+                characterId,
+                framing.focusX.coerceIn(0f, 1f),
+                framing.focusY.coerceIn(0f, 1f),
+                framing.zoom.coerceIn(1f, PortraitFraming.MAX_ZOOM),
+                System.currentTimeMillis()
+            )
         }
     }
 

@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.data.repository
 
+import com.dndcharacterhandler.domain.model.PortraitFraming
 import com.dndcharacterhandler.domain.model.AdvancementRecord
 import com.dndcharacterhandler.domain.model.Attack
 import com.dndcharacterhandler.domain.model.AttackCalculationMode
@@ -143,6 +144,7 @@ class CharacterArchiveCodecTest {
                 subclass = "Hunter",
                 level = 7,
                 portraitUri = "res:drawable/portrait_aluen",
+                portraitFraming = PortraitFraming(focusX = 0.25f, focusY = 0.75f, zoom = 1.5f),
                 currentHp = 41,
                 maxHp = 52,
                 temporaryHp = 6,

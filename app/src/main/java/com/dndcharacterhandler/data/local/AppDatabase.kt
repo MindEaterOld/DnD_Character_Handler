@@ -30,7 +30,7 @@ import com.dndcharacterhandler.data.local.entity.SpellEntity
         FeatureEntity::class,
         NoteEntity::class
     ],
-    version = 51,
+    version = 52,
     exportSchema = false
 )
 @TypeConverters(RoomConverters::class)
@@ -97,7 +97,8 @@ abstract class AppDatabase : RoomDatabase() {
                     MIGRATION_47_48,
                     MIGRATION_48_49,
                     MIGRATION_49_50,
-                    MIGRATION_50_51
+                    MIGRATION_50_51,
+                    MIGRATION_51_52
                 ).build().also { INSTANCE = it }
             }
         }
@@ -587,6 +588,15 @@ abstract class AppDatabase : RoomDatabase() {
                 // Death saving throws.
                 db.execSQL("ALTER TABLE characters ADD COLUMN deathSaveSuccesses INTEGER NOT NULL DEFAULT 0")
                 db.execSQL("ALTER TABLE characters ADD COLUMN deathSaveFailures INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
+        private val MIGRATION_51_52 = object : Migration(51, 52) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Which part of the portrait shows in its frame.
+                db.execSQL("ALTER TABLE characters ADD COLUMN portraitFocusX REAL NOT NULL DEFAULT 0.5")
+                db.execSQL("ALTER TABLE characters ADD COLUMN portraitFocusY REAL NOT NULL DEFAULT 0.5")
+                db.execSQL("ALTER TABLE characters ADD COLUMN portraitZoom REAL NOT NULL DEFAULT 1.0")
             }
         }
     }

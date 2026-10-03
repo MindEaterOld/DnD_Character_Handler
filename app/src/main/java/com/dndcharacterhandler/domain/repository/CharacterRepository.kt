@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.domain.repository
 
+import com.dndcharacterhandler.domain.model.PortraitFraming
 import com.dndcharacterhandler.domain.model.CharacterBundle
 import com.dndcharacterhandler.domain.model.CombatResource
 import com.dndcharacterhandler.domain.model.CreatureSize
@@ -24,6 +25,7 @@ interface CharacterRepository {
     suspend fun updateIdentity(characterId: Long, name: String, race: String, characterClass: String, level: Int)
     suspend fun updateExperience(characterId: Long, experience: Int)
     suspend fun updatePortrait(characterId: Long, portraitUri: String?)
+    suspend fun updatePortraitFraming(characterId: Long, framing: PortraitFraming)
     suspend fun updateHitPoints(characterId: Long, currentHp: Int, temporaryHp: Int)
     suspend fun updateMaxHitPoints(characterId: Long, currentHp: Int, maxHp: Int)
     suspend fun updateInitiative(characterId: Long, initiative: Int, initiativeBonus: Int)

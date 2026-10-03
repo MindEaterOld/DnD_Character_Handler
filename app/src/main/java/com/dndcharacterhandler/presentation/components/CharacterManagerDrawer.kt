@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import com.dndcharacterhandler.data.localization.LocalizedStrings
+import com.dndcharacterhandler.domain.model.PortraitFraming
 import com.dndcharacterhandler.domain.model.AssetReferences
 import com.dndcharacterhandler.domain.model.Character
 import com.dndcharacterhandler.domain.model.CharacterBundle
@@ -204,6 +205,7 @@ private fun DrawerCharacterCard(
             DrawerSelectionDot(selected = selected)
             DrawerPortrait(
                 portraitUri = character.portraitUri,
+                framing = character.portraitFraming,
                 characterName = characterName,
                 modifier = Modifier.padding(start = 8.dp)
             )
@@ -266,6 +268,7 @@ private fun DrawerSelectionDot(selected: Boolean) {
 @Composable
 private fun DrawerPortrait(
     portraitUri: String?,
+    framing: PortraitFraming,
     characterName: String,
     modifier: Modifier = Modifier
 ) {
@@ -300,6 +303,7 @@ private fun DrawerPortrait(
                 contentDescription = characterName,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop,
+                framing = framing,
                 fallback = {
                     Box(
                         modifier = Modifier

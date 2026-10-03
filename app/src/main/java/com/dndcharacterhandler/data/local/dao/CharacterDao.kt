@@ -80,11 +80,17 @@ interface CharacterDao {
         """
         UPDATE characters
         SET portraitUri = :portraitUri,
+            portraitFocusX = 0.5,
+            portraitFocusY = 0.5,
+            portraitZoom = 1.0,
             updatedAt = :updatedAt
         WHERE id = :characterId
         """
     )
     suspend fun updatePortrait(characterId: Long, portraitUri: String?, updatedAt: Long)
+
+    @Query("UPDATE characters SET portraitFocusX = :focusX, portraitFocusY = :focusY, portraitZoom = :zoom, updatedAt = :updatedAt WHERE id = :characterId")
+    suspend fun updatePortraitFraming(characterId: Long, focusX: Float, focusY: Float, zoom: Float, updatedAt: Long)
 
     @Query(
         """

@@ -10,6 +10,7 @@ import com.dndcharacterhandler.data.local.entity.NoteEntity
 import com.dndcharacterhandler.data.local.entity.SkillEntity
 import com.dndcharacterhandler.data.local.entity.SpellAttackEntity
 import com.dndcharacterhandler.data.local.entity.SpellEntity
+import com.dndcharacterhandler.domain.model.PortraitFraming
 import com.dndcharacterhandler.domain.model.Attack
 import com.dndcharacterhandler.domain.model.ArmorClassMode
 import com.dndcharacterhandler.domain.model.Character
@@ -119,6 +120,7 @@ fun CharacterEntity.toDomain(): Character =
         subclass = subclass,
         level = level,
         portraitUri = portraitUri,
+        portraitFraming = PortraitFraming(portraitFocusX, portraitFocusY, portraitZoom),
         currentHp = currentHp,
         maxHp = maxHp,
         temporaryHp = temporaryHp,
@@ -267,6 +269,9 @@ fun Character.toEntity(): CharacterEntity =
         subclass = subclass,
         level = level,
         portraitUri = portraitUri,
+        portraitFocusX = portraitFraming.focusX,
+        portraitFocusY = portraitFraming.focusY,
+        portraitZoom = portraitFraming.zoom,
         currentHp = currentHp,
         maxHp = maxHp,
         temporaryHp = temporaryHp,

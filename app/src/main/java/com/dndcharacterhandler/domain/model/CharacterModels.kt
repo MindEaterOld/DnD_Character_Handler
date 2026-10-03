@@ -22,6 +22,8 @@ data class Character(
     val subclass: String,
     val level: Int,
     val portraitUri: String?,
+    /** Which part of the portrait shows in its frame; back to the default with a new picture. */
+    val portraitFraming: PortraitFraming = PortraitFraming(),
     val currentHp: Int,
     val maxHp: Int,
     val temporaryHp: Int,

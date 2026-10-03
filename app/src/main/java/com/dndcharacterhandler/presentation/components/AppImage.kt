@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
@@ -12,18 +13,26 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.isUnspecified
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import com.dndcharacterhandler.domain.model.AssetReferences
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import com.dndcharacterhandler.domain.model.PortraitFraming
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 private sealed interface ImageSourceKind {
     data class Drawable(@DrawableRes val resId: Int) : ImageSourceKind
@@ -36,8 +45,25 @@ fun AppImage(
     contentDescription: String?,
     modifier: Modifier = Modifier,
     contentScale: ContentScale = ContentScale.Crop,
+    /** Which part of the picture shows (a portrait's own framing); null draws it with [contentScale]. */
+    framing: PortraitFraming? = null,
     fallback: @Composable (() -> Unit)? = null
 ) {
+    val painter = rememberAppImagePainter(imageRef)
+    when {
+        painter != null && framing != null -> FramedImage(painter, framing, contentDescription, modifier)
+        painter != null -> Image(painter = painter, contentDescription = contentDescription, contentScale = contentScale, modifier = modifier)
+        fallback != null -> Box(modifier = modifier, contentAlignment = Alignment.Center) { fallback() }
+    }
+}
+
+/**
+ * The picture behind [imageRef] (a drawable, an asset, a file or a content URI), or null while it
+ * loads or when it can't be read. A file is decoded off the main thread so disk I/O doesn't jank
+ * composition (e.g. drawer portraits); a preview, one static frame that doesn't wait, decodes at once.
+ */
+@Composable
+fun rememberAppImagePainter(imageRef: String?): Painter? {
     val context = LocalContext.current
     // Cheap, synchronous: classify the reference without reading/decoding any bytes.
     val sourceKind = remember(imageRef) {
@@ -45,21 +71,9 @@ fun AppImage(
             context.resources.getIdentifier(name, "drawable", context.packageName)
         }
     }
-
-    when (sourceKind) {
-        is ImageSourceKind.Drawable -> {
-            Image(
-                painter = painterResource(id = sourceKind.resId),
-                contentDescription = contentDescription,
-                contentScale = contentScale,
-                modifier = modifier
-            )
-        }
-
+    return when (sourceKind) {
+        is ImageSourceKind.Drawable -> painterResource(id = sourceKind.resId)
         is ImageSourceKind.BitmapRef -> {
-            // Decode off the main thread so disk I/O + bitmap decode doesn't jank composition
-            // (e.g. drawer portraits). Falls back until the bitmap is ready or if decoding fails.
-            // A preview is one static frame that doesn't wait for that: it decodes at once.
             val inPreview = LocalInspectionMode.current
             val previewPainter = remember(sourceKind.reference, inPreview) {
                 if (!inPreview) null
@@ -73,33 +87,28 @@ fun AppImage(
                         ?.let { BitmapPainter(it.asImageBitmap()) }
                 }
             }
-            val resolvedPainter = painter
-            if (resolvedPainter != null) {
-                Image(
-                    painter = resolvedPainter,
-                    contentDescription = contentDescription,
-                    contentScale = contentScale,
-                    modifier = modifier
-                )
-            } else if (fallback != null) {
-                Box(
-                    modifier = modifier,
-                    contentAlignment = Alignment.Center
-                ) {
-                    fallback()
-                }
-            }
+            painter
         }
+        null -> null
+    }
+}
 
-        null -> {
-            if (fallback != null) {
-                Box(
-                    modifier = modifier,
-                    contentAlignment = Alignment.Center
-                ) {
-                    fallback()
-                }
-            }
+/** [painter] laid in the box by [framing]: covering it, the framing's focus at its centre. */
+@Composable
+private fun FramedImage(painter: Painter, framing: PortraitFraming, contentDescription: String?, modifier: Modifier) {
+    Canvas(
+        modifier = modifier
+            .clipToBounds()
+            .then(if (contentDescription != null) Modifier.semantics { this.contentDescription = contentDescription } else Modifier)
+    ) {
+        val image = painter.intrinsicSize
+        if (image.isUnspecified || image.width <= 0f || image.height <= 0f) {
+            with(painter) { draw(size) }
+            return@Canvas
+        }
+        val placed = framing.placement(image.width, image.height, size.width, size.height)
+        translate(placed.left, placed.top) {
+            with(painter) { draw(Size(placed.width, placed.height)) }
         }
     }
 }

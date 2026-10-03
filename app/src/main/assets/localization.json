@@ -2835,6 +2835,34 @@
     "fr": "Changer le portrait",
     "es": "Cambiar retrato"
   },
+  "overview_portrait_frame": {
+    "en": "Adjust framing",
+    "ru": "Кадрировать портрет",
+    "de": "Ausschnitt anpassen",
+    "fr": "Ajuster le cadrage",
+    "es": "Ajustar encuadre"
+  },
+  "overview_portrait_frame_hint": {
+    "en": "Drag the portrait, pinch to zoom: the frame shows what will be seen.",
+    "ru": "Двигайте портрет и приближайте двумя пальцами: в рамке то, что будет видно.",
+    "de": "Porträt ziehen, mit zwei Fingern zoomen: Der Rahmen zeigt, was zu sehen ist.",
+    "fr": "Faites glisser le portrait, pincez pour zoomer : le cadre montre ce qui sera visible.",
+    "es": "Arrastra el retrato y pellizca para acercar: el marco muestra lo que se verá."
+  },
+  "overview_portrait_zoom": {
+    "en": "Zoom",
+    "ru": "Масштаб",
+    "de": "Zoom",
+    "fr": "Zoom",
+    "es": "Zoom"
+  },
+  "overview_portrait_frame_reset": {
+    "en": "Reset",
+    "ru": "Сбросить",
+    "de": "Zurücksetzen",
+    "fr": "Réinitialiser",
+    "es": "Restablecer"
+  },
   "overview_inspiration": {
     "en": "Inspiration",
     "ru": "\u0412\u0434\u043e\u0445\u043d\u043e\u0432\u0435\u043d\u0438\u0435",

@@ -28,6 +28,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import com.dndcharacterhandler.domain.model.PortraitFraming
+import androidx.compose.material.icons.outlined.Crop
 import androidx.compose.material.icons.Icons
 import androidx.compose.foundation.shape.GenericShape
 import kotlin.math.cos
@@ -270,6 +272,12 @@ class OverviewViewModel(
         viewModelScope.launch {
             characterRepository.updateExperience(characterBundle.character.id, sanitized)
         }
+    }
+
+    fun updatePortraitFraming(characterBundle: CharacterBundle, framing: PortraitFraming) {
+        val current = characterBundle.character
+        if (framing == current.portraitFraming) return
+        viewModelScope.launch { characterRepository.updatePortraitFraming(current.id, framing) }
     }
 
     fun updatePortrait(characterBundle: CharacterBundle, portraitUri: String?) {
@@ -584,6 +592,7 @@ fun OverviewScreen(
         onUpdateIdentity = viewModel::updateIdentity,
         onUpdateExperience = viewModel::updateExperience,
         onUpdatePortrait = viewModel::updatePortrait,
+        onUpdatePortraitFraming = viewModel::updatePortraitFraming,
         onDamageHitPoints = viewModel::damageHitPoints,
         onHealHitPoints = viewModel::healHitPoints,
         onAddTemporaryHitPoints = viewModel::addTemporaryHitPoints,
@@ -639,6 +648,7 @@ private fun OverviewContent(
     onUpdateIdentity: (CharacterBundle, String?, String?, String?, Int?) -> Unit,
     onUpdateExperience: (CharacterBundle, Int) -> Unit,
     onUpdatePortrait: (CharacterBundle, String?) -> Unit,
+    onUpdatePortraitFraming: (CharacterBundle, PortraitFraming) -> Unit = { _, _ -> },
     onDamageHitPoints: (CharacterBundle, Int) -> Unit,
     onHealHitPoints: (CharacterBundle, Int) -> Unit,
     onAddTemporaryHitPoints: (CharacterBundle, Int) -> Unit,
@@ -689,6 +699,7 @@ private fun OverviewContent(
     var isLevelDownNoticeOpen by remember { mutableStateOf(false) }
     var isPortraitMenuOpen by remember { mutableStateOf(false) }
     var isPortraitViewerOpen by remember { mutableStateOf(false) }
+    var isPortraitFramingOpen by remember { mutableStateOf(false) }
     var isExperienceDialogOpen by remember { mutableStateOf(false) }
     var experienceEditMode by remember { mutableStateOf(OverviewExperienceEditMode.ADD) }
     var experienceDraft by remember(character?.id, character?.experience) { mutableStateOf("") }
@@ -794,6 +805,7 @@ private fun OverviewContent(
                             portraitUri = character?.portraitUri,
                             characterName = displayName,
                             dead = dead,
+                            framing = character?.portraitFraming ?: PortraitFraming(),
                             onClick = {
                                 if (characterBundle != null) {
                                     isPortraitMenuOpen = true
@@ -1517,7 +1529,24 @@ private fun OverviewContent(
                 isPortraitMenuOpen = false
                 portraitPickerLauncher.launch(arrayOf("image/*"))
             },
+            onFramePortrait = {
+                isPortraitMenuOpen = false
+                isPortraitFramingOpen = true
+            },
             onDismiss = { isPortraitMenuOpen = false }
+        )
+    }
+
+    if (isPortraitFramingOpen && characterBundle != null) {
+        PortraitFramingDialog(
+            portraitReference = characterBundle.character.portraitUri
+                ?: AssetReferences.portraitPlaceholderPath("portrait_placeholder.png"),
+            initial = characterBundle.character.portraitFraming,
+            onSave = { framing ->
+                onUpdatePortraitFraming(characterBundle, framing)
+                isPortraitFramingOpen = false
+            },
+            onDismiss = { isPortraitFramingOpen = false }
         )
     }
 
@@ -1613,7 +1642,8 @@ private fun PortraitFrame(
     characterName: String,
     /** Three failed death saves: the portrait drains to black and white. */
     dead: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    framing: PortraitFraming = PortraitFraming()
 ) {
     val portraitReference = portraitUri ?: AssetReferences.portraitPlaceholderPath("portrait_placeholder.png")
     val colors = LocalDesignTokens.current.colors
@@ -1646,6 +1676,7 @@ private fun PortraitFrame(
                 contentDescription = characterName,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop,
+                framing = framing,
                 fallback = {
                     PortraitFallback(characterName)
                 }
@@ -1654,27 +1685,12 @@ private fun PortraitFrame(
     }
 }
 
-/** A regular octagon round [center], [radius] to its corners, its sides flat at the top, bottom and sides. */
-private fun octagonPath(center: Offset, radius: Float): Path = Path().apply {
-    for (i in 0 until 8) {
-        val angle = (PI / 8 + i * PI / 4).toFloat()
-        val x = center.x + radius * cos(angle)
-        val y = center.y + radius * sin(angle)
-        if (i == 0) moveTo(x, y) else lineTo(x, y)
-    }
-    close()
-}
-
 /**
  * From the portrait's centre to the middle of the frame's diagonal side, along each axis: the outer
  * contour's inner radius (110dp × cos 22.5°) times cos 45°, about 72dp.
  */
 private val PortraitCornerOffset = (110.0 * cos(PI / 8) * cos(PI / 4)).toFloat().dp
 
-/** The portrait's octagon, filling whatever it clips. */
-private val OctagonShape = GenericShape { size, _ ->
-    addPath(octagonPath(Offset(size.width / 2f, size.height / 2f), size.minDimension / 2f))
-}
 
 @Composable
 private fun PortraitFallback(characterName: String) {
@@ -1707,6 +1723,7 @@ private fun PortraitMenuDialog(
     hasPortrait: Boolean,
     onShowPortrait: () -> Unit,
     onChangePortrait: () -> Unit,
+    onFramePortrait: () -> Unit,
     onDismiss: () -> Unit
 ) {
     EditDialog(
@@ -1725,6 +1742,12 @@ private fun PortraitMenuDialog(
                 icon = Icons.Outlined.Image,
                 enabled = true,
                 onClick = onChangePortrait
+            )
+            PortraitMenuOption(
+                label = text("overview_portrait_frame"),
+                icon = Icons.Outlined.Crop,
+                enabled = true,
+                onClick = onFramePortrait
             )
         }
     }
