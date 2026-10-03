@@ -1,5 +1,11 @@
 package com.dndcharacterhandler.presentation.attributes
 
+import com.dndcharacterhandler.presentation.components.RollMarker
+import com.dndcharacterhandler.domain.rules.rollEffects
+import com.dndcharacterhandler.domain.rules.activeConditions
+import com.dndcharacterhandler.domain.rules.RollEffects
+import com.dndcharacterhandler.domain.rules.D20Test
+import androidx.compose.foundation.layout.widthIn
 import com.dndcharacterhandler.presentation.components.StatCardRow
 import com.dndcharacterhandler.presentation.components.BorderLabelCard
 import com.dndcharacterhandler.presentation.components.MiniStatCardIcon
@@ -405,6 +411,14 @@ fun AttributesContent(
     val character = characterBundle.character
     val strings = LocalStrings.current
     val abilityScores = remember(character) { buildAbilityScores(character) }
+    // The conditions on every check and save, by ability.
+    val activeConditions = remember(character) { activeConditions(character.conditions, character.currentHp) }
+    val checkEffects = remember(activeConditions, character.exhaustion) {
+        AbilityType.entries.associateWith { rollEffects(D20Test.AbilityCheck(it.toAbility()), activeConditions, character.exhaustion) }
+    }
+    val saveEffects = remember(activeConditions, character.exhaustion) {
+        AbilityType.entries.associateWith { rollEffects(D20Test.SavingThrow(it.toAbility()), activeConditions, character.exhaustion) }
+    }
     val proficiencyBonus = proficiencyBonusForLevel(character.level)
     val perceptionSkill = characterBundle?.skills?.firstOrNull { it.name == "skill_perception" }
     val passivePerception = passivePerceptionValue(character, proficiencyBonus, perceptionSkill)
@@ -509,6 +523,8 @@ fun AttributesContent(
                                     score = score,
                                     proficiencyBonus = proficiencyBonus,
                                     modifier = Modifier.weight(1f),
+                                    checkEffects = checkEffects[score.type],
+                                    saveEffects = saveEffects[score.type],
                                     onClick = {
                                         if (characterBundle != null) {
                                             editingAbility = score
@@ -527,6 +543,7 @@ fun AttributesContent(
                 AttributesSectionTitle(title = text("attributes_skills"))
                 SkillGroups(
                     skills = skillRows,
+                    checkEffects = checkEffects,
                     onSkillClick = { skill ->
                         if (characterBundle != null) {
                             editingSkill = skill
@@ -1195,6 +1212,9 @@ private fun AbilityScoreCard(
     score: AbilityScore,
     proficiencyBonus: Int,
     modifier: Modifier = Modifier,
+    /** The conditions on this ability's checks and saves: the values as they are now, with arrows. */
+    checkEffects: RollEffects? = null,
+    saveEffects: RollEffects? = null,
     onClick: () -> Unit = {}
 ) {
     val tokens = LocalDesignTokens.current.typography
@@ -1212,11 +1232,14 @@ private fun AbilityScoreCard(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(1.dp)
         ) {
-            Text(
-                text = signed(score.modifier),
-                style = MaterialTheme.typography.headlineMedium.copy(fontSize = tokens.hpTemporary.fontSizeSp.sp),
-                color = colors.text.primary
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                RollMarker(checkEffects, size = 20.dp)
+                Text(
+                    text = signed(score.modifier + (checkEffects?.modifier ?: 0)),
+                    style = MaterialTheme.typography.headlineMedium.copy(fontSize = tokens.hpTemporary.fontSizeSp.sp),
+                    color = colors.text.primary
+                )
+            }
             Text(
                 text = score.value.toString(),
                 style = MaterialTheme.typography.titleLarge,
@@ -1253,8 +1276,9 @@ private fun AbilityScoreCard(
                     style = MaterialTheme.typography.labelMedium,
                     color = colors.text.muted
                 )
+                RollMarker(saveEffects, modifier = Modifier.padding(start = 4.dp), size = 14.dp)
                 Text(
-                    text = signed(score.saveModifier(proficiencyBonus)),
+                    text = signed(score.saveModifier(proficiencyBonus) + (saveEffects?.modifier ?: 0)),
                     modifier = Modifier.padding(start = 4.dp),
                     style = MaterialTheme.typography.labelMedium,
                     color = colors.text.muted
@@ -1268,6 +1292,8 @@ private fun AbilityScoreCard(
 private fun SkillGroups(
     skills: List<SkillRow>,
     modifier: Modifier = Modifier,
+    /** The conditions on each ability's checks, skills included. */
+    checkEffects: Map<AbilityType, RollEffects> = emptyMap(),
     onSkillClick: (SkillRow) -> Unit = {}
 ) {
     Column(
@@ -1288,6 +1314,7 @@ private fun SkillGroups(
                                 SkillRowCard(
                                     skill = skill,
                                     modifier = Modifier.weight(1f),
+                                    effects = checkEffects[skill.abilityType],
                                     onClick = { onSkillClick(skill) }
                                 )
                             }
@@ -1329,6 +1356,7 @@ private val skillAbilityGroups = listOf(
 private fun SkillRowCard(
     skill: SkillRow,
     modifier: Modifier = Modifier,
+    effects: RollEffects? = null,
     onClick: () -> Unit = {}
 ) {
     val strings = LocalStrings.current
@@ -1377,11 +1405,12 @@ private fun SkillRowCard(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
+            RollMarker(effects, modifier = Modifier.padding(start = 4.dp), size = 16.dp)
             Text(
-                text = signed(skill.modifier),
+                text = signed(skill.modifier + (effects?.modifier ?: 0)),
                 modifier = Modifier
-                    .padding(start = 8.dp)
-                    .width(24.dp),
+                    .padding(start = 4.dp)
+                    .widthIn(min = 24.dp),
                 style = MaterialTheme.typography.bodyLarge,
                 color = colors.text.primary,
                 textAlign = TextAlign.End
@@ -1497,7 +1526,10 @@ enum class AbilityType {
     CONSTITUTION,
     INTELLIGENCE,
     WISDOM,
-    CHARISMA
+    CHARISMA;
+
+    /** The rules' own ability (the same six, by name). */
+    fun toAbility(): SpellcastingAbility = SpellcastingAbility.valueOf(name)
 }
 
 private fun buildSkillRows(skills: List<Skill>, abilityScores: List<AbilityScore>, proficiencyBonus: Int): List<SkillRow> {

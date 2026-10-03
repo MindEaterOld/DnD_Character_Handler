@@ -40,6 +40,10 @@
 | `LimitProgressBar(…)` | 2 | Подпись «текущее / максимум» и полоса под ней (вес инвентаря, подготовленные заклинания); `overLimit` красит в опасный цвет |
 | `SizeToggle(…)` | 2 | Размер существа: три фигуры в рамке карточки стата |
 | `SelectableDot(selected, …)` | 2 | Точка-переключатель: «надето», «подготовлено» |
+| `RollMarker(effects)` / `RollMarker(worse, better)` | 6 | Стрелки у значения, которое меняют состояния: две вниз (`dangerHpZero`) — хуже обычного, две вверх (`heal`) — преимущество. Значение рядом — текущее, своим цветом. В `MiniStatCard` — параметр `valueMarker` (стрелки встают на место иконки) |
+| `ConcentrationToggle(concentrating, onToggle, enabled)` | 1 | Концентрация у заклинания: круг 36dp у отметки «подготовлено», выкл. — `surface.button`, вкл. — золото `primary`; не `enabled`, пока персонаж выведен из строя |
+| `EndConcentrationDialog(spellName, onEnd, onDismiss)` | 2 | «Прервать концентрацию?» — с экрана заклинаний и из столбика состояний |
+| `Condition.icon` / `.nameKey` / `.accent()` (`ConditionVisuals.kt`) | 2 | Значок, ключ названия и цвет состояния |
 | `StepButton(icon, contentDescription, onClick, enabled)` | 1 | Степпер: круг 48dp заливки `surface.button`, иконка `Remove`/`Add` в `text.primary`, у края — `text.subtle`. Брать для любого «−/+» у числа (окна урона и лечения). Старые копии в бою и инвентаре — долг в бэклоге |
 
 ## Текст, картинки, эффекты

@@ -159,7 +159,9 @@ fun MiniStatCard(
     value: String,
     modifier: Modifier = Modifier,
     icon: (@Composable () -> Unit)? = null,
-    onClick: (() -> Unit)? = null
+    onClick: (() -> Unit)? = null,
+    /** Beside the value: the conditions' arrows (RollMarker). */
+    valueMarker: (@Composable () -> Unit)? = null
 ) {
     val typography = LocalDesignTokens.current.typography
     val colors = LocalDesignTokens.current.colors
@@ -171,7 +173,8 @@ fun MiniStatCard(
             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            icon?.invoke()
+            // The arrows take the icon's place: there's no room for both beside a long value.
+            if (valueMarker == null) icon?.invoke()
             val valueStyle = MaterialTheme.typography.headlineMedium.copy(
                 fontSize = typography.miniStatValue.fontSizeSp.sp,
                 lineHeight = (typography.miniStatValue.lineHeightSp ?: typography.miniStatValue.fontSizeSp).sp
@@ -182,6 +185,10 @@ fun MiniStatCard(
                 // AC, bonuses, DCs, coins, ranges: the same size on every screen, never shrunk by a
                 // word beside them; a unit follows in body text.
                 Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    // The arrows close to the number they mark, centred on it.
+                    valueMarker?.let { marker ->
+                        Box(modifier = Modifier.align(Alignment.CenterVertically)) { marker() }
+                    }
                     Text(text = number.groupValues[1], style = valueStyle, color = colors.text.primary, maxLines = 1)
                     number.groupValues[2].takeIf { it.isNotEmpty() }?.let { unit ->
                         Text(
@@ -194,6 +201,7 @@ fun MiniStatCard(
                     }
                 }
             } else {
+                valueMarker?.invoke()
                 AutoSizeText(
                     text = shown,
                     modifier = Modifier.weight(1f, fill = false),

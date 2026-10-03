@@ -74,6 +74,87 @@ class ConditionRulesTest {
         assertEquals(30, effectiveSpeed(30, setOf(Condition.STUNNED), exhaustion = 0))
     }
 
+    /** What the sheet shows for one condition alone: each value the screens mark. */
+    private data class Shown(
+        val attack: RollMode = RollMode.NORMAL,
+        val checks: RollMode = RollMode.NORMAL,
+        val failsStrengthAndDexteritySaves: Boolean = false,
+        val dexteritySave: RollMode = RollMode.NORMAL,
+        val initiative: RollMode = RollMode.NORMAL,
+        val speed: Int = 30,
+        val attacksAgainst: RollMode = RollMode.NORMAL,
+        val damageOf10: Int = 10
+    )
+
+    private val expected = mapOf(
+        Condition.BLINDED to Shown(attack = RollMode.DISADVANTAGE, attacksAgainst = RollMode.ADVANTAGE),
+        Condition.CHARMED to Shown(),
+        Condition.DEAFENED to Shown(),
+        Condition.FRIGHTENED to Shown(attack = RollMode.DISADVANTAGE, checks = RollMode.DISADVANTAGE, initiative = RollMode.DISADVANTAGE),
+        Condition.GRAPPLED to Shown(speed = 0),
+        Condition.INCAPACITATED to Shown(initiative = RollMode.DISADVANTAGE),
+        Condition.INVISIBLE to Shown(attack = RollMode.ADVANTAGE, initiative = RollMode.ADVANTAGE, attacksAgainst = RollMode.DISADVANTAGE),
+        Condition.PARALYZED to Shown(failsStrengthAndDexteritySaves = true, initiative = RollMode.DISADVANTAGE, speed = 0, attacksAgainst = RollMode.ADVANTAGE),
+        Condition.PETRIFIED to Shown(failsStrengthAndDexteritySaves = true, initiative = RollMode.DISADVANTAGE, speed = 0, attacksAgainst = RollMode.ADVANTAGE, damageOf10 = 5),
+        Condition.POISONED to Shown(attack = RollMode.DISADVANTAGE, checks = RollMode.DISADVANTAGE, initiative = RollMode.DISADVANTAGE),
+        Condition.PRONE to Shown(attack = RollMode.DISADVANTAGE),
+        Condition.RESTRAINED to Shown(attack = RollMode.DISADVANTAGE, dexteritySave = RollMode.DISADVANTAGE, speed = 0, attacksAgainst = RollMode.ADVANTAGE),
+        Condition.STUNNED to Shown(failsStrengthAndDexteritySaves = true, initiative = RollMode.DISADVANTAGE, attacksAgainst = RollMode.ADVANTAGE),
+        Condition.UNCONSCIOUS to Shown(attack = RollMode.DISADVANTAGE, failsStrengthAndDexteritySaves = true, initiative = RollMode.DISADVANTAGE, speed = 0, attacksAgainst = RollMode.ADVANTAGE)
+    )
+
+    private fun shown(conditions: Set<Condition>, exhaustion: Int = 0): Shown {
+        val strengthSave = rollEffects(D20Test.SavingThrow(SpellcastingAbility.STRENGTH), conditions, exhaustion)
+        val dexteritySave = rollEffects(D20Test.SavingThrow(SpellcastingAbility.DEXTERITY), conditions, exhaustion)
+        val checks = SpellcastingAbility.entries.map { rollEffects(D20Test.AbilityCheck(it), conditions, exhaustion).mode }.distinct()
+        assertEquals("every ability's check alike", 1, checks.size)
+        return Shown(
+            attack = rollEffects(D20Test.Attack, conditions, exhaustion).mode,
+            checks = checks.single(),
+            failsStrengthAndDexteritySaves = strengthSave.autoFail.isNotEmpty() && dexteritySave.autoFail.isNotEmpty(),
+            dexteritySave = dexteritySave.mode,
+            initiative = rollEffects(D20Test.Initiative, conditions, exhaustion).mode,
+            speed = effectiveSpeed(30, conditions, exhaustion),
+            attacksAgainst = attacksAgainst(conditions),
+            damageOf10 = damageTaken(10, conditions)
+        )
+    }
+
+    @Test
+    fun everyConditionShowsWhatItDoes() {
+        assertEquals(Condition.entries.toSet(), expected.keys)
+        expected.forEach { (condition, want) -> assertEquals(condition.name, want, shown(setOf(condition))) }
+        // The other saves never fail, whatever the condition.
+        Condition.entries.forEach { condition ->
+            listOf(SpellcastingAbility.CONSTITUTION, SpellcastingAbility.INTELLIGENCE, SpellcastingAbility.WISDOM, SpellcastingAbility.CHARISMA).forEach {
+                assertTrue(rollEffects(D20Test.SavingThrow(it), setOf(condition), 0).autoFail.isEmpty())
+            }
+        }
+    }
+
+    @Test
+    fun takingConditionsOffBringsEverythingBack() {
+        // All of them at once, then none: nothing left over.
+        assertEquals(Shown(), shown(emptySet()))
+        val tests = listOf(D20Test.Attack, D20Test.Initiative, D20Test.DeathSave) +
+            SpellcastingAbility.entries.flatMap { listOf(D20Test.AbilityCheck(it), D20Test.SavingThrow(it)) }
+        tests.forEach { assertFalse(rollEffects(it, emptySet(), 0).changesRoll) }
+        assertTrue(rollEffects(D20Test.Attack, Condition.entries.toSet(), 3).changesRoll)
+        // The stored keys go round and come back the same, and an empty list stays empty.
+        assertEquals(Condition.entries.toSet(), Condition.parse(Condition.join(Condition.entries.toSet())))
+        assertEquals(emptySet<Condition>(), Condition.parse(Condition.join(emptySet())))
+        assertEquals(emptySet<Condition>(), Condition.parse(""))
+    }
+
+    @Test
+    fun exhaustionShowsOnEveryRollAndOnSpeed() {
+        val tired = shown(emptySet(), exhaustion = 3)
+        assertEquals(Shown(speed = 15), tired)
+        val tests = listOf(D20Test.Attack, D20Test.Initiative, D20Test.DeathSave) +
+            SpellcastingAbility.entries.flatMap { listOf(D20Test.AbilityCheck(it), D20Test.SavingThrow(it)) }
+        tests.forEach { assertEquals(-6, rollEffects(it, emptySet(), 3).modifier) }
+    }
+
     @Test
     fun zeroHitPointsMeanUnconsciousAndTheSixthLevelOfExhaustionKills() {
         assertTrue(Condition.UNCONSCIOUS in activeConditions(emptySet(), currentHp = 0))

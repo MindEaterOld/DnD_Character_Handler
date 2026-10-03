@@ -93,6 +93,30 @@ fun rollEffects(test: D20Test, conditions: Set<Condition>, exhaustion: Int): Rol
     }
 }
 
+/**
+ * How attacks against the character are rolled: with advantage while it can't see them coming or
+ * can't dodge (blinded, paralyzed, petrified, restrained, stunned, unconscious), with disadvantage
+ * while it's unseen. Prone hangs on the attacker's distance and isn't counted.
+ */
+fun attacksAgainst(conditions: Set<Condition>): RollMode {
+    val active = effectiveConditions(conditions)
+    val advantage = active.any { it in ExposedToAttacks }
+    val disadvantage = Condition.INVISIBLE in active
+    return when {
+        advantage && !disadvantage -> RollMode.ADVANTAGE
+        disadvantage && !advantage -> RollMode.DISADVANTAGE
+        else -> RollMode.NORMAL
+    }
+}
+
+private val ExposedToAttacks = setOf(
+    Condition.BLINDED, Condition.PARALYZED, Condition.PETRIFIED, Condition.RESTRAINED, Condition.STUNNED, Condition.UNCONSCIOUS
+)
+
+/** The damage that gets through: petrified, the character resists all of it (half, rounded down). */
+fun damageTaken(damage: Int, conditions: Set<Condition>): Int =
+    if (Condition.PETRIFIED in effectiveConditions(conditions)) damage.coerceAtLeast(0) / 2 else damage.coerceAtLeast(0)
+
 /** The speed left: 0 while held or bound, otherwise 5 feet less for each level of exhaustion. */
 fun effectiveSpeed(speed: Int, conditions: Set<Condition>, exhaustion: Int): Int =
     if (effectiveConditions(conditions).any { it in Immobilizing }) 0

@@ -1,5 +1,14 @@
 package com.dndcharacterhandler.presentation.combat
 
+import com.dndcharacterhandler.domain.rules.RollMode
+import com.dndcharacterhandler.domain.rules.attacksAgainst
+import com.dndcharacterhandler.presentation.components.isBetter
+import com.dndcharacterhandler.presentation.components.isWorse
+import com.dndcharacterhandler.presentation.components.RollMarker
+import com.dndcharacterhandler.domain.rules.rollEffects
+import com.dndcharacterhandler.domain.rules.activeConditions
+import com.dndcharacterhandler.domain.rules.RollEffects
+import com.dndcharacterhandler.domain.rules.D20Test
 import com.dndcharacterhandler.presentation.components.StatCardRow
 import com.dndcharacterhandler.presentation.components.MiniStatCardIcon
 import androidx.compose.foundation.BorderStroke
@@ -350,8 +359,12 @@ internal fun CombatContent(
     val weaponProficiencyIds = remember(character.weaponProficiencies) {
         decodeProficiencyIds(character.weaponProficiencies)
     }
-    val spellAttackBonus = remember(proficiencyBonus, spellModifier) {
-        signedNumber(proficiencyBonus + spellModifier)
+    // Attack rolls under the conditions: the bonus as it is now, and the arrows.
+    val attackEffects = remember(character) {
+        rollEffects(D20Test.Attack, activeConditions(character.conditions, character.currentHp), character.exhaustion)
+    }
+    val spellAttackBonus = remember(proficiencyBonus, spellModifier, attackEffects) {
+        signedNumber(proficiencyBonus + spellModifier + attackEffects.modifier)
     }
     val spellSaveDc = remember(proficiencyBonus, spellModifier) {
         (8 + proficiencyBonus + spellModifier).toString()
@@ -393,11 +406,15 @@ internal fun CombatContent(
 
                 item {
                     StatCardRow {
+                        val attacksAgainstMode = attacksAgainst(activeConditions(character.conditions, character.currentHp))
                         MiniStatCard(
                             modifier = Modifier.weight(1f),
                             value = character.armorClass.toString(),
                             label = text("stat_card_armor_class"),
                             icon = { MiniStatCardIcon(Icons.Outlined.Shield) },
+                            valueMarker = if (attacksAgainstMode != RollMode.NORMAL) ({
+                                RollMarker(worse = attacksAgainstMode == RollMode.ADVANTAGE, better = attacksAgainstMode == RollMode.DISADVANTAGE, size = 20.dp)
+                            }) else null,
                             onClick = {
                                 armorClassBaseDraft = character.baseArmorClass.toString()
                                 armorClassManualDraft = if (character.armorClassMode == ArmorClassMode.MANUAL) {
@@ -413,6 +430,7 @@ internal fun CombatContent(
                             modifier = Modifier.weight(1f),
                             value = spellAttackBonus,
                             label = text("stat_card_spell_bonus"),
+                            valueMarker = if (attackEffects.isWorse || attackEffects.isBetter) ({ RollMarker(attackEffects, size = 20.dp) }) else null,
                             onClick = { isSpellcastingAbilityDialogOpen = true }
                         )
                         MiniStatCard(
@@ -438,6 +456,7 @@ internal fun CombatContent(
                             attack = attack,
                             character = character,
                             proficiencyBonus = proficiencyBonus,
+                            attackEffects = attackEffects,
                             mastery = attackMastery(attack, resolvedBundle, characterCatalog),
                             onClick = { editingAttack = attack }
                         )
@@ -446,6 +465,7 @@ internal fun CombatContent(
                         SpellAttackCard(
                             spell = spell,
                             spellAttackBonus = spellAttackBonus,
+                            attackEffects = attackEffects,
                             spellSaveDcLabel = spellSaveDcLabel,
                             spellModifier = spellModifier,
                             onClick = { editingSpellAttack = spell }
@@ -987,6 +1007,8 @@ private fun AttackCard(
     attack: Attack,
     character: com.dndcharacterhandler.domain.model.Character,
     proficiencyBonus: Int,
+    /** The conditions on attack rolls. */
+    attackEffects: RollEffects? = null,
     /** The mastery property of the attack's weapon, when the character has mastered it. */
     mastery: CatalogWeaponMastery? = null,
     onClick: () -> Unit
@@ -1003,7 +1025,8 @@ private fun AttackCard(
     val attackBonusLabel = attack.displayAttackBonusOrSaveDc(
         character = character,
         proficiencyBonus = proficiencyBonus,
-        attackLabel = text("combat_attack_section_attack")
+        attackLabel = text("combat_attack_section_attack"),
+        conditionModifier = attackEffects?.modifier ?: 0
     )
     val damageLabel = attack.displayDamage(character = character)
     val colors = LocalDesignTokens.current.colors
@@ -1060,13 +1083,16 @@ private fun AttackCard(
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 attackBonusLabel.takeIf { it.isNotBlank() }?.let { label ->
-                    Text(
-                        text = label,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = colors.text.primary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        RollMarker(attackEffects, modifier = Modifier.padding(end = 4.dp), size = 16.dp)
+                        Text(
+                            text = label,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = colors.text.primary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
                 Text(
                     text = damageLabel,
@@ -1092,6 +1118,7 @@ private fun AttackCard(
 private fun SpellAttackCard(
     spell: Spell,
     spellAttackBonus: String,
+    attackEffects: RollEffects? = null,
     spellSaveDcLabel: String,
     spellModifier: Int,
     onClick: () -> Unit
@@ -1171,13 +1198,18 @@ private fun SpellAttackCard(
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 bonusLine.takeIf { it.isNotBlank() }?.let { label ->
-                    Text(
-                        text = label,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = colors.text.primary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        if (resolution == SpellResolutionKind.ATTACK) {
+                            RollMarker(attackEffects, modifier = Modifier.padding(end = 4.dp), size = 16.dp)
+                        }
+                        Text(
+                            text = label,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = colors.text.primary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
                 amountLabel.takeIf { it.isNotBlank() }?.let { amount ->
                     Text(
@@ -2549,13 +2581,15 @@ private fun Attack.displayRange(
 private fun Attack.displayAttackBonusOrSaveDc(
     character: com.dndcharacterhandler.domain.model.Character,
     proficiencyBonus: Int,
-    attackLabel: String
+    attackLabel: String,
+    /** The conditions' penalty (exhaustion); a hand-written bonus stays as written. */
+    conditionModifier: Int = 0
 ): String {
     return if (calculationMode == AttackCalculationMode.MANUAL) {
         manualAttackBonusOrSaveDc
     } else {
         val abilityScore = scoreForSpellcastingAbility(character, ability)
-        val total = (if (isProficient) proficiencyBonus else 0) + abilityModifier(abilityScore) + magicalBonus
+        val total = (if (isProficient) proficiencyBonus else 0) + abilityModifier(abilityScore) + magicalBonus + conditionModifier
         "${signedNumber(total)} $attackLabel"
     }
 }

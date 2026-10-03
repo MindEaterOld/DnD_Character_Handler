@@ -3774,6 +3774,140 @@
     "fr": "Inconscient",
     "es": "Inconsciente"
   },
+  "roll_marker_worse": {
+    "en": "Worse than usual because of conditions",
+    "ru": "Хуже обычного из-за состояний",
+    "de": "Wegen Zuständen schlechter als sonst",
+    "fr": "Moins bon que d'habitude à cause des états",
+    "es": "Peor de lo habitual por los estados"
+  },
+  "roll_marker_better": {
+    "en": "Advantage",
+    "ru": "Преимущество",
+    "de": "Vorteil",
+    "fr": "Avantage",
+    "es": "Ventaja"
+  },
+  "conditions_title": {
+    "en": "Conditions",
+    "ru": "Состояния",
+    "de": "Zustände",
+    "fr": "États",
+    "es": "Estados"
+  },
+  "conditions_add": {
+    "en": "Add a condition",
+    "ru": "Добавить состояние",
+    "de": "Zustand hinzufügen",
+    "fr": "Ajouter un état",
+    "es": "Añadir un estado"
+  },
+  "conditions_exhaustion_level": {
+    "en": "Exhaustion %1$d",
+    "ru": "Истощение %1$d",
+    "de": "Erschöpfung %1$d",
+    "fr": "Épuisement %1$d",
+    "es": "Agotamiento %1$d"
+  },
+  "conditions_exhaustion_effect": {
+    "en": "−%1$d to d20 · −%2$d %3$s",
+    "ru": "−%1$d к d20 · −%2$d %3$s",
+    "de": "−%1$d auf W20 · −%2$d %3$s",
+    "fr": "−%1$d au d20 · −%2$d %3$s",
+    "es": "−%1$d al d20 · −%2$d %3$s"
+  },
+  "conditions_summary_attack_disadvantage": {
+    "en": "disadvantage on attacks",
+    "ru": "помеха на атаки",
+    "de": "Nachteil bei Angriffen",
+    "fr": "désavantage aux attaques",
+    "es": "desventaja en ataques"
+  },
+  "conditions_summary_attack_advantage": {
+    "en": "advantage on attacks",
+    "ru": "преимущество на атаки",
+    "de": "Vorteil bei Angriffen",
+    "fr": "avantage aux attaques",
+    "es": "ventaja en ataques"
+  },
+  "conditions_summary_check_disadvantage": {
+    "en": "disadvantage on ability checks",
+    "ru": "помеха на проверки",
+    "de": "Nachteil bei Attributswürfen",
+    "fr": "désavantage aux tests de caractéristique",
+    "es": "desventaja en pruebas de característica"
+  },
+  "conditions_summary_initiative_disadvantage": {
+    "en": "disadvantage on initiative",
+    "ru": "помеха на инициативу",
+    "de": "Nachteil bei der Initiative",
+    "fr": "désavantage à l'initiative",
+    "es": "desventaja en iniciativa"
+  },
+  "conditions_summary_initiative_advantage": {
+    "en": "advantage on initiative",
+    "ru": "преимущество на инициативу",
+    "de": "Vorteil bei der Initiative",
+    "fr": "avantage à l'initiative",
+    "es": "ventaja en iniciativa"
+  },
+  "conditions_summary_save_fail": {
+    "en": "Strength and Dexterity saves fail",
+    "ru": "спасброски Силы и Ловкости проваливаются",
+    "de": "Stärke- und Geschicklichkeitsrettungswürfe misslingen",
+    "fr": "échec aux jets de sauvegarde de Force et de Dextérité",
+    "es": "fallan las salvaciones de Fuerza y Destreza"
+  },
+  "conditions_summary_dex_save_disadvantage": {
+    "en": "disadvantage on Dexterity saves",
+    "ru": "помеха на спасброски Ловкости",
+    "de": "Nachteil bei Geschicklichkeitsrettungswürfen",
+    "fr": "désavantage aux sauvegardes de Dextérité",
+    "es": "desventaja en salvaciones de Destreza"
+  },
+  "conditions_summary_speed_zero": {
+    "en": "speed 0",
+    "ru": "скорость 0",
+    "de": "Bewegungsrate 0",
+    "fr": "vitesse 0",
+    "es": "velocidad 0"
+  },
+  "conditions_summary_incapacitated": {
+    "en": "no actions or reactions, concentration ends",
+    "ru": "нет действий и реакций, концентрация прерывается",
+    "de": "keine Aktionen oder Reaktionen, Konzentration endet",
+    "fr": "ni actions ni réactions, la concentration prend fin",
+    "es": "sin acciones ni reacciones, la concentración termina"
+  },
+  "concentration_title": {
+    "en": "Concentration",
+    "ru": "Концентрация",
+    "de": "Konzentration",
+    "fr": "Concentration",
+    "es": "Concentración"
+  },
+  "concentration_card": {
+    "maxChars": 11,
+    "en": "Concentr.",
+    "ru": "Концентр.",
+    "de": "Konzentr.",
+    "fr": "Concentr.",
+    "es": "Concentr."
+  },
+  "concentration_end": {
+    "en": "End",
+    "ru": "Прервать",
+    "de": "Beenden",
+    "fr": "Mettre fin",
+    "es": "Terminar"
+  },
+  "concentration_end_hint": {
+    "en": "Lasts until you're incapacitated or fail a Constitution save after taking damage. Casting another concentration spell ends it.",
+    "ru": "Держится, пока вы не выведены из строя и не провалили спасбросок Телосложения после урона. Новое заклинание с концентрацией прерывает прежнее.",
+    "de": "Hält, bis du kampfunfähig wirst oder nach Schaden einen Konstitutionsrettungswurf nicht schaffst. Ein neuer Konzentrationszauber beendet sie.",
+    "fr": "Dure jusqu'à ce que vous soyez neutralisé ou ratiez un jet de sauvegarde de Constitution après des dégâts. Lancer un autre sort de concentration y met fin.",
+    "es": "Dura hasta que quedes incapacitado o falles una salvación de Constitución tras recibir daño. Lanzar otro conjuro de concentración la termina."
+  },
   "overview_hp_hint_concentration": {
     "en": "Concentration on %1$s: Constitution save DC %2$d",
     "ru": "Концентрация на «%1$s»: спасбросок Телосложения СЛ %2$d",
@@ -3787,6 +3921,13 @@
     "de": "Die Konzentration auf %1$s endet",
     "fr": "La concentration sur %1$s prend fin",
     "es": "La concentración en %1$s termina"
+  },
+  "overview_hp_hint_resistance": {
+    "en": "Petrified, resists all damage: %1$d of %2$d",
+    "ru": "Окаменение, сопротивление всему урону: %1$d из %2$d",
+    "de": "Versteinert, resistent gegen allen Schaden: %1$d von %2$d",
+    "fr": "Pétrifié, résistant à tous les dégâts : %1$d sur %2$d",
+    "es": "Petrificado, resiste todo el daño: %1$d de %2$d"
   },
   "overview_hp_heal_title": {
     "en": "Healing",
@@ -5754,7 +5895,7 @@
     "ru": "Концентрация",
     "de": "Konzentration",
     "fr": "Concentration",
-    "es": "Concentracion"
+    "es": "Concentración"
   },
   "spells_section_effect": {
     "en": "Effect",

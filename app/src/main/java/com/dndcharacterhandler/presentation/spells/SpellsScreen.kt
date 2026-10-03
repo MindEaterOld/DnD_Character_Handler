@@ -1,5 +1,19 @@
 package com.dndcharacterhandler.presentation.spells
 
+import com.dndcharacterhandler.domain.rules.breaksConcentration
+import com.dndcharacterhandler.presentation.components.MiniStatCardHeight
+import com.dndcharacterhandler.presentation.components.BorderLabelCard
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.foundation.layout.BoxWithConstraints
+import com.dndcharacterhandler.presentation.components.isBetter
+import com.dndcharacterhandler.presentation.components.isWorse
+import com.dndcharacterhandler.presentation.components.RollMarker
+import com.dndcharacterhandler.presentation.components.EndConcentrationDialog
+import com.dndcharacterhandler.presentation.components.ConcentrationToggle
+import com.dndcharacterhandler.domain.rules.rollEffects
+import com.dndcharacterhandler.domain.rules.activeConditions
+import com.dndcharacterhandler.domain.rules.D20Test
 import com.dndcharacterhandler.presentation.components.StatCardRow
 import com.dndcharacterhandler.presentation.components.MiniStatCard
 import androidx.compose.foundation.BorderStroke
@@ -166,6 +180,21 @@ class SpellsViewModel(
         }
     }
 
+    /** Concentrating on [spell], or letting go of it; a new one ends the one held before. */
+    fun toggleConcentration(characterBundle: CharacterBundle, spell: Spell) {
+        val current = characterBundle.character
+        val next = if (current.concentrationSpellId == spell.id) null else spell.id
+        // Whoever is incapacitated (unconscious at 0 hit points too) can't take it up.
+        if (next != null && breaksConcentration(activeConditions(current.conditions, current.currentHp))) return
+        viewModelScope.launch { characterRepository.updateConcentration(current.id, next) }
+    }
+
+    fun endConcentration(characterBundle: CharacterBundle) {
+        val current = characterBundle.character
+        if (current.concentrationSpellId == null) return
+        viewModelScope.launch { characterRepository.updateConcentration(current.id, null) }
+    }
+
     fun togglePrepared(characterBundle: CharacterBundle, spell: Spell) {
         updateSpell(
             characterBundle,
@@ -268,6 +297,8 @@ fun SpellsScreen(
         onUpdateSpell = viewModel::updateSpell,
         onDeleteSpell = viewModel::deleteSpell,
         onTogglePrepared = viewModel::togglePrepared,
+        onToggleConcentration = viewModel::toggleConcentration,
+        onEndConcentration = viewModel::endConcentration,
         onUpdateAllSpellSlots = viewModel::updateAllSpellSlots,
         onUpdateSpellSlotRemaining = viewModel::updateSpellSlotRemaining,
         onUpdateSpellcastingAbility = viewModel::updateSpellcastingAbility
@@ -287,6 +318,8 @@ internal fun SpellsContent(
     onUpdateSpell: (CharacterBundle, Spell) -> Unit = { _, _ -> },
     onDeleteSpell: (CharacterBundle, Spell) -> Unit = { _, _ -> },
     onTogglePrepared: (CharacterBundle, Spell) -> Unit = { _, _ -> },
+    onToggleConcentration: (CharacterBundle, Spell) -> Unit = { _, _ -> },
+    onEndConcentration: (CharacterBundle) -> Unit = {},
     onUpdateAllSpellSlots: (CharacterBundle, List<Int>, List<Int>, Boolean, Boolean) -> Unit = { _, _, _, _, _ -> },
     onUpdateSpellSlotRemaining: (CharacterBundle, Int, Int) -> Unit = { _, _, _ -> },
     onUpdateSpellcastingAbility: (CharacterBundle, SpellcastingAbility) -> Unit = { _, _ -> }
@@ -298,6 +331,7 @@ internal fun SpellsContent(
     var isSlotsDialogOpen by remember { mutableStateOf(false) }
     var isAddEntryDialogOpen by remember { mutableStateOf(false) }
     var isSpellcastingAbilityDialogOpen by remember { mutableStateOf(false) }
+    var isEndConcentrationOpen by remember { mutableStateOf(false) }
     // Unfolded cards, kept while scrolling; several can be open at once to compare them.
     var expandedSpells by remember(characterBundle?.character?.id) { mutableStateOf(initiallyExpanded) }
 
@@ -327,7 +361,11 @@ internal fun SpellsContent(
     val resolvedBundle = characterBundle
     val spellModifier = abilityModifier(scoreForSpellcastingAbility(character, character.spellcastingAbility))
     val proficiencyBonus = proficiencyBonusForLevel(character.level)
-    val spellAttackBonus = signedNumber(proficiencyBonus + spellModifier)
+    // A spell attack is an attack roll: the conditions count.
+    val attackEffects = rollEffects(D20Test.Attack, activeConditions(character.conditions, character.currentHp), character.exhaustion)
+    val spellAttackBonus = signedNumber(proficiencyBonus + spellModifier + attackEffects.modifier)
+    val concentrationSpell = resolvedBundle.spells.firstOrNull { it.id == character.concentrationSpellId }
+    val canConcentrate = !breaksConcentration(activeConditions(character.conditions, character.currentHp))
     val spellSaveDc = (8 + proficiencyBonus + spellModifier).toString()
     val slotMaximums = remember(character.spellSlotMaximums) { character.spellSlotMaximums.toSpellSlotList() }
     val slotRemainings = remember(character.spellSlotRemaining) { character.spellSlotRemaining.toSpellSlotList() }
@@ -362,15 +400,16 @@ internal fun SpellsContent(
 
                 item {
                     StatCardRow {
-                        MiniStatCard(
+                        ConcentrationCard(
+                            spellName = concentrationSpell?.name,
                             modifier = Modifier.weight(1f),
-                            label = text("placeholder_class"),
-                            value = character.characterClass
+                            onClick = { isEndConcentrationOpen = true }
                         )
                         MiniStatCard(
                             modifier = Modifier.weight(1f),
                             label = text("stat_card_spell_bonus"),
                             value = spellAttackBonus,
+                            valueMarker = if (attackEffects.isWorse || attackEffects.isBetter) ({ RollMarker(attackEffects, size = 20.dp) }) else null,
                             onClick = { isSpellcastingAbilityDialogOpen = true }
                         )
                         MiniStatCard(
@@ -434,7 +473,10 @@ internal fun SpellsContent(
                                     expandedSpells = if (open) expandedSpells + spell.id else expandedSpells - spell.id
                                 },
                                 onEdit = { editingSpell = spell },
-                                onTogglePrepared = { onTogglePrepared(resolvedBundle, spell) }
+                                onTogglePrepared = { onTogglePrepared(resolvedBundle, spell) },
+                                concentrating = character.concentrationSpellId == spell.id,
+                                canConcentrate = canConcentrate,
+                                onToggleConcentration = { onToggleConcentration(resolvedBundle, spell) }
                             )
                         }
                     }
@@ -482,6 +524,18 @@ internal fun SpellsContent(
             } else {
                 null
             }
+        )
+    }
+
+    val heldSpell = characterBundle.spells.firstOrNull { it.id == character.concentrationSpellId }
+    if (isEndConcentrationOpen && heldSpell != null) {
+        EndConcentrationDialog(
+            spellName = heldSpell.name,
+            onEnd = {
+                onEndConcentration(characterBundle)
+                isEndConcentrationOpen = false
+            },
+            onDismiss = { isEndConcentrationOpen = false }
         )
     }
 
@@ -665,7 +719,12 @@ private fun SpellCard(
     expanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
     onEdit: () -> Unit,
-    onTogglePrepared: () -> Unit
+    onTogglePrepared: () -> Unit,
+    /** Held by the character's concentration now; a concentration spell gets the toggle. */
+    concentrating: Boolean = false,
+    /** The character can concentrate (isn't incapacitated). */
+    canConcentrate: Boolean = true,
+    onToggleConcentration: () -> Unit = {}
 ) {
     val strings = LocalStrings.current
     val subtitle = listOfNotNull(
@@ -685,7 +744,14 @@ private fun SpellCard(
         onExpandedChange = onExpandedChange,
         subtitle = subtitle,
         body = body,
-        trailing = { SelectableDot(selected = spell.isPrepared, onClick = onTogglePrepared) },
+        trailing = {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                if (spell.requiresConcentration) {
+                    ConcentrationToggle(concentrating = concentrating, onToggle = onToggleConcentration, enabled = canConcentrate)
+                }
+                SelectableDot(selected = spell.isPrepared, onClick = onTogglePrepared)
+            }
+        },
         onLongClick = onEdit,
         actions = { CardEditButton(onClick = onEdit) }
     )
@@ -2241,3 +2307,72 @@ private val SpellcastingAbility.labelKey: String
         SpellcastingAbility.WISDOM -> "ability_wisdom"
         SpellcastingAbility.CHARISMA -> "ability_charisma"
     }
+
+/**
+ * Concentration among the spells screen's stats, where the class was (owner's choice, 2026-10-03):
+ * lit in gold while a spell is held, its name as much as fits and cut with a dot, a tap offering to
+ * end it; quiet, with a dash, while nothing is held.
+ */
+@Composable
+private fun ConcentrationCard(spellName: String?, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    val colors = LocalDesignTokens.current.colors
+    val typography = LocalDesignTokens.current.typography
+    val gold = MaterialTheme.colorScheme.primary
+    val lit = spellName != null
+    val valueStyle = MaterialTheme.typography.headlineMedium.copy(
+        fontSize = typography.miniStatValue.fontSizeSp.sp,
+        lineHeight = (typography.miniStatValue.lineHeightSp ?: typography.miniStatValue.fontSizeSp).sp
+    )
+    BorderLabelCard(
+        label = text("concentration_card"),
+        modifier = modifier.height(MiniStatCardHeight),
+        labelColor = if (lit) gold else colors.text.miniLabel,
+        border = if (lit) gold else colors.border.miniCard,
+        onClick = if (lit) onClick else null
+    ) {
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 10.dp, vertical = 6.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            if (spellName == null) {
+                Text(text = "—", style = valueStyle, color = colors.text.subtle)
+            } else {
+                DotFittedText(
+                    text = spellName,
+                    styles = listOf(valueStyle, MaterialTheme.typography.titleLarge, MaterialTheme.typography.titleMedium),
+                    maxWidth = constraints.maxWidth,
+                    color = gold
+                )
+            }
+        }
+    }
+}
+
+/**
+ * [text] on one line in the first of [styles] it fits in [maxWidth] pixels; in the last, cut to fit
+ * and ended with a dot, as the app shortens a word that doesn't fit ("Благослов.").
+ */
+@Composable
+private fun DotFittedText(text: String, styles: List<TextStyle>, maxWidth: Int, color: Color) {
+    val measurer = rememberTextMeasurer()
+    val (shown, style) = remember(text, styles, maxWidth) {
+        fun fits(value: String, style: TextStyle) = measurer.measure(value, style, maxLines = 1, softWrap = false).size.width <= maxWidth
+        styles.firstOrNull { fits(text, it) }?.let { text to it } ?: run {
+            val style = styles.last()
+            var length = text.length - 1
+            var cut = text.take(1) + "."
+            while (length > 1) {
+                val candidate = text.take(length).trimEnd() + "."
+                if (fits(candidate, style)) {
+                    cut = candidate
+                    break
+                }
+                length--
+            }
+            cut to style
+        }
+    }
+    Text(text = shown, style = style, color = color, maxLines = 1, softWrap = false)
+}

@@ -1,4 +1,13 @@
 package com.dndcharacterhandler.presentation.overview
+import com.dndcharacterhandler.domain.rules.RollMode
+import com.dndcharacterhandler.domain.rules.damageTaken
+import com.dndcharacterhandler.domain.rules.attacksAgainst
+import com.dndcharacterhandler.presentation.components.EndConcentrationDialog
+import com.dndcharacterhandler.presentation.components.isBetter
+import com.dndcharacterhandler.presentation.components.isWorse
+import com.dndcharacterhandler.presentation.components.RollMarker
+import com.dndcharacterhandler.domain.rules.effectiveSpeed
+import com.dndcharacterhandler.domain.rules.activeConditions
 import com.dndcharacterhandler.domain.rules.concentrationSaveDc
 import com.dndcharacterhandler.domain.rules.isDead
 import com.dndcharacterhandler.domain.rules.rollEffects
@@ -316,7 +325,8 @@ class OverviewViewModel(
     fun damageHitPoints(characterBundle: CharacterBundle, amount: Int) {
         val current = characterBundle.character
         val before = DeathSaves(current.deathSaveSuccesses, current.deathSaveFailures)
-        val result = takeDamage(amount, current.currentHp, current.temporaryHp, current.maxHp, before)
+        val dealt = damageTaken(amount, activeConditions(current.conditions, current.currentHp))
+        val result = takeDamage(dealt, current.currentHp, current.temporaryHp, current.maxHp, before)
         val hitPointsChanged = result.currentHp != current.currentHp || result.temporaryHp != current.temporaryHp
         if (!hitPointsChanged && result.saves == before) return
         viewModelScope.launch {
@@ -576,7 +586,10 @@ private data class OverviewStat(
     val labelKey: String,
     val value: String,
     val icon: androidx.compose.ui.graphics.vector.ImageVector?,
-    val field: OverviewMiniStatField
+    val field: OverviewMiniStatField,
+    /** The conditions make it worse or better than usual: arrows beside the value. */
+    val worse: Boolean = false,
+    val better: Boolean = false
 )
 
 private enum class OverviewEditableField {
@@ -632,6 +645,9 @@ fun OverviewScreen(
         onUpdateExperience = viewModel::updateExperience,
         onUpdatePortrait = viewModel::updatePortrait,
         onUpdatePortraitFraming = viewModel::updatePortraitFraming,
+        onUpdateConditions = viewModel::updateConditions,
+        onUpdateExhaustion = viewModel::updateExhaustion,
+        onEndConcentration = viewModel::endConcentration,
         onDamageHitPoints = viewModel::damageHitPoints,
         onHealHitPoints = viewModel::healHitPoints,
         onAddTemporaryHitPoints = viewModel::addTemporaryHitPoints,
@@ -688,6 +704,9 @@ private fun OverviewContent(
     onUpdateExperience: (CharacterBundle, Int) -> Unit,
     onUpdatePortrait: (CharacterBundle, String?) -> Unit,
     onUpdatePortraitFraming: (CharacterBundle, PortraitFraming) -> Unit = { _, _ -> },
+    onUpdateConditions: (CharacterBundle, Set<Condition>) -> Unit = { _, _ -> },
+    onUpdateExhaustion: (CharacterBundle, Int) -> Unit = { _, _ -> },
+    onEndConcentration: (CharacterBundle) -> Unit = {},
     onDamageHitPoints: (CharacterBundle, Int) -> Unit,
     onHealHitPoints: (CharacterBundle, Int) -> Unit,
     onAddTemporaryHitPoints: (CharacterBundle, Int) -> Unit,
@@ -739,6 +758,8 @@ private fun OverviewContent(
     var isPortraitMenuOpen by remember { mutableStateOf(false) }
     var isPortraitViewerOpen by remember { mutableStateOf(false) }
     var isPortraitFramingOpen by remember { mutableStateOf(false) }
+    var isConditionsDialogOpen by remember { mutableStateOf(false) }
+    var isEndConcentrationOpen by remember { mutableStateOf(false) }
     var isExperienceDialogOpen by remember { mutableStateOf(false) }
     var experienceEditMode by remember { mutableStateOf(OverviewExperienceEditMode.ADD) }
     var experienceDraft by remember(character?.id, character?.experience) { mutableStateOf("") }
@@ -791,6 +812,8 @@ private fun OverviewContent(
     val levelLabel = strings.format("overview_level_format", character?.level ?: 1)
     val xpInfo = remember(character) { buildXpInfo(character) }
 
+    val concentrationSpell = characterBundle?.spells?.firstOrNull { it.id == character?.concentrationSpellId }
+
     val openHpDialog: (OverviewHpEditMode) -> Unit = { mode ->
         hpEditMode = mode
         hpDraft = ""
@@ -798,25 +821,36 @@ private fun OverviewContent(
     }
 
     val miniStats = remember(character, strings) {
+        val active = character?.let { activeConditions(it.conditions, it.currentHp) }.orEmpty()
+        val exhaustion = character?.exhaustion ?: 0
+        val initiativeEffects = rollEffects(D20Test.Initiative, active, exhaustion)
+        val baseSpeed = character?.speed ?: 30
+        val speed = effectiveSpeed(baseSpeed, active, exhaustion)
         listOf(
             OverviewStat(
                 // The same label as the Combat screen's card.
                 labelKey = "stat_card_armor_class",
                 value = (character?.armorClass ?: 10).toString(),
                 icon = Icons.Outlined.Shield,
-                field = OverviewMiniStatField.ARMOR_CLASS
+                field = OverviewMiniStatField.ARMOR_CLASS,
+                // Attacks against the character with advantage: worse; with disadvantage: better.
+                worse = attacksAgainst(active) == RollMode.ADVANTAGE,
+                better = attacksAgainst(active) == RollMode.DISADVANTAGE
             ),
             OverviewStat(
                 labelKey = "overview_initiative",
-                value = signed(calculateInitiative(character?.dexterity ?: 10, character?.initiativeBonus ?: 0)),
+                value = signed(calculateInitiative(character?.dexterity ?: 10, character?.initiativeBonus ?: 0) + initiativeEffects.modifier),
                 icon = null,
-                field = OverviewMiniStatField.INITIATIVE
+                field = OverviewMiniStatField.INITIATIVE,
+                worse = initiativeEffects.isWorse,
+                better = initiativeEffects.isBetter
             ),
             OverviewStat(
                 labelKey = "overview_speed",
-                value = "${character?.speed ?: 30} ${strings["inventory_unit_feet"]}",
+                value = "$speed ${strings["inventory_unit_feet"]}",
                 icon = Icons.AutoMirrored.Outlined.DirectionsRun,
-                field = OverviewMiniStatField.SPEED
+                field = OverviewMiniStatField.SPEED,
+                worse = speed < baseSpeed
             )
         )
     }
@@ -851,6 +885,20 @@ private fun OverviewContent(
                                 }
                             }
                         )
+                        // The conditions down the left, as the rests go down the right.
+                        if (character != null) {
+                            ConditionsColumn(
+                                // Unconscious at 0 hit points too: it explains the arrows.
+                                conditions = activeConditions(character.conditions, character.currentHp),
+                                exhaustion = character.exhaustion,
+                                concentrating = concentrationSpell != null,
+                                onOpenPicker = { isConditionsDialogOpen = true },
+                                onOpenConcentration = { isEndConcentrationOpen = true },
+                                modifier = Modifier
+                                    .align(Alignment.TopStart)
+                                    .offset(y = (-2).dp)
+                            )
+                        }
                         // The rests: bare icons in a column under the dice button, like the top bar's own.
                         Column(
                             modifier = Modifier
@@ -1018,6 +1066,7 @@ private fun OverviewContent(
                             value = stat.value,
                             label = text(stat.labelKey),
                             icon = if (statIcon == null) null else ({ MiniStatCardIcon(statIcon) }),
+                            valueMarker = if (stat.worse || stat.better) ({ RollMarker(worse = stat.worse, better = stat.better, size = 18.dp) }) else null,
                             onClick = {
                                 activeMiniStatField = stat.field
                                 miniStatDraft = when (stat.field) {
@@ -1188,13 +1237,15 @@ private fun OverviewContent(
         val current = characterBundle.character
         val amount = hpDraft.toIntOrNull()?.coerceAtLeast(0) ?: 0
         val damage = hpEditMode == OverviewHpEditMode.DAMAGE
+        // What gets through: petrified, half.
+        val taken = if (damage) damageTaken(amount, activeConditions(current.conditions, current.currentHp)) else amount
         val before = HpPreview(current.currentHp, current.maxHp, current.temporaryHp)
-        val result = remember(current.currentHp, current.maxHp, current.temporaryHp, amount, hpEditMode) {
-            calculateHpPreview(current.currentHp, current.maxHp, current.temporaryHp, amount, hpEditMode)
+        val result = remember(current.currentHp, current.maxHp, current.temporaryHp, taken, hpEditMode) {
+            calculateHpPreview(current.currentHp, current.maxHp, current.temporaryHp, taken, hpEditMode)
         }
         val savesBefore = DeathSaves(current.deathSaveSuccesses, current.deathSaveFailures)
-        val savesAfter = if (damage && amount > 0) {
-            takeDamage(amount, current.currentHp, current.temporaryHp, current.maxHp, savesBefore).saves
+        val savesAfter = if (damage && taken > 0) {
+            takeDamage(taken, current.currentHp, current.temporaryHp, current.maxHp, savesBefore).saves
         } else {
             savesBefore
         }
@@ -1217,7 +1268,8 @@ private fun OverviewContent(
         val hints = buildList {
             when (hpEditMode) {
                 OverviewHpEditMode.DAMAGE -> {
-                    val absorbed = minOf(amount, current.temporaryHp)
+                    if (taken != amount) add(strings.format("overview_hp_hint_resistance", taken, amount) to colors.text.muted)
+                    val absorbed = minOf(taken, current.temporaryHp)
                     if (absorbed > 0) add(strings.format("overview_hp_hint_absorbed", absorbed) to colors.accent.hpTemporary)
                     if (savesAfter != savesBefore) {
                         val hint = if (savesAfter.isDead) strings["overview_death_saves_dead"] else strings.format("overview_hp_death_save_failures", savesAfter.failures)
@@ -1225,11 +1277,11 @@ private fun OverviewContent(
                     }
                     // Any damage tests concentration; dropping to 0 ends it.
                     val held = characterBundle.spells.firstOrNull { it.id == current.concentrationSpellId }
-                    if (held != null && amount > 0) {
+                    if (held != null && taken > 0) {
                         val hint = if (result.currentHp == 0) {
                             strings.format("overview_hp_hint_concentration_lost", held.name)
                         } else {
-                            strings.format("overview_hp_hint_concentration", held.name, concentrationSaveDc(amount))
+                            strings.format("overview_hp_hint_concentration", held.name, concentrationSaveDc(taken))
                         }
                         add(hint to colors.accent.magical)
                     }
@@ -1619,6 +1671,30 @@ private fun OverviewContent(
         )
     }
 
+    if (isConditionsDialogOpen && characterBundle != null) {
+        ConditionsDialog(
+            initialConditions = characterBundle.character.conditions,
+            initialExhaustion = characterBundle.character.exhaustion,
+            onSave = { conditions, exhaustion ->
+                onUpdateConditions(characterBundle, conditions)
+                onUpdateExhaustion(characterBundle, exhaustion)
+                isConditionsDialogOpen = false
+            },
+            onDismiss = { isConditionsDialogOpen = false }
+        )
+    }
+
+    if (isEndConcentrationOpen && characterBundle != null && concentrationSpell != null) {
+        EndConcentrationDialog(
+            spellName = concentrationSpell.name,
+            onEnd = {
+                onEndConcentration(characterBundle)
+                isEndConcentrationOpen = false
+            },
+            onDismiss = { isEndConcentrationOpen = false }
+        )
+    }
+
     if (isPortraitFramingOpen && characterBundle != null) {
         PortraitFramingDialog(
             portraitReference = characterBundle.character.portraitUri
@@ -1911,7 +1987,7 @@ private fun PortraitViewerContent(
 }
 
 /** How much of an HP action's colour fills its button: at 12 % even the red label reads (4.6:1). */
-private const val HpActionTint = 0.12f
+internal const val HpActionTint = 0.12f
 
 /**
  * Healing or damage, hanging from the hit points' card beside the death saves' tab like a tab of its
