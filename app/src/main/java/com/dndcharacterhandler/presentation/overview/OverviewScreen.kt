@@ -30,6 +30,22 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import com.dndcharacterhandler.domain.model.PortraitFraming
 import androidx.compose.material.icons.outlined.Crop
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Remove
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.drawscope.clipPath
+import androidx.compose.ui.text.input.ImeAction
+import com.dndcharacterhandler.domain.rules.gainTemporaryHitPoints
+import com.dndcharacterhandler.domain.rules.heal
+import com.dndcharacterhandler.presentation.components.StepButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.foundation.shape.GenericShape
 import kotlin.math.cos
@@ -304,18 +320,13 @@ class OverviewViewModel(
     }
 
     fun healHitPoints(characterBundle: CharacterBundle, amount: Int) {
-        val healing = amount.coerceAtLeast(0)
         val current = characterBundle.character
-        val newCurrentHp = (current.currentHp + healing).coerceAtMost(current.maxHp)
-
-        updateHitPoints(characterBundle, newCurrentHp, current.temporaryHp)
+        updateHitPoints(characterBundle, heal(amount, current.currentHp, current.maxHp), current.temporaryHp)
     }
 
     fun addTemporaryHitPoints(characterBundle: CharacterBundle, amount: Int) {
-        val temporaryHp = amount.coerceAtLeast(0)
         val current = characterBundle.character
-
-        updateHitPoints(characterBundle, current.currentHp, current.temporaryHp + temporaryHp)
+        updateHitPoints(characterBundle, current.currentHp, gainTemporaryHitPoints(amount, current.temporaryHp))
     }
 
     fun updateMaxHitPoints(characterBundle: CharacterBundle, maxHp: Int) {
@@ -944,36 +955,26 @@ private fun OverviewContent(
                                 rollDice(DiceRollRequest(mapOf(DieType.D20 to 1)) { dice ->
                                     dice.firstOrNull()?.let { onDeathSave(snapshot, before, it.value()) }
                                 })
+                            },
+                            // Healing on the left, damage on the right, each into its own pop-up.
+                            start = {
+                                HpActionButton(
+                                    label = text("overview_hp_heal"),
+                                    icon = Icons.Outlined.Favorite,
+                                    color = colors.accent.heal,
+                                    modifier = Modifier.weight(1f),
+                                    onClick = { openHpDialog(OverviewHpEditMode.HEAL) }
+                                )
+                            },
+                            end = {
+                                HpActionButton(
+                                    label = text("overview_hp_damage"),
+                                    icon = Icons.Outlined.HeartBroken,
+                                    color = colors.accent.dangerHpZero,
+                                    modifier = Modifier.weight(1f),
+                                    onClick = { openHpDialog(OverviewHpEditMode.DAMAGE) }
+                                )
                             }
-                        )
-                    }
-                    // Straight into the hit points' pop-up, in the mode of the button.
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 10.dp),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        HpActionButton(
-                            label = text("overview_hp_damage"),
-                            icon = Icons.Outlined.HeartBroken,
-                            color = colors.accent.dangerHpZero,
-                            modifier = Modifier.weight(1f),
-                            onClick = { openHpDialog(OverviewHpEditMode.DAMAGE) }
-                        )
-                        HpActionButton(
-                            label = text("overview_hp_heal"),
-                            icon = Icons.Outlined.Favorite,
-                            color = colors.accent.heal,
-                            modifier = Modifier.weight(1f),
-                            onClick = { openHpDialog(OverviewHpEditMode.HEAL) }
-                        )
-                        HpActionButton(
-                            label = text("overview_hp_temporary"),
-                            icon = Icons.Outlined.HealthAndSafety,
-                            color = colors.accent.hpTemporary,
-                            modifier = Modifier.weight(1f),
-                            onClick = { openHpDialog(OverviewHpEditMode.TEMPORARY) }
                         )
                     }
                 }
@@ -1157,86 +1158,129 @@ private fun OverviewContent(
 
     if (isHpDialogOpen && characterBundle != null) {
         val current = characterBundle.character
-        val draftValue = hpDraft.toIntOrNull()?.coerceAtLeast(0) ?: 0
-        val result = remember(current.currentHp, current.maxHp, current.temporaryHp, draftValue, hpEditMode) {
-            calculateHpPreview(current.currentHp, current.maxHp, current.temporaryHp, draftValue, hpEditMode)
+        val amount = hpDraft.toIntOrNull()?.coerceAtLeast(0) ?: 0
+        val damage = hpEditMode == OverviewHpEditMode.DAMAGE
+        val before = HpPreview(current.currentHp, current.maxHp, current.temporaryHp)
+        val result = remember(current.currentHp, current.maxHp, current.temporaryHp, amount, hpEditMode) {
+            calculateHpPreview(current.currentHp, current.maxHp, current.temporaryHp, amount, hpEditMode)
+        }
+        val savesBefore = DeathSaves(current.deathSaveSuccesses, current.deathSaveFailures)
+        val savesAfter = if (damage && amount > 0) {
+            takeDamage(amount, current.currentHp, current.temporaryHp, current.maxHp, savesBefore).saves
+        } else {
+            savesBefore
+        }
+        val accent = when (hpEditMode) {
+            OverviewHpEditMode.DAMAGE -> colors.accent.dangerHpZero
+            OverviewHpEditMode.HEAL -> colors.accent.heal
+            OverviewHpEditMode.TEMPORARY -> colors.accent.hpTemporary
+        }
+        // Nothing to save when it changes nothing (full hit points, fewer temporary ones than now).
+        val canConfirm = amount > 0 && (result != before || savesAfter != savesBefore)
+        val confirm = {
+            when (hpEditMode) {
+                OverviewHpEditMode.DAMAGE -> onDamageHitPoints(characterBundle, amount)
+                OverviewHpEditMode.HEAL -> onHealHitPoints(characterBundle, amount)
+                OverviewHpEditMode.TEMPORARY -> onAddTemporaryHitPoints(characterBundle, amount)
+            }
+            isHpDialogOpen = false
+        }
+        val stepTo: (Int) -> Unit = { value -> hpDraft = value.coerceIn(0, MaxHpChange).toString() }
+        val hints = buildList {
+            when (hpEditMode) {
+                OverviewHpEditMode.DAMAGE -> {
+                    val absorbed = minOf(amount, current.temporaryHp)
+                    if (absorbed > 0) add(strings.format("overview_hp_hint_absorbed", absorbed) to colors.accent.hpTemporary)
+                    if (savesAfter != savesBefore) {
+                        val hint = if (savesAfter.isDead) strings["overview_death_saves_dead"] else strings.format("overview_hp_death_save_failures", savesAfter.failures)
+                        add(hint to colors.accent.dangerHpZero)
+                    }
+                }
+                OverviewHpEditMode.HEAL -> when {
+                    current.currentHp >= current.maxHp -> add(strings["overview_hp_hint_full"] to colors.text.muted)
+                    amount > 0 -> {
+                        if (current.currentHp == 0) add(strings["overview_hp_hint_revive"] to colors.accent.heal)
+                        val lost = current.currentHp + amount - current.maxHp
+                        if (lost > 0) add(strings.format("overview_hp_hint_overflow", lost) to colors.text.muted)
+                    }
+                }
+                OverviewHpEditMode.TEMPORARY -> if (amount > 0) {
+                    when {
+                        current.temporaryHp >= amount -> add(strings.format("overview_hp_hint_temporary_keep", current.temporaryHp) to colors.text.muted)
+                        current.temporaryHp > 0 -> add(strings.format("overview_hp_hint_temporary_replace", amount, current.temporaryHp) to colors.text.muted)
+                    }
+                    if (current.currentHp == 0) add(strings["overview_hp_hint_temporary_unconscious"] to colors.text.muted)
+                }
+            }
         }
 
         EditDialog(
-            title = text("overview_hp_dialog_title"),
+            title = if (damage) text("overview_hp_damage") else text("overview_hp_heal_title"),
+            titleLeading = {
+                Icon(
+                    imageVector = if (damage) Icons.Outlined.HeartBroken else Icons.Outlined.Favorite,
+                    contentDescription = null,
+                    tint = if (damage) colors.accent.dangerHpZero else colors.accent.heal,
+                    modifier = Modifier
+                        .padding(end = 10.dp)
+                        .size(26.dp)
+                )
+            },
             onDismiss = { isHpDialogOpen = false },
-            onConfirm = {
+            onConfirm = confirm,
+            confirmLabel = strings.format(
                 when (hpEditMode) {
-                    OverviewHpEditMode.DAMAGE -> onDamageHitPoints(characterBundle, draftValue)
-                    OverviewHpEditMode.HEAL -> onHealHitPoints(characterBundle, draftValue)
-                    OverviewHpEditMode.TEMPORARY -> onAddTemporaryHitPoints(characterBundle, draftValue)
-                }
-                isHpDialogOpen = false
-            }
+                    OverviewHpEditMode.DAMAGE -> "overview_hp_confirm_damage"
+                    OverviewHpEditMode.HEAL -> "overview_hp_confirm_heal"
+                    OverviewHpEditMode.TEMPORARY -> "overview_hp_confirm_temporary"
+                },
+                amount
+            ),
+            confirmEnabled = canConfirm,
+            confirmIsDanger = damage
         ) {
-            Text(
-                text = strings.format(
-                    "overview_hp_current",
-                    formatHpPlain(current.currentHp, current.maxHp, current.temporaryHp)
-                ),
-                style = MaterialTheme.typography.bodyLarge,
-                color = colors.text.muted
-            )
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                ExperienceModeButton(
-                    modifier = Modifier.weight(1f),
-                    label = text("overview_hp_damage"),
-                    selected = hpEditMode == OverviewHpEditMode.DAMAGE,
-                    onClick = { hpEditMode = OverviewHpEditMode.DAMAGE }
-                )
-                ExperienceModeButton(
-                    modifier = Modifier.weight(1f),
-                    label = text("overview_hp_heal"),
-                    selected = hpEditMode == OverviewHpEditMode.HEAL,
-                    onClick = { hpEditMode = OverviewHpEditMode.HEAL }
+            if (!damage) {
+                HpKindToggle(
+                    temporary = hpEditMode == OverviewHpEditMode.TEMPORARY,
+                    onPick = { hpEditMode = it }
                 )
             }
-            ExperienceModeButton(
-                modifier = Modifier.fillMaxWidth(),
-                label = text("overview_hp_temporary"),
-                selected = hpEditMode == OverviewHpEditMode.TEMPORARY,
-                onClick = { hpEditMode = OverviewHpEditMode.TEMPORARY }
+            // The number from the keyboard, which opens at once, or a step at a time.
+            val focus = remember { FocusRequester() }
+            val amountStyle = MaterialTheme.typography.headlineMedium.copy(
+                fontSize = typographyTokens.shortRestCounterValue.fontSizeSp.sp,
+                lineHeight = (typographyTokens.shortRestCounterValue.lineHeightSp ?: typographyTokens.shortRestCounterValue.fontSizeSp).sp,
+                textAlign = TextAlign.Center
             )
-            OutlinedTextField(
-                value = hpDraft,
-                onValueChange = { value ->
-                    hpDraft = value.filter(Char::isDigit)
-                },
-                singleLine = true,
-                label = {
-                    Text(
-                        when (hpEditMode) {
-                            OverviewHpEditMode.DAMAGE -> text("overview_hp_damage")
-                            OverviewHpEditMode.HEAL -> text("overview_hp_heal")
-                            OverviewHpEditMode.TEMPORARY -> text("overview_hp_temporary")
-                        }
-                    )
-                },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-            )
-            Text(
-                text = strings.format(
-                    "overview_hp_result",
-                    formatHpPlain(result.currentHp, result.maxHp, result.temporaryHp)
-                ),
-                style = MaterialTheme.typography.bodyLarge,
-                color = colors.text.primary
-            )
-            if (hpEditMode == OverviewHpEditMode.DAMAGE && draftValue > 0) {
-                val before = DeathSaves(current.deathSaveSuccesses, current.deathSaveFailures)
-                val after = takeDamage(draftValue, current.currentHp, current.temporaryHp, current.maxHp, before).saves
-                if (after != before) {
-                    Text(
-                        text = if (after.isDead) text("overview_death_saves_dead") else strings.format("overview_hp_death_save_failures", after.failures),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = colors.accent.dangerHpZero
-                    )
-                }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                StepButton(
+                    icon = Icons.Outlined.Remove,
+                    contentDescription = text("common_decrease"),
+                    onClick = { stepTo(amount - 1) },
+                    enabled = amount > 0
+                )
+                OutlinedTextField(
+                    value = hpDraft,
+                    onValueChange = { value -> hpDraft = value.filter(Char::isDigit).take(MaxHpChange.toString().length) },
+                    modifier = Modifier
+                        .weight(1f)
+                        .focusRequester(focus),
+                    singleLine = true,
+                    textStyle = amountStyle.copy(color = accent),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = { if (canConfirm) confirm() })
+                )
+                StepButton(
+                    icon = Icons.Outlined.Add,
+                    contentDescription = text("common_increase"),
+                    onClick = { stepTo(amount + 1) },
+                    enabled = amount < MaxHpChange
+                )
+            }
+            LaunchedEffect(Unit) { focus.requestFocus() }
+            HpChange(before = before, after = result)
+            hints.forEach { (hint, color) ->
+                Text(text = hint, style = MaterialTheme.typography.bodyMedium, color = color)
             }
         }
     }
@@ -1832,20 +1876,21 @@ private fun PortraitViewerContent(
 private const val HpActionTint = 0.12f
 
 /**
- * Damage, heal or temporary hit points, under the hit points: the colour of what it does, faint
- * behind its icon and label.
+ * Healing or damage, hanging from the hit points' card beside the death saves' tab like a tab of its
+ * own: the colour of what it does, faint behind its icon and label.
  */
 @Composable
 private fun HpActionButton(label: String, icon: ImageVector, color: Color, modifier: Modifier = Modifier, onClick: () -> Unit) {
     val token = LocalDesignTokens.current.typography.actionButtonLabel
-    val shape = RoundedCornerShape(20.dp)
+    val shape = RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp)
     Row(
         modifier = modifier
-            .height(48.dp)
+            .offset(y = (-1).dp)
+            .height(44.dp)
             .clip(shape)
             .background(color.copy(alpha = HpActionTint))
             .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp),
+            .padding(horizontal = 10.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -1862,6 +1907,107 @@ private fun HpActionButton(label: String, icon: ImageVector, color: Color, modif
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
+    }
+}
+
+/** The most hit points one change can take or give: four digits. */
+private const val MaxHpChange = 9999
+
+/** Healing's two kinds, a toggle: the picked one in its colour at 12 %, the other on the option fill. */
+@Composable
+private fun HpKindToggle(temporary: Boolean, onPick: (OverviewHpEditMode) -> Unit) {
+    val colors = LocalDesignTokens.current.colors
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        HpKindOption(
+            label = text("overview_hp_kind_hit_points"),
+            icon = Icons.Outlined.Favorite,
+            accent = colors.accent.heal,
+            selected = !temporary,
+            modifier = Modifier.weight(1f),
+            onClick = { onPick(OverviewHpEditMode.HEAL) }
+        )
+        HpKindOption(
+            label = text("overview_hp_kind_temporary"),
+            icon = Icons.Outlined.HealthAndSafety,
+            accent = colors.accent.hpTemporary,
+            selected = temporary,
+            modifier = Modifier.weight(1f),
+            onClick = { onPick(OverviewHpEditMode.TEMPORARY) }
+        )
+    }
+}
+
+@Composable
+private fun HpKindOption(label: String, icon: ImageVector, accent: Color, selected: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    val colors = LocalDesignTokens.current.colors
+    Row(
+        modifier = modifier
+            .height(40.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(if (selected) accent.copy(alpha = HpActionTint) else colors.surface.option)
+            .selectable(selected = selected, role = Role.RadioButton, onClick = onClick)
+            .padding(horizontal = 8.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(imageVector = icon, contentDescription = null, tint = if (selected) accent else colors.text.subtle, modifier = Modifier.size(16.dp))
+        Text(
+            text = label,
+            modifier = Modifier.padding(start = 6.dp),
+            style = MaterialTheme.typography.bodyMedium,
+            color = if (selected) accent else colors.text.muted,
+            fontWeight = FontWeight.Medium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+/**
+ * What a change does to the hit points: a bar of them (kept in the bar's colour, lost in red, healed
+ * in green, temporary in blue after them), and "before → after" under it.
+ */
+@Composable
+private fun HpChange(before: HpPreview, after: HpPreview) {
+    val colors = LocalDesignTokens.current.colors
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Canvas(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(10.dp)
+        ) {
+            val scale = maxOf(before.maxHp, before.currentHp, after.currentHp) + maxOf(before.temporaryHp, after.temporaryHp)
+            val unit = size.width / scale.coerceAtLeast(1)
+            val corner = CornerRadius(size.height / 2f)
+            drawRoundRect(colors.progress.xpTrack, cornerRadius = corner)
+            clipPath(Path().apply { addRoundRect(RoundRect(Rect(Offset.Zero, size), corner)) }) {
+                var x = 0f
+                fun segment(count: Int, color: Color) {
+                    if (count <= 0) return
+                    drawRect(color, topLeft = Offset(x, 0f), size = Size(count * unit, size.height))
+                    x += count * unit
+                }
+                segment(minOf(before.currentHp, after.currentHp), colors.progress.xpFill)
+                segment(before.currentHp - after.currentHp, colors.accent.dangerHpZero)
+                segment(after.currentHp - before.currentHp, colors.accent.heal)
+                segment(minOf(before.temporaryHp, after.temporaryHp), colors.accent.hpTemporary)
+                segment(before.temporaryHp - after.temporaryHp, colors.accent.dangerHpZero)
+                segment(after.temporaryHp - before.temporaryHp, colors.accent.hpTemporary)
+            }
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = formatHpPlain(before.currentHp, before.maxHp, before.temporaryHp),
+                style = MaterialTheme.typography.bodyLarge,
+                color = colors.text.muted
+            )
+            Text(text = "  →  ", style = MaterialTheme.typography.bodyLarge, color = colors.text.subtle)
+            Text(
+                text = formatHpPlain(after.currentHp, after.maxHp, after.temporaryHp),
+                style = MaterialTheme.typography.titleMedium,
+                color = colors.text.primary
+            )
+        }
     }
 }
 
@@ -1937,6 +2083,7 @@ private fun OverviewXpBlock(
  * tray out like a blind and stays under it, a second tap rolls it back — successes on the left,
  * failures on the right, and a d20 with a skull on its front in the middle. A tap on the die throws it on the dice table and counts the result; a tap on a circle
  * sets the count (on the last filled one, takes it back). The tray opens by itself at 0 hit points.
+ * Whatever goes in [start] and [end] hangs beside the tab and rides down with it.
  */
 @Composable
 private fun DeathSavesTray(
@@ -1946,7 +2093,9 @@ private fun DeathSavesTray(
     successes: Int,
     failures: Int,
     onSetSaves: (Int, Int) -> Unit,
-    onRoll: () -> Unit
+    onRoll: () -> Unit,
+    start: @Composable RowScope.() -> Unit = {},
+    end: @Composable RowScope.() -> Unit = {}
 ) {
     val colors = LocalDesignTokens.current.colors
     val look = LocalDiceSkin.current
@@ -2022,23 +2171,34 @@ private fun DeathSavesTray(
                 }
             }
         }
-        // The tab hangs from the tray when it is out, from the hit points' card when it is in.
-        val tabShape = RoundedCornerShape(bottomStart = 10.dp, bottomEnd = 10.dp)
-        Box(
+        // The tab hangs from the tray when it is out, from the hit points' card when it is in, and
+        // [start] and [end] hang beside it from the same straight edge.
+        Row(
             modifier = Modifier
-                .offset(y = (-1).dp)
-                .clip(tabShape)
-                .background(colors.surface.card)
-                .border(1.dp, colors.border.panel, tabShape)
-                .clickable { open = !open }
-                .padding(horizontal = 18.dp, vertical = 4.dp)
+                .fillMaxWidth()
+                .padding(horizontal = HpCardCornerRadius),
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+            verticalAlignment = Alignment.Top
         ) {
-            Icon(
-                imageVector = SkullIcon,
-                contentDescription = text("overview_death_saves"),
-                tint = if (dying) colors.accent.dangerHpZero else colors.text.label,
-                modifier = Modifier.size(20.dp)
-            )
+            start()
+            val tabShape = RoundedCornerShape(bottomStart = 10.dp, bottomEnd = 10.dp)
+            Box(
+                modifier = Modifier
+                    .offset(y = (-1).dp)
+                    .clip(tabShape)
+                    .background(colors.surface.card)
+                    .border(1.dp, colors.border.panel, tabShape)
+                    .clickable { open = !open }
+                    .padding(horizontal = 18.dp, vertical = 4.dp)
+            ) {
+                Icon(
+                    imageVector = SkullIcon,
+                    contentDescription = text("overview_death_saves"),
+                    tint = if (dying) colors.accent.dangerHpZero else colors.text.label,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            end()
         }
     }
 }
@@ -2224,14 +2384,14 @@ private fun calculateHpPreview(
             )
         }
         OverviewHpEditMode.HEAL -> HpPreview(
-            currentHp = (currentHp + sanitizedAmount).coerceAtMost(maxHp),
+            currentHp = heal(sanitizedAmount, currentHp, maxHp),
             maxHp = maxHp,
             temporaryHp = temporaryHp
         )
         OverviewHpEditMode.TEMPORARY -> HpPreview(
             currentHp = currentHp,
             maxHp = maxHp,
-            temporaryHp = temporaryHp + sanitizedAmount
+            temporaryHp = gainTemporaryHitPoints(sanitizedAmount, temporaryHp)
         )
     }
 }
@@ -2495,12 +2655,8 @@ private fun OverviewPreviewContent(
             "overview_exp_set" to "Set",
             "overview_exp_current" to "Current EXP: %1\$s",
             "overview_exp_result" to "Result: %1\$s EXP",
-            "overview_hp_dialog_title" to "Edit HP",
             "overview_hp_damage" to "Damage",
             "overview_hp_heal" to "Heal",
-            "overview_hp_temporary" to "Temp HP",
-            "overview_hp_current" to "Current HP: %1\$s",
-            "overview_hp_result" to "Result: %1\$s",
             "overview_hp_max_dialog_title" to "Edit Max HP",
             "overview_hp_max" to "Max HP",
             "overview_hit_dice_remaining_hint" to "You currently have",

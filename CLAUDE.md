@@ -26,7 +26,8 @@ What can be pressed as an action and what shows a value must look different at a
   - **standard button**: `surface.button` #3B3840 (1.58:1 against the cards), text and icon `text.primary`;
   - main action (Save) and a toggle that is on: `materialTheme.primary` #C6A36C, text and icon `onPrimary`;
   - **Inspiration** is its own toggle, not a filled button: a compass rose of eight points (`InspirationStar`, 96dp, no outline) in the lower right corner of the portrait's octagon — `text.label` while off (the screen's colour for an idle mark), `accent.inspiration` while on, with a white heart and a breathing glow of `accent.inspiration` fading out (owner's choice from boards, 2026-10-03);
-  - HP actions (damage, heal, temporary HP): their accent (`accent.dangerHpZero`, `accent.heal`, `accent.hpTemporary`) at **12 %** as the fill behind an icon and label in the full accent — at 12 % even the red label reads (4.6:1);
+  - HP actions: their accent (`accent.dangerHpZero`, `accent.heal`, `accent.hpTemporary`) at **12 %** as the fill behind an icon and label in the full accent — at 12 % even the red label reads (4.6:1). On the overview, Heal (left) and Damage (right) hang from the hit points' card beside the death saves' skull tab, as tabs of their own; temporary hit points are a kind of healing, picked by a toggle in the Healing pop-up (the picked kind in its accent at 12 %) — owner's choice, 2026-10-03;
+  - stepper (− and + beside a number): `StepButton`, a 48dp circle of `surface.button` with the icon in `text.primary`;
   - dangerous action (confirm deletion): `accent.dangerHpZero`, text `text.primary`;
   - delete icon (the trash in a pop-up): `accent.dangerHpZero` at 16% behind an `accent.dangerHpZero` icon;
   - `surface.option` #1A171D is the old near-card fill of picker rows and toggle options; they move to the palette when redone (the selected state of a toggle is still to be chosen with the owner).

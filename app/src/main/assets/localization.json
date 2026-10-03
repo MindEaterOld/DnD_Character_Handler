@@ -3661,43 +3661,114 @@
     "fr": "Résultat : %1$s PX",
     "es": "Resultado: %1$s PX"
   },
-  "overview_hp_dialog_title": {
-    "en": "Edit HP",
-    "ru": "\u0418\u0437\u043c\u0435\u043d\u0438\u0442\u044c HP",
-    "de": "TP bearbeiten",
-    "fr": "Modifier les pv",
-    "es": "Editar PG"
-  },
   "overview_hp_damage": {
-    "maxChars": 9,
+    "maxChars": 10,
     "en": "Damage",
     "ru": "\u0423\u0440\u043e\u043d",
     "de": "Schaden",
     "fr": "Dégâts",
     "es": "Daño"
   },
+  "overview_hp_heal_title": {
+    "en": "Healing",
+    "ru": "Лечение",
+    "de": "Heilung",
+    "fr": "Soins",
+    "es": "Curación"
+  },
+  "overview_hp_kind_hit_points": {
+    "maxChars": 11,
+    "en": "Hit points",
+    "ru": "Хиты",
+    "de": "TP",
+    "fr": "pv",
+    "es": "PG"
+  },
+  "overview_hp_kind_temporary": {
+    "maxChars": 11,
+    "en": "Temporary",
+    "ru": "Временные",
+    "de": "Temporäre",
+    "fr": "Temporaires",
+    "es": "Temporales"
+  },
+  "overview_hp_confirm_damage": {
+    "en": "Take %1$d",
+    "ru": "Нанести %1$d",
+    "de": "%1$d erleiden",
+    "fr": "Subir %1$d",
+    "es": "Recibir %1$d"
+  },
+  "overview_hp_confirm_heal": {
+    "en": "Heal %1$d",
+    "ru": "Вылечить %1$d",
+    "de": "%1$d heilen",
+    "fr": "Soigner %1$d",
+    "es": "Curar %1$d"
+  },
+  "overview_hp_confirm_temporary": {
+    "en": "Gain %1$d",
+    "ru": "Получить %1$d",
+    "de": "%1$d erhalten",
+    "fr": "Gagner %1$d",
+    "es": "Ganar %1$d"
+  },
+  "overview_hp_hint_absorbed": {
+    "en": "Temporary hit points absorb %1$d",
+    "ru": "Временные поглотят %1$d",
+    "de": "Temporäre TP fangen %1$d ab",
+    "fr": "Les pv temporaires absorbent %1$d",
+    "es": "Los PG temporales absorben %1$d"
+  },
+  "overview_hp_hint_overflow": {
+    "en": "%1$d above the maximum is lost",
+    "ru": "%1$d сверх максимума пропадёт",
+    "de": "%1$d über dem Maximum verfallen",
+    "fr": "%1$d au-delà du maximum sont perdus",
+    "es": "%1$d por encima del máximo se pierden"
+  },
+  "overview_hp_hint_full": {
+    "en": "Hit points are already full",
+    "ru": "Хиты уже полные",
+    "de": "Die TP sind bereits voll",
+    "fr": "Les pv sont déjà au maximum",
+    "es": "Los PG ya están al máximo"
+  },
+  "overview_hp_hint_revive": {
+    "en": "Regains consciousness; death saves start over",
+    "ru": "Придёт в сознание, спасброски сбросятся",
+    "de": "Kommt zu Bewusstsein, die Todesrettungswürfe beginnen von vorn",
+    "fr": "Reprend conscience, les jets contre la mort repartent de zéro",
+    "es": "Recupera la consciencia; las salvaciones contra muerte vuelven a empezar"
+  },
+  "overview_hp_hint_temporary_replace": {
+    "en": "They don't stack: %1$d replace %2$d",
+    "ru": "Не складываются: %1$d заменят %2$d",
+    "de": "Nicht kumulativ: %1$d ersetzen %2$d",
+    "fr": "Ne se cumulent pas : %1$d remplacent %2$d",
+    "es": "No se acumulan: %1$d sustituyen a %2$d"
+  },
+  "overview_hp_hint_temporary_keep": {
+    "en": "They don't stack: you keep your %1$d",
+    "ru": "Не складываются: останутся прежние %1$d",
+    "de": "Nicht kumulativ: die bisherigen %1$d bleiben",
+    "fr": "Ne se cumulent pas : vous gardez vos %1$d",
+    "es": "No se acumulan: conservas tus %1$d"
+  },
+  "overview_hp_hint_temporary_unconscious": {
+    "en": "Temporary hit points don't bring you round",
+    "ru": "Временные хиты не приводят в сознание",
+    "de": "Temporäre TP wecken nicht auf",
+    "fr": "Les pv temporaires ne rendent pas conscience",
+    "es": "Los PG temporales no devuelven la consciencia"
+  },
   "overview_hp_heal": {
-    "maxChars": 9,
+    "maxChars": 10,
     "en": "Heal",
     "ru": "\u0425\u0438\u043b",
     "de": "Heilen",
     "fr": "Soins",
     "es": "Curar"
-  },
-  "overview_hp_temporary": {
-    "maxChars": 9,
-    "en": "Temp HP",
-    "ru": "\u0412\u0440\u0435\u043c. HP",
-    "de": "Temp. TP",
-    "fr": "pv temp.",
-    "es": "PG temp."
-  },
-  "overview_hp_current": {
-    "en": "Current HP: %1$s",
-    "ru": "\u0422\u0435\u043a\u0443\u0449\u0438\u0435 HP: %1$s",
-    "de": "Aktuelle TP: %1$s",
-    "fr": "pv actuels : %1$s",
-    "es": "PG actuales: %1$s"
   },
   "overview_hp_death_save_failures": {
     "en": "Death save failures: %1$d of 3",
@@ -3705,13 +3776,6 @@
     "de": "Fehlschl\u00e4ge bei Todesrettungsw\u00fcrfen: %1$d von 3",
     "fr": "\u00c9checs aux jets contre la mort : %1$d sur 3",
     "es": "Fallos de salvaci\u00f3n contra muerte: %1$d de 3"
-  },
-  "overview_hp_result": {
-    "en": "Result: %1$s",
-    "ru": "\u0418\u0442\u043e\u0433: %1$s",
-    "de": "Ergebnis: %1$s",
-    "fr": "Résultat : %1$s",
-    "es": "Resultado: %1$s"
   },
   "overview_hp_max_dialog_title": {
     "en": "Edit Max HP",
@@ -3796,6 +3860,20 @@
     "de": "Speichern",
     "fr": "Enregistrer",
     "es": "Guardar"
+  },
+  "common_decrease": {
+    "en": "Decrease",
+    "ru": "Уменьшить",
+    "de": "Verringern",
+    "fr": "Diminuer",
+    "es": "Reducir"
+  },
+  "common_increase": {
+    "en": "Increase",
+    "ru": "Увеличить",
+    "de": "Erhöhen",
+    "fr": "Augmenter",
+    "es": "Aumentar"
   },
   "common_cancel": {
     "en": "Cancel",
