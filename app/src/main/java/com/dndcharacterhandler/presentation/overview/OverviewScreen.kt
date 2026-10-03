@@ -29,6 +29,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.foundation.shape.GenericShape
+import kotlin.math.cos
+import kotlin.math.sin
 import androidx.compose.material.icons.outlined.HeartBroken
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.HealthAndSafety
@@ -1611,78 +1614,27 @@ private fun PortraitFrame(
     val colors = LocalDesignTokens.current.colors
     val saturation by animateFloatAsState(if (dead) 0f else 1f, animationSpec = tween(durationMillis = 1200), label = "portraitSaturation")
 
+    // An octagon with flat sides, a heraldic frame: its shadow, a double contour, the portrait inside.
     Box(
         modifier = Modifier
             .offset(y = (-47).dp)
-            .padding(bottom = 0.dp)
             .size(238.dp)
-            .clip(CircleShape)
+            .clip(OctagonShape)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
-            val c = center
-            val outer = size.minDimension / 2f - 8.dp.toPx()
-            val middle = outer - 12.dp.toPx()
-            val inner = outer - 26.dp.toPx()
-
-            drawCircle(
-                color = colors.ornament.outer,
-                radius = outer + 8.dp.toPx(),
-                center = c,
-                style = Stroke(width = 1.dp.toPx())
-            )
-            drawCircle(
-                color = colors.ornament.middle,
-                radius = outer,
-                center = c,
-                style = Stroke(width = 3.dp.toPx())
-            )
-            drawCircle(
-                color = colors.ornament.innerGlow,
-                radius = middle,
-                center = c,
-                style = Stroke(width = 1.dp.toPx())
-            )
-            drawCircle(
-                color = colors.ornament.inner,
-                radius = inner,
-                center = c,
-                style = Stroke(width = 2.dp.toPx())
-            )
-
-            val ornamentRadius = outer + 2.dp.toPx()
-            listOf(
-                Offset(c.x, c.y - ornamentRadius),
-                Offset(c.x + ornamentRadius, c.y),
-                Offset(c.x, c.y + ornamentRadius),
-                Offset(c.x - ornamentRadius, c.y)
-            ).forEachIndexed { index, offset ->
-                val half = if (index % 2 == 0) 10.dp.toPx() else 12.dp.toPx()
-                val diamond = Path().apply {
-                    moveTo(offset.x, offset.y - half)
-                    lineTo(offset.x + half, offset.y)
-                    lineTo(offset.x, offset.y + half)
-                    lineTo(offset.x - half, offset.y)
-                    close()
-                }
-                drawPath(diamond, color = colors.ornament.shadow)
-                drawPath(diamond, color = colors.ornament.stroke, style = Stroke(width = 1.dp.toPx()))
-                drawCircle(
-                    color = colors.ornament.dot,
-                    radius = 5.dp.toPx(),
-                    center = offset
-                )
-            }
+            drawPath(octagonPath(center, 114.dp.toPx()), color = colors.ornament.shadow)
+            drawPath(octagonPath(center, 110.dp.toPx()), color = colors.ornament.middle, style = Stroke(width = 3.dp.toPx()))
+            drawPath(octagonPath(center, 103.dp.toPx()), color = colors.ornament.inner, style = Stroke(width = 1.dp.toPx()))
         }
 
-        Surface(
+        Box(
             modifier = Modifier
-                .size(188.dp)
-                .clip(CircleShape)
-                .saturation(saturation),
-            shape = CircleShape,
-            color = colors.surface.portrait
+                .size(196.dp)
+                .clip(OctagonShape)
+                .background(colors.surface.portrait)
+                .saturation(saturation)
         ) {
             AppImage(
                 imageRef = portraitReference,
@@ -1695,6 +1647,22 @@ private fun PortraitFrame(
             )
         }
     }
+}
+
+/** A regular octagon round [center], [radius] to its corners, its sides flat at the top, bottom and sides. */
+private fun octagonPath(center: Offset, radius: Float): Path = Path().apply {
+    for (i in 0 until 8) {
+        val angle = (PI / 8 + i * PI / 4).toFloat()
+        val x = center.x + radius * cos(angle)
+        val y = center.y + radius * sin(angle)
+        if (i == 0) moveTo(x, y) else lineTo(x, y)
+    }
+    close()
+}
+
+/** The portrait's octagon, filling whatever it clips. */
+private val OctagonShape = GenericShape { size, _ ->
+    addPath(octagonPath(Offset(size.width / 2f, size.height / 2f), size.minDimension / 2f))
 }
 
 @Composable
