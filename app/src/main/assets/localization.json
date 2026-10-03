@@ -3668,13 +3668,6 @@
     "fr": "pv actuels : %1$s",
     "es": "PG actuales: %1$s"
   },
-  "overview_hp_critical": {
-    "en": "Critical hit",
-    "ru": "\u041a\u0440\u0438\u0442\u0438\u0447\u0435\u0441\u043a\u0438\u0439 \u0443\u0434\u0430\u0440",
-    "de": "Kritischer Treffer",
-    "fr": "Coup critique",
-    "es": "Golpe cr\u00edtico"
-  },
   "overview_hp_death_save_failures": {
     "en": "Death save failures: %1$d of 3",
     "ru": "\u041f\u0440\u043e\u0432\u0430\u043b\u043e\u0432 \u0441\u043f\u0430\u0441\u0431\u0440\u043e\u0441\u043a\u043e\u0432 \u043e\u0442 \u0441\u043c\u0435\u0440\u0442\u0438: %1$d \u0438\u0437 3",

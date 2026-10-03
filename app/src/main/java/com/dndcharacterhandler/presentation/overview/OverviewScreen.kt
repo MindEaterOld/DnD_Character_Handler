@@ -117,6 +117,9 @@ import com.dndcharacterhandler.domain.rules.DeathSaves
 import com.dndcharacterhandler.domain.rules.deathSave
 import com.dndcharacterhandler.domain.rules.takeDamage
 import com.dndcharacterhandler.presentation.components.SkullIcon
+import com.dndcharacterhandler.presentation.components.saturation
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import com.dndcharacterhandler.presentation.dice.DiceRollRequest
 import com.dndcharacterhandler.presentation.dice.DieIcon
 import com.dndcharacterhandler.presentation.dice.DieType
@@ -268,11 +271,11 @@ class OverviewViewModel(
         }
     }
 
-    /** Damage of [amount]; at 0 hit points it fails death saves, two when [critical]. */
-    fun damageHitPoints(characterBundle: CharacterBundle, amount: Int, critical: Boolean = false) {
+    /** Damage of [amount]: at 0 hit points it fails a death save; as much as the maximum past 0 kills. */
+    fun damageHitPoints(characterBundle: CharacterBundle, amount: Int) {
         val current = characterBundle.character
         val before = DeathSaves(current.deathSaveSuccesses, current.deathSaveFailures)
-        val result = takeDamage(amount, critical, current.currentHp, current.temporaryHp, current.maxHp, before)
+        val result = takeDamage(amount, current.currentHp, current.temporaryHp, current.maxHp, before)
         val hitPointsChanged = result.currentHp != current.currentHp || result.temporaryHp != current.temporaryHp
         if (!hitPointsChanged && result.saves == before) return
         viewModelScope.launch {
@@ -630,7 +633,7 @@ private fun OverviewContent(
     onUpdateIdentity: (CharacterBundle, String?, String?, String?, Int?) -> Unit,
     onUpdateExperience: (CharacterBundle, Int) -> Unit,
     onUpdatePortrait: (CharacterBundle, String?) -> Unit,
-    onDamageHitPoints: (CharacterBundle, Int, Boolean) -> Unit,
+    onDamageHitPoints: (CharacterBundle, Int) -> Unit,
     onHealHitPoints: (CharacterBundle, Int) -> Unit,
     onAddTemporaryHitPoints: (CharacterBundle, Int) -> Unit,
     onUpdateMaxHitPoints: (CharacterBundle, Int) -> Unit,
@@ -686,8 +689,6 @@ private fun OverviewContent(
     var isHpDialogOpen by remember { mutableStateOf(false) }
     var hpEditMode by remember { mutableStateOf(OverviewHpEditMode.DAMAGE) }
     var hpDraft by remember(character?.id, character?.currentHp, character?.temporaryHp) { mutableStateOf("") }
-    // A critical hit counts only for damage taken at 0 hit points: two failed death saves.
-    var hpCritical by remember(character?.id, character?.currentHp, character?.temporaryHp) { mutableStateOf(false) }
     var isMaxHpDialogOpen by remember { mutableStateOf(false) }
     var maxHpDraft by remember(character?.id, character?.maxHp) { mutableStateOf("") }
     var activeMiniStatField by remember { mutableStateOf<OverviewMiniStatField?>(null) }
@@ -719,8 +720,17 @@ private fun OverviewContent(
             buildOverviewClassLabel(character, strings)
         }
     }
-    // Two classes and more don't fit at the usual size.
     val rollDice = LocalDiceRoller.current
+    // The Wilhelm scream: once, when the character dies (the third failed death save, however it
+    // came: a hit, the d20, a circle). Not for one who was dead already when the sheet opened.
+    val dead = character?.let { DeathSaves(it.deathSaveSuccesses, it.deathSaveFailures).isDead } ?: false
+    var wasDead by remember(character?.id) { mutableStateOf<Boolean?>(null) }
+    LaunchedEffect(character?.id, dead) {
+        if (character == null) return@LaunchedEffect
+        if (wasDead == false && dead) playAssetSound(context, "sounds/wilhelm_scream.mp3")
+        wasDead = dead
+    }
+    // Two classes and more don't fit at the usual size.
     val isMulticlass = (character?.classes?.size ?: 0) > 1
     val levelLabel = strings.format("overview_level_format", character?.level ?: 1)
     val xpInfo = remember(character) { buildXpInfo(character) }
@@ -778,6 +788,7 @@ private fun OverviewContent(
                     PortraitFrame(
                         portraitUri = character?.portraitUri,
                         characterName = displayName,
+                        dead = dead,
                         onClick = {
                             if (characterBundle != null) {
                                 isPortraitMenuOpen = true
@@ -1103,16 +1114,8 @@ private fun OverviewContent(
             title = text("overview_hp_dialog_title"),
             onDismiss = { isHpDialogOpen = false },
             onConfirm = {
-                if (
-                    hpEditMode == OverviewHpEditMode.DAMAGE &&
-                    draftValue > 0 &&
-                    current.currentHp > 0 &&
-                    result.currentHp == 0
-                ) {
-                    playAssetSound(context, "sounds/wilhelm_scream.mp3")
-                }
                 when (hpEditMode) {
-                    OverviewHpEditMode.DAMAGE -> onDamageHitPoints(characterBundle, draftValue, hpCritical)
+                    OverviewHpEditMode.DAMAGE -> onDamageHitPoints(characterBundle, draftValue)
                     OverviewHpEditMode.HEAL -> onHealHitPoints(characterBundle, draftValue)
                     OverviewHpEditMode.TEMPORARY -> onAddTemporaryHitPoints(characterBundle, draftValue)
                 }
@@ -1164,14 +1167,6 @@ private fun OverviewContent(
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
-            if (hpEditMode == OverviewHpEditMode.DAMAGE && current.currentHp == 0) {
-                ExperienceModeButton(
-                    modifier = Modifier.fillMaxWidth(),
-                    label = text("overview_hp_critical"),
-                    selected = hpCritical,
-                    onClick = { hpCritical = !hpCritical }
-                )
-            }
             Text(
                 text = strings.format(
                     "overview_hp_result",
@@ -1182,7 +1177,7 @@ private fun OverviewContent(
             )
             if (hpEditMode == OverviewHpEditMode.DAMAGE && draftValue > 0) {
                 val before = DeathSaves(current.deathSaveSuccesses, current.deathSaveFailures)
-                val after = takeDamage(draftValue, hpCritical, current.currentHp, current.temporaryHp, current.maxHp, before).saves
+                val after = takeDamage(draftValue, current.currentHp, current.temporaryHp, current.maxHp, before).saves
                 if (after != before) {
                     Text(
                         text = if (after.isDead) text("overview_death_saves_dead") else strings.format("overview_hp_death_save_failures", after.failures),
@@ -1576,10 +1571,13 @@ private fun SubtitleDivider() {
 private fun PortraitFrame(
     portraitUri: String?,
     characterName: String,
+    /** Three failed death saves: the portrait drains to black and white. */
+    dead: Boolean,
     onClick: () -> Unit
 ) {
     val portraitReference = portraitUri ?: AssetReferences.portraitPlaceholderPath("portrait_placeholder.png")
     val colors = LocalDesignTokens.current.colors
+    val saturation by animateFloatAsState(if (dead) 0f else 1f, animationSpec = tween(durationMillis = 1200), label = "portraitSaturation")
 
     Box(
         modifier = Modifier
@@ -1649,7 +1647,8 @@ private fun PortraitFrame(
         Surface(
             modifier = Modifier
                 .size(188.dp)
-                .clip(CircleShape),
+                .clip(CircleShape)
+                .saturation(saturation),
             shape = CircleShape,
             color = colors.surface.portrait
         ) {
@@ -2421,6 +2420,13 @@ private fun OverviewDyingPreview() {
     OverviewPreviewContent(currentHp = 0, temporaryHp = 0, deathSaveSuccesses = 1, deathSaveFailures = 2, deathSavesOpen = true)
 }
 
+/** Three failed death saves: dead, the portrait in black and white. */
+@Preview(showBackground = true, showSystemUi = true, device = "spec:width=412dp,height=915dp")
+@Composable
+private fun OverviewDeadPreview() {
+    OverviewPreviewContent(currentHp = 0, temporaryHp = 0, deathSaveSuccesses = 1, deathSaveFailures = 3, deathSavesOpen = true)
+}
+
 @Composable
 private fun OverviewPreviewContent(
     currentHp: Int,
@@ -2577,7 +2583,7 @@ private fun OverviewPreviewContent(
                 onUpdateIdentity = { _, _, _, _, _ -> },
                 onUpdateExperience = { _, _ -> },
                 onUpdatePortrait = { _, _ -> },
-                onDamageHitPoints = { _, _, _ -> },
+                onDamageHitPoints = { _, _ -> },
                 onHealHitPoints = { _, _ -> },
                 onAddTemporaryHitPoints = { _, _ -> },
                 onUpdateMaxHitPoints = { _, _ -> },

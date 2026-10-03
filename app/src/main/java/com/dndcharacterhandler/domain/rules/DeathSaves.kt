@@ -20,11 +20,12 @@ data class DamageResult(val currentHp: Int, val temporaryHp: Int, val saves: Dea
 
 /**
  * [damage] by the 2024 rules. The temporary hit points take it first; only what gets past them
- * reaches the character. Damage that drops them to 0 with as much left over as their [maxHp] kills
- * outright. At 0 hit points any damage is a failed death save, two from a [critical] hit, and
- * damage as big as the maximum kills.
+ * reaches the character. Damage that drops them to 0 with as much left over as their [maxHp]
+ * (or more) kills outright: at 27 maximum hit points, a hit that would leave them at -27. At 0 hit
+ * points any damage is a failed death save, and damage as big as the maximum kills. (A critical hit
+ * at 0 would be two failures; the app leaves that to the dice and the circles.)
  */
-fun takeDamage(damage: Int, critical: Boolean, currentHp: Int, temporaryHp: Int, maxHp: Int, saves: DeathSaves): DamageResult {
+fun takeDamage(damage: Int, currentHp: Int, temporaryHp: Int, maxHp: Int, saves: DeathSaves): DamageResult {
     val dealt = damage.coerceAtLeast(0)
     val absorbed = dealt.coerceAtMost(temporaryHp)
     val remaining = dealt - absorbed
@@ -37,7 +38,7 @@ fun takeDamage(damage: Int, critical: Boolean, currentHp: Int, temporaryHp: Int,
         return DamageResult((currentHp - remaining).coerceAtLeast(0), temporaryLeft, if (leftOver >= maximum) dead else saves)
     }
     if (remaining >= maximum) return DamageResult(0, temporaryLeft, dead)
-    val failures = (saves.failures + if (critical) 2 else 1).coerceAtMost(DEATH_SAVES_TO_END)
+    val failures = (saves.failures + 1).coerceAtMost(DEATH_SAVES_TO_END)
     return DamageResult(0, temporaryLeft, saves.copy(failures = failures))
 }
 
