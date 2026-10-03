@@ -115,6 +115,7 @@ import com.dndcharacterhandler.presentation.components.BorderLabelCard
 import com.dndcharacterhandler.domain.rules.DEATH_SAVES_TO_END
 import com.dndcharacterhandler.domain.rules.DeathSaves
 import com.dndcharacterhandler.domain.rules.deathSave
+import com.dndcharacterhandler.domain.rules.takeDamage
 import com.dndcharacterhandler.presentation.components.SkullIcon
 import com.dndcharacterhandler.presentation.dice.DiceRollRequest
 import com.dndcharacterhandler.presentation.dice.DieIcon
@@ -267,15 +268,17 @@ class OverviewViewModel(
         }
     }
 
-    fun damageHitPoints(characterBundle: CharacterBundle, amount: Int) {
-        val damage = amount.coerceAtLeast(0)
+    /** Damage of [amount]; at 0 hit points it fails death saves, two when [critical]. */
+    fun damageHitPoints(characterBundle: CharacterBundle, amount: Int, critical: Boolean = false) {
         val current = characterBundle.character
-        val temporaryDamage = damage.coerceAtMost(current.temporaryHp)
-        val remainingDamage = damage - temporaryDamage
-        val newTemporaryHp = current.temporaryHp - temporaryDamage
-        val newCurrentHp = (current.currentHp - remainingDamage).coerceAtLeast(0)
-
-        updateHitPoints(characterBundle, newCurrentHp, newTemporaryHp)
+        val before = DeathSaves(current.deathSaveSuccesses, current.deathSaveFailures)
+        val result = takeDamage(amount, critical, current.currentHp, current.temporaryHp, current.maxHp, before)
+        val hitPointsChanged = result.currentHp != current.currentHp || result.temporaryHp != current.temporaryHp
+        if (!hitPointsChanged && result.saves == before) return
+        viewModelScope.launch {
+            if (hitPointsChanged) characterRepository.updateHitPoints(current.id, result.currentHp, result.temporaryHp)
+            if (result.saves != before) characterRepository.updateDeathSaves(current.id, result.saves.successes, result.saves.failures)
+        }
     }
 
     fun healHitPoints(characterBundle: CharacterBundle, amount: Int) {
@@ -627,7 +630,7 @@ private fun OverviewContent(
     onUpdateIdentity: (CharacterBundle, String?, String?, String?, Int?) -> Unit,
     onUpdateExperience: (CharacterBundle, Int) -> Unit,
     onUpdatePortrait: (CharacterBundle, String?) -> Unit,
-    onDamageHitPoints: (CharacterBundle, Int) -> Unit,
+    onDamageHitPoints: (CharacterBundle, Int, Boolean) -> Unit,
     onHealHitPoints: (CharacterBundle, Int) -> Unit,
     onAddTemporaryHitPoints: (CharacterBundle, Int) -> Unit,
     onUpdateMaxHitPoints: (CharacterBundle, Int) -> Unit,
@@ -683,6 +686,8 @@ private fun OverviewContent(
     var isHpDialogOpen by remember { mutableStateOf(false) }
     var hpEditMode by remember { mutableStateOf(OverviewHpEditMode.DAMAGE) }
     var hpDraft by remember(character?.id, character?.currentHp, character?.temporaryHp) { mutableStateOf("") }
+    // A critical hit counts only for damage taken at 0 hit points: two failed death saves.
+    var hpCritical by remember(character?.id, character?.currentHp, character?.temporaryHp) { mutableStateOf(false) }
     var isMaxHpDialogOpen by remember { mutableStateOf(false) }
     var maxHpDraft by remember(character?.id, character?.maxHp) { mutableStateOf("") }
     var activeMiniStatField by remember { mutableStateOf<OverviewMiniStatField?>(null) }
@@ -1107,7 +1112,7 @@ private fun OverviewContent(
                     playAssetSound(context, "sounds/wilhelm_scream.mp3")
                 }
                 when (hpEditMode) {
-                    OverviewHpEditMode.DAMAGE -> onDamageHitPoints(characterBundle, draftValue)
+                    OverviewHpEditMode.DAMAGE -> onDamageHitPoints(characterBundle, draftValue, hpCritical)
                     OverviewHpEditMode.HEAL -> onHealHitPoints(characterBundle, draftValue)
                     OverviewHpEditMode.TEMPORARY -> onAddTemporaryHitPoints(characterBundle, draftValue)
                 }
@@ -1159,6 +1164,14 @@ private fun OverviewContent(
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
+            if (hpEditMode == OverviewHpEditMode.DAMAGE && current.currentHp == 0) {
+                ExperienceModeButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    label = text("overview_hp_critical"),
+                    selected = hpCritical,
+                    onClick = { hpCritical = !hpCritical }
+                )
+            }
             Text(
                 text = strings.format(
                     "overview_hp_result",
@@ -1167,6 +1180,17 @@ private fun OverviewContent(
                 style = MaterialTheme.typography.bodyLarge,
                 color = colors.text.primary
             )
+            if (hpEditMode == OverviewHpEditMode.DAMAGE && draftValue > 0) {
+                val before = DeathSaves(current.deathSaveSuccesses, current.deathSaveFailures)
+                val after = takeDamage(draftValue, hpCritical, current.currentHp, current.temporaryHp, current.maxHp, before).saves
+                if (after != before) {
+                    Text(
+                        text = if (after.isDead) text("overview_death_saves_dead") else strings.format("overview_hp_death_save_failures", after.failures),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = colors.accent.dangerHpZero
+                    )
+                }
+            }
         }
     }
 
@@ -2552,7 +2576,7 @@ private fun OverviewPreviewContent(
                 onUpdateIdentity = { _, _, _, _, _ -> },
                 onUpdateExperience = { _, _ -> },
                 onUpdatePortrait = { _, _ -> },
-                onDamageHitPoints = { _, _ -> },
+                onDamageHitPoints = { _, _, _ -> },
                 onHealHitPoints = { _, _ -> },
                 onAddTemporaryHitPoints = { _, _ -> },
                 onUpdateMaxHitPoints = { _, _ -> },

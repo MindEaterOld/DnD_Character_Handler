@@ -102,6 +102,17 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
     val customDiceSkins by appState.diceSkinsViewModel.skins.collectAsStateWithLifecycle()
     // The dice workshop: the skin it edits, and whether it's a new one.
     var workshopSkin by remember { mutableStateOf<Pair<com.dndcharacterhandler.domain.model.CustomDiceSkin, Boolean>?>(null) }
+    // The player's skin a new one starts from, so its pictures come along.
+    var workshopSource by remember { mutableStateOf<String?>(null) }
+    // A skin a friend shared, read from its file into a new one of the player's.
+    val skinImportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) {
+            scope.launch {
+                val imported = appState.diceSkinsViewModel.importSkin(uri)
+                snackbarHostState.showSnackbar(strings[if (imported) "dice_skin_imported" else "dice_skin_import_failed"])
+            }
+        }
+    }
     // The top-right button of every screen throws dice; settings are in the drawer.
     val openDice: () -> Unit = { isDicePickerOpen = true }
     val selectedCharacterName = managerState.characters
@@ -319,7 +330,8 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                     viewModel = appState.diceSkinsViewModel,
                     initial = skin,
                     isNew = isNew,
-                    onClose = { workshopSkin = null }
+                    onClose = { workshopSkin = null },
+                    copiedFrom = workshopSource
                 )
             }
         }
@@ -330,14 +342,17 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                 skin = diceSkin,
                 customSkins = customDiceSkins.map { appState.diceSkinsViewModel.customLook(it) },
                 onSkinChange = appState.diceSkinsViewModel::select,
-                onCreateSkin = { start ->
+                onCreateSkin = { start, source ->
                     isDicePickerOpen = false
+                    workshopSource = source
                     workshopSkin = start to true
                 },
                 onEditSkin = { skin ->
                     isDicePickerOpen = false
+                    workshopSource = null
                     workshopSkin = skin to false
                 },
+                onImportSkin = { skinImportLauncher.launch(arrayOf("*/*")) },
                 onDismiss = { isDicePickerOpen = false },
                 onRoll = { selection ->
                     diceSelection = selection

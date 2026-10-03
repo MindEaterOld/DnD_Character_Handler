@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.util.UUID
 
 /** The dice looks: the app's and the player's own (made in the dice workshop), and the one picked. */
 class DiceSkinsViewModel(
@@ -86,6 +87,23 @@ class DiceSkinsViewModel(
     }
 
     fun discardDraft() = store.clearDraft()
+
+    /**
+     * [sourceId]'s pictures copied into the workshop's draft, for a new skin made from it: the
+     * material picture and the face pictures by die kind.
+     */
+    suspend fun copyPicturesToDraft(sourceId: String): Pair<File?, Map<String, File?>> = store.copyIntoDraft(sourceId)
+
+    /** Writes the workshop's [look], pictures and all, to [uri] as one file to share. */
+    internal suspend fun exportSkin(uri: Uri, look: DiceLook.Custom): Boolean =
+        store.exportSkin(uri, look.skin, look.picture, look.faceArt.mapKeys { it.key.name })
+
+    /** Reads a shared skin file into a new skin of the player's and picks it; false when it isn't one. */
+    suspend fun importSkin(uri: Uri): Boolean {
+        val skin = store.importSkin(uri, UUID.randomUUID().toString(), DiceFaceAtlas.SIZE) ?: return false
+        preferences.setDiceSkin("custom:${skin.id}")
+        return true
+    }
 
     /** Reads a material picture into the draft; null when it can't be read. */
     suspend fun importPicture(uri: Uri): File? =

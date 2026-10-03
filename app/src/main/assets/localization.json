@@ -3668,6 +3668,20 @@
     "fr": "pv actuels : %1$s",
     "es": "PG actuales: %1$s"
   },
+  "overview_hp_critical": {
+    "en": "Critical hit",
+    "ru": "\u041a\u0440\u0438\u0442\u0438\u0447\u0435\u0441\u043a\u0438\u0439 \u0443\u0434\u0430\u0440",
+    "de": "Kritischer Treffer",
+    "fr": "Coup critique",
+    "es": "Golpe cr\u00edtico"
+  },
+  "overview_hp_death_save_failures": {
+    "en": "Death save failures: %1$d of 3",
+    "ru": "\u041f\u0440\u043e\u0432\u0430\u043b\u043e\u0432 \u0441\u043f\u0430\u0441\u0431\u0440\u043e\u0441\u043a\u043e\u0432 \u043e\u0442 \u0441\u043c\u0435\u0440\u0442\u0438: %1$d \u0438\u0437 3",
+    "de": "Fehlschl\u00e4ge bei Todesrettungsw\u00fcrfen: %1$d von 3",
+    "fr": "\u00c9checs aux jets contre la mort : %1$d sur 3",
+    "es": "Fallos de salvaci\u00f3n contra muerte: %1$d de 3"
+  },
   "overview_hp_result": {
     "en": "Result: %1$s",
     "ru": "\u0418\u0442\u043e\u0433: %1$s",
@@ -4139,6 +4153,48 @@
     "de": "Zuf\u00e4lliger Skin",
     "fr": "Skin al\u00e9atoire",
     "es": "Skin aleatorio"
+  },
+  "dice_workshop_share": {
+    "en": "Share skin",
+    "ru": "\u041f\u043e\u0434\u0435\u043b\u0438\u0442\u044c\u0441\u044f \u0441\u043a\u0438\u043d\u043e\u043c",
+    "de": "Skin teilen",
+    "fr": "Partager le skin",
+    "es": "Compartir skin"
+  },
+  "dice_workshop_shared": {
+    "en": "Skin saved to a file",
+    "ru": "\u0421\u043a\u0438\u043d \u0441\u043e\u0445\u0440\u0430\u043d\u0451\u043d \u0432 \u0444\u0430\u0439\u043b",
+    "de": "Skin als Datei gespeichert",
+    "fr": "Skin enregistr\u00e9 dans un fichier",
+    "es": "Skin guardado en un archivo"
+  },
+  "dice_workshop_share_failed": {
+    "en": "Couldn't save the file",
+    "ru": "\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0441\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u0444\u0430\u0439\u043b",
+    "de": "Datei konnte nicht gespeichert werden",
+    "fr": "Impossible d'enregistrer le fichier",
+    "es": "No se pudo guardar el archivo"
+  },
+  "dice_skin_import": {
+    "en": "Load a skin from a file",
+    "ru": "\u0417\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044c \u0441\u043a\u0438\u043d \u0438\u0437 \u0444\u0430\u0439\u043b\u0430",
+    "de": "Skin aus Datei laden",
+    "fr": "Charger un skin depuis un fichier",
+    "es": "Cargar un skin desde un archivo"
+  },
+  "dice_skin_imported": {
+    "en": "Skin loaded",
+    "ru": "\u0421\u043a\u0438\u043d \u0437\u0430\u0433\u0440\u0443\u0436\u0435\u043d",
+    "de": "Skin geladen",
+    "fr": "Skin charg\u00e9",
+    "es": "Skin cargado"
+  },
+  "dice_skin_import_failed": {
+    "en": "This file isn't a dice skin",
+    "ru": "\u042d\u0442\u043e \u043d\u0435 \u0444\u0430\u0439\u043b \u0441\u043a\u0438\u043d\u0430 \u043a\u0443\u0431\u0438\u043a\u043e\u0432",
+    "de": "Diese Datei ist kein W\u00fcrfel-Skin",
+    "fr": "Ce fichier n'est pas un skin de d\u00e9s",
+    "es": "Este archivo no es un skin de dados"
   },
   "dice_workshop_shuffle": {
     "en": "Shuffle",

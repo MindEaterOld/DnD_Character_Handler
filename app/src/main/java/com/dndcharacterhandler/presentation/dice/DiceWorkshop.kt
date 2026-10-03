@@ -32,6 +32,7 @@ import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.Image
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.Shuffle
 import androidx.compose.material.icons.outlined.Upload
 import androidx.compose.material3.Button
@@ -97,12 +98,20 @@ private val FaceArtKinds = listOf(
  * The dice workshop: the player's own dice skin, seen on a die turning above its settings — the
  * faces' colour, see-through and shine; the edges; the numbers' colour, outline, font and size; a
  * pattern over the faces (a web, marble, a nebula, or a picture as their material); and pictures of
- * their own for every face of a die (a face template saved, painted, loaded back). Nothing is kept
- * until Save; pictures loaded meanwhile wait as drafts.
+ * their own for every face of a die (a face template saved, painted, loaded back). A random look by
+ * DiceSkinGenerator's rules is a tap away, and the skin as it stands can be shared as one file.
+ * Nothing is kept until Save; pictures loaded meanwhile wait as drafts.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun DiceWorkshopOverlay(viewModel: DiceSkinsViewModel, initial: CustomDiceSkin, isNew: Boolean, onClose: () -> Unit) {
+internal fun DiceWorkshopOverlay(
+    viewModel: DiceSkinsViewModel,
+    initial: CustomDiceSkin,
+    isNew: Boolean,
+    onClose: () -> Unit,
+    /** The player's skin a new one is made from: its pictures come along as drafts. */
+    copiedFrom: String? = null
+) {
     val colors = LocalDesignTokens.current.colors
     val strings = LocalStrings.current
     val context = LocalContext.current
@@ -126,6 +135,14 @@ internal fun DiceWorkshopOverlay(viewModel: DiceSkinsViewModel, initial: CustomD
         onClose()
     }
     BackHandler(onBack = ::close)
+    LaunchedEffect(copiedFrom) {
+        val source = copiedFrom ?: return@LaunchedEffect
+        val (picture, faces) = viewModel.copyPicturesToDraft(source)
+        draftPicture = picture
+        draftFaceArt = faces
+        // A new version, so the preview reads the pictures.
+        skin = skin.copy(updatedAt = System.nanoTime())
+    }
     LaunchedEffect(message) {
         if (message != null) {
             delay(2500)
@@ -158,6 +175,12 @@ internal fun DiceWorkshopOverlay(viewModel: DiceSkinsViewModel, initial: CustomD
             } else {
                 message = strings["dice_workshop_image_failed"]
             }
+        }
+    }
+    val shareLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri: Uri? ->
+        uri ?: return@rememberLauncherForActivityResult
+        scope.launch {
+            message = strings[if (viewModel.exportSkin(uri, look)) "dice_workshop_shared" else "dice_workshop_share_failed"]
         }
     }
     val templateLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("image/png")) { uri: Uri? ->
@@ -212,8 +235,15 @@ internal fun DiceWorkshopOverlay(viewModel: DiceSkinsViewModel, initial: CustomD
                     modifier = Modifier.fillMaxWidth()
                 )
                 // A new look by DiceSkinGenerator's rules; the name and the face pictures stay.
-                ActionButton(text("dice_workshop_random"), Icons.Outlined.Casino) {
-                    skin = DiceSkinGenerator.generate(skin)
+                FlowRow {
+                    ActionButton(text("dice_workshop_random"), Icons.Outlined.Casino) {
+                        skin = DiceSkinGenerator.generate(skin)
+                    }
+                    // The skin as it is now, pictures and all, in a file to send a friend.
+                    ActionButton(text("dice_workshop_share"), Icons.Outlined.Share) {
+                        val fileName = skin.name.trim().ifBlank { strings["dice_workshop_default_name"] }.replace(Regex("[\\\\/:*?\"<>|]"), "_")
+                        shareLauncher.launch("$fileName.diceskin")
+                    }
                 }
 
                 WorkshopSection(text("dice_workshop_section_faces")) {

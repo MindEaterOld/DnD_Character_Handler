@@ -28,12 +28,19 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.InputStream
+import java.io.OutputStream
+import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
+import java.util.zip.ZipOutputStream
 
 /**
  * The player's own dice skins: `dice_skins/skins.json` in the app's files, and each skin's pictures
  * (its material, its face pictures) in a folder of its own. Pictures the workshop imports wait in a
- * draft folder until the skin is saved.
+ * draft folder until the skin is saved. A skin travels between players as one zip file of its
+ * settings and pictures (see [exportSkin], [importSkin]).
  */
 class DiceSkinStore(context: Context) {
     private val appContext = context.applicationContext
@@ -64,15 +71,22 @@ class DiceSkinStore(context: Context) {
      * (a filled-in face template), or at most [maxSide] for a material. False when it can't be read.
      */
     suspend fun importImage(uri: Uri, target: File, square: Int? = null, maxSide: Int = 1024): Boolean = withContext(Dispatchers.IO) {
-        val resolver = appContext.contentResolver
+        writePicture({ appContext.contentResolver.openInputStream(uri) }, target, square, maxSide)
+    }
+
+    /**
+     * Decodes the picture [open] reads (twice: its size first) into [target] as PNG, squeezed as
+     * [importImage] says. Written anew, so whatever came in that isn't a picture is left behind.
+     */
+    private fun writePicture(open: () -> InputStream?, target: File, square: Int?, maxSide: Int): Boolean {
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-        resolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, bounds) } ?: return@withContext false
-        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return@withContext false
+        open()?.use { BitmapFactory.decodeStream(it, null, bounds) } ?: return false
+        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return false
         var sample = 1
         while (maxOf(bounds.outWidth, bounds.outHeight) / (sample * 2) >= (square ?: maxSide)) sample *= 2
-        val decoded = resolver.openInputStream(uri)?.use {
+        val decoded = open()?.use {
             BitmapFactory.decodeStream(it, null, BitmapFactory.Options().apply { inSampleSize = sample })
-        } ?: return@withContext false
+        } ?: return false
         val scaled = if (square != null) {
             Bitmap.createScaledBitmap(decoded, square, square, true)
         } else {
@@ -85,7 +99,63 @@ class DiceSkinStore(context: Context) {
         }
         target.parentFile?.mkdirs()
         target.outputStream().use { scaled.compress(Bitmap.CompressFormat.PNG, 100, it) }
-        true
+        return true
+    }
+
+    /**
+     * Copies [sourceId]'s saved pictures into the draft, for a new skin made from it: its material
+     * picture (null when it has none) and its face pictures by die kind.
+     */
+    suspend fun copyIntoDraft(sourceId: String): Pair<File?, Map<String, File>> = withContext(Dispatchers.IO) {
+        val picture = pictureFile(sourceId).takeIf { it.exists() }?.let { it.copyTo(draftPictureFile(), overwrite = true) }
+        val faces = File(root, sourceId).listFiles().orEmpty()
+            .mapNotNull { file -> FaceFileName.matchEntire(file.name)?.groupValues?.get(1)?.let { kind -> kind to file } }
+            .associate { (kind, file) -> kind to file.copyTo(draftFaceArtFile(kind), overwrite = true) }
+        picture to faces
+    }
+
+    /**
+     * Writes [skin] as one file to share: a zip of its settings ([SKIN_ENTRY]), its material
+     * [picture] and its [faceArt] pictures by die kind. False when it can't be written.
+     */
+    suspend fun exportSkin(uri: Uri, skin: CustomDiceSkin, picture: File?, faceArt: Map<String, File>): Boolean = withContext(Dispatchers.IO) {
+        runCatching {
+            val faces = faceArt.filterValues { it.exists() }
+            val shared = skin.copy(faceArt = faces.keys, updatedAt = 0)
+            val entries = buildMap {
+                put(SKIN_ENTRY, encodeDiceSkins(listOf(shared)).toByteArray())
+                picture?.takeIf { it.exists() }?.let { put(PICTURE_ENTRY, it.readBytes()) }
+                faces.forEach { (kind, file) -> put(faceEntry(kind), file.readBytes()) }
+            }
+            appContext.contentResolver.openOutputStream(uri)?.use { writeSkinEntries(it, entries) } != null
+        }.getOrDefault(false)
+    }
+
+    /**
+     * Reads a shared skin file ([exportSkin]) into a new skin of the player's with [newId], so it
+     * never takes the place of one they have. Only the known entries are read, none bigger than
+     * [MAX_ENTRY_BYTES], and every picture is decoded and written anew ([faceSide] pixels a side for
+     * the face pictures). Null when the file isn't a skin.
+     */
+    suspend fun importSkin(uri: Uri, newId: String, faceSide: Int): CustomDiceSkin? = withContext(Dispatchers.IO) {
+        val entries = runCatching { appContext.contentResolver.openInputStream(uri)?.use(::readSkinEntries) }.getOrNull()
+            ?: return@withContext null
+        val shared = entries[SKIN_ENTRY]?.let { bytes -> runCatching { decodeDiceSkins(String(bytes)).firstOrNull() }.getOrNull() }
+            ?: return@withContext null
+        runCatching {
+            val hasPicture = entries[PICTURE_ENTRY]?.let { bytes -> writePicture({ bytes.inputStream() }, pictureFile(newId), null, 1024) } == true
+            val faces = entries.keys.mapNotNull { name -> FaceFileName.matchEntire(name)?.groupValues?.get(1) }.filter { kind ->
+                writePicture({ entries.getValue(faceEntry(kind)).inputStream() }, faceArtFile(newId, kind), faceSide, faceSide)
+            }.toSet()
+            val pattern = shared.pattern.takeIf { it !is DicePattern.Picture || hasPicture } ?: DicePattern.None
+            val imported = shared.copy(id = newId, faceArt = faces, pattern = pattern, updatedAt = System.currentTimeMillis())
+            writeList(_skins.value + imported)
+            imported
+        }.getOrElse {
+            // Half a skin is no skin: its pictures go too.
+            File(root, newId).deleteRecursively()
+            null
+        }
     }
 
     /** Writes [bitmap] as PNG to [uri] (a face template the player saves). */
@@ -126,6 +196,61 @@ class DiceSkinStore(context: Context) {
         root.mkdirs()
         listFile.writeText(encodeDiceSkins(list))
         _skins.value = list
+    }
+}
+
+/** A shared skin file's entries: the settings, the material picture, a face picture per die kind. */
+internal const val SKIN_ENTRY = "skin.json"
+internal const val PICTURE_ENTRY = "picture.png"
+private val FaceFileName = Regex("faces_([A-Z0-9_]{1,16})\\.png")
+
+internal fun faceEntry(kind: String) = "faces_$kind.png"
+
+/** A shared skin file is a handful of pictures: more entries, or a bigger one, and it isn't one. */
+internal const val MAX_ENTRIES = 32
+internal const val MAX_ENTRY_BYTES = 16 * 1024 * 1024
+
+/** A shared skin file: [entries] by name, zipped into [output]. */
+internal fun writeSkinEntries(output: OutputStream, entries: Map<String, ByteArray>) {
+    ZipOutputStream(output).use { zip ->
+        entries.forEach { (name, bytes) ->
+            zip.putNextEntry(ZipEntry(name))
+            zip.write(bytes)
+            zip.closeEntry()
+        }
+    }
+}
+
+/**
+ * A shared skin file's entries by name: only the known ones (the settings, the picture, face
+ * pictures), none past [MAX_ENTRY_BYTES]. Null when the file holds more than [MAX_ENTRIES] entries
+ * or a bigger one; anything else, a path into folders included, is passed over.
+ */
+internal fun readSkinEntries(input: InputStream): Map<String, ByteArray>? {
+    val entries = HashMap<String, ByteArray>()
+    ZipInputStream(input).use { zip ->
+        var count = 0
+        while (true) {
+            val entry = zip.nextEntry ?: break
+            if (++count > MAX_ENTRIES) return null
+            val known = entry.name == SKIN_ENTRY || entry.name == PICTURE_ENTRY || FaceFileName.matches(entry.name)
+            if (!entry.isDirectory && known) entries[entry.name] = zip.readAtMost(MAX_ENTRY_BYTES) ?: return null
+        }
+    }
+    return entries
+}
+
+/** All of this stream, or null once it runs past [limit] bytes. */
+private fun InputStream.readAtMost(limit: Int): ByteArray? {
+    val out = ByteArrayOutputStream()
+    val buffer = ByteArray(8192)
+    var total = 0
+    while (true) {
+        val count = read(buffer)
+        if (count < 0) return out.toByteArray()
+        total += count
+        if (total > limit) return null
+        out.write(buffer, 0, count)
     }
 }
 

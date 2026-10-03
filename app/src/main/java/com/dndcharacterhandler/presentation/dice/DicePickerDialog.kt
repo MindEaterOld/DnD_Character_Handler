@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Brush
+import androidx.compose.material.icons.outlined.FileOpen
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Remove
@@ -50,8 +51,10 @@ internal const val MAX_DICE_BODIES = 12
 /**
  * Pick how many of each die to throw. The gear in the corner turns the dialog to the dice skins;
  * a picked skin applies right away ([onSkinChange]). The skins end with the player's own and
- * "Create your own", which opens the dice workshop on a copy of the picked look ([onCreateSkin]);
- * the pencil on one of the player's opens it on that one ([onEditSkin]).
+ * "Create your own", which opens the dice workshop on a copy of the picked look ([onCreateSkin],
+ * with the id of the player's skin it copies, if it is one, so its pictures come too); the pencil on
+ * one of the player's opens it on that one ([onEditSkin]); the last row loads a skin a friend
+ * shared as a file ([onImportSkin]).
  */
 @Composable
 internal fun DicePickerDialog(
@@ -59,8 +62,9 @@ internal fun DicePickerDialog(
     skin: DiceLook,
     customSkins: List<DiceLook.Custom>,
     onSkinChange: (DiceLook) -> Unit,
-    onCreateSkin: (CustomDiceSkin) -> Unit,
+    onCreateSkin: (CustomDiceSkin, String?) -> Unit,
     onEditSkin: (CustomDiceSkin) -> Unit,
+    onImportSkin: () -> Unit,
     onDismiss: () -> Unit,
     onRoll: (Map<DieType, Int>) -> Unit
 ) {
@@ -100,8 +104,9 @@ internal fun DicePickerDialog(
                 selected = skin,
                 customSkins = customSkins,
                 onSelect = onSkinChange,
-                onCreate = { onCreateSkin(start) },
-                onEdit = onEditSkin
+                onCreate = { onCreateSkin(start, (skin as? DiceLook.Custom)?.skin?.id) },
+                onEdit = onEditSkin,
+                onImport = onImportSkin
             )
         } else {
             DiceCountList(counts = counts, bodies = bodies, onCountsChange = { counts = it })
@@ -160,7 +165,8 @@ private fun DiceSkinList(
     customSkins: List<DiceLook.Custom>,
     onSelect: (DiceLook) -> Unit,
     onCreate: () -> Unit,
-    onEdit: (CustomDiceSkin) -> Unit
+    onEdit: (CustomDiceSkin) -> Unit,
+    onImport: () -> Unit
 ) {
     val colors = LocalDesignTokens.current.colors
     val shape = RoundedCornerShape(14.dp)
@@ -205,25 +211,36 @@ private fun DiceSkinList(
             }
         }
         item(key = "create") {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(shape)
-                    .border(1.dp, colors.border.muted, shape)
-                    .clickable(onClick = onCreate)
-                    .padding(horizontal = 12.dp, vertical = 14.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
-                Icon(Icons.Outlined.Brush, contentDescription = null, tint = colors.text.label, modifier = Modifier.size(28.dp))
-                Text(
-                    text = text("dice_workshop_create"),
-                    modifier = Modifier.weight(1f),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = colors.text.primary
-                )
-            }
+            SkinListAction(Icons.Outlined.Brush, text("dice_workshop_create"), onCreate)
         }
+        item(key = "import") {
+            SkinListAction(Icons.Outlined.FileOpen, text("dice_skin_import"), onImport)
+        }
+    }
+}
+
+/** A row under the skins that does something rather than picking one. */
+@Composable
+private fun SkinListAction(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, onClick: () -> Unit) {
+    val colors = LocalDesignTokens.current.colors
+    val shape = RoundedCornerShape(14.dp)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .border(1.dp, colors.border.muted, shape)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        Icon(icon, contentDescription = null, tint = colors.text.label, modifier = Modifier.size(28.dp))
+        Text(
+            text = label,
+            modifier = Modifier.weight(1f),
+            style = MaterialTheme.typography.titleMedium,
+            color = colors.text.primary
+        )
     }
 }
 

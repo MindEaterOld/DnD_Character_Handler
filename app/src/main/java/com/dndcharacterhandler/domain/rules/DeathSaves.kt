@@ -15,6 +15,32 @@ data class DeathSaves(val successes: Int = 0, val failures: Int = 0) {
 /** What a death saving throw did: the saves after it, and whether the character is up with 1 hit point. */
 data class DeathSaveResult(val saves: DeathSaves, val regainsHitPoint: Boolean)
 
+/** Where damage leaves a character: the hit points, the temporary ones, and the death saves. */
+data class DamageResult(val currentHp: Int, val temporaryHp: Int, val saves: DeathSaves)
+
+/**
+ * [damage] by the 2024 rules. The temporary hit points take it first; only what gets past them
+ * reaches the character. Damage that drops them to 0 with as much left over as their [maxHp] kills
+ * outright. At 0 hit points any damage is a failed death save, two from a [critical] hit, and
+ * damage as big as the maximum kills.
+ */
+fun takeDamage(damage: Int, critical: Boolean, currentHp: Int, temporaryHp: Int, maxHp: Int, saves: DeathSaves): DamageResult {
+    val dealt = damage.coerceAtLeast(0)
+    val absorbed = dealt.coerceAtMost(temporaryHp)
+    val remaining = dealt - absorbed
+    val temporaryLeft = temporaryHp - absorbed
+    if (remaining == 0) return DamageResult(currentHp, temporaryLeft, saves)
+    val maximum = maxHp.coerceAtLeast(1)
+    val dead = saves.copy(failures = DEATH_SAVES_TO_END)
+    if (currentHp > 0) {
+        val leftOver = remaining - currentHp
+        return DamageResult((currentHp - remaining).coerceAtLeast(0), temporaryLeft, if (leftOver >= maximum) dead else saves)
+    }
+    if (remaining >= maximum) return DamageResult(0, temporaryLeft, dead)
+    val failures = (saves.failures + if (critical) 2 else 1).coerceAtMost(DEATH_SAVES_TO_END)
+    return DamageResult(0, temporaryLeft, saves.copy(failures = failures))
+}
+
 /**
  * A death saving throw of [roll] (a d20) on top of [saves], by the 2024 rules: 10 or more is a
  * success, less a failure; a 1 is two failures; a 20 brings the character back with 1 hit point,
