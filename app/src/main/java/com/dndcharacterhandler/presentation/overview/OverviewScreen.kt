@@ -29,6 +29,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.HeartBroken
+import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.HealthAndSafety
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.graphics.vector.ImageVector
+import com.dndcharacterhandler.presentation.components.ScreenTopActionButton
 import androidx.compose.material.icons.automirrored.outlined.DirectionsRun
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.Bedtime
@@ -514,11 +521,6 @@ class OverviewViewModel(
     }
 }
 
-private data class OverviewAction(
-    val labelKey: String,
-    val icon: androidx.compose.ui.graphics.vector.ImageVector
-)
-
 private data class OverviewStat(
     val labelKey: String,
     val value: String,
@@ -735,12 +737,10 @@ private fun OverviewContent(
     val levelLabel = strings.format("overview_level_format", character?.level ?: 1)
     val xpInfo = remember(character) { buildXpInfo(character) }
 
-    val actions = remember {
-        listOf(
-            OverviewAction("overview_short_rest", Icons.Outlined.LocalCafe),
-            OverviewAction("overview_long_rest", Icons.Outlined.Bedtime),
-            OverviewAction("overview_inspiration", Icons.Outlined.AutoAwesome)
-        )
+    val openHpDialog: (OverviewHpEditMode) -> Unit = { mode ->
+        hpEditMode = mode
+        hpDraft = ""
+        isHpDialogOpen = true
     }
 
     val miniStats = remember(character, strings) {
@@ -785,16 +785,52 @@ private fun OverviewContent(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    PortraitFrame(
-                        portraitUri = character?.portraitUri,
-                        characterName = displayName,
-                        dead = dead,
-                        onClick = {
-                            if (characterBundle != null) {
-                                isPortraitMenuOpen = true
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
+                        PortraitFrame(
+                            portraitUri = character?.portraitUri,
+                            characterName = displayName,
+                            dead = dead,
+                            onClick = {
+                                if (characterBundle != null) {
+                                    isPortraitMenuOpen = true
+                                }
+                            }
+                        )
+                        // The rests: bare icons in a column under the dice button, like the top bar's own.
+                        Column(
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .offset(y = (-2).dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            ScreenTopActionButton(onClick = {
+                                hitDiceSpendCount = 0
+                                isShortRestDialogOpen = true
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Outlined.LocalCafe,
+                                    contentDescription = text("overview_short_rest"),
+                                    tint = colors.text.icon,
+                                    modifier = Modifier.size(28.dp)
+                                )
+                            }
+                            ScreenTopActionButton(onClick = { isLongRestDialogOpen = true }) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Bedtime,
+                                    contentDescription = text("overview_long_rest"),
+                                    tint = colors.text.icon,
+                                    modifier = Modifier.size(28.dp)
+                                )
                             }
                         }
-                    )
+                        InspirationToggle(
+                            inspired = character?.hasInspiration ?: false,
+                            onToggle = { if (characterBundle != null) onToggleInspiration(characterBundle) },
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .offset(x = 78.dp, y = (-58).dp)
+                        )
+                    }
                     Text(
                         text = displayName,
                         modifier = Modifier
@@ -849,40 +885,6 @@ private fun OverviewContent(
             }
 
             item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .offset(y = (-28).dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    actions.forEach { action ->
-                        OverviewActionButton(
-                            modifier = Modifier.weight(1f),
-                            label = text(action.labelKey),
-                            icon = action.icon,
-                            selected = action.labelKey == "overview_inspiration" && (character?.hasInspiration ?: false),
-                            onClick = {
-                                when (action.labelKey) {
-                                    "overview_short_rest" -> {
-                                        hitDiceSpendCount = 0
-                                        isShortRestDialogOpen = true
-                                    }
-                                    "overview_long_rest" -> {
-                                        isLongRestDialogOpen = true
-                                    }
-                                    "overview_inspiration" -> {
-                                        if (characterBundle != null) {
-                                            onToggleInspiration(characterBundle)
-                                        }
-                                    }
-                                }
-                            }
-                        )
-                    }
-                }
-            }
-
-            item {
                 Column(
                     modifier = Modifier.offset(y = (-30).dp),
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -894,11 +896,7 @@ private fun OverviewContent(
                             maxHp = character?.maxHp ?: 0,
                             temporaryHp = character?.temporaryHp ?: 0,
                             hpLabel = text("overview_hp"),
-                            onClick = {
-                                hpEditMode = OverviewHpEditMode.DAMAGE
-                                hpDraft = ""
-                                isHpDialogOpen = true
-                            },
+                            onClick = { openHpDialog(OverviewHpEditMode.DAMAGE) },
                             onMaxHpClick = {
                                 maxHpDraft = (character?.maxHp ?: 0).toString()
                                 isMaxHpDialogOpen = true
@@ -922,6 +920,35 @@ private fun OverviewContent(
                                     dice.firstOrNull()?.let { onDeathSave(snapshot, before, it.value()) }
                                 })
                             }
+                        )
+                    }
+                    // Straight into the hit points' pop-up, in the mode of the button.
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 10.dp),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        HpActionButton(
+                            label = text("overview_hp_damage"),
+                            icon = Icons.Outlined.HeartBroken,
+                            color = colors.accent.dangerHpZero,
+                            modifier = Modifier.weight(1f),
+                            onClick = { openHpDialog(OverviewHpEditMode.DAMAGE) }
+                        )
+                        HpActionButton(
+                            label = text("overview_hp_heal"),
+                            icon = Icons.Outlined.Favorite,
+                            color = colors.accent.heal,
+                            modifier = Modifier.weight(1f),
+                            onClick = { openHpDialog(OverviewHpEditMode.HEAL) }
+                        )
+                        HpActionButton(
+                            label = text("overview_hp_temporary"),
+                            icon = Icons.Outlined.HealthAndSafety,
+                            color = colors.accent.hpTemporary,
+                            modifier = Modifier.weight(1f),
+                            onClick = { openHpDialog(OverviewHpEditMode.TEMPORARY) }
                         )
                     }
                 }
@@ -1374,7 +1401,7 @@ private fun OverviewContent(
                     Box(modifier = Modifier.padding(start = 12.dp)) {
                         Surface(
                             shape = RoundedCornerShape(14.dp),
-                            color = colors.surface.button,
+                            color = colors.surface.option,
                             border = BorderStroke(1.dp, colors.border.default),
                             onClick = { isHitDieMenuOpen = true }
                         ) {
@@ -1502,7 +1529,7 @@ private fun ExperienceModeButton(
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
-        color = if (selected) colors.surface.selected else colors.surface.button,
+        color = if (selected) colors.surface.selected else colors.surface.option,
         border = BorderStroke(1.dp, if (selected) colors.border.selected else colors.border.muted),
         onClick = onClick
     ) {
@@ -1794,50 +1821,65 @@ private fun PortraitViewerContent(
     }
 }
 
+/**
+ * Inspiration, a toggle on the portrait's frame: the button grey while the character has none, gold
+ * (the main action's fill) while they have it.
+ */
 @Composable
-private fun OverviewActionButton(
-        modifier: Modifier = Modifier,
-    label: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    selected: Boolean = false,
-    onClick: () -> Unit
-) {
-    val token = LocalDesignTokens.current.typography.actionButtonLabel
+private fun InspirationToggle(inspired: Boolean, onToggle: () -> Unit, modifier: Modifier = Modifier) {
     val colors = LocalDesignTokens.current.colors
-    val contentColor = if (selected) colors.accent.inspiration else colors.text.action
-    Surface(
-        modifier = modifier.height(66.dp),
-        shape = RoundedCornerShape(20.dp),
-        border = BorderStroke(1.dp, if (selected) colors.accent.inspiration.copy(alpha = 0.6f) else colors.border.default),
-        color = if (selected) colors.surface.inspiration else colors.surface.button,
-        onClick = onClick
+    val scheme = MaterialTheme.colorScheme
+    Box(
+        modifier = modifier
+            .size(44.dp)
+            .clip(CircleShape)
+            .background(if (inspired) scheme.primary else colors.surface.button)
+            .toggleable(value = inspired, role = Role.Switch, onValueChange = { onToggle() }),
+        contentAlignment = Alignment.Center
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 12.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = contentColor,
-                modifier = Modifier.size(19.dp)
-            )
-            Text(
-                text = label,
-                modifier = Modifier.padding(start = 7.dp),
-                style = MaterialTheme.typography.bodyLarge.copy(
-                    fontSize = token.fontSizeSp.sp,
-                    lineHeight = (token.lineHeightSp ?: token.fontSizeSp).sp
-                ),
-                color = contentColor,
-                fontWeight = FontWeight.Medium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
+        Icon(
+            imageVector = Icons.Outlined.AutoAwesome,
+            contentDescription = text("overview_inspiration"),
+            tint = if (inspired) scheme.onPrimary else colors.text.primary,
+            modifier = Modifier.size(20.dp)
+        )
+    }
+}
+
+/** How much of an HP action's colour fills its button: at 12 % even the red label reads (4.6:1). */
+private const val HpActionTint = 0.12f
+
+/**
+ * Damage, heal or temporary hit points, under the hit points: the colour of what it does, faint
+ * behind its icon and label.
+ */
+@Composable
+private fun HpActionButton(label: String, icon: ImageVector, color: Color, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    val token = LocalDesignTokens.current.typography.actionButtonLabel
+    val shape = RoundedCornerShape(20.dp)
+    Row(
+        modifier = modifier
+            .height(48.dp)
+            .clip(shape)
+            .background(color.copy(alpha = HpActionTint))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(imageVector = icon, contentDescription = null, tint = color, modifier = Modifier.size(19.dp))
+        Text(
+            text = label,
+            modifier = Modifier.padding(start = 6.dp),
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontSize = token.fontSizeSp.sp,
+                lineHeight = (token.lineHeightSp ?: token.fontSizeSp).sp
+            ),
+            color = color,
+            fontWeight = FontWeight.Medium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }
 
@@ -2381,7 +2423,7 @@ private fun ArmorClassModeOption(
     val colors = LocalDesignTokens.current.colors
     Surface(
         shape = RoundedCornerShape(12.dp),
-        color = colors.surface.button,
+        color = colors.surface.option,
         border = BorderStroke(1.dp, if (selected) colors.border.selected else colors.border.muted),
         onClick = onClick
     ) {

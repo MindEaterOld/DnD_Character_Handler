@@ -50,8 +50,13 @@ fun ScreenTopActions(
     }
 }
 
+/**
+ * A bare icon of the top bar (the menu, the dice, the rests under the dice on the overview): a 44dp
+ * round tap area with no fill. The one kind of button without a fill — the owner's choice for the
+ * top bar.
+ */
 @Composable
-private fun ScreenTopActionButton(
+fun ScreenTopActionButton(
     onClick: () -> Unit,
     content: @Composable () -> Unit
 ) {

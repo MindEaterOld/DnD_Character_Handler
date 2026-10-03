@@ -32,7 +32,7 @@ fun OverlayCloseButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
             .padding(16.dp)
             .size(44.dp)
             .clip(CircleShape)
-            .background(colors.surface.button)
+            .background(colors.surface.option)
             .border(1.dp, colors.border.default, CircleShape)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center

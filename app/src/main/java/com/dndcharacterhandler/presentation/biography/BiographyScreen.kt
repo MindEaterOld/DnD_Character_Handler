@@ -627,7 +627,7 @@ private fun BiographySelectionOption(
             .clip(RoundedCornerShape(10.dp))
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(10.dp),
-        color = if (selected) colors.surface.selected else colors.surface.button,
+        color = if (selected) colors.surface.selected else colors.surface.option,
         border = BorderStroke(1.dp, if (selected) colors.border.selected else colors.border.muted)
     ) {
         Text(

@@ -725,7 +725,7 @@ private fun DialogActionSection(
                     .fillMaxWidth()
                     .clickable(onClick = action.onClick),
                 shape = RoundedCornerShape(12.dp),
-                color = colors.surface.button,
+                color = colors.surface.option,
                 border = BorderStroke(1.dp, colors.ornament.outer)
             ) {
                 Text(
@@ -764,7 +764,7 @@ private fun WeaponAttackPickerDialog(
                             .fillMaxWidth()
                             .clickable { onSelect(weapon) },
                         shape = RoundedCornerShape(12.dp),
-                        color = colors.surface.button,
+                        color = colors.surface.option,
                         border = BorderStroke(1.dp, colors.ornament.outer)
                     ) {
                         Column(
@@ -844,7 +844,7 @@ private fun SpellAttackPickerDialog(
                             .fillMaxWidth()
                             .clickable { onSelect(spell) },
                         shape = RoundedCornerShape(12.dp),
-                        color = colors.surface.button,
+                        color = colors.surface.option,
                         border = BorderStroke(1.dp, colors.ornament.outer)
                     ) {
                         Column(
@@ -1493,7 +1493,7 @@ private fun StepperButton(
             .clip(RoundedCornerShape(8.dp))
             .clickable(enabled = enabled, onClick = onClick),
         shape = RoundedCornerShape(8.dp),
-        color = if (enabled) colors.surface.button else colors.surface.card,
+        color = if (enabled) colors.surface.option else colors.surface.card,
         border = BorderStroke(1.dp, colors.ornament.outer)
     ) {
         Box(contentAlignment = Alignment.Center) {

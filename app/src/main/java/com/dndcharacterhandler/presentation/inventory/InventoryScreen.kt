@@ -1052,7 +1052,7 @@ private fun InventoryToggleButton(
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
-        color = if (selected) colors.surface.selected else colors.surface.button,
+        color = if (selected) colors.surface.selected else colors.surface.option,
         border = BorderStroke(1.dp, if (selected) colors.border.selected else colors.border.muted),
         onClick = onClick
     ) {

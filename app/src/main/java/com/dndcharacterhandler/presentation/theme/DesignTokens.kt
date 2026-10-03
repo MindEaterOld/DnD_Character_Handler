@@ -64,7 +64,10 @@ data class BackgroundColorTokens(
 /** Card / button / portrait surfaces. */
 data class SurfaceColorTokens(
     val card: Color,
+    /** The standard fill of a button: it stands out from the cards (1.58:1), see CLAUDE.md. */
     val button: Color,
+    /** The old near-card fill of picker rows and toggle options, until they move to the button palette. */
+    val option: Color,
     val selected: Color,
     val inspiration: Color,
     val portrait: Color,
@@ -152,7 +155,8 @@ val DefaultDesignColors = DesignColorTokens(
     ),
     surface = SurfaceColorTokens(
         card = Color(0xFF17141B),
-        button = Color(0xFF1A171D),
+        button = Color(0xFF3B3840),
+        option = Color(0xFF1A171D),
         selected = Color(0xFF3A3244),
         inspiration = Color(0xFF2A2419),
         portrait = Color(0xFF141118),
@@ -297,6 +301,7 @@ private fun loadColorTokens(app: JsonObject?): DesignColorTokens {
         surface = SurfaceColorTokens(
             card = surface.colorToken("card", defaults.surface.card),
             button = surface.colorToken("button", defaults.surface.button),
+            option = surface.colorToken("option", defaults.surface.option),
             selected = surface.colorToken("selected", defaults.surface.selected),
             inspiration = surface.colorToken("inspiration", defaults.surface.inspiration),
             portrait = surface.colorToken("portrait", defaults.surface.portrait),

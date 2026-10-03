@@ -3641,6 +3641,7 @@
     "es": "Editar PG"
   },
   "overview_hp_damage": {
+    "maxChars": 9,
     "en": "Damage",
     "ru": "\u0423\u0440\u043e\u043d",
     "de": "Schaden",
@@ -3648,6 +3649,7 @@
     "es": "Daño"
   },
   "overview_hp_heal": {
+    "maxChars": 9,
     "en": "Heal",
     "ru": "\u0425\u0438\u043b",
     "de": "Heilen",
@@ -3655,6 +3657,7 @@
     "es": "Curar"
   },
   "overview_hp_temporary": {
+    "maxChars": 9,
     "en": "Temp HP",
     "ru": "\u0412\u0440\u0435\u043c. HP",
     "de": "Temp. TP",

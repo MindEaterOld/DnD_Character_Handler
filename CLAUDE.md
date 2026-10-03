@@ -19,12 +19,16 @@ What can be pressed as an action and what shows a value must look different at a
 - **Buttons** are always round (a circle, for an icon alone) or a rectangle with rounded corners — never sharp corners. A button has a **fill that stands out** from the background and from the cards around it; the fill is what says "press me". The fill comes from the button palette, never from a card's surface: `surface.button` (#1A171D) is next to `surface.card` (#17141B) and does not stand out.
 - **Stats and cells** (abilities, HP, AC, speed, list cells, info cards) have an **outline and no fill of their own** — the dark card surface, like the background. They stay that way even when a tap on them opens an editor.
 - So: **fill = button, outline without a fill = stat.** Never give a stat a button's fill, and never make a button outline-only (an outlined `Surface` or `OutlinedButton` as an action).
-- Only **significant, often pressed** actions are buttons with a fill (Save, the rests, Inspiration, the floating buttons, steppers). Minor actions stay plain text buttons (`TextButton`) — Cancel, a link in a list, "Edit" at the bottom of an unfolded card. That is the one exception.
+- Only **significant, often pressed** actions are buttons with a fill (Save, Inspiration, the HP actions, the floating buttons, steppers). Minor actions stay plain text buttons (`TextButton`) — Cancel, a link in a list, "Edit" at the bottom of an unfolded card. That is the one exception.
 - A **toggle** (one option of a row to pick from, or an on/off button like Inspiration) is a button too: the picked option differs from the others by its fill's colour or transparency, not only by its outline.
-- **Button palette** (fills and their text/icon colours, by role) — being worked out with the project owner; until it is approved and in `design_tokens.json`, use what is approved so far:
-  - main action (Save): `materialTheme.primary` #C6A36C, text `onPrimary`;
+- **The top bar's icons are the one exception**: the menu, the dice and (on the overview) the rests in a column under the dice are bare icons with no fill (`ScreenTopActionButton`) — the owner's choice, 2026-10-03.
+- **Button palette** (approved 2026-10-03; fills and their text/icon colours by role):
+  - **standard button**: `surface.button` #3B3840 (1.58:1 against the cards), text and icon `text.primary`;
+  - main action (Save) and a toggle that is on (Inspiration): `materialTheme.primary` #C6A36C, text and icon `onPrimary`;
+  - HP actions (damage, heal, temporary HP): their accent (`accent.dangerHpZero`, `accent.heal`, `accent.hpTemporary`) at **12 %** as the fill behind an icon and label in the full accent — at 12 % even the red label reads (4.6:1);
   - dangerous action (confirm deletion): `accent.dangerHpZero`, text `text.primary`;
-  - delete icon (the trash in a pop-up): `accent.dangerHpZero` at 16% behind an `accent.dangerHpZero` icon.
+  - delete icon (the trash in a pop-up): `accent.dangerHpZero` at 16% behind an `accent.dangerHpZero` icon;
+  - `surface.option` #1A171D is the old near-card fill of picker rows and toggle options; they move to the palette when redone (the selected state of a toggle is still to be chosen with the owner).
 
 ## Naming — Character Wizard
 

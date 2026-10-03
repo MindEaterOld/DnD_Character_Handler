@@ -1657,7 +1657,7 @@ private fun SpellSlotsConfigDialogPreview() {
 
     CompositionLocalProvider(LocalStrings provides strings) {
         DnDTheme {
-            Surface(color = LocalDesignTokens.current.colors.surface.button) {
+            Surface(color = LocalDesignTokens.current.colors.surface.option) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
                         text = text("spells_edit_slots"),

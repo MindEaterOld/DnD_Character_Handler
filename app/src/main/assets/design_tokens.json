@@ -160,7 +160,8 @@
       },
       "surface": {
         "card": "#17141B",
-        "button": "#1A171D",
+        "button": "#3B3840",
+        "option": "#1A171D",
         "selected": "#3A3244",
         "inspiration": "#2A2419",
         "portrait": "#141118",

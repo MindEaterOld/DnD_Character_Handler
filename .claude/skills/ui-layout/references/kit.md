@@ -9,6 +9,7 @@
 | `ScreenBackground { }` | 9 | Радиальный фон окна; экран рисует только свою часть, фон бесшовно продолжается под нижней панелью и системными полосами |
 | `CharacterScreenHeader(character, onOpenDrawer, onOpenDice)` | 7 | Шапка экрана персонажа: меню, кубы, имя и подзаголовок |
 | `ScreenTopActions(onOpenDrawer, onOpenDice)` | 9 | Верхний ряд: «гамбургер» слева, d20 справа (кнопки 44dp, иконки 28) |
+| `ScreenTopActionButton(onClick) { Icon }` | 2 | Голая иконка верхней панели без заливки, тап-зона 44dp — единственная кнопка без подложки (меню, кубы, отдых столбиком под кубами на обзоре) |
 | `BottomNavigationBar` | — | Панель вкладок: обводка поверх фона, без своей заливки |
 | `FloatingAddButton(onClick)` | 5 | Круглая плавающая «+» 58dp в правом нижнем углу (`padding(end = 24.dp, bottom = 15.dp)`) |
 | `LocalFloatingButtonsInset` | — | Нижнее поле списка, чтобы последние элементы выезжали из-под плавающих кнопок; приложение задаёт на экран (`SingleFloatingButtonInset` 110, `NoFloatingButtonInset` 16) |

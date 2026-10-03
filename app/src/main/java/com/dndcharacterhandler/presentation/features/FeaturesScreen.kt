@@ -682,7 +682,7 @@ internal fun FeatureCatalogRow(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
-        color = LocalDesignTokens.current.colors.surface.button,
+        color = LocalDesignTokens.current.colors.surface.option,
         border = BorderStroke(1.dp, LocalDesignTokens.current.colors.border.muted)
     ) {
         Row(

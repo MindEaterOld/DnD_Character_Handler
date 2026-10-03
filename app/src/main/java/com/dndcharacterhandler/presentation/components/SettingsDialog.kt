@@ -57,7 +57,7 @@ private fun SettingsLanguageOption(
     val colors = LocalDesignTokens.current.colors
     Surface(
         shape = RoundedCornerShape(12.dp),
-        color = colors.surface.button,
+        color = colors.surface.option,
         border = BorderStroke(1.dp, if (selected) colors.border.selected else colors.border.muted),
         onClick = onClick
     ) {
