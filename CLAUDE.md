@@ -12,6 +12,18 @@ Rules:
 - **Never add new colors or font sizes (кегли) on your own.** If a new color or size seems necessary, you must first request it from the project owner and get explicit approval before adding it. No new value goes into the code without that approval.
 - When touching older code that uses non-token hex values, align it to the tokens.
 
+## Buttons vs. stats — fill or outline
+
+What can be pressed as an action and what shows a value must look different at a glance:
+
+- **Buttons** are always round (a circle, for an icon alone) or a rectangle with rounded corners — never sharp corners. A button has a **fill that stands out** from the background and from the cards around it; the fill is what says "press me". The fill comes from the button palette, never from a card's surface: `surface.button` (#1A171D) is next to `surface.card` (#17141B) and does not stand out.
+- **Stats and cells** (abilities, HP, AC, speed, list cells, info cards) have an **outline and no fill of their own** — the dark card surface, like the background. They stay that way even when a tap on them opens an editor.
+- So: **fill = button, outline without a fill = stat.** Never give a stat a button's fill, and never make a button outline-only (an outlined `Surface` or `OutlinedButton` as an action).
+- **Button palette** (fills and their text/icon colours, by role) — being worked out with the project owner; until it is approved and in `design_tokens.json`, use what is approved so far:
+  - main action (Save): `materialTheme.primary` #C6A36C, text `onPrimary`;
+  - dangerous action (confirm deletion): `accent.dangerHpZero`, text `text.primary`;
+  - delete icon (the trash in a pop-up): `accent.dangerHpZero` at 16% behind an `accent.dangerHpZero` icon.
+
 ## Naming — Character Wizard
 
 The step-by-step character building and level-up system is called **Character Wizard**. It's a name: write it in English in every language and never translate it (not «мастер», «Assistent», «assistant», «asistente»). Use it in texts and when talking to the project owner.
