@@ -1,5 +1,8 @@
 package com.dndcharacterhandler.data.repository
 
+import com.dndcharacterhandler.domain.rules.breaksConcentration
+import com.dndcharacterhandler.domain.rules.MAX_EXHAUSTION
+import com.dndcharacterhandler.domain.model.Condition
 import com.dndcharacterhandler.data.local.AppDatabase
 import com.dndcharacterhandler.data.local.dao.CharacterDao
 import com.dndcharacterhandler.domain.model.PortraitFraming
@@ -118,6 +121,8 @@ class CharacterRepositoryImpl(
             )
             // Up again: the death saving throws start over next time.
             if (currentHp > 0) characterDao.updateDeathSaves(characterId, 0, 0, updatedAt)
+            // Down: unconscious, and concentration ends.
+            if (currentHp <= 0) characterDao.updateConcentration(characterId, null, updatedAt)
         }
     }
 
@@ -184,6 +189,27 @@ class CharacterRepositoryImpl(
     override suspend fun updateDeathSaves(characterId: Long, successes: Int, failures: Int) {
         writeMutex.withLock {
             characterDao.updateDeathSaves(characterId, successes.coerceIn(0, 3), failures.coerceIn(0, 3), System.currentTimeMillis())
+        }
+    }
+
+    override suspend fun updateConditions(characterId: Long, conditions: Set<Condition>) {
+        writeMutex.withLock {
+            val updatedAt = System.currentTimeMillis()
+            characterDao.updateConditions(characterId, Condition.join(conditions), updatedAt)
+            // Whatever incapacitates ends concentration.
+            if (breaksConcentration(conditions)) characterDao.updateConcentration(characterId, null, updatedAt)
+        }
+    }
+
+    override suspend fun updateExhaustion(characterId: Long, exhaustion: Int) {
+        writeMutex.withLock {
+            characterDao.updateExhaustion(characterId, exhaustion.coerceIn(0, MAX_EXHAUSTION), System.currentTimeMillis())
+        }
+    }
+
+    override suspend fun updateConcentration(characterId: Long, spellId: Long?) {
+        writeMutex.withLock {
+            characterDao.updateConcentration(characterId, spellId, System.currentTimeMillis())
         }
     }
 
@@ -318,6 +344,7 @@ class CharacterRepositoryImpl(
 
     override suspend fun deleteSpell(characterId: Long, spellId: Long) {
         writeMutex.withLock {
+            characterDao.dropConcentrationOn(characterId, spellId)
             writeCoordinator.deleteSpellForCharacter(
                 characterId = characterId,
                 spellId = spellId,

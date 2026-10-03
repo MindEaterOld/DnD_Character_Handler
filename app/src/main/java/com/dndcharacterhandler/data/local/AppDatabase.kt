@@ -30,7 +30,7 @@ import com.dndcharacterhandler.data.local.entity.SpellEntity
         FeatureEntity::class,
         NoteEntity::class
     ],
-    version = 52,
+    version = 53,
     exportSchema = false
 )
 @TypeConverters(RoomConverters::class)
@@ -98,7 +98,8 @@ abstract class AppDatabase : RoomDatabase() {
                     MIGRATION_48_49,
                     MIGRATION_49_50,
                     MIGRATION_50_51,
-                    MIGRATION_51_52
+                    MIGRATION_51_52,
+                    MIGRATION_52_53
                 ).build().also { INSTANCE = it }
             }
         }
@@ -597,6 +598,15 @@ abstract class AppDatabase : RoomDatabase() {
                 db.execSQL("ALTER TABLE characters ADD COLUMN portraitFocusX REAL NOT NULL DEFAULT 0.5")
                 db.execSQL("ALTER TABLE characters ADD COLUMN portraitFocusY REAL NOT NULL DEFAULT 0.5")
                 db.execSQL("ALTER TABLE characters ADD COLUMN portraitZoom REAL NOT NULL DEFAULT 1.0")
+            }
+        }
+
+        private val MIGRATION_52_53 = object : Migration(52, 53) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Conditions, exhaustion, the spell held by concentration.
+                db.execSQL("ALTER TABLE characters ADD COLUMN conditions TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE characters ADD COLUMN exhaustion INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE characters ADD COLUMN concentrationSpellId INTEGER")
             }
         }
     }

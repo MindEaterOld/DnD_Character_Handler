@@ -98,6 +98,13 @@ fun effectiveSpeed(speed: Int, conditions: Set<Condition>, exhaustion: Int): Int
     if (effectiveConditions(conditions).any { it in Immobilizing }) 0
     else (speed - 5 * exhaustion.coerceIn(0, MAX_EXHAUSTION)).coerceAtLeast(0)
 
+/** The conditions in play: those put on by hand, and unconscious at 0 hit points. */
+fun activeConditions(conditions: Set<Condition>, currentHp: Int): Set<Condition> =
+    if (currentHp <= 0) conditions + Condition.UNCONSCIOUS else conditions
+
+/** Dead: three failed death saves, or exhaustion's last level. */
+fun isDead(saves: DeathSaves, exhaustion: Int): Boolean = saves.isDead || exhaustion >= MAX_EXHAUSTION
+
 /** Whatever incapacitates ends concentration. */
 fun breaksConcentration(conditions: Set<Condition>): Boolean = Condition.INCAPACITATED in effectiveConditions(conditions)
 

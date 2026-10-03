@@ -75,6 +75,15 @@ class ConditionRulesTest {
     }
 
     @Test
+    fun zeroHitPointsMeanUnconsciousAndTheSixthLevelOfExhaustionKills() {
+        assertTrue(Condition.UNCONSCIOUS in activeConditions(emptySet(), currentHp = 0))
+        assertFalse(Condition.UNCONSCIOUS in activeConditions(emptySet(), currentHp = 3))
+        assertTrue(isDead(DeathSaves(), exhaustion = 6))
+        assertFalse(isDead(DeathSaves(failures = 2), exhaustion = 5))
+        assertTrue(isDead(DeathSaves(failures = 3), exhaustion = 0))
+    }
+
+    @Test
     fun concentration() {
         assertTrue(breaksConcentration(setOf(Condition.STUNNED)))
         assertTrue(breaksConcentration(setOf(Condition.INCAPACITATED)))

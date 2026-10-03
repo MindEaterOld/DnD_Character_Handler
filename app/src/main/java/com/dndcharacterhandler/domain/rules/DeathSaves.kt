@@ -47,9 +47,10 @@ fun takeDamage(damage: Int, currentHp: Int, temporaryHp: Int, maxHp: Int, saves:
  * success, less a failure; a 1 is two failures; a 20 brings the character back with 1 hit point,
  * the saves cleared.
  */
-fun deathSave(roll: Int, saves: DeathSaves): DeathSaveResult = when {
+fun deathSave(roll: Int, saves: DeathSaves, modifier: Int = 0): DeathSaveResult = when {
+    // A natural 20 or 1 counts whatever the modifier (exhaustion's -2 a level).
     roll >= 20 -> DeathSaveResult(DeathSaves(), regainsHitPoint = true)
     roll <= 1 -> DeathSaveResult(saves.copy(failures = (saves.failures + 2).coerceAtMost(DEATH_SAVES_TO_END)), false)
-    roll < 10 -> DeathSaveResult(saves.copy(failures = (saves.failures + 1).coerceAtMost(DEATH_SAVES_TO_END)), false)
+    roll + modifier < 10 -> DeathSaveResult(saves.copy(failures = (saves.failures + 1).coerceAtMost(DEATH_SAVES_TO_END)), false)
     else -> DeathSaveResult(saves.copy(successes = (saves.successes + 1).coerceAtMost(DEATH_SAVES_TO_END)), false)
 }

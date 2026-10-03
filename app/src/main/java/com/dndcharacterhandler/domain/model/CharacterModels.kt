@@ -30,6 +30,12 @@ data class Character(
     /** Death saving throws while at 0 hit points; both go back to 0 once the character is up again. */
     val deathSaveSuccesses: Int = 0,
     val deathSaveFailures: Int = 0,
+    /** Conditions put on by hand; unconscious at 0 hit points comes by itself (activeConditions). */
+    val conditions: Set<Condition> = emptySet(),
+    /** Levels of exhaustion, 0 to 6; the sixth kills. */
+    val exhaustion: Int = 0,
+    /** The character's spell held by concentration, if any (a [Spell.id]). */
+    val concentrationSpellId: Long? = null,
     val hitDieSides: Int,
     val spentHitDice: Int,
     val hasInspiration: Boolean,

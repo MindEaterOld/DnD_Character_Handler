@@ -180,6 +180,19 @@ interface CharacterDao {
     @Query("UPDATE characters SET deathSaveSuccesses = :successes, deathSaveFailures = :failures, updatedAt = :updatedAt WHERE id = :characterId")
     suspend fun updateDeathSaves(characterId: Long, successes: Int, failures: Int, updatedAt: Long)
 
+    @Query("UPDATE characters SET conditions = :conditions, updatedAt = :updatedAt WHERE id = :characterId")
+    suspend fun updateConditions(characterId: Long, conditions: String, updatedAt: Long)
+
+    @Query("UPDATE characters SET exhaustion = :exhaustion, updatedAt = :updatedAt WHERE id = :characterId")
+    suspend fun updateExhaustion(characterId: Long, exhaustion: Int, updatedAt: Long)
+
+    @Query("UPDATE characters SET concentrationSpellId = :spellId, updatedAt = :updatedAt WHERE id = :characterId")
+    suspend fun updateConcentration(characterId: Long, spellId: Long?, updatedAt: Long)
+
+    /** A deleted spell can't be held any more. */
+    @Query("UPDATE characters SET concentrationSpellId = NULL WHERE id = :characterId AND concentrationSpellId = :spellId")
+    suspend fun dropConcentrationOn(characterId: Long, spellId: Long)
+
     @Query("UPDATE characters SET size = :size, updatedAt = :updatedAt WHERE id = :characterId")
     suspend fun updateSize(characterId: Long, size: CreatureSize, updatedAt: Long)
 

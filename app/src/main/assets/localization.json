@@ -3669,6 +3669,125 @@
     "fr": "Dégâts",
     "es": "Daño"
   },
+  "condition_blinded": {
+    "en": "Blinded",
+    "ru": "Слепота",
+    "de": "Blind",
+    "fr": "Aveuglé",
+    "es": "Cegado"
+  },
+  "condition_charmed": {
+    "en": "Charmed",
+    "ru": "Обворожение",
+    "de": "Bezaubert",
+    "fr": "Charmé",
+    "es": "Hechizado"
+  },
+  "condition_deafened": {
+    "en": "Deafened",
+    "ru": "Глухота",
+    "de": "Taub",
+    "fr": "Assourdi",
+    "es": "Ensordecido"
+  },
+  "condition_exhaustion": {
+    "en": "Exhaustion",
+    "ru": "Истощение",
+    "de": "Erschöpfung",
+    "fr": "Épuisement",
+    "es": "Agotamiento"
+  },
+  "condition_frightened": {
+    "en": "Frightened",
+    "ru": "Испуг",
+    "de": "Verängstigt",
+    "fr": "Effrayé",
+    "es": "Asustado"
+  },
+  "condition_grappled": {
+    "en": "Grappled",
+    "ru": "Захват",
+    "de": "Gepackt",
+    "fr": "Agrippé",
+    "es": "Agarrado"
+  },
+  "condition_incapacitated": {
+    "en": "Incapacitated",
+    "ru": "Выход из строя",
+    "de": "Kampfunfähig",
+    "fr": "Neutralisé",
+    "es": "Incapacitado"
+  },
+  "condition_invisible": {
+    "en": "Invisible",
+    "ru": "Невидимость",
+    "de": "Unsichtbar",
+    "fr": "Invisible",
+    "es": "Invisible"
+  },
+  "condition_paralyzed": {
+    "en": "Paralyzed",
+    "ru": "Паралич",
+    "de": "Gelähmt",
+    "fr": "Paralysé",
+    "es": "Paralizado"
+  },
+  "condition_petrified": {
+    "en": "Petrified",
+    "ru": "Окаменение",
+    "de": "Versteinert",
+    "fr": "Pétrifié",
+    "es": "Petrificado"
+  },
+  "condition_poisoned": {
+    "en": "Poisoned",
+    "ru": "Отравление",
+    "de": "Vergiftet",
+    "fr": "Empoisonné",
+    "es": "Envenenado"
+  },
+  "condition_prone": {
+    "en": "Prone",
+    "ru": "Распластанность",
+    "de": "Liegend",
+    "fr": "À terre",
+    "es": "Derribado"
+  },
+  "condition_restrained": {
+    "en": "Restrained",
+    "ru": "Обездвиженность",
+    "de": "Festgesetzt",
+    "fr": "Entravé",
+    "es": "Apresado"
+  },
+  "condition_stunned": {
+    "en": "Stunned",
+    "ru": "Шок",
+    "de": "Betäubt",
+    "fr": "Étourdi",
+    "es": "Aturdido"
+  },
+  "condition_unconscious": {
+    "en": "Unconscious",
+    "ru": "Без сознания",
+    "de": "Bewusstlos",
+    "fr": "Inconscient",
+    "es": "Inconsciente"
+  },
+  "overview_hp_hint_concentration": {
+    "en": "Concentration on %1$s: Constitution save DC %2$d",
+    "ru": "Концентрация на «%1$s»: спасбросок Телосложения СЛ %2$d",
+    "de": "Konzentration auf %1$s: Konstitutionsrettungswurf SG %2$d",
+    "fr": "Concentration sur %1$s : jet de sauvegarde de Constitution DD %2$d",
+    "es": "Concentración en %1$s: salvación de Constitución CD %2$d"
+  },
+  "overview_hp_hint_concentration_lost": {
+    "en": "Concentration on %1$s ends",
+    "ru": "Концентрация на «%1$s» прервётся",
+    "de": "Die Konzentration auf %1$s endet",
+    "fr": "La concentration sur %1$s prend fin",
+    "es": "La concentración en %1$s termina"
+  },
   "overview_hp_heal_title": {
     "en": "Healing",
     "ru": "Лечение",

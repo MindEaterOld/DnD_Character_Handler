@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.data.repository
 
+import com.dndcharacterhandler.domain.model.Condition
 import com.dndcharacterhandler.data.local.entity.AttackEntity
 import com.dndcharacterhandler.data.local.entity.CharacterEntity
 import com.dndcharacterhandler.data.local.entity.CharacterWithDetails
@@ -126,6 +127,9 @@ fun CharacterEntity.toDomain(): Character =
         temporaryHp = temporaryHp,
         deathSaveSuccesses = deathSaveSuccesses,
         deathSaveFailures = deathSaveFailures,
+        conditions = Condition.parse(conditions),
+        exhaustion = exhaustion,
+        concentrationSpellId = concentrationSpellId,
         hitDieSides = hitDieSides,
         spentHitDice = spentHitDice,
         hasInspiration = hasInspiration,
@@ -277,6 +281,9 @@ fun Character.toEntity(): CharacterEntity =
         temporaryHp = temporaryHp,
         deathSaveSuccesses = deathSaveSuccesses,
         deathSaveFailures = deathSaveFailures,
+        conditions = Condition.join(conditions),
+        exhaustion = exhaustion,
+        concentrationSpellId = concentrationSpellId,
         hitDieSides = hitDieSides,
         spentHitDice = spentHitDice,
         hasInspiration = hasInspiration,

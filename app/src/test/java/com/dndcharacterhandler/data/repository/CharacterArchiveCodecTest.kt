@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.data.repository
 
+import com.dndcharacterhandler.domain.model.Condition
 import com.dndcharacterhandler.domain.model.PortraitFraming
 import com.dndcharacterhandler.domain.model.AdvancementRecord
 import com.dndcharacterhandler.domain.model.Attack
@@ -150,6 +151,8 @@ class CharacterArchiveCodecTest {
                 temporaryHp = 6,
                 deathSaveSuccesses = 1,
                 deathSaveFailures = 2,
+                conditions = setOf(Condition.POISONED, Condition.PRONE),
+                exhaustion = 2,
                 hitDieSides = 10,
                 spentHitDice = 2,
                 hasInspiration = true,

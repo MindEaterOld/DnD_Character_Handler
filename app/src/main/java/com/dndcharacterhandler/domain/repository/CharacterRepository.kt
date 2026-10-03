@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.domain.repository
 
+import com.dndcharacterhandler.domain.model.Condition
 import com.dndcharacterhandler.domain.model.PortraitFraming
 import com.dndcharacterhandler.domain.model.CharacterBundle
 import com.dndcharacterhandler.domain.model.CombatResource
@@ -36,6 +37,9 @@ interface CharacterRepository {
     suspend fun updateDarkvision(characterId: Long, mode: DarkvisionMode, manualFeet: Int)
     suspend fun updateSize(characterId: Long, size: CreatureSize)
     suspend fun updateDeathSaves(characterId: Long, successes: Int, failures: Int)
+    suspend fun updateConditions(characterId: Long, conditions: Set<Condition>)
+    suspend fun updateExhaustion(characterId: Long, exhaustion: Int)
+    suspend fun updateConcentration(characterId: Long, spellId: Long?)
     suspend fun updateAbilityScore(
         characterId: Long,
         ability: SpellcastingAbility,

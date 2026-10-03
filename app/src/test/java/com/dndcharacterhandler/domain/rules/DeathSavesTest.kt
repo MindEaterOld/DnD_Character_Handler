@@ -13,6 +13,9 @@ class DeathSavesTest {
         assertEquals(DeathSaves(failures = 1), deathSave(9, DeathSaves()).saves)
         assertEquals(DeathSaves(successes = 2, failures = 2), deathSave(2, DeathSaves(2, 1)).saves)
         assertFalse(deathSave(19, DeathSaves()).regainsHitPoint)
+        // Exhaustion 2: a 12 is a 8, a failure; a natural 20 still brings them round.
+        assertEquals(DeathSaves(failures = 1), deathSave(12, DeathSaves(), modifier = -4).saves)
+        assertTrue(deathSave(20, DeathSaves(), modifier = -4).regainsHitPoint)
     }
 
     @Test

@@ -1,5 +1,7 @@
 package com.dndcharacterhandler.data.repository
 
+import com.dndcharacterhandler.domain.rules.MAX_EXHAUSTION
+import com.dndcharacterhandler.domain.model.Condition
 import androidx.core.net.toUri
 import com.dndcharacterhandler.data.json.has
 import com.dndcharacterhandler.data.json.isNull
@@ -47,7 +49,10 @@ import java.io.File
 //     (containerIndex: its index in inventoryItems).
 // 22: weaponMasteries; an attack's baseWeaponId.
 // 23: deathSaveSuccesses, deathSaveFailures.
-private const val SCHEMA_VERSION = 24
+// 24: portraitFocusX, portraitFocusY, portraitZoom.
+// 25: conditions (keys, comma-separated), exhaustion. Concentration isn't carried: it lasts minutes,
+//     and the spells get new ids on import.
+private const val SCHEMA_VERSION = 25
 
 data class ImportedArchive(
     val characterBundle: CharacterBundle,
@@ -75,6 +80,8 @@ fun CharacterBundle.toArchiveManifest(
         put("temporaryHp", character.temporaryHp)
         put("deathSaveSuccesses", character.deathSaveSuccesses)
         put("deathSaveFailures", character.deathSaveFailures)
+        put("conditions", Condition.join(character.conditions))
+        put("exhaustion", character.exhaustion)
         put("hitDieSides", character.hitDieSides)
         put("spentHitDice", character.spentHitDice)
         put("hasInspiration", character.hasInspiration)
@@ -338,6 +345,8 @@ fun archiveManifestToCharacterBundle(
         temporaryHp = characterJson.optInt("temporaryHp").coerceAtLeast(0),
         deathSaveSuccesses = characterJson.optInt("deathSaveSuccesses").coerceIn(0, 3),
         deathSaveFailures = characterJson.optInt("deathSaveFailures").coerceIn(0, 3),
+        conditions = Condition.parse(characterJson.optString("conditions")),
+        exhaustion = characterJson.optInt("exhaustion").coerceIn(0, MAX_EXHAUSTION),
         hitDieSides = characterJson.optInt("hitDieSides", 8).coerceInHitDieSides(),
         spentHitDice = characterJson.optInt("spentHitDice").coerceIn(0, importedLevel),
         hasInspiration = characterJson.optBoolean("hasInspiration"),

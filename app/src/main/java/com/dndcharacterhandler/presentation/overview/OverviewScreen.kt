@@ -1,4 +1,10 @@
 package com.dndcharacterhandler.presentation.overview
+import com.dndcharacterhandler.domain.rules.concentrationSaveDc
+import com.dndcharacterhandler.domain.rules.isDead
+import com.dndcharacterhandler.domain.rules.rollEffects
+import com.dndcharacterhandler.domain.rules.D20Test
+import com.dndcharacterhandler.domain.rules.MAX_EXHAUSTION
+import com.dndcharacterhandler.domain.model.Condition
 import android.content.Context
 import android.content.Intent
 import android.media.MediaPlayer
@@ -462,7 +468,7 @@ class OverviewViewModel(
      */
     fun recordDeathSave(characterBundle: CharacterBundle, before: DeathSaves, roll: Int) {
         val current = characterBundle.character
-        val result = deathSave(roll, before)
+        val result = deathSave(roll, before, rollEffects(D20Test.DeathSave, current.conditions, current.exhaustion).modifier)
         viewModelScope.launch {
             if (result.regainsHitPoint) {
                 // Up with 1 hit point: the repository clears the saves.
@@ -499,7 +505,29 @@ class OverviewViewModel(
                 characterRepository.updateSpellSlotRemaining(current.id, current.spellSlotMaximums)
             }
             restoreCombatResources(characterBundle, longRest = true)
+            // A long rest takes one level of exhaustion away and ends concentration.
+            if (current.exhaustion > 0) characterRepository.updateExhaustion(current.id, current.exhaustion - 1)
+            if (current.concentrationSpellId != null) characterRepository.updateConcentration(current.id, null)
         }
+    }
+
+    fun updateConditions(characterBundle: CharacterBundle, conditions: Set<Condition>) {
+        val current = characterBundle.character
+        if (conditions == current.conditions) return
+        viewModelScope.launch { characterRepository.updateConditions(current.id, conditions) }
+    }
+
+    fun updateExhaustion(characterBundle: CharacterBundle, exhaustion: Int) {
+        val current = characterBundle.character
+        val level = exhaustion.coerceIn(0, MAX_EXHAUSTION)
+        if (level == current.exhaustion) return
+        viewModelScope.launch { characterRepository.updateExhaustion(current.id, level) }
+    }
+
+    fun endConcentration(characterBundle: CharacterBundle) {
+        val current = characterBundle.character
+        if (current.concentrationSpellId == null) return
+        viewModelScope.launch { characterRepository.updateConcentration(current.id, null) }
     }
 
     fun shortRest(characterBundle: CharacterBundle) {
@@ -751,7 +779,7 @@ private fun OverviewContent(
     val rollDice = LocalDiceRoller.current
     // The Wilhelm scream: once, when the character dies (the third failed death save, however it
     // came: a hit, the d20, a circle). Not for one who was dead already when the sheet opened.
-    val dead = character?.let { DeathSaves(it.deathSaveSuccesses, it.deathSaveFailures).isDead } ?: false
+    val dead = character?.let { isDead(DeathSaves(it.deathSaveSuccesses, it.deathSaveFailures), it.exhaustion) } ?: false
     var wasDead by remember(character?.id) { mutableStateOf<Boolean?>(null) }
     LaunchedEffect(character?.id, dead) {
         if (character == null) return@LaunchedEffect
@@ -1194,6 +1222,16 @@ private fun OverviewContent(
                     if (savesAfter != savesBefore) {
                         val hint = if (savesAfter.isDead) strings["overview_death_saves_dead"] else strings.format("overview_hp_death_save_failures", savesAfter.failures)
                         add(hint to colors.accent.dangerHpZero)
+                    }
+                    // Any damage tests concentration; dropping to 0 ends it.
+                    val held = characterBundle.spells.firstOrNull { it.id == current.concentrationSpellId }
+                    if (held != null && amount > 0) {
+                        val hint = if (result.currentHp == 0) {
+                            strings.format("overview_hp_hint_concentration_lost", held.name)
+                        } else {
+                            strings.format("overview_hp_hint_concentration", held.name, concentrationSaveDc(amount))
+                        }
+                        add(hint to colors.accent.magical)
                     }
                 }
                 OverviewHpEditMode.HEAL -> when {

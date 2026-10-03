@@ -34,6 +34,10 @@ data class CharacterEntity(
     val temporaryHp: Int,
     val deathSaveSuccesses: Int = 0,
     val deathSaveFailures: Int = 0,
+    /** Condition keys, comma-separated. */
+    val conditions: String = "",
+    val exhaustion: Int = 0,
+    val concentrationSpellId: Long? = null,
     val hitDieSides: Int,
     val spentHitDice: Int,
     val hasInspiration: Boolean,
