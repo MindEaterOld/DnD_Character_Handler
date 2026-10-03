@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import com.dndcharacterhandler.domain.model.AssetReferences
 import kotlinx.coroutines.Dispatchers
@@ -58,7 +59,14 @@ fun AppImage(
         is ImageSourceKind.BitmapRef -> {
             // Decode off the main thread so disk I/O + bitmap decode doesn't jank composition
             // (e.g. drawer portraits). Falls back until the bitmap is ready or if decoding fails.
-            val painter by produceState<BitmapPainter?>(initialValue = null, sourceKind.reference) {
+            // A preview is one static frame that doesn't wait for that: it decodes at once.
+            val inPreview = LocalInspectionMode.current
+            val previewPainter = remember(sourceKind.reference, inPreview) {
+                if (!inPreview) null
+                else runCatching { decodeBitmap(context, sourceKind.reference) }.getOrNull()?.let { BitmapPainter(it.asImageBitmap()) }
+            }
+            val painter by produceState(initialValue = previewPainter, sourceKind.reference) {
+                if (previewPainter != null) return@produceState
                 value = withContext(Dispatchers.IO) {
                     runCatching { decodeBitmap(context, sourceKind.reference) }
                         .getOrNull()

@@ -24,7 +24,8 @@ What can be pressed as an action and what shows a value must look different at a
 - **The top bar's icons are the one exception**: the menu, the dice and (on the overview) the rests in a column under the dice are bare icons with no fill (`ScreenTopActionButton`) — the owner's choice, 2026-10-03.
 - **Button palette** (approved 2026-10-03; fills and their text/icon colours by role):
   - **standard button**: `surface.button` #3B3840 (1.58:1 against the cards), text and icon `text.primary`;
-  - main action (Save) and a toggle that is on (Inspiration): `materialTheme.primary` #C6A36C, text and icon `onPrimary`;
+  - main action (Save) and a toggle that is on: `materialTheme.primary` #C6A36C, text and icon `onPrimary`;
+  - **Inspiration** is its own toggle, not a filled button: a compass rose of eight points (`InspirationStar`, 96dp) on the portrait's ring — the band `text.subtle` while off, `accent.inspiration` while on, with a white heart and a breathing glow of `accent.inspiration` fading out (owner's choice from boards, 2026-10-03);
   - HP actions (damage, heal, temporary HP): their accent (`accent.dangerHpZero`, `accent.heal`, `accent.hpTemporary`) at **12 %** as the fill behind an icon and label in the full accent — at 12 % even the red label reads (4.6:1);
   - dangerous action (confirm deletion): `accent.dangerHpZero`, text `text.primary`;
   - delete icon (the trash in a pop-up): `accent.dangerHpZero` at 16% behind an `accent.dangerHpZero` icon;

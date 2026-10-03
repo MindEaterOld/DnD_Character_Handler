@@ -36,6 +36,7 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.dndcharacterhandler.presentation.components.ScreenTopActionButton
+import com.dndcharacterhandler.presentation.components.InspirationStar
 import androidx.compose.material.icons.automirrored.outlined.DirectionsRun
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.Bedtime
@@ -823,12 +824,16 @@ private fun OverviewContent(
                                 )
                             }
                         }
-                        InspirationToggle(
+                        // Inspiration: a compass rose on the portrait's frame, lit gold while the character has it.
+                        InspirationStar(
                             inspired = character?.hasInspiration ?: false,
                             onToggle = { if (characterBundle != null) onToggleInspiration(characterBundle) },
+                            contentDescription = text("overview_inspiration"),
+                            size = 96.dp,
+                            // Its centre on the ring, below and to the right of the portrait.
                             modifier = Modifier
                                 .align(Alignment.BottomCenter)
-                                .offset(x = 78.dp, y = (-58).dp)
+                                .offset(x = 80.dp, y = (-32).dp)
                         )
                     }
                     Text(
@@ -1818,31 +1823,6 @@ private fun PortraitViewerContent(
             contentScale = ContentScale.Fit
         )
         OverlayCloseButton(onClick = onClose, modifier = Modifier.align(Alignment.TopEnd))
-    }
-}
-
-/**
- * Inspiration, a toggle on the portrait's frame: the button grey while the character has none, gold
- * (the main action's fill) while they have it.
- */
-@Composable
-private fun InspirationToggle(inspired: Boolean, onToggle: () -> Unit, modifier: Modifier = Modifier) {
-    val colors = LocalDesignTokens.current.colors
-    val scheme = MaterialTheme.colorScheme
-    Box(
-        modifier = modifier
-            .size(44.dp)
-            .clip(CircleShape)
-            .background(if (inspired) scheme.primary else colors.surface.button)
-            .toggleable(value = inspired, role = Role.Switch, onValueChange = { onToggle() }),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            imageVector = Icons.Outlined.AutoAwesome,
-            contentDescription = text("overview_inspiration"),
-            tint = if (inspired) scheme.onPrimary else colors.text.primary,
-            modifier = Modifier.size(20.dp)
-        )
     }
 }
 

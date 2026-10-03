@@ -49,6 +49,7 @@
 | `AppImage(imageRef, contentDescription, fallback)` | 2 | Картинка по ссылке проекта (`res:drawable/…`, ассеты, файл, `content://`), декодирует вне главного потока, пока грузит — `fallback` |
 | `Modifier.saturation(s)` | 1 | Насыщенность содержимого: 1 как есть, 0 — чёрно-белое (портрет погибшего); работает на любом содержимом |
 | `SkullIcon` | 1 | Череп спасбросков от смерти (`ImageVector`, тонируется `Icon`) |
+| `InspirationStar(inspired, onToggle, contentDescription)` | 1 | Вдохновение: роза ветров 96dp на кольце портрета, серая / золотая с белым сердцем и пульсирующим свечением; переключатель (`Role.Switch`) |
 | `D20Outline` (`dice/D20Outline.kt`) | — | Контурный d20 кнопки кубов |
 
 ## Кубики (`presentation/dice/`)
