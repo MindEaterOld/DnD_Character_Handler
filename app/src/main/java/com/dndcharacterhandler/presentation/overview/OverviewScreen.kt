@@ -2443,6 +2443,7 @@ private fun OverviewPreviewContent(
             "overview_long_rest_confirm_button" to "Rest",
             "overview_inspiration" to "Inspiration",
             "overview_xp" to "EXP",
+            "levelup_badge" to "Level UP",
             "overview_hp" to "HP",
             "overview_death_saves" to "Death saves",
             "overview_death_saves_successes" to "Successes",
