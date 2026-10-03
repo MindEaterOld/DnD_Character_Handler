@@ -16,7 +16,8 @@ import kotlin.random.Random
  *   least [NUMBER_CONTRAST] against the faces, as small text must against its background, and
  *   [BACKGROUND_CONTRAST] against anything else the die paints under them (see [weakest]). Where
  *   they fall short, the shine is dulled first, then the pattern quietened, then the faces made
- *   darker or lighter; an outline of the opposite lightness only if that still isn't enough.
+ *   darker or lighter, and once they are black or white the numbers lighter or darker in their own
+ *   hue; an outline of the opposite lightness only if that still isn't enough.
  * - The edges draw the shape but stay quieter than the numbers: [EDGE_CONTRAST] against the faces,
  *   and always below the numbers' own contrast.
  * - A pattern is a texture, not a picture: at most [PATTERN_CONTRAST] against the faces (thin web
@@ -43,16 +44,25 @@ internal object DiceSkinGenerator {
         var gloss = random.between(mood.gloss.start, mood.gloss.endInclusive)
         // Behind see-through faces the far numbers show, mirrored: on a busy pattern that's noise.
         val opacity = if (pattern == DicePattern.None && random.nextFloat() < mood.seeThroughChance) random.between(0.6f, 0.82f) else 1f
+        fun moveFaces() {
+            val lightNumbers = luminance(numbers.color) > luminance(body.color)
+            if (if (lightNumbers) body.l > 0.02f else body.l < 0.98f) {
+                body = body.withL(body.l + if (lightNumbers) -0.02f else 0.02f)
+                numbers = draft.numbers.readableOn(body.color)
+                pattern = draft.pattern?.let { patternFor(it, body.color) } ?: DicePattern.None
+            } else {
+                // The faces are black or white already: a deep red or violet can't read on a side
+                // face in shadow, so the numbers turn lighter (or darker) in their own hue.
+                numbers = numbers.withL(numbers.l + if (lightNumbers) 0.02f else -0.02f)
+            }
+        }
         for (step in 0 until FIX_STEPS) {
             when (weakest(numbers.color, body.color, pattern, gloss, opacity)) {
                 Weak.NONE -> break
                 Weak.SHINE -> gloss = (gloss - 0.05f).coerceAtLeast(0f)
-                Weak.PATTERN -> pattern = pattern.towards(body.color)
-                Weak.FACES -> {
-                    body = body.withL(body.l + if (luminance(numbers.color) > luminance(body.color)) -0.02f else 0.02f)
-                    numbers = draft.numbers.readableOn(body.color)
-                    pattern = draft.pattern?.let { patternFor(it, body.color) } ?: DicePattern.None
-                }
+                // A pattern already as quiet as it gets (next to the faces' colour) leaves the faces to move.
+                Weak.PATTERN -> pattern.towards(body.color).let { quieter -> if (quieter != pattern) pattern = quieter else moveFaces() }
+                Weak.FACES -> moveFaces()
             }
         }
         val readable = weakest(numbers.color, body.color, pattern, gloss, opacity) == Weak.NONE
@@ -177,7 +187,7 @@ internal object DiceSkinGenerator {
     /** Full light, and a side face turned away from it (the renderer goes down to 0.38). */
     private val Brightness = floatArrayOf(1f, 0.6f)
 
-    private const val FIX_STEPS = 80
+    private const val FIX_STEPS = 200
     private const val BLACK = 0xFF000000.toInt()
     private const val WHITE = 0xFFFFFFFF.toInt()
 
