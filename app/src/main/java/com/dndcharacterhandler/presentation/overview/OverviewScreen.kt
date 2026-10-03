@@ -827,17 +827,22 @@ private fun OverviewContent(
                                 )
                             }
                         }
-                        // Inspiration: a compass rose on the portrait's frame, lit gold while the character has it.
-                        InspirationStar(
-                            inspired = character?.hasInspiration ?: false,
-                            onToggle = { if (characterBundle != null) onToggleInspiration(characterBundle) },
-                            contentDescription = text("overview_inspiration"),
-                            size = 96.dp,
-                            // Its centre on the ring, below and to the right of the portrait.
+                        // Inspiration: a compass rose in the frame's lower right corner, lit gold while the
+                        // character has it. Laid out in the portrait's own square, so it moves with the frame.
+                        Box(
                             modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .offset(x = 80.dp, y = (-32).dp)
-                        )
+                                .offset(y = (-47).dp)
+                                .size(238.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            InspirationStar(
+                                inspired = character?.hasInspiration ?: false,
+                                onToggle = { if (characterBundle != null) onToggleInspiration(characterBundle) },
+                                contentDescription = text("overview_inspiration"),
+                                size = 96.dp,
+                                modifier = Modifier.offset(x = PortraitCornerOffset, y = PortraitCornerOffset)
+                            )
+                        }
                     }
                     Text(
                         text = displayName,
@@ -1659,6 +1664,12 @@ private fun octagonPath(center: Offset, radius: Float): Path = Path().apply {
     }
     close()
 }
+
+/**
+ * From the portrait's centre to the middle of the frame's diagonal side, along each axis: the outer
+ * contour's inner radius (110dp × cos 22.5°) times cos 45°, about 72dp.
+ */
+private val PortraitCornerOffset = (110.0 * cos(PI / 8) * cos(PI / 4)).toFloat().dp
 
 /** The portrait's octagon, filling whatever it clips. */
 private val OctagonShape = GenericShape { size, _ ->
