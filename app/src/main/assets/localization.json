@@ -3788,6 +3788,13 @@
     "fr": "Avantage",
     "es": "Ventaja"
   },
+  "roll_marker_fail": {
+    "en": "Fails outright",
+    "ru": "Автоматический провал",
+    "de": "Misslingt automatisch",
+    "fr": "Échec automatique",
+    "es": "Fallo automático"
+  },
   "conditions_title": {
     "en": "Conditions",
     "ru": "Состояния",

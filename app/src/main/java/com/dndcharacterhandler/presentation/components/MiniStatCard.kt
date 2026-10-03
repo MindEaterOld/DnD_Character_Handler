@@ -161,7 +161,9 @@ fun MiniStatCard(
     icon: (@Composable () -> Unit)? = null,
     onClick: (() -> Unit)? = null,
     /** Beside the value: the conditions' arrows (RollMarker). */
-    valueMarker: (@Composable () -> Unit)? = null
+    valueMarker: (@Composable () -> Unit)? = null,
+    /** The value's colour when the conditions moved it (changedValueColor). */
+    valueColor: Color? = null
 ) {
     val typography = LocalDesignTokens.current.typography
     val colors = LocalDesignTokens.current.colors
@@ -189,7 +191,7 @@ fun MiniStatCard(
                     valueMarker?.let { marker ->
                         Box(modifier = Modifier.align(Alignment.CenterVertically)) { marker() }
                     }
-                    Text(text = number.groupValues[1], style = valueStyle, color = colors.text.primary, maxLines = 1)
+                    Text(text = number.groupValues[1], style = valueStyle, color = valueColor ?: colors.text.primary, maxLines = 1)
                     number.groupValues[2].takeIf { it.isNotEmpty() }?.let { unit ->
                         Text(
                             text = unit,

@@ -1,4 +1,5 @@
 package com.dndcharacterhandler.presentation.overview
+import com.dndcharacterhandler.presentation.components.changedValueColor
 import com.dndcharacterhandler.domain.rules.RollMode
 import com.dndcharacterhandler.domain.rules.damageTaken
 import com.dndcharacterhandler.domain.rules.attacksAgainst
@@ -587,9 +588,11 @@ private data class OverviewStat(
     val value: String,
     val icon: androidx.compose.ui.graphics.vector.ImageVector?,
     val field: OverviewMiniStatField,
-    /** The conditions make it worse or better than usual: arrows beside the value. */
+    /** The conditions roll it worse or better: arrows beside the value. */
     val worse: Boolean = false,
-    val better: Boolean = false
+    val better: Boolean = false,
+    /** How far the conditions moved the value: its colour. */
+    val delta: Int = 0
 )
 
 private enum class OverviewEditableField {
@@ -843,14 +846,15 @@ private fun OverviewContent(
                 icon = null,
                 field = OverviewMiniStatField.INITIATIVE,
                 worse = initiativeEffects.isWorse,
-                better = initiativeEffects.isBetter
+                better = initiativeEffects.isBetter,
+                delta = initiativeEffects.modifier
             ),
             OverviewStat(
                 labelKey = "overview_speed",
                 value = "$speed ${strings["inventory_unit_feet"]}",
                 icon = Icons.AutoMirrored.Outlined.DirectionsRun,
                 field = OverviewMiniStatField.SPEED,
-                worse = speed < baseSpeed
+                delta = speed - baseSpeed
             )
         )
     }
@@ -1067,6 +1071,7 @@ private fun OverviewContent(
                             label = text(stat.labelKey),
                             icon = if (statIcon == null) null else ({ MiniStatCardIcon(statIcon) }),
                             valueMarker = if (stat.worse || stat.better) ({ RollMarker(worse = stat.worse, better = stat.better, size = 18.dp) }) else null,
+                            valueColor = changedValueColor(stat.delta),
                             onClick = {
                                 activeMiniStatField = stat.field
                                 miniStatDraft = when (stat.field) {

@@ -1,5 +1,7 @@
 package com.dndcharacterhandler.presentation.components
 
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -16,23 +18,47 @@ import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 
 /**
- * Beside a bonus the conditions change: two arrows down while it's worse than usual (exhaustion's
- * penalty, disadvantage, an outright fail), two up for advantage. The bonus keeps its own colour and
- * shows the value that applies now (owner's choice, 2026-10-03). Nothing when nothing applies.
+ * How the conditions roll the d20 (owner's choices, 2026-10-04): two red arrows down for
+ * disadvantage, two green up for advantage, a red cross when there's no roll at all (an outright
+ * fail). How far they move the value itself shows in its colour instead ([changedValueColor]); the
+ * two combine. Nothing when the roll is as usual.
  */
 @Composable
 fun RollMarker(effects: RollEffects?, modifier: Modifier = Modifier, size: Dp = 16.dp) {
     if (effects == null) return
+    if (effects.fails) {
+        Icon(
+            imageVector = Icons.Outlined.Close,
+            contentDescription = text("roll_marker_fail"),
+            tint = LocalDesignTokens.current.colors.accent.dangerHpZero,
+            modifier = modifier.size(size)
+        )
+        return
+    }
     RollMarker(worse = effects.isWorse, better = effects.isBetter, modifier = modifier, size = size)
 }
 
-/** Worse than usual: a penalty, disadvantage, an outright fail. */
-val RollEffects.isWorse: Boolean get() = modifier < 0 || mode == RollMode.DISADVANTAGE || autoFail.isNotEmpty()
+/** No roll at all: it fails outright. */
+val RollEffects.fails: Boolean get() = autoFail.isNotEmpty()
 
-/** Better than usual: advantage. */
+/** Rolled worse: disadvantage. */
+val RollEffects.isWorse: Boolean get() = mode == RollMode.DISADVANTAGE
+
+/** Rolled better: advantage. */
 val RollEffects.isBetter: Boolean get() = mode == RollMode.ADVANTAGE
 
-/** The same marks for a value that isn't a roll (speed). */
+/** A value the conditions moved by [delta]: red when lower, green when higher, null when as usual. */
+@Composable
+fun changedValueColor(delta: Int): Color? {
+    val colors = LocalDesignTokens.current.colors
+    return when {
+        delta < 0 -> colors.accent.dangerHpZero
+        delta > 0 -> colors.accent.heal
+        else -> null
+    }
+}
+
+/** The same arrows for what isn't the character's own roll (AC: how attacks against it are rolled). */
 @Composable
 fun RollMarker(worse: Boolean, better: Boolean, modifier: Modifier = Modifier, size: Dp = 16.dp) {
     if (!worse && !better) return

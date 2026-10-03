@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation.attributes
 
+import com.dndcharacterhandler.presentation.components.changedValueColor
 import com.dndcharacterhandler.presentation.components.RollMarker
 import com.dndcharacterhandler.domain.rules.rollEffects
 import com.dndcharacterhandler.domain.rules.activeConditions
@@ -1237,7 +1238,7 @@ private fun AbilityScoreCard(
                 Text(
                     text = signed(score.modifier + (checkEffects?.modifier ?: 0)),
                     style = MaterialTheme.typography.headlineMedium.copy(fontSize = tokens.hpTemporary.fontSizeSp.sp),
-                    color = colors.text.primary
+                    color = changedValueColor(checkEffects?.modifier ?: 0) ?: colors.text.primary
                 )
             }
             Text(
@@ -1281,7 +1282,7 @@ private fun AbilityScoreCard(
                     text = signed(score.saveModifier(proficiencyBonus) + (saveEffects?.modifier ?: 0)),
                     modifier = Modifier.padding(start = 4.dp),
                     style = MaterialTheme.typography.labelMedium,
-                    color = colors.text.muted
+                    color = changedValueColor(saveEffects?.modifier ?: 0) ?: colors.text.muted
                 )
             }
         }
@@ -1412,7 +1413,7 @@ private fun SkillRowCard(
                     .padding(start = 4.dp)
                     .widthIn(min = 24.dp),
                 style = MaterialTheme.typography.bodyLarge,
-                color = colors.text.primary,
+                color = changedValueColor(effects?.modifier ?: 0) ?: colors.text.primary,
                 textAlign = TextAlign.End
             )
         }

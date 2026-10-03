@@ -33,7 +33,9 @@ What can be pressed as an action and what shows a value must look different at a
 ## Conditions — how the sheet shows them (owner's choices, 2026-10-03)
 
 - **On the overview** the conditions go down the left of the portrait, as the rests go down the right: an outlined mark each (they are stats), exhaustion as its level in `accent.damageFire`, concentration's mark in `primary` gold, then a filled "+" that opens the picker. Three marks at most, the rest fold into "+N".
-- **A value the conditions change** (a check, a save, a skill, initiative, an attack bonus, speed, AC against attacks) shows the value as it is now, in its usual colour, with `RollMarker` beside it: two arrows down in `accent.dangerHpZero` while it is worse than usual, two up in `accent.heal` for advantage. No colouring or striking of the value itself.
+- **A value the conditions change** (a check, a save, a skill, initiative, an attack bonus, speed, AC against attacks) shows the value as it is now, and two things that combine (owner's choice, 2026-10-04):
+  - **how the d20 is rolled** — `RollMarker` beside the value: two arrows down in `accent.dangerHpZero` for disadvantage, two up in `accent.heal` for advantage, a red cross for an outright fail (no roll);
+  - **how far the value moved** — its colour, `changedValueColor`: `accent.dangerHpZero` when lower (exhaustion's −2), `accent.heal` when higher. Speed has only the colour; AC only the arrows (how attacks against the character are rolled).
 - **Concentration** is a card on the Spells screen in place of the class: lit in gold while a spell is held, the spell's name as much as fits, cut with a dot.
 - In Russian exhaustion is «Истощение» (the owner's word); the other names and languages are as the catalog and the 2024 books have them.
   - dangerous action (confirm deletion): `accent.dangerHpZero`, text `text.primary`;

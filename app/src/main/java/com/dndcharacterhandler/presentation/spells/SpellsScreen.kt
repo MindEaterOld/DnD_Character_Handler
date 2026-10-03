@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation.spells
 
+import com.dndcharacterhandler.presentation.components.changedValueColor
 import com.dndcharacterhandler.domain.rules.breaksConcentration
 import com.dndcharacterhandler.presentation.components.MiniStatCardHeight
 import com.dndcharacterhandler.presentation.components.BorderLabelCard
@@ -410,6 +411,7 @@ internal fun SpellsContent(
                             label = text("stat_card_spell_bonus"),
                             value = spellAttackBonus,
                             valueMarker = if (attackEffects.isWorse || attackEffects.isBetter) ({ RollMarker(attackEffects, size = 20.dp) }) else null,
+                            valueColor = changedValueColor(attackEffects.modifier),
                             onClick = { isSpellcastingAbilityDialogOpen = true }
                         )
                         MiniStatCard(

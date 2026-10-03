@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation.combat
 
+import com.dndcharacterhandler.presentation.components.changedValueColor
 import com.dndcharacterhandler.domain.rules.RollMode
 import com.dndcharacterhandler.domain.rules.attacksAgainst
 import com.dndcharacterhandler.presentation.components.isBetter
@@ -431,6 +432,7 @@ internal fun CombatContent(
                             value = spellAttackBonus,
                             label = text("stat_card_spell_bonus"),
                             valueMarker = if (attackEffects.isWorse || attackEffects.isBetter) ({ RollMarker(attackEffects, size = 20.dp) }) else null,
+                            valueColor = changedValueColor(attackEffects.modifier),
                             onClick = { isSpellcastingAbilityDialogOpen = true }
                         )
                         MiniStatCard(
@@ -1088,7 +1090,9 @@ private fun AttackCard(
                         Text(
                             text = label,
                             style = MaterialTheme.typography.titleMedium,
-                            color = colors.text.primary,
+                            // A hand-written bonus isn't moved by the conditions: its colour stays.
+                            color = (if (attack.calculationMode == AttackCalculationMode.MANUAL) null else changedValueColor(attackEffects?.modifier ?: 0))
+                                ?: colors.text.primary,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -1205,7 +1209,8 @@ private fun SpellAttackCard(
                         Text(
                             text = label,
                             style = MaterialTheme.typography.titleMedium,
-                            color = colors.text.primary,
+                            color = (if (resolution == SpellResolutionKind.ATTACK) changedValueColor(attackEffects?.modifier ?: 0) else null)
+                                ?: colors.text.primary,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
