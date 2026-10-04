@@ -103,7 +103,7 @@ class AssetInventoryCatalogRepository(
                             id = "magic:$variantIndex",
                             bonus = bonus,
                             name = byIndex[variantIndex]?.optString("name").orEmpty(),
-                            ruName = russian.optObject("magic:$variantIndex")?.optString("name").orEmpty()
+                            ruName = russian.optObject("magic:$variantIndex")?.optString("name").orEmpty().trim()
                         )
                     }.sortedBy { it.bonus }
                 )
@@ -189,7 +189,7 @@ class AssetInventoryCatalogRepository(
             this
         } else {
             copy(
-                ruName = text.optString("name"),
+                ruName = text.optString("name").trim(),
                 ruDescription = text.optString("description"),
                 ruDetailLine = text.optString("detail")
             )
