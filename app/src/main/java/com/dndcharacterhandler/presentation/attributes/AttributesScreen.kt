@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.vector.addPathNodes
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import com.dndcharacterhandler.domain.model.Condition
 import com.dndcharacterhandler.domain.rules.Defenses
@@ -1372,7 +1373,7 @@ private fun AbilityScoreCard(
     BorderLabelCard(
         label = text(score.shortNameKey),
         modifier = modifier,
-        labelStyle = MaterialTheme.typography.titleMedium,
+        labelStyle = abilityLabelStyle,
         onClick = onClick
     ) {
         Column(
@@ -1441,9 +1442,9 @@ private fun AbilityScoreCard(
 
 /**
  * The skills in two columns, one frame per ability with its short name on the top border, as the ability
- * scores have: Strength, Dexterity and Intelligence on the left, Wisdom and
- * Charisma on the right — nine rows each, the labels 16sp in bold (owner's choice, 2026-10-04). The left
- * column has one frame more, so it is taller; under Charisma a spider hangs into the spare room.
+ * cards have it: Strength, Dexterity and Intelligence on the left, Wisdom and Charisma on the right — nine
+ * rows each. The left column has one frame more, so it is taller; under Charisma a spider hangs into the
+ * spare room.
  */
 @Composable
 private fun SkillGroups(
@@ -1490,14 +1491,15 @@ private fun SkillGroups(
 
 /**
  * The spider hanging under Charisma's frame into the skills' spare room (owner's choice from boards,
- * 2026-10-04): a decoration in the ornament's colour, 22dp in from the column's left edge. Its feet are at
- * the room's bottom, level with the left column's, and its thread runs up to the frame, as long as the
- * room makes it. A [Spacer]: it draws in the height it is given and asks for none, so the columns stay level.
+ * 2026-10-04): a decoration in the colour of the frames' outline, 22dp in from the column's left edge. Its
+ * feet are at the room's bottom, level with the left column's, and its thread runs up to the frame, as long
+ * as the room makes it. A [Spacer]: it draws in the height it is given and asks for none, so the columns
+ * stay level.
  */
 @Composable
 private fun SkillsSpider(modifier: Modifier = Modifier) {
     val painter = rememberVectorPainter(SkillsSpiderBody)
-    val tint = LocalDesignTokens.current.colors.ornament.middle
+    val tint = LocalDesignTokens.current.colors.border.miniCard
     Spacer(
         modifier = modifier.drawBehind {
             // The icon's own units at 1.3dp each: 26dp from the thread's top to the feet, as the icon draws it.
@@ -1545,6 +1547,13 @@ private val SkillsSpiderBody: ImageVector by lazy {
         .build()
 }
 
+/**
+ * An ability's short name on a frame's top border: over the ability cards and over the skills' groups
+ * alike, 16sp in bold (owner's choice, 2026-10-04).
+ */
+private val abilityLabelStyle: TextStyle
+    @Composable get() = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
+
 /** The abilities skills belong to, in the sheet's order, with the short name their frames carry. */
 private val skillAbilities = listOf(
     AbilityType.STRENGTH to "ability_str_short",
@@ -1565,7 +1574,7 @@ private fun SkillGroupCard(
     BorderLabelCard(
         label = label,
         modifier = Modifier.fillMaxWidth(),
-        labelStyle = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+        labelStyle = abilityLabelStyle,
         cornerRadius = 7.dp
     ) {
         Column {
