@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation.inventory
 
+import com.dndcharacterhandler.presentation.components.NumberStepperField
 import com.dndcharacterhandler.presentation.components.StatCardRow
 import com.dndcharacterhandler.presentation.components.MiniStatCard
 import androidx.compose.foundation.BorderStroke
@@ -1577,7 +1578,7 @@ private fun InventoryItemEditDialog(
                             )
                         }
                     }
-                    CompactNumberStepperField(
+                    NumberStepperField(
                         label = text("inventory_field_quantity"),
                         value = quantity.toIntOrNull() ?: 1,
                         onValueChange = { quantity = it.toString() },
@@ -1940,7 +1941,7 @@ private fun WeaponDamageEditor(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.Top
         ) {
-            CompactNumberStepperField(
+            NumberStepperField(
                 label = text("inventory_field_damage_dice_count"),
                 value = diceCount.toIntOrNull() ?: 1,
                 onValueChange = { onDiceCountChange(it.toString()) },
@@ -2195,87 +2196,6 @@ private fun CompactTextField(
                         }
                     }
                 }
-            )
-        }
-    }
-}
-
-@Composable
-private fun CompactNumberStepperField(
-    label: String,
-    value: Int,
-    onValueChange: (Int) -> Unit,
-    minValue: Int = 0,
-    modifier: Modifier = Modifier
-) {
-    val colors = LocalDesignTokens.current.colors
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(6.dp)
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = colors.text.muted
-        )
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            StepperButton(label = "-") {
-                onValueChange((value - 1).coerceAtLeast(minValue))
-            }
-            Surface(
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(10.dp),
-                color = colors.ornament.outer,
-                border = BorderStroke(1.dp, colors.border.muted)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(CompactEditorFieldHeight)
-                        .padding(horizontal = 8.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = value.toString(),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = colors.text.primary,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-            StepperButton(label = "+") {
-                onValueChange(value + 1)
-            }
-        }
-    }
-}
-
-@Composable
-private fun StepperButton(
-    label: String,
-    onClick: () -> Unit
-) {
-    val colors = LocalDesignTokens.current.colors
-    Surface(
-        modifier = Modifier.clickable(onClick = onClick),
-        shape = RoundedCornerShape(10.dp),
-        color = colors.ornament.outer,
-        border = BorderStroke(1.dp, colors.border.muted)
-    ) {
-        Box(
-            modifier = Modifier
-                .height(CompactEditorFieldHeight)
-                .padding(horizontal = 8.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.titleMedium,
-                color = colors.text.primary
             )
         }
     }

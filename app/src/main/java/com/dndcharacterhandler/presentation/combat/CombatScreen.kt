@@ -1,5 +1,7 @@
 package com.dndcharacterhandler.presentation.combat
 
+import com.dndcharacterhandler.presentation.components.NumberStepperField
+import com.dndcharacterhandler.presentation.components.StepButton
 import com.dndcharacterhandler.domain.rules.DiceFormula
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -1432,10 +1434,12 @@ private fun CombatResourceTile(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                StepperButton(
+                StepButton(
                     icon = Icons.Outlined.Remove,
+                    contentDescription = text("common_decrease"),
                     enabled = resource.currentUses > 0,
-                    onClick = { onAdjust(resource.id, -1) }
+                    onClick = { onAdjust(resource.id, -1) },
+                    size = 28.dp
                 )
                 Text(
                     text = if (resource.maximumUses <= 0) {
@@ -1448,10 +1452,12 @@ private fun CombatResourceTile(
                     maxLines = 1,
                     textAlign = TextAlign.Center
                 )
-                StepperButton(
+                StepButton(
                     icon = Icons.Outlined.Add,
+                    contentDescription = text("common_increase"),
                     enabled = resource.maximumUses <= 0 || resource.currentUses < resource.maximumUses,
-                    onClick = { onAdjust(resource.id, 1) }
+                    onClick = { onAdjust(resource.id, 1) },
+                    size = 28.dp
                 )
             }
         }
@@ -1549,33 +1555,6 @@ private fun ResourceCheckboxRow(
             style = MaterialTheme.typography.bodyLarge,
             color = LocalDesignTokens.current.colors.text.primary
         )
-    }
-}
-
-@Composable
-private fun StepperButton(
-    icon: ImageVector,
-    enabled: Boolean,
-    onClick: () -> Unit
-) {
-    val colors = LocalDesignTokens.current.colors
-    Surface(
-        modifier = Modifier
-            .size(26.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .clickable(enabled = enabled, onClick = onClick),
-        shape = RoundedCornerShape(8.dp),
-        color = if (enabled) colors.surface.option else colors.surface.card,
-        border = BorderStroke(1.dp, colors.ornament.outer)
-    ) {
-        Box(contentAlignment = Alignment.Center) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = if (enabled) colors.text.primary else colors.text.muted.copy(alpha = 0.4f),
-                modifier = Modifier.size(13.dp)
-            )
-        }
     }
 }
 
@@ -1716,7 +1695,7 @@ private fun AttackEditDialog(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.Top
                 ) {
-                    CombatCompactNumberStepperField(
+                    NumberStepperField(
                         label = text("inventory_field_damage_dice_count"),
                         value = damageDiceCount,
                         onValueChange = { damageDiceCount = it },
@@ -1755,7 +1734,7 @@ private fun AttackEditDialog(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.Top
                     ) {
-                        CombatCompactNumberStepperField(
+                        NumberStepperField(
                             label = text("inventory_field_damage_dice_count"),
                             value = alternateDamageDiceCount,
                             onValueChange = { alternateDamageDiceCount = it },
@@ -2276,87 +2255,6 @@ private fun CombatCompactTextField(
                         }
                     }
                 }
-            )
-        }
-    }
-}
-
-@Composable
-private fun CombatCompactNumberStepperField(
-    label: String,
-    value: Int,
-    onValueChange: (Int) -> Unit,
-    minValue: Int = 0,
-    modifier: Modifier = Modifier
-) {
-    val colors = LocalDesignTokens.current.colors
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(6.dp)
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = colors.text.muted
-        )
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            AttackDialogStepperButton(label = "-") {
-                onValueChange((value - 1).coerceAtLeast(minValue))
-            }
-            Surface(
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(10.dp),
-                color = colors.ornament.outer,
-                border = BorderStroke(1.dp, colors.border.muted)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(46.dp)
-                        .padding(horizontal = 8.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = value.toString(),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = colors.text.primary,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-            AttackDialogStepperButton(label = "+") {
-                onValueChange(value + 1)
-            }
-        }
-    }
-}
-
-@Composable
-private fun AttackDialogStepperButton(
-    label: String,
-    onClick: () -> Unit
-) {
-    val colors = LocalDesignTokens.current.colors
-    Surface(
-        modifier = Modifier.clickable(onClick = onClick),
-        shape = RoundedCornerShape(10.dp),
-        color = colors.ornament.outer,
-        border = BorderStroke(1.dp, colors.border.muted)
-    ) {
-        Box(
-            modifier = Modifier
-                .height(46.dp)
-                .padding(horizontal = 8.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.titleMedium,
-                color = colors.text.primary
             )
         }
     }

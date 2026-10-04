@@ -44,7 +44,7 @@
 | `ConcentrationToggle(concentrating, onToggle, enabled)` | 1 | Концентрация у заклинания: круг 36dp у отметки «подготовлено», выкл. — `surface.button`, вкл. — золото `primary`; не `enabled`, пока персонаж выведен из строя |
 | `EndConcentrationDialog(spellName, onEnd, onDismiss)` | 2 | «Прервать концентрацию?» — с экрана заклинаний и из столбика состояний |
 | `Condition.icon` / `.nameKey` / `.accent()` (`ConditionVisuals.kt`) | 2 | Значок, ключ названия и цвет состояния |
-| `StepButton(icon, contentDescription, onClick, enabled)` | 1 | Степпер: круг 48dp заливки `surface.button`, иконка `Remove`/`Add` в `text.primary`, у края — `text.subtle`. Брать для любого «−/+» у числа (окна урона и лечения). Старые копии в бою и инвентаре — долг в бэклоге |
+| `StepButton(icon, contentDescription, onClick, enabled, size)` / `NumberStepperField(label, value, onValueChange, minValue)` | 5 | Степпер: круг заливки `surface.button`, иконка `Remove`/`Add` (половина круга) в `text.primary`, у края — `text.subtle`; 48dp в окнах хитов и состояний, 30dp в поле «− число +», 28dp в ресурсах боя |
 
 ## Текст, картинки, эффекты
 
