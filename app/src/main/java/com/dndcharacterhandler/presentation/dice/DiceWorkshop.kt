@@ -177,7 +177,8 @@ internal fun DiceWorkshopOverlay(
             }
         }
     }
-    val shareLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri: Uri? ->
+    // Not "application/zip": the system's file picker would add ".zip" to the name.
+    val shareLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/octet-stream")) { uri: Uri? ->
         uri ?: return@rememberLauncherForActivityResult
         scope.launch {
             message = strings[if (viewModel.exportSkin(uri, look)) "dice_workshop_shared" else "dice_workshop_share_failed"]
