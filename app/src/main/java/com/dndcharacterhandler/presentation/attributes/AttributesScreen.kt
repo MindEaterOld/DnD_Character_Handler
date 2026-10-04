@@ -1429,6 +1429,11 @@ private fun AbilityScoreCard(
     }
 }
 
+/**
+ * The skills in two columns, no headings (owner's choice, 2026-10-04): each cell names its ability on
+ * its top border, as the ability scores do. Down the columns by ability — Strength, Dexterity and
+ * Intelligence on the left, Wisdom and Charisma on the right: nine each.
+ */
 @Composable
 private fun SkillGroups(
     skills: List<SkillRow>,
@@ -1437,60 +1442,36 @@ private fun SkillGroups(
     checkEffects: Map<AbilityType, RollEffects> = emptyMap(),
     onSkillClick: (SkillRow) -> Unit = {}
 ) {
-    Column(
+    val ordered = skillAbilities.flatMap { (type, _) -> skills.filter { it.abilityType == type } }
+    val half = (ordered.size + 1) / 2
+    Row(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        skillAbilityGroups.forEach { group ->
-            val groupSkills = skills.filter { it.abilityType == group.type }
-            if (groupSkills.isNotEmpty()) {
-                SkillAbilityTitle(title = text(group.displayNameKey))
-                Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
-                    groupSkills.chunked(2).forEach { rowSkills ->
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            rowSkills.forEach { skill ->
-                                SkillRowCard(
-                                    skill = skill,
-                                    modifier = Modifier.weight(1f),
-                                    effects = checkEffects[skill.abilityType],
-                                    onClick = { onSkillClick(skill) }
-                                )
-                            }
-                            if (rowSkills.size == 1) {
-                                Spacer(modifier = Modifier.weight(1f))
-                            }
-                        }
-                    }
+        listOf(ordered.take(half), ordered.drop(half)).forEach { column ->
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                column.forEach { skill ->
+                    SkillRowCard(
+                        skill = skill,
+                        effects = checkEffects[skill.abilityType],
+                        onClick = { onSkillClick(skill) }
+                    )
                 }
             }
         }
     }
 }
 
-@Composable
-private fun SkillAbilityTitle(title: String) {
-    Text(
-        text = title,
-        modifier = Modifier.fillMaxWidth(),
-        style = MaterialTheme.typography.titleLarge,
-        color = LocalDesignTokens.current.colors.text.primary
-    )
-}
-
-private data class SkillAbilityGroup(
-    val type: AbilityType,
-    val displayNameKey: String
-)
-
-private val skillAbilityGroups = listOf(
-    SkillAbilityGroup(AbilityType.STRENGTH, "ability_strength"),
-    SkillAbilityGroup(AbilityType.DEXTERITY, "ability_dexterity"),
-    SkillAbilityGroup(AbilityType.INTELLIGENCE, "ability_intelligence"),
-    SkillAbilityGroup(AbilityType.WISDOM, "ability_wisdom"),
-    SkillAbilityGroup(AbilityType.CHARISMA, "ability_charisma")
+/** The abilities skills belong to, in the sheet's order, with the short name their cells carry. */
+private val skillAbilities = listOf(
+    AbilityType.STRENGTH to "ability_str_short",
+    AbilityType.DEXTERITY to "ability_dex_short",
+    AbilityType.INTELLIGENCE to "ability_int_short",
+    AbilityType.WISDOM to "ability_wis_short",
+    AbilityType.CHARISMA to "ability_cha_short"
 )
 
 @Composable
@@ -1502,18 +1483,18 @@ private fun SkillRowCard(
 ) {
     val strings = LocalStrings.current
     val colors = LocalDesignTokens.current.colors
-    Surface(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(48.dp)
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(7.dp),
-        color = colors.surface.card.copy(alpha = 0.62f),
-        border = BorderStroke(1.dp, colors.border.muted)
+    val abilityKey = skillAbilities.firstOrNull { it.first == skill.abilityType }?.second
+    BorderLabelCard(
+        label = abilityKey?.let { strings[it] }.orEmpty(),
+        modifier = modifier.fillMaxWidth(),
+        labelStyle = MaterialTheme.typography.labelMedium,
+        cornerRadius = 7.dp,
+        onClick = onClick
     ) {
         Row(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
+                .height(40.dp)
                 .padding(horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
