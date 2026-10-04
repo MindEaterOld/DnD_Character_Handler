@@ -848,11 +848,17 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
             "tool" to decodeProficiencyIds(character.toolProficiencies),
             "languages" to decodeProficiencyIds(character.languageProficiencies)
         )
-        /** The fields' text, for proficiencies written as names before they were ids. */
-        private val proficiencyText = listOf(
+        /**
+         * The fields' entries as whole words, for proficiencies written as names before they were
+         * ids ("Лютня, Флейта"): a flute is not a pan flute, Common is not Undercommon.
+         */
+        private val proficiencyText: Set<String> = listOf(
             character.armorProficiencies, character.weaponProficiencies,
             character.toolProficiencies, character.languageProficiencies
-        ).joinToString(" ").lowercase()
+        ).flatMap { field -> field.split('|', ',', ';', '\n') }
+            .map { it.substringAfter(':').trim().lowercase() }
+            .filter { it.isNotEmpty() }
+            .toSet()
         val gainedTraits = mutableListOf<String>()
         val gainedExpertise = mutableListOf<String>()
         /** Weapon masteries gained now; [knownMasteries] the character has, as trait keys. */

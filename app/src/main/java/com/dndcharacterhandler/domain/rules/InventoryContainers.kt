@@ -9,11 +9,28 @@ import com.dndcharacterhandler.domain.model.InventoryItem
  */
 class InventoryTree(val items: List<InventoryItem>) {
     private val byId = items.filter { it.id != 0L }.associateBy { it.id }
-    private val children = items.groupBy { item -> item.containerId?.takeIf { it in byId && it != item.id } }
+
+    /**
+     * The container [item] really lies in: one that exists, is a container, and doesn't lie inside
+     * [item] itself (a loop a broken archive could bring). Anything else leaves the item carried.
+     */
+    private val parents: Map<Long, InventoryItem> = buildMap {
+        items.forEach { item ->
+            val parent = item.containerId?.takeIf { it != item.id }?.let(byId::get) ?: return@forEach
+            if (parent.category != InventoryCategory.CONTAINER) return@forEach
+            var above: InventoryItem? = parent
+            val seen = mutableSetOf(item.id)
+            while (above != null) {
+                if (!seen.add(above.id)) return@forEach
+                above = above.containerId?.takeIf { it != above!!.id }?.let(byId::get)
+            }
+            put(item.id, parent)
+        }
+    }
+    private val children = items.groupBy { item -> parents[item.id]?.id }
 
     /** The container [item] lies in, if it still exists. */
-    fun containerOf(item: InventoryItem): InventoryItem? =
-        item.containerId?.takeIf { it != item.id }?.let(byId::get)
+    fun containerOf(item: InventoryItem): InventoryItem? = parents[item.id]
 
     /** What the character carries as is: not inside any container. */
     val topLevel: List<InventoryItem> get() = children[null].orEmpty()
@@ -38,9 +55,19 @@ class InventoryTree(val items: List<InventoryItem>) {
         return result
     }
 
-    /** What fills [container]: its contents' weight, nested containers with theirs. */
-    fun contentsWeight(container: InventoryItem): Double =
-        allContentsOf(container).sumOf { it.weight * it.quantity }
+    /**
+     * What fills [container]: its contents' weight, nested containers with theirs — but a nested
+     * container whose contents weigh nothing (a Bag of Holding in a backpack) only with its own.
+     */
+    fun contentsWeight(container: InventoryItem): Double {
+        val seen = mutableSetOf(container.id)
+        fun weightIn(parent: InventoryItem): Double = contentsOf(parent).sumOf { item ->
+            if (!seen.add(item.id)) return@sumOf 0.0
+            val own = item.weight * item.quantity
+            if (item.containerDetails?.weightlessContents == true) own else own + weightIn(item)
+        }
+        return weightIn(container)
+    }
 
     /**
      * The weight the character carries: every item, except what lies in a container whose contents

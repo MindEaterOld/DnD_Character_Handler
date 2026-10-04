@@ -164,4 +164,11 @@ class CharacterRulesTest {
             hasStealthDisadvantage = false
         )
     )
+
+    @Test
+    fun aLargeCharacterCarriesTwiceAsMuch() {
+        org.junit.Assert.assertEquals(240.0, carryingCapacity(16, com.dndcharacterhandler.domain.model.CreatureSize.MEDIUM), 0.0)
+        org.junit.Assert.assertEquals(240.0, carryingCapacity(16, com.dndcharacterhandler.domain.model.CreatureSize.SMALL), 0.0)
+        org.junit.Assert.assertEquals(480.0, carryingCapacity(16, com.dndcharacterhandler.domain.model.CreatureSize.LARGE), 0.0)
+    }
 }

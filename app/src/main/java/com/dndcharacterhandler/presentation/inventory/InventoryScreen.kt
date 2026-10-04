@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation.inventory
 
+import com.dndcharacterhandler.domain.rules.carryingCapacity
 import com.dndcharacterhandler.presentation.components.NumberStepperField
 import com.dndcharacterhandler.presentation.components.StatCardRow
 import com.dndcharacterhandler.presentation.components.MiniStatCard
@@ -179,7 +180,9 @@ class InventoryViewModel(
                 val items = catalog.containerItems(
                     container, russian, { ref, count -> matchedEquipmentItem(itemsByName, ref, count, russian) }, NewItemIds()
                 )
-                characterRepository.addInventoryItems(characterId, items)
+                // The container itself keeps what the catalog item says of it (a Bag of Holding is magic).
+                val own = items.first().copy(isMagical = item.isMagical, catalogId = item.id)
+                characterRepository.addInventoryItems(characterId, listOf(own) + items.drop(1))
             } else {
                 characterRepository.upsertInventoryItem(
                     characterId = characterId,
@@ -460,7 +463,7 @@ internal fun InventoryContent(
                 ?.let { characterCatalog?.masteryOf(it) }
         }
     }
-    val carryLimit = (character.strength.coerceAtLeast(1) * 15).toDouble()
+    val carryLimit = carryingCapacity(character.strength, character.size)
     val listState = rememberLazyListState()
 
     ScreenBackground {

@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.domain.rules
 
+import com.dndcharacterhandler.domain.model.CreatureSize
 import com.dndcharacterhandler.domain.model.Character
 import com.dndcharacterhandler.domain.model.InventoryArmorDetails
 import com.dndcharacterhandler.domain.model.InventoryArmorType
@@ -7,6 +8,10 @@ import com.dndcharacterhandler.domain.model.InventoryItem
 import com.dndcharacterhandler.domain.model.SpellcastingAbility
 
 fun abilityModifier(score: Int): Int = Math.floorDiv(score - 10, 2)
+
+/** What a character can carry, in lb (2024): Strength × 15, twice that for a Large one. */
+fun carryingCapacity(strength: Int, size: CreatureSize): Double =
+    strength.coerceAtLeast(1) * 15.0 * if (size == CreatureSize.LARGE) 2 else 1
 
 fun proficiencyBonusForLevel(level: Int): Int = 2 + ((level.coerceIn(1, 20) - 1) / 4)
 

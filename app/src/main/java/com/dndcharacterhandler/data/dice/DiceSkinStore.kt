@@ -22,6 +22,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
@@ -48,6 +50,8 @@ class DiceSkinStore(context: Context) {
     private val listFile = File(root, "skins.json")
     private val draftDir = File(root, "_draft")
     private val _skins = MutableStateFlow<List<CustomDiceSkin>>(emptyList())
+    /** One change of the list at a time: a save, an import or a delete reads the list and writes it back. */
+    private val listMutex = Mutex()
     val skins: StateFlow<List<CustomDiceSkin>> = _skins.asStateFlow()
 
     suspend fun load() = withContext(Dispatchers.IO) {
@@ -71,7 +75,8 @@ class DiceSkinStore(context: Context) {
      * (a filled-in face template), or at most [maxSide] for a material. False when it can't be read.
      */
     suspend fun importImage(uri: Uri, target: File, square: Int? = null, maxSide: Int = 1024): Boolean = withContext(Dispatchers.IO) {
-        writePicture({ appContext.contentResolver.openInputStream(uri) }, target, square, maxSide)
+        // A picture that can't be read or scaled is "couldn't load it", never a crash.
+        runCatching { writePicture({ appContext.contentResolver.openInputStream(uri) }, target, square, maxSide) }.getOrDefault(false)
     }
 
     /**
@@ -80,7 +85,9 @@ class DiceSkinStore(context: Context) {
      */
     private fun writePicture(open: () -> InputStream?, target: File, square: Int?, maxSide: Int): Boolean {
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-        open()?.use { BitmapFactory.decodeStream(it, null, bounds) } ?: return false
+        // Reading only the size returns no bitmap: what counts is what it wrote into [bounds].
+        val stream = open() ?: return false
+        stream.use { BitmapFactory.decodeStream(it, null, bounds) }
         if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return false
         var sample = 1
         while (maxOf(bounds.outWidth, bounds.outHeight) / (sample * 2) >= (square ?: maxSide)) sample *= 2
@@ -92,7 +99,13 @@ class DiceSkinStore(context: Context) {
         } else {
             val factor = minOf(1f, maxSide.toFloat() / maxOf(decoded.width, decoded.height))
             if (factor < 1f) {
-                Bitmap.createScaledBitmap(decoded, (decoded.width * factor).toInt(), (decoded.height * factor).toInt(), true)
+                // A very long, thin picture keeps at least a pixel a side.
+                Bitmap.createScaledBitmap(
+                    decoded,
+                    (decoded.width * factor).toInt().coerceAtLeast(1),
+                    (decoded.height * factor).toInt().coerceAtLeast(1),
+                    true
+                )
             } else {
                 decoded
             }
@@ -138,23 +151,25 @@ class DiceSkinStore(context: Context) {
      * the face pictures). Null when the file isn't a skin.
      */
     suspend fun importSkin(uri: Uri, newId: String, faceSide: Int): CustomDiceSkin? = withContext(Dispatchers.IO) {
-        val entries = runCatching { appContext.contentResolver.openInputStream(uri)?.use(::readSkinEntries) }.getOrNull()
-            ?: return@withContext null
-        val shared = entries[SKIN_ENTRY]?.let { bytes -> runCatching { decodeDiceSkins(String(bytes)).firstOrNull() }.getOrNull() }
-            ?: return@withContext null
-        runCatching {
-            val hasPicture = entries[PICTURE_ENTRY]?.let { bytes -> writePicture({ bytes.inputStream() }, pictureFile(newId), null, 1024) } == true
-            val faces = entries.keys.mapNotNull { name -> FaceFileName.matchEntire(name)?.groupValues?.get(1) }.filter { kind ->
-                writePicture({ entries.getValue(faceEntry(kind)).inputStream() }, faceArtFile(newId, kind), faceSide, faceSide)
-            }.toSet()
-            val pattern = shared.pattern.takeIf { it !is DicePattern.Picture || hasPicture } ?: DicePattern.None
-            val imported = shared.copy(id = newId, faceArt = faces, pattern = pattern, updatedAt = System.currentTimeMillis())
-            writeList(_skins.value + imported)
-            imported
-        }.getOrElse {
-            // Half a skin is no skin: its pictures go too.
-            File(root, newId).deleteRecursively()
-            null
+        listMutex.withLock {
+            val entries = runCatching { appContext.contentResolver.openInputStream(uri)?.use(::readSkinEntries) }.getOrNull()
+                ?: return@withContext null
+            val shared = entries[SKIN_ENTRY]?.let { bytes -> runCatching { decodeDiceSkins(String(bytes)).firstOrNull() }.getOrNull() }
+                ?: return@withContext null
+            runCatching {
+                val hasPicture = entries[PICTURE_ENTRY]?.let { bytes -> writePicture({ bytes.inputStream() }, pictureFile(newId), null, 1024) } == true
+                val faces = entries.keys.mapNotNull { name -> FaceFileName.matchEntire(name)?.groupValues?.get(1) }.filter { kind ->
+                    writePicture({ entries.getValue(faceEntry(kind)).inputStream() }, faceArtFile(newId, kind), faceSide, faceSide)
+                }.toSet()
+                val pattern = shared.pattern.takeIf { it !is DicePattern.Picture || hasPicture } ?: DicePattern.None
+                val imported = shared.copy(id = newId, faceArt = faces, pattern = pattern, updatedAt = System.currentTimeMillis())
+                writeList(_skins.value + imported)
+                imported
+            }.getOrElse {
+                // Half a skin is no skin: its pictures go too.
+                File(root, newId).deleteRecursively()
+                null
+            }
         }
     }
 
@@ -168,20 +183,24 @@ class DiceSkinStore(context: Context) {
      * die kinds to their draft face pictures, or to null to drop that kind's.
      */
     suspend fun save(skin: CustomDiceSkin, picture: File?, faceArt: Map<String, File?>) = withContext(Dispatchers.IO) {
-        picture?.let { moveInto(it, pictureFile(skin.id)) }
-        faceArt.forEach { (kind, draft) ->
-            if (draft == null) faceArtFile(skin.id, kind).delete() else moveInto(draft, faceArtFile(skin.id, kind))
+        listMutex.withLock {
+            picture?.let { moveInto(it, pictureFile(skin.id)) }
+            faceArt.forEach { (kind, draft) ->
+                if (draft == null) faceArtFile(skin.id, kind).delete() else moveInto(draft, faceArtFile(skin.id, kind))
+            }
+            val saved = skin.copy(updatedAt = System.currentTimeMillis())
+            val list = _skins.value.filterNot { it.id == skin.id } + saved
+            writeList(list)
+            clearDraft()
+            saved
         }
-        val saved = skin.copy(updatedAt = System.currentTimeMillis())
-        val list = _skins.value.filterNot { it.id == skin.id } + saved
-        writeList(list)
-        clearDraft()
-        saved
     }
 
     suspend fun delete(skinId: String) = withContext(Dispatchers.IO) {
-        File(root, skinId).deleteRecursively()
-        writeList(_skins.value.filterNot { it.id == skinId })
+        listMutex.withLock {
+            File(root, skinId).deleteRecursively()
+            writeList(_skins.value.filterNot { it.id == skinId })
+        }
     }
 
     private fun moveInto(source: File, target: File) {
@@ -192,9 +211,21 @@ class DiceSkinStore(context: Context) {
         }
     }
 
+    /**
+     * Writes the list next to the old one and puts it in its place, so a save cut short (the app
+     * killed) leaves the old list whole rather than an empty file.
+     */
     private fun writeList(list: List<CustomDiceSkin>) {
         root.mkdirs()
-        listFile.writeText(encodeDiceSkins(list))
+        val temporary = File(root, "skins.json.tmp")
+        temporary.writeText(encodeDiceSkins(list))
+        if (!temporary.renameTo(listFile)) {
+            listFile.delete()
+            if (!temporary.renameTo(listFile)) {
+                temporary.copyTo(listFile, overwrite = true)
+                temporary.delete()
+            }
+        }
         _skins.value = list
     }
 }

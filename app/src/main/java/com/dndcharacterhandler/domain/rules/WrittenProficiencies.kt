@@ -39,10 +39,14 @@ fun repairWrittenProficiencies(character: Character, catalog: CharacterCatalog):
                 name = name.removePrefix(prefix).trim()
             }
             val key = keyNamed(name, kind)
+            // After "Мастерство:" the old wizard went on writing the next level's proficiencies on the
+            // same line: only a weapon that has a mastery property is a mastery, a group ("Воинское
+            // оружие") or anything else stays a proficiency.
+            val masteryWeapon = key?.substringAfterLast(':')?.let { weaponIdForFoundry(it) ?: it }
+                ?.takeIf { inMasteries && catalog.masteryOf(it) != null }
             when {
                 name in knownProficiencyIds || name.startsWith(CustomProficiencyPrefix) -> repaired += name
-                inMasteries -> masteries = masteries +
-                    (key?.substringAfterLast(':')?.let { weaponIdForFoundry(it) ?: it } ?: (CustomProficiencyPrefix + name))
+                masteryWeapon != null -> masteries = masteries + masteryWeapon
                 else -> repaired += key?.let(::proficiencyIdForTrait) ?: (CustomProficiencyPrefix + name)
             }
         }

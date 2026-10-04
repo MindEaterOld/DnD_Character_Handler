@@ -65,6 +65,19 @@ class WrittenProficienciesTest {
     }
 
     @Test
+    fun aLaterLevelsWeaponsAfterTheMasteriesStayProficiencies() {
+        val base = defaultCharacterBundle(now = 0).character
+        fun ru(key: String) = catalog.traits.getValue(key).name.ru
+        // Rogue's masteries, then a fighter level's martial weapons on the same line.
+        val written = base.copy(
+            weaponProficiencies = "${ru("weapon:sim")}, Мастерство: ${ru("weapon:mar:longsword")}, ${ru("weapon:mar")}"
+        )
+        val repaired = repairWrittenProficiencies(written, catalog)!!
+        assertEquals(setOf("simple_weapons", "martial_weapons"), decodeProficiencyIds(repaired.weaponProficiencies))
+        assertEquals(setOf("longsword"), decodeProficiencyIds(repaired.weaponMasteries))
+    }
+
+    @Test
     fun idsAndCustomEntriesStayAsTheyAre() {
         val character = defaultCharacterBundle(now = 0).character.copy(
             weaponProficiencies = "simple_weapons|custom:Пистолет",
