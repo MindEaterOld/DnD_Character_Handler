@@ -214,7 +214,7 @@ class AssetInventoryCatalogRepository(
         val name = json.optString("name").ifBlank { return null }
         val categories = json.optArray("equipment_categories") ?: JsonArray(emptyList())
         val category = mapCategory(name = name, categories = categories)
-        val weight = json.optDoubleOrZero("weight")
+        val weight = WeightCorrections[id] ?: json.optDoubleOrZero("weight")
         val detailLine = buildEquipmentDetailLine(json)
         val description = json.optString("description").ifBlank { detailLine }
         val cost = json.optObject("cost")
@@ -438,3 +438,17 @@ class AssetInventoryCatalogRepository(
     private fun JsonObject.optNullableInt(name: String): Int? =
         if (isNull(name) || !has(name)) null else optInt(name)
 }
+
+/**
+ * Weights the 5e-database's 2024 data has wrong, as the 2024 books (and Foundry's catalog) give
+ * them: a 25 lb bedroll put an explorer's pack at 68 lb. The packs and the waterskin differ on
+ * purpose (their contents are counted apart) and stay.
+ */
+private val WeightCorrections = mapOf(
+    "bedroll" to 7.0,
+    "chest" to 25.0,
+    "clothes-fine" to 6.0,
+    "component-pouch" to 2.0,
+    "robe" to 4.0,
+    "sack" to 0.5
+)

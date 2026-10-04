@@ -33,7 +33,7 @@ import com.dndcharacterhandler.data.local.entity.SpellEntity
         FeatureEntity::class,
         NoteEntity::class
     ],
-    version = 54,
+    version = 55,
     exportSchema = false
 )
 @TypeConverters(RoomConverters::class)
@@ -103,7 +103,8 @@ abstract class AppDatabase : RoomDatabase() {
                     MIGRATION_50_51,
                     MIGRATION_51_52,
                     MIGRATION_52_53,
-                    MIGRATION_53_54
+                    MIGRATION_53_54,
+                    MIGRATION_54_55
                 ).build().also { INSTANCE = it }
             }
         }
@@ -628,6 +629,25 @@ abstract class AppDatabase : RoomDatabase() {
                 }
                 found.forEach { (id, value) ->
                     db.execSQL("UPDATE characters SET defenses = ? WHERE id = ?", arrayOf<Any>(value, id))
+                }
+            }
+        }
+
+        private val MIGRATION_54_55 = object : Migration(54, 55) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Items taken with the 5e-database's wrong weights (a 25 lb bedroll), as the 2024 books give them.
+                listOf(
+                    "bedroll" to (25.0 to 7.0),
+                    "chest" to (20.0 to 25.0),
+                    "clothes-fine" to (3.0 to 6.0),
+                    "component-pouch" to (1.0 to 2.0),
+                    "robe" to (1.0 to 4.0),
+                    "sack" to (1.0 to 0.5)
+                ).forEach { (id, weights) ->
+                    db.execSQL(
+                        "UPDATE inventory_items SET weight = ? WHERE catalogId = ? AND weight = ?",
+                        arrayOf<Any>(weights.second, "equipment:$id", weights.first)
+                    )
                 }
             }
         }
