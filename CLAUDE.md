@@ -43,6 +43,7 @@ What can be pressed as an action and what shows a value must look different at a
   - **how far the value moved** — its colour, `changedValueColor`: `accent.dangerHpZero` when lower (exhaustion's −2), `accent.heal` when higher. Speed has only the colour; AC only the arrows (how attacks against the character are rolled).
 - **Concentration** is a card on the Spells screen in place of the class: lit in gold while a spell is held, the spell's name as much as fits, cut with a dot.
 - In Russian exhaustion is «Истощение» (the owner's word); the other names and languages are as the catalog and the 2024 books have them.
+- Damage types in Russian are the catalog's words everywhere (combat, inventory, the spell editor, defenses): radiant is **«Лучистый»**, never «Сияние» or «Излучение» (owner's choice, 2026-10-04); force «Сила», lightning «Молния», thunder «Гром», necrotic «Некротический», psychic «Психический».
 
 ## Naming — Character Wizard
 

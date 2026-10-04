@@ -5465,7 +5465,7 @@
   },
   "inventory_damage_type_radiant": {
     "en": "Radiant",
-    "ru": "\u0421\u0438\u044f\u043d\u0438\u0435",
+    "ru": "Лучистый",
     "de": "Strahlend",
     "fr": "Radiant",
     "es": "Radiante"
@@ -6361,21 +6361,21 @@
   },
   "spells_damage_type_force": {
     "en": "Force",
-    "ru": "Силовое поле",
+    "ru": "Сила",
     "de": "Energie",
     "fr": "Force",
     "es": "Fuerza"
   },
   "spells_damage_type_lightning": {
     "en": "Lightning",
-    "ru": "Электричество",
+    "ru": "Молния",
     "de": "Blitz",
     "fr": "Foudre",
     "es": "Relampago"
   },
   "spells_damage_type_necrotic": {
     "en": "Necrotic",
-    "ru": "Некротическая энергия",
+    "ru": "Некротический",
     "de": "Nekrotisch",
     "fr": "Necrotique",
     "es": "Necrotico"
@@ -6396,14 +6396,14 @@
   },
   "spells_damage_type_psychic": {
     "en": "Psychic",
-    "ru": "Психическая энергия",
+    "ru": "Психический",
     "de": "Psychisch",
     "fr": "Psychique",
     "es": "Psiquico"
   },
   "spells_damage_type_radiant": {
     "en": "Radiant",
-    "ru": "Излучение",
+    "ru": "Лучистый",
     "de": "Gleissend",
     "fr": "Radiant",
     "es": "Radiante"
@@ -6417,7 +6417,7 @@
   },
   "spells_damage_type_thunder": {
     "en": "Thunder",
-    "ru": "Звук",
+    "ru": "Гром",
     "de": "Schall",
     "fr": "Tonnerre",
     "es": "Trueno"
