@@ -65,6 +65,8 @@ import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
 import com.dndcharacterhandler.presentation.components.ScreenBackground
 import com.dndcharacterhandler.presentation.components.ScreenTopActions
 import com.dndcharacterhandler.presentation.components.SizeToggle
+import com.dndcharacterhandler.presentation.components.toggleContent
+import com.dndcharacterhandler.presentation.components.toggleFill
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 import kotlinx.coroutines.launch
@@ -620,21 +622,19 @@ private fun BiographySelectionOption(
     selected: Boolean,
     onClick: () -> Unit
 ) {
-    val colors = LocalDesignTokens.current.colors
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(10.dp))
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(10.dp),
-        color = if (selected) colors.surface.selected else colors.surface.option,
-        border = BorderStroke(1.dp, if (selected) colors.border.selected else colors.border.muted)
+        color = toggleFill(selected)
     ) {
         Text(
             text = text,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
             style = MaterialTheme.typography.bodyLarge,
-            color = if (selected) colors.text.warmPrimary else colors.text.muted
+            color = toggleContent(selected)
         )
     }
 }
@@ -718,18 +718,17 @@ private fun UnitSwitcher(
     selected: String,
     onSelected: (String) -> Unit
 ) {
-    val colors = LocalDesignTokens.current.colors
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         listOf(first, second).forEach { option ->
             Text(
                 text = option,
                 modifier = Modifier
                     .clip(RoundedCornerShape(10.dp))
-                    .background(if (selected == option) colors.surface.selected else Color.Transparent)
+                    .background(toggleFill(selected == option))
                     .clickable { onSelected(option) }
                     .padding(horizontal = 16.dp, vertical = 10.dp),
                 style = MaterialTheme.typography.bodyLarge,
-                color = colors.text.primary
+                color = toggleContent(selected == option)
             )
         }
     }

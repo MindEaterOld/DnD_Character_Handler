@@ -24,7 +24,6 @@ import android.net.Uri
 import android.webkit.MimeTypeMap
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -66,6 +65,9 @@ import com.dndcharacterhandler.domain.rules.heal
 import com.dndcharacterhandler.presentation.components.StepButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.foundation.shape.GenericShape
+import com.dndcharacterhandler.presentation.components.toggleContent
+import com.dndcharacterhandler.presentation.components.toggleFill
+import com.dndcharacterhandler.presentation.components.toggleRadioColors
 import kotlin.math.cos
 import kotlin.math.sin
 import androidx.compose.material.icons.outlined.HeartBroken
@@ -1130,7 +1132,7 @@ private fun OverviewContent(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(12.dp))
-                                .background(if (isSelected) colors.surface.selected else Color.Transparent)
+                                .background(toggleFill(isSelected))
                                 .clickable {
                                     val current = characterBundle.character.level
                                     when {
@@ -1145,7 +1147,7 @@ private fun OverviewContent(
                                 }
                                 .padding(horizontal = 12.dp, vertical = 12.dp),
                             style = MaterialTheme.typography.bodyLarge,
-                            color = if (isSelected) colors.text.warmPrimary else colors.text.muted
+                            color = toggleContent(isSelected)
                         )
                     }
                 }
@@ -1573,8 +1575,7 @@ private fun OverviewContent(
                     Box(modifier = Modifier.padding(start = 12.dp)) {
                         Surface(
                             shape = RoundedCornerShape(14.dp),
-                            color = colors.surface.option,
-                            border = BorderStroke(1.dp, colors.border.default),
+                            color = colors.surface.button,
                             onClick = { isHitDieMenuOpen = true }
                         ) {
                             Text(
@@ -1760,19 +1761,17 @@ private fun ExperienceModeButton(
     selected: Boolean,
     onClick: () -> Unit
 ) {
-    val colors = LocalDesignTokens.current.colors
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
-        color = if (selected) colors.surface.selected else colors.surface.option,
-        border = BorderStroke(1.dp, if (selected) colors.border.selected else colors.border.muted),
+        color = toggleFill(selected),
         onClick = onClick
     ) {
         Text(
             text = label,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
             style = MaterialTheme.typography.bodyLarge,
-            color = if (selected) colors.text.warmPrimary else colors.text.muted,
+            color = toggleContent(selected),
             textAlign = TextAlign.Center
         )
     }
@@ -2093,18 +2092,18 @@ private fun HpKindOption(label: String, icon: ImageVector, accent: Color, select
         modifier = modifier
             .height(40.dp)
             .clip(RoundedCornerShape(12.dp))
-            .background(if (selected) accent.copy(alpha = HpActionTint) else colors.surface.option)
+            .background(if (selected) accent.copy(alpha = HpActionTint) else colors.surface.button)
             .selectable(selected = selected, role = Role.RadioButton, onClick = onClick)
             .padding(horizontal = 8.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(imageVector = icon, contentDescription = null, tint = if (selected) accent else colors.text.subtle, modifier = Modifier.size(16.dp))
+        Icon(imageVector = icon, contentDescription = null, tint = if (selected) accent else colors.text.primary, modifier = Modifier.size(16.dp))
         Text(
             text = label,
             modifier = Modifier.padding(start = 6.dp),
             style = MaterialTheme.typography.bodyMedium,
-            color = if (selected) accent else colors.text.muted,
+            color = if (selected) accent else colors.text.primary,
             fontWeight = FontWeight.Medium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
@@ -2714,8 +2713,7 @@ private fun ArmorClassModeOption(
     val colors = LocalDesignTokens.current.colors
     Surface(
         shape = RoundedCornerShape(12.dp),
-        color = colors.surface.option,
-        border = BorderStroke(1.dp, if (selected) colors.border.selected else colors.border.muted),
+        color = toggleFill(selected),
         onClick = onClick
     ) {
         Row(
@@ -2724,16 +2722,16 @@ private fun ArmorClassModeOption(
                 .padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            RadioButton(selected = selected, onClick = null)
+            RadioButton(selected = selected, onClick = null, colors = toggleRadioColors())
             Column(
                 modifier = Modifier.padding(start = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                Text(text = title, style = MaterialTheme.typography.bodyLarge, color = colors.text.primary)
+                Text(text = title, style = MaterialTheme.typography.bodyLarge, color = toggleContent(selected))
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = colors.text.muted
+                    color = toggleContent(selected, colors.text.muted)
                 )
             }
         }

@@ -21,6 +21,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -34,7 +38,8 @@ import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
  * the right. Without [onConfirm] and [onDelete] (a list to pick from, a read-only text) there is no
  * bottom row; a tap on an entry does the work.
  *
- * [confirmIsDanger] paints the main action in the danger colour (confirming a deletion).
+ * [confirmIsDanger] paints the main action in the danger colour (confirming a deletion). Delete
+ * asks first ("Delete? This can't be undone."), in a pop-up of its own (owner's choice, 2026-10-04).
  * [scrollable] false for content that scrolls by itself (a LazyColumn). [titleActions] sit before
  * the cross (the dice picker's skin button); [titleLeading] before the title (a back arrow).
  */
@@ -54,6 +59,7 @@ fun EditDialog(
     content: @Composable ColumnScope.() -> Unit
 ) {
     val colors = LocalDesignTokens.current.colors
+    var confirmingDelete by remember { mutableStateOf(false) }
     AlertDialog(
         onDismissRequest = onDismiss,
         modifier = modifier,
@@ -84,7 +90,7 @@ fun EditDialog(
                     if (onDelete != null) {
                         // As tall as the main button: the danger red, faint behind the icon.
                         FilledIconButton(
-                            onClick = onDelete,
+                            onClick = { confirmingDelete = true },
                             colors = IconButtonDefaults.filledIconButtonColors(
                                 containerColor = colors.accent.dangerHpZero.copy(alpha = 0.16f),
                                 contentColor = colors.accent.dangerHpZero
@@ -114,4 +120,18 @@ fun EditDialog(
             }
         }
     )
+    if (confirmingDelete && onDelete != null) {
+        EditDialog(
+            title = text("common_delete_confirm_title"),
+            onDismiss = { confirmingDelete = false },
+            onConfirm = {
+                confirmingDelete = false
+                onDelete()
+            },
+            confirmLabel = text("common_delete"),
+            confirmIsDanger = true
+        ) {
+            Text(text = text("common_delete_confirm_text"), color = colors.text.primary)
+        }
+    }
 }

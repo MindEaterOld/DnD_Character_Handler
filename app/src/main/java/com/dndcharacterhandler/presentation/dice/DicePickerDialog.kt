@@ -1,7 +1,6 @@
 package com.dndcharacterhandler.presentation.dice
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -42,6 +41,8 @@ import com.dndcharacterhandler.domain.model.CustomDiceSkin
 import com.dndcharacterhandler.domain.model.DicePattern
 import com.dndcharacterhandler.presentation.components.EditDialog
 import com.dndcharacterhandler.presentation.components.StepButton
+import com.dndcharacterhandler.presentation.components.toggleContent
+import com.dndcharacterhandler.presentation.components.toggleFill
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 import java.util.UUID
@@ -182,8 +183,7 @@ private fun DiceSkinList(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(shape)
-                    .then(if (isSelected) Modifier.background(colors.surface.selected) else Modifier)
-                    .border(1.dp, if (isSelected) colors.border.selected else colors.border.muted, shape)
+                    .background(toggleFill(isSelected))
                     .clickable { onSelect(look) }
                     .padding(horizontal = 12.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -197,18 +197,18 @@ private fun DiceSkinList(
                     },
                     modifier = Modifier.weight(1f),
                     style = MaterialTheme.typography.titleMedium,
-                    color = colors.text.primary
+                    color = toggleContent(isSelected)
                 )
                 if (isSelected) {
                     Icon(
                         imageVector = Icons.Outlined.Check,
                         contentDescription = null,
-                        tint = colors.accent.inspiration
+                        tint = toggleContent(true)
                     )
                 }
                 if (look is DiceLook.Custom) {
                     IconButton(onClick = { onEdit(look.skin) }) {
-                        Icon(Icons.Outlined.Edit, contentDescription = text("common_edit"), tint = colors.text.muted)
+                        Icon(Icons.Outlined.Edit, contentDescription = text("common_edit"), tint = toggleContent(isSelected, colors.text.muted))
                     }
                 }
             }
@@ -231,13 +231,13 @@ private fun SkinListAction(icon: androidx.compose.ui.graphics.vector.ImageVector
         modifier = Modifier
             .fillMaxWidth()
             .clip(shape)
-            .border(1.dp, colors.border.muted, shape)
+            .background(colors.surface.button)
             .clickable(onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        Icon(icon, contentDescription = null, tint = colors.text.label, modifier = Modifier.size(28.dp))
+        Icon(icon, contentDescription = null, tint = colors.text.primary, modifier = Modifier.size(28.dp))
         Text(
             text = label,
             modifier = Modifier.weight(1f),

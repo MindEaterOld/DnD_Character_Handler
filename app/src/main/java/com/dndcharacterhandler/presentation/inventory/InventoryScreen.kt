@@ -109,6 +109,8 @@ import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
 import com.dndcharacterhandler.presentation.components.ScreenBackground
 import com.dndcharacterhandler.presentation.components.SelectableDot
 import com.dndcharacterhandler.presentation.components.ScreenTopActions
+import com.dndcharacterhandler.presentation.components.toggleContent
+import com.dndcharacterhandler.presentation.components.toggleFill
 import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
@@ -1052,19 +1054,17 @@ private fun InventoryToggleButton(
     selected: Boolean,
     onClick: () -> Unit
 ) {
-    val colors = LocalDesignTokens.current.colors
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
-        color = if (selected) colors.surface.selected else colors.surface.option,
-        border = BorderStroke(1.dp, if (selected) colors.border.selected else colors.border.muted),
+        color = toggleFill(selected),
         onClick = onClick
     ) {
         Text(
             text = label,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
             style = MaterialTheme.typography.bodyLarge,
-            color = if (selected) colors.text.warmPrimary else colors.text.muted,
+            color = toggleContent(selected),
             textAlign = TextAlign.Center,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
@@ -1322,12 +1322,13 @@ private fun InventoryItemRow(
                         color = colors.text.subtle
                     )
                 } else {
+                    // Cells, not buttons: the outline and the indent set them apart, no fill of their own.
                     Surface(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(start = 24.dp, top = 4.dp),
                         shape = RoundedCornerShape(8.dp),
-                        color = colors.ornament.outer,
+                        color = colors.surface.card,
                         border = BorderStroke(1.dp, colors.border.muted)
                     ) {
                         Column {
@@ -1364,7 +1365,6 @@ private fun InventoryMoveDialog(
     onDismiss: () -> Unit,
     onMove: (Long?) -> Unit
 ) {
-    val colors = LocalDesignTokens.current.colors
     val current = tree.containerOf(item)?.id
     val options: List<Pair<Long?, String>> = listOf<Pair<Long?, String>>(null to text("inventory_move_carried")) +
         tree.containersFor(item).map { container -> container.id to containerPath(tree, container) }
@@ -1381,14 +1381,13 @@ private fun InventoryMoveDialog(
                         .fillMaxWidth()
                         .clickable { onMove(containerId) },
                     shape = RoundedCornerShape(10.dp),
-                    color = if (selected) colors.surface.selected else colors.ornament.outer,
-                    border = BorderStroke(1.dp, if (selected) colors.border.selected else colors.border.muted)
+                    color = toggleFill(selected)
                 ) {
                     Text(
                         text = label,
                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = colors.text.primary
+                        color = toggleContent(selected)
                     )
                 }
             }
@@ -2213,7 +2212,6 @@ private fun <T> SelectionDialog(
     onDismiss: () -> Unit,
     onSelect: (T) -> Unit
 ) {
-    val colors = LocalDesignTokens.current.colors
     // A picker: a tap on an option does the work; the list scrolls by itself.
     EditDialog(
         title = title,
@@ -2228,14 +2226,13 @@ private fun <T> SelectionDialog(
                         .fillMaxWidth()
                         .clickable { onSelect(option) },
                     shape = RoundedCornerShape(10.dp),
-                    color = if (isSelected) colors.ornament.outer else Color.Transparent,
-                    border = BorderStroke(1.dp, if (isSelected) colors.border.selected else colors.ornament.outer)
+                    color = toggleFill(isSelected)
                 ) {
                     Text(
                         text = labelForOption(option),
                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = colors.text.primary
+                        color = toggleContent(isSelected)
                     )
                 }
             }
@@ -2252,7 +2249,6 @@ private fun <T> MultiSelectionDialog(
     onDismiss: () -> Unit,
     onToggle: (T) -> Unit
 ) {
-    val colors = LocalDesignTokens.current.colors
     // Each tap toggles an option right away; Save (as the cross) just closes. The list scrolls by itself.
     EditDialog(
         title = title,
@@ -2268,14 +2264,13 @@ private fun <T> MultiSelectionDialog(
                         .fillMaxWidth()
                         .clickable { onToggle(option) },
                     shape = RoundedCornerShape(10.dp),
-                    color = if (isSelected) colors.ornament.outer else Color.Transparent,
-                    border = BorderStroke(1.dp, if (isSelected) colors.border.selected else colors.ornament.outer)
+                    color = toggleFill(isSelected)
                 ) {
                     Text(
                         text = labelForOption(option),
                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = colors.text.primary
+                        color = toggleContent(isSelected)
                     )
                 }
             }
@@ -2307,15 +2302,14 @@ private fun <T> EnumSelectorRow(
                 val isSelected = option == selected
                 Surface(
                     shape = RoundedCornerShape(999.dp),
-                    color = colors.ornament.outer,
-                    border = BorderStroke(1.dp, if (isSelected) colors.border.selected else colors.border.muted),
+                    color = toggleFill(isSelected),
                     modifier = Modifier.clickable { onSelected(option) }
                 ) {
                     Text(
                         text = labelForOption(option),
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
                         style = MaterialTheme.typography.labelMedium,
-                        color = colors.text.primary
+                        color = toggleContent(isSelected)
                     )
                 }
             }

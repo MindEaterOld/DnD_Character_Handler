@@ -38,7 +38,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.IconButton
@@ -105,6 +104,7 @@ import com.dndcharacterhandler.presentation.components.FloatingAddButton
 import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
 import com.dndcharacterhandler.presentation.components.ScreenBackground
 import com.dndcharacterhandler.presentation.components.ScreenTopActions
+import com.dndcharacterhandler.presentation.components.ToggleChip
 import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
@@ -606,17 +606,13 @@ private fun FeaturesAddEntryDialog(
                 if (groups.size > 1) {
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         item {
-                            FilterChip(
-                                selected = group == null,
-                                onClick = { group = null },
-                                label = { Text(text("features_filter_all")) }
-                            )
+                            ToggleChip(label = text("features_filter_all"), selected = group == null, onClick = { group = null })
                         }
                         items(groups) { option ->
-                            FilterChip(
+                            ToggleChip(
+                                label = catalogGroupLabel(option),
                                 selected = group == option,
-                                onClick = { group = if (group == option) null else option },
-                                label = { Text(catalogGroupLabel(option)) }
+                                onClick = { group = if (group == option) null else option }
                             )
                         }
                     }
@@ -682,7 +678,7 @@ internal fun FeatureCatalogRow(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
-        color = LocalDesignTokens.current.colors.surface.option,
+        color = LocalDesignTokens.current.colors.surface.card,
         border = BorderStroke(1.dp, LocalDesignTokens.current.colors.border.muted)
     ) {
         Row(
@@ -733,7 +729,6 @@ internal fun FeatureEditDialog(
     onDelete: (() -> Unit)? = null,
     renderText: (String) -> String = { it }
 ) {
-    val colors = LocalDesignTokens.current.colors
     // Catalog texts keep their formulas ({=...}, see CatalogFormulaText); the dialog shows this
     // character's numbers, and an untouched text is saved with its formulas so it keeps following them.
     val shownDescription = remember(feature) { renderText(feature.description) }

@@ -231,7 +231,7 @@ internal fun ConditionsDialog(
     }
 }
 
-/** A condition to pick: its colour at 12 % with its colour's text while on, the option fill while off. */
+/** A condition to pick: its colour at 12 % with its colour's text while on, the standard button fill while off. */
 @Composable
 private fun ConditionToggle(condition: Condition, on: Boolean, immune: Boolean = false, onToggle: () -> Unit) {
     val colors = LocalDesignTokens.current.colors
@@ -240,12 +240,12 @@ private fun ConditionToggle(condition: Condition, on: Boolean, immune: Boolean =
         modifier = Modifier
             .height(36.dp)
             .clip(RoundedCornerShape(18.dp))
-            .background(if (on) accent.copy(alpha = HpActionTint) else colors.surface.option)
+            .background(if (on) accent.copy(alpha = HpActionTint) else colors.surface.button)
             .toggleable(value = on, enabled = !immune, role = Role.Checkbox, onValueChange = { onToggle() })
             .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(condition.icon, contentDescription = null, tint = if (on) accent else colors.text.subtle, modifier = Modifier.size(16.dp))
+        Icon(condition.icon, contentDescription = null, tint = if (on) accent else if (immune) colors.text.subtle else colors.text.primary, modifier = Modifier.size(16.dp))
         Text(
             text = if (immune) "${text(condition.nameKey)} · ${text("conditions_immune")}" else text(condition.nameKey),
             modifier = Modifier.padding(start = 6.dp),
@@ -253,7 +253,7 @@ private fun ConditionToggle(condition: Condition, on: Boolean, immune: Boolean =
             color = when {
                 on -> accent
                 immune -> colors.text.subtle
-                else -> colors.text.muted
+                else -> colors.text.primary
             },
             maxLines = 1,
             overflow = TextOverflow.Ellipsis

@@ -120,7 +120,6 @@ fun CharacterManagerDrawer(
                     label = text("drawer_new_character"),
                     icon = Icons.Outlined.AddCircleOutline,
                     onClick = onCreateCharacter,
-                    dashed = true,
                     modifier = Modifier.padding(top = 16.dp)
                 )
             }
@@ -330,21 +329,19 @@ private fun DrawerActionCard(
     label: String,
     icon: ImageVector,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    iconTint: Color = LocalDesignTokens.current.colors.text.action,
-    dashed: Boolean = false
+    modifier: Modifier = Modifier
 ) {
     val tokens = LocalDesignTokens.current.typography
     val colors = LocalDesignTokens.current.colors
 
+    // An action, so a button: the standard button fill, no outline (CLAUDE.md, buttons vs. stats).
     Surface(
         modifier = modifier
             .fillMaxWidth()
             .height(60.dp)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(8.dp),
-        color = colors.surface.card.copy(alpha = 0.48f),
-        border = BorderStroke(1.dp, if (dashed) MaterialTheme.colorScheme.outline else colors.border.miniCard)
+        color = colors.surface.button
     ) {
         Row(
             modifier = Modifier
@@ -355,14 +352,14 @@ private fun DrawerActionCard(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = iconTint,
+                tint = colors.text.primary,
                 modifier = Modifier.size(24.dp)
             )
             Text(
                 text = label,
                 modifier = Modifier.padding(start = 14.dp),
                 style = MaterialTheme.typography.titleMedium.copy(fontSize = tokens.titleMedium.fontSizeSp.sp),
-                color = colors.text.muted,
+                color = colors.text.primary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )

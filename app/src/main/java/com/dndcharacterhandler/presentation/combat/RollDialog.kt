@@ -415,19 +415,19 @@ private fun RollResultsPreview() {
         DnDTheme {
             ScreenBackground {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    DiceResultPanel(Modifier.fillMaxWidth()) {
+                    DiceResultPanel(Modifier.fillMaxWidth(), onClose = {}) {
                         AttackResult("Секира", null, greataxe, greataxe.read(mapOf(20 to listOf(20), 12 to listOf(9))), "рубящий", healing = false)
                     }
-                    DiceResultPanel(Modifier.fillMaxWidth()) {
+                    DiceResultPanel(Modifier.fillMaxWidth(), onClose = {}) {
                         AttackResult("Секира", null, greataxe, greataxe.read(mapOf(20 to listOf(1), 12 to listOf(7))), "рубящий", healing = false)
                     }
-                    DiceResultPanel(Modifier.fillMaxWidth()) {
+                    DiceResultPanel(Modifier.fillMaxWidth(), onClose = {}) {
                         AttackResult("Длинный меч", null, poisoned, poisoned.read(mapOf(20 to listOf(15, 7), 8 to listOf(5))), "рубящий", healing = false)
                     }
-                    DiceResultPanel(Modifier.fillMaxWidth()) {
+                    DiceResultPanel(Modifier.fillMaxWidth(), onClose = {}) {
                         AmountResult("Огненный шар", DiceFormula.of(8, 6).read(mapOf(6 to listOf(3, 5, 1, 6, 4, 2, 6, 3))), "огнём", healing = false, save = "ЛОВ СЛ 13")
                     }
-                    DiceResultPanel(Modifier.fillMaxWidth()) {
+                    DiceResultPanel(Modifier.fillMaxWidth(), onClose = {}) {
                         CriticalResult("Секира", firstDamage = 12, extra = DiceFormula.of(1, 12).read(mapOf(12 to listOf(8))), damageType = "рубящий")
                     }
                 }

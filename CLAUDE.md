@@ -25,10 +25,15 @@ What can be pressed as an action and what shows a value must look different at a
 - **Button palette** (approved 2026-10-03; fills and their text/icon colours by role):
   - **standard button**: `surface.button` #3B3840 (1.58:1 against the cards), text and icon `text.primary`;
   - main action (Save) and a toggle that is on: `materialTheme.primary` #C6A36C, text and icon `onPrimary`;
+  - **toggles** (the options of a row or a list to pick from: modes, language, size, units, filters, the skins, the fonts, the dice chips) — the picked one gold `primary` with `onPrimary` text, the others `surface.button` with `text.primary`, no outline. In code: `toggleFill(selected)` / `toggleContent(selected)` / `toggleRadioColors()` and `ToggleChip` in `components/Toggle.kt` (owner's choice from boards, 2026-10-04). A pick that is its own colour keeps it (a condition, the healing kind: its accent at 12 %);
   - **Inspiration** is its own toggle, not a filled button: a compass rose of eight points (`InspirationStar`, 96dp, no outline) in the lower right corner of the portrait's octagon — `text.label` while off (the screen's colour for an idle mark), `accent.inspiration` while on, with a white heart and a breathing glow of `accent.inspiration` fading out (owner's choice from boards, 2026-10-03);
   - HP actions: their accent (`accent.dangerHpZero`, `accent.heal`, `accent.hpTemporary`) at **12 %** as the fill behind an icon and label in the full accent — at 12 % even the red label reads (4.6:1). On the overview, Heal (left) and Damage (right) hang from the hit points' card beside the death saves' skull tab, as tabs of their own; temporary hit points are a kind of healing, picked by a toggle in the Healing pop-up (the picked kind in its accent at 12 %) — owner's choice, 2026-10-03;
   - stepper (− and + beside a number): `StepButton`, a 48dp circle of `surface.button` with the icon in `text.primary`;
-  - concentration on a spell: `ConcentrationToggle`, a 36dp circle beside the prepared dot — `surface.button` while off, `primary` gold while on (owner's choice, 2026-10-03).
+  - concentration on a spell: `ConcentrationToggle`, a 36dp circle beside the prepared dot — `surface.button` while off, `primary` gold while on (owner's choice, 2026-10-03);
+  - dangerous action (confirm deletion): `accent.dangerHpZero`, text `text.primary`;
+  - delete icon (the trash in a pop-up): `accent.dangerHpZero` at 16% behind an `accent.dangerHpZero` icon; it always asks first, «Удалить? Это действие нельзя отменить.» (`EditDialog` does it, owner's choice 2026-10-04);
+  - `surface.option` and `surface.selected` are the old fills; what still has them (Character Wizard's choice cards) moves to the palette when redone.
+- **The dice table's result panel** is as wide as the sheet's content, its top level with the top bar's dice button, the cross that closes the table in its corner (owner's choice, 2026-10-04).
 
 ## Conditions — how the sheet shows them (owner's choices, 2026-10-03)
 
@@ -38,9 +43,6 @@ What can be pressed as an action and what shows a value must look different at a
   - **how far the value moved** — its colour, `changedValueColor`: `accent.dangerHpZero` when lower (exhaustion's −2), `accent.heal` when higher. Speed has only the colour; AC only the arrows (how attacks against the character are rolled).
 - **Concentration** is a card on the Spells screen in place of the class: lit in gold while a spell is held, the spell's name as much as fits, cut with a dot.
 - In Russian exhaustion is «Истощение» (the owner's word); the other names and languages are as the catalog and the 2024 books have them.
-  - dangerous action (confirm deletion): `accent.dangerHpZero`, text `text.primary`;
-  - delete icon (the trash in a pop-up): `accent.dangerHpZero` at 16% behind an `accent.dangerHpZero` icon;
-  - `surface.option` #1A171D is the old near-card fill of picker rows and toggle options; they move to the palette when redone (the selected state of a toggle is still to be chosen with the owner).
 
 ## Naming — Character Wizard
 

@@ -112,6 +112,8 @@ import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
 import com.dndcharacterhandler.presentation.components.MiniStatCard
 import com.dndcharacterhandler.presentation.components.ScreenBackground
 import com.dndcharacterhandler.presentation.components.ScreenTopActions
+import com.dndcharacterhandler.presentation.components.toggleContent
+import com.dndcharacterhandler.presentation.components.toggleFill
 import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.spells.SpellEditDialog
@@ -781,8 +783,7 @@ private fun DialogActionSection(
                     .fillMaxWidth()
                     .clickable(onClick = action.onClick),
                 shape = RoundedCornerShape(12.dp),
-                color = colors.surface.option,
-                border = BorderStroke(1.dp, colors.ornament.outer)
+                color = colors.surface.button
             ) {
                 Text(
                     text = action.label,
@@ -962,8 +963,7 @@ private fun ArmorClassModeOption(
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
-        color = colors.ornament.outer,
-        border = BorderStroke(1.dp, if (selected) colors.border.selected else colors.ornament.outer)
+        color = toggleFill(selected)
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
@@ -972,12 +972,12 @@ private fun ArmorClassModeOption(
             Text(
                 text = title,
                 style = MaterialTheme.typography.bodyLarge,
-                color = colors.text.primary
+                color = toggleContent(selected)
             )
             Text(
                 text = description,
                 style = MaterialTheme.typography.bodyMedium,
-                color = colors.text.muted
+                color = toggleContent(selected, colors.text.muted)
             )
         }
     }
@@ -989,20 +989,18 @@ private fun SpellcastingAbilityOption(
     selected: Boolean,
     onClick: () -> Unit
 ) {
-    val colors = LocalDesignTokens.current.colors
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
-        color = if (selected) colors.ornament.outer else Color.Transparent,
-        border = BorderStroke(1.dp, if (selected) colors.border.selected else colors.ornament.outer)
+        color = toggleFill(selected)
     ) {
         Text(
             text = title,
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
             style = MaterialTheme.typography.bodyLarge,
-            color = colors.text.primary
+            color = toggleContent(selected)
         )
     }
 }
@@ -2271,7 +2269,6 @@ private fun <T> SelectionDialog(
     onDismiss: () -> Unit,
     onSelect: (T) -> Unit
 ) {
-    val colors = LocalDesignTokens.current.colors
     EditDialog(
         title = title,
         onDismiss = onDismiss,
@@ -2285,14 +2282,13 @@ private fun <T> SelectionDialog(
                         .fillMaxWidth()
                         .clickable { onSelect(option) },
                     shape = RoundedCornerShape(10.dp),
-                    color = if (isSelected) colors.ornament.outer else Color.Transparent,
-                    border = BorderStroke(1.dp, if (isSelected) colors.border.selected else colors.ornament.outer)
+                    color = toggleFill(isSelected)
                 ) {
                     Text(
                         text = labelForOption(option),
                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = colors.text.primary
+                        color = toggleContent(isSelected)
                     )
                 }
             }

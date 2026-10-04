@@ -94,6 +94,8 @@ import com.dndcharacterhandler.domain.model.FeatureCatalogItem
 import com.dndcharacterhandler.domain.model.Skill
 import com.dndcharacterhandler.domain.model.SpellcastingAbility
 import com.dndcharacterhandler.domain.repository.FeatureCatalogRepository
+import com.dndcharacterhandler.presentation.components.toggleContent
+import com.dndcharacterhandler.presentation.components.toggleFill
 import com.dndcharacterhandler.presentation.features.FeatureCard
 import com.dndcharacterhandler.presentation.features.FeatureCatalogLookup
 import com.dndcharacterhandler.presentation.features.FeatureCatalogRow
@@ -1286,18 +1288,16 @@ private fun DarkvisionModeChip(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = LocalDesignTokens.current.colors
     Surface(
         modifier = modifier.clickable(onClick = onClick),
         shape = RoundedCornerShape(8.dp),
-        color = if (selected) colors.surface.selected else colors.surface.card.copy(alpha = 0.62f),
-        border = BorderStroke(1.dp, if (selected) colors.border.selected else colors.border.muted)
+        color = toggleFill(selected)
     ) {
         Text(
             text = label,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
             style = MaterialTheme.typography.bodyLarge,
-            color = colors.text.primary
+            color = toggleContent(selected)
         )
     }
 }

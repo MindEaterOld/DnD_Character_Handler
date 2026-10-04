@@ -38,7 +38,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -92,6 +91,7 @@ import com.dndcharacterhandler.data.localization.LocalizedStrings
 import com.dndcharacterhandler.presentation.components.OverlayCloseButton
 import com.dndcharacterhandler.presentation.components.SizeToggle
 import com.dndcharacterhandler.presentation.components.StepButton
+import com.dndcharacterhandler.presentation.components.ToggleChip
 import com.dndcharacterhandler.presentation.components.labelKey
 import com.dndcharacterhandler.presentation.dice.DiceTableOverlay
 import com.dndcharacterhandler.presentation.dice.DieIcon
@@ -722,15 +722,15 @@ private fun LazyListScope.abilityScoresPage(
     if (page.allowFeat) {
         item(key = "modes") {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChip(
+                ToggleChip(
+                    label = strings["levelup_asi_scores"],
                     selected = answer !is LevelUpAnswer.Feat,
-                    onClick = { onAnswer(LevelUpAnswer.AbilityScores(emptyMap())) },
-                    label = { Text(strings["levelup_asi_scores"]) }
+                    onClick = { onAnswer(LevelUpAnswer.AbilityScores(emptyMap())) }
                 )
-                FilterChip(
+                ToggleChip(
+                    label = strings["levelup_asi_feat"],
                     selected = answer is LevelUpAnswer.Feat,
-                    onClick = { if (answer !is LevelUpAnswer.Feat) onAnswer(LevelUpAnswer.Feat("")) },
-                    label = { Text(strings["levelup_asi_feat"]) }
+                    onClick = { if (answer !is LevelUpAnswer.Feat) onAnswer(LevelUpAnswer.Feat("")) }
                 )
             }
         }
@@ -1496,8 +1496,8 @@ private fun AbilityRow(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        color = if (added > 0) colors.surface.selected else colors.surface.card,
-        border = BorderStroke(1.dp, if (added > 0) colors.border.selected else colors.border.muted)
+        color = colors.surface.card,
+        border = BorderStroke(1.dp, colors.border.muted)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),

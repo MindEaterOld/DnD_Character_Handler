@@ -1,6 +1,5 @@
 package com.dndcharacterhandler.presentation.components
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -54,11 +53,9 @@ private fun SettingsLanguageOption(
     selected: Boolean,
     onClick: () -> Unit
 ) {
-    val colors = LocalDesignTokens.current.colors
     Surface(
         shape = RoundedCornerShape(12.dp),
-        color = colors.surface.option,
-        border = BorderStroke(1.dp, if (selected) colors.border.selected else colors.border.muted),
+        color = toggleFill(selected),
         onClick = onClick
     ) {
         Row(
@@ -67,12 +64,12 @@ private fun SettingsLanguageOption(
                 .padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            RadioButton(selected = selected, onClick = null)
+            RadioButton(selected = selected, onClick = null, colors = toggleRadioColors())
             Text(
                 text = label,
                 modifier = Modifier.padding(start = 12.dp),
                 style = MaterialTheme.typography.bodyLarge,
-                color = if (selected) colors.text.primary else colors.text.muted
+                color = toggleContent(selected)
             )
         }
     }

@@ -11,9 +11,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,7 +41,6 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
-import com.dndcharacterhandler.presentation.components.OverlayCloseButton
 import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
@@ -179,42 +183,63 @@ internal fun DiceTableOverlay(
                 }
         )
 
+        // As wide as the sheet's content, its top level with the top bar's dice button (owner's choice, 2026-10-04).
         DiceStatusPanel(
             state = state,
             result = result,
+            onClose = onClose,
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .systemBarsPadding()
-                .padding(start = 72.dp, end = 72.dp, top = 16.dp)
+                .padding(start = 24.dp, end = 24.dp, top = 4.dp)
+                .fillMaxWidth()
         )
-
-        OverlayCloseButton(onClick = onClose, modifier = Modifier.align(Alignment.TopEnd))
     }
 }
 
-/** The panel over the dice table that reads a throw: a card, half see-through, its lines centred. */
+/**
+ * The panel over the dice table that reads a throw: a card, half see-through, its lines centred;
+ * with [onClose], the cross that closes the table in its corner, as a pop-up has it.
+ */
 @Composable
-internal fun DiceResultPanel(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
+internal fun DiceResultPanel(modifier: Modifier = Modifier, onClose: (() -> Unit)? = null, content: @Composable ColumnScope.() -> Unit) {
     val colors = LocalDesignTokens.current.colors
-    Column(
+    Box(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
             .background(colors.surface.card.copy(alpha = 0.88f))
             .border(1.dp, colors.border.muted, RoundedCornerShape(16.dp))
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(6.dp),
-        content = content
-    )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                // Room for the cross on both sides, so the lines stay centred.
+                .padding(horizontal = if (onClose != null) 44.dp else 16.dp, vertical = 12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+            content = content
+        )
+        if (onClose != null) {
+            IconButton(onClick = onClose, modifier = Modifier.align(Alignment.TopEnd)) {
+                Icon(imageVector = Icons.Outlined.Close, contentDescription = text("common_close"), tint = colors.text.muted)
+            }
+        }
+    }
 }
 
 @Composable
-private fun DiceStatusPanel(state: DiceTableState, modifier: Modifier = Modifier, result: (@Composable (List<ThrownDie>) -> Unit)? = null) {
+private fun DiceStatusPanel(
+    state: DiceTableState,
+    onClose: () -> Unit,
+    modifier: Modifier = Modifier,
+    result: (@Composable (List<ThrownDie>) -> Unit)? = null
+) {
     val colors = LocalDesignTokens.current.colors
     val strings = LocalStrings.current
     val phase = state.phase
+    // Hidden only while the dice are in hand or in the air; Back closes the table then.
     if (phase == DicePhase.HOLDING || phase == DicePhase.ROLLING) return
-    DiceResultPanel(modifier = modifier) {
+    DiceResultPanel(modifier = modifier, onClose = onClose) {
         if (phase == DicePhase.SETTLED && result != null) {
             result(state.results)
         } else if (phase == DicePhase.SETTLED) {

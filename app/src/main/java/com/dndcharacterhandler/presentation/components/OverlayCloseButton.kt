@@ -1,7 +1,6 @@
 package com.dndcharacterhandler.presentation.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -32,15 +31,14 @@ fun OverlayCloseButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
             .padding(16.dp)
             .size(44.dp)
             .clip(CircleShape)
-            .background(colors.surface.option)
-            .border(1.dp, colors.border.default, CircleShape)
+            .background(colors.surface.button)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         Icon(
             imageVector = Icons.Outlined.Close,
             contentDescription = text("common_close"),
-            tint = colors.text.icon,
+            tint = colors.text.primary,
             modifier = Modifier.size(28.dp)
         )
     }

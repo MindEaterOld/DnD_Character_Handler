@@ -38,7 +38,6 @@ import androidx.compose.material.icons.outlined.Shuffle
 import androidx.compose.material.icons.outlined.Upload
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilledTonalIconButton
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -73,6 +72,9 @@ import com.dndcharacterhandler.domain.model.CustomDiceSkin
 import com.dndcharacterhandler.domain.model.DiceFontIds
 import com.dndcharacterhandler.domain.model.DicePattern
 import com.dndcharacterhandler.presentation.components.OverlayCloseButton
+import com.dndcharacterhandler.presentation.components.ToggleChip
+import com.dndcharacterhandler.presentation.components.toggleContent
+import com.dndcharacterhandler.presentation.components.toggleFill
 import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
@@ -228,7 +230,7 @@ internal fun DiceWorkshopOverlay(
                 horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally)
             ) {
                 PreviewDice.forEach { (kinds, label) ->
-                    FilterChip(selected = previewKind in kinds, onClick = { previewKind = kinds.last() }, label = { Text(label) })
+                    ToggleChip(label = label, selected = previewKind in kinds, onClick = { previewKind = kinds.last() })
                 }
             }
             Column(
@@ -298,7 +300,7 @@ internal fun DiceWorkshopOverlay(
 
                 WorkshopSection(text("dice_workshop_section_pattern")) {
                     val pattern = skin.pattern
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         listOf(
                             "dice_workshop_pattern_none" to DicePattern.None,
                             "dice_workshop_pattern_web" to ((pattern as? DicePattern.Web) ?: DicePattern.Web(skin.edgeColor)),
@@ -306,13 +308,13 @@ internal fun DiceWorkshopOverlay(
                             "dice_workshop_pattern_nebula" to ((pattern as? DicePattern.Nebula) ?: DicePattern.Nebula(skin.edgeColor, skin.numberColor, Random.nextInt())),
                             "dice_workshop_pattern_picture" to ((pattern as? DicePattern.Picture) ?: DicePattern.Picture())
                         ).forEach { (labelKey, option) ->
-                            FilterChip(
+                            ToggleChip(
+                                label = text(labelKey),
                                 selected = option::class == pattern::class,
                                 onClick = {
                                     if (option is DicePattern.Picture && draftPicture == null && look.picture == null) pictureLauncher.launch(arrayOf("image/*"))
                                     skin = skin.copy(pattern = option)
-                                },
-                                label = { Text(text(labelKey)) }
+                                }
                             )
                         }
                     }
@@ -611,8 +613,7 @@ private fun FontSample(font: String, selected: Boolean, onClick: () -> Unit) {
     Column(
         modifier = Modifier
             .clip(shape)
-            .background(if (selected) colors.surface.selected else colors.ornament.outer)
-            .border(1.dp, if (selected) colors.border.selected else colors.border.muted, shape)
+            .background(toggleFill(selected))
             .clickable(onClick = onClick)
             .padding(horizontal = 10.dp, vertical = 6.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -621,14 +622,14 @@ private fun FontSample(font: String, selected: Boolean, onClick: () -> Unit) {
             text = "20",
             modifier = Modifier.width(64.dp),
             style = style.copy(fontFamily = diceFont?.family ?: style.fontFamily, fontWeight = diceFont?.weight ?: style.fontWeight),
-            color = colors.text.primary,
+            color = toggleContent(selected),
             textAlign = TextAlign.Center,
             maxLines = 1
         )
         Text(
             text = DiceFonts.label(font) ?: text("dice_font_app"),
             style = MaterialTheme.typography.labelMedium,
-            color = colors.text.muted,
+            color = toggleContent(selected, colors.text.muted),
             maxLines = 1
         )
     }

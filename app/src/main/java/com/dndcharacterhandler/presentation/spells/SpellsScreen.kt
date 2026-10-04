@@ -108,6 +108,8 @@ import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
 import com.dndcharacterhandler.presentation.components.ScreenBackground
 import com.dndcharacterhandler.presentation.components.ScreenTopActions
 import com.dndcharacterhandler.presentation.components.SelectableDot
+import com.dndcharacterhandler.presentation.components.toggleContent
+import com.dndcharacterhandler.presentation.components.toggleFill
 import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.DnDTheme
@@ -1876,7 +1878,6 @@ private fun <T> SelectionDialog(
     onDismiss: () -> Unit,
     onSelect: (T) -> Unit
 ) {
-    val colors = LocalDesignTokens.current.colors
     // A picker: a tap on an option does the work; the list scrolls by itself.
     EditDialog(
         title = title,
@@ -1891,14 +1892,13 @@ private fun <T> SelectionDialog(
                         .fillMaxWidth()
                         .clickable { onSelect(option) },
                     shape = RoundedCornerShape(10.dp),
-                    color = if (isSelected) colors.ornament.outer else Color.Transparent,
-                    border = BorderStroke(1.dp, if (isSelected) colors.border.selected else colors.ornament.outer)
+                    color = toggleFill(isSelected)
                 ) {
                     Text(
                         text = labelForOption(option),
                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = colors.text.primary
+                        color = toggleContent(isSelected)
                     )
                 }
             }

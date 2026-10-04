@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.dndcharacterhandler.domain.model.CreatureSize
 import com.dndcharacterhandler.presentation.localization.text
-import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 
 /**
  * The character's size: a gnome, a human and a giant, each drawn at its size, in a stat card's
@@ -40,7 +39,6 @@ fun SizeToggle(
     modifier: Modifier = Modifier,
     sizes: List<CreatureSize> = CreatureSize.entries
 ) {
-    val colors = LocalDesignTokens.current.colors
     BorderLabelCard(label = text("size_label"), modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
@@ -54,7 +52,7 @@ fun SizeToggle(
                     modifier = Modifier
                         .weight(1f)
                         .clip(RoundedCornerShape(8.dp))
-                        .background(if (isSelected) colors.surface.selected else Color.Transparent)
+                        .background(toggleFill(isSelected))
                         .clickable { onSelect(size) }
                         .padding(horizontal = 4.dp, vertical = 8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -65,14 +63,14 @@ fun SizeToggle(
                         Icon(
                             imageVector = size.figure,
                             contentDescription = null,
-                            tint = if (isSelected) colors.text.primary else colors.text.label,
+                            tint = toggleContent(isSelected),
                             modifier = Modifier.size(size.figureSize)
                         )
                     }
                     Text(
                         text = text(size.labelKey),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = if (isSelected) colors.text.primary else colors.text.muted,
+                        color = toggleContent(isSelected),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
