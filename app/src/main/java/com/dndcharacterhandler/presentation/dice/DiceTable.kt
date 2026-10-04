@@ -9,6 +9,7 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -191,12 +192,10 @@ internal fun DiceTableOverlay(
     }
 }
 
+/** The panel over the dice table that reads a throw: a card, half see-through, its lines centred. */
 @Composable
-private fun DiceStatusPanel(state: DiceTableState, modifier: Modifier = Modifier, result: (@Composable (List<ThrownDie>) -> Unit)? = null) {
+internal fun DiceResultPanel(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
     val colors = LocalDesignTokens.current.colors
-    val strings = LocalStrings.current
-    val phase = state.phase
-    if (phase == DicePhase.HOLDING || phase == DicePhase.ROLLING) return
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
@@ -204,8 +203,18 @@ private fun DiceStatusPanel(state: DiceTableState, modifier: Modifier = Modifier
             .border(1.dp, colors.border.muted, RoundedCornerShape(16.dp))
             .padding(horizontal = 16.dp, vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(6.dp)
-    ) {
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+        content = content
+    )
+}
+
+@Composable
+private fun DiceStatusPanel(state: DiceTableState, modifier: Modifier = Modifier, result: (@Composable (List<ThrownDie>) -> Unit)? = null) {
+    val colors = LocalDesignTokens.current.colors
+    val strings = LocalStrings.current
+    val phase = state.phase
+    if (phase == DicePhase.HOLDING || phase == DicePhase.ROLLING) return
+    DiceResultPanel(modifier = modifier) {
         if (phase == DicePhase.SETTLED && result != null) {
             result(state.results)
         } else if (phase == DicePhase.SETTLED) {

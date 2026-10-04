@@ -104,3 +104,6 @@ EditDialog(title, onDismiss, onConfirm?, onDelete?)
 `AttributesScreenPreview`, `BiographyScreenPreview`, `CombatScreenPreview`, `FeaturesScreenPreview`, `InventoryScreenPreview`, `InventoryContainersPreview`, `NotesScreenPreview`, `SpellsScreenPreview`, `OverviewScreenPreview`, `OverviewDyingPreview`, `OverviewDeadPreview`, `CharacterManagerDrawerPreview`, `CharacterManagerDrawerEmptyPreview`, `DiceSkinsPreview`, `SplashScreenPreview`, `SpellSlotsConfigDialogPreview`.
 
 Строки в превью — рукописная карта `LocalizedStrings(language, mapOf(...))`: новый ключ экрана добавлять и туда.
+
+Превью частей, которые на устройстве зависят от удачи или не рисуются в превью экрана:
+- `RollResultsPreview` в `combat/RollDialog.kt` — панели итога над 3D-столом (`DiceResultPanel`): натуральная 20 с кнопкой крита, натуральная 1, помеха, урон заклинания со СЛ, второй бросок крита. Строки берёт из `localization.json` (`LocalizationRepository(LocalContext.current)`), русские.

@@ -3,6 +3,7 @@ package com.dndcharacterhandler.presentation.combat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,6 +24,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,9 +34,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.dndcharacterhandler.data.localization.LocalizationRepository
+import com.dndcharacterhandler.domain.model.AppLanguage
 import com.dndcharacterhandler.domain.rules.AttackOutcome
 import com.dndcharacterhandler.domain.rules.AttackRoll
 import com.dndcharacterhandler.domain.rules.DiceFormula
@@ -45,8 +51,10 @@ import com.dndcharacterhandler.domain.rules.ThrownValues
 import com.dndcharacterhandler.domain.rules.read
 import com.dndcharacterhandler.presentation.components.EditDialog
 import com.dndcharacterhandler.presentation.components.RollMarker
+import com.dndcharacterhandler.presentation.components.ScreenBackground
 import com.dndcharacterhandler.presentation.components.changedValueColor
 import com.dndcharacterhandler.presentation.components.nameKey
+import com.dndcharacterhandler.presentation.dice.DiceResultPanel
 import com.dndcharacterhandler.presentation.dice.DiceRollRequest
 import com.dndcharacterhandler.presentation.dice.LocalDiceRoller
 import com.dndcharacterhandler.presentation.dice.ThrownDie
@@ -54,6 +62,7 @@ import com.dndcharacterhandler.presentation.dice.dieTypeOf
 import com.dndcharacterhandler.presentation.dice.sides
 import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.localization.text
+import com.dndcharacterhandler.presentation.theme.DnDTheme
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 
 /** What the roll pop-up needs to know of one attack, a weapon's or a spell's. */
@@ -390,3 +399,40 @@ internal fun Map<Int, Int>.toDieSelection() = mapNotNull { (sides, count) -> die
 
 /** The thrown dice by their sides, in the table's order. */
 internal fun List<ThrownDie>.toThrownValues(): ThrownValues = groupBy { it.type.sides }.mapValues { (_, dice) -> dice.map { it.value() } }
+
+/**
+ * The dice table's readings, as the panel over the table shows them: a natural 20 (gold, with the
+ * critical's extra dice), a natural 1, a throw with disadvantage, a save spell's damage and the
+ * critical's second throw. On the device a 20 is luck; here it is always there to look at.
+ */
+@Preview(name = "Roll results", widthDp = 412, heightDp = 980)
+@Composable
+private fun RollResultsPreview() {
+    val strings = LocalizationRepository(LocalContext.current).getStrings(AppLanguage.RUSSIAN)
+    val greataxe = AttackRoll(bonus = 5, mode = RollMode.NORMAL, damage = DiceFormula.of(1, 12, 3))
+    val poisoned = AttackRoll(bonus = 4, mode = RollMode.DISADVANTAGE, damage = DiceFormula.of(1, 8, 2))
+    CompositionLocalProvider(LocalStrings provides strings) {
+        DnDTheme {
+            ScreenBackground {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    DiceResultPanel(Modifier.fillMaxWidth()) {
+                        AttackResult("Секира", null, greataxe, greataxe.read(mapOf(20 to listOf(20), 12 to listOf(9))), "рубящий", healing = false)
+                    }
+                    DiceResultPanel(Modifier.fillMaxWidth()) {
+                        AttackResult("Секира", null, greataxe, greataxe.read(mapOf(20 to listOf(1), 12 to listOf(7))), "рубящий", healing = false)
+                    }
+                    DiceResultPanel(Modifier.fillMaxWidth()) {
+                        AttackResult("Длинный меч", null, poisoned, poisoned.read(mapOf(20 to listOf(15, 7), 8 to listOf(5))), "рубящий", healing = false)
+                    }
+                    DiceResultPanel(Modifier.fillMaxWidth()) {
+                        AmountResult("Огненный шар", DiceFormula.of(8, 6).read(mapOf(6 to listOf(3, 5, 1, 6, 4, 2, 6, 3))), "огнём", healing = false, save = "ЛОВ СЛ 13")
+                    }
+                    DiceResultPanel(Modifier.fillMaxWidth()) {
+                        CriticalResult("Секира", firstDamage = 12, extra = DiceFormula.of(1, 12).read(mapOf(12 to listOf(8))), damageType = "рубящий")
+                    }
+                }
+            }
+        }
+    }
+}
+
