@@ -446,6 +446,8 @@ fun AttributesContent(
     var masteryDraft by remember { mutableStateOf(emptySet<String>()) }
     var editingAbility by remember { mutableStateOf<AbilityScore?>(null) }
     var editingSkill by remember { mutableStateOf<SkillRow?>(null) }
+    var rolling by remember { mutableStateOf<AbilityRoll?>(null) }
+    var rollingSkill by remember { mutableStateOf<SkillRow?>(null) }
     var abilityDraft by remember { mutableStateOf("") }
     var saveProficientDraft by remember { mutableStateOf(false) }
     var skillProficientDraft by remember { mutableStateOf(false) }
@@ -526,13 +528,9 @@ fun AttributesContent(
                                     modifier = Modifier.weight(1f),
                                     checkEffects = checkEffects[score.type],
                                     saveEffects = saveEffects[score.type],
-                                    onClick = {
-                                        if (characterBundle != null) {
-                                            editingAbility = score
-                                            abilityDraft = score.value.toString()
-                                            saveProficientDraft = score.saveProficient
-                                        }
-                                    }
+                                    // A tap rolls; the pop-up's "Edit" opens the editor.
+                                    onClick = { if (characterBundle != null) rolling = AbilityRoll(score, save = false) },
+                                    onSaveClick = { if (characterBundle != null) rolling = AbilityRoll(score, save = true) }
                                 )
                             }
                         }
@@ -545,14 +543,7 @@ fun AttributesContent(
                 SkillGroups(
                     skills = skillRows,
                     checkEffects = checkEffects,
-                    onSkillClick = { skill ->
-                        if (characterBundle != null) {
-                            editingSkill = skill
-                            skillProficientDraft = skill.proficient
-                            skillExpertiseDraft = skill.expertise
-                            skillJackDraft = skill.jackOfAllTrades
-                        }
-                    }
+                    onSkillClick = { skill -> if (characterBundle != null) rollingSkill = skill }
                 )
             }
 
@@ -781,6 +772,52 @@ fun AttributesContent(
                 }
             )
         }
+    }
+
+    rolling?.let { roll ->
+        val score = roll.score
+        val effects = if (roll.save) saveEffects[score.type] else checkEffects[score.type]
+        val base = if (roll.save) score.saveModifier(proficiencyBonus) else score.modifier
+        val abilityName = LocalStrings.current[score.displayNameKey]
+        com.dndcharacterhandler.presentation.combat.RollDialog(
+            input = com.dndcharacterhandler.presentation.combat.RollInput(
+                title = abilityName,
+                attackBonus = base + (effects?.modifier ?: 0),
+                effects = effects,
+                damage = null,
+                damageType = "",
+                rollLabel = LocalStrings.current[if (roll.save) "attributes_roll_save" else "attributes_roll_check"]
+            ),
+            onEdit = {
+                rolling = null
+                editingAbility = score
+                abilityDraft = score.value.toString()
+                saveProficientDraft = score.saveProficient
+            },
+            onDismiss = { rolling = null }
+        )
+    }
+
+    rollingSkill?.let { skill ->
+        val effects = checkEffects[skill.abilityType]
+        com.dndcharacterhandler.presentation.combat.RollDialog(
+            input = com.dndcharacterhandler.presentation.combat.RollInput(
+                title = LocalStrings.current[skill.nameKey],
+                attackBonus = skill.modifier + (effects?.modifier ?: 0),
+                effects = effects,
+                damage = null,
+                damageType = "",
+                rollLabel = LocalStrings.current["attributes_roll_check"]
+            ),
+            onEdit = {
+                rollingSkill = null
+                editingSkill = skill
+                skillProficientDraft = skill.proficient
+                skillExpertiseDraft = skill.expertise
+                skillJackDraft = skill.jackOfAllTrades
+            },
+            onDismiss = { rollingSkill = null }
+        )
     }
 
     val currentEditingAbility = editingAbility
@@ -1216,7 +1253,9 @@ private fun AbilityScoreCard(
     /** The conditions on this ability's checks and saves: the values as they are now, with arrows. */
     checkEffects: RollEffects? = null,
     saveEffects: RollEffects? = null,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
+    /** A tap on the save line: its own roll. */
+    onSaveClick: () -> Unit = onClick
 ) {
     val tokens = LocalDesignTokens.current.typography
     val colors = LocalDesignTokens.current.colors
@@ -1256,6 +1295,7 @@ private fun AbilityScoreCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .clickable(onClick = onSaveClick)
                     .padding(top = 2.dp),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
@@ -1730,3 +1770,6 @@ internal fun previewFallbackCharacter(): Character =
         createdAt = 0L,
         updatedAt = 0L
     )
+
+/** A roll asked from an ability card: its check, or its save. */
+private data class AbilityRoll(val score: AbilityScore, val save: Boolean)

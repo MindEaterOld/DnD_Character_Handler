@@ -3795,6 +3795,27 @@
     "fr": "Échec automatique",
     "es": "Fallo automático"
   },
+  "attributes_roll_check": {
+    "en": "Check",
+    "ru": "Проверка",
+    "de": "Probe",
+    "fr": "Test",
+    "es": "Prueba"
+  },
+  "attributes_roll_save": {
+    "en": "Saving throw",
+    "ru": "Спасбросок",
+    "de": "Rettungswurf",
+    "fr": "Sauvegarde",
+    "es": "Salvación"
+  },
+  "combat_roll_auto_fail": {
+    "en": "Fails outright: %1$s",
+    "ru": "Автоматический провал: %1$s",
+    "de": "Misslingt automatisch: %1$s",
+    "fr": "Échec automatique : %1$s",
+    "es": "Fallo automático: %1$s"
+  },
   "combat_roll_attack": {
     "en": "Attack",
     "ru": "Атака",
@@ -3850,6 +3871,13 @@
     "de": "Heilung würfeln",
     "fr": "Lancer les soins",
     "es": "Tirar curación"
+  },
+  "combat_roll_extra_bonus": {
+    "en": "Roll bonus",
+    "ru": "Бонус к броску",
+    "de": "Wurfbonus",
+    "fr": "Bonus au jet",
+    "es": "Bonificador a la tirada"
   },
   "combat_roll_attack_bonus": {
     "en": "Attack bonus",

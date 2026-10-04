@@ -762,6 +762,7 @@ private fun OverviewContent(
     var isPortraitViewerOpen by remember { mutableStateOf(false) }
     var isPortraitFramingOpen by remember { mutableStateOf(false) }
     var isConditionsDialogOpen by remember { mutableStateOf(false) }
+    var isInitiativeRollOpen by remember { mutableStateOf(false) }
     var isEndConcentrationOpen by remember { mutableStateOf(false) }
     var isExperienceDialogOpen by remember { mutableStateOf(false) }
     var experienceEditMode by remember { mutableStateOf(OverviewExperienceEditMode.ADD) }
@@ -1073,6 +1074,11 @@ private fun OverviewContent(
                             valueMarker = if (stat.worse || stat.better) ({ RollMarker(worse = stat.worse, better = stat.better, size = 18.dp) }) else null,
                             valueColor = changedValueColor(stat.delta),
                             onClick = {
+                                // Initiative rolls; its pop-up's "Edit" opens the bonus.
+                                if (stat.field == OverviewMiniStatField.INITIATIVE && character != null) {
+                                    isInitiativeRollOpen = true
+                                    return@MiniStatCard
+                                }
                                 activeMiniStatField = stat.field
                                 miniStatDraft = when (stat.field) {
                                     OverviewMiniStatField.ARMOR_CLASS -> (character?.armorClass ?: 10).toString()
@@ -1673,6 +1679,26 @@ private fun OverviewContent(
                 isPortraitFramingOpen = true
             },
             onDismiss = { isPortraitMenuOpen = false }
+        )
+    }
+
+    if (isInitiativeRollOpen && character != null) {
+        val effects = rollEffects(D20Test.Initiative, activeConditions(character.conditions, character.currentHp), character.exhaustion)
+        com.dndcharacterhandler.presentation.combat.RollDialog(
+            input = com.dndcharacterhandler.presentation.combat.RollInput(
+                title = text("overview_initiative"),
+                attackBonus = calculateInitiative(character.dexterity, character.initiativeBonus) + effects.modifier,
+                effects = effects,
+                damage = null,
+                damageType = "",
+                rollLabel = text("overview_initiative")
+            ),
+            onEdit = {
+                isInitiativeRollOpen = false
+                activeMiniStatField = OverviewMiniStatField.INITIATIVE
+                miniStatDraft = character.initiativeBonus.toString()
+            },
+            onDismiss = { isInitiativeRollOpen = false }
         )
     }
 

@@ -74,7 +74,11 @@ internal data class RollInput(
     val alternateDamageType: String? = null,
     val healing: Boolean = false,
     /** A save spell's DC for the target ("ЛОВ СЛ 13"). */
-    val save: String? = null
+    val save: String? = null,
+    /** What the d20 is rolled for: "Атака", "Проверка Силы", "Спасбросок Ловкости", "Инициатива". */
+    val rollLabel: String? = null,
+    /** The edit link's own words, when "Edit" isn't what it opens. */
+    val editLabel: String? = null
 )
 
 /**
@@ -101,7 +105,7 @@ internal fun RollDialog(input: RollInput, onEdit: () -> Unit, onDismiss: () -> U
     EditDialog(title = input.title, onDismiss = onDismiss) {
         input.attackBonus?.let { bonus ->
             RollLine(
-                label = text("combat_roll_attack"),
+                label = input.rollLabel ?: text("combat_roll_attack"),
                 value = DiceFormula.of(1, 20, bonus).label(),
                 valueColor = changedValueColor(input.effects?.modifier ?: 0),
                 marker = { RollMarker(input.effects, size = 18.dp) }
@@ -130,11 +134,11 @@ internal fun RollDialog(input: RollInput, onEdit: () -> Unit, onDismiss: () -> U
                 )
             }
         }
-        if (input.attackBonus != null) {
+        if (input.attackBonus != null && input.effects?.autoFail.isNullOrEmpty()) {
             BonusField(
                 value = attackExtraText,
                 onValueChange = { attackExtraText = it },
-                label = text("combat_roll_attack_bonus"),
+                label = text(if (input.rollLabel == null) "combat_roll_attack_bonus" else "combat_roll_extra_bonus"),
                 isError = attackExtra == null
             )
         }
@@ -148,7 +152,15 @@ internal fun RollDialog(input: RollInput, onEdit: () -> Unit, onDismiss: () -> U
         }
 
         Spacer(modifier = Modifier.height(4.dp))
-        if (input.attackBonus != null && valid) {
+        val fails = input.effects?.autoFail.orEmpty()
+        if (input.attackBonus != null && fails.isNotEmpty()) {
+            // No roll at all: it fails outright.
+            Text(
+                text = strings.format("combat_roll_auto_fail", fails.joinToString(", ") { strings[it.nameKey] }),
+                style = MaterialTheme.typography.titleMedium,
+                color = colors.accent.dangerHpZero
+            )
+        } else if (input.attackBonus != null && valid) {
             val roll = { mode: RollMode ->
                 val attackRoll = AttackRoll(
                     bonus = input.attackBonus,
@@ -159,7 +171,7 @@ internal fun RollDialog(input: RollInput, onEdit: () -> Unit, onDismiss: () -> U
                 rollDice(
                     DiceRollRequest(
                         selection = attackRoll.selection().toDieSelection(),
-                        result = { dice -> AttackResult(input.title, attackRoll, attackRoll.read(dice.toThrownValues()), damageType, input.healing) }
+                        result = { dice -> AttackResult(input.title, input.rollLabel, attackRoll, attackRoll.read(dice.toThrownValues()), damageType, input.healing) }
                     )
                 )
                 onDismiss()
@@ -185,7 +197,7 @@ internal fun RollDialog(input: RollInput, onEdit: () -> Unit, onDismiss: () -> U
                 onDismiss()
             }
         }
-        TextButton(onClick = onEdit) { Text(text("common_edit")) }
+        TextButton(onClick = onEdit) { Text(input.editLabel ?: text("common_edit")) }
     }
 }
 
@@ -278,15 +290,16 @@ private fun RollPart.breakdown(): String {
 
 /** An attack read off the table: the hit total (gold on a critical, red on a natural 1) and the damage. */
 @Composable
-private fun AttackResult(title: String, roll: AttackRoll, outcome: AttackOutcome, damageType: String, healing: Boolean) {
+private fun AttackResult(title: String, rollLabel: String?, roll: AttackRoll, outcome: AttackOutcome, damageType: String, healing: Boolean) {
     val colors = LocalDesignTokens.current.colors
     val strings = LocalStrings.current
     val rollDice = LocalDiceRoller.current
     Text(text = title, style = MaterialTheme.typography.titleMedium, color = colors.text.label, textAlign = TextAlign.Center)
     Text(
-        text = strings.format("combat_roll_attack_total", outcome.attack.total),
+        text = if (rollLabel != null) "$rollLabel ${outcome.attack.total}" else strings.format("combat_roll_attack_total", outcome.attack.total),
         style = MaterialTheme.typography.headlineMedium,
         color = when {
+            rollLabel != null -> colors.text.primary
             outcome.critical -> colors.accent.inspiration
             outcome.fumble -> colors.accent.dangerHpZero
             else -> colors.text.primary
@@ -302,9 +315,12 @@ private fun AttackResult(title: String, roll: AttackRoll, outcome: AttackOutcome
         )
     }
     Text(text = outcome.attack.breakdown(), style = MaterialTheme.typography.bodyLarge, color = colors.text.muted, textAlign = TextAlign.Center)
-    when {
-        outcome.critical -> Text(text("combat_roll_critical"), style = MaterialTheme.typography.titleMedium, color = colors.accent.inspiration, textAlign = TextAlign.Center)
-        outcome.fumble -> Text(text("combat_roll_fumble"), style = MaterialTheme.typography.titleMedium, color = colors.accent.dangerHpZero, textAlign = TextAlign.Center)
+    // Only an attack hits or misses on a natural 20 or 1; a check or a save is just its total.
+    if (rollLabel == null) {
+        when {
+            outcome.critical -> Text(text("combat_roll_critical"), style = MaterialTheme.typography.titleMedium, color = colors.accent.inspiration, textAlign = TextAlign.Center)
+            outcome.fumble -> Text(text("combat_roll_fumble"), style = MaterialTheme.typography.titleMedium, color = colors.accent.dangerHpZero, textAlign = TextAlign.Center)
+        }
     }
     if (!roll.damage.isEmpty) {
         Text(
