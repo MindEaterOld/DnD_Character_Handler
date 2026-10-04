@@ -2,6 +2,7 @@ package com.dndcharacterhandler.presentation.attributes
 
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.outlined.GppBad
 import androidx.compose.material.icons.outlined.GppGood
 import androidx.compose.material.icons.outlined.Security
@@ -32,10 +33,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -122,12 +121,8 @@ import com.dndcharacterhandler.domain.repository.CharacterRepository
 import com.dndcharacterhandler.domain.usecase.GetCharacterBundleUseCase
 import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
-import com.dndcharacterhandler.presentation.components.CharacterScreenHeader
 import com.dndcharacterhandler.presentation.components.EditDialog
-import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
 import com.dndcharacterhandler.presentation.components.MiniStatCard
-import com.dndcharacterhandler.presentation.components.ScreenBackground
-import com.dndcharacterhandler.presentation.components.ScreenTopActions
 import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
@@ -361,40 +356,55 @@ private fun AbilityType.toSpellcastingAbility(): SpellcastingAbility =
         AbilityType.CHARISMA -> SpellcastingAbility.CHARISMA
     }
 
+/**
+ * The ability scores, skills, proficiencies and defenses as a section of another screen's list: the
+ * overview's, below its own cards (owner's choice, 2026-10-04: the stats screen merged into the overview).
+ * [content] lays the list out and puts the section's items where they go; the pop-ups they open are the
+ * section's own. Until the character loads there are no items.
+ */
 @Composable
-fun AttributesScreen(
+fun AttributesSection(
     viewModel: AttributesViewModel,
-    onOpenDrawer: () -> Unit,
-    onOpenDice: () -> Unit
+    content: @Composable (items: LazyListScope.() -> Unit) -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val darkvisionCatalog by viewModel.darkvisionCatalog.collectAsStateWithLifecycle()
     val characterCatalog by viewModel.characterCatalog.collectAsStateWithLifecycle()
-    AttributesContent(
-        characterBundle = state.character,
-        darkvisionCatalogItems = darkvisionCatalog,
-        characterCatalog = characterCatalog,
-        onUpdatePassivePerceptionBonus = viewModel::updatePassivePerceptionBonus,
-        onUpdateAbilityScore = viewModel::updateAbilityScore,
-        onUpdateSkillTraining = viewModel::updateSkillTraining,
-        onUpdateArmorProficiencies = viewModel::updateArmorProficiencies,
-        onUpdateWeaponProficiencies = viewModel::updateWeaponProficiencies,
-        onUpdateToolProficiencies = viewModel::updateToolProficiencies,
-        onUpdateLanguageProficiencies = viewModel::updateLanguageProficiencies,
-        onUpdateWeaponMasteries = viewModel::updateWeaponMasteries,
-        onUpdateDefenses = viewModel::updateDefenses,
-        onUpdateDarkvisionMode = viewModel::updateDarkvisionMode,
-        onUpdateDarkvisionManualFeet = viewModel::updateDarkvisionManualFeet,
-        onUpsertFeature = viewModel::upsertFeature,
-        onDeleteFeature = viewModel::deleteFeature,
-        onOpenDrawer = onOpenDrawer,
-        onOpenDice = onOpenDice
-    )
+    val bundle = state.character
+    val items = if (bundle == null) {
+        NoItems
+    } else {
+        attributesSectionItems(
+            characterBundle = bundle,
+            darkvisionCatalogItems = darkvisionCatalog,
+            characterCatalog = characterCatalog,
+            onUpdatePassivePerceptionBonus = viewModel::updatePassivePerceptionBonus,
+            onUpdateAbilityScore = viewModel::updateAbilityScore,
+            onUpdateSkillTraining = viewModel::updateSkillTraining,
+            onUpdateArmorProficiencies = viewModel::updateArmorProficiencies,
+            onUpdateWeaponProficiencies = viewModel::updateWeaponProficiencies,
+            onUpdateToolProficiencies = viewModel::updateToolProficiencies,
+            onUpdateLanguageProficiencies = viewModel::updateLanguageProficiencies,
+            onUpdateWeaponMasteries = viewModel::updateWeaponMasteries,
+            onUpdateDefenses = viewModel::updateDefenses,
+            onUpdateDarkvisionMode = viewModel::updateDarkvisionMode,
+            onUpdateDarkvisionManualFeet = viewModel::updateDarkvisionManualFeet,
+            onUpsertFeature = viewModel::upsertFeature,
+            onDeleteFeature = viewModel::deleteFeature
+        )
+    }
+    content(items)
 }
 
+private val NoItems: LazyListScope.() -> Unit = {}
+
+/**
+ * The section's list items for [characterBundle]: the proficiency, passive perception and darkvision cards,
+ * then the ability scores, skills, proficiencies and defenses. The pop-ups they open show where this is called.
+ */
 @Composable
-fun AttributesContent(
-    characterBundle: CharacterBundle?,
+internal fun attributesSectionItems(
+    characterBundle: CharacterBundle,
     darkvisionCatalogItems: List<FeatureCatalogItem> = emptyList(),
     /** Weapons' mastery properties; without it the masteries show by weapon only. */
     characterCatalog: CharacterCatalog? = null,
@@ -410,33 +420,8 @@ fun AttributesContent(
     onUpdateDarkvisionMode: (CharacterBundle, DarkvisionMode) -> Unit = { _, _ -> },
     onUpdateDarkvisionManualFeet: (CharacterBundle, Int) -> Unit = { _, _ -> },
     onUpsertFeature: (CharacterBundle, Feature) -> Unit = { _, _ -> },
-    onDeleteFeature: (CharacterBundle, Feature) -> Unit = { _, _ -> },
-    onOpenDrawer: () -> Unit = {},
-    onOpenDice: () -> Unit = {}
-) {
-    if (characterBundle == null) {
-        // Same loading state as the other screens (this used to render the preview character).
-        ScreenBackground {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(start = 24.dp, end = 24.dp, top = 4.dp)
-            ) {
-                ScreenTopActions(
-                    onOpenDrawer = onOpenDrawer,
-                    onOpenDice = onOpenDice,
-                    modifier = Modifier.align(Alignment.TopCenter)
-                )
-                Text(
-                    text = text("placeholder_loading_character"),
-                    modifier = Modifier.align(Alignment.Center),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = LocalDesignTokens.current.colors.text.muted
-                )
-            }
-        }
-        return
-    }
+    onDeleteFeature: (CharacterBundle, Feature) -> Unit = { _, _ -> }
+): LazyListScope.() -> Unit {
     val character = characterBundle.character
     val strings = LocalStrings.current
     val abilityScores = remember(character) { buildAbilityScores(character) }
@@ -505,195 +490,181 @@ fun AttributesContent(
         mutableStateOf(character.darkvisionManualFeet.takeIf { it > 0 }?.toString().orEmpty())
     }
 
-    ScreenBackground {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 4.dp, bottom = LocalFloatingButtonsInset.current),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            item {
-                CharacterScreenHeader(
-                    character = character,
-                    onOpenDrawer = onOpenDrawer,
-                    onOpenDice = onOpenDice
+    val items: LazyListScope.() -> Unit = {
+        item {
+            StatCardRow {
+                MiniStatCard(
+                    modifier = Modifier.weight(1f),
+                    label = text("stat_card_proficiency"),
+                    value = signed(proficiencyBonus),
+                    icon = { MiniStatCardIcon(Icons.Outlined.AutoAwesome) }
+                )
+                MiniStatCard(
+                    modifier = Modifier.weight(1f),
+                    label = text("stat_card_passive_perception"),
+                    value = passivePerception.toString(),
+                    icon = { MiniStatCardIcon(Icons.Outlined.Visibility) },
+                    onClick = { if (characterBundle != null) isPassiveDialogOpen = true }
+                )
+                MiniStatCard(
+                    modifier = Modifier.weight(1f),
+                    label = text("stat_card_darkvision"),
+                    value = darkvisionValue,
+                    icon = { MiniStatCardIcon(Icons.Outlined.DarkMode) },
+                    onClick = { if (characterBundle != null) isDarkvisionDialogOpen = true }
                 )
             }
+        }
 
-            item {
-                StatCardRow {
-                    MiniStatCard(
-                        modifier = Modifier.weight(1f),
-                        label = text("stat_card_proficiency"),
-                        value = signed(proficiencyBonus),
-                        icon = { MiniStatCardIcon(Icons.Outlined.AutoAwesome) }
-                    )
-                    MiniStatCard(
-                        modifier = Modifier.weight(1f),
-                        label = text("stat_card_passive_perception"),
-                        value = passivePerception.toString(),
-                        icon = { MiniStatCardIcon(Icons.Outlined.Visibility) },
-                        onClick = { if (characterBundle != null) isPassiveDialogOpen = true }
-                    )
-                    MiniStatCard(
-                        modifier = Modifier.weight(1f),
-                        label = text("stat_card_darkvision"),
-                        value = darkvisionValue,
-                        icon = { MiniStatCardIcon(Icons.Outlined.DarkMode) },
-                        onClick = { if (characterBundle != null) isDarkvisionDialogOpen = true }
-                    )
-                }
-            }
-
-            item {
-                AttributesSectionTitle(title = text("attributes_ability_scores"))
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    abilityScores.chunked(3).forEach { rowScores ->
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            rowScores.forEach { score ->
-                                AbilityScoreCard(
-                                    score = score,
-                                    proficiencyBonus = proficiencyBonus,
-                                    modifier = Modifier.weight(1f),
-                                    checkEffects = checkEffects[score.type],
-                                    saveEffects = saveEffects[score.type],
-                                    // A tap rolls; the pop-up's "Edit" opens the editor.
-                                    onClick = { if (characterBundle != null) rolling = AbilityRoll(score, save = false) },
-                                    onSaveClick = { if (characterBundle != null) rolling = AbilityRoll(score, save = true) }
-                                )
-                            }
+        item {
+            AttributesSectionTitle(title = text("attributes_ability_scores"))
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                abilityScores.chunked(3).forEach { rowScores ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        rowScores.forEach { score ->
+                            AbilityScoreCard(
+                                score = score,
+                                proficiencyBonus = proficiencyBonus,
+                                modifier = Modifier.weight(1f),
+                                checkEffects = checkEffects[score.type],
+                                saveEffects = saveEffects[score.type],
+                                // A tap rolls; the pop-up's "Edit" opens the editor.
+                                onClick = { if (characterBundle != null) rolling = AbilityRoll(score, save = false) },
+                                onSaveClick = { if (characterBundle != null) rolling = AbilityRoll(score, save = true) }
+                            )
                         }
                     }
                 }
             }
+        }
 
-            item {
-                AttributesSectionTitle(title = text("attributes_skills"))
-                SkillGroups(
-                    skills = skillRows,
-                    checkEffects = checkEffects,
-                    onSkillClick = { skill -> if (characterBundle != null) rollingSkill = skill }
+        item {
+            AttributesSectionTitle(title = text("attributes_skills"))
+            SkillGroups(
+                skills = skillRows,
+                checkEffects = checkEffects,
+                onSkillClick = { skill -> if (characterBundle != null) rollingSkill = skill }
+            )
+        }
+
+        item {
+            AttributesSectionTitle(title = text("attributes_proficiencies"))
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    ProficiencyInfoCard(
+                        icon = Icons.Outlined.Shield,
+                        label = text("attributes_proficiency_armor"),
+                        value = formatSelectedProficiencies(
+                            selectedIds = decodeProficiencyIds(character.armorProficiencies),
+                            options = armorProficiencyOptions,
+                            strings = strings
+                        ),
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            if (characterBundle != null) {
+                                armorDraft = decodeProficiencyIds(character.armorProficiencies)
+                                isArmorDialogOpen = true
+                            }
+                        }
+                    )
+                    ProficiencyInfoCard(
+                        icon = Icons.Outlined.AutoAwesome,
+                        label = text("attributes_proficiency_weapons"),
+                        value = formatWeaponProficiencies(decodeProficiencyIds(character.weaponProficiencies), strings),
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            if (characterBundle != null) {
+                                weaponDraft = decodeProficiencyIds(character.weaponProficiencies)
+                                isWeaponDialogOpen = true
+                            }
+                        }
+                    )
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    ProficiencyInfoCard(
+                        icon = Icons.Outlined.Build,
+                        label = text("attributes_proficiency_tools"),
+                        value = formatToolProficiencies(decodeProficiencyIds(character.toolProficiencies), strings),
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            if (characterBundle != null) {
+                                val selectedTools = decodeProficiencyIds(character.toolProficiencies)
+                                toolDraft = selectedTools.filterNot { it.startsWith(CustomProficiencyPrefix) }.toSet()
+                                customToolDrafts = selectedTools
+                                    .filter { it.startsWith(CustomProficiencyPrefix) }
+                                    .map { it.removePrefix(CustomProficiencyPrefix) }
+                                isToolsDialogOpen = true
+                            }
+                        }
+                    )
+                    ProficiencyInfoCard(
+                        icon = Icons.AutoMirrored.Outlined.Chat,
+                        label = text("attributes_proficiency_languages"),
+                        value = formatLanguageProficiencies(decodeProficiencyIds(character.languageProficiencies), strings),
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            if (characterBundle != null) {
+                                val selectedLanguages = decodeProficiencyIds(character.languageProficiencies)
+                                languageDraft = selectedLanguages.filterNot { it.startsWith(CustomProficiencyPrefix) }.toSet()
+                                customLanguageDrafts = selectedLanguages
+                                    .filter { it.startsWith(CustomProficiencyPrefix) }
+                                    .map { it.removePrefix(CustomProficiencyPrefix) }
+                                isLanguagesDialogOpen = true
+                            }
+                        }
+                    )
+                }
+                ProficiencyInfoCard(
+                    icon = Icons.Outlined.MilitaryTech,
+                    label = text("attributes_proficiency_masteries"),
+                    value = formatWeaponMasteries(decodeProficiencyIds(character.weaponMasteries), characterCatalog, strings),
+                    modifier = Modifier.fillMaxWidth(),
+                    maxLines = Int.MAX_VALUE,
+                    onClick = {
+                        masteryDraft = decodeProficiencyIds(character.weaponMasteries)
+                        isMasteryDialogOpen = true
+                    }
                 )
             }
+        }
 
-            item {
-                AttributesSectionTitle(title = text("attributes_proficiencies"))
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        ProficiencyInfoCard(
-                            icon = Icons.Outlined.Shield,
-                            label = text("attributes_proficiency_armor"),
-                            value = formatSelectedProficiencies(
-                                selectedIds = decodeProficiencyIds(character.armorProficiencies),
-                                options = armorProficiencyOptions,
-                                strings = strings
-                            ),
-                            modifier = Modifier.weight(1f),
-                            onClick = {
-                                if (characterBundle != null) {
-                                    armorDraft = decodeProficiencyIds(character.armorProficiencies)
-                                    isArmorDialogOpen = true
-                                }
-                            }
-                        )
-                        ProficiencyInfoCard(
-                            icon = Icons.Outlined.AutoAwesome,
-                            label = text("attributes_proficiency_weapons"),
-                            value = formatWeaponProficiencies(decodeProficiencyIds(character.weaponProficiencies), strings),
-                            modifier = Modifier.weight(1f),
-                            onClick = {
-                                if (characterBundle != null) {
-                                    weaponDraft = decodeProficiencyIds(character.weaponProficiencies)
-                                    isWeaponDialogOpen = true
-                                }
-                            }
-                        )
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        ProficiencyInfoCard(
-                            icon = Icons.Outlined.Build,
-                            label = text("attributes_proficiency_tools"),
-                            value = formatToolProficiencies(decodeProficiencyIds(character.toolProficiencies), strings),
-                            modifier = Modifier.weight(1f),
-                            onClick = {
-                                if (characterBundle != null) {
-                                    val selectedTools = decodeProficiencyIds(character.toolProficiencies)
-                                    toolDraft = selectedTools.filterNot { it.startsWith(CustomProficiencyPrefix) }.toSet()
-                                    customToolDrafts = selectedTools
-                                        .filter { it.startsWith(CustomProficiencyPrefix) }
-                                        .map { it.removePrefix(CustomProficiencyPrefix) }
-                                    isToolsDialogOpen = true
-                                }
-                            }
-                        )
-                        ProficiencyInfoCard(
-                            icon = Icons.AutoMirrored.Outlined.Chat,
-                            label = text("attributes_proficiency_languages"),
-                            value = formatLanguageProficiencies(decodeProficiencyIds(character.languageProficiencies), strings),
-                            modifier = Modifier.weight(1f),
-                            onClick = {
-                                if (characterBundle != null) {
-                                    val selectedLanguages = decodeProficiencyIds(character.languageProficiencies)
-                                    languageDraft = selectedLanguages.filterNot { it.startsWith(CustomProficiencyPrefix) }.toSet()
-                                    customLanguageDrafts = selectedLanguages
-                                        .filter { it.startsWith(CustomProficiencyPrefix) }
-                                        .map { it.removePrefix(CustomProficiencyPrefix) }
-                                    isLanguagesDialogOpen = true
-                                }
-                            }
-                        )
+        item {
+            // Resistances, immunities, vulnerabilities: what Character Wizard grants, and edits by hand.
+            AttributesSectionTitle(title = text("attributes_defenses"))
+            val defenses = decodeProficiencyIds(character.defenses)
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                listOf(
+                    Triple(Defenses.RESISTANCE, Icons.Outlined.Security, "attributes_defense_resistances"),
+                    Triple(Defenses.IMMUNITY, Icons.Outlined.GppGood, "attributes_defense_immunities"),
+                    Triple(Defenses.VULNERABILITY, Icons.Outlined.GppBad, "attributes_defense_vulnerabilities")
+                ).forEach { (kind, icon, labelKey) ->
+                    val shown = if (kind == Defenses.IMMUNITY) {
+                        Defenses.ofKind(defenses, Defenses.IMMUNITY) + Defenses.ofKind(defenses, Defenses.CONDITION_IMMUNITY)
+                    } else {
+                        Defenses.ofKind(defenses, kind)
                     }
                     ProficiencyInfoCard(
-                        icon = Icons.Outlined.MilitaryTech,
-                        label = text("attributes_proficiency_masteries"),
-                        value = formatWeaponMasteries(decodeProficiencyIds(character.weaponMasteries), characterCatalog, strings),
+                        icon = icon,
+                        label = text(labelKey),
+                        value = shown.joinToString(", ") { defenseName(it, characterCatalog, strings) }.ifEmpty { strings["common_none"] },
                         modifier = Modifier.fillMaxWidth(),
                         maxLines = Int.MAX_VALUE,
                         onClick = {
-                            masteryDraft = decodeProficiencyIds(character.weaponMasteries)
-                            isMasteryDialogOpen = true
+                            if (characterBundle != null) {
+                                defenseDraft = defenses
+                                editingDefenseKind = kind
+                            }
                         }
                     )
-                }
-            }
-
-            item {
-                // Resistances, immunities, vulnerabilities: what Character Wizard grants, and edits by hand.
-                AttributesSectionTitle(title = text("attributes_defenses"))
-                val defenses = decodeProficiencyIds(character.defenses)
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    listOf(
-                        Triple(Defenses.RESISTANCE, Icons.Outlined.Security, "attributes_defense_resistances"),
-                        Triple(Defenses.IMMUNITY, Icons.Outlined.GppGood, "attributes_defense_immunities"),
-                        Triple(Defenses.VULNERABILITY, Icons.Outlined.GppBad, "attributes_defense_vulnerabilities")
-                    ).forEach { (kind, icon, labelKey) ->
-                        val shown = if (kind == Defenses.IMMUNITY) {
-                            Defenses.ofKind(defenses, Defenses.IMMUNITY) + Defenses.ofKind(defenses, Defenses.CONDITION_IMMUNITY)
-                        } else {
-                            Defenses.ofKind(defenses, kind)
-                        }
-                        ProficiencyInfoCard(
-                            icon = icon,
-                            label = text(labelKey),
-                            value = shown.joinToString(", ") { defenseName(it, characterCatalog, strings) }.ifEmpty { strings["common_none"] },
-                            modifier = Modifier.fillMaxWidth(),
-                            maxLines = Int.MAX_VALUE,
-                            onClick = {
-                                if (characterBundle != null) {
-                                    defenseDraft = defenses
-                                    editingDefenseKind = kind
-                                }
-                            }
-                        )
-                    }
                 }
             }
         }
@@ -1289,6 +1260,7 @@ fun AttributesContent(
             }
         }
     }
+    return items
 }
 
 @Composable

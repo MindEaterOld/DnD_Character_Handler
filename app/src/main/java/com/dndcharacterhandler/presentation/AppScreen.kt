@@ -5,7 +5,6 @@ import androidx.compose.material.icons.outlined.AutoStories
 import androidx.compose.material.icons.outlined.Badge
 import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Description
-import androidx.compose.material.icons.outlined.FitnessCenter
 import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material.icons.outlined.Notes
 import androidx.compose.material.icons.outlined.Shield
@@ -18,7 +17,6 @@ sealed class AppScreen(
     val icon: ImageVector
 ) {
     data object Overview : AppScreen("overview", "nav_overview", "nav_overview_compact", Icons.Outlined.Badge)
-    data object Attributes : AppScreen("attributes", "nav_attributes", "nav_attributes_compact", Icons.Outlined.FitnessCenter)
     data object Combat : AppScreen("combat", "nav_combat", "nav_combat_compact", Icons.Outlined.Shield)
     data object Inventory : AppScreen("inventory", "nav_inventory", "nav_inventory_compact", Icons.Outlined.Inventory2)
     data object Spells : AppScreen("spells", "nav_spells", "nav_spells_compact", Icons.Outlined.Bolt)
@@ -29,7 +27,6 @@ sealed class AppScreen(
 
 val bottomNavigationScreens = listOf(
     AppScreen.Overview,
-    AppScreen.Attributes,
     AppScreen.Combat,
     AppScreen.Inventory,
     AppScreen.Spells,

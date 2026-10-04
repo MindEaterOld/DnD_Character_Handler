@@ -1,6 +1,10 @@
 package com.dndcharacterhandler.presentation.overview
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.ui.unit.Dp
 import com.dndcharacterhandler.domain.model.decodeProficiencyIds
 import com.dndcharacterhandler.domain.rules.Defenses
+import com.dndcharacterhandler.presentation.attributes.AttributesSection
+import com.dndcharacterhandler.presentation.attributes.AttributesViewModel
 import com.dndcharacterhandler.presentation.components.changedValueColor
 import com.dndcharacterhandler.domain.rules.RollMode
 import com.dndcharacterhandler.domain.rules.damageTaken
@@ -599,6 +603,18 @@ private data class OverviewStat(
     val delta: Int = 0
 )
 
+/**
+ * Draws the item [by] higher than its place and gives that room back, so what follows moves up with it:
+ * an offset alone would leave the gap below, under the next item.
+ */
+private fun Modifier.pullUp(by: Dp): Modifier = layout { measurable, constraints ->
+    val placeable = measurable.measure(constraints)
+    val shift = by.roundToPx()
+    layout(placeable.width, (placeable.height - shift).coerceAtLeast(0)) {
+        placeable.place(0, -shift)
+    }
+}
+
 private enum class OverviewEditableField {
     NAME,
     RACE,
@@ -622,9 +638,15 @@ private enum class OverviewMiniStatField {
     SPEED
 }
 
+/**
+ * The overview: the portrait, hit points and the stat cards, then — further down the same list — the
+ * ability scores, skills, proficiencies and defenses, the stats screen that used to be its own tab
+ * (owner's choice, 2026-10-04).
+ */
 @Composable
 fun OverviewScreen(
     viewModel: OverviewViewModel,
+    attributesViewModel: AttributesViewModel,
     onOpenDrawer: () -> Unit,
     onOpenDice: () -> Unit,
     onOpenLevelUp: (targetLevel: Int) -> Unit = {}
@@ -642,34 +664,37 @@ fun OverviewScreen(
     ) {
         state.character?.let(viewModel::syncAutomaticArmorClass)
     }
-    OverviewContent(
-        characterBundle = state.character,
-        catalog = catalog,
-        onOpenLevelUp = onOpenLevelUp,
-        onOpenDrawer = onOpenDrawer,
-        onOpenDice = onOpenDice,
-        onUpdateIdentity = viewModel::updateIdentity,
-        onUpdateExperience = viewModel::updateExperience,
-        onUpdatePortrait = viewModel::updatePortrait,
-        onUpdatePortraitFraming = viewModel::updatePortraitFraming,
-        onUpdateConditions = viewModel::updateConditions,
-        onUpdateExhaustion = viewModel::updateExhaustion,
-        onEndConcentration = viewModel::endConcentration,
-        onDamageHitPoints = viewModel::damageHitPoints,
-        onHealHitPoints = viewModel::healHitPoints,
-        onAddTemporaryHitPoints = viewModel::addTemporaryHitPoints,
-        onUpdateMaxHitPoints = viewModel::updateMaxHitPoints,
-        onUpdateArmorClass = viewModel::updateArmorClass,
-        onUpdateInitiative = viewModel::updateInitiative,
-        onUpdateSpeed = viewModel::updateSpeed,
-        onUpdateHitDieSides = viewModel::updateHitDieSides,
-        onSpendHitDice = viewModel::spendHitDice,
-        onToggleInspiration = viewModel::toggleInspiration,
-        onShortRest = viewModel::shortRest,
-        onLongRest = viewModel::longRest,
-        onSetDeathSaves = viewModel::setDeathSaves,
-        onDeathSave = viewModel::recordDeathSave
-    )
+    AttributesSection(viewModel = attributesViewModel) { attributesItems ->
+        OverviewContent(
+            characterBundle = state.character,
+            moreItems = attributesItems,
+            catalog = catalog,
+            onOpenLevelUp = onOpenLevelUp,
+            onOpenDrawer = onOpenDrawer,
+            onOpenDice = onOpenDice,
+            onUpdateIdentity = viewModel::updateIdentity,
+            onUpdateExperience = viewModel::updateExperience,
+            onUpdatePortrait = viewModel::updatePortrait,
+            onUpdatePortraitFraming = viewModel::updatePortraitFraming,
+            onUpdateConditions = viewModel::updateConditions,
+            onUpdateExhaustion = viewModel::updateExhaustion,
+            onEndConcentration = viewModel::endConcentration,
+            onDamageHitPoints = viewModel::damageHitPoints,
+            onHealHitPoints = viewModel::healHitPoints,
+            onAddTemporaryHitPoints = viewModel::addTemporaryHitPoints,
+            onUpdateMaxHitPoints = viewModel::updateMaxHitPoints,
+            onUpdateArmorClass = viewModel::updateArmorClass,
+            onUpdateInitiative = viewModel::updateInitiative,
+            onUpdateSpeed = viewModel::updateSpeed,
+            onUpdateHitDieSides = viewModel::updateHitDieSides,
+            onSpendHitDice = viewModel::spendHitDice,
+            onToggleInspiration = viewModel::toggleInspiration,
+            onShortRest = viewModel::shortRest,
+            onLongRest = viewModel::longRest,
+            onSetDeathSaves = viewModel::setDeathSaves,
+            onDeathSave = viewModel::recordDeathSave
+        )
+    }
 }
 
 /**
@@ -729,7 +754,9 @@ private fun OverviewContent(
     onSetDeathSaves: (CharacterBundle, Int, Int) -> Unit = { _, _, _ -> },
     onDeathSave: (CharacterBundle, DeathSaves, Int) -> Unit = { _, _, _ -> },
     /** The death saving throws' tray starts open (the screen preview). */
-    deathSavesOpen: Boolean = false
+    deathSavesOpen: Boolean = false,
+    /** The list's items after the overview's own: the stats section. */
+    moreItems: LazyListScope.() -> Unit = {}
 ) {
     val character = characterBundle?.character
     val context = LocalContext.current
@@ -986,7 +1013,7 @@ private fun OverviewContent(
             }
 
             item {
-                Box(modifier = Modifier.offset(y = (-24).dp)) {
+                Box(modifier = Modifier.pullUp(24.dp)) {
                     OverviewXpBlock(
                         xpInfo = xpInfo,
                         levelLabel = levelLabel,
@@ -1005,7 +1032,8 @@ private fun OverviewContent(
 
             item {
                 Column(
-                    modifier = Modifier.offset(y = (-30).dp),
+                    // With the XP bar's 24dp, 30dp above its place.
+                    modifier = Modifier.pullUp(6.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     // Over the death saves' tray, which slides out from under it.
@@ -1065,7 +1093,8 @@ private fun OverviewContent(
 
             item {
                 // The app's stat cards, as on the other screens.
-                StatCardRow(modifier = Modifier.offset(y = (-34).dp)) {
+                // With the pulls above it, 34dp above its place.
+                StatCardRow(modifier = Modifier.pullUp(4.dp)) {
                     miniStats.forEach { stat ->
                         val statIcon = stat.icon
                         MiniStatCard(
@@ -1097,6 +1126,8 @@ private fun OverviewContent(
                     }
                 }
             }
+
+            moreItems()
         }
     }
 

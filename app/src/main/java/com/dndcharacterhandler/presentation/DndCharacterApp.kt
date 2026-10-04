@@ -39,7 +39,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.dndcharacterhandler.data.localization.LocalizationRepository
-import com.dndcharacterhandler.presentation.attributes.AttributesScreen
 import com.dndcharacterhandler.presentation.biography.BiographyScreen
 import com.dndcharacterhandler.presentation.combat.CombatScreen
 import com.dndcharacterhandler.presentation.components.BottomNavigationBar
@@ -241,18 +240,12 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                         composable(AppScreen.Overview.route) {
                             OverviewScreen(
                                 viewModel = appState.overviewViewModel,
+                                attributesViewModel = appState.attributesViewModel,
                                 onOpenDrawer = { scope.launch { drawerState.open() } },
                                 onOpenDice = openDice,
                                 onOpenLevelUp = { levelUpTarget = it }
                             )
                         }
-                            composable(AppScreen.Attributes.route) {
-                                AttributesScreen(
-                                    viewModel = appState.attributesViewModel,
-                                    onOpenDrawer = { scope.launch { drawerState.open() } },
-                                    onOpenDice = openDice
-                                )
-                            }
                             composable(AppScreen.Combat.route) {
                                 CombatScreen(
                                     viewModel = appState.combatViewModel,

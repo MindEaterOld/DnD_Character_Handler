@@ -13,13 +13,6 @@
     "fr": "Vue d'ensemble",
     "es": "Resumen"
   },
-  "nav_attributes": {
-    "en": "Attributes",
-    "ru": "Характеристики",
-    "de": "Attribute",
-    "fr": "Attributs",
-    "es": "Atributos"
-  },
   "nav_combat": {
     "en": "Combat",
     "ru": "Бой",
@@ -5144,13 +5137,6 @@
     "de": "Uber.",
     "fr": "Vue",
     "es": "Res."
-  },
-  "nav_attributes_compact": {
-    "en": "Attr.",
-    "ru": "\u0425\u0430\u0440.",
-    "de": "Attr.",
-    "fr": "Stats",
-    "es": "Atrib."
   },
   "nav_combat_compact": {
     "en": "Fight",

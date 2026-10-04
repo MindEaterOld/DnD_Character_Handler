@@ -1,17 +1,22 @@
 package com.dndcharacterhandler.presentation.attributes
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.dndcharacterhandler.data.localization.LocalizedStrings
 import com.dndcharacterhandler.domain.model.AppLanguage
 import com.dndcharacterhandler.domain.model.CharacterBundle
 import com.dndcharacterhandler.domain.model.Skill
+import com.dndcharacterhandler.presentation.components.ScreenBackground
 import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.theme.DnDTheme
 
 @Preview(
-    name = "Attributes Screen",
+    name = "Attributes Section",
     showBackground = true,
     showSystemUi = true,
     device = "spec:width=412dp,height=915dp"
@@ -32,6 +37,7 @@ fun AttributesScreenPreview() {
             "attributes_weapon_simple_short" to "Simple",
             "attributes_weapon_martial_short" to "Martial",
             "common_none" to "None",
+            "attributes_saving_throw_short" to "Save",
             "stat_card_proficiency" to "Proficiency",
             "stat_card_passive_perception" to "Pass. Perc.",
             "stat_card_darkvision" to "Darkvision",
@@ -88,7 +94,8 @@ fun AttributesScreenPreview() {
 
     CompositionLocalProvider(LocalStrings provides strings) {
         DnDTheme {
-            AttributesContent(
+            // The section as the overview lists it, below its own cards.
+            val items = attributesSectionItems(
                 characterBundle = CharacterBundle(
                     // A Fighter's proficiencies as the sheet stores them, with three weapon masteries.
                     character = previewFallbackCharacter().copy(
@@ -114,6 +121,14 @@ fun AttributesScreenPreview() {
                 ),
                 onUpdatePassivePerceptionBonus = { _, _ -> }
             )
+            ScreenBackground {
+                LazyColumn(
+                    contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 4.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    items()
+                }
+            }
         }
     }
 }
