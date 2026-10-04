@@ -30,6 +30,7 @@ fun NotesScreenPreview() {
             "placeholder_loading_character" to "Loading character",
             "nav_notes" to "Notes",
             "notes_search_placeholder" to "Search Notes",
+            "notes_add" to "Add note",
             "notes_new_note" to "New Note",
             "notes_edit_note" to "Edit Note",
             "notes_title" to "Title",

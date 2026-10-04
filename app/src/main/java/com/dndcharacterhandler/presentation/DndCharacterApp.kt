@@ -395,9 +395,7 @@ private val routesWithAddButton = setOf(
     AppScreen.Combat.route,
     AppScreen.Inventory.route,
     AppScreen.Spells.route,
-    AppScreen.Features.route,
-    // The notes' "+", under the biography.
-    AppScreen.Biography.route
+    AppScreen.Features.route
 )
 
 private fun suggestCharacterArchiveName(characterName: String?): String {

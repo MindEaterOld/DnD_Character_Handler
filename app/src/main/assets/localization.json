@@ -2846,6 +2846,14 @@
     "fr": "Rechercher des notes",
     "es": "Buscar notas"
   },
+  "notes_add": {
+    "maxChars": 23,
+    "en": "Add note",
+    "ru": "Добавить заметку",
+    "de": "Notiz hinzufügen",
+    "fr": "Ajouter une note",
+    "es": "Añadir nota"
+  },
   "notes_new_note": {
     "en": "New Note",
     "ru": "Новая заметка",

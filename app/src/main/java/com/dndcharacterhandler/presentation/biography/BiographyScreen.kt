@@ -1,10 +1,5 @@
 package com.dndcharacterhandler.presentation.biography
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -21,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -39,7 +33,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -69,7 +62,6 @@ import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
 import com.dndcharacterhandler.presentation.components.CharacterScreenHeader
 import com.dndcharacterhandler.presentation.components.EditDialog
-import com.dndcharacterhandler.presentation.components.FloatingAddButton
 import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
 import com.dndcharacterhandler.presentation.components.ScreenBackground
 import com.dndcharacterhandler.presentation.components.ScreenTopActions
@@ -77,7 +69,6 @@ import com.dndcharacterhandler.presentation.components.SizeToggle
 import com.dndcharacterhandler.presentation.components.toggleContent
 import com.dndcharacterhandler.presentation.components.toggleFill
 import com.dndcharacterhandler.presentation.localization.text
-import com.dndcharacterhandler.presentation.notes.NotesKeyPrefix
 import com.dndcharacterhandler.presentation.notes.NotesSection
 import com.dndcharacterhandler.presentation.notes.NotesViewModel
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
@@ -170,7 +161,7 @@ fun BiographyScreen(
     onOpenDice: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    NotesSection(viewModel = notesViewModel) { notesItems, onAddNote ->
+    NotesSection(viewModel = notesViewModel) { notesItems ->
         BiographyContent(
             characterBundle = state.character,
             onOpenDrawer = onOpenDrawer,
@@ -178,8 +169,7 @@ fun BiographyScreen(
             onUpdateBiography = viewModel::updateBiography,
             onUpdateField = viewModel::updateBiographyField,
             onUpdateSize = viewModel::updateSize,
-            moreItems = notesItems,
-            onAddNote = onAddNote
+            moreItems = notesItems
         )
     }
 }
@@ -192,20 +182,12 @@ internal fun BiographyContent(
     onUpdateBiography: (CharacterBundle, String) -> Unit = { _, _ -> },
     onUpdateField: (CharacterBundle, BiographyField, String) -> Unit = { _, _, _ -> },
     onUpdateSize: (CharacterBundle, CreatureSize) -> Unit = { _, _ -> },
-    /** The list's items after the biography's own: the notes section, its keys starting with [NotesKeyPrefix]. */
-    moreItems: LazyListScope.() -> Unit = {},
-    /** Starts a note: the "+" shows while the notes are on screen. */
-    onAddNote: (() -> Unit)? = null
+    /** The list's items after the biography's own: the notes section. */
+    moreItems: LazyListScope.() -> Unit = {}
 ) {
     val colors = LocalDesignTokens.current.colors
     val character = characterBundle?.character
     var editingField by remember { mutableStateOf<BiographyField?>(null) }
-    val listState = rememberLazyListState()
-    val notesInView by remember(listState) {
-        derivedStateOf {
-            listState.layoutInfo.visibleItemsInfo.any { (it.key as? String)?.startsWith(NotesKeyPrefix) == true }
-        }
-    }
     if (character == null) {
         ScreenBackground {
             Box(
@@ -231,89 +213,75 @@ internal fun BiographyContent(
     val resolvedCharacter = character
     val resolvedBundle = characterBundle
     ScreenBackground {
-        Box(modifier = Modifier.fillMaxSize()) {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                state = listState,
-                contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 4.dp, bottom = LocalFloatingButtonsInset.current),
-                verticalArrangement = Arrangement.spacedBy(0.dp)
-            ) {
-                item {
-                    CharacterScreenHeader(
-                        character = resolvedCharacter,
-                        onOpenDrawer = onOpenDrawer,
-                        onOpenDice = onOpenDice
-                    )
-                }
-                item {
-                    BiographySection(
-                        title = text("biography_identity"),
-                        rows = listOf(
-                            BiographyRow(
-                                BiographyField.ALIGNMENT,
-                                Icons.Outlined.Shield,
-                                text("biography_alignment"),
-                                localizedAlignment(resolvedCharacter.alignment)
-                            ),
-                            BiographyRow(BiographyField.BACKGROUND, Icons.Outlined.Description, text("biography_background"), resolvedCharacter.background),
-                            BiographyRow(BiographyField.FAITH, Icons.Outlined.AutoAwesome, text("biography_faith"), resolvedCharacter.faith),
-                            BiographyRow(BiographyField.HOMELAND, Icons.Outlined.Home, text("biography_homeland"), resolvedCharacter.homeland),
-                            BiographyRow(BiographyField.PERSONALITY_TRAITS, Icons.Outlined.Badge, text("biography_personality_traits"), resolvedCharacter.personalityTraits),
-                            BiographyRow(BiographyField.IDEALS, Icons.Outlined.AutoAwesome, text("biography_ideals"), resolvedCharacter.ideals),
-                            BiographyRow(BiographyField.BONDS, Icons.Outlined.Shield, text("biography_bonds"), resolvedCharacter.bonds),
-                            BiographyRow(BiographyField.FLAWS, Icons.Outlined.Description, text("biography_flaws"), resolvedCharacter.flaws)
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 4.dp, bottom = LocalFloatingButtonsInset.current),
+            verticalArrangement = Arrangement.spacedBy(0.dp)
+        ) {
+            item {
+                CharacterScreenHeader(
+                    character = resolvedCharacter,
+                    onOpenDrawer = onOpenDrawer,
+                    onOpenDice = onOpenDice
+                )
+            }
+            item {
+                BiographySection(
+                    title = text("biography_identity"),
+                    rows = listOf(
+                        BiographyRow(
+                            BiographyField.ALIGNMENT,
+                            Icons.Outlined.Shield,
+                            text("biography_alignment"),
+                            localizedAlignment(resolvedCharacter.alignment)
                         ),
-                        valueWeight = 1.45f,
-                        onRowClick = { editingField = it.field }
-                    )
-                }
-                item {
-                    BiographySection(
-                        modifier = Modifier.padding(top = 14.dp),
-                        title = text("biography_appearance"),
-                        top = {
-                            SizeToggle(
-                                selected = resolvedCharacter.size,
-                                onSelect = { onUpdateSize(resolvedBundle, it) },
-                                modifier = Modifier.padding(bottom = 4.dp)
-                            )
-                        },
-                        rows = listOf(
-                            BiographyRow(BiographyField.AGE, Icons.Outlined.Inventory2, text("biography_age"), resolvedCharacter.age),
-                            BiographyRow(BiographyField.GENDER, Icons.Outlined.Badge, text("biography_gender"), localizedGender(resolvedCharacter.gender)),
-                            BiographyRow(BiographyField.HEIGHT, Icons.Outlined.Badge, text("biography_height"), localizedMeasuredValue(resolvedCharacter.height)),
-                            BiographyRow(BiographyField.WEIGHT, Icons.Outlined.Inventory2, text("biography_weight"), localizedMeasuredValue(resolvedCharacter.weight)),
-                            BiographyRow(BiographyField.EYES, Icons.Outlined.Visibility, text("biography_eyes"), resolvedCharacter.eyes),
-                            BiographyRow(BiographyField.HAIR, Icons.Outlined.AutoAwesome, text("biography_hair"), resolvedCharacter.hair),
-                            BiographyRow(BiographyField.SKIN, Icons.Outlined.Badge, text("biography_skin"), resolvedCharacter.skin)
-                        ),
-                        onRowClick = { editingField = it.field }
-                    )
-                }
-                item {
-                    BiographyHistorySection(
-                        characterId = resolvedCharacter.id,
-                        history = resolvedCharacter.biography,
-                        onHistoryChange = { value ->
-                            onUpdateBiography(resolvedBundle, value)
-                        },
-                        modifier = Modifier.padding(top = 14.dp)
-                    )
-                }
+                        BiographyRow(BiographyField.BACKGROUND, Icons.Outlined.Description, text("biography_background"), resolvedCharacter.background),
+                        BiographyRow(BiographyField.FAITH, Icons.Outlined.AutoAwesome, text("biography_faith"), resolvedCharacter.faith),
+                        BiographyRow(BiographyField.HOMELAND, Icons.Outlined.Home, text("biography_homeland"), resolvedCharacter.homeland),
+                        BiographyRow(BiographyField.PERSONALITY_TRAITS, Icons.Outlined.Badge, text("biography_personality_traits"), resolvedCharacter.personalityTraits),
+                        BiographyRow(BiographyField.IDEALS, Icons.Outlined.AutoAwesome, text("biography_ideals"), resolvedCharacter.ideals),
+                        BiographyRow(BiographyField.BONDS, Icons.Outlined.Shield, text("biography_bonds"), resolvedCharacter.bonds),
+                        BiographyRow(BiographyField.FLAWS, Icons.Outlined.Description, text("biography_flaws"), resolvedCharacter.flaws)
+                    ),
+                    valueWeight = 1.45f,
+                    onRowClick = { editingField = it.field }
+                )
+            }
+            item {
+                BiographySection(
+                    modifier = Modifier.padding(top = 14.dp),
+                    title = text("biography_appearance"),
+                    top = {
+                        SizeToggle(
+                            selected = resolvedCharacter.size,
+                            onSelect = { onUpdateSize(resolvedBundle, it) },
+                            modifier = Modifier.padding(bottom = 4.dp)
+                        )
+                    },
+                    rows = listOf(
+                        BiographyRow(BiographyField.AGE, Icons.Outlined.Inventory2, text("biography_age"), resolvedCharacter.age),
+                        BiographyRow(BiographyField.GENDER, Icons.Outlined.Badge, text("biography_gender"), localizedGender(resolvedCharacter.gender)),
+                        BiographyRow(BiographyField.HEIGHT, Icons.Outlined.Badge, text("biography_height"), localizedMeasuredValue(resolvedCharacter.height)),
+                        BiographyRow(BiographyField.WEIGHT, Icons.Outlined.Inventory2, text("biography_weight"), localizedMeasuredValue(resolvedCharacter.weight)),
+                        BiographyRow(BiographyField.EYES, Icons.Outlined.Visibility, text("biography_eyes"), resolvedCharacter.eyes),
+                        BiographyRow(BiographyField.HAIR, Icons.Outlined.AutoAwesome, text("biography_hair"), resolvedCharacter.hair),
+                        BiographyRow(BiographyField.SKIN, Icons.Outlined.Badge, text("biography_skin"), resolvedCharacter.skin)
+                    ),
+                    onRowClick = { editingField = it.field }
+                )
+            }
+            item {
+                BiographyHistorySection(
+                    characterId = resolvedCharacter.id,
+                    history = resolvedCharacter.biography,
+                    onHistoryChange = { value ->
+                        onUpdateBiography(resolvedBundle, value)
+                    },
+                    modifier = Modifier.padding(top = 14.dp)
+                )
+            }
 
-                moreItems()
-            }
-            // As on the screens of lists, in the corner; only while the notes are in view.
-            AnimatedVisibility(
-                visible = onAddNote != null && notesInView,
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(end = 24.dp, bottom = 15.dp),
-                enter = fadeIn() + scaleIn(),
-                exit = fadeOut() + scaleOut()
-            ) {
-                FloatingAddButton(onClick = { onAddNote?.invoke() })
-            }
+            moreItems()
         }
     }
 

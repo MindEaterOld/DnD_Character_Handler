@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material.icons.outlined.Search
@@ -82,14 +83,14 @@ class NotesViewModel(
 
 /**
  * The notes as a section of another screen's list: the biography's, below its own sections (owner's
- * choice, 2026-10-04: the notes screen merged into the biography). [content] lays the list out, puts the
- * section's items where they go and shows the "+" that starts a note ([onAddNote]); the note's editor is
- * the section's own. Until the character loads there are no items.
+ * choice, 2026-10-04: the notes screen merged into the biography). [content] lays the list out and puts
+ * the section's items where they go; the note's editor is the section's own. Until the character loads
+ * there are no items.
  */
 @Composable
 fun NotesSection(
     viewModel: NotesViewModel,
-    content: @Composable (items: LazyListScope.() -> Unit, onAddNote: () -> Unit) -> Unit
+    content: @Composable (items: LazyListScope.() -> Unit) -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val bundle = state.character
@@ -100,10 +101,11 @@ fun NotesSection(
         notesSectionItems(
             characterBundle = bundle,
             onOpenNote = { editingNote = it },
+            onAddNote = { editingNote = newDraftNote() },
             onTogglePinned = viewModel::togglePinned
         )
     }
-    content(items) { editingNote = newDraftNote() }
+    content(items)
 
     val note = editingNote
     if (note != null && bundle != null) {
@@ -120,17 +122,19 @@ fun NotesSection(
 
 private val NoItems: LazyListScope.() -> Unit = {}
 
-/** What every key of the notes section's items starts with, so a list can tell them from its own. */
-const val NotesKeyPrefix = "notes:"
+/** What every key of the section's items starts with: unique in the list it shares. */
+private const val NotesKeyPrefix = "notes:"
 
 /**
- * The section's list items: its title, the search and the notes, the pinned first, then the latest. They
- * space themselves, as the biography's list has no spacing of its own.
+ * The section's list items: its title, the search, the notes — the pinned first, then the latest — and
+ * last the card that adds one, there even when there are none (owner's choice, 2026-10-04). They space
+ * themselves, as the biography's list has no spacing of its own.
  */
 @Composable
 internal fun notesSectionItems(
     characterBundle: CharacterBundle,
     onOpenNote: (Note) -> Unit = {},
+    onAddNote: () -> Unit = {},
     onTogglePinned: (CharacterBundle, Note) -> Unit = { _, _ -> }
 ): LazyListScope.() -> Unit {
     var query by remember { mutableStateOf("") }
@@ -164,6 +168,48 @@ internal fun notesSectionItems(
                 onClick = { onOpenNote(note) },
                 onTogglePinned = { onTogglePinned(characterBundle, note) },
                 modifier = Modifier.padding(top = 10.dp)
+            )
+        }
+        item(key = "${NotesKeyPrefix}add") {
+            AddNoteCard(
+                onClick = onAddNote,
+                modifier = Modifier.padding(top = 10.dp)
+            )
+        }
+    }
+}
+
+/**
+ * The notes' last card, which starts a new one (owner's choice from boards, 2026-10-04): a note card's size
+ * and shape, the "+" where a pinned note has its pin — in the button fill, as it is pressed, not read.
+ */
+@Composable
+private fun AddNoteCard(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val colors = LocalDesignTokens.current.colors
+    Surface(
+        onClick = onClick,
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(10.dp),
+        color = colors.surface.button
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Add,
+                contentDescription = null,
+                tint = colors.text.primary,
+                modifier = Modifier
+                    .padding(end = 12.dp)
+                    .size(28.dp)
+            )
+            Text(
+                text = text("notes_add"),
+                style = MaterialTheme.typography.titleLarge,
+                color = colors.text.primary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
@@ -320,7 +366,8 @@ private fun NoteEditDialog(
     var isPinned by remember(note) { mutableStateOf(note.isPinned) }
 
     EditDialog(
-        title = text("notes_edit_note"),
+        // A note not saved yet is a new one.
+        title = text(if (note.id == 0L) "notes_new_note" else "notes_edit_note"),
         onDismiss = onDismiss,
         onConfirm = {
             onSave(

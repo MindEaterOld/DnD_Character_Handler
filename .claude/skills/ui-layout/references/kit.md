@@ -99,7 +99,7 @@ EditDialog(title, onDismiss, onConfirm?, onDelete?)
 
 ## Превью
 
-Экранные превью живут в `<экран>/<Экран>ScreenPreview.kt` (у обзора — внутри `OverviewScreen.kt`), устройство `spec:width=412dp,height=915dp`, `showSystemUi = true`. Статы (характеристики, навыки, владения, защиты) — не отдельный экран, а секция списка обзора под его карточками (`AttributesSection` отдаёт обзору свои пункты списка и сама держит свои поп-апы); `AttributesScreenPreview` показывает эту секцию отдельно. Так же заметки — секция списка биографии (`NotesSection`, ключи её пунктов начинаются с `NotesKeyPrefix`; «+» новой заметки биография показывает, пока заметки на экране), `NotesScreenPreview` показывает её отдельно:
+Экранные превью живут в `<экран>/<Экран>ScreenPreview.kt` (у обзора — внутри `OverviewScreen.kt`), устройство `spec:width=412dp,height=915dp`, `showSystemUi = true`. Статы (характеристики, навыки, владения, защиты) — не отдельный экран, а секция списка обзора под его карточками (`AttributesSection` отдаёт обзору свои пункты списка и сама держит свои поп-апы); `AttributesScreenPreview` показывает эту секцию отдельно. Так же заметки — секция списка биографии (`NotesSection`; последняя карточка — «Добавить заметку» с заливкой кнопки, плавающей «+» нет), `NotesScreenPreview` показывает её отдельно:
 
 `AttributesScreenPreview`, `BiographyScreenPreview`, `CombatScreenPreview`, `FeaturesScreenPreview`, `InventoryScreenPreview`, `InventoryContainersPreview`, `NotesScreenPreview`, `SpellsScreenPreview`, `OverviewScreenPreview`, `OverviewDyingPreview`, `OverviewDeadPreview`, `CharacterManagerDrawerPreview`, `CharacterManagerDrawerEmptyPreview`, `DiceSkinsPreview`, `SplashScreenPreview`, `SpellSlotsConfigDialogPreview`.
 
