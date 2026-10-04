@@ -54,6 +54,8 @@ internal sealed interface CastConcentration {
     /** Not a concentration spell (or one the sheet can't track: made by hand in combat). */
     data object None : CastConcentration
     data object Starts : CastConcentration
+    /** The spell is the one held now: casting it again keeps it. */
+    data object Continues : CastConcentration
     /** The spell held now ends. */
     data class Replaces(val heldName: String) : CastConcentration
     /** Incapacitated: the spell can be cast, but it isn't held. */
@@ -67,6 +69,7 @@ internal sealed interface CastConcentration {
 internal fun castConcentration(requires: Boolean, bookSpellId: Long?, character: Character, heldName: String?): CastConcentration = when {
     !requires || bookSpellId == null -> CastConcentration.None
     breaksConcentration(activeConditions(character.conditions, character.currentHp)) -> CastConcentration.Cannot
+    character.concentrationSpellId == bookSpellId -> CastConcentration.Continues
     heldName != null && character.concentrationSpellId != null && character.concentrationSpellId != bookSpellId ->
         CastConcentration.Replaces(heldName)
     else -> CastConcentration.Starts
@@ -211,6 +214,7 @@ private fun ConcentrationNote(concentration: CastConcentration) {
     val (note, color) = when (concentration) {
         CastConcentration.None -> return
         CastConcentration.Starts -> text("spells_cast_concentration_starts") to colors.text.muted
+        CastConcentration.Continues -> text("spells_cast_concentration_continues") to colors.text.muted
         is CastConcentration.Replaces -> strings.format("spells_cast_concentration_replaces", concentration.heldName) to colors.accent.dangerHpZero
         CastConcentration.Cannot -> text("spells_cast_concentration_cannot") to colors.text.muted
     }

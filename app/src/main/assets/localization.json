@@ -6205,6 +6205,13 @@
     "fr": "Démarre la concentration.",
     "es": "Inicia la concentración."
   },
+  "spells_cast_concentration_continues": {
+    "en": "Concentration continues.",
+    "ru": "Концентрация продолжится.",
+    "de": "Die Konzentration bleibt bestehen.",
+    "fr": "La concentration continue.",
+    "es": "La concentración continúa."
+  },
   "spells_cast_concentration_replaces": {
     "en": "Ends concentration on “%1$s”.",
     "ru": "Прервёт концентрацию на «%1$s».",
