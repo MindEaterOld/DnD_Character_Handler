@@ -56,6 +56,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.dndcharacterhandler.domain.levelup.AbilityMethod
@@ -90,6 +91,7 @@ import com.dndcharacterhandler.domain.rules.proficiencyBonusForLevel
 import com.dndcharacterhandler.data.localization.LocalizedStrings
 import com.dndcharacterhandler.presentation.components.OverlayCloseButton
 import com.dndcharacterhandler.presentation.components.SizeToggle
+import com.dndcharacterhandler.presentation.components.StepButton
 import com.dndcharacterhandler.presentation.components.labelKey
 import com.dndcharacterhandler.presentation.dice.DiceTableOverlay
 import com.dndcharacterhandler.presentation.dice.DieIcon
@@ -874,15 +876,21 @@ private fun LazyListScope.baseAbilitiesPage(
                 val value = scores[ability] ?: 8
                 val nextCost = POINT_BUY_COSTS[value + 1]?.minus(POINT_BUY_COSTS[value] ?: 0)
                 ScoreRow(abilityLabel(strings, ability), value) {
-                    IconButton(onClick = { onAnswer(answer.copy(scores = scores + (ability to value - 1))) }, enabled = value > 8) {
-                        Icon(Icons.Outlined.Remove, contentDescription = null)
-                    }
-                    IconButton(
+                    StepButton(
+                        icon = Icons.Outlined.Remove,
+                        contentDescription = strings["common_decrease"],
+                        onClick = { onAnswer(answer.copy(scores = scores + (ability to value - 1))) },
+                        enabled = value > 8,
+                        size = 40.dp
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    StepButton(
+                        icon = Icons.Outlined.Add,
+                        contentDescription = strings["common_increase"],
                         onClick = { onAnswer(answer.copy(scores = scores + (ability to value + 1))) },
-                        enabled = nextCost != null && spent + nextCost <= POINT_BUY_BUDGET
-                    ) {
-                        Icon(Icons.Outlined.Add, contentDescription = null)
-                    }
+                        enabled = nextCost != null && spent + nextCost <= POINT_BUY_BUDGET,
+                        size = 40.dp
+                    )
                 }
             }
         }
@@ -1496,14 +1504,15 @@ private fun AbilityRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge, color = colors.text.primary)
-            IconButton(onClick = onRemove, enabled = canRemove) { Icon(Icons.Outlined.Remove, contentDescription = null) }
+            StepButton(icon = Icons.Outlined.Remove, contentDescription = text("common_decrease"), onClick = onRemove, enabled = canRemove, size = 40.dp)
             Text(
                 text = value.toString() + if (added > 0) " (+$added)" else "",
-                modifier = Modifier.width(72.dp),
+                modifier = Modifier.width(80.dp),
                 style = MaterialTheme.typography.titleMedium,
-                color = if (added > 0) colors.accent.inspiration else colors.text.primary
+                color = if (added > 0) colors.accent.inspiration else colors.text.primary,
+                textAlign = TextAlign.Center
             )
-            IconButton(onClick = onAdd, enabled = canAdd) { Icon(Icons.Outlined.Add, contentDescription = null) }
+            StepButton(icon = Icons.Outlined.Add, contentDescription = text("common_increase"), onClick = onAdd, enabled = canAdd, size = 40.dp)
         }
     }
 }

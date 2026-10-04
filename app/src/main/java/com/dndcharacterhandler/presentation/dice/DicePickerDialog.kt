@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import com.dndcharacterhandler.domain.model.CustomDiceSkin
 import com.dndcharacterhandler.domain.model.DicePattern
 import com.dndcharacterhandler.presentation.components.EditDialog
+import com.dndcharacterhandler.presentation.components.StepButton
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 import java.util.UUID
@@ -121,7 +122,7 @@ private fun DiceCountList(
     onCountsChange: (Map<DieType, Int>) -> Unit
 ) {
     val colors = LocalDesignTokens.current.colors
-    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         DieType.entries.forEach { type ->
             val count = counts[type] ?: 0
             Row(
@@ -134,25 +135,27 @@ private fun DiceCountList(
                     style = MaterialTheme.typography.titleMedium,
                     color = colors.text.primary
                 )
-                IconButton(
+                StepButton(
+                    icon = Icons.Outlined.Remove,
+                    contentDescription = text("common_decrease"),
                     onClick = { onCountsChange(counts + (type to count - 1)) },
-                    enabled = count > 0
-                ) {
-                    Icon(Icons.Outlined.Remove, contentDescription = null)
-                }
+                    enabled = count > 0,
+                    size = 40.dp
+                )
                 Text(
                     text = count.toString(),
-                    modifier = Modifier.widthIn(min = 28.dp),
+                    modifier = Modifier.widthIn(min = 44.dp),
                     style = MaterialTheme.typography.titleMedium,
                     color = if (count > 0) colors.accent.inspiration else colors.text.subtle,
                     textAlign = TextAlign.Center
                 )
-                IconButton(
+                StepButton(
+                    icon = Icons.Outlined.Add,
+                    contentDescription = text("common_increase"),
                     onClick = { onCountsChange(counts + (type to count + 1)) },
-                    enabled = bodies + type.bodyCount <= MAX_DICE_BODIES
-                ) {
-                    Icon(Icons.Outlined.Add, contentDescription = null)
-                }
+                    enabled = bodies + type.bodyCount <= MAX_DICE_BODIES,
+                    size = 40.dp
+                )
             }
         }
     }
