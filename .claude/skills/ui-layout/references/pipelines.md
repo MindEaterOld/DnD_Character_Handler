@@ -80,6 +80,24 @@ ADB="$LOCALAPPDATA/Android/Sdk/platform-tools/adb.exe"
 4. Режим поп-апа (`remember` в экране) переживает закрытие: при повторном открытии он прежний.
 5. Изменённые данные тестового персонажа вернуть как было тем же способом и показать итоговый скриншот.
 
+## Пайплайн: проверка, после которой интерфейсом не откатить
+
+Новый портрет вместо пустого, смерть, удалённые вещи — интерфейс назад не вернёт. Тогда база целиком:
+
+```bash
+export MSYS_NO_PATHCONV=1; P=com.dndcharacterhandler
+for f in dnd_character_handler.db dnd_character_handler.db-wal; do "$ADB" exec-out "run-as $P cat databases/$f" > "db/$f"; done   # до проверки
+# ... проверка ...
+"$ADB" shell am force-stop $P
+"$ADB" shell "run-as $P rm databases/dnd_character_handler.db-wal databases/dnd_character_handler.db-shm"
+"$ADB" exec-in run-as $P sh -c 'cat > databases/dnd_character_handler.db' < db/dnd_character_handler.db
+```
+
+- Если копия вместе с `-wal` — вернуть оба файла; `-shm` удалить всегда, SQLite соберёт его сам. Чужой `-wal` поверх своей базы её испортит.
+- **Python `sqlite3.connect` на копии сливает `-wal` в базу и удаляет его** при закрытии. Читать копию — `sqlite3.connect('file:...db?mode=ro', uri=True)`; если уже открывал без этого — `-wal` больше нет, возвращать одну базу.
+- Картинку для портрета — `adb push` в `/sdcard/Pictures/`, затем `adb shell content call --uri content://media --method scan_volume --arg external_primary`, чтобы её увидел выбор файла. После проверки удалить.
+- Звук проверяется без ушей: `adb shell dumpsys audio | grep dndcharacter` — строка `new player` с временем на каждое проигрывание.
+
 ## Пайплайн: замер вместо глазомера
 
 - **Превью:** `--print-semantics` даёт `left/top/right/bottom` в пикселях кадра. Плотность = ширина кадра / 412 (рендер 1082 px → 2.626). Отступ в dp = разница в px / плотность.
