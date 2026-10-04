@@ -13,7 +13,6 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.vector.addPathNodes
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import com.dndcharacterhandler.domain.model.Condition
 import com.dndcharacterhandler.domain.rules.Defenses
 import com.dndcharacterhandler.presentation.components.changedValueColor
@@ -1548,11 +1547,11 @@ private val SkillsSpiderBody: ImageVector by lazy {
 }
 
 /**
- * An ability's short name on a frame's top border: over the ability cards and over the skills' groups
- * alike, 16sp in bold (owner's choice, 2026-10-04).
+ * An ability's short name on a frame's top border: the ability cards' title style, and the skills' groups
+ * take it from them (owner's choice, 2026-10-04).
  */
 private val abilityLabelStyle: TextStyle
-    @Composable get() = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
+    @Composable get() = MaterialTheme.typography.titleMedium
 
 /** The abilities skills belong to, in the sheet's order, with the short name their frames carry. */
 private val skillAbilities = listOf(
