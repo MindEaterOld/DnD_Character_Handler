@@ -2,12 +2,17 @@ package com.dndcharacterhandler.presentation.attributes
 
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.offset
 import androidx.compose.material.icons.outlined.GppBad
 import androidx.compose.material.icons.outlined.GppGood
 import androidx.compose.material.icons.outlined.Security
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.vector.addPathNodes
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.text.font.FontWeight
 import com.dndcharacterhandler.domain.model.Condition
 import com.dndcharacterhandler.domain.rules.Defenses
 import com.dndcharacterhandler.presentation.components.changedValueColor
@@ -1436,10 +1441,9 @@ private fun AbilityScoreCard(
 
 /**
  * The skills in two columns, one frame per ability with its short name on the top border, as the ability
- * scores have (owner's choice, 2026-10-04): Strength, Dexterity and Intelligence on the left, Wisdom and
- * Charisma on the right — nine rows each. The left column has one frame more, so it is taller; the right
- * one stretches to its height and puts the spare room between Wisdom and Charisma (variant C2), where a
- * spider hangs on its thread from Wisdom's frame.
+ * scores have: Strength, Dexterity and Intelligence on the left, Wisdom and
+ * Charisma on the right — nine rows each, the labels 16sp in bold (owner's choice, 2026-10-04). The left
+ * column has one frame more, so it is taller; under Charisma a spider hangs into the spare room.
  */
 @Composable
 private fun SkillGroups(
@@ -1469,66 +1473,76 @@ private fun SkillGroups(
         Column(
             modifier = Modifier
                 .weight(1f)
-                .fillMaxHeight(),
-            verticalArrangement = Arrangement.SpaceBetween
+                .fillMaxHeight()
         ) {
-            val right = groups.drop(3)
-            right.forEachIndexed { index, (key, groupSkills) ->
-                Box {
-                    SkillGroupCard(text(key), groupSkills, checkEffects, onSkillClick)
-                    if (index < right.lastIndex) {
-                        // Below the frame, it takes no room of its own.
-                        SkillsSpider(
-                            modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .padding(end = 22.dp)
-                                .offset(y = SkillsSpiderHeight)
-                        )
-                    }
-                }
+            groups.drop(3).forEachIndexed { index, (key, groupSkills) ->
+                if (index > 0) Spacer(modifier = Modifier.height(12.dp))
+                SkillGroupCard(text(key), groupSkills, checkEffects, onSkillClick)
             }
+            SkillsSpider(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            )
         }
     }
 }
 
-/** How far the skills' spider hangs below Wisdom's frame: clear of Charisma's label and border. */
-private val SkillsSpiderHeight = 26.dp
+/**
+ * The spider hanging under Charisma's frame into the skills' spare room (owner's choice from boards,
+ * 2026-10-04): a decoration in the ornament's colour, 22dp in from the column's left edge. Its feet are at
+ * the room's bottom, level with the left column's, and its thread runs up to the frame, as long as the
+ * room makes it. A [Spacer]: it draws in the height it is given and asks for none, so the columns stay level.
+ */
+@Composable
+private fun SkillsSpider(modifier: Modifier = Modifier) {
+    val painter = rememberVectorPainter(SkillsSpiderBody)
+    val tint = LocalDesignTokens.current.colors.ornament.middle
+    Spacer(
+        modifier = modifier.drawBehind {
+            // The icon's own units at 1.3dp each: 26dp from the thread's top to the feet, as the icon draws it.
+            val unit = 1.3.dp.toPx()
+            val bodyWidth = SkillsSpiderBody.viewportWidth * unit
+            val bodyHeight = SkillsSpiderBody.viewportHeight * unit
+            val left = 22.dp.toPx()
+            val bodyTop = size.height - bodyHeight
+            // The thread is two units wide over the body's middle and stops short of the legs, as in the icon.
+            drawRect(
+                color = tint,
+                topLeft = Offset(left + 9.55f * unit, 0f),
+                size = Size(2f * unit, (bodyTop - 1.84f * unit).coerceAtLeast(0f))
+            )
+            translate(left, bodyTop) {
+                with(painter) { draw(Size(bodyWidth, bodyHeight), colorFilter = ColorFilter.tint(tint)) }
+            }
+        }
+    )
+}
 
 /**
- * The spider hanging on its thread in the skills' spare room (owner's choice from boards, 2026-10-04): a
- * decoration, in the ornament's colour. The "spider-thread" of Material Design Icons by Pictogrammers
- * (Apache 2.0), its viewport cut to the figure, so the thread starts right at the frame.
+ * The spider's body: the "spider-thread" of Material Design Icons by Pictogrammers (Apache 2.0) without its
+ * thread, the viewport cut to the figure; [SkillsSpider] draws the thread to the length it needs.
  */
-private val SkillsSpiderIcon: ImageVector by lazy {
+private val SkillsSpiderBody: ImageVector by lazy {
     ImageVector.Builder(
-        name = "SkillsSpider",
-        defaultWidth = SkillsSpiderHeight * (21.1f / 20f),
-        defaultHeight = SkillsSpiderHeight,
+        name = "SkillsSpiderBody",
+        defaultWidth = 21.1.dp,
+        defaultHeight = 13.08.dp,
         viewportWidth = 21.1f,
-        viewportHeight = 20f
+        viewportHeight = 13.08f
     )
-        .addGroup(translationX = -1.45f, translationY = -2f)
+        .addGroup(translationX = -1.45f, translationY = -8.92f)
         .addPath(
             pathData = addPathNodes(
-                "M13 2v5.08A5.5 5.5 0 0 0 12 7a5.5 5.5 0 0 0-1 .08V2m5.9 13a5 5 0 0 1-.17.55L20 17.42V22h-2v-3.42l-2.26-1.29a4.94 4.94 0 " +
-                    "0 1-7.48 0L6 18.58V22H4v-4.58l3.27-1.87A5 5 0 0 1 7.1 15H5.3l-2.75 1.83l-1.1-1.66L4.7 13h2.4a5 5 0 0 1 .27-.88l-1.56-1l-" +
-                    "3.57.88l-.48-2l4.43-1.08l2.31 1.53a5 5 0 0 1 7 0l2.27-1.53L22.24 10l-.48 2l-3.57-.89l-1.56 1a5 5 0 0 1 .27.89h2.4l3.25 2.16l-1.1 1.66L18.7 15" +
+                "M16.9 15a5 5 0 0 1-.17.55L20 17.42V22h-2v-3.42l-2.26-1.29a4.94 4.94 0 0 1-7.48 0L6 18.58V22H4v-4.58l3.27-1.87A5 5 0 0 1 7.1 15H5.3" +
+                    "l-2.75 1.83l-1.1-1.66L4.7 13h2.4a5 5 0 0 1 .27-.88l-1.56-1l-3.57.88l-.48-2l4.43-1.08l2.31 1.53a5 5 0 0 1 7 0l2.27-1.53L22.24 10" +
+                    "l-.48 2l-3.57-.89l-1.56 1a5 5 0 0 1 .27.89h2.4l3.25 2.16l-1.1 1.66L18.7 15" +
                     "M11 14a1 1 0 1 0-1 1a1 1 0 0 0 1-1m4 0a1 1 0 1 0-1 1a1 1 0 0 0 1-1"
             ),
             fill = SolidColor(Color.Black)
         )
         .clearGroup()
         .build()
-}
-
-@Composable
-private fun SkillsSpider(modifier: Modifier = Modifier) {
-    Icon(
-        imageVector = SkillsSpiderIcon,
-        contentDescription = null,
-        modifier = modifier,
-        tint = LocalDesignTokens.current.colors.ornament.middle
-    )
 }
 
 /** The abilities skills belong to, in the sheet's order, with the short name their frames carry. */
@@ -1551,7 +1565,7 @@ private fun SkillGroupCard(
     BorderLabelCard(
         label = label,
         modifier = Modifier.fillMaxWidth(),
-        labelStyle = MaterialTheme.typography.labelMedium,
+        labelStyle = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
         cornerRadius = 7.dp
     ) {
         Column {
