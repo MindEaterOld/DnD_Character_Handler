@@ -820,8 +820,9 @@ private fun WeaponAttackPickerDialog(
                             .fillMaxWidth()
                             .clickable { onSelect(weapon) },
                         shape = RoundedCornerShape(12.dp),
-                        color = colors.surface.option,
-                        border = BorderStroke(1.dp, colors.ornament.outer)
+                        // A cell of a list to pick from: the card's own surface and an outline.
+                        color = colors.surface.card,
+                        border = BorderStroke(1.dp, colors.border.muted)
                     ) {
                         Column(
                             modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
@@ -900,8 +901,9 @@ private fun SpellAttackPickerDialog(
                             .fillMaxWidth()
                             .clickable { onSelect(spell) },
                         shape = RoundedCornerShape(12.dp),
-                        color = colors.surface.option,
-                        border = BorderStroke(1.dp, colors.ornament.outer)
+                        // A cell of a list to pick from: the card's own surface and an outline.
+                        color = colors.surface.card,
+                        border = BorderStroke(1.dp, colors.border.muted)
                     ) {
                         Column(
                             modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
