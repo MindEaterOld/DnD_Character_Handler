@@ -1,5 +1,8 @@
 package com.dndcharacterhandler.data.local
 
+import com.dndcharacterhandler.domain.model.encodeProficiencyIds
+import com.dndcharacterhandler.domain.rules.Defenses
+import com.dndcharacterhandler.data.repository.ProgressionJson
 import android.content.Context
 import androidx.room.Database
 import androidx.room.migration.Migration
@@ -30,7 +33,7 @@ import com.dndcharacterhandler.data.local.entity.SpellEntity
         FeatureEntity::class,
         NoteEntity::class
     ],
-    version = 53,
+    version = 54,
     exportSchema = false
 )
 @TypeConverters(RoomConverters::class)
@@ -99,7 +102,8 @@ abstract class AppDatabase : RoomDatabase() {
                     MIGRATION_49_50,
                     MIGRATION_50_51,
                     MIGRATION_51_52,
-                    MIGRATION_52_53
+                    MIGRATION_52_53,
+                    MIGRATION_53_54
                 ).build().also { INSTANCE = it }
             }
         }
@@ -607,6 +611,24 @@ abstract class AppDatabase : RoomDatabase() {
                 db.execSQL("ALTER TABLE characters ADD COLUMN conditions TEXT NOT NULL DEFAULT ''")
                 db.execSQL("ALTER TABLE characters ADD COLUMN exhaustion INTEGER NOT NULL DEFAULT 0")
                 db.execSQL("ALTER TABLE characters ADD COLUMN concentrationSpellId INTEGER")
+            }
+        }
+
+        private val MIGRATION_53_54 = object : Migration(53, 54) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Resistances, immunities, vulnerabilities; read back from what Character Wizard granted.
+                db.execSQL("ALTER TABLE characters ADD COLUMN defenses TEXT NOT NULL DEFAULT ''")
+                val found = mutableListOf<Pair<Long, String>>()
+                db.query("SELECT id, advancementsJson FROM characters").use { cursor ->
+                    while (cursor.moveToNext()) {
+                        val records = runCatching { ProgressionJson.decodeAdvancements(cursor.getString(1)) }.getOrDefault(emptyList())
+                        val defenses = Defenses.fromAdvancements(records)
+                        if (defenses.isNotEmpty()) found += cursor.getLong(0) to encodeProficiencyIds(defenses)
+                    }
+                }
+                found.forEach { (id, value) ->
+                    db.execSQL("UPDATE characters SET defenses = ? WHERE id = ?", arrayOf<Any>(value, id))
+                }
             }
         }
     }

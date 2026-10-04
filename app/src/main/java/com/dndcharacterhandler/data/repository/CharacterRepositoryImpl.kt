@@ -254,6 +254,7 @@ class CharacterRepositoryImpl(
                 CharacterProficiencyField.TOOL -> characterDao.updateToolProficiencies(characterId, value, updatedAt)
                 CharacterProficiencyField.LANGUAGE -> characterDao.updateLanguageProficiencies(characterId, value, updatedAt)
                 CharacterProficiencyField.WEAPON_MASTERY -> characterDao.updateWeaponMasteries(characterId, value, updatedAt)
+                CharacterProficiencyField.DEFENSES -> characterDao.updateDefenses(characterId, value, updatedAt)
             }
         }
     }

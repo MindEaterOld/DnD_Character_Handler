@@ -3795,6 +3795,55 @@
     "fr": "Échec automatique",
     "es": "Fallo automático"
   },
+  "attributes_defenses": {
+    "en": "Defenses",
+    "ru": "Защиты",
+    "de": "Verteidigung",
+    "fr": "Défenses",
+    "es": "Defensas"
+  },
+  "attributes_defense_resistances": {
+    "en": "Damage resistances",
+    "ru": "Сопротивления урону",
+    "de": "Schadensresistenzen",
+    "fr": "Résistances aux dégâts",
+    "es": "Resistencias al daño"
+  },
+  "attributes_defense_immunities": {
+    "en": "Immunities",
+    "ru": "Иммунитеты",
+    "de": "Immunitäten",
+    "fr": "Immunités",
+    "es": "Inmunidades"
+  },
+  "attributes_defense_vulnerabilities": {
+    "en": "Damage vulnerabilities",
+    "ru": "Уязвимости к урону",
+    "de": "Schadensanfälligkeiten",
+    "fr": "Vulnérabilités aux dégâts",
+    "es": "Vulnerabilidades al daño"
+  },
+  "attributes_defense_damage": {
+    "en": "Damage",
+    "ru": "Урон",
+    "de": "Schaden",
+    "fr": "Dégâts",
+    "es": "Daño"
+  },
+  "attributes_defense_conditions": {
+    "en": "Conditions",
+    "ru": "Состояния",
+    "de": "Zustände",
+    "fr": "États",
+    "es": "Estados"
+  },
+  "conditions_immune": {
+    "en": "immune",
+    "ru": "иммунитет",
+    "de": "immun",
+    "fr": "immunisé",
+    "es": "inmune"
+  },
   "attributes_roll_check": {
     "en": "Check",
     "ru": "Проверка",

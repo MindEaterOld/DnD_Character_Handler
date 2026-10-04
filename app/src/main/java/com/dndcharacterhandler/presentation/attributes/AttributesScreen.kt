@@ -1,5 +1,10 @@
 package com.dndcharacterhandler.presentation.attributes
 
+import androidx.compose.material.icons.outlined.GppBad
+import androidx.compose.material.icons.outlined.GppGood
+import androidx.compose.material.icons.outlined.Security
+import com.dndcharacterhandler.domain.model.Condition
+import com.dndcharacterhandler.domain.rules.Defenses
 import com.dndcharacterhandler.presentation.components.changedValueColor
 import com.dndcharacterhandler.presentation.components.RollMarker
 import com.dndcharacterhandler.domain.rules.rollEffects
@@ -256,6 +261,15 @@ class AttributesViewModel(
         )
     }
 
+    fun updateDefenses(characterBundle: CharacterBundle, keys: Set<String>) {
+        updateCharacterProficiencyString(
+            characterBundle = characterBundle,
+            field = CharacterProficiencyField.DEFENSES,
+            currentValue = characterBundle.character.defenses,
+            nextValue = encodeProficiencyIds(keys)
+        )
+    }
+
     fun updateWeaponMasteries(characterBundle: CharacterBundle, selectedIds: Set<String>) {
         updateCharacterProficiencyString(
             characterBundle = characterBundle,
@@ -356,6 +370,7 @@ fun AttributesScreen(
         onUpdateToolProficiencies = viewModel::updateToolProficiencies,
         onUpdateLanguageProficiencies = viewModel::updateLanguageProficiencies,
         onUpdateWeaponMasteries = viewModel::updateWeaponMasteries,
+        onUpdateDefenses = viewModel::updateDefenses,
         onUpdateDarkvisionMode = viewModel::updateDarkvisionMode,
         onUpdateDarkvisionManualFeet = viewModel::updateDarkvisionManualFeet,
         onUpsertFeature = viewModel::upsertFeature,
@@ -379,6 +394,7 @@ fun AttributesContent(
     onUpdateToolProficiencies: (CharacterBundle, Set<String>) -> Unit = { _, _ -> },
     onUpdateLanguageProficiencies: (CharacterBundle, Set<String>) -> Unit = { _, _ -> },
     onUpdateWeaponMasteries: (CharacterBundle, Set<String>) -> Unit = { _, _ -> },
+    onUpdateDefenses: (CharacterBundle, Set<String>) -> Unit = { _, _ -> },
     onUpdateDarkvisionMode: (CharacterBundle, DarkvisionMode) -> Unit = { _, _ -> },
     onUpdateDarkvisionManualFeet: (CharacterBundle, Int) -> Unit = { _, _ -> },
     onUpsertFeature: (CharacterBundle, Feature) -> Unit = { _, _ -> },
@@ -443,6 +459,9 @@ fun AttributesContent(
     var isToolsDialogOpen by remember { mutableStateOf(false) }
     var isLanguagesDialogOpen by remember { mutableStateOf(false) }
     var isMasteryDialogOpen by remember { mutableStateOf(false) }
+    /** The kind of defense being edited ("dr", "di", "dv"), with its draft. */
+    var editingDefenseKind by remember { mutableStateOf<String?>(null) }
+    var defenseDraft by remember { mutableStateOf(emptySet<String>()) }
     var masteryDraft by remember { mutableStateOf(emptySet<String>()) }
     var editingAbility by remember { mutableStateOf<AbilityScore?>(null) }
     var editingSkill by remember { mutableStateOf<SkillRow?>(null) }
@@ -631,6 +650,38 @@ fun AttributesContent(
                             isMasteryDialogOpen = true
                         }
                     )
+                }
+            }
+
+            item {
+                // Resistances, immunities, vulnerabilities: what Character Wizard grants, and edits by hand.
+                AttributesSectionTitle(title = text("attributes_defenses"))
+                val defenses = decodeProficiencyIds(character.defenses)
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    listOf(
+                        Triple(Defenses.RESISTANCE, Icons.Outlined.Security, "attributes_defense_resistances"),
+                        Triple(Defenses.IMMUNITY, Icons.Outlined.GppGood, "attributes_defense_immunities"),
+                        Triple(Defenses.VULNERABILITY, Icons.Outlined.GppBad, "attributes_defense_vulnerabilities")
+                    ).forEach { (kind, icon, labelKey) ->
+                        val shown = if (kind == Defenses.IMMUNITY) {
+                            Defenses.ofKind(defenses, Defenses.IMMUNITY) + Defenses.ofKind(defenses, Defenses.CONDITION_IMMUNITY)
+                        } else {
+                            Defenses.ofKind(defenses, kind)
+                        }
+                        ProficiencyInfoCard(
+                            icon = icon,
+                            label = text(labelKey),
+                            value = shown.joinToString(", ") { defenseName(it, characterCatalog, strings) }.ifEmpty { strings["common_none"] },
+                            modifier = Modifier.fillMaxWidth(),
+                            maxLines = Int.MAX_VALUE,
+                            onClick = {
+                                if (characterBundle != null) {
+                                    defenseDraft = defenses
+                                    editingDefenseKind = kind
+                                }
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -1006,6 +1057,55 @@ fun AttributesContent(
                             }
                         )
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    editingDefenseKind?.let { kind ->
+        // Each kind's own choices; the immunities hold the conditions too. Any key the lists lack
+        // (a Foundry extra, "all damage") stays and can be taken off.
+        val choices = buildList {
+            if (kind == Defenses.IMMUNITY) add(text("attributes_defense_damage") to null)
+            addAll(Defenses.DamageTypes.map { "$kind:$it" to it })
+            if (kind == Defenses.IMMUNITY) {
+                add(text("attributes_defense_conditions") to null)
+                addAll((Condition.entries.map { it.key } + "exhaustion").map { "${Defenses.CONDITION_IMMUNITY}:$it" to it })
+            }
+        }
+        val listed = choices.mapNotNull { (key, code) -> key.takeIf { code != null } }.toSet()
+        val extras = defenseDraft.filter { (it.startsWith("$kind:") || (kind == Defenses.IMMUNITY && it.startsWith("${Defenses.CONDITION_IMMUNITY}:"))) && it !in listed }
+        EditDialog(
+            title = text(
+                when (kind) {
+                    Defenses.RESISTANCE -> "attributes_defense_resistances"
+                    Defenses.VULNERABILITY -> "attributes_defense_vulnerabilities"
+                    else -> "attributes_defense_immunities"
+                }
+            ),
+            onDismiss = { editingDefenseKind = null },
+            onConfirm = {
+                if (characterBundle != null) onUpdateDefenses(characterBundle, defenseDraft)
+                editingDefenseKind = null
+            },
+            scrollable = false
+        ) {
+            LazyColumn(modifier = Modifier.height(420.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                items(choices + extras.map { it to it }) { (key, code) ->
+                    if (code == null) {
+                        Text(
+                            text = key,
+                            modifier = Modifier.padding(top = 8.dp, bottom = 2.dp),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = LocalDesignTokens.current.colors.text.label
+                        )
+                    } else {
+                        ProficiencyCheckboxRow(
+                            label = defenseName(key, characterCatalog, strings),
+                            checked = key in defenseDraft,
+                            onCheckedChange = { checked -> defenseDraft = defenseDraft.toggled(key, checked) }
+                        )
                     }
                 }
             }
@@ -1773,3 +1873,19 @@ internal fun previewFallbackCharacter(): Character =
 
 /** A roll asked from an ability card: its check, or its save. */
 private data class AbilityRoll(val score: AbilityScore, val save: Boolean)
+
+/** A defense's name: the catalog's ("Огонь", "Отравление"), else the key's own word. */
+private fun defenseName(
+    key: String,
+    catalog: CharacterCatalog?,
+    strings: com.dndcharacterhandler.data.localization.LocalizedStrings
+): String {
+    val russian = strings.language == AppLanguage.RUSSIAN
+    val code = key.substringAfter(':')
+    // The conditions by the sheet's own names (exhaustion is «Истощение», not the catalog's word).
+    if (key.startsWith("${Defenses.CONDITION_IMMUNITY}:") && (Condition.ofKey(code) != null || code == "exhaustion")) {
+        return strings["condition_$code"]
+    }
+    catalog?.traits?.get(key)?.name?.get(russian)?.takeIf { it.isNotBlank() }?.let { return it }
+    return code.replaceFirstChar { it.uppercase() }
+}

@@ -75,6 +75,8 @@ data class Character(
     val languageProficiencies: String,
     /** Weapons whose mastery property the character can use (weapon ids, see Proficiencies). */
     val weaponMasteries: String = "",
+    /** Resistances, immunities, vulnerabilities as trait keys ("dr:fire", "ci:poisoned"; see Defenses), encoded as proficiencies are. */
+    val defenses: String = "",
     val alignment: String,
     val background: String,
     val faith: String,

@@ -153,6 +153,7 @@ class CharacterArchiveCodecTest {
                 deathSaveFailures = 2,
                 conditions = setOf(Condition.POISONED, Condition.PRONE),
                 exhaustion = 2,
+                defenses = "dr:fire|ci:poisoned",
                 hitDieSides = 10,
                 spentHitDice = 2,
                 hasInspiration = true,

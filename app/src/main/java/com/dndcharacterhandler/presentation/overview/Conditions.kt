@@ -161,7 +161,10 @@ internal fun ConditionsDialog(
     initialConditions: Set<Condition>,
     initialExhaustion: Int,
     onSave: (Set<Condition>, Int) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    /** Conditions the character is immune to: shown, not to be put on. */
+    immune: Set<Condition> = emptySet(),
+    exhaustionImmune: Boolean = false
 ) {
     val strings = LocalStrings.current
     val colors = LocalDesignTokens.current.colors
@@ -197,7 +200,7 @@ internal fun ConditionsDialog(
                 icon = Icons.Outlined.Add,
                 contentDescription = text("common_increase"),
                 onClick = { exhaustion += 1 },
-                enabled = exhaustion < MAX_EXHAUSTION,
+                enabled = exhaustion < MAX_EXHAUSTION && !exhaustionImmune,
                 size = 40.dp
             )
         }
@@ -217,6 +220,7 @@ internal fun ConditionsDialog(
                 ConditionToggle(
                     condition = condition,
                     on = condition in picked,
+                    immune = condition in immune && condition !in picked,
                     onToggle = { picked = if (condition in picked) picked - condition else picked + condition }
                 )
             }
@@ -229,7 +233,7 @@ internal fun ConditionsDialog(
 
 /** A condition to pick: its colour at 12 % with its colour's text while on, the option fill while off. */
 @Composable
-private fun ConditionToggle(condition: Condition, on: Boolean, onToggle: () -> Unit) {
+private fun ConditionToggle(condition: Condition, on: Boolean, immune: Boolean = false, onToggle: () -> Unit) {
     val colors = LocalDesignTokens.current.colors
     val accent = condition.accent()
     Row(
@@ -237,16 +241,20 @@ private fun ConditionToggle(condition: Condition, on: Boolean, onToggle: () -> U
             .height(36.dp)
             .clip(RoundedCornerShape(18.dp))
             .background(if (on) accent.copy(alpha = HpActionTint) else colors.surface.option)
-            .toggleable(value = on, role = Role.Checkbox, onValueChange = { onToggle() })
+            .toggleable(value = on, enabled = !immune, role = Role.Checkbox, onValueChange = { onToggle() })
             .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(condition.icon, contentDescription = null, tint = if (on) accent else colors.text.subtle, modifier = Modifier.size(16.dp))
         Text(
-            text = text(condition.nameKey),
+            text = if (immune) "${text(condition.nameKey)} · ${text("conditions_immune")}" else text(condition.nameKey),
             modifier = Modifier.padding(start = 6.dp),
             style = MaterialTheme.typography.bodyMedium,
-            color = if (on) accent else colors.text.muted,
+            color = when {
+                on -> accent
+                immune -> colors.text.subtle
+                else -> colors.text.muted
+            },
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )

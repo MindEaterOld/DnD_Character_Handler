@@ -76,6 +76,7 @@ data class CharacterEntity(
     val toolProficiencies: String,
     val languageProficiencies: String,
     val weaponMasteries: String = "",
+    val defenses: String = "",
     val alignment: String,
     val background: String,
     val faith: String,

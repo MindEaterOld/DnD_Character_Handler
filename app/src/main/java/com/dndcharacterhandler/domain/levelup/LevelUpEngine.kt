@@ -859,6 +859,8 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
         val masteries = mutableListOf<String>()
         private val knownMasteries: Set<String> = decodeProficiencyIds(character.weaponMasteries).mapNotNull(::masteryKey).toSet()
         val defenses = mutableListOf<String>()
+        /** The defenses on the sheet already. */
+        private val knownDefenses: Set<String> = decodeProficiencyIds(character.defenses)
         val knownFeatureIds = bundle.features.mapNotNull { it.catalogId }.toMutableSet()
         val addedFeatures = mutableListOf<Pair<CatalogFeature, StepContext>>()
         val removedFeatureIds = mutableListOf<String>()
@@ -953,7 +955,7 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
                 mode == "mastery" -> key in masteries || key in knownMasteries
                 kind == "saves" -> code in saves
                 kind == "skills" -> code in proficientSkills
-                kind in DEFENSES -> key in defenses
+                kind in DEFENSES -> key in defenses || key in knownDefenses
                 else -> key in gainedTraits || onSheet(kind, key)
             }
         }
@@ -981,7 +983,7 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
                 mode == "upgrade" && kind == "skills" && code in proficientSkills -> if (expertSkills.add(code)) gainedExpertise += key
                 kind == "saves" -> if (saves.add(code)) gainedTraits += key
                 kind == "skills" -> if (proficientSkills.add(code)) gainedTraits += key
-                kind in DEFENSES -> if (key !in defenses) defenses += key
+                kind in DEFENSES -> if (key !in defenses && key !in knownDefenses) defenses += key
                 else -> if (!hasTrait(key, mode)) gainedTraits += key
             }
         }
@@ -1144,6 +1146,7 @@ class LevelUpEngine(private val catalog: CharacterCatalog) {
                 toolProficiencies = withTraits(character.toolProficiencies, "tool"),
                 languageProficiencies = withTraits(character.languageProficiencies, "languages"),
                 weaponMasteries = encodeProficiencyIds(weaponMasteries),
+                defenses = encodeProficiencyIds(decodeProficiencyIds(character.defenses) + defenses),
                 spellSlotMaximums = slotMaximums,
                 spellSlotRemaining = slotRemaining,
                 spellSlotsRestoreOnShortRest = if (onlyPact) true else character.spellSlotsRestoreOnShortRest,

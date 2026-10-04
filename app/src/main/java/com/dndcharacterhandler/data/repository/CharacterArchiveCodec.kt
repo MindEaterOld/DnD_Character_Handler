@@ -52,7 +52,8 @@ import java.io.File
 // 24: portraitFocusX, portraitFocusY, portraitZoom.
 // 25: conditions (keys, comma-separated), exhaustion. Concentration isn't carried: it lasts minutes,
 //     and the spells get new ids on import.
-private const val SCHEMA_VERSION = 25
+// 26: defenses (resistances, immunities, vulnerabilities as trait keys).
+private const val SCHEMA_VERSION = 26
 
 data class ImportedArchive(
     val characterBundle: CharacterBundle,
@@ -120,6 +121,7 @@ fun CharacterBundle.toArchiveManifest(
         put("toolProficiencies", character.toolProficiencies)
         put("languageProficiencies", character.languageProficiencies)
         put("weaponMasteries", character.weaponMasteries)
+        put("defenses", character.defenses)
         put("alignment", character.alignment)
         put("background", character.background)
         put("faith", character.faith)
@@ -392,6 +394,7 @@ fun archiveManifestToCharacterBundle(
         toolProficiencies = characterJson.optString("toolProficiencies"),
         languageProficiencies = characterJson.optString("languageProficiencies"),
         weaponMasteries = characterJson.optString("weaponMasteries"),
+        defenses = characterJson.optString("defenses"),
         alignment = characterJson.optString("alignment"),
         background = characterJson.optString("background"),
         faith = characterJson.optString("faith"),

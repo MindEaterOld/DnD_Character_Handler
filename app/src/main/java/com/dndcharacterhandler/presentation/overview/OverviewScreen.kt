@@ -1,4 +1,6 @@
 package com.dndcharacterhandler.presentation.overview
+import com.dndcharacterhandler.domain.model.decodeProficiencyIds
+import com.dndcharacterhandler.domain.rules.Defenses
 import com.dndcharacterhandler.presentation.components.changedValueColor
 import com.dndcharacterhandler.domain.rules.RollMode
 import com.dndcharacterhandler.domain.rules.damageTaken
@@ -1711,7 +1713,9 @@ private fun OverviewContent(
                 onUpdateExhaustion(characterBundle, exhaustion)
                 isConditionsDialogOpen = false
             },
-            onDismiss = { isConditionsDialogOpen = false }
+            onDismiss = { isConditionsDialogOpen = false },
+            immune = Defenses.immuneConditions(decodeProficiencyIds(characterBundle.character.defenses)),
+            exhaustionImmune = Defenses.immuneToExhaustion(decodeProficiencyIds(characterBundle.character.defenses))
         )
     }
 

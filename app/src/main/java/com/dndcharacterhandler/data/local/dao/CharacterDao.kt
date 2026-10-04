@@ -284,6 +284,9 @@ interface CharacterDao {
     @Query("UPDATE characters SET weaponMasteries = :value, updatedAt = :updatedAt WHERE id = :characterId")
     suspend fun updateWeaponMasteries(characterId: Long, value: String, updatedAt: Long)
 
+    @Query("UPDATE characters SET defenses = :value, updatedAt = :updatedAt WHERE id = :characterId")
+    suspend fun updateDefenses(characterId: Long, value: String, updatedAt: Long)
+
     @Query("UPDATE characters SET alignment = :value, updatedAt = :updatedAt WHERE id = :characterId")
     suspend fun updateAlignment(characterId: Long, value: String, updatedAt: Long)
 
