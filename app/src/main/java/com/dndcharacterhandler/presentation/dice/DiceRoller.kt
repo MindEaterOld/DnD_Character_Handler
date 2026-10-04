@@ -11,8 +11,9 @@ import androidx.compose.runtime.staticCompositionLocalOf
  */
 internal class DiceRollRequest(
     val selection: Map<DieType, Int>,
-    val onSettled: (List<ThrownDie>) -> Unit = {},
-    val result: (@Composable (List<ThrownDie>) -> Unit)? = null
+    val result: (@Composable (List<ThrownDie>) -> Unit)? = null,
+    // Last, so a trailing lambda is always this one and never the composable [result].
+    val onSettled: (List<ThrownDie>) -> Unit = {}
 )
 
 /** The faces of a die: 20 for a d20, 100 for the d100 thrown as two d10. */
