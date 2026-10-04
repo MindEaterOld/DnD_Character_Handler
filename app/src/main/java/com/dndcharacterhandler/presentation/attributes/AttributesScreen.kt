@@ -1518,7 +1518,8 @@ private fun SkillRowCard(
                 )
             }
             Text(
-                text = strings[skill.nameKey],
+                // The cell's own name, cut with a dot to its maxChars; the pop-ups take the full one.
+                text = strings["${skill.nameKey}_short"],
                 modifier = Modifier
                     .padding(start = 6.dp)
                     .weight(1f),

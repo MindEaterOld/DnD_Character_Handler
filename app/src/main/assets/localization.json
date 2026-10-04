@@ -323,12 +323,28 @@
     "fr": "Acrobaties",
     "es": "Acrobacias"
   },
+  "skill_acrobatics_short": {
+    "maxChars": 14,
+    "en": "Acrobatics",
+    "ru": "Акробатика",
+    "de": "Akrobatik",
+    "fr": "Acrobaties",
+    "es": "Acrobacias"
+  },
   "skill_animal_handling": {
     "en": "Animal Handling",
     "ru": "Уход за животными",
     "de": "Mit Tieren umgehen",
     "fr": "Dressage",
     "es": "Trato con Animales"
+  },
+  "skill_animal_handling_short": {
+    "maxChars": 14,
+    "en": "Animal Handl.",
+    "ru": "Уход за живот.",
+    "de": "Mit Tier. umg.",
+    "fr": "Dressage",
+    "es": "Trato c. Anim."
   },
   "skill_arcana": {
     "en": "Arcana",
@@ -337,7 +353,23 @@
     "fr": "Arcanes",
     "es": "Conocimiento Arcano"
   },
+  "skill_arcana_short": {
+    "maxChars": 14,
+    "en": "Arcana",
+    "ru": "Магия",
+    "de": "Arkane Kunde",
+    "fr": "Arcanes",
+    "es": "Conoc. Arcano"
+  },
   "skill_athletics": {
+    "en": "Athletics",
+    "ru": "Атлетика",
+    "de": "Athletik",
+    "fr": "Athlétisme",
+    "es": "Atletismo"
+  },
+  "skill_athletics_short": {
+    "maxChars": 14,
     "en": "Athletics",
     "ru": "Атлетика",
     "de": "Athletik",
@@ -351,7 +383,23 @@
     "fr": "Tromperie",
     "es": "Engaño"
   },
+  "skill_deception_short": {
+    "maxChars": 14,
+    "en": "Deception",
+    "ru": "Обман",
+    "de": "Täuschen",
+    "fr": "Tromperie",
+    "es": "Engaño"
+  },
   "skill_history": {
+    "en": "History",
+    "ru": "История",
+    "de": "Geschichte",
+    "fr": "Histoire",
+    "es": "Historia"
+  },
+  "skill_history_short": {
+    "maxChars": 14,
     "en": "History",
     "ru": "История",
     "de": "Geschichte",
@@ -365,7 +413,23 @@
     "fr": "Intuition",
     "es": "Perspicacia"
   },
+  "skill_insight_short": {
+    "maxChars": 14,
+    "en": "Insight",
+    "ru": "Проницательн.",
+    "de": "Motiv erkennen",
+    "fr": "Intuition",
+    "es": "Perspicacia"
+  },
   "skill_intimidation": {
+    "en": "Intimidation",
+    "ru": "Запугивание",
+    "de": "Einschüchtern",
+    "fr": "Intimidation",
+    "es": "Intimidación"
+  },
+  "skill_intimidation_short": {
+    "maxChars": 14,
     "en": "Intimidation",
     "ru": "Запугивание",
     "de": "Einschüchtern",
@@ -379,7 +443,23 @@
     "fr": "Investigation",
     "es": "Investigación"
   },
+  "skill_investigation_short": {
+    "maxChars": 14,
+    "en": "Investigation",
+    "ru": "Расследование",
+    "de": "Nachforsch.",
+    "fr": "Investigation",
+    "es": "Investigación"
+  },
   "skill_medicine": {
+    "en": "Medicine",
+    "ru": "Медицина",
+    "de": "Heilkunde",
+    "fr": "Médecine",
+    "es": "Medicina"
+  },
+  "skill_medicine_short": {
+    "maxChars": 14,
     "en": "Medicine",
     "ru": "Медицина",
     "de": "Heilkunde",
@@ -393,7 +473,23 @@
     "fr": "Nature",
     "es": "Naturaleza"
   },
+  "skill_nature_short": {
+    "maxChars": 14,
+    "en": "Nature",
+    "ru": "Природа",
+    "de": "Naturkunde",
+    "fr": "Nature",
+    "es": "Naturaleza"
+  },
   "skill_perception": {
+    "en": "Perception",
+    "ru": "Внимательность",
+    "de": "Wahrnehmung",
+    "fr": "Perception",
+    "es": "Percepción"
+  },
+  "skill_perception_short": {
+    "maxChars": 14,
     "en": "Perception",
     "ru": "Внимательность",
     "de": "Wahrnehmung",
@@ -407,7 +503,23 @@
     "fr": "Représentation",
     "es": "Interpretación"
   },
+  "skill_performance_short": {
+    "maxChars": 14,
+    "en": "Performance",
+    "ru": "Выступление",
+    "de": "Auftreten",
+    "fr": "Représentation",
+    "es": "Interpretación"
+  },
   "skill_persuasion": {
+    "en": "Persuasion",
+    "ru": "Убеждение",
+    "de": "Überzeugen",
+    "fr": "Persuasion",
+    "es": "Persuasión"
+  },
+  "skill_persuasion_short": {
+    "maxChars": 14,
     "en": "Persuasion",
     "ru": "Убеждение",
     "de": "Überzeugen",
@@ -421,10 +533,26 @@
     "fr": "Religion",
     "es": "Religión"
   },
+  "skill_religion_short": {
+    "maxChars": 14,
+    "en": "Religion",
+    "ru": "Религия",
+    "de": "Religion",
+    "fr": "Religion",
+    "es": "Religión"
+  },
   "skill_sleight_of_hand": {
     "en": "Sleight of Hand",
     "ru": "Ловкость рук",
     "de": "Fingerfertigkeit",
+    "fr": "Escamotage",
+    "es": "Juego de Manos"
+  },
+  "skill_sleight_of_hand_short": {
+    "maxChars": 14,
+    "en": "Sleight of H.",
+    "ru": "Ловкость рук",
+    "de": "Fingerfertigk.",
     "fr": "Escamotage",
     "es": "Juego de Manos"
   },
@@ -435,10 +563,26 @@
     "fr": "Discrétion",
     "es": "Sigilo"
   },
+  "skill_stealth_short": {
+    "maxChars": 14,
+    "en": "Stealth",
+    "ru": "Скрытность",
+    "de": "Heimlichkeit",
+    "fr": "Discrétion",
+    "es": "Sigilo"
+  },
   "skill_survival": {
     "en": "Survival",
     "ru": "Выживание",
     "de": "Überlebenskunst",
+    "fr": "Survie",
+    "es": "Supervivencia"
+  },
+  "skill_survival_short": {
+    "maxChars": 14,
+    "en": "Survival",
+    "ru": "Выживание",
+    "de": "Überlebensk.",
     "fr": "Survie",
     "es": "Supervivencia"
   },
