@@ -58,7 +58,6 @@ import com.dndcharacterhandler.presentation.features.FeaturesScreen
 import com.dndcharacterhandler.presentation.inventory.InventoryScreen
 import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.localization.text
-import com.dndcharacterhandler.presentation.notes.NotesScreen
 import com.dndcharacterhandler.presentation.overview.OverviewLevelUpOverlay
 import com.dndcharacterhandler.presentation.overview.OverviewScreen
 import com.dndcharacterhandler.presentation.spells.SpellsScreen
@@ -278,13 +277,7 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                             composable(AppScreen.Biography.route) {
                                 BiographyScreen(
                                     viewModel = appState.biographyViewModel,
-                                    onOpenDrawer = { scope.launch { drawerState.open() } },
-                                    onOpenDice = openDice
-                                )
-                            }
-                            composable(AppScreen.Notes.route) {
-                                NotesScreen(
-                                    viewModel = appState.notesViewModel,
+                                    notesViewModel = appState.notesViewModel,
                                     onOpenDrawer = { scope.launch { drawerState.open() } },
                                     onOpenDice = openDice
                                 )
@@ -403,7 +396,8 @@ private val routesWithAddButton = setOf(
     AppScreen.Inventory.route,
     AppScreen.Spells.route,
     AppScreen.Features.route,
-    AppScreen.Notes.route
+    // The notes' "+", under the biography.
+    AppScreen.Biography.route
 )
 
 private fun suggestCharacterArchiveName(characterName: String?): String {

@@ -1,13 +1,17 @@
 package com.dndcharacterhandler.presentation.notes
 
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.dndcharacterhandler.data.localization.LocalizedStrings
 import com.dndcharacterhandler.domain.model.AppLanguage
 import com.dndcharacterhandler.domain.model.CharacterBundle
 import com.dndcharacterhandler.domain.model.Note
 import com.dndcharacterhandler.presentation.attributes.previewFallbackCharacter
+import com.dndcharacterhandler.presentation.components.ScreenBackground
 import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.theme.DnDTheme
 
@@ -81,7 +85,8 @@ fun NotesScreenPreview() {
 
     CompositionLocalProvider(LocalStrings provides strings) {
         DnDTheme {
-            NotesContent(
+            // The section as the biography lists it, below its own sections.
+            val items = notesSectionItems(
                 characterBundle = CharacterBundle(
                     character = character,
                     skills = emptyList(),
@@ -93,6 +98,11 @@ fun NotesScreenPreview() {
                     notes = notes
                 )
             )
+            ScreenBackground {
+                LazyColumn(contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 4.dp)) {
+                    items()
+                }
+            }
         }
     }
 }

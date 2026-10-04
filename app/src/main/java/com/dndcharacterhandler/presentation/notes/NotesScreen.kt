@@ -1,18 +1,16 @@
 package com.dndcharacterhandler.presentation.notes
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -34,7 +32,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -46,12 +46,7 @@ import com.dndcharacterhandler.domain.repository.CharacterRepository
 import com.dndcharacterhandler.domain.usecase.GetCharacterBundleUseCase
 import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
-import com.dndcharacterhandler.presentation.components.CharacterScreenHeader
 import com.dndcharacterhandler.presentation.components.EditDialog
-import com.dndcharacterhandler.presentation.components.FloatingAddButton
-import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
-import com.dndcharacterhandler.presentation.components.ScreenBackground
-import com.dndcharacterhandler.presentation.components.ScreenTopActions
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 import kotlinx.coroutines.launch
@@ -85,61 +80,62 @@ class NotesViewModel(
     }
 }
 
+/**
+ * The notes as a section of another screen's list: the biography's, below its own sections (owner's
+ * choice, 2026-10-04: the notes screen merged into the biography). [content] lays the list out, puts the
+ * section's items where they go and shows the "+" that starts a note ([onAddNote]); the note's editor is
+ * the section's own. Until the character loads there are no items.
+ */
 @Composable
-fun NotesScreen(
+fun NotesSection(
     viewModel: NotesViewModel,
-    onOpenDrawer: () -> Unit,
-    onOpenDice: () -> Unit
+    content: @Composable (items: LazyListScope.() -> Unit, onAddNote: () -> Unit) -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    NotesContent(
-        characterBundle = state.character,
-        onOpenDrawer = onOpenDrawer,
-        onOpenDice = onOpenDice,
-        onUpdateNote = viewModel::updateNote,
-        onTogglePinned = viewModel::togglePinned
-    )
+    val bundle = state.character
+    var editingNote by remember { mutableStateOf<Note?>(null) }
+    val items = if (bundle == null) {
+        NoItems
+    } else {
+        notesSectionItems(
+            characterBundle = bundle,
+            onOpenNote = { editingNote = it },
+            onTogglePinned = viewModel::togglePinned
+        )
+    }
+    content(items) { editingNote = newDraftNote() }
+
+    val note = editingNote
+    if (note != null && bundle != null) {
+        NoteEditDialog(
+            note = note,
+            onDismiss = { editingNote = null },
+            onSave = { updated ->
+                viewModel.updateNote(bundle, updated.copy(updatedDate = System.currentTimeMillis()))
+                editingNote = null
+            }
+        )
+    }
 }
 
+private val NoItems: LazyListScope.() -> Unit = {}
+
+/** What every key of the notes section's items starts with, so a list can tell them from its own. */
+const val NotesKeyPrefix = "notes:"
+
+/**
+ * The section's list items: its title, the search and the notes, the pinned first, then the latest. They
+ * space themselves, as the biography's list has no spacing of its own.
+ */
 @Composable
-internal fun NotesContent(
-    characterBundle: CharacterBundle?,
-    onOpenDrawer: () -> Unit = {},
-    onOpenDice: () -> Unit = {},
-    onUpdateNote: (CharacterBundle, Note) -> Unit = { _, _ -> },
+internal fun notesSectionItems(
+    characterBundle: CharacterBundle,
+    onOpenNote: (Note) -> Unit = {},
     onTogglePinned: (CharacterBundle, Note) -> Unit = { _, _ -> }
-) {
-    val colors = LocalDesignTokens.current.colors
-    val character = characterBundle?.character
+): LazyListScope.() -> Unit {
     var query by remember { mutableStateOf("") }
-    var editingNote by remember { mutableStateOf<Note?>(null) }
-
-    if (character == null) {
-        ScreenBackground {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(start = 24.dp, end = 24.dp, top = 4.dp)
-            ) {
-                ScreenTopActions(
-                    onOpenDrawer = onOpenDrawer,
-                    onOpenDice = onOpenDice,
-                    modifier = Modifier.align(Alignment.TopCenter)
-                )
-                Text(
-                    text = text("placeholder_loading_character"),
-                    modifier = Modifier.align(Alignment.Center),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = colors.progress.xpFill
-                )
-            }
-        }
-        return
-    }
-
-    val resolvedBundle = characterBundle
-    val visibleNotes = remember(resolvedBundle.notes, query) {
-        resolvedBundle.notes
+    val visibleNotes = remember(characterBundle.notes, query) {
+        characterBundle.notes
             .filter { note ->
                 val needle = query.trim()
                 needle.isBlank() ||
@@ -148,70 +144,40 @@ internal fun NotesContent(
             }
             .sortedWith(compareByDescending<Note> { it.isPinned }.thenByDescending { maxOf(it.updatedDate, it.createdDate) })
     }
-
-    ScreenBackground {
-        Box(modifier = Modifier.fillMaxSize()) {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 4.dp, bottom = LocalFloatingButtonsInset.current),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                item {
-                    CharacterScreenHeader(
-                        character = character,
-                        onOpenDrawer = onOpenDrawer,
-                        onOpenDice = onOpenDice
-                    )
-                }
-
-                item {
-                    NotesSearchField(
-                        value = query,
-                        onValueChange = { query = it }
-                    )
-                }
-
-                item {
-                    NotesSectionTitle(text("nav_notes"))
-                }
-
-                items(visibleNotes, key = { it.id }) { note ->
-                    NoteCard(
-                        note = note,
-                        onClick = { editingNote = note },
-                        onTogglePinned = { onTogglePinned(resolvedBundle, note) }
-                    )
-                }
-            }
-            FloatingAddButton(
-                onClick = { editingNote = newDraftNote() },
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(end = 24.dp, bottom = 15.dp)
+    return {
+        item(key = "${NotesKeyPrefix}title") {
+            NotesSectionTitle(
+                title = text("nav_notes"),
+                modifier = Modifier.padding(top = 14.dp)
             )
         }
-    }
-
-    editingNote?.let { note ->
-        NoteEditDialog(
-            note = note,
-            onDismiss = { editingNote = null },
-            onSave = { updated ->
-                onUpdateNote(resolvedBundle, updated.copy(updatedDate = System.currentTimeMillis()))
-                editingNote = null
-            }
-        )
+        item(key = "${NotesKeyPrefix}search") {
+            NotesSearchField(
+                value = query,
+                onValueChange = { query = it },
+                modifier = Modifier.padding(top = 6.dp)
+            )
+        }
+        items(visibleNotes, key = { "$NotesKeyPrefix${it.id}" }) { note ->
+            NoteCard(
+                note = note,
+                onClick = { onOpenNote(note) },
+                onTogglePinned = { onTogglePinned(characterBundle, note) },
+                modifier = Modifier.padding(top = 10.dp)
+            )
+        }
     }
 }
 
 @Composable
 private fun NotesSearchField(
     value: String,
-    onValueChange: (String) -> Unit
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val colors = LocalDesignTokens.current.colors
     Surface(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
         color = colors.surface.card.copy(alpha = 0.62f),
         border = BorderStroke(1.dp, colors.border.muted)
@@ -247,14 +213,15 @@ private fun NotesSearchField(
     }
 }
 
+/** The section's title, drawn as the biography's own section titles, which it follows. */
 @Composable
-private fun NotesSectionTitle(title: String) {
+private fun NotesSectionTitle(title: String, modifier: Modifier = Modifier) {
     val tokens = LocalDesignTokens.current.typography
     val colors = LocalDesignTokens.current.colors
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .padding(top = 6.dp),
+            .padding(top = 6.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
@@ -264,20 +231,20 @@ private fun NotesSectionTitle(title: String) {
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
-        Box(
+        Canvas(
             modifier = Modifier
-                .padding(start = 12.dp)
+                .padding(start = 14.dp)
                 .weight(1f)
-                .height(1.dp)
+                .height(18.dp)
         ) {
-            androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize()) {
-                drawLine(
-                    color = colors.border.muted,
-                    start = androidx.compose.ui.geometry.Offset(0f, size.height / 2f),
-                    end = androidx.compose.ui.geometry.Offset(size.width, size.height / 2f),
-                    strokeWidth = 1.dp.toPx()
-                )
-            }
+            val centerY = size.height / 2f
+            drawLine(
+                color = colors.ornament.stroke,
+                start = Offset(0f, centerY),
+                end = Offset(size.width - 18.dp.toPx(), centerY),
+                strokeWidth = 1.dp.toPx(),
+                cap = StrokeCap.Round
+            )
         }
     }
 }
@@ -286,11 +253,12 @@ private fun NotesSectionTitle(title: String) {
 private fun NoteCard(
     note: Note,
     onClick: () -> Unit,
-    onTogglePinned: () -> Unit
+    onTogglePinned: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val colors = LocalDesignTokens.current.colors
     Surface(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(10.dp),
