@@ -1,5 +1,11 @@
 package com.dndcharacterhandler.presentation.spells
 
+import androidx.compose.material.icons.outlined.AutoFixHigh
+import com.dndcharacterhandler.domain.repository.castSpell
+import com.dndcharacterhandler.domain.repository.undoCast
+import com.dndcharacterhandler.presentation.combat.SpellCastDialog
+import com.dndcharacterhandler.presentation.combat.castConcentration
+import com.dndcharacterhandler.presentation.components.CardMainButton
 import com.dndcharacterhandler.presentation.components.changedValueColor
 import com.dndcharacterhandler.domain.rules.breaksConcentration
 import com.dndcharacterhandler.presentation.components.MiniStatCardHeight
@@ -192,6 +198,16 @@ class SpellsViewModel(
         viewModelScope.launch { characterRepository.updateConcentration(current.id, next) }
     }
 
+    /** A spell cast: its slot spent (none for null), concentration taken up when it needs it. */
+    fun castSpell(characterBundle: CharacterBundle, slotLevel: Int?, concentrationSpellId: Long?) {
+        viewModelScope.launch { characterRepository.castSpell(characterBundle.character, slotLevel, concentrationSpellId) }
+    }
+
+    /** Takes a cast back: slots and concentration as [before] had them. */
+    fun undoCast(before: com.dndcharacterhandler.domain.model.Character) {
+        viewModelScope.launch { characterRepository.undoCast(before) }
+    }
+
     fun endConcentration(characterBundle: CharacterBundle) {
         val current = characterBundle.character
         if (current.concentrationSpellId == null) return
@@ -302,6 +318,8 @@ fun SpellsScreen(
         onTogglePrepared = viewModel::togglePrepared,
         onToggleConcentration = viewModel::toggleConcentration,
         onEndConcentration = viewModel::endConcentration,
+        onCastSpell = viewModel::castSpell,
+        onUndoCast = viewModel::undoCast,
         onUpdateAllSpellSlots = viewModel::updateAllSpellSlots,
         onUpdateSpellSlotRemaining = viewModel::updateSpellSlotRemaining,
         onUpdateSpellcastingAbility = viewModel::updateSpellcastingAbility
@@ -323,6 +341,9 @@ internal fun SpellsContent(
     onTogglePrepared: (CharacterBundle, Spell) -> Unit = { _, _ -> },
     onToggleConcentration: (CharacterBundle, Spell) -> Unit = { _, _ -> },
     onEndConcentration: (CharacterBundle) -> Unit = {},
+    /** A spell cast: the slot level spent (null for none) and the spell to concentrate on. */
+    onCastSpell: (CharacterBundle, Int?, Long?) -> Unit = { _, _, _ -> },
+    onUndoCast: (com.dndcharacterhandler.domain.model.Character) -> Unit = {},
     onUpdateAllSpellSlots: (CharacterBundle, List<Int>, List<Int>, Boolean, Boolean) -> Unit = { _, _, _, _, _ -> },
     onUpdateSpellSlotRemaining: (CharacterBundle, Int, Int) -> Unit = { _, _, _ -> },
     onUpdateSpellcastingAbility: (CharacterBundle, SpellcastingAbility) -> Unit = { _, _ -> }
@@ -331,6 +352,7 @@ internal fun SpellsContent(
     val strings = LocalStrings.current
     var query by remember { mutableStateOf("") }
     var editingSpell by remember { mutableStateOf<Spell?>(null) }
+    var castingSpell by remember { mutableStateOf<Spell?>(null) }
     var isSlotsDialogOpen by remember { mutableStateOf(false) }
     var isAddEntryDialogOpen by remember { mutableStateOf(false) }
     var isSpellcastingAbilityDialogOpen by remember { mutableStateOf(false) }
@@ -477,6 +499,8 @@ internal fun SpellsContent(
                                     expandedSpells = if (open) expandedSpells + spell.id else expandedSpells - spell.id
                                 },
                                 onEdit = { editingSpell = spell },
+                                // Every spell can be cast; the pop-up says when one isn't prepared.
+                                onCast = { castingSpell = spell },
                                 onTogglePrepared = { onTogglePrepared(resolvedBundle, spell) },
                                 concentrating = character.concentrationSpellId == spell.id,
                                 canConcentrate = canConcentrate,
@@ -509,6 +533,33 @@ internal fun SpellsContent(
                 onUpdateSpell(resolvedBundle, item.toLocalizedSpell(strings))
                 isAddEntryDialogOpen = false
             }
+        )
+    }
+
+    castingSpell?.let { spell ->
+        SpellCastDialog(
+            spell = spell,
+            characterLevel = character.level,
+            slotMaximums = slotMaximums,
+            slotRemaining = slotRemainings,
+            attackBonus = proficiencyBonus + spellModifier + attackEffects.modifier,
+            effects = attackEffects,
+            spellModifier = spellModifier,
+            spellSaveDcLabel = strings.format("combat_attack_save_dc", spellSaveDc),
+            concentration = castConcentration(
+                spell.requiresConcentration,
+                spell.id,
+                character,
+                displayedSpells.firstOrNull { it.id == character.concentrationSpellId }?.name
+            ),
+            notPrepared = spell.level > 0 && !spell.isPrepared && !spell.isAlwaysPrepared,
+            onCast = { slotLevel -> onCastSpell(resolvedBundle, slotLevel, spell.id.takeIf { spell.requiresConcentration }) },
+            onUndo = { onUndoCast(character) },
+            onEdit = {
+                castingSpell = null
+                editingSpell = spell
+            },
+            onDismiss = { castingSpell = null }
         )
     }
 
@@ -723,6 +774,8 @@ private fun SpellCard(
     expanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
     onEdit: () -> Unit,
+    /** Casting it, for a spell at hand (a cantrip, a prepared one); null hides the button. */
+    onCast: (() -> Unit)? = null,
     onTogglePrepared: () -> Unit,
     /** Held by the character's concentration now; a concentration spell gets the toggle. */
     concentrating: Boolean = false,
@@ -757,7 +810,12 @@ private fun SpellCard(
             }
         },
         onLongClick = onEdit,
-        actions = { CardEditButton(onClick = onEdit) }
+        actions = {
+            CardEditButton(onClick = onEdit)
+            onCast?.let { cast ->
+                CardMainButton(label = text("spells_cast"), icon = Icons.Outlined.AutoFixHigh, onClick = cast, modifier = Modifier.padding(start = 8.dp))
+            }
+        }
     )
 }
 

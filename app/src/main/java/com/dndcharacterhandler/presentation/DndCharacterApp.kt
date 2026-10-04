@@ -10,8 +10,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -61,6 +63,7 @@ import com.dndcharacterhandler.presentation.notes.NotesScreen
 import com.dndcharacterhandler.presentation.overview.OverviewLevelUpOverlay
 import com.dndcharacterhandler.presentation.overview.OverviewScreen
 import com.dndcharacterhandler.presentation.spells.SpellsScreen
+import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -154,7 +157,14 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
     CompositionLocalProvider(
         LocalStrings provides strings,
         LocalDiceSkin provides diceSkin,
-        com.dndcharacterhandler.presentation.dice.LocalDiceRoller provides { request -> diceRollRequest = request }
+        com.dndcharacterhandler.presentation.dice.LocalDiceRoller provides { request -> diceRollRequest = request },
+        com.dndcharacterhandler.presentation.components.LocalAppSnackbar provides com.dndcharacterhandler.presentation.components.AppSnackbar { message, actionLabel, onAction ->
+            scope.launch {
+                snackbarHostState.currentSnackbarData?.dismiss()
+                val result = snackbarHostState.showSnackbar(message, actionLabel, withDismissAction = false, duration = androidx.compose.material3.SnackbarDuration.Long)
+                if (result == androidx.compose.material3.SnackbarResult.ActionPerformed) onAction()
+            }
+        }
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             ModalNavigationDrawer(
@@ -294,6 +304,7 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                 }
             }
 
+            // On the standard button fill (it stands out from the cards), its action in gold.
             SnackbarHost(
                 hostState = snackbarHostState,
                 modifier = Modifier
@@ -301,7 +312,16 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                     .statusBarsPadding()
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 12.dp)
-            )
+            ) { data ->
+                val tokens = LocalDesignTokens.current.colors
+                androidx.compose.material3.Snackbar(
+                    snackbarData = data,
+                    containerColor = tokens.surface.button,
+                    contentColor = tokens.text.primary,
+                    actionColor = MaterialTheme.colorScheme.primary,
+                    shape = RoundedCornerShape(12.dp)
+                )
+            }
 
             // Covers the whole app, bottom navigation included.
             levelUpTarget?.let { target ->

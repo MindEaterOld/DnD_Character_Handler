@@ -105,5 +105,11 @@ EditDialog(title, onDismiss, onConfirm?, onDelete?)
 
 Строки в превью — рукописная карта `LocalizedStrings(language, mapOf(...))`: новый ключ экрана добавлять и туда.
 
+Общие части, добавленные 2026-10-04:
+- `components/Toggle.kt` — `toggleFill(selected)`, `toggleContent(selected)`, `toggleRadioColors()`, `ToggleChip`: любой выбор из ряда или списка (выбранный — золото).
+- `components/CardEditButton.kt` — `CardMainButton`: главное действие внизу раскрытой карточки с заливкой кнопки («Сотворить»), после текстовых «Изменить»/«Переложить».
+- `components/AppSnackbar.kt` — `LocalAppSnackbar.current.show(message, actionLabel, onAction)`: уведомление сверху с «Отменить». Стол кубов рисуется поверх него — для действия с броском подпись идёт в итог на столе (`RollInput.resultTitle`).
+- `combat/SpellCast.kt` — `SpellCastDialog`: окно сотворения (ячейки, концентрация, бросок) для экрана заклинаний и боя; `RollDialog` принимает `header`, `onRoll`, `enabled`, `castLabel`.
+
 Превью частей, которые на устройстве зависят от удачи или не рисуются в превью экрана:
 - `RollResultsPreview` в `combat/RollDialog.kt` — панели итога над 3D-столом (`DiceResultPanel`): натуральная 20 с кнопкой крита, натуральная 1, помеха, урон заклинания со СЛ, второй бросок крита. Строки берёт из `localization.json` (`LocalizationRepository(LocalContext.current)`), русские.

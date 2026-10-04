@@ -6163,6 +6163,104 @@
     "fr": "Concentration",
     "es": "Concentración"
   },
+  "spells_cast": {
+    "en": "Cast",
+    "ru": "Сотворить",
+    "de": "Wirken",
+    "fr": "Lancer",
+    "es": "Lanzar"
+  },
+  "spells_cast_slot": {
+    "en": "Spell slot",
+    "ru": "Ячейка",
+    "de": "Zauberplatz",
+    "fr": "Emplacement",
+    "es": "Espacio"
+  },
+  "spells_cast_no_slot": {
+    "en": "No slot",
+    "ru": "Без ячейки",
+    "de": "Ohne Platz",
+    "fr": "Sans",
+    "es": "Sin espacio"
+  },
+  "spells_cast_no_slots_left": {
+    "en": "No slots left: only without one.",
+    "ru": "Свободных ячеек нет — только без ячейки.",
+    "de": "Keine Plätze frei – nur ohne Platz.",
+    "fr": "Plus d'emplacement libre : seulement sans.",
+    "es": "No quedan espacios: solo sin espacio."
+  },
+  "spells_cast_ritual": {
+    "en": "As a ritual: no slot, 10 minutes longer.",
+    "ru": "Ритуалом: без ячейки, на 10 минут дольше.",
+    "de": "Als Ritual: ohne Platz, 10 Minuten länger.",
+    "fr": "En rituel : sans emplacement, 10 minutes de plus.",
+    "es": "Como ritual: sin espacio, 10 minutos más."
+  },
+  "spells_cast_concentration_starts": {
+    "en": "Starts concentration.",
+    "ru": "Начнётся концентрация.",
+    "de": "Beginnt Konzentration.",
+    "fr": "Démarre la concentration.",
+    "es": "Inicia la concentración."
+  },
+  "spells_cast_concentration_replaces": {
+    "en": "Ends concentration on “%1$s”.",
+    "ru": "Прервёт концентрацию на «%1$s».",
+    "de": "Beendet die Konzentration auf „%1$s“.",
+    "fr": "Met fin à la concentration sur « %1$s ».",
+    "es": "Termina la concentración en «%1$s»."
+  },
+  "spells_cast_concentration_cannot": {
+    "en": "No concentration: the character is incapacitated.",
+    "ru": "Концентрация не начнётся: персонаж недееспособен.",
+    "de": "Keine Konzentration: Der Charakter ist kampfunfähig.",
+    "fr": "Pas de concentration : le personnage est neutralisé.",
+    "es": "Sin concentración: el personaje está incapacitado."
+  },
+  "spells_cast_damage": {
+    "en": "Cast and roll damage",
+    "ru": "Сотворить и бросить урон",
+    "de": "Wirken und Schaden würfeln",
+    "fr": "Lancer et jeter les dégâts",
+    "es": "Lanzar y tirar el daño"
+  },
+  "spells_cast_healing": {
+    "en": "Cast and roll healing",
+    "ru": "Сотворить и бросить лечение",
+    "de": "Wirken und Heilung würfeln",
+    "fr": "Lancer et jeter les soins",
+    "es": "Lanzar y tirar la curación"
+  },
+  "spells_cast_with_slot": {
+    "en": "%1$s · level %2$s slot",
+    "ru": "%1$s · ячейка %2$s круга",
+    "de": "%1$s · Platz Grad %2$s",
+    "fr": "%1$s · emplacement niv. %2$s",
+    "es": "%1$s · espacio de nivel %2$s"
+  },
+  "spells_cast_done": {
+    "en": "%1$s cast",
+    "ru": "Сотворено: %1$s",
+    "de": "Gewirkt: %1$s",
+    "fr": "Lancé : %1$s",
+    "es": "Lanzado: %1$s"
+  },
+  "common_undo": {
+    "en": "Undo",
+    "ru": "Отменить",
+    "de": "Rückgängig",
+    "fr": "Annuler",
+    "es": "Deshacer"
+  },
+  "spells_cast_not_prepared": {
+    "en": "Not prepared.",
+    "ru": "Заклинание не подготовлено.",
+    "de": "Nicht vorbereitet.",
+    "fr": "Sort non préparé.",
+    "es": "Conjuro no preparado."
+  },
   "spells_section_effect": {
     "en": "Effect",
     "ru": "Эффект",

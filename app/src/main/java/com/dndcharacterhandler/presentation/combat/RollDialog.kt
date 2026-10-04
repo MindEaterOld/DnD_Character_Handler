@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AutoFixHigh
 import androidx.compose.material.icons.outlined.Casino
 import androidx.compose.material.icons.outlined.KeyboardDoubleArrowDown
 import androidx.compose.material.icons.outlined.KeyboardDoubleArrowUp
@@ -87,7 +89,9 @@ internal data class RollInput(
     /** What the d20 is rolled for: "Атака", "Проверка Силы", "Спасбросок Ловкости", "Инициатива". */
     val rollLabel: String? = null,
     /** The edit link's own words, when "Edit" isn't what it opens. */
-    val editLabel: String? = null
+    val editLabel: String? = null,
+    /** The table's reading's title, when it says more than [title] (the slot a spell was cast with). */
+    val resultTitle: String? = null
 )
 
 /**
@@ -98,7 +102,21 @@ internal data class RollInput(
  * spell, healing) one button throws the damage.
  */
 @Composable
-internal fun RollDialog(input: RollInput, onEdit: () -> Unit, onDismiss: () -> Unit) {
+internal fun RollDialog(
+    input: RollInput,
+    onEdit: () -> Unit,
+    onDismiss: () -> Unit,
+    /** Above the lines: a spell's slot to cast with, what the cast does to concentration. */
+    header: (@Composable ColumnScope.() -> Unit)? = null,
+    /** Called as the throw goes onto the table (a spell is cast then: its slot spent). */
+    onRoll: () -> Unit = {},
+    /** Off while nothing may be thrown yet (a spell with no slot picked). */
+    enabled: Boolean = true,
+    /** The one button of a spell that rolls nothing ("Cast"); null where there is always a roll. */
+    castLabel: String? = null,
+    /** The damage-only (healing-only) button's words when a cast comes with it. */
+    damageOnlyLabel: String? = null
+) {
     val colors = LocalDesignTokens.current.colors
     val strings = LocalStrings.current
     val rollDice = LocalDiceRoller.current
@@ -112,6 +130,7 @@ internal fun RollDialog(input: RollInput, onEdit: () -> Unit, onDismiss: () -> U
     val valid = attackExtra != null && damageExtra != null
 
     EditDialog(title = input.title, onDismiss = onDismiss) {
+        header?.invoke(this)
         input.attackBonus?.let { bonus ->
             RollLine(
                 label = input.rollLabel ?: text("combat_roll_attack"),
@@ -177,32 +196,40 @@ internal fun RollDialog(input: RollInput, onEdit: () -> Unit, onDismiss: () -> U
                     attackExtra = attackExtra ?: DiceFormula.Zero,
                     damage = (damage ?: DiceFormula.Zero) + (damageExtra ?: DiceFormula.Zero)
                 )
+                onRoll()
                 rollDice(
                     DiceRollRequest(
                         selection = attackRoll.selection().toDieSelection(),
-                        result = { dice -> AttackResult(input.title, input.rollLabel, attackRoll, attackRoll.read(dice.toThrownValues()), damageType, input.healing) }
+                        result = { dice -> AttackResult(input.resultTitle ?: input.title, input.rollLabel, attackRoll, attackRoll.read(dice.toThrownValues()), damageType, input.healing) }
                     )
                 )
                 onDismiss()
             }
             val preferred = input.effects?.mode ?: RollMode.NORMAL
-            RollModeButton(text("combat_roll_advantage"), Icons.Outlined.KeyboardDoubleArrowUp, preferred == RollMode.ADVANTAGE) { roll(RollMode.ADVANTAGE) }
-            RollModeButton(text("combat_roll_normal"), Icons.Outlined.Casino, preferred == RollMode.NORMAL) { roll(RollMode.NORMAL) }
-            RollModeButton(text("combat_roll_disadvantage"), Icons.Outlined.KeyboardDoubleArrowDown, preferred == RollMode.DISADVANTAGE) { roll(RollMode.DISADVANTAGE) }
+            RollModeButton(text("combat_roll_advantage"), Icons.Outlined.KeyboardDoubleArrowUp, preferred == RollMode.ADVANTAGE, enabled) { roll(RollMode.ADVANTAGE) }
+            RollModeButton(text("combat_roll_normal"), Icons.Outlined.Casino, preferred == RollMode.NORMAL, enabled) { roll(RollMode.NORMAL) }
+            RollModeButton(text("combat_roll_disadvantage"), Icons.Outlined.KeyboardDoubleArrowDown, preferred == RollMode.DISADVANTAGE, enabled) { roll(RollMode.DISADVANTAGE) }
         } else if (input.attackBonus == null && damage != null && valid) {
             val formula = damage + (damageExtra ?: DiceFormula.Zero)
             RollModeButton(
-                label = text(if (input.healing) "combat_roll_healing_only" else "combat_roll_damage_only"),
+                label = damageOnlyLabel ?: text(if (input.healing) "combat_roll_healing_only" else "combat_roll_damage_only"),
                 icon = Icons.Outlined.Casino,
                 primary = true,
-                enabled = formula.hasDice
+                enabled = enabled && formula.hasDice
             ) {
+                onRoll()
                 rollDice(
                     DiceRollRequest(
                         selection = formula.dice.toDieSelection(),
-                        result = { dice -> AmountResult(input.title, formula.read(dice.toThrownValues()), damageType, input.healing, input.save) }
+                        result = { dice -> AmountResult(input.resultTitle ?: input.title, formula.read(dice.toThrownValues()), damageType, input.healing, input.save) }
                     )
                 )
+                onDismiss()
+            }
+        } else if (castLabel != null && input.attackBonus == null && damage == null) {
+            // A spell that rolls nothing (Bless, Shield): casting it is the whole action.
+            RollModeButton(label = castLabel, icon = Icons.Outlined.AutoFixHigh, primary = true, enabled = enabled) {
+                onRoll()
                 onDismiss()
             }
         }

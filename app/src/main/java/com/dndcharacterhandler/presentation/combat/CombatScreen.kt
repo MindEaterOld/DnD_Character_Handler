@@ -1,8 +1,13 @@
 package com.dndcharacterhandler.presentation.combat
 
+import com.dndcharacterhandler.domain.repository.castSpell
+import com.dndcharacterhandler.domain.repository.undoCast
 import com.dndcharacterhandler.domain.rules.asIn
 import com.dndcharacterhandler.domain.rules.bookSpellOf
+import com.dndcharacterhandler.domain.rules.castAt
+import com.dndcharacterhandler.domain.rules.castLevel
 import com.dndcharacterhandler.domain.rules.madeWith
+import com.dndcharacterhandler.domain.rules.spellSlots
 import com.dndcharacterhandler.domain.rules.weaponAttack
 import com.dndcharacterhandler.domain.rules.weaponOf
 import com.dndcharacterhandler.presentation.components.NumberStepperField
@@ -223,6 +228,16 @@ class CombatViewModel(
         }
     }
 
+    /** A spell cast from combat: its slot spent, concentration on the spellbook's spell taken up. */
+    fun castSpell(characterBundle: CharacterBundle, slotLevel: Int?, concentrationSpellId: Long?) {
+        viewModelScope.launch { characterRepository.castSpell(characterBundle.character, slotLevel, concentrationSpellId) }
+    }
+
+    /** Takes a cast back: slots and concentration as [before] had them. */
+    fun undoCast(before: com.dndcharacterhandler.domain.model.Character) {
+        viewModelScope.launch { characterRepository.undoCast(before) }
+    }
+
     /** The spellbook's spell, edited from combat. */
     fun updateSpell(characterBundle: CharacterBundle, spell: Spell) {
         viewModelScope.launch {
@@ -303,6 +318,8 @@ fun CombatScreen(
         onUpdateSpellAttack = viewModel::updateSpellAttack,
         onDeleteSpellAttack = viewModel::deleteSpellAttack,
         onUpdateSpell = viewModel::updateSpell,
+        onCastSpell = viewModel::castSpell,
+        onUndoCast = viewModel::undoCast,
         onUpdateCombatResourceUses = viewModel::updateCombatResourceUses,
         onUpdateCombatResource = viewModel::updateCombatResource,
         onDeleteCombatResource = viewModel::deleteCombatResource
@@ -326,6 +343,9 @@ internal fun CombatContent(
     onDeleteSpellAttack: (CharacterBundle, Spell) -> Unit = { _, _ -> },
     /** Saves a spell of the spellbook: a combat spell that is the book's is edited there. */
     onUpdateSpell: (CharacterBundle, Spell) -> Unit = { _, _ -> },
+    /** A spell cast: the slot level spent (null for none) and the spellbook's spell to concentrate on. */
+    onCastSpell: (CharacterBundle, Int?, Long?) -> Unit = { _, _, _ -> },
+    onUndoCast: (com.dndcharacterhandler.domain.model.Character) -> Unit = {},
     onUpdateCombatResourceUses: (CharacterBundle, Long, Int) -> Unit = { _, _, _ -> },
     onUpdateCombatResource: (CharacterBundle, CombatResource) -> Unit = { _, _ -> },
     onDeleteCombatResource: (CharacterBundle, CombatResource) -> Unit = { _, _ -> }
@@ -501,14 +521,13 @@ internal fun CombatContent(
                     }
                     items(spellAttacks, key = { "spell-${it.id}" }) { spell ->
                         SpellAttackCard(
-                            spell = spell,
+                            // A cantrip's dice as the character's level has them.
+                            spell = spell.castAt(castLevel(spell.level, null, character.level)),
                             spellAttackBonus = spellAttackBonus,
                             attackEffects = attackEffects,
                             spellSaveDcLabel = spellSaveDcLabel,
                             spellModifier = spellModifier,
-                            onClick = {
-                                if (parseResolutionKind(spell) == SpellResolutionKind.NONE) editingSpellAttack = spell else rollingSpell = spell
-                            },
+                            onClick = { rollingSpell = spell },
                             onLongClick = { editingSpellAttack = spell }
                         )
                     }
@@ -614,8 +633,26 @@ internal fun CombatContent(
     }
 
     rollingSpell?.let { spell ->
-        RollDialog(
-            input = spell.rollInput(proficiencyBonus + spellModifier + attackEffects.modifier, attackEffects, spellModifier, spellSaveDcLabel, strings),
+        // Concentration is kept on the spellbook's spell; one made by hand in combat isn't tracked.
+        val book = bookSpellOf(spell, bookSpells)
+        SpellCastDialog(
+            spell = spell,
+            characterLevel = character.level,
+            slotMaximums = spellSlots(character.spellSlotMaximums),
+            slotRemaining = spellSlots(character.spellSlotRemaining),
+            attackBonus = proficiencyBonus + spellModifier + attackEffects.modifier,
+            effects = attackEffects,
+            spellModifier = spellModifier,
+            spellSaveDcLabel = spellSaveDcLabel,
+            concentration = castConcentration(
+                spell.requiresConcentration,
+                book?.id,
+                character,
+                bookSpells.firstOrNull { it.id == character.concentrationSpellId }?.name
+            ),
+            notPrepared = book != null && book.level > 0 && !book.isPrepared && !book.isAlwaysPrepared,
+            onCast = { slotLevel -> onCastSpell(resolvedBundle, slotLevel, book?.id?.takeIf { spell.requiresConcentration }) },
+            onUndo = { onUndoCast(character) },
             onEdit = {
                 rollingSpell = null
                 editingSpellAttack = spell
@@ -1949,7 +1986,7 @@ private fun Spell.spellAttackBonusOrDcLabel(
     SpellResolutionKind.NONE -> ""
 }
 
-private fun Spell.spellSaveLabel(
+internal fun Spell.spellSaveLabel(
     spellSaveDcLabel: String,
     strings: com.dndcharacterhandler.data.localization.LocalizedStrings
 ): String {
@@ -2408,7 +2445,7 @@ private fun formatAttackRange(
     }
 }
 
-private fun damageTypeLocalizationKeyForCombat(type: String): String =
+internal fun damageTypeLocalizationKeyForCombat(type: String): String =
     when (type) {
         "Acid" -> "inventory_damage_type_acid"
         "Bludgeoning" -> "inventory_damage_type_bludgeoning"
@@ -2582,31 +2619,3 @@ private fun Attack.rollInput(
     )
 }
 
-/** The roll pop-up's view of a spell: an attack, a save with its DC, or healing. */
-private fun Spell.rollInput(
-    attackBonus: Int,
-    effects: RollEffects,
-    spellModifier: Int,
-    spellSaveDcLabel: String,
-    strings: com.dndcharacterhandler.data.localization.LocalizedStrings
-): RollInput {
-    val kind = parseResolutionKind(this)
-    fun formula(base: String, bonusIsModifier: Boolean, bonusValue: Int): DiceFormula? {
-        val dice = DiceFormula.parse(base) ?: return null
-        val total = dice + (if (bonusIsModifier) spellModifier else bonusValue)
-        return total.takeUnless { it.isEmpty }
-    }
-    val healing = kind == SpellResolutionKind.HEAL
-    return RollInput(
-        title = name,
-        attackBonus = if (kind == SpellResolutionKind.ATTACK) attackBonus else null,
-        effects = effects,
-        damage = if (healing) formula(healBase, healBonusIsModifier, healBonusValue) else formula(damageBase, damageBonusIsModifier, damageBonusValue),
-        damageType = if (healing) "" else damageType.takeIf { it.isNotBlank() }?.let { strings[damageTypeLocalizationKeyForCombat(it)] }.orEmpty(),
-        alternateDamage = if (healing) null else formula(altDamageBase, altDamageBonusIsModifier, altDamageBonusValue),
-        alternateKey = "combat_roll_alternate",
-        alternateDamageType = altDamageType.takeIf { it.isNotBlank() }?.let { strings[damageTypeLocalizationKeyForCombat(it)] },
-        healing = healing,
-        save = if (kind == SpellResolutionKind.SAVE) spellSaveLabel(spellSaveDcLabel, strings) else null
-    )
-}
