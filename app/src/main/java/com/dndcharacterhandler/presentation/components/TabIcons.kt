@@ -72,12 +72,21 @@ val TabIconSpells: ImageVector by lazy {
     )
 }
 
-/** Features: a four-pointed star. MDI "star-four-points-outline". */
+/**
+ * Features: a rosette with ribbons, an award — the class features, traits and feats a character earns.
+ * MDI "seal-variant" (owner's choice from boards, 2026-10-04).
+ */
 val TabIconFeatures: ImageVector by lazy {
     tabIcon(
         "TabIconFeatures",
-        "m12 6.7l1.45 3.85L17.3 12l-3.85 1.45L12 17.3l-1.45-3.85L6.7 12l3.85-1.45zM12 1L9 9l-8 3l8 3l3 8l3-8" +
-            "l8-3l-8-3z"
+        "M17.71 6.15c-.25-.77-.92-.94-1.26-1.38c-.31-.46-.27-1.15-.92-1.62s-1.3-.23-1.83-.38S12.81 2 12 2" +
+            "s-1.18.58-1.7.77s-1.17-.1-1.83.38s-.61 1.16-.92 1.62c-.34.44-1 .61-1.26 1.38S6.5 7.45 6.5 8" +
+            "S6 9.08 6.29 9.85s.92.94 1.26 1.38c.31.46.27 1.15.92 1.62s1.3.23 1.83.38s.89.77 1.7.77" +
+            "s1.18-.58 1.7-.77s1.17.1 1.83-.38s.61-1.16.92-1.62c.34-.44 1-.61 1.26-1.38S17.5 8.55 17.5 8" +
+            "s.5-1.08.21-1.85M12 12a4 4 0 1 1 4-4a4 4 0 0 1-4 4m2-4a2 2 0 1 1-2-2a2 2 0 0 1 2 2m-.29 7.56" +
+            "l-.63 3.6l-.73 4.13l-2.61-2.49l-3.3 1.45l1.33-7.5a4 4 0 0 0 1.89.42a4.2 4.2 0 0 0 1.34.68" +
+            "a3.3 3.3 0 0 0 1 .15a3.5 3.5 0 0 0 1.71-.44m4.21 3.22l-2.58-.92l.51-2.94a3.2 3.2 0 0 0 .85-.45" +
+            "l.12-.1Z"
     )
 }
 
