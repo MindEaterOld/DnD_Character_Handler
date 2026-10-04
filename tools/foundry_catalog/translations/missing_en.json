@@ -5,9 +5,8 @@
   "book": "PHB 2024",
   "owner": "Acolyte",
   "ru": "Посвящённый в магию Жреца",
-  "en": "",
+  "en": "Magic Initiate (Cleric)",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -17,9 +16,8 @@
   "book": "PHB 2024",
   "owner": "Genie Touched",
   "ru": "Посвящённый в магию Волшебника",
-  "en": "",
+  "en": "Magic Initiate (Wizard)",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -29,9 +27,8 @@
   "book": "PHB 2024",
   "owner": "Moonwell Pilgrim",
   "ru": "Посвящённый в магию Друида",
-  "en": "",
+  "en": "Magic Initiate (Druid)",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -1042,9 +1039,8 @@
   "book": "PHB 2024",
   "owner": "Elemental Adept",
   "ru": "Адепт стихии (Звук)",
-  "en": "",
+  "en": "Elemental Adept (Thunder)",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -1054,9 +1050,8 @@
   "book": "PHB 2024",
   "owner": "Elemental Adept",
   "ru": "Адепт стихии (Кислота)",
-  "en": "",
+  "en": "Elemental Adept (Acid)",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -1066,9 +1061,8 @@
   "book": "PHB 2024",
   "owner": "Elemental Adept",
   "ru": "Адепт стихии (Огонь)",
-  "en": "",
+  "en": "Elemental Adept (Fire)",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -1078,9 +1072,8 @@
   "book": "PHB 2024",
   "owner": "Elemental Adept",
   "ru": "Адепт стихии (Холод)",
-  "en": "",
+  "en": "Elemental Adept (Cold)",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -1090,9 +1083,8 @@
   "book": "PHB 2024",
   "owner": "Elemental Adept",
   "ru": "Адепт стихии (Электричество)",
-  "en": "",
+  "en": "Elemental Adept (Lightning)",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -1102,9 +1094,8 @@
   "book": "PHB 2024",
   "owner": "Elemental Affinity",
   "ru": "Родство со стихией: Кислота",
-  "en": "",
+  "en": "Elemental Affinity: Acid",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -1114,9 +1105,8 @@
   "book": "PHB 2024",
   "owner": "Elemental Affinity",
   "ru": "Родство со стихией: Огонь",
-  "en": "",
+  "en": "Elemental Affinity: Fire",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -1126,9 +1116,8 @@
   "book": "PHB 2024",
   "owner": "Elemental Affinity",
   "ru": "Родство со стихией: Холод",
-  "en": "",
+  "en": "Elemental Affinity: Cold",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -1138,9 +1127,8 @@
   "book": "PHB 2024",
   "owner": "Elemental Affinity",
   "ru": "Родство со стихией: Электричество",
-  "en": "",
+  "en": "Elemental Affinity: Lightning",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -1150,9 +1138,8 @@
   "book": "PHB 2024",
   "owner": "Elemental Affinity",
   "ru": "Родство со стихией: Яд",
-  "en": "",
+  "en": "Elemental Affinity: Poison",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -1184,9 +1171,8 @@
   "book": "PHB 2024",
   "owner": "",
   "ru": "Засушливые земли",
-  "en": "",
+  "en": "Arid Land",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -1207,9 +1193,8 @@
   "book": "PHB 2024",
   "owner": "",
   "ru": "Полярные земли",
-  "en": "",
+  "en": "Polar Land",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -1219,9 +1204,8 @@
   "book": "PHB 2024",
   "owner": "",
   "ru": "Тропические земли",
-  "en": "",
+  "en": "Tropical Land",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -1231,9 +1215,8 @@
   "book": "PHB 2024",
   "owner": "",
   "ru": "Умеренные земли",
-  "en": "",
+  "en": "Temperate Land",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -2453,9 +2436,8 @@
   "book": "EE",
   "owner": "Quori Bond",
   "ru": "Узы ду'улора",
-  "en": "",
+  "en": "Du'ulora Bond",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -2465,9 +2447,8 @@
   "book": "EE",
   "owner": "Quori Bond",
   "ru": "Узы каларак",
-  "en": "",
+  "en": "Kalaraq Bond",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -2477,9 +2458,8 @@
   "book": "EE",
   "owner": "Quori Bond",
   "ru": "Узы хашалак",
-  "en": "",
+  "en": "Hashalaq Bond",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -2489,9 +2469,8 @@
   "book": "EE",
   "owner": "Quori Bond",
   "ru": "Узы цукора",
-  "en": "",
+  "en": "Tsucora Bond",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -2501,9 +2480,8 @@
   "book": "EE",
   "owner": "",
   "ru": "Эликсир жизненной силы",
-  "en": "",
+  "en": "Elixir of Vitality",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -2513,9 +2491,8 @@
   "book": "EE",
   "owner": "",
   "ru": "Эликсир панацеи",
-  "en": "",
+  "en": "Elixir of Panacea",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -2525,9 +2502,8 @@
   "book": "EE",
   "owner": "Gnoll",
   "ru": "Укус",
-  "en": "",
+  "en": "Bite",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -2636,9 +2612,8 @@
   "book": "EE",
   "owner": "Aasimar (Eberron)",
   "ru": "Мабарский аасимар",
-  "en": "",
+  "en": "Mabaran Aasimar",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -2648,9 +2623,8 @@
   "book": "EE",
   "owner": "Aasimar (Eberron)",
   "ru": "Стандартный аасимар",
-  "en": "",
+  "en": "Standard Aasimar",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -2660,9 +2634,8 @@
   "book": "EE",
   "owner": "Aasimar (Eberron)",
   "ru": "Фернийский аасимар",
-  "en": "",
+  "en": "Fernian Aasimar",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -2672,9 +2645,8 @@
   "book": "EE",
   "owner": "Dhakaani Ghaal'dar (Hobgoblin)",
   "ru": "Дисциплина",
-  "en": "",
+  "en": "Discipline",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -2684,9 +2656,8 @@
   "book": "EE",
   "owner": "Dhakaani Ghaal'dar (Hobgoblin)",
   "ru": "Сила в единстве",
-  "en": "",
+  "en": "Strength in Unity",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -2696,9 +2667,8 @@
   "book": "EE",
   "owner": "Dhakaani Golin'dar (Goblin)",
   "ru": "Естественная скрытность",
-  "en": "",
+  "en": "Natural Stealth",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -2708,9 +2678,8 @@
   "book": "EE",
   "owner": "Dhakaani Golin'dar (Goblin)",
   "ru": "Проворство",
-  "en": "",
+  "en": "Nimbleness",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -2720,9 +2689,8 @@
   "book": "EE",
   "owner": "Dhakaani Guul'dar (Bugbear)",
   "ru": "Длиннорукий",
-  "en": "",
+  "en": "Long-Limbed",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -2732,9 +2700,8 @@
   "book": "EE",
   "owner": "Dhakaani Guul'dar (Bugbear)",
   "ru": "Могучее телосложение",
-  "en": "",
+  "en": "Powerful Build",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -2744,9 +2711,8 @@
   "book": "EE",
   "owner": "Dhakaani Guul'dar (Bugbear)",
   "ru": "Плечом к плечу",
-  "en": "",
+  "en": "Shoulder to Shoulder",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -2756,9 +2722,19 @@
   "book": "EE",
   "owner": "Dhakaani Guul'dar (Bugbear)",
   "ru": "Храбрый",
-  "en": "",
+  "en": "Brave",
   "missing": [
-   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "ZfqbsOIZG18vi3rA",
+  "kind": "speciesTrait",
+  "book": "EE",
+  "owner": "Fernian Aasimar",
+  "ru": "Откровение Фернии",
+  "en": "Revelation of Fernia",
+  "missing": [
    "text"
   ]
  },
@@ -2768,9 +2744,8 @@
   "book": "EE",
   "owner": "Gnoll",
   "ru": "Буйство",
-  "en": "",
+  "en": "Rampage",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -2780,9 +2755,8 @@
   "book": "EE",
   "owner": "Kalamer Landwalker (Merfolk)",
   "ru": "Амфибия",
-  "en": "",
+  "en": "Amphibious",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -2792,9 +2766,19 @@
   "book": "EE",
   "owner": "Kalamer Landwalker (Merfolk)",
   "ru": "Благословение моря",
-  "en": "",
+  "en": "Blessing of the Sea",
   "missing": [
-   "name",
+   "text"
+  ]
+ },
+ {
+  "id": "fGaBIU3YloblYWYw",
+  "kind": "speciesTrait",
+  "book": "EE",
+  "owner": "Mabaran Aasimar",
+  "ru": "Откровение Мабара",
+  "en": "Revelation of Mabar",
+  "missing": [
    "text"
   ]
  },
@@ -2804,9 +2788,8 @@
   "book": "EE",
   "owner": "Ruinbound",
   "ru": "Неестественная стойкость",
-  "en": "",
+  "en": "Unnatural Resilience",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -2816,9 +2799,8 @@
   "book": "EE",
   "owner": "Ruinbound",
   "ru": "Персональный симбионт",
-  "en": "",
+  "en": "Personal Symbiont",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -2828,9 +2810,8 @@
   "book": "EE",
   "owner": "Ruinbound",
   "ru": "Симбиотическое мастерство",
-  "en": "",
+  "en": "Symbiotic Mastery",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -2840,9 +2821,8 @@
   "book": "EE",
   "owner": "Sahuagin",
   "ru": "Быстрый пловец",
-  "en": "",
+  "en": "Swift Swimmer",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -2852,9 +2832,8 @@
   "book": "EE",
   "owner": "Sahuagin",
   "ru": "Кровавое бешенство",
-  "en": "",
+  "en": "Blood Frenzy",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -2864,9 +2843,8 @@
   "book": "EE",
   "owner": "Sahuagin",
   "ru": "Ограниченная амфибийность",
-  "en": "",
+  "en": "Limited Amphibiousness",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -2876,33 +2854,8 @@
   "book": "EE",
   "owner": "Sahuagin",
   "ru": "Природная броня",
-  "en": "",
+  "en": "Natural Armor",
   "missing": [
-   "name",
-   "text"
-  ]
- },
- {
-  "id": "fGaBIU3YloblYWYw",
-  "kind": "speciesTrait",
-  "book": "EE",
-  "owner": "Мабарский аасимар",
-  "ru": "Откровение Мабара",
-  "en": "",
-  "missing": [
-   "name",
-   "text"
-  ]
- },
- {
-  "id": "ZfqbsOIZG18vi3rA",
-  "kind": "speciesTrait",
-  "book": "EE",
-  "owner": "Фернийский аасимар",
-  "ru": "Откровение Фернии",
-  "en": "",
-  "missing": [
-   "name",
    "text"
   ]
  },
@@ -4551,9 +4504,8 @@
   "book": "EFA",
   "owner": "",
   "ru": "Дредноут",
-  "en": "",
+  "en": "Dreadnaught",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -4563,9 +4515,8 @@
   "book": "EFA",
   "owner": "",
   "ru": "Лазутчик",
-  "en": "",
+  "en": "Infiltrator",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -4575,9 +4526,8 @@
   "book": "EFA",
   "owner": "",
   "ru": "Страж",
-  "en": "",
+  "en": "Guardian",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -4587,9 +4537,8 @@
   "book": "EFA",
   "owner": "",
   "ru": "Эликсир исцеления",
-  "en": "",
+  "en": "Elixir of Healing",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -4599,9 +4548,8 @@
   "book": "EFA",
   "owner": "",
   "ru": "Эликсир полёта",
-  "en": "",
+  "en": "Elixir of Flight",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -4611,9 +4559,8 @@
   "book": "EFA",
   "owner": "",
   "ru": "Эликсир проворности",
-  "en": "",
+  "en": "Elixir of Swiftness",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -4623,9 +4570,8 @@
   "book": "EFA",
   "owner": "",
   "ru": "Эликсир смелости",
-  "en": "",
+  "en": "Elixir of Boldness",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -4635,9 +4581,8 @@
   "book": "EFA",
   "owner": "",
   "ru": "Эликсир стойкости",
-  "en": "",
+  "en": "Elixir of Resilience",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -4713,9 +4658,8 @@
   "book": "EFA",
   "owner": "Changeling",
   "ru": "Перевёртыш",
-  "en": "",
+  "en": "Shapechanger",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -4725,9 +4669,8 @@
   "book": "EFA",
   "owner": "Kalashtar",
   "ru": "Двойственный разум",
-  "en": "",
+  "en": "Dual Mind",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -4737,9 +4680,8 @@
   "book": "EFA",
   "owner": "Kalashtar",
   "ru": "Ментальная дисциплина",
-  "en": "",
+  "en": "Mental Discipline",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -4749,9 +4691,8 @@
   "book": "EFA",
   "owner": "Kalashtar",
   "ru": "Отстранённый от снов",
-  "en": "",
+  "en": "Severed from Dreams",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -4761,9 +4702,8 @@
   "book": "EFA",
   "owner": "Kalashtar",
   "ru": "Связь разумов",
-  "en": "",
+  "en": "Mind Link",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -4773,9 +4713,8 @@
   "book": "EFA",
   "owner": "Khoravar",
   "ru": "Дар фей",
-  "en": "",
+  "en": "Fey Gift",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -4785,9 +4724,8 @@
   "book": "EFA",
   "owner": "Khoravar",
   "ru": "Наследие фей",
-  "en": "",
+  "en": "Fey Ancestry",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -4797,9 +4735,8 @@
   "book": "EFA",
   "owner": "Khoravar",
   "ru": "Универсальный навык",
-  "en": "",
+  "en": "Skill Versatility",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -4809,9 +4746,8 @@
   "book": "EFA",
   "owner": "Khoravar",
   "ru": "Устойчивость к летаргии",
-  "en": "",
+  "en": "Lethargy Resilience",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -4821,9 +4757,8 @@
   "book": "EFA",
   "owner": "Shifter",
   "ru": "Быстролапый",
-  "en": "",
+  "en": "Swiftstride",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -4833,9 +4768,8 @@
   "book": "EFA",
   "owner": "Shifter",
   "ru": "Дикохищный",
-  "en": "",
+  "en": "Wildhunt",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -4845,9 +4779,8 @@
   "book": "EFA",
   "owner": "Shifter",
   "ru": "Длиннозубый",
-  "en": "",
+  "en": "Longtooth",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -4857,9 +4790,8 @@
   "book": "EFA",
   "owner": "Shifter",
   "ru": "Зверошкурый",
-  "en": "",
+  "en": "Beasthide",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -4869,9 +4801,8 @@
   "book": "EFA",
   "owner": "Warforged",
   "ru": "Безустанный",
-  "en": "",
+  "en": "Tireless",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -4881,9 +4812,8 @@
   "book": "EFA",
   "owner": "Warforged",
   "ru": "Встроенная защита",
-  "en": "",
+  "en": "Integrated Protection",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -4893,9 +4823,8 @@
   "book": "EFA",
   "owner": "Warforged",
   "ru": "Покой дозорного",
-  "en": "",
+  "en": "Sentry's Rest",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -4905,9 +4834,8 @@
   "book": "EFA",
   "owner": "Warforged",
   "ru": "Стойкость конструкции",
-  "en": "",
+  "en": "Constructed Resilience",
   "missing": [
-   "name",
    "text"
   ]
  },
@@ -5698,9 +5626,8 @@
   "book": "HoF",
   "owner": "",
   "ru": "Командная работа Арфистов",
-  "en": "",
+  "en": "Harper Teamwork",
   "missing": [
-   "name",
    "text"
   ]
  },
