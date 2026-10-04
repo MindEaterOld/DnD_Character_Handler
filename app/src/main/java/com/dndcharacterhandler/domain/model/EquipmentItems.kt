@@ -28,8 +28,14 @@ fun matchedEquipmentItem(
     count: Int,
     russian: Boolean
 ): InventoryItem =
-    itemsByName[equipmentNameKey(item.name.en)]?.toInventoryItem(russian)?.copy(quantity = count)
+    (itemsByName[equipmentNameKey(item.name.en)] ?: EquipmentNameAliases[equipmentNameKey(item.name.en)]?.let(itemsByName::get))
+        ?.toInventoryItem(russian)?.copy(quantity = count)
         ?: plainEquipmentItem(item, count, russian)
+
+/** Foundry's names the item catalog knows by another: a druid's wooden staff is the SRD's Staff (a druidic focus). */
+private val EquipmentNameAliases = mapOf(
+    "wooden staff" to "staff"
+)
 
 /**
  * [container] as the character's items: the container, then what it holds (a pack's tinderbox and
