@@ -151,12 +151,27 @@
         "subtle": "#AAA29A",
         "label": "#C2BBB3",
         "miniLabel": "#BEB6AE",
-        "icon": "#F3EEE6"
+        "icon": "#F3EEE6",
+        "engraved": {
+          "icon": "#E8D6B2",
+          "action": "#E8D6B2",
+          "muted": "#D8C7A6",
+          "miniLabel": "#D8C7A6",
+          "warmPrimary": "#EFDBB5",
+          "primary": "#EFDBB5",
+          "label": "#D8C7A6",
+          "subtle": "#A99C83"
+        }
       },
       "background": {
         "radialStart": "#1A161D",
         "radialMiddle": "#0E0B11",
-        "radialEnd": "#09070D"
+        "radialEnd": "#09070D",
+        "engraved": {
+          "radialStart": "#201F1D",
+          "radialMiddle": "#201F1D",
+          "radialEnd": "#201F1D"
+        }
       },
       "surface": {
         "card": "#17141B",
@@ -167,14 +182,32 @@
         "portrait": "#141118",
         "portraitFallbackStart": "#3B3840",
         "portraitFallbackMiddle": "#18151C",
-        "portraitFallbackEnd": "#0F0C12"
+        "portraitFallbackEnd": "#0F0C12",
+        "engraved": {
+          "portraitFallbackStart": "#34312B",
+          "portraitFallbackEnd": "#201F1D",
+          "inspiration": "#363025",
+          "option": "#272521",
+          "portraitFallbackMiddle": "#272521",
+          "button": "#34312B",
+          "selected": "#363025",
+          "card": "#201F1D",
+          "portrait": "#201F1D"
+        }
       },
       "border": {
         "default": "#50FFFFFF",
         "panel": "#44FFFFFF",
         "miniCard": "#42FFFFFF",
         "selected": "#66FFF6EA",
-        "muted": "#30FFFFFF"
+        "muted": "#30FFFFFF",
+        "engraved": {
+          "muted": "#50D8C7A6",
+          "default": "#A0D8C7A6",
+          "panel": "#A0D8C7A6",
+          "miniCard": "#80D8C7A6",
+          "selected": "#C09E8850"
+        }
       },
       "accent": {
         "inspiration": "#FFD86B",
@@ -190,11 +223,22 @@
         "damageCold": "#7BB7FF",
         "damageLightning": "#CFB6FF",
         "damagePoison": "#A8D76F",
-        "damageOther": "#D5C6B2"
+        "damageOther": "#D5C6B2",
+        "engraved": {
+          "dangerHpZero": "#B96052",
+          "xpCapped": "#9E8850",
+          "inspiration": "#9E8850",
+          "hpTemporary": "#D8C7A6",
+          "heal": "#D8C7A6"
+        }
       },
       "progress": {
         "xpFill": "#D7D1CC",
-        "xpTrack": "#30FFFFFF"
+        "xpTrack": "#30FFFFFF",
+        "engraved": {
+          "xpTrack": "#30D8C7A6",
+          "xpFill": "#E8D6B2"
+        }
       },
       "ornament": {
         "outer": "#20FFFFFF",
@@ -203,7 +247,16 @@
         "inner": "#E9E2D9",
         "shadow": "#14000000",
         "stroke": "#55A19892",
-        "dot": "#2D2730"
+        "dot": "#2D2730",
+        "engraved": {
+          "middle": "#A0D8C7A6",
+          "stroke": "#709E8850",
+          "dot": "#72352F",
+          "inner": "#D8C7A6",
+          "outer": "#30D8C7A6",
+          "innerGlow": "#40D8C7A6",
+          "shadow": "#20201F1D"
+        }
       }
     }
   },

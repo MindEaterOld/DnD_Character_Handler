@@ -58,6 +58,7 @@ import com.dndcharacterhandler.presentation.components.nameKey
 import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
+import com.dndcharacterhandler.presentation.theme.LocalEngravedOverview
 
 /** How many marks the column holds before the rest fold into "+N": with "+" under them, the portrait's height. */
 private const val ColumnMarks = 3
@@ -81,6 +82,7 @@ internal fun ConditionsColumn(
 ) {
     val strings = LocalStrings.current
     val colors = LocalDesignTokens.current.colors
+    val engraved = LocalEngravedOverview.current
     // Exhaustion's level and concentration first: they matter most and stay in sight.
     val marks = buildList<@Composable () -> Unit> {
         if (exhaustion > 0) {
@@ -128,7 +130,8 @@ internal fun ConditionsColumn(
             modifier = Modifier
                 .size(MarkSize)
                 .clip(CircleShape)
-                .background(colors.surface.button)
+                .background(if (engraved) colors.surface.card.copy(alpha = 0.85f) else colors.surface.button)
+                .then(if (engraved) Modifier.border(1.dp, colors.accent.inspiration, CircleShape) else Modifier)
                 .clickable(onClick = onOpenPicker),
             contentAlignment = Alignment.Center
         ) {

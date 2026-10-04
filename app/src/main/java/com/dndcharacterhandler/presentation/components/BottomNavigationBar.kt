@@ -2,7 +2,6 @@ package com.dndcharacterhandler.presentation.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +12,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -22,10 +22,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.dndcharacterhandler.presentation.AppScreen
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
+import com.dndcharacterhandler.presentation.theme.LocalEngravedOverview
 
 /** The tab bar: an outline over the screen's own background, with no fill of its own. */
 @Composable
@@ -35,14 +37,15 @@ fun BottomNavigationBar(
     onNavigate: (AppScreen) -> Unit
 ) {
     val colors = LocalDesignTokens.current.colors
+    val engraved = LocalEngravedOverview.current
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .navigationBarsPadding()
             .padding(horizontal = 14.dp, vertical = 8.dp)
             .height(62.dp),
-        shape = RoundedCornerShape(26.dp),
-        color = Color.Transparent,
+        shape = RoundedCornerShape(if (engraved) 12.dp else 26.dp),
+        color = if (engraved) colors.surface.card.copy(alpha = 0.94f) else Color.Transparent,
         border = BorderStroke(1.dp, colors.border.muted)
     ) {
         Row(
@@ -57,9 +60,10 @@ fun BottomNavigationBar(
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .clip(RoundedCornerShape(18.dp))
+                        .clip(if (engraved) EngravedPortraitShape else RoundedCornerShape(18.dp))
                         .background(if (selected) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent)
-                        .clickable { onNavigate(screen) }
+                        .then(if (engraved && selected) Modifier.engravedBorder(colors.accent.inspiration) else Modifier)
+                        .selectable(selected = selected, role = Role.Tab, onClick = { onNavigate(screen) })
                         .padding(horizontal = 2.dp, vertical = 10.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center

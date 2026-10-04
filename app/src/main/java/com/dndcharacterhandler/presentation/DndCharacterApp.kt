@@ -62,6 +62,7 @@ import com.dndcharacterhandler.presentation.overview.OverviewLevelUpOverlay
 import com.dndcharacterhandler.presentation.overview.OverviewScreen
 import com.dndcharacterhandler.presentation.spells.SpellsScreen
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
+import com.dndcharacterhandler.presentation.theme.EngravedOverviewTheme
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -197,6 +198,7 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                 }
             ) {
                 // The background is the screens' own gradient, under the bottom bar too: the bar has none.
+                EngravedOverviewTheme(enabled = currentRoute == AppScreen.Overview.route) {
                 ScreenBackground {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
@@ -286,6 +288,7 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                     }
                     }
                     }
+                }
                 }
                 }
             }

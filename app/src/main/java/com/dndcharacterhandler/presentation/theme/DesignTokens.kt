@@ -134,7 +134,8 @@ data class DesignColorTokens(
 
 data class DesignTokens(
     val typography: DesignTypographyTokens,
-    val colors: DesignColorTokens
+    val colors: DesignColorTokens,
+    val engravedColors: DesignColorTokens = colors
 )
 
 val DefaultDesignColors = DesignColorTokens(
@@ -267,21 +268,26 @@ fun loadDesignTokens(context: Context): DesignTokens {
                 shortRestCounterButton = overview.textToken("shortRestCounterButton", defaults.shortRestCounterButton),
                 shortRestCounterValue = overview.textToken("shortRestCounterValue", defaults.shortRestCounterValue)
             ),
-            colors = loadColorTokens(root.optObject("colors")?.optObject("app"))
+            colors = loadColorTokens(root.optObject("colors")?.optObject("app")),
+            engravedColors = loadColorTokens(root.optObject("colors")?.optObject("app"), engraved = true)
         )
     }.getOrDefault(DefaultDesignTokens)
 }
 
-private fun loadColorTokens(app: JsonObject?): DesignColorTokens {
+private fun loadColorTokens(app: JsonObject?, engraved: Boolean = false): DesignColorTokens {
     if (app == null) return DefaultDesignColors
-    val defaults = DefaultDesignColors
-    val text = app.optObject("text") ?: JsonObject(emptyMap())
-    val background = app.optObject("background") ?: JsonObject(emptyMap())
-    val surface = app.optObject("surface") ?: JsonObject(emptyMap())
-    val border = app.optObject("border") ?: JsonObject(emptyMap())
-    val accent = app.optObject("accent") ?: JsonObject(emptyMap())
-    val progress = app.optObject("progress") ?: JsonObject(emptyMap())
-    val ornament = app.optObject("ornament") ?: JsonObject(emptyMap())
+    val defaults = if (engraved) loadColorTokens(app) else DefaultDesignColors
+    fun group(name: String): JsonObject {
+        val base = app.optObject(name) ?: JsonObject(emptyMap())
+        return if (engraved) base.optObject("engraved") ?: JsonObject(emptyMap()) else base
+    }
+    val text = group("text")
+    val background = group("background")
+    val surface = group("surface")
+    val border = group("border")
+    val accent = group("accent")
+    val progress = group("progress")
+    val ornament = group("ornament")
     return DesignColorTokens(
         text = TextColorTokens(
             primary = text.colorToken("primary", defaults.text.primary),

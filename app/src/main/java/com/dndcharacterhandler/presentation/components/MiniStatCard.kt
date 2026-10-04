@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
+import com.dndcharacterhandler.presentation.theme.LocalEngravedOverview
 
 /** Every stat card is this tall, its label on the border included. */
 val MiniStatCardHeight = 80.dp
@@ -87,6 +88,7 @@ fun BorderLabelCard(
     content: @Composable BoxScope.() -> Unit
 ) {
     // The label's box in the card's coordinates: the border is cut there.
+    val engraved = LocalEngravedOverview.current
     var notch by remember { mutableStateOf(Rect.Zero) }
     Layout(
         modifier = modifier.drawBehind {
@@ -94,19 +96,24 @@ fun BorderLabelCard(
             val top = notch.center.y
             val radius = cornerRadius.toPx()
             drawRoundRect(
-                color = fill,
+                // Keep the dragon quiet behind values when panels scroll over the hero artwork.
+                color = if (engraved) fill.copy(alpha = 0.92f) else fill,
                 topLeft = Offset(0f, top),
                 size = Size(size.width, size.height - top),
                 cornerRadius = CornerRadius(radius)
             )
             clipRect(left = notch.left, top = 0f, right = notch.right, bottom = top + stroke, clipOp = ClipOp.Difference) {
-                drawRoundRect(
-                    color = border,
-                    topLeft = Offset(stroke / 2, top + stroke / 2),
-                    size = Size(size.width - stroke, size.height - top - stroke),
-                    cornerRadius = CornerRadius(radius - stroke / 2),
-                    style = Stroke(width = stroke)
-                )
+                if (engraved) {
+                    drawEngravedFrame(border, top)
+                } else {
+                    drawRoundRect(
+                        color = border,
+                        topLeft = Offset(stroke / 2, top + stroke / 2),
+                        size = Size(size.width - stroke, size.height - top - stroke),
+                        cornerRadius = CornerRadius(radius - stroke / 2),
+                        style = Stroke(width = stroke)
+                    )
+                }
             }
         },
         content = {
