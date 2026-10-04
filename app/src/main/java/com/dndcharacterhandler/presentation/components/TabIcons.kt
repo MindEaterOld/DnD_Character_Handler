@@ -7,8 +7,9 @@ import androidx.compose.ui.graphics.vector.addPathNodes
 import androidx.compose.ui.unit.dp
 
 /*
- * The bottom bar's tab icons: game things, from Material Design Icons by Pictogrammers (Apache 2.0) —
- * the owner's choice from boards, 2026-10-04. Filled shapes on the icons' 24-unit grid, tinted by Icon.
+ * The bottom bar's tab icons: game things, chosen by the owner from boards (2026-10-04) — most from Material
+ * Design Icons by Pictogrammers, the wand from Material Symbols (both Apache 2.0). Filled shapes on the
+ * icons' 24-unit grid, tinted by Icon.
  */
 
 /** Overview: a figure on a shield, the hero. MDI "shield-account-outline". */
@@ -35,24 +36,39 @@ val TabIconCombat: ImageVector by lazy {
     )
 }
 
-/** Inventory: a chest. MDI "treasure-chest-outline". */
+/** Inventory: a sack tied with a rope, its two ends hanging in front. MDI's "sack" body under a mouth with a
+ * sag and a rope of our own, set in front of the sack by a thin gap (owner's choice from boards, 2026-10-04). */
 val TabIconInventory: ImageVector by lazy {
     tabIcon(
         "TabIconInventory",
-        "M2 20h20V7c0-.8-.32-1.56-.88-2.12S19.8 4 19 4H5c-.8 0-1.56.32-2.12.88S2 6.2 2 7zm18-9h-5V9H9v2H4V7" +
-            "c0-.26.11-.5.29-.71C4.5 6.11 4.74 6 5 6h14c.27 0 .5.11.71.29c.19.21.29.45.29.71zm-5 2h5v5H4v-5h5l2 2" +
-            "h2zm-4-2h2v2h-2z"
+        "M19.17 14.05C20.44 16.05 21 18 21 18C21 18 22 22 16 22L8 22C2 22 3 18 3 18C3 18 4.6 12.4 8.6 10.4" +
+            "L12.43 10.4Q12.56 12.44 11.74 14.49Q11.6 14.85 11.6 15.22Q11.6 15.6 11.75 15.95" +
+            "Q11.9 16.3 12.17 16.56Q12.44 16.82 12.79 16.96Q13.15 17.1 13.52 17.1Q13.9 17.1 14.25 16.95" +
+            "Q14.6 16.8 14.86 16.53Q15.12 16.26 15.26 15.91Q15.42 15.52 15.55 15.14Q15.6 15.25 15.67 15.37" +
+            "Q15.86 15.69 16.16 15.92Q16.46 16.15 16.83 16.24Q17.19 16.33 17.57 16.28Q17.94 16.23 18.27 16.03" +
+            "Q18.59 15.84 18.82 15.54Q19.05 15.24 19.14 14.87Q19.23 14.51 19.18 14.13Q19.17 14.09 19.17 14.05Z" +
+            "M8 6.4L6.25 2.9C5.95 2.3 6.45 1.6 7.1 1.75C8.5 2.1 10.2 2.35 12 2.35C13.8 2.35 15.5 2.1 16.9 1.75" +
+            "C17.55 1.6 18.05 2.3 17.75 2.9L16 6.4ZM8 7.4L16 7.4C16.55 7.4 17 7.85 17 8.4" +
+            "C17 8.77 16.79 9.1 16.49 9.27Q17.81 11.6 18.19 14.27Q18.22 14.45 18.17 14.62Q18.13 14.8 18.02 14.94" +
+            "Q17.91 15.08 17.76 15.17Q17.6 15.27 17.43 15.29Q17.25 15.32 17.08 15.27Q16.9 15.23 16.76 15.12" +
+            "Q16.62 15.01 16.53 14.86Q16.43 14.7 16.41 14.53Q16.12 12.54 15.25 10.77Q15.29 13.15 14.34 15.53" +
+            "Q14.27 15.7 14.14 15.83Q14.02 15.96 13.85 16.03Q13.69 16.1 13.51 16.1Q13.33 16.1 13.17 16.04" +
+            "Q13 15.97 12.87 15.84Q12.74 15.72 12.67 15.55Q12.6 15.39 12.6 15.21Q12.6 15.03 12.66 14.87" +
+            "Q13.76 12.13 13.32 9.4L8 9.4C7.45 9.4 7 8.95 7 8.4C7 7.85 7.45 7.4 8 7.4Z"
     )
 }
 
-/** Spells: a wizard's hat. MDI "wizard-hat". */
+/** Spells: a wand with a star and sparkles. Material Symbols Rounded "wand_stars" (owner's pick, 2026-10-04). */
 val TabIconSpells: ImageVector by lazy {
     tabIcon(
         "TabIconSpells",
-        "M21 22H3v-2h18zm-2-3H5l6.1-16.4q.3-.6.9-.6l6 3h-4.1zM10 7.5l1.04.47L11.5 9l.47-1.03L13 7.5l-1.03-.47" +
-            "L11.5 6l-.46 1.03zm3 7.5l-2.06-.93L10 12l-.93 2.07L7 15l2.07.93L10 18l.94-2.07zm.97-3.03L15 11.5" +
-            "l-1.03-.47L13.5 10l-.46 1.03l-1.04.47l1.04.47l.46 1.03zm2 4L17 15.5l-1.03-.47L15.5 14l-.46 1.03" +
-            "l-1.04.47l1.04.47l.46 1.03z"
+        "M16.15 13.05L14 16.5q-.275.425-.762.35t-.613-.575l-.7-2.8L5.1 20.3q-.275.275-.687.288T3.7 20.3" +
+            "q-.275-.275-.275-.7t.275-.7l6.825-6.85l-2.8-.7q-.5-.125-.575-.612t.35-.763l3.45-2.125l-.3-4.075" +
+            "q-.05-.5.4-.725t.825.1L15 5.775l3.775-1.525q.475-.2.825.15t.15.825L18.225 9l2.625 3.1q.325.375.1.825" +
+            "t-.725.4zm-12.8-6.7Q3.2 6.2 3.2 6t.15-.35l1.3-1.3Q4.8 4.2 5 4.2t.35.15l1.3 1.3q.15.15.15.35t-.15.35" +
+            "l-1.3 1.3Q5.2 7.8 5 7.8t-.35-.15zm10.525 6.575l1.2-1.975l2.325.175l-1.5-1.775l.875-2.15l-2.15.875" +
+            "L12.85 6.6l.175 2.3l-1.975 1.225l2.25.55zm3.775 7.725l-1.3-1.3q-.15-.15-.15-.35t.15-.35l1.3-1.3" +
+            "q.15-.15.35-.15t.35.15l1.3 1.3q.15.15.15.35t-.15.35l-1.3 1.3q-.15.15-.35.15t-.35-.15m-3.425-10.9"
     )
 }
 
