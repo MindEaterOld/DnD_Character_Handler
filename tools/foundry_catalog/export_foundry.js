@@ -220,4 +220,44 @@ for (const doc of await game.packs.get('dnd5e.equipment24').getDocuments({ type:
   if (base && doc.system.mastery && !(base in masteryWeapons)) masteryWeapons[base] = doc.system.mastery;
 }
 report.push({ id: 'weaponMasteries', count: Object.keys(masteryWeapons).length, status: await send('weaponMasteries.json', { properties: masteryProperties, weapons: masteryWeapons }) });
+
+// The equipment packs' items for the inventory catalog: what a sheet needs of each (weight, price,
+// armor, damage, range, properties, mastery, rarity, attunement, its container) and its description.
+for (const id of ['dnd5e.equipment24', 'ag-fifthpendium.equipment']) {
+  const pack = game.packs.get(id);
+  if (!pack) { report.push({ id, missing: true }); continue; }
+  const documents = (await pack.getDocuments()).map(d => {
+    const s = d.system;
+    return {
+      id: d.id,
+      name: d.name,
+      type: d.type,
+      identifier: s.identifier ?? null,
+      book: s.source?.book ?? '',
+      rules: s.source?.rules ?? '',
+      container: s.container ?? null,
+      quantity: s.quantity ?? 1,
+      weight: s.weight?.value ?? 0,
+      price: s.price ? { value: s.price.value, denomination: s.price.denomination } : null,
+      rarity: s.rarity ?? '',
+      attunement: s.attunement ?? '',
+      typeValue: s.type?.value ?? null,
+      typeSub: s.type?.subtype ?? null,
+      baseItem: s.type?.baseItem ?? null,
+      properties: s.properties ? Array.from(s.properties) : [],
+      magicalBonus: s.magicalBonus ?? s.armor?.magicalBonus ?? null,
+      armor: s.armor ? { value: s.armor.value ?? null, dex: s.armor.dex ?? null, magicalBonus: s.armor.magicalBonus ?? null } : null,
+      strength: s.strength ?? null,
+      damage: s.damage ? {
+        base: s.damage.base ? { number: s.damage.base.number, denomination: s.damage.base.denomination, bonus: s.damage.base.bonus, types: Array.from(s.damage.base.types ?? []) } : null,
+        versatile: s.damage.versatile ? { number: s.damage.versatile.number, denomination: s.damage.versatile.denomination, types: Array.from(s.damage.versatile.types ?? []) } : null
+      } : null,
+      range: s.range ? { value: s.range.value, long: s.range.long, reach: s.range.reach ?? null } : null,
+      mastery: s.mastery ?? null,
+      capacity: d.type === 'container' ? { weight: s.capacity?.weight?.value ?? null, count: s.capacity?.count ?? null } : null,
+      description: s.description?.value ?? ''
+    };
+  });
+  report.push({ id, count: documents.length, status: await send(`equipment.${id}.json`, { pack: id, packageVersion: game.modules.get(pack.metadata.packageName)?.version ?? game.system.version, exportedAt: new Date().toISOString(), documents }) });
+}
 return report;
