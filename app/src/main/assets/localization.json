@@ -1877,6 +1877,13 @@
     "fr": "Ma\u00eetrise",
     "es": "Competente"
   },
+  "combat_attack_from_weapon": {
+    "en": "From the inventory: “%1$s”. Proficiency, ability, damage, range and magic bonus come from the weapon and the character's stats.",
+    "ru": "Из инвентаря: «%1$s». Владение, характеристика, урон, дальность и магический бонус берутся из оружия и статов персонажа сами.",
+    "de": "Aus dem Inventar: „%1$s“. Übung, Attribut, Schaden, Reichweite und magischer Bonus kommen von der Waffe und den Werten des Charakters.",
+    "fr": "De l'inventaire : « %1$s ». Maîtrise, caractéristique, dégâts, portée et bonus magique viennent de l'arme et des caractéristiques du personnage.",
+    "es": "Del inventario: «%1$s». La competencia, la característica, el daño, el alcance y el bono mágico salen del arma y de las estadísticas del personaje."
+  },
   "combat_empty_attacks": {
     "en": "No attacks yet.",
     "ru": "\u041f\u043e\u043a\u0430 \u043d\u0435\u0442 \u0430\u0442\u0430\u043a.",
@@ -2869,13 +2876,6 @@
     "de": "Inspiration",
     "fr": "Inspiration",
     "es": "Inspiración"
-  },
-  "overview_xp": {
-    "en": "EXP",
-    "ru": "EXP",
-    "de": "EP",
-    "fr": "PX",
-    "es": "PX"
   },
   "overview_hp": {
     "maxChars": 26,

@@ -972,7 +972,6 @@ private fun OverviewContent(
                         raceLabel = raceLabel,
                         classLabel = classLabel,
                         compactClass = isMulticlass,
-                        levelLabel = levelLabel,
                         modifier = Modifier
                             .offset(y = (-34).dp)
                             .padding(top = 2.dp),
@@ -981,10 +980,7 @@ private fun OverviewContent(
                             activeField = OverviewEditableField.RACE
                         },
                         // The class is chosen in the level-up wizard, not typed in.
-                        onEditClass = { character?.let(::classWizardTarget)?.let(onOpenLevelUp) },
-                        onEditLevel = {
-                            activeField = OverviewEditableField.LEVEL
-                        }
+                        onEditClass = { character?.let(::classWizardTarget)?.let(onOpenLevelUp) }
                     )
                 }
             }
@@ -993,6 +989,8 @@ private fun OverviewContent(
                 Box(modifier = Modifier.offset(y = (-24).dp)) {
                     OverviewXpBlock(
                         xpInfo = xpInfo,
+                        levelLabel = levelLabel,
+                        onEditLevel = { activeField = OverviewEditableField.LEVEL },
                         canLevelUp = character != null &&
                             character.level < MAX_CHARACTER_LEVEL && levelForExperience(character.experience) > character.level,
                         onLevelUp = { character?.let { onOpenLevelUp(levelForExperience(it.experience)) } },
@@ -1782,11 +1780,9 @@ private fun OverviewSubtitleRow(
     raceLabel: String,
     classLabel: String,
     compactClass: Boolean,
-    levelLabel: String,
     modifier: Modifier = Modifier,
     onEditRace: () -> Unit,
-    onEditClass: () -> Unit,
-    onEditLevel: () -> Unit
+    onEditClass: () -> Unit
 ) {
     Row(
         modifier = modifier,
@@ -1796,8 +1792,6 @@ private fun OverviewSubtitleRow(
         SubtitleToken(text = raceLabel, onClick = onEditRace)
         SubtitleDivider()
         SubtitleToken(text = classLabel, onClick = onEditClass, compact = compactClass)
-        SubtitleDivider()
-        SubtitleToken(text = levelLabel, onClick = onEditLevel)
     }
 }
 
@@ -2162,6 +2156,9 @@ private fun HpChange(before: HpPreview, after: HpPreview) {
 @Composable
 private fun OverviewXpBlock(
     xpInfo: XpProgressInfo,
+    /** "Уровень 3" at the left of the bar's line; a tap on it picks the level. */
+    levelLabel: String,
+    onEditLevel: () -> Unit,
     canLevelUp: Boolean = false,
     onLevelUp: () -> Unit = {},
     onClick: () -> Unit
@@ -2176,19 +2173,17 @@ private fun OverviewXpBlock(
         modifier = Modifier.clickable(onClick = onClick),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        // "Level UP" sits at the right end of the EXP line, above the bar.
+        // Above the bar: the level at the left ("Level UP" after it when the experience allows one),
+        // the experience at the right, as plain numbers.
         Row(modifier = Modifier.fillMaxWidth()) {
             Text(
-                text = if (xpInfo.isMaxLevel) {
-                    "${text("overview_xp")} ${formatter.format(xpInfo.currentXp)}"
-                } else {
-                    "${text("overview_xp")} ${formatter.format(xpInfo.currentXp)} / ${formatter.format(xpInfo.nextLevelXp)}"
-                },
+                text = levelLabel,
                 modifier = Modifier
-                    .weight(1f)
-                    .alignByBaseline(),
+                    .alignByBaseline()
+                    .clickable(onClick = onEditLevel),
                 style = MaterialTheme.typography.bodyLarge.copy(fontSize = token.fontSizeSp.sp),
-                color = colors.text.action
+                color = colors.text.action,
+                maxLines = 1
             )
             if (canLevelUp) {
                 Text(
@@ -2198,9 +2193,24 @@ private fun OverviewXpBlock(
                         .padding(start = 12.dp)
                         .clickable(onClick = onLevelUp),
                     style = MaterialTheme.typography.titleMedium,
-                    color = colors.accent.inspiration
+                    color = colors.accent.inspiration,
+                    maxLines = 1
                 )
             }
+            Spacer(modifier = Modifier.weight(1f))
+            Text(
+                text = if (xpInfo.isMaxLevel) {
+                    formatter.format(xpInfo.currentXp)
+                } else {
+                    "${formatter.format(xpInfo.currentXp)} / ${formatter.format(xpInfo.nextLevelXp)}"
+                },
+                modifier = Modifier
+                    .alignByBaseline()
+                    .padding(start = 12.dp),
+                style = MaterialTheme.typography.bodyLarge.copy(fontSize = token.fontSizeSp.sp),
+                color = colors.text.action,
+                maxLines = 1
+            )
         }
         Canvas(
             modifier = Modifier
@@ -2779,7 +2789,6 @@ private fun OverviewPreviewContent(
             "overview_long_rest_confirm" to "Confirm that this character takes a long rest of up to 8 hours?",
             "overview_long_rest_confirm_button" to "Rest",
             "overview_inspiration" to "Inspiration",
-            "overview_xp" to "EXP",
             "levelup_badge" to "Level UP",
             "overview_hp" to "HP",
             "overview_death_saves" to "Death saves",

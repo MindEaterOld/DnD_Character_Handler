@@ -1,5 +1,10 @@
 package com.dndcharacterhandler.presentation.combat
 
+import com.dndcharacterhandler.domain.rules.asIn
+import com.dndcharacterhandler.domain.rules.bookSpellOf
+import com.dndcharacterhandler.domain.rules.madeWith
+import com.dndcharacterhandler.domain.rules.weaponAttack
+import com.dndcharacterhandler.domain.rules.weaponOf
 import com.dndcharacterhandler.presentation.components.NumberStepperField
 import com.dndcharacterhandler.presentation.components.StepButton
 import com.dndcharacterhandler.domain.rules.DiceFormula
@@ -85,10 +90,7 @@ import com.dndcharacterhandler.domain.model.InventoryCategory
 import com.dndcharacterhandler.domain.model.InventoryItem
 import com.dndcharacterhandler.domain.model.CatalogWeaponMastery
 import com.dndcharacterhandler.domain.model.CharacterCatalog
-import com.dndcharacterhandler.domain.model.WeaponGroupMartialId
-import com.dndcharacterhandler.domain.model.WeaponGroupSimpleId
 import com.dndcharacterhandler.domain.model.decodeProficiencyIds
-import com.dndcharacterhandler.domain.model.InventoryWeaponProperty
 import com.dndcharacterhandler.domain.model.InventoryWeaponRangeType
 import com.dndcharacterhandler.domain.model.Spell
 import com.dndcharacterhandler.domain.model.SpellCatalogItem
@@ -221,6 +223,13 @@ class CombatViewModel(
         }
     }
 
+    /** The spellbook's spell, edited from combat. */
+    fun updateSpell(characterBundle: CharacterBundle, spell: Spell) {
+        viewModelScope.launch {
+            characterRepository.upsertSpell(characterId = characterBundle.character.id, spell = spell)
+        }
+    }
+
     fun updateSpellAttack(characterBundle: CharacterBundle, spellAttack: Spell) {
         viewModelScope.launch {
             characterRepository.upsertSpellAttack(
@@ -293,6 +302,7 @@ fun CombatScreen(
         onDeleteAttack = viewModel::deleteAttack,
         onUpdateSpellAttack = viewModel::updateSpellAttack,
         onDeleteSpellAttack = viewModel::deleteSpellAttack,
+        onUpdateSpell = viewModel::updateSpell,
         onUpdateCombatResourceUses = viewModel::updateCombatResourceUses,
         onUpdateCombatResource = viewModel::updateCombatResource,
         onDeleteCombatResource = viewModel::deleteCombatResource
@@ -314,6 +324,8 @@ internal fun CombatContent(
     onDeleteAttack: (CharacterBundle, Attack) -> Unit = { _, _ -> },
     onUpdateSpellAttack: (CharacterBundle, Spell) -> Unit = { _, _ -> },
     onDeleteSpellAttack: (CharacterBundle, Spell) -> Unit = { _, _ -> },
+    /** Saves a spell of the spellbook: a combat spell that is the book's is edited there. */
+    onUpdateSpell: (CharacterBundle, Spell) -> Unit = { _, _ -> },
     onUpdateCombatResourceUses: (CharacterBundle, Long, Int) -> Unit = { _, _, _ -> },
     onUpdateCombatResource: (CharacterBundle, CombatResource) -> Unit = { _, _ -> },
     onDeleteCombatResource: (CharacterBundle, CombatResource) -> Unit = { _, _ -> }
@@ -393,11 +405,24 @@ internal fun CombatContent(
             .filter { it.category == InventoryCategory.WEAPON && it.weaponDetails != null }
             .localizedWith(inventoryCatalogLookup, russian = strings.language == AppLanguage.RUSSIAN)
     }
+    // An attack made from a weapon is that weapon's: it follows the weapon, the proficiencies and the scores.
+    val attacks = remember(resolvedBundle.attacks, weaponAttackOptions, resolvedBundle.inventoryItems, character.strength, character.dexterity, weaponProficiencyIds) {
+        val weapons = weaponAttackOptions + resolvedBundle.inventoryItems
+        resolvedBundle.attacks.map { attack ->
+            weaponOf(attack, weapons)?.let { attack.madeWith(it, character.strength, character.dexterity, weaponProficiencyIds) } ?: attack
+        }
+    }
     val spellAttackOptions = remember(resolvedBundle.spells, spellCatalog, strings) {
         resolvedBundle.spells.filter { it.isCombatSpell() }.localizedWith(spellCatalog, strings)
     }
-    val spellAttacks = remember(resolvedBundle.spellAttacks, spellCatalog, strings) {
-        resolvedBundle.spellAttacks.localizedWith(spellCatalog, strings)
+    val bookSpells = remember(resolvedBundle.spells, spellCatalog, strings) {
+        resolvedBundle.spells.localizedWith(spellCatalog, strings)
+    }
+    // A spell added from the spellbook is the book's: it shows what the book has now.
+    val spellAttacks = remember(resolvedBundle.spellAttacks, bookSpells, spellCatalog, strings) {
+        resolvedBundle.spellAttacks.localizedWith(spellCatalog, strings).map { entry ->
+            bookSpellOf(entry, bookSpells)?.let(entry::asIn) ?: entry
+        }
     }
 
     ScreenBackground {
@@ -458,12 +483,12 @@ internal fun CombatContent(
                     CombatSectionTitle(text("combat_section_attacks_title"))
                 }
 
-                if (resolvedBundle.attacks.isEmpty() && resolvedBundle.spellAttacks.isEmpty()) {
+                if (attacks.isEmpty() && resolvedBundle.spellAttacks.isEmpty()) {
                     item {
                         CombatEmptyCard(text("combat_empty_attacks"))
                     }
                 } else {
-                    items(resolvedBundle.attacks, key = { "attack-${it.id}" }) { attack ->
+                    items(attacks, key = { "attack-${it.id}" }) { attack ->
                         AttackCard(
                             attack = attack,
                             character = character,
@@ -552,11 +577,11 @@ internal fun CombatContent(
             onSelect = { weapon ->
                 onUpdateAttack(
                     resolvedBundle,
-                    weapon.toCombatAttack(
-                        strengthScore = resolvedBundle.character.strength,
-                        dexterityScore = resolvedBundle.character.dexterity,
-                        weaponProficiencyIds = weaponProficiencyIds
-                    )
+                    if (weapon.weaponDetails != null) {
+                        weaponAttack(weapon, character.strength, character.dexterity, weaponProficiencyIds)
+                    } else {
+                        newDraftAttack().copy(name = weapon.name, icon = weapon.icon)
+                    }
                 )
                 isWeaponAttackPickerOpen = false
             }
@@ -602,6 +627,9 @@ internal fun CombatContent(
     editingAttack?.let { attack ->
         AttackEditDialog(
             attack = attack,
+            weaponName = weaponOf(attack, weaponAttackOptions + resolvedBundle.inventoryItems)?.let { weapon ->
+                weaponAttackOptions.firstOrNull { it.id == weapon.id }?.name ?: weapon.name
+            },
             onDismiss = { editingAttack = null },
             onSave = { updated ->
                 onUpdateAttack(resolvedBundle, updated)
@@ -623,6 +651,7 @@ internal fun CombatContent(
             spell = spell,
             onDismiss = { editingSpellAttack = null },
             onSave = { updated ->
+                bookSpellOf(spell, bookSpells)?.let { book -> onUpdateSpell(resolvedBundle, updated.copy(id = book.id)) }
                 onUpdateSpellAttack(resolvedBundle, updated)
                 editingSpellAttack = null
             },
@@ -1561,6 +1590,8 @@ private fun ResourceCheckboxRow(
 @Composable
 private fun AttackEditDialog(
     attack: Attack,
+    /** The inventory weapon the attack is made with: then its numbers are the weapon's, not typed here. */
+    weaponName: String? = null,
     onDismiss: () -> Unit,
     onSave: (Attack) -> Unit,
     onDelete: (() -> Unit)? = null
@@ -1658,7 +1689,18 @@ private fun AttackEditDialog(
                 value = text(calculationMode.localizationKey),
                 onClick = { calculationMode = calculationMode.toggle() }
             )
-            if (calculationMode == AttackCalculationMode.AUTOMATIC) {
+            if (calculationMode == AttackCalculationMode.AUTOMATIC && weaponName != null) {
+                Text(
+                    text = strings.format("combat_attack_from_weapon", weaponName),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = LocalDesignTokens.current.colors.text.muted
+                )
+                ResourceCheckboxRow(
+                    checked = applyAbilityModifierToDamage,
+                    label = text("combat_attack_main_hand"),
+                    onCheckedChange = { applyAbilityModifierToDamage = it }
+                )
+            } else if (calculationMode == AttackCalculationMode.AUTOMATIC) {
                 CombatDialogSection(text("combat_attack_section_attack"))
                 CombatCompactSelectionField(
                     label = text("combat_attack_ability"),
@@ -1892,48 +1934,6 @@ private fun newDraftCombatResource(): CombatResource =
     )
 
 private fun signedNumber(value: Int): String = if (value >= 0) "+$value" else value.toString()
-
-private fun InventoryItem.toCombatAttack(
-    strengthScore: Int,
-    dexterityScore: Int,
-    weaponProficiencyIds: Set<String>
-): Attack {
-    val details = weaponDetails ?: return newDraftAttack().copy(name = name, icon = icon)
-    val strengthModifier = abilityModifier(strengthScore)
-    val dexterityModifier = abilityModifier(dexterityScore)
-    val attackAbility = when {
-        details.rangeType == InventoryWeaponRangeType.RANGED -> SpellcastingAbility.DEXTERITY
-        InventoryWeaponProperty.FINESSE in details.properties && dexterityModifier > strengthModifier ->
-            SpellcastingAbility.DEXTERITY
-        else -> SpellcastingAbility.STRENGTH
-    }
-    val magicalModifier = if (isMagical) magicalBonus else 0
-    val isProficient = details.isCharacterProficient(weaponProficiencyIds)
-    val primaryDamage = details.damages.firstOrNull()
-    val alternateDamage = details.twoHandedDamage
-    return Attack(
-        id = 0,
-        name = name,
-        icon = icon,
-        isProficient = isProficient,
-        calculationMode = AttackCalculationMode.AUTOMATIC,
-        ability = attackAbility,
-        normalRange = details.normalRange,
-        longRange = details.longRange,
-        damageDiceCount = primaryDamage?.dice.toDiceCount() ?: 1,
-        damageDieType = primaryDamage?.dice.toDieType() ?: "d4",
-        alternateDamageDiceCount = alternateDamage?.dice?.toDiceCount(),
-        alternateDamageDieType = alternateDamage?.dice?.toDieType(),
-        alternateDamageType = alternateDamage?.damageType,
-        magicalBonus = magicalModifier,
-        applyAbilityModifierToDamage = true,
-        manualAttackBonusOrSaveDc = "",
-        manualDamage = "",
-        primaryDamageType = primaryDamage?.damageType.orEmpty(),
-        // Older catalog items may store SRD ids with hyphens ("war-pick").
-        baseWeaponId = details.baseWeaponId?.replace('-', '_')
-    )
-}
 
 private fun Spell.isCombatSpell(): Boolean =
     parseResolutionKind(this) != SpellResolutionKind.NONE || damageBase.isNotBlank()
@@ -2296,21 +2296,6 @@ private fun <T> SelectionDialog(
     }
 }
 
-private fun com.dndcharacterhandler.domain.model.InventoryWeaponDetails.isCharacterProficient(
-    weaponProficiencyIds: Set<String>
-): Boolean {
-    // Older catalog items may store SRD ids with hyphens ("war-pick"); proficiency ids use underscores.
-    val baseWeaponId = baseWeaponId?.replace('-', '_')
-    return when {
-        !baseWeaponId.isNullOrBlank() && baseWeaponId in weaponProficiencyIds -> true
-        weaponClass == com.dndcharacterhandler.domain.model.InventoryWeaponClass.SIMPLE &&
-            WeaponGroupSimpleId in weaponProficiencyIds -> true
-        weaponClass == com.dndcharacterhandler.domain.model.InventoryWeaponClass.MARTIAL &&
-            WeaponGroupMartialId in weaponProficiencyIds -> true
-        else -> false
-    }
-}
-
 private fun InventoryItem.primaryDamageLabel(): String? =
     weaponDetails?.damages?.firstOrNull()?.toCombatDamageLabel(if (isMagical) magicalBonus else 0)
 
@@ -2549,14 +2534,6 @@ private fun Attack.displayDamage(
         )
     }
 }
-
-private fun String?.toDiceCount(): Int? =
-    this?.replace(" ", "")
-        ?.let { Regex("""^(\d+)d\d+.*$""").matchEntire(it)?.groupValues?.getOrNull(1)?.toIntOrNull() }
-
-private fun String?.toDieType(): String? =
-    this?.replace(" ", "")
-        ?.let { Regex("""^\d+(d\d+).*$""").matchEntire(it)?.groupValues?.getOrNull(1) }
 
 private fun Attack.displayDamageTypeLabel(strings: com.dndcharacterhandler.data.localization.LocalizedStrings): String {
     val primary = strings[damageTypeLocalizationKeyForCombat(primaryDamageType)]
