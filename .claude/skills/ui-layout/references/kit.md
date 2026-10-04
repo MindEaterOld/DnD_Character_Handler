@@ -106,6 +106,7 @@ EditDialog(title, onDismiss, onConfirm?, onDelete?)
 Строки в превью — рукописная карта `LocalizedStrings(language, mapOf(...))`: новый ключ экрана добавлять и туда.
 
 Общие части, добавленные 2026-10-04:
+- `components/TabIcons.kt` — `TabIconOverview`, `TabIconCombat`, `TabIconInventory`, `TabIconSpells`, `TabIconFeatures`, `TabIconBiography`: иконки вкладок нижней панели из Material Design Icons (щит с фигурой, скрещённые мечи, сундук, шляпа волшебника, четырёхлучевая звезда, свиток), залитые, на сетке 24.
 - `components/Toggle.kt` — `toggleFill(selected)`, `toggleContent(selected)`, `toggleRadioColors()`, `ToggleChip`: любой выбор из ряда или списка (выбранный — золото).
 - `components/CardEditButton.kt` — `CardMainButton`: главное действие внизу раскрытой карточки с заливкой кнопки («Сотворить»), после текстовых «Изменить»/«Переложить».
 - `components/AppSnackbar.kt` — `LocalAppSnackbar.current.show(message, actionLabel, onAction)`: уведомление сверху с «Отменить». Стол кубов рисуется поверх него — для действия с броском подпись идёт в итог на столе (`RollInput.resultTitle`).
