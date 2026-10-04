@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -92,6 +93,16 @@ private val FaceArtKinds = listOf(
     DieShapeKind.D10_TENS to "d10 ×10",
     DieShapeKind.D12 to "d12",
     DieShapeKind.D20 to "d20"
+)
+
+/** The dice the preview shows, by the chips above it: the d100 is its two d10s, the tens and the units. */
+private val PreviewDice = listOf(
+    listOf(DieShapeKind.D4) to "d4",
+    listOf(DieShapeKind.D6) to "d6",
+    listOf(DieShapeKind.D8) to "d8",
+    listOf(DieShapeKind.D12) to "d12",
+    listOf(DieShapeKind.D20) to "d20",
+    listOf(DieShapeKind.D10_TENS, DieShapeKind.D10) to "d100"
 )
 
 /**
@@ -209,15 +220,15 @@ internal fun DiceWorkshopOverlay(
                 style = MaterialTheme.typography.headlineMedium,
                 color = colors.text.primary
             )
-            WorkshopPreview(look = look, kind = previewKind)
+            WorkshopPreview(look = look, kinds = PreviewDice.first { previewKind in it.first }.first)
             FlowRow(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp),
                 horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally)
             ) {
-                FaceArtKinds.forEach { (kind, label) ->
-                    FilterChip(selected = kind == previewKind, onClick = { previewKind = kind }, label = { Text(label) })
+                PreviewDice.forEach { (kinds, label) ->
+                    FilterChip(selected = previewKind in kinds, onClick = { previewKind = kinds.last() }, label = { Text(label) })
                 }
             }
             Column(
@@ -487,9 +498,9 @@ private fun patternColor(pattern: DicePattern): Int = when (pattern) {
 
 private fun percent(value: Float): String = "${(value * 100).toInt()}%"
 
-/** The skin on a die turning slowly, so every side of it shows. */
+/** The skin on [kinds] turning slowly side by side (the d100's two dice), so every side of them shows. */
 @Composable
-private fun WorkshopPreview(look: DiceLook, kind: DieShapeKind) {
+private fun WorkshopPreview(look: DiceLook, kinds: List<DieShapeKind>) {
     var angle by remember { mutableFloatStateOf(0f) }
     LaunchedEffect(Unit) {
         var previous = 0L
@@ -501,15 +512,23 @@ private fun WorkshopPreview(look: DiceLook, kind: DieShapeKind) {
         }
     }
     val turn = Quat.axisAngle(Vec3(0.35, 1.0, 0.2).normalized(), angle.toDouble())
-    DieIcon(
-        type = DieType.D20,
-        look = look,
-        kind = kind,
-        turn = turn,
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(200.dp)
-    )
+    ) {
+        kinds.forEach { kind ->
+            DieIcon(
+                type = DieType.D20,
+                look = look,
+                kind = kind,
+                turn = turn,
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+            )
+        }
+    }
 }
 
 @Composable
