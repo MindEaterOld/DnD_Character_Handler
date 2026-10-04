@@ -1,0 +1,376 @@
+package com.dndcharacterhandler.presentation.combat
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Casino
+import androidx.compose.material.icons.outlined.KeyboardDoubleArrowDown
+import androidx.compose.material.icons.outlined.KeyboardDoubleArrowUp
+import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import com.dndcharacterhandler.domain.rules.AttackOutcome
+import com.dndcharacterhandler.domain.rules.AttackRoll
+import com.dndcharacterhandler.domain.rules.DiceFormula
+import com.dndcharacterhandler.domain.rules.RollEffects
+import com.dndcharacterhandler.domain.rules.RollMode
+import com.dndcharacterhandler.domain.rules.RollPart
+import com.dndcharacterhandler.domain.rules.ThrownValues
+import com.dndcharacterhandler.domain.rules.read
+import com.dndcharacterhandler.presentation.components.EditDialog
+import com.dndcharacterhandler.presentation.components.RollMarker
+import com.dndcharacterhandler.presentation.components.changedValueColor
+import com.dndcharacterhandler.presentation.components.nameKey
+import com.dndcharacterhandler.presentation.dice.DiceRollRequest
+import com.dndcharacterhandler.presentation.dice.LocalDiceRoller
+import com.dndcharacterhandler.presentation.dice.ThrownDie
+import com.dndcharacterhandler.presentation.dice.dieTypeOf
+import com.dndcharacterhandler.presentation.dice.sides
+import com.dndcharacterhandler.presentation.localization.LocalStrings
+import com.dndcharacterhandler.presentation.localization.text
+import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
+
+/** What the roll pop-up needs to know of one attack, a weapon's or a spell's. */
+internal data class RollInput(
+    val title: String,
+    /** The attack's bonus as it stands, the conditions' penalty in it; null when nothing rolls to hit. */
+    val attackBonus: Int?,
+    /** The conditions on attack rolls: the default button and why. */
+    val effects: RollEffects?,
+    /** The damage (or healing) with its bonus; null when there is none. */
+    val damage: DiceFormula?,
+    /** Its type, as the card shows it ("рубящий"). */
+    val damageType: String,
+    /** A second damage to pick instead (a versatile weapon in two hands, a spell's other damage). */
+    val alternateDamage: DiceFormula? = null,
+    /** What picks it: "Двумя руками: %1$s". */
+    val alternateKey: String = "combat_roll_two_handed",
+    val alternateDamageType: String? = null,
+    val healing: Boolean = false,
+    /** A save spell's DC for the target ("ЛОВ СЛ 13"). */
+    val save: String? = null
+)
+
+/**
+ * Rolling an attack, as Foundry asks it: the attack and the damage, what the conditions do (and the
+ * button they pick: advantage, normal or disadvantage, the gold one), a situational bonus for each
+ * ("1к4" for Bless), and the three ways to throw. The attack and its damage go onto the dice table
+ * in one throw; a natural 20 then offers the critical's extra dice. Without an attack roll (a save
+ * spell, healing) one button throws the damage.
+ */
+@Composable
+internal fun RollDialog(input: RollInput, onEdit: () -> Unit, onDismiss: () -> Unit) {
+    val colors = LocalDesignTokens.current.colors
+    val strings = LocalStrings.current
+    val rollDice = LocalDiceRoller.current
+    var twoHanded by remember { mutableStateOf(false) }
+    var attackExtraText by remember { mutableStateOf("") }
+    var damageExtraText by remember { mutableStateOf("") }
+    val attackExtra = DiceFormula.parse(attackExtraText)
+    val damageExtra = DiceFormula.parse(damageExtraText)
+    val damage = if (twoHanded && input.alternateDamage != null) input.alternateDamage else input.damage
+    val damageType = if (twoHanded) input.alternateDamageType ?: input.damageType else input.damageType
+    val valid = attackExtra != null && damageExtra != null
+
+    EditDialog(title = input.title, onDismiss = onDismiss) {
+        input.attackBonus?.let { bonus ->
+            RollLine(
+                label = text("combat_roll_attack"),
+                value = DiceFormula.of(1, 20, bonus).label(),
+                valueColor = changedValueColor(input.effects?.modifier ?: 0),
+                marker = { RollMarker(input.effects, size = 18.dp) }
+            )
+            rollReason(input.effects)?.let { reason ->
+                Text(text = reason, style = MaterialTheme.typography.bodyMedium, color = colors.text.muted)
+            }
+        }
+        input.save?.let { save ->
+            Text(text = strings.format("combat_roll_save", save), style = MaterialTheme.typography.bodyLarge, color = colors.text.primary)
+        }
+        damage?.let { formula ->
+            RollLine(
+                label = text(if (input.healing) "combat_roll_healing" else "combat_roll_damage"),
+                value = listOf(formula.label(), damageType).filter { it.isNotBlank() }.joinToString(" ")
+            )
+        }
+        input.alternateDamage?.let { alternate ->
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(checked = twoHanded, onCheckedChange = { twoHanded = it })
+                Text(
+                    text = strings.format(input.alternateKey, alternate.label()),
+                    modifier = Modifier.clickable { twoHanded = !twoHanded },
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = colors.text.primary
+                )
+            }
+        }
+        if (input.attackBonus != null) {
+            BonusField(
+                value = attackExtraText,
+                onValueChange = { attackExtraText = it },
+                label = text("combat_roll_attack_bonus"),
+                isError = attackExtra == null
+            )
+        }
+        if (damage != null) {
+            BonusField(
+                value = damageExtraText,
+                onValueChange = { damageExtraText = it },
+                label = text(if (input.healing) "combat_roll_healing_bonus" else "combat_roll_damage_bonus"),
+                isError = damageExtra == null
+            )
+        }
+
+        Spacer(modifier = Modifier.height(4.dp))
+        if (input.attackBonus != null && valid) {
+            val roll = { mode: RollMode ->
+                val attackRoll = AttackRoll(
+                    bonus = input.attackBonus,
+                    mode = mode,
+                    attackExtra = attackExtra ?: DiceFormula.Zero,
+                    damage = (damage ?: DiceFormula.Zero) + (damageExtra ?: DiceFormula.Zero)
+                )
+                rollDice(
+                    DiceRollRequest(
+                        selection = attackRoll.selection().toDieSelection(),
+                        result = { dice -> AttackResult(input.title, attackRoll, attackRoll.read(dice.toThrownValues()), damageType, input.healing) }
+                    )
+                )
+                onDismiss()
+            }
+            val preferred = input.effects?.mode ?: RollMode.NORMAL
+            RollModeButton(text("combat_roll_advantage"), Icons.Outlined.KeyboardDoubleArrowUp, preferred == RollMode.ADVANTAGE) { roll(RollMode.ADVANTAGE) }
+            RollModeButton(text("combat_roll_normal"), Icons.Outlined.Casino, preferred == RollMode.NORMAL) { roll(RollMode.NORMAL) }
+            RollModeButton(text("combat_roll_disadvantage"), Icons.Outlined.KeyboardDoubleArrowDown, preferred == RollMode.DISADVANTAGE) { roll(RollMode.DISADVANTAGE) }
+        } else if (input.attackBonus == null && damage != null && valid) {
+            val formula = damage + (damageExtra ?: DiceFormula.Zero)
+            RollModeButton(
+                label = text(if (input.healing) "combat_roll_healing_only" else "combat_roll_damage_only"),
+                icon = Icons.Outlined.Casino,
+                primary = true,
+                enabled = formula.hasDice
+            ) {
+                rollDice(
+                    DiceRollRequest(
+                        selection = formula.dice.toDieSelection(),
+                        result = { dice -> AmountResult(input.title, formula.read(dice.toThrownValues()), damageType, input.healing, input.save) }
+                    )
+                )
+                onDismiss()
+            }
+        }
+        TextButton(onClick = onEdit) { Text(text("common_edit")) }
+    }
+}
+
+@Composable
+private fun RollLine(label: String, value: String, valueColor: Color? = null, marker: (@Composable () -> Unit)? = null) {
+    val colors = LocalDesignTokens.current.colors
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(text = label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge, color = colors.text.muted)
+        marker?.invoke()
+        Text(
+            text = value,
+            modifier = Modifier.padding(start = 6.dp),
+            style = MaterialTheme.typography.titleMedium,
+            color = valueColor ?: colors.text.primary,
+            textAlign = TextAlign.End
+        )
+    }
+}
+
+@Composable
+private fun BonusField(value: String, onValueChange: (String) -> Unit, label: String, isError: Boolean) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = Modifier.fillMaxWidth(),
+        singleLine = true,
+        isError = isError,
+        label = { Text(label) },
+        placeholder = { Text(text("combat_roll_bonus_hint")) }
+    )
+}
+
+/** One way to throw: the conditions' choice in gold (the main action), the others on the button fill. */
+@Composable
+private fun RollModeButton(label: String, icon: ImageVector, primary: Boolean, enabled: Boolean = true, onClick: () -> Unit) {
+    val colors = LocalDesignTokens.current.colors
+    val content = when {
+        !enabled -> colors.text.subtle
+        primary -> MaterialTheme.colorScheme.onPrimary
+        else -> colors.text.primary
+    }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(48.dp)
+            .clip(RoundedCornerShape(24.dp))
+            .background(if (primary && enabled) MaterialTheme.colorScheme.primary else colors.surface.button)
+            .clickable(enabled = enabled, onClick = onClick)
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(imageVector = icon, contentDescription = null, tint = content, modifier = Modifier.size(20.dp))
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(text = label, style = MaterialTheme.typography.bodyLarge, color = content, fontWeight = FontWeight.Medium)
+    }
+}
+
+/** Why the conditions pick the button: "Помеха: Отравление · −4: Истощение 2"; null when they don't. */
+@Composable
+private fun rollReason(effects: RollEffects?): String? {
+    if (effects == null || !effects.changesRoll) return null
+    val strings = LocalStrings.current
+    val parts = buildList {
+        if (effects.disadvantage.isNotEmpty()) {
+            add(strings.format("combat_roll_reason_disadvantage", effects.disadvantage.joinToString(", ") { strings[it.nameKey] }))
+        }
+        if (effects.advantage.isNotEmpty()) {
+            add(strings.format("combat_roll_reason_advantage", effects.advantage.joinToString(", ") { strings[it.nameKey] }))
+        }
+        if (effects.modifier < 0) {
+            add("${effects.modifier}: " + strings.format("conditions_exhaustion_level", -effects.modifier / 2))
+        }
+    }
+    return parts.joinToString(" · ").ifEmpty { null }
+}
+
+/** "14 + 3 + 5 = 22": the dice, then the number added, then the total. */
+private fun RollPart.breakdown(): String {
+    val terms = dice.map { it.toString() }.toMutableList()
+    val start = terms.joinToString(" + ")
+    val withFlat = when {
+        terms.isEmpty() -> flat.toString()
+        flat > 0 -> "$start + $flat"
+        flat < 0 -> "$start - ${-flat}"
+        else -> start
+    }
+    return if (terms.size + (if (flat != 0) 1 else 0) > 1) "$withFlat = $total" else withFlat
+}
+
+/** An attack read off the table: the hit total (gold on a critical, red on a natural 1) and the damage. */
+@Composable
+private fun AttackResult(title: String, roll: AttackRoll, outcome: AttackOutcome, damageType: String, healing: Boolean) {
+    val colors = LocalDesignTokens.current.colors
+    val strings = LocalStrings.current
+    val rollDice = LocalDiceRoller.current
+    Text(text = title, style = MaterialTheme.typography.titleMedium, color = colors.text.label, textAlign = TextAlign.Center)
+    Text(
+        text = strings.format("combat_roll_attack_total", outcome.attack.total),
+        style = MaterialTheme.typography.headlineMedium,
+        color = when {
+            outcome.critical -> colors.accent.inspiration
+            outcome.fumble -> colors.accent.dangerHpZero
+            else -> colors.text.primary
+        },
+        textAlign = TextAlign.Center
+    )
+    if (outcome.d20s.size > 1) {
+        Text(
+            text = strings.format("combat_roll_d20s", outcome.d20s.joinToString(", "), outcome.natural),
+            style = MaterialTheme.typography.bodyMedium,
+            color = colors.text.muted,
+            textAlign = TextAlign.Center
+        )
+    }
+    Text(text = outcome.attack.breakdown(), style = MaterialTheme.typography.bodyLarge, color = colors.text.muted, textAlign = TextAlign.Center)
+    when {
+        outcome.critical -> Text(text("combat_roll_critical"), style = MaterialTheme.typography.titleMedium, color = colors.accent.inspiration, textAlign = TextAlign.Center)
+        outcome.fumble -> Text(text("combat_roll_fumble"), style = MaterialTheme.typography.titleMedium, color = colors.accent.dangerHpZero, textAlign = TextAlign.Center)
+    }
+    if (!roll.damage.isEmpty) {
+        Text(
+            text = strings.format(if (healing) "combat_roll_healing_total" else "combat_roll_damage_total", outcome.damageTotal, damageType).trim(),
+            style = MaterialTheme.typography.titleLarge,
+            color = if (outcome.fumble) colors.text.subtle else colors.text.primary,
+            textAlign = TextAlign.Center
+        )
+        Text(text = outcome.damage.breakdown(), style = MaterialTheme.typography.bodyMedium, color = colors.text.muted, textAlign = TextAlign.Center)
+        val extra = roll.criticalExtra
+        if (outcome.critical && extra.hasDice) {
+            Button(onClick = {
+                val first = outcome.damageTotal
+                rollDice(
+                    DiceRollRequest(
+                        selection = extra.dice.toDieSelection(),
+                        result = { dice -> CriticalResult(title, first, extra.read(dice.toThrownValues()), damageType) }
+                    )
+                )
+            }) { Text(strings.format("combat_roll_critical_extra", extra.label())) }
+        }
+    }
+}
+
+/** A critical's extra dice added to the first throw's damage. */
+@Composable
+private fun CriticalResult(title: String, firstDamage: Int, extra: RollPart, damageType: String) {
+    val colors = LocalDesignTokens.current.colors
+    val strings = LocalStrings.current
+    val total = firstDamage + extra.total
+    Text(text = title, style = MaterialTheme.typography.titleMedium, color = colors.text.label, textAlign = TextAlign.Center)
+    Text(text = text("combat_roll_critical"), style = MaterialTheme.typography.titleMedium, color = colors.accent.inspiration, textAlign = TextAlign.Center)
+    Text(
+        text = strings.format("combat_roll_damage_total", total, damageType).trim(),
+        style = MaterialTheme.typography.headlineMedium,
+        color = colors.text.primary,
+        textAlign = TextAlign.Center
+    )
+    Text(
+        text = "$firstDamage + ${extra.dice.joinToString(" + ")} = $total",
+        style = MaterialTheme.typography.bodyLarge,
+        color = colors.text.muted,
+        textAlign = TextAlign.Center
+    )
+}
+
+/** Damage or healing alone (a save spell, a healing spell) read off the table. */
+@Composable
+private fun AmountResult(title: String, amount: RollPart, damageType: String, healing: Boolean, save: String?) {
+    val colors = LocalDesignTokens.current.colors
+    val strings = LocalStrings.current
+    Text(text = title, style = MaterialTheme.typography.titleMedium, color = colors.text.label, textAlign = TextAlign.Center)
+    Text(
+        text = strings.format(if (healing) "combat_roll_healing_total" else "combat_roll_damage_total", amount.total.coerceAtLeast(0), damageType).trim(),
+        style = MaterialTheme.typography.headlineMedium,
+        color = if (healing) colors.accent.heal else colors.text.primary,
+        textAlign = TextAlign.Center
+    )
+    Text(text = amount.breakdown(), style = MaterialTheme.typography.bodyLarge, color = colors.text.muted, textAlign = TextAlign.Center)
+    save?.let {
+        Text(text = strings.format("combat_roll_save", it), style = MaterialTheme.typography.bodyMedium, color = colors.text.muted, textAlign = TextAlign.Center)
+    }
+}
+
+/** The table's dice for a formula's: sides to how many. */
+internal fun Map<Int, Int>.toDieSelection() = mapNotNull { (sides, count) -> dieTypeOf(sides)?.let { it to count } }.toMap()
+
+/** The thrown dice by their sides, in the table's order. */
+internal fun List<ThrownDie>.toThrownValues(): ThrownValues = groupBy { it.type.sides }.mapValues { (_, dice) -> dice.map { it.value() } }

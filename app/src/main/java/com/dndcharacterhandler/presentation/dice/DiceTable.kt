@@ -118,7 +118,9 @@ internal fun DiceTableOverlay(
     skin: DiceLook,
     onClose: () -> Unit,
     /** Called with the dice every time a throw settles; a new throw replaces the result. */
-    onSettled: (List<ThrownDie>) -> Unit = {}
+    onSettled: (List<ThrownDie>) -> Unit = {},
+    /** Reads the settled dice in the panel instead of the plain total. */
+    result: (@Composable (List<ThrownDie>) -> Unit)? = null
 ) {
     val state = remember(selection) { DiceTableState(selection) }
     val colors = LocalDesignTokens.current.colors
@@ -178,6 +180,7 @@ internal fun DiceTableOverlay(
 
         DiceStatusPanel(
             state = state,
+            result = result,
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .systemBarsPadding()
@@ -189,7 +192,7 @@ internal fun DiceTableOverlay(
 }
 
 @Composable
-private fun DiceStatusPanel(state: DiceTableState, modifier: Modifier = Modifier) {
+private fun DiceStatusPanel(state: DiceTableState, modifier: Modifier = Modifier, result: (@Composable (List<ThrownDie>) -> Unit)? = null) {
     val colors = LocalDesignTokens.current.colors
     val strings = LocalStrings.current
     val phase = state.phase
@@ -203,7 +206,9 @@ private fun DiceStatusPanel(state: DiceTableState, modifier: Modifier = Modifier
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        if (phase == DicePhase.SETTLED) {
+        if (phase == DicePhase.SETTLED && result != null) {
+            result(state.results)
+        } else if (phase == DicePhase.SETTLED) {
             val results = state.results
             Text(
                 text = strings.format("dice_result_total", results.sumOf { it.value() }),

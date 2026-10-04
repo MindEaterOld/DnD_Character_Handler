@@ -321,7 +321,8 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                     selection = request.selection,
                     skin = diceSkin,
                     onClose = { diceRollRequest = null },
-                    onSettled = request.onSettled
+                    onSettled = request.onSettled,
+                    result = request.result
                 )
             }
 

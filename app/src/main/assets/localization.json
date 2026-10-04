@@ -3795,6 +3795,174 @@
     "fr": "Échec automatique",
     "es": "Fallo automático"
   },
+  "combat_roll_attack": {
+    "en": "Attack",
+    "ru": "Атака",
+    "de": "Angriff",
+    "fr": "Attaque",
+    "es": "Ataque"
+  },
+  "combat_roll_damage": {
+    "en": "Damage",
+    "ru": "Урон",
+    "de": "Schaden",
+    "fr": "Dégâts",
+    "es": "Daño"
+  },
+  "combat_roll_healing": {
+    "en": "Healing",
+    "ru": "Лечение",
+    "de": "Heilung",
+    "fr": "Soins",
+    "es": "Curación"
+  },
+  "combat_roll_advantage": {
+    "en": "With advantage",
+    "ru": "С преимуществом",
+    "de": "Mit Vorteil",
+    "fr": "Avec avantage",
+    "es": "Con ventaja"
+  },
+  "combat_roll_normal": {
+    "en": "Normal roll",
+    "ru": "Обычный бросок",
+    "de": "Normaler Wurf",
+    "fr": "Jet normal",
+    "es": "Tirada normal"
+  },
+  "combat_roll_disadvantage": {
+    "en": "With disadvantage",
+    "ru": "С помехой",
+    "de": "Mit Nachteil",
+    "fr": "Avec désavantage",
+    "es": "Con desventaja"
+  },
+  "combat_roll_damage_only": {
+    "en": "Roll damage",
+    "ru": "Бросить урон",
+    "de": "Schaden würfeln",
+    "fr": "Lancer les dégâts",
+    "es": "Tirar daño"
+  },
+  "combat_roll_healing_only": {
+    "en": "Roll healing",
+    "ru": "Бросить лечение",
+    "de": "Heilung würfeln",
+    "fr": "Lancer les soins",
+    "es": "Tirar curación"
+  },
+  "combat_roll_attack_bonus": {
+    "en": "Attack bonus",
+    "ru": "Бонус к атаке",
+    "de": "Angriffsbonus",
+    "fr": "Bonus d'attaque",
+    "es": "Bonificador de ataque"
+  },
+  "combat_roll_damage_bonus": {
+    "en": "Damage bonus",
+    "ru": "Бонус к урону",
+    "de": "Schadensbonus",
+    "fr": "Bonus de dégâts",
+    "es": "Bonificador de daño"
+  },
+  "combat_roll_healing_bonus": {
+    "en": "Healing bonus",
+    "ru": "Бонус к лечению",
+    "de": "Heilungsbonus",
+    "fr": "Bonus de soins",
+    "es": "Bonificador de curación"
+  },
+  "combat_roll_bonus_hint": {
+    "en": "e.g. 1d4 or +2",
+    "ru": "например, 1к4 или +2",
+    "de": "z. B. 1W4 oder +2",
+    "fr": "ex. 1d4 ou +2",
+    "es": "p. ej. 1d4 o +2"
+  },
+  "combat_roll_two_handed": {
+    "en": "Two-handed: %1$s",
+    "ru": "Двумя руками: %1$s",
+    "de": "Zweihändig: %1$s",
+    "fr": "À deux mains : %1$s",
+    "es": "A dos manos: %1$s"
+  },
+  "combat_roll_alternate": {
+    "en": "Other damage: %1$s",
+    "ru": "Другой урон: %1$s",
+    "de": "Anderer Schaden: %1$s",
+    "fr": "Autres dégâts : %1$s",
+    "es": "Otro daño: %1$s"
+  },
+  "combat_roll_save": {
+    "en": "Target's save: %1$s",
+    "ru": "Спасбросок цели: %1$s",
+    "de": "Rettungswurf des Ziels: %1$s",
+    "fr": "Sauvegarde de la cible : %1$s",
+    "es": "Salvación del objetivo: %1$s"
+  },
+  "combat_roll_reason_disadvantage": {
+    "en": "Disadvantage: %1$s",
+    "ru": "Помеха: %1$s",
+    "de": "Nachteil: %1$s",
+    "fr": "Désavantage : %1$s",
+    "es": "Desventaja: %1$s"
+  },
+  "combat_roll_reason_advantage": {
+    "en": "Advantage: %1$s",
+    "ru": "Преимущество: %1$s",
+    "de": "Vorteil: %1$s",
+    "fr": "Avantage : %1$s",
+    "es": "Ventaja: %1$s"
+  },
+  "combat_roll_attack_total": {
+    "en": "Attack %1$d",
+    "ru": "Атака %1$d",
+    "de": "Angriff %1$d",
+    "fr": "Attaque %1$d",
+    "es": "Ataque %1$d"
+  },
+  "combat_roll_d20s": {
+    "en": "d20: %1$s, counts %2$d",
+    "ru": "к20: %1$s, берётся %2$d",
+    "de": "W20: %1$s, zählt %2$d",
+    "fr": "d20 : %1$s, compte %2$d",
+    "es": "d20: %1$s, cuenta %2$d"
+  },
+  "combat_roll_critical": {
+    "en": "Critical hit!",
+    "ru": "Критическое попадание!",
+    "de": "Kritischer Treffer!",
+    "fr": "Coup critique !",
+    "es": "¡Golpe crítico!"
+  },
+  "combat_roll_fumble": {
+    "en": "Natural 1: a miss",
+    "ru": "Натуральная 1: промах",
+    "de": "Natürliche 1: daneben",
+    "fr": "1 naturel : raté",
+    "es": "1 natural: fallo"
+  },
+  "combat_roll_damage_total": {
+    "en": "Damage %1$d %2$s",
+    "ru": "Урон %1$d %2$s",
+    "de": "Schaden %1$d %2$s",
+    "fr": "Dégâts %1$d %2$s",
+    "es": "Daño %1$d %2$s"
+  },
+  "combat_roll_healing_total": {
+    "en": "Healing %1$d",
+    "ru": "Лечение %1$d",
+    "de": "Heilung %1$d",
+    "fr": "Soins %1$d",
+    "es": "Curación %1$d"
+  },
+  "combat_roll_critical_extra": {
+    "en": "Roll the critical's dice: %1$s",
+    "ru": "Докинуть кубы крита: %1$s",
+    "de": "Kritische Würfel werfen: %1$s",
+    "fr": "Lancer les dés du critique : %1$s",
+    "es": "Tirar los dados del crítico: %1$s"
+  },
   "conditions_title": {
     "en": "Conditions",
     "ru": "Состояния",

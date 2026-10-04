@@ -1,5 +1,8 @@
 package com.dndcharacterhandler.presentation.combat
 
+import com.dndcharacterhandler.domain.rules.DiceFormula
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.ExperimentalFoundationApi
 import com.dndcharacterhandler.presentation.components.changedValueColor
 import com.dndcharacterhandler.domain.rules.RollMode
 import com.dndcharacterhandler.domain.rules.attacksAgainst
@@ -315,6 +318,9 @@ internal fun CombatContent(
     val character = characterBundle?.character
     var editingAttack by remember { mutableStateOf<Attack?>(null) }
     var editingSpellAttack by remember { mutableStateOf<Spell?>(null) }
+    // A tap rolls (the pop-up Foundry has), a long press edits.
+    var rollingAttack by remember { mutableStateOf<Attack?>(null) }
+    var rollingSpell by remember { mutableStateOf<Spell?>(null) }
     var editingCombatResource by remember { mutableStateOf<CombatResource?>(null) }
     var isAddEntryDialogOpen by remember { mutableStateOf(false) }
     var isWeaponAttackPickerOpen by remember { mutableStateOf(false) }
@@ -460,7 +466,8 @@ internal fun CombatContent(
                             proficiencyBonus = proficiencyBonus,
                             attackEffects = attackEffects,
                             mastery = attackMastery(attack, resolvedBundle, characterCatalog),
-                            onClick = { editingAttack = attack }
+                            onClick = { rollingAttack = attack },
+                            onLongClick = { editingAttack = attack }
                         )
                     }
                     items(spellAttacks, key = { "spell-${it.id}" }) { spell ->
@@ -470,7 +477,10 @@ internal fun CombatContent(
                             attackEffects = attackEffects,
                             spellSaveDcLabel = spellSaveDcLabel,
                             spellModifier = spellModifier,
-                            onClick = { editingSpellAttack = spell }
+                            onClick = {
+                                if (parseResolutionKind(spell) == SpellResolutionKind.NONE) editingSpellAttack = spell else rollingSpell = spell
+                            },
+                            onLongClick = { editingSpellAttack = spell }
                         )
                     }
                 }
@@ -560,6 +570,28 @@ internal fun CombatContent(
                 onUpdateSpellAttack(resolvedBundle, spell.copy(id = 0))
                 isSpellAttackPickerOpen = false
             }
+        )
+    }
+
+    rollingAttack?.let { attack ->
+        RollDialog(
+            input = attack.rollInput(character, proficiencyBonus, attackEffects, strings),
+            onEdit = {
+                rollingAttack = null
+                editingAttack = attack
+            },
+            onDismiss = { rollingAttack = null }
+        )
+    }
+
+    rollingSpell?.let { spell ->
+        RollDialog(
+            input = spell.rollInput(proficiencyBonus + spellModifier + attackEffects.modifier, attackEffects, spellModifier, spellSaveDcLabel, strings),
+            onEdit = {
+                rollingSpell = null
+                editingSpellAttack = spell
+            },
+            onDismiss = { rollingSpell = null }
         )
     }
 
@@ -1004,6 +1036,7 @@ private fun CombatSectionTitle(title: String) {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun AttackCard(
     attack: Attack,
@@ -1013,7 +1046,8 @@ private fun AttackCard(
     attackEffects: RollEffects? = null,
     /** The mastery property of the attack's weapon, when the character has mastered it. */
     mastery: CatalogWeaponMastery? = null,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onLongClick: () -> Unit = {}
 ) {
     val strings = LocalStrings.current
     var isMasteryOpen by remember { mutableStateOf(false) }
@@ -1035,7 +1069,7 @@ private fun AttackCard(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick),
         shape = RoundedCornerShape(10.dp),
         color = colors.surface.card.copy(alpha = 0.62f),
         border = BorderStroke(1.dp, colors.border.muted)
@@ -1117,7 +1151,7 @@ private fun AttackCard(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class)
 @Composable
 private fun SpellAttackCard(
     spell: Spell,
@@ -1125,7 +1159,8 @@ private fun SpellAttackCard(
     attackEffects: RollEffects? = null,
     spellSaveDcLabel: String,
     spellModifier: Int,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onLongClick: () -> Unit = {}
 ) {
     val strings = LocalStrings.current
     val resolution = parseResolutionKind(spell)
@@ -1148,7 +1183,7 @@ private fun SpellAttackCard(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick),
         shape = RoundedCornerShape(10.dp),
         color = colors.surface.card.copy(alpha = 0.62f),
         border = BorderStroke(1.dp, colors.border.muted)
@@ -2633,3 +2668,72 @@ private fun Attack.displayDamageTypeLabel(strings: com.dndcharacterhandler.data.
     return if (alternate != null && !alternate.equals(primary, ignoreCase = true)) "$primary / $alternate" else primary
 }
 
+
+
+/** The roll pop-up's view of a weapon attack: its bonus with the conditions' penalty, its damage. */
+private fun Attack.rollInput(
+    character: com.dndcharacterhandler.domain.model.Character,
+    proficiencyBonus: Int,
+    effects: RollEffects,
+    strings: com.dndcharacterhandler.data.localization.LocalizedStrings
+): RollInput {
+    val manual = calculationMode == AttackCalculationMode.MANUAL
+    val abilityBonus = abilityModifier(scoreForSpellcastingAbility(character, ability))
+    val sides = { die: String? -> die?.trim()?.removePrefix("d")?.toIntOrNull() ?: 0 }
+    val bonus = if (manual) {
+        // A hand-written bonus rolls if it starts with a number ("+5", "5"); a DC doesn't.
+        Regex("""^\s*([+-]?\d+)""").find(manualAttackBonusOrSaveDc)?.groupValues?.get(1)?.toIntOrNull()
+    } else {
+        (if (isProficient) proficiencyBonus else 0) + abilityBonus + magicalBonus
+    }
+    val damageBonus = magicalBonus + if (applyAbilityModifierToDamage) abilityBonus else 0
+    val damage = if (manual) {
+        DiceFormula.parse(manualDamage) ?: DiceFormula.of(damageDiceCount, sides(damageDieType))
+    } else {
+        DiceFormula.of(damageDiceCount, sides(damageDieType), damageBonus)
+    }
+    val alternateCount = alternateDamageDiceCount
+    val alternate = if (!manual && alternateCount != null && !alternateDamageDieType.isNullOrBlank()) {
+        DiceFormula.of(alternateCount, sides(alternateDamageDieType), damageBonus)
+    } else {
+        null
+    }
+    return RollInput(
+        title = name,
+        attackBonus = bonus?.plus(effects.modifier),
+        effects = effects,
+        damage = damage.takeUnless { it.isEmpty },
+        damageType = strings[damageTypeLocalizationKeyForCombat(primaryDamageType)],
+        alternateDamage = alternate,
+        alternateDamageType = alternateDamageType?.takeIf { it.isNotBlank() }?.let { strings[damageTypeLocalizationKeyForCombat(it)] }
+    )
+}
+
+/** The roll pop-up's view of a spell: an attack, a save with its DC, or healing. */
+private fun Spell.rollInput(
+    attackBonus: Int,
+    effects: RollEffects,
+    spellModifier: Int,
+    spellSaveDcLabel: String,
+    strings: com.dndcharacterhandler.data.localization.LocalizedStrings
+): RollInput {
+    val kind = parseResolutionKind(this)
+    fun formula(base: String, bonusIsModifier: Boolean, bonusValue: Int): DiceFormula? {
+        val dice = DiceFormula.parse(base) ?: return null
+        val total = dice + (if (bonusIsModifier) spellModifier else bonusValue)
+        return total.takeUnless { it.isEmpty }
+    }
+    val healing = kind == SpellResolutionKind.HEAL
+    return RollInput(
+        title = name,
+        attackBonus = if (kind == SpellResolutionKind.ATTACK) attackBonus else null,
+        effects = effects,
+        damage = if (healing) formula(healBase, healBonusIsModifier, healBonusValue) else formula(damageBase, damageBonusIsModifier, damageBonusValue),
+        damageType = if (healing) "" else damageType.takeIf { it.isNotBlank() }?.let { strings[damageTypeLocalizationKeyForCombat(it)] }.orEmpty(),
+        alternateDamage = if (healing) null else formula(altDamageBase, altDamageBonusIsModifier, altDamageBonusValue),
+        alternateKey = "combat_roll_alternate",
+        alternateDamageType = altDamageType.takeIf { it.isNotBlank() }?.let { strings[damageTypeLocalizationKeyForCombat(it)] },
+        healing = healing,
+        save = if (kind == SpellResolutionKind.SAVE) spellSaveLabel(spellSaveDcLabel, strings) else null
+    )
+}
