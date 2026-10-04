@@ -1,5 +1,7 @@
 package com.dndcharacterhandler.presentation.attributes
 
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.material.icons.outlined.GppBad
 import androidx.compose.material.icons.outlined.GppGood
 import androidx.compose.material.icons.outlined.Security
@@ -1430,9 +1432,10 @@ private fun AbilityScoreCard(
 }
 
 /**
- * The skills in two columns, no headings (owner's choice, 2026-10-04): each cell names its ability on
- * its top border, as the ability scores do. Down the columns by ability — Strength, Dexterity and
- * Intelligence on the left, Wisdom and Charisma on the right: nine each.
+ * The skills in two columns, one frame per ability with its short name on the top border, as the ability
+ * scores have (owner's choice, 2026-10-04): Strength, Dexterity and Intelligence on the left, Wisdom and
+ * Charisma on the right — nine rows each. The left column has one frame more, so it is taller; the right
+ * one stretches to its height and puts the spare room between Wisdom and Charisma (variant C2).
  */
 @Composable
 private fun SkillGroups(
@@ -1442,30 +1445,37 @@ private fun SkillGroups(
     checkEffects: Map<AbilityType, RollEffects> = emptyMap(),
     onSkillClick: (SkillRow) -> Unit = {}
 ) {
-    val ordered = skillAbilities.flatMap { (type, _) -> skills.filter { it.abilityType == type } }
-    val half = (ordered.size + 1) / 2
+    val groups = skillAbilities
+        .map { (type, key) -> key to skills.filter { it.abilityType == type } }
+        .filter { (_, groupSkills) -> groupSkills.isNotEmpty() }
     Row(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min),
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        listOf(ordered.take(half), ordered.drop(half)).forEach { column ->
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                column.forEach { skill ->
-                    SkillRowCard(
-                        skill = skill,
-                        effects = checkEffects[skill.abilityType],
-                        onClick = { onSkillClick(skill) }
-                    )
-                }
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            groups.take(3).forEach { (key, groupSkills) ->
+                SkillGroupCard(text(key), groupSkills, checkEffects, onSkillClick)
+            }
+        }
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight(),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            groups.drop(3).forEach { (key, groupSkills) ->
+                SkillGroupCard(text(key), groupSkills, checkEffects, onSkillClick)
             }
         }
     }
 }
 
-/** The abilities skills belong to, in the sheet's order, with the short name their cells carry. */
+/** The abilities skills belong to, in the sheet's order, with the short name their frames carry. */
 private val skillAbilities = listOf(
     AbilityType.STRENGTH to "ability_str_short",
     AbilityType.DEXTERITY to "ability_dex_short",
@@ -1474,71 +1484,84 @@ private val skillAbilities = listOf(
     AbilityType.CHARISMA to "ability_cha_short"
 )
 
+/** One ability's skills in one frame, its short name on the border; a tap on a row rolls that skill. */
 @Composable
-private fun SkillRowCard(
-    skill: SkillRow,
-    modifier: Modifier = Modifier,
-    effects: RollEffects? = null,
-    onClick: () -> Unit = {}
+private fun SkillGroupCard(
+    label: String,
+    skills: List<SkillRow>,
+    checkEffects: Map<AbilityType, RollEffects>,
+    onSkillClick: (SkillRow) -> Unit
 ) {
-    val strings = LocalStrings.current
-    val colors = LocalDesignTokens.current.colors
-    val abilityKey = skillAbilities.firstOrNull { it.first == skill.abilityType }?.second
     BorderLabelCard(
-        label = abilityKey?.let { strings[it] }.orEmpty(),
-        modifier = modifier.fillMaxWidth(),
+        label = label,
+        modifier = Modifier.fillMaxWidth(),
         labelStyle = MaterialTheme.typography.labelMedium,
-        cornerRadius = 7.dp,
-        onClick = onClick
+        cornerRadius = 7.dp
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(40.dp)
-                .padding(horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Canvas(modifier = Modifier.size(12.dp)) {
-                val expertiseColor = colors.accent.inspiration
-                val fillColor = when {
-                    skill.expertise -> expertiseColor
-                    skill.proficient -> colors.text.primary
-                    skill.jackOfAllTrades -> colors.text.primary.copy(alpha = 0.5f)
-                    else -> Color.Transparent
-                }
-                val strokeColor = if (skill.expertise) expertiseColor else colors.text.label
-                drawCircle(
-                    color = fillColor,
-                    radius = 5.dp.toPx()
-                )
-                drawCircle(
-                    color = strokeColor,
-                    radius = 5.dp.toPx(),
-                    style = Stroke(width = 1.dp.toPx())
+        Column {
+            skills.forEach { skill ->
+                SkillLine(
+                    skill = skill,
+                    effects = checkEffects[skill.abilityType],
+                    modifier = Modifier.clickable { onSkillClick(skill) }
                 )
             }
-            Text(
-                // The cell's own name, cut with a dot to its maxChars; the pop-ups take the full one.
-                text = strings["${skill.nameKey}_short"],
-                modifier = Modifier
-                    .padding(start = 6.dp)
-                    .weight(1f),
-                style = MaterialTheme.typography.bodyMedium,
-                color = colors.text.muted,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+        }
+    }
+}
+
+/** A skill's line: the training dot, the name, the roll's marker and the bonus as it is now. */
+@Composable
+private fun SkillLine(skill: SkillRow, effects: RollEffects?, modifier: Modifier = Modifier) {
+    val strings = LocalStrings.current
+    val colors = LocalDesignTokens.current.colors
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(36.dp)
+            .padding(horizontal = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Canvas(modifier = Modifier.size(12.dp)) {
+            val expertiseColor = colors.accent.inspiration
+            val fillColor = when {
+                skill.expertise -> expertiseColor
+                skill.proficient -> colors.text.primary
+                skill.jackOfAllTrades -> colors.text.primary.copy(alpha = 0.5f)
+                else -> Color.Transparent
+            }
+            val strokeColor = if (skill.expertise) expertiseColor else colors.text.label
+            drawCircle(
+                color = fillColor,
+                radius = 5.dp.toPx()
             )
-            RollMarker(effects, modifier = Modifier.padding(start = 4.dp), size = 16.dp)
-            Text(
-                text = signed(skill.modifier + (effects?.modifier ?: 0)),
-                modifier = Modifier
-                    .padding(start = 4.dp)
-                    .widthIn(min = 24.dp),
-                style = MaterialTheme.typography.bodyLarge,
-                color = changedValueColor(effects?.modifier ?: 0) ?: colors.text.primary,
-                textAlign = TextAlign.End
+            drawCircle(
+                color = strokeColor,
+                radius = 5.dp.toPx(),
+                style = Stroke(width = 1.dp.toPx())
             )
         }
+        Text(
+            // The row's own name, cut with a dot to its maxChars; the pop-ups take the full one.
+            text = strings["${skill.nameKey}_short"],
+            modifier = Modifier
+                .padding(start = 6.dp)
+                .weight(1f),
+            style = MaterialTheme.typography.bodyMedium,
+            color = colors.text.muted,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        RollMarker(effects, modifier = Modifier.padding(start = 4.dp), size = 16.dp)
+        Text(
+            text = signed(skill.modifier + (effects?.modifier ?: 0)),
+            modifier = Modifier
+                .padding(start = 4.dp)
+                .widthIn(min = 24.dp),
+            style = MaterialTheme.typography.bodyLarge,
+            color = changedValueColor(effects?.modifier ?: 0) ?: colors.text.primary,
+            textAlign = TextAlign.End
+        )
     }
 }
 
