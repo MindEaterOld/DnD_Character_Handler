@@ -30,8 +30,10 @@ import com.dndcharacterhandler.domain.rules.activeConditions
 import com.dndcharacterhandler.domain.rules.RollEffects
 import com.dndcharacterhandler.domain.rules.D20Test
 import androidx.compose.foundation.layout.widthIn
-import com.dndcharacterhandler.presentation.components.StatStrip
-import com.dndcharacterhandler.presentation.components.StatStripItem
+import com.dndcharacterhandler.presentation.components.MiniStatCard
+import com.dndcharacterhandler.presentation.components.MiniStatCardCompactIconSize
+import com.dndcharacterhandler.presentation.components.MiniStatCardIcon
+import com.dndcharacterhandler.presentation.components.StatCardRow
 import com.dndcharacterhandler.presentation.components.BorderLabelCard
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -490,19 +492,33 @@ internal fun attributesSectionItems(
 
     val items: LazyListScope.() -> Unit = {
         item {
-            // The proficiency bonus and the senses: looked up now and then, so a slim strip under the
-            // fight's three (owner's choice from boards, 2026-10-05).
-            StatStrip(
-                listOf(
-                    StatStripItem(text("stat_card_proficiency"), signed(proficiencyBonus), Icons.Outlined.AutoAwesome),
-                    StatStripItem(text("stat_card_passive_perception"), passivePerception.toString(), Icons.Outlined.Visibility) {
-                        isPassiveDialogOpen = true
-                    },
-                    StatStripItem(text("stat_card_darkvision"), darkvisionValue, Icons.Outlined.DarkMode) {
-                        isDarkvisionDialogOpen = true
-                    }
+            // The proficiency bonus and the senses: looked up now and then, so three compact cards under
+            // the fight's three (owner's choice from boards, 2026-10-06: S4).
+            StatCardRow {
+                MiniStatCard(
+                    label = text("stat_card_proficiency"),
+                    value = signed(proficiencyBonus),
+                    modifier = Modifier.weight(1f),
+                    icon = { MiniStatCardIcon(Icons.Outlined.AutoAwesome, MiniStatCardCompactIconSize) },
+                    compact = true
                 )
-            )
+                MiniStatCard(
+                    label = text("stat_card_passive_perception"),
+                    value = passivePerception.toString(),
+                    modifier = Modifier.weight(1f),
+                    icon = { MiniStatCardIcon(Icons.Outlined.Visibility, MiniStatCardCompactIconSize) },
+                    onClick = { isPassiveDialogOpen = true },
+                    compact = true
+                )
+                MiniStatCard(
+                    label = text("stat_card_darkvision"),
+                    value = darkvisionValue,
+                    modifier = Modifier.weight(1f),
+                    icon = { MiniStatCardIcon(Icons.Outlined.DarkMode, MiniStatCardCompactIconSize) },
+                    onClick = { isDarkvisionDialogOpen = true },
+                    compact = true
+                )
+            }
         }
 
         item {
