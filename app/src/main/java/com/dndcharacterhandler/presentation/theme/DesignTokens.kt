@@ -1,6 +1,8 @@
 package com.dndcharacterhandler.presentation.theme
 
 import android.content.Context
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import com.dndcharacterhandler.data.json.has
@@ -8,6 +10,7 @@ import com.dndcharacterhandler.data.json.optDouble
 import com.dndcharacterhandler.data.json.optObject
 import com.dndcharacterhandler.data.json.optString
 import com.dndcharacterhandler.data.json.parseJsonObject
+import com.dndcharacterhandler.domain.model.AppTheme
 import kotlinx.serialization.json.JsonObject
 
 data class TextSizeToken(
@@ -132,11 +135,27 @@ data class DesignColorTokens(
     val ornament: OrnamentColorTokens
 )
 
+/** The type scale and the colours of the theme in use. */
 data class DesignTokens(
     val typography: DesignTypographyTokens,
-    val colors: DesignColorTokens,
-    val engravedColors: DesignColorTokens = colors
+    val colors: DesignColorTokens
 )
+
+/** A theme's palette as design_tokens.json gives it (`themes.<key>.colors`): the app's roles and the Material scheme. */
+data class ThemePalette(
+    val colors: DesignColorTokens,
+    val material: ColorScheme
+)
+
+/** Every theme's palette and the type scale they share; a theme the file lacks gets the classic palette. */
+data class DesignTokenSet(
+    val typography: DesignTypographyTokens,
+    val palettes: Map<AppTheme, ThemePalette>
+) {
+    fun palette(theme: AppTheme): ThemePalette = palettes[theme] ?: palettes[AppTheme.CLASSIC] ?: DefaultThemePalette
+
+    fun tokens(theme: AppTheme): DesignTokens = DesignTokens(typography, palette(theme).colors)
+}
 
 val DefaultDesignColors = DesignColorTokens(
     text = TextColorTokens(
@@ -230,21 +249,48 @@ val DefaultDesignTokens = DesignTokens(
     colors = DefaultDesignColors
 )
 
+/** The classic Material scheme, should design_tokens.json fail to load. */
+val DefaultMaterialColors: ColorScheme = darkColorScheme(
+    primary = Color(0xFFC6A36C),
+    onPrimary = Color(0xFF22170C),
+    primaryContainer = Color(0xFF49321A),
+    onPrimaryContainer = Color(0xFFF3DDB8),
+    secondary = Color(0xFF9E7B5A),
+    onSecondary = Color(0xFF21150C),
+    background = Color(0xFF120E18),
+    onBackground = Color(0xFFF0E7DA),
+    surface = Color(0xFF1A1521),
+    onSurface = Color(0xFFF0E7DA),
+    surfaceVariant = Color(0xFF2A2231),
+    onSurfaceVariant = Color(0xFFCABFB3),
+    outline = Color(0xFF706359),
+    outlineVariant = Color(0xFF423830)
+)
+
+val DefaultThemePalette = ThemePalette(DefaultDesignColors, DefaultMaterialColors)
+
+val DefaultDesignTokenSet = DesignTokenSet(
+    typography = DefaultDesignTokens.typography,
+    palettes = mapOf(AppTheme.CLASSIC to DefaultThemePalette)
+)
+
 val LocalDesignTokens = staticCompositionLocalOf { DefaultDesignTokens }
 
-fun loadDesignTokens(context: Context): DesignTokens {
+fun loadDesignTokenSet(context: Context): DesignTokenSet = runCatching {
+    parseDesignTokenSet(context.assets.open("design_tokens.json").bufferedReader().use { it.readText() })
+}.getOrDefault(DefaultDesignTokenSet)
+
+/** design_tokens.json's text read into every theme's palette; a part that fails to parse falls back to the defaults. */
+fun parseDesignTokenSet(json: String): DesignTokenSet {
     return runCatching {
-        val root = parseJsonObject(
-            context.assets.open("design_tokens.json")
-                .bufferedReader()
-                .use { it.readText() }
-        )
+        val root = parseJsonObject(json)
         val typography = root.optObject("typography") ?: JsonObject(emptyMap())
         val materialTheme = typography.optObject("materialTheme") ?: JsonObject(emptyMap())
         val overview = typography.optObject("overviewOverrides") ?: JsonObject(emptyMap())
         val defaults = DefaultDesignTokens.typography
 
-        DesignTokens(
+        val themes = root.optObject("themes")
+        DesignTokenSet(
             typography = DesignTypographyTokens(
                 headlineMedium = materialTheme.textToken("headlineMedium", defaults.headlineMedium),
                 titleLarge = materialTheme.textToken("titleLarge", defaults.titleLarge),
@@ -268,19 +314,67 @@ fun loadDesignTokens(context: Context): DesignTokens {
                 shortRestCounterButton = overview.textToken("shortRestCounterButton", defaults.shortRestCounterButton),
                 shortRestCounterValue = overview.textToken("shortRestCounterValue", defaults.shortRestCounterValue)
             ),
-            colors = loadColorTokens(root.optObject("colors")?.optObject("app")),
-            engravedColors = loadColorTokens(root.optObject("colors")?.optObject("app"), engraved = true)
+            palettes = AppTheme.entries.mapNotNull { theme ->
+                val colors = themes?.optObject(theme.key)?.optObject("colors") ?: return@mapNotNull null
+                theme to ThemePalette(
+                    colors = loadColorTokens(colors.optObject("app")),
+                    material = colors.optObject("materialTheme").materialColors()
+                )
+            }.toMap()
         )
-    }.getOrDefault(DefaultDesignTokens)
+    }.getOrDefault(DefaultDesignTokenSet)
 }
 
-private fun loadColorTokens(app: JsonObject?, engraved: Boolean = false): DesignColorTokens {
+/** A theme's Material scheme: the roles the file names, Material's dark defaults for the rest. */
+private fun JsonObject?.materialColors(): ColorScheme {
+    if (this == null) return DefaultMaterialColors
+    val dark = darkColorScheme()
+    fun role(name: String, fallback: Color) = colorToken(name, fallback)
+    val primary = role("primary", dark.primary)
+    return darkColorScheme(
+        primary = primary,
+        onPrimary = role("onPrimary", dark.onPrimary),
+        primaryContainer = role("primaryContainer", dark.primaryContainer),
+        onPrimaryContainer = role("onPrimaryContainer", dark.onPrimaryContainer),
+        inversePrimary = role("inversePrimary", dark.inversePrimary),
+        secondary = role("secondary", dark.secondary),
+        onSecondary = role("onSecondary", dark.onSecondary),
+        secondaryContainer = role("secondaryContainer", dark.secondaryContainer),
+        onSecondaryContainer = role("onSecondaryContainer", dark.onSecondaryContainer),
+        tertiary = role("tertiary", dark.tertiary),
+        onTertiary = role("onTertiary", dark.onTertiary),
+        tertiaryContainer = role("tertiaryContainer", dark.tertiaryContainer),
+        onTertiaryContainer = role("onTertiaryContainer", dark.onTertiaryContainer),
+        background = role("background", dark.background),
+        onBackground = role("onBackground", dark.onBackground),
+        surface = role("surface", dark.surface),
+        onSurface = role("onSurface", dark.onSurface),
+        surfaceVariant = role("surfaceVariant", dark.surfaceVariant),
+        onSurfaceVariant = role("onSurfaceVariant", dark.onSurfaceVariant),
+        surfaceTint = role("surfaceTint", primary),
+        inverseSurface = role("inverseSurface", dark.inverseSurface),
+        inverseOnSurface = role("inverseOnSurface", dark.inverseOnSurface),
+        error = role("error", dark.error),
+        onError = role("onError", dark.onError),
+        errorContainer = role("errorContainer", dark.errorContainer),
+        onErrorContainer = role("onErrorContainer", dark.onErrorContainer),
+        outline = role("outline", dark.outline),
+        outlineVariant = role("outlineVariant", dark.outlineVariant),
+        scrim = role("scrim", dark.scrim),
+        surfaceBright = role("surfaceBright", dark.surfaceBright),
+        surfaceContainer = role("surfaceContainer", dark.surfaceContainer),
+        surfaceContainerHigh = role("surfaceContainerHigh", dark.surfaceContainerHigh),
+        surfaceContainerHighest = role("surfaceContainerHighest", dark.surfaceContainerHighest),
+        surfaceContainerLow = role("surfaceContainerLow", dark.surfaceContainerLow),
+        surfaceContainerLowest = role("surfaceContainerLowest", dark.surfaceContainerLowest),
+        surfaceDim = role("surfaceDim", dark.surfaceDim)
+    )
+}
+
+private fun loadColorTokens(app: JsonObject?): DesignColorTokens {
     if (app == null) return DefaultDesignColors
-    val defaults = if (engraved) loadColorTokens(app) else DefaultDesignColors
-    fun group(name: String): JsonObject {
-        val base = app.optObject(name) ?: JsonObject(emptyMap())
-        return if (engraved) base.optObject("engraved") ?: JsonObject(emptyMap()) else base
-    }
+    val defaults = DefaultDesignColors
+    fun group(name: String): JsonObject = app.optObject(name) ?: JsonObject(emptyMap())
     val text = group("text")
     val background = group("background")
     val surface = group("surface")

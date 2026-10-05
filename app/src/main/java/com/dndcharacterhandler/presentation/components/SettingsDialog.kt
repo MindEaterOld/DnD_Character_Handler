@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dndcharacterhandler.domain.model.AppLanguage
+import com.dndcharacterhandler.domain.model.AppTheme
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 
@@ -23,7 +24,9 @@ import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 fun SettingsDialog(
     currentLanguage: AppLanguage,
     onLanguageSelected: (AppLanguage) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    currentTheme: AppTheme = AppTheme.CLASSIC,
+    onThemeSelected: (AppTheme) -> Unit = {}
 ) {
     val colors = LocalDesignTokens.current.colors
     EditDialog(
@@ -37,10 +40,24 @@ fun SettingsDialog(
                 color = colors.text.label
             )
             AppLanguage.entries.forEach { language ->
-                SettingsLanguageOption(
+                SettingsOption(
                     label = text(language.localizationKey),
                     selected = language == currentLanguage,
                     onClick = { onLanguageSelected(language) }
+                )
+            }
+            // The app's look: the same screens in another palette and style (owner's choice, 2026-10-05).
+            Text(
+                text = text("settings_theme"),
+                modifier = Modifier.padding(top = 8.dp),
+                style = MaterialTheme.typography.titleMedium,
+                color = colors.text.label
+            )
+            AppTheme.entries.forEach { theme ->
+                SettingsOption(
+                    label = text(theme.localizationKey),
+                    selected = theme == currentTheme,
+                    onClick = { onThemeSelected(theme) }
                 )
             }
         }
@@ -48,7 +65,7 @@ fun SettingsDialog(
 }
 
 @Composable
-private fun SettingsLanguageOption(
+private fun SettingsOption(
     label: String,
     selected: Boolean,
     onClick: () -> Unit

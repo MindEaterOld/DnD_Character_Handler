@@ -124,138 +124,184 @@
       }
     }
   },
-  "colors": {
-    "materialTheme": {
-      "primary": "#C6A36C",
-      "onPrimary": "#22170C",
-      "primaryContainer": "#49321A",
-      "onPrimaryContainer": "#F3DDB8",
-      "secondary": "#9E7B5A",
-      "onSecondary": "#21150C",
-      "background": "#120E18",
-      "onBackground": "#F0E7DA",
-      "surface": "#1A1521",
-      "onSurface": "#F0E7DA",
-      "surfaceVariant": "#2A2231",
-      "onSurfaceVariant": "#CABFB3",
-      "outline": "#706359",
-      "outlineVariant": "#423830"
+  "themes": {
+    "comment": "Every theme has its own whole palette with the same roles: the Material scheme and the app palette grouped by role. Code reads the chosen theme's colours through LocalDesignTokens.colors.<group>.<name> and MaterialTheme.colorScheme; a new colour goes into every theme, and only with the owner's approval. Hex is #RRGGBB (opaque) or #AARRGGBB (with alpha). Material roles a theme leaves out keep Material's dark defaults.",
+    "classic": {
+      "name": "Классика — тёмная фиолетово-чёрная, золото действий (до 2026-10-05 единственная тема).",
+      "colors": {
+        "materialTheme": {
+          "primary": "#C6A36C",
+          "onPrimary": "#22170C",
+          "primaryContainer": "#49321A",
+          "onPrimaryContainer": "#F3DDB8",
+          "secondary": "#9E7B5A",
+          "onSecondary": "#21150C",
+          "background": "#120E18",
+          "onBackground": "#F0E7DA",
+          "surface": "#1A1521",
+          "onSurface": "#F0E7DA",
+          "surfaceVariant": "#2A2231",
+          "onSurfaceVariant": "#CABFB3",
+          "outline": "#706359",
+          "outlineVariant": "#423830"
+        },
+        "app": {
+          "text": {
+            "primary": "#F7F2EA",
+            "warmPrimary": "#FFF6EA",
+            "action": "#F1ECE5",
+            "muted": "#D2CAC2",
+            "subtle": "#AAA29A",
+            "label": "#C2BBB3",
+            "miniLabel": "#BEB6AE",
+            "icon": "#F3EEE6"
+          },
+          "background": {
+            "radialStart": "#1A161D",
+            "radialMiddle": "#0E0B11",
+            "radialEnd": "#09070D"
+          },
+          "surface": {
+            "card": "#17141B",
+            "button": "#3B3840",
+            "option": "#1A171D",
+            "selected": "#3A3244",
+            "inspiration": "#2A2419",
+            "portrait": "#141118",
+            "portraitFallbackStart": "#3B3840",
+            "portraitFallbackMiddle": "#18151C",
+            "portraitFallbackEnd": "#0F0C12"
+          },
+          "border": {
+            "default": "#50FFFFFF",
+            "panel": "#44FFFFFF",
+            "miniCard": "#42FFFFFF",
+            "selected": "#66FFF6EA",
+            "muted": "#30FFFFFF"
+          },
+          "accent": {
+            "inspiration": "#FFD86B",
+            "xpCapped": "#E0B84E",
+            "hpTemporary": "#69B7FF",
+            "heal": "#8AD178",
+            "dangerHpZero": "#E85C5C",
+            "coinCopper": "#C9824B",
+            "coinSilver": "#C4C8D2",
+            "coinGold": "#E0B548",
+            "magical": "#69B7FF",
+            "damageFire": "#FF8A3D",
+            "damageCold": "#7BB7FF",
+            "damageLightning": "#CFB6FF",
+            "damagePoison": "#A8D76F",
+            "damageOther": "#D5C6B2"
+          },
+          "progress": {
+            "xpFill": "#D7D1CC",
+            "xpTrack": "#30FFFFFF"
+          },
+          "ornament": {
+            "outer": "#20FFFFFF",
+            "middle": "#80C7C1BB",
+            "innerGlow": "#42FFFFFF",
+            "inner": "#E9E2D9",
+            "shadow": "#14000000",
+            "stroke": "#55A19892",
+            "dot": "#2D2730"
+          }
+        }
+      }
     },
-    "appComment": "App palette grouped by role. Hex is #RRGGBB (opaque) or #AARRGGBB (with alpha). Accessed in code via LocalDesignTokens.colors.",
-    "app": {
-      "text": {
-        "primary": "#F7F2EA",
-        "warmPrimary": "#FFF6EA",
-        "action": "#F1ECE5",
-        "muted": "#D2CAC2",
-        "subtle": "#AAA29A",
-        "label": "#C2BBB3",
-        "miniLabel": "#BEB6AE",
-        "icon": "#F3EEE6",
-        "engraved": {
-          "icon": "#E8D6B2",
-          "action": "#E8D6B2",
-          "muted": "#D8C7A6",
-          "miniLabel": "#D8C7A6",
-          "warmPrimary": "#EFDBB5",
-          "primary": "#EFDBB5",
-          "label": "#D8C7A6",
-          "subtle": "#A99C83"
-        }
-      },
-      "background": {
-        "radialStart": "#1A161D",
-        "radialMiddle": "#0E0B11",
-        "radialEnd": "#09070D",
-        "engraved": {
-          "radialStart": "#201F1D",
-          "radialMiddle": "#201F1D",
-          "radialEnd": "#201F1D"
-        }
-      },
-      "surface": {
-        "card": "#17141B",
-        "button": "#3B3840",
-        "option": "#1A171D",
-        "selected": "#3A3244",
-        "inspiration": "#2A2419",
-        "portrait": "#141118",
-        "portraitFallbackStart": "#3B3840",
-        "portraitFallbackMiddle": "#18151C",
-        "portraitFallbackEnd": "#0F0C12",
-        "engraved": {
-          "portraitFallbackStart": "#34312B",
-          "portraitFallbackEnd": "#201F1D",
-          "inspiration": "#363025",
-          "option": "#272521",
-          "portraitFallbackMiddle": "#272521",
-          "button": "#34312B",
-          "selected": "#363025",
-          "card": "#201F1D",
-          "portrait": "#201F1D"
-        }
-      },
-      "border": {
-        "default": "#50FFFFFF",
-        "panel": "#44FFFFFF",
-        "miniCard": "#42FFFFFF",
-        "selected": "#66FFF6EA",
-        "muted": "#30FFFFFF",
-        "engraved": {
-          "muted": "#50D8C7A6",
-          "default": "#A0D8C7A6",
-          "panel": "#A0D8C7A6",
-          "miniCard": "#80D8C7A6",
-          "selected": "#C09E8850"
-        }
-      },
-      "accent": {
-        "inspiration": "#FFD86B",
-        "xpCapped": "#E0B84E",
-        "hpTemporary": "#69B7FF",
-        "heal": "#8AD178",
-        "dangerHpZero": "#E85C5C",
-        "coinCopper": "#C9824B",
-        "coinSilver": "#C4C8D2",
-        "coinGold": "#E0B548",
-        "magical": "#69B7FF",
-        "damageFire": "#FF8A3D",
-        "damageCold": "#7BB7FF",
-        "damageLightning": "#CFB6FF",
-        "damagePoison": "#A8D76F",
-        "damageOther": "#D5C6B2",
-        "engraved": {
-          "dangerHpZero": "#B96052",
-          "xpCapped": "#9E8850",
-          "inspiration": "#9E8850",
-          "hpTemporary": "#D8C7A6",
-          "heal": "#D8C7A6"
-        }
-      },
-      "progress": {
-        "xpFill": "#D7D1CC",
-        "xpTrack": "#30FFFFFF",
-        "engraved": {
-          "xpTrack": "#30D8C7A6",
-          "xpFill": "#E8D6B2"
-        }
-      },
-      "ornament": {
-        "outer": "#20FFFFFF",
-        "middle": "#80C7C1BB",
-        "innerGlow": "#42FFFFFF",
-        "inner": "#E9E2D9",
-        "shadow": "#14000000",
-        "stroke": "#55A19892",
-        "dot": "#2D2730",
-        "engraved": {
-          "middle": "#A0D8C7A6",
-          "stroke": "#709E8850",
-          "dot": "#72352F",
-          "inner": "#D8C7A6",
-          "outer": "#30D8C7A6",
-          "innerGlow": "#40D8C7A6",
-          "shadow": "#20201F1D"
+    "engraved": {
+      "name": "Гравюра — тушь цвета слоновой кости на угольной бумаге, охра и бордо; фон — гравюра с драконом (ChatGPT, 2026-10-04).",
+      "colors": {
+        "materialTheme": {
+          "primary": "#9E8850",
+          "onPrimary": "#201F1D",
+          "primaryContainer": "#363025",
+          "onPrimaryContainer": "#EFDBB5",
+          "secondary": "#D8C7A6",
+          "onSecondary": "#21150C",
+          "background": "#201F1D",
+          "onBackground": "#EFDBB5",
+          "surface": "#201F1D",
+          "onSurface": "#EFDBB5",
+          "surfaceVariant": "#363025",
+          "onSurfaceVariant": "#D8C7A6",
+          "outline": "#A0D8C7A6",
+          "outlineVariant": "#50D8C7A6",
+          "surfaceDim": "#201F1D",
+          "surfaceBright": "#34312B",
+          "surfaceContainer": "#201F1D",
+          "surfaceContainerHigh": "#272521",
+          "surfaceContainerHighest": "#34312B",
+          "surfaceContainerLow": "#201F1D",
+          "surfaceContainerLowest": "#201F1D",
+          "surfaceTint": "#9E8850",
+          "error": "#B96052"
+        },
+        "app": {
+          "text": {
+            "primary": "#EFDBB5",
+            "warmPrimary": "#EFDBB5",
+            "action": "#E8D6B2",
+            "muted": "#D8C7A6",
+            "subtle": "#A99C83",
+            "label": "#D8C7A6",
+            "miniLabel": "#D8C7A6",
+            "icon": "#E8D6B2"
+          },
+          "background": {
+            "radialStart": "#201F1D",
+            "radialMiddle": "#201F1D",
+            "radialEnd": "#201F1D"
+          },
+          "surface": {
+            "card": "#201F1D",
+            "button": "#34312B",
+            "option": "#272521",
+            "selected": "#363025",
+            "inspiration": "#363025",
+            "portrait": "#201F1D",
+            "portraitFallbackStart": "#34312B",
+            "portraitFallbackMiddle": "#272521",
+            "portraitFallbackEnd": "#201F1D"
+          },
+          "border": {
+            "default": "#A0D8C7A6",
+            "panel": "#A0D8C7A6",
+            "miniCard": "#80D8C7A6",
+            "selected": "#C09E8850",
+            "muted": "#50D8C7A6"
+          },
+          "accent": {
+            "inspiration": "#9E8850",
+            "xpCapped": "#9E8850",
+            "hpTemporary": "#D8C7A6",
+            "heal": "#D8C7A6",
+            "dangerHpZero": "#B96052",
+            "coinCopper": "#C9824B",
+            "coinSilver": "#C4C8D2",
+            "coinGold": "#E0B548",
+            "magical": "#69B7FF",
+            "damageFire": "#FF8A3D",
+            "damageCold": "#7BB7FF",
+            "damageLightning": "#CFB6FF",
+            "damagePoison": "#A8D76F",
+            "damageOther": "#D5C6B2"
+          },
+          "progress": {
+            "xpFill": "#E8D6B2",
+            "xpTrack": "#30D8C7A6"
+          },
+          "ornament": {
+            "outer": "#30D8C7A6",
+            "middle": "#A0D8C7A6",
+            "innerGlow": "#40D8C7A6",
+            "inner": "#D8C7A6",
+            "shadow": "#20201F1D",
+            "stroke": "#709E8850",
+            "dot": "#72352F"
+          }
         }
       }
     }

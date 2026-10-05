@@ -132,6 +132,27 @@
     "fr": "Langue",
     "es": "Idioma"
   },
+  "settings_theme": {
+    "en": "Theme",
+    "ru": "Тема",
+    "de": "Design",
+    "fr": "Thème",
+    "es": "Tema"
+  },
+  "settings_theme_classic": {
+    "en": "Classic",
+    "ru": "Классика",
+    "de": "Klassisch",
+    "fr": "Classique",
+    "es": "Clásico"
+  },
+  "settings_theme_engraved": {
+    "en": "Engraving",
+    "ru": "Гравюра",
+    "de": "Kupferstich",
+    "fr": "Gravure",
+    "es": "Grabado"
+  },
   "drawer_level": {
     "en": "Level %1$s",
     "ru": "Уровень %1$s",

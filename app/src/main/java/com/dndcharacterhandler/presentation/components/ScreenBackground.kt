@@ -14,18 +14,16 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.drawscope.clipRect
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalView
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
-import com.dndcharacterhandler.presentation.theme.LocalEngravedOverview
-import com.dndcharacterhandler.R
+import com.dndcharacterhandler.presentation.theme.LocalThemeBackdrop
 
 /**
- * The app's background: one radial gradient over the whole window. A screen draws only its own
- * part of it, so it runs on seamlessly into the app's own background under the bottom bar and the
- * system bars.
+ * The app's background, the theme's backdrop over the whole window: the palette's radial gradient, or
+ * the theme's illustration over its last stop. A screen draws only its own part of it, so it runs on
+ * seamlessly into the app's own background under the bottom bar and the system bars.
  */
 @Composable
 fun ScreenBackground(
@@ -33,8 +31,8 @@ fun ScreenBackground(
     content: @Composable () -> Unit
 ) {
     val colors = LocalDesignTokens.current.colors.background
-    val engraved = LocalEngravedOverview.current
-    val illustration = if (engraved) painterResource(R.drawable.engraved_overview_background) else null
+    // The theme's illustration over its last stop, or the radial gradient.
+    val illustration = LocalThemeBackdrop.current
     val root = LocalView.current
     // Where this box sits in the window.
     var origin by remember { mutableStateOf(Offset.Zero) }

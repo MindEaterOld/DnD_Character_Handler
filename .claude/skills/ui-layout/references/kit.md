@@ -6,7 +6,7 @@
 
 | Компонент | Файлов | Роль |
 |---|---|---|
-| `ScreenBackground { }` | 9 | Радиальный фон окна; экран рисует только свою часть, фон бесшовно продолжается под нижней панелью и системными полосами |
+| `ScreenBackground { }` | 9 | Фон темы на всё окно (радиальный градиент или иллюстрация темы — `LocalThemeBackdrop`); экран рисует только свою часть, фон бесшовно продолжается под нижней панелью и системными полосами |
 | `CharacterScreenHeader(character, onOpenDrawer, onOpenDice)` | 7 | Шапка экрана персонажа: меню, кубы, имя и подзаголовок |
 | `ScreenTopActions(onOpenDrawer, onOpenDice)` | 9 | Верхний ряд: «гамбургер» слева, d20 справа (кнопки 44dp, иконки 28) |
 | `ScreenTopActionButton(onClick) { Icon }` | 2 | Голая иконка верхней панели без заливки, тап-зона 44dp — единственная кнопка без подложки (меню, кубы, отдых столбиком под кубами на обзоре) |
@@ -104,6 +104,8 @@ EditDialog(title, onDismiss, onConfirm?, onDelete?)
 `AttributesScreenPreview`, `BiographyScreenPreview`, `CombatScreenPreview`, `FeaturesScreenPreview`, `InventoryScreenPreview`, `InventoryContainersPreview`, `NotesScreenPreview`, `SpellsScreenPreview`, `OverviewScreenPreview`, `OverviewDyingPreview`, `OverviewDeadPreview`, `CharacterManagerDrawerPreview`, `CharacterManagerDrawerEmptyPreview`, `DiceSkinsPreview`, `SplashScreenPreview`, `SpellSlotsConfigDialogPreview`.
 
 Строки в превью — рукописная карта `LocalizedStrings(language, mapOf(...))`: новый ключ экрана добавлять и туда.
+
+Темы (2026-10-05): `DnDTheme(theme)` в превью — палитра и вид темы; что тема рисует иначе — `ThemeLook` (`LocalThemeLook`: `frames`, `portrait`, `xpBar`), его читают компоненты, а не экраны. У обзора превью в обеих темах (`ClassicOverviewRussianPreview`, `EngravedOverviewRussianPreview`).
 
 Общие части, добавленные 2026-10-04:
 - `components/TabIcons.kt` — `TabIconOverview`, `TabIconCombat`, `TabIconInventory`, `TabIconSpells`, `TabIconFeatures`, `TabIconBiography`: иконки вкладок нижней панели (щит с фигурой, скрещённые мечи, мешок с верёвкой, волшебная палочка, розетка с лентами, свиток), залитые, на сетке 24. Почти все из Material Design Icons; палочка — Material Symbols Rounded `wand_stars`; мешок — тело MDI `sack` с нашей горловиной и верёвкой, вырезанной зазором (собран булевыми операциями над контурами).

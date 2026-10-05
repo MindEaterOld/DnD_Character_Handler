@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dndcharacterhandler.data.preferences.LanguagePreferencesRepository
 import com.dndcharacterhandler.domain.model.AppLanguage
+import com.dndcharacterhandler.domain.model.AppTheme
 import com.dndcharacterhandler.domain.model.CharacterBundle
 import com.dndcharacterhandler.domain.model.defaultCharacterBundle
 import com.dndcharacterhandler.domain.repository.CharacterFileRepository
@@ -23,6 +24,7 @@ data class CharacterManagerUiState(
     val characters: List<CharacterBundle> = emptyList(),
     val selectedCharacterId: Long? = null,
     val language: AppLanguage = AppLanguage.ENGLISH,
+    val theme: AppTheme = AppTheme.CLASSIC,
     /** The character list has been read once: an empty [characters] then means there are none. */
     val isLoaded: Boolean = false
 )
@@ -43,6 +45,11 @@ class CharacterManagerViewModel(
         viewModelScope.launch {
             languagePreferencesRepository.language.collectLatest { language ->
                 _uiState.value = _uiState.value.copy(language = language)
+            }
+        }
+        viewModelScope.launch {
+            languagePreferencesRepository.theme.collectLatest { theme ->
+                _uiState.value = _uiState.value.copy(theme = theme)
             }
         }
         viewModelScope.launch {
@@ -125,6 +132,10 @@ class CharacterManagerViewModel(
             _uiState.value = _uiState.value.copy(selectedCharacterId = null)
             languagePreferencesRepository.setSelectedCharacterId(null)
         }
+    }
+
+    fun setTheme(theme: AppTheme) {
+        viewModelScope.launch { languagePreferencesRepository.setTheme(theme) }
     }
 
     fun setLanguage(language: AppLanguage) {

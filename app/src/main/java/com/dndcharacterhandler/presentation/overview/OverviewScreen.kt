@@ -1,6 +1,9 @@
 package com.dndcharacterhandler.presentation.overview
-import com.dndcharacterhandler.presentation.theme.LocalEngravedOverview
-import com.dndcharacterhandler.presentation.theme.EngravedOverviewTheme
+import com.dndcharacterhandler.domain.model.AppTheme
+import com.dndcharacterhandler.presentation.theme.FrameStyle
+import com.dndcharacterhandler.presentation.theme.LocalThemeLook
+import com.dndcharacterhandler.presentation.theme.PortraitStyle
+import com.dndcharacterhandler.presentation.theme.XpBarStyle
 import com.dndcharacterhandler.presentation.components.EngravedPortraitShape
 import com.dndcharacterhandler.presentation.components.engravedPortraitPath
 import com.dndcharacterhandler.presentation.components.engravedBorder
@@ -770,7 +773,7 @@ private fun OverviewContent(
     val strings = LocalStrings.current
     val typographyTokens = LocalDesignTokens.current.typography
     val colors = LocalDesignTokens.current.colors
-    val engraved = LocalEngravedOverview.current
+    val crest = LocalThemeLook.current.portrait == PortraitStyle.ETCHED_CREST
     val portraitScope = rememberCoroutineScope()
     val portraitPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
@@ -975,14 +978,14 @@ private fun OverviewContent(
                         Box(
                             modifier = Modifier
                                 .offset(y = (-47).dp)
-                                .size(if (engraved) 222.dp else 238.dp),
+                                .size(if (crest) 222.dp else 238.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             InspirationStar(
                                 inspired = character?.hasInspiration ?: false,
                                 onToggle = { if (characterBundle != null) onToggleInspiration(characterBundle) },
                                 contentDescription = text("overview_inspiration"),
-                                size = if (engraved) 82.dp else 96.dp,
+                                size = if (crest) 82.dp else 96.dp,
                                 modifier = Modifier.offset(x = PortraitCornerOffset, y = PortraitCornerOffset)
                             )
                         }
@@ -1021,7 +1024,7 @@ private fun OverviewContent(
             }
 
             item {
-                Box(modifier = Modifier.pullUp(if (engraved) 34.dp else 24.dp)) {
+                Box(modifier = Modifier.pullUp(if (crest) 34.dp else 24.dp)) {
                     OverviewXpBlock(
                         xpInfo = xpInfo,
                         levelLabel = levelLabel,
@@ -1872,21 +1875,21 @@ private fun PortraitFrame(
 ) {
     val portraitReference = portraitUri ?: AssetReferences.portraitPlaceholderPath("portrait_placeholder.png")
     val colors = LocalDesignTokens.current.colors
-    val engraved = LocalEngravedOverview.current
-    val shape = if (engraved) EngravedPortraitShape else OctagonShape
+    val crest = LocalThemeLook.current.portrait == PortraitStyle.ETCHED_CREST
+    val shape = if (crest) EngravedPortraitShape else OctagonShape
     val saturation by animateFloatAsState(if (dead) 0f else 1f, animationSpec = tween(durationMillis = 1200), label = "portraitSaturation")
 
     // An octagon with flat sides, a heraldic frame: its shadow, a double contour, the portrait inside.
     Box(
         modifier = Modifier
             .offset(y = (-47).dp)
-            .size(if (engraved) 222.dp else 238.dp)
+            .size(if (crest) 222.dp else 238.dp)
             .clip(shape)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
-            if (engraved) {
+            if (crest) {
                 drawPath(engravedPortraitPath(size), colors.ornament.inner, style = Stroke(1.dp.toPx()))
                 scale(.94f, .94f) {
                     drawPath(engravedPortraitPath(size), colors.ornament.middle, style = Stroke(.65.dp.toPx()))
@@ -1901,7 +1904,7 @@ private fun PortraitFrame(
 
         Box(
             modifier = Modifier
-                .size(if (engraved) 198.dp else 196.dp)
+                .size(if (crest) 198.dp else 196.dp)
                 .clip(shape)
                 .background(colors.surface.portrait)
                 .saturation(saturation)
@@ -2073,16 +2076,16 @@ internal const val HpActionTint = 0.12f
 @Composable
 private fun HpActionButton(label: String, icon: ImageVector, color: Color, modifier: Modifier = Modifier, onClick: () -> Unit) {
     val token = LocalDesignTokens.current.typography.actionButtonLabel
-    val engraved = LocalEngravedOverview.current
+    val etched = LocalThemeLook.current.frames == FrameStyle.ETCHED
     val colors = LocalDesignTokens.current.colors
-    val shape = if (engraved) RoundedCornerShape(4.dp) else RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp)
+    val shape = if (etched) RoundedCornerShape(4.dp) else RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp)
     Row(
         modifier = modifier
             .offset(y = (-1).dp)
-            .height(if (engraved) 48.dp else 44.dp)
+            .height(if (etched) 48.dp else 44.dp)
             .clip(shape)
             .background(color.copy(alpha = HpActionTint))
-            .then(if (engraved) Modifier.engravedBorder(color.copy(alpha = .7f)) else Modifier)
+            .then(if (etched) Modifier.engravedBorder(color.copy(alpha = .7f)) else Modifier)
             .clickable(onClick = onClick)
             .padding(horizontal = 10.dp),
         horizontalArrangement = Arrangement.Center,
@@ -2096,7 +2099,7 @@ private fun HpActionButton(label: String, icon: ImageVector, color: Color, modif
                 fontSize = token.fontSizeSp.sp,
                 lineHeight = (token.lineHeightSp ?: token.fontSizeSp).sp
             ),
-            color = if (engraved) colors.text.primary else color,
+            color = if (etched) colors.text.primary else color,
             fontWeight = FontWeight.Medium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
@@ -2220,7 +2223,7 @@ private fun OverviewXpBlock(
     val colors = LocalDesignTokens.current.colors
     val progressColor = if (xpInfo.hasReachedLevelCap) colors.accent.xpCapped else colors.progress.xpFill
     val trackColor = colors.progress.xpTrack
-    val engraved = LocalEngravedOverview.current
+    val hairline = LocalThemeLook.current.xpBar == XpBarStyle.HAIRLINE
 
     Column(
         modifier = Modifier.clickable(onClick = onClick),
@@ -2270,7 +2273,7 @@ private fun OverviewXpBlock(
                 .fillMaxWidth()
                 .height(16.dp)
         ) {
-            val stroke = (if (engraved) 3.dp else 11.dp).toPx()
+            val stroke = (if (hairline) 3.dp else 11.dp).toPx()
             drawLine(
                 color = trackColor,
                 start = Offset(stroke / 2, center.y),
@@ -2285,7 +2288,7 @@ private fun OverviewXpBlock(
                 strokeWidth = stroke,
                 cap = StrokeCap.Round
             )
-            if (engraved) {
+            if (hairline) {
                 drawCircle(progressColor, 4.dp.toPx(), Offset((size.width - stroke) * xpInfo.progress + stroke / 2, center.y))
             }
         }
@@ -2313,7 +2316,7 @@ private fun DeathSavesTray(
 ) {
     val colors = LocalDesignTokens.current.colors
     val look = LocalDiceSkin.current
-    val engraved = LocalEngravedOverview.current
+    val etched = LocalThemeLook.current.frames == FrameStyle.ETCHED
     val rollDescription = text("overview_death_saves_roll")
     var open by remember(characterId) { mutableStateOf(initiallyOpen || dying) }
     LaunchedEffect(dying) { if (dying) open = true }
@@ -2391,12 +2394,12 @@ private fun DeathSavesTray(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = if (engraved) 12.dp else HpCardCornerRadius),
+                .padding(horizontal = if (etched) 12.dp else HpCardCornerRadius),
             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
             verticalAlignment = Alignment.Top
         ) {
             start()
-            val tabShape = if (engraved) RoundedCornerShape(4.dp) else RoundedCornerShape(bottomStart = 10.dp, bottomEnd = 10.dp)
+            val tabShape = if (etched) RoundedCornerShape(4.dp) else RoundedCornerShape(bottomStart = 10.dp, bottomEnd = 10.dp)
             Box(
                 modifier = Modifier
                     .offset(y = (-1).dp)
@@ -2404,7 +2407,7 @@ private fun DeathSavesTray(
                     .background(colors.surface.card)
                     .border(1.dp, colors.border.panel, tabShape)
                     .clickable { open = !open }
-                    .then(if (engraved) Modifier.height(48.dp) else Modifier)
+                    .then(if (etched) Modifier.height(48.dp) else Modifier)
                     .padding(horizontal = 18.dp, vertical = 4.dp),
                 contentAlignment = Alignment.Center
             ) {
@@ -2462,14 +2465,14 @@ private fun OverviewHpCard(
 ) {
     val tokens = LocalDesignTokens.current.typography
     val colors = LocalDesignTokens.current.colors
-    val engraved = LocalEngravedOverview.current
+    val etched = LocalThemeLook.current.frames == FrameStyle.ETCHED
     BorderLabelCard(
         label = hpLabel,
         modifier = Modifier.fillMaxWidth(),
         labelStyle = MaterialTheme.typography.titleLarge.copy(fontSize = tokens.hpLabel.fontSizeSp.sp),
         labelColor = colors.text.label,
         cornerRadius = HpCardCornerRadius,
-        fill = colors.surface.card.copy(alpha = if (engraved) 0.7f else 1f),
+        fill = colors.surface.card.copy(alpha = if (etched) 0.7f else 1f),
         border = colors.border.panel,
         onClick = onClick
     ) {
@@ -2478,7 +2481,7 @@ private fun OverviewHpCard(
                 .fillMaxWidth()
                 .padding(horizontal = 18.dp, vertical = 18.dp)
         ) {
-            if (!engraved) {
+            if (!etched) {
                 FrameCorner(modifier = Modifier.align(Alignment.TopStart))
                 FrameCorner(
                     modifier = Modifier.align(Alignment.TopEnd).offset(x = 6.dp),
@@ -2810,10 +2813,16 @@ private fun OverviewScreenPreview() {
     OverviewPreviewContent(currentHp = 38, temporaryHp = 10)
 }
 
+@Preview(name = "Classic overview · Russian", showBackground = true, showSystemUi = true, device = "spec:width=412dp,height=915dp")
+@Composable
+private fun ClassicOverviewRussianPreview() {
+    OverviewPreviewContent(currentHp = 8, temporaryHp = 0, russian = true)
+}
+
 @Preview(name = "Engraved overview · Russian", showBackground = true, showSystemUi = true, device = "spec:width=412dp,height=915dp")
 @Composable
 private fun EngravedOverviewRussianPreview() {
-    OverviewPreviewContent(currentHp = 8, temporaryHp = 0, russian = true)
+    OverviewPreviewContent(currentHp = 8, temporaryHp = 0, russian = true, theme = AppTheme.ENGRAVED)
 }
 
 /** At 0 hit points, the death saving throws' tray open: one success, two failures. */
@@ -2837,7 +2846,8 @@ private fun OverviewPreviewContent(
     deathSaveSuccesses: Int = 0,
     deathSaveFailures: Int = 0,
     deathSavesOpen: Boolean = false,
-    russian: Boolean = false
+    russian: Boolean = false,
+    theme: AppTheme = AppTheme.CLASSIC
 ) {
     val previewStrings = LocalizedStrings(
         language = AppLanguage.ENGLISH,
@@ -2970,8 +2980,7 @@ private fun OverviewPreviewContent(
     } else previewStrings
     val sample = if (russian) previewCharacter.copy(name = "Имя персонажа", race = "Раса", characterClass = "Класс", level = 1, experience = 0, maxHp = 8, armorClass = 10, dexterity = 10) else previewCharacter
     CompositionLocalProvider(LocalStrings provides localized) {
-        DnDTheme {
-            EngravedOverviewTheme {
+        DnDTheme(theme) {
             OverviewContent(
                 characterBundle = CharacterBundle(
                     character = sample,
@@ -3002,7 +3011,6 @@ private fun OverviewPreviewContent(
                 onLongRest = {},
                 deathSavesOpen = deathSavesOpen
             )
-            }
         }
     }
 }

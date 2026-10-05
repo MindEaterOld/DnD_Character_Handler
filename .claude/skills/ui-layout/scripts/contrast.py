@@ -1,9 +1,10 @@
 """WCAG contrast of design_tokens.json colours, the translucent ones laid over the real background first.
 
 Usage:
-  python contrast.py <foreground> <background> [<under the background>]
-  python contrast.py --table
+  python contrast.py [--theme engraved] <foreground> <background> [<under the background>]
+  python contrast.py [--theme engraved] --table
 
+The colours are a theme's palette, themes.<theme>.colors (classic unless --theme says otherwise).
 A colour is a token name — `text.primary`, `surface.card`, `accent.heal` (colors.app) or
 `materialTheme.primary` / `primary` (colors.materialTheme) — or a hex: `#C6A36C`, `#29E85C5C` (ARGB).
 A translucent background (a fill at 16 %) is laid over the third colour, by default the dialog's
@@ -18,7 +19,11 @@ import os
 import sys
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..'))
-TOKENS = json.load(open(os.path.join(ROOT, 'app', 'src', 'main', 'assets', 'design_tokens.json'), encoding='utf-8'))['colors']
+THEME = 'classic'
+if sys.argv[1:2] == ['--theme']:
+    THEME = sys.argv[2]
+    del sys.argv[1:3]
+TOKENS = json.load(open(os.path.join(ROOT, 'app', 'src', 'main', 'assets', 'design_tokens.json'), encoding='utf-8'))['themes'][THEME]['colors']
 
 
 def resolve(name):

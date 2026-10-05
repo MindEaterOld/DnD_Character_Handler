@@ -7,10 +7,31 @@ Colors, fonts, and font sizes (type scale / "кегли") must come **only** fro
 - `app/src/main/assets/design_tokens.json`
 
 Rules:
-- **Colors** — use only the values defined under `colors.materialTheme` (Material color scheme) and `colors.app` (the app palette, grouped by role: `text`, `background`, `surface`, `border`, `accent`, `progress`, `ornament`). Do not invent new hex values. In code, reference the app palette through the token accessor `LocalDesignTokens.current.colors.<group>.<name>` (e.g. `colors.text.primary`, `colors.surface.card`, `colors.border.muted`, `colors.accent.heal`) rather than hardcoding `Color(0x…)` literals. Examples: `border.muted #30FFFFFF`, `text.muted #D2CAC2`, `accent.hpTemporary #69B7FF` (blue), `accent.inspiration #FFD86B` (gold), `accent.heal #8AD178` (green).
+- **Colors** — use only the values defined under `themes.<theme>.colors.materialTheme` (Material color scheme) and `themes.<theme>.colors.app` (the app palette, grouped by role: `text`, `background`, `surface`, `border`, `accent`, `progress`, `ornament`). Every theme has its whole palette with the same roles (see **Themes** below). Do not invent new hex values. In code, reference the app palette through the token accessor `LocalDesignTokens.current.colors.<group>.<name>` (e.g. `colors.text.primary`, `colors.surface.card`, `colors.border.muted`, `colors.accent.heal`) rather than hardcoding `Color(0x…)` literals. Examples: `border.muted #30FFFFFF`, `text.muted #D2CAC2`, `accent.hpTemporary #69B7FF` (blue), `accent.inspiration #FFD86B` (gold), `accent.heal #8AD178` (green).
 - **Fonts & font sizes** — use the `MaterialTheme.typography.*` styles, which map to the sizes defined under `typography.materialTheme` (`headlineMedium` 28sp, `titleLarge` 22sp, `titleMedium` 18sp, `bodyLarge` 16sp, `bodyMedium` 14sp, `labelMedium` 12sp). Do not hardcode arbitrary `fontSize` values.
 - **Never add new colors or font sizes (кегли) on your own.** If a new color or size seems necessary, you must first request it from the project owner and get explicit approval before adding it. No new value goes into the code without that approval.
 - When touching older code that uses non-token hex values, align it to the tokens.
+
+## Themes — one set of screens, a look per theme
+
+The player picks the app's look in the settings, under the language (owner's choice, 2026-10-05): **Classic** — the app as it was — and **Engraving** — ivory ink on charcoal paper over an engraving of a dragon (ChatGPT, 2026-10-04). Themes change only how things look; the screens, their logic and their layout are the same in every theme.
+
+- **Never two copies of a screen.** What a theme draws differently goes into the theme, not into the screen:
+  - its **palette** — `themes.<key>.colors` in `design_tokens.json`; code reads it as before, `LocalDesignTokens.current.colors.<group>.<name>` and `MaterialTheme.colorScheme`, and gets the chosen theme's values;
+  - its **look** — `ThemeLook` in `presentation/theme/ThemeLook.kt`: the backdrop (`LocalThemeBackdrop`), the frames of cards, stats, buttons and the tab bar (`FrameStyle`), the portrait (`PortraitStyle`), the XP bar (`XpBarStyle`). Components read it through `LocalThemeLook` (`BorderLabelCard`, `ScreenBackground`, `BottomNavigationBar`, the overview's portrait, HP card, its buttons and XP bar); a screen never asks which theme is on.
+- If a theme needs a part drawn another way, add a style to `ThemeLook` and a variant inside the component — never a branch on the theme in a screen.
+- **Every theme has its whole palette with the same roles** as the classic one; `DesignTokenThemesTest` checks it. A new colour goes into every theme's palette — and, as always, only with the owner's approval.
+- Previews: a screen's preview takes a theme (`DnDTheme(theme)`); the overview has one per theme. Boards show both themes when a change touches both.
+- `AppTheme` (`domain/model`) is the list of themes; the pick is stored with the language (`app_theme`) and applied at the app's root by `DnDTheme(theme)`.
+
+## Parallel work — two agents in one tree
+
+Another agent (ChatGPT) may work in this working tree at the same time:
+
+- Agree who works on which screens and files; a shared file (`DndCharacterApp.kt`, `localization.json`, `design_tokens.json`, `docs/BACKLOG.md`, `components/`) is changed by one at a time.
+- Before changing a file, check it isn't changed by someone else (`git status` / `git diff -- <file>`); if it is, leave it.
+- Commit small and often, **only your own files, by name** — never `git add -A`, `git commit -a`, or `git checkout -- .` / `git stash` / `git reset` over the whole tree.
+- Keep the project building: add new files first, wire them in last.
 
 ## Buttons vs. stats — fill or outline
 

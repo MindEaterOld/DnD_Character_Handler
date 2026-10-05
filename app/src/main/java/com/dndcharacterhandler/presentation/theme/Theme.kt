@@ -5,18 +5,18 @@ import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.dndcharacterhandler.domain.model.AppTheme
 
 // Keep app/src/main/assets/design_tokens.json in sync when theme fonts, sizes, or colors change.
 data class DnDSpacing(
@@ -37,36 +37,29 @@ object DnDCardDefaults {
     )
 }
 
-private val DnDColors = darkColorScheme(
-    primary = Color(0xFFC6A36C),
-    onPrimary = Color(0xFF22170C),
-    primaryContainer = Color(0xFF49321A),
-    onPrimaryContainer = Color(0xFFF3DDB8),
-    secondary = Color(0xFF9E7B5A),
-    onSecondary = Color(0xFF21150C),
-    background = Color(0xFF120E18),
-    onBackground = Color(0xFFF0E7DA),
-    surface = Color(0xFF1A1521),
-    onSurface = Color(0xFFF0E7DA),
-    surfaceVariant = Color(0xFF2A2231),
-    onSurfaceVariant = Color(0xFFCABFB3),
-    outline = Color(0xFF706359),
-    outlineVariant = Color(0xFF423830)
-)
-
 private val DnDShapes = Shapes()
 
+/**
+ * The app in [theme]: its palette from design_tokens.json (the app's roles through [LocalDesignTokens], the
+ * Material scheme), its [ThemeLook] through [LocalThemeLook] and its backdrop, loaded once, through
+ * [LocalThemeBackdrop]. The type scale is the same in every theme.
+ */
 @Composable
-fun DnDTheme(content: @Composable () -> Unit) {
+fun DnDTheme(theme: AppTheme = AppTheme.CLASSIC, content: @Composable () -> Unit) {
     val context = LocalContext.current
-    val designTokens = remember(context) { loadDesignTokens(context) }
+    val tokenSet = remember(context) { loadDesignTokenSet(context) }
+    val designTokens = remember(tokenSet, theme) { tokenSet.tokens(theme) }
+    val look = theme.look()
+    val backdrop = look.backdrop?.let { painterResource(it) }
 
     CompositionLocalProvider(
         LocalDnDSpacing provides DnDSpacing(),
-        LocalDesignTokens provides designTokens
+        LocalDesignTokens provides designTokens,
+        LocalThemeLook provides look,
+        LocalThemeBackdrop provides backdrop
     ) {
         MaterialTheme(
-            colorScheme = DnDColors,
+            colorScheme = tokenSet.palette(theme).material,
             typography = buildDnDTypography(designTokens.typography),
             shapes = DnDShapes,
             content = content

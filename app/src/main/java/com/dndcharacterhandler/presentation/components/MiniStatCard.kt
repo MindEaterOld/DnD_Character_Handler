@@ -43,7 +43,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
-import com.dndcharacterhandler.presentation.theme.LocalEngravedOverview
+import com.dndcharacterhandler.presentation.theme.FrameStyle
+import com.dndcharacterhandler.presentation.theme.LocalThemeLook
 
 /** Every stat card is this tall, its label on the border included. */
 val MiniStatCardHeight = 80.dp
@@ -88,7 +89,7 @@ fun BorderLabelCard(
     content: @Composable BoxScope.() -> Unit
 ) {
     // The label's box in the card's coordinates: the border is cut there.
-    val engraved = LocalEngravedOverview.current
+    val etched = LocalThemeLook.current.frames == FrameStyle.ETCHED
     var notch by remember { mutableStateOf(Rect.Zero) }
     Layout(
         modifier = modifier.drawBehind {
@@ -97,13 +98,13 @@ fun BorderLabelCard(
             val radius = cornerRadius.toPx()
             drawRoundRect(
                 // Keep the dragon quiet behind values when panels scroll over the hero artwork.
-                color = if (engraved) fill.copy(alpha = 0.92f) else fill,
+                color = if (etched) fill.copy(alpha = 0.92f) else fill,
                 topLeft = Offset(0f, top),
                 size = Size(size.width, size.height - top),
                 cornerRadius = CornerRadius(radius)
             )
             clipRect(left = notch.left, top = 0f, right = notch.right, bottom = top + stroke, clipOp = ClipOp.Difference) {
-                if (engraved) {
+                if (etched) {
                     drawEngravedFrame(border, top)
                 } else {
                     drawRoundRect(

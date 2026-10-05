@@ -1,6 +1,8 @@
 # Токены: design_tokens.json
 
-Единственный источник цветов, шрифтов и кеглей — `app/src/main/assets/design_tokens.json`. Его читает `presentation/theme/DesignTokens.kt` (`loadDesignTokens`) и раздаёт через `LocalDesignTokens`; `Theme.kt` строит из него `MaterialTheme.typography`. Правило файла (`usage.rule`): если нужен новый шрифт, кегль или цвет — спросить владельца до того, как добавлять.
+Единственный источник цветов, шрифтов и кеглей — `app/src/main/assets/design_tokens.json`. Его читает `presentation/theme/DesignTokens.kt` (`loadDesignTokenSet`): кегли общие, а **цвета — свои у каждой темы**, `themes.<тема>.colors` (`classic`, `engraved`; с 2026-10-05). `DnDTheme(theme)` раздаёт палитру выбранной темы через `LocalDesignTokens` и `MaterialTheme.colorScheme`, кегли — через `MaterialTheme.typography`. У каждой темы полный набор тех же ролей, это проверяет `DesignTokenThemesTest`. Правило файла (`usage.rule`): если нужен новый шрифт, кегль или цвет — спросить владельца до того, как добавлять; новый цвет вписывается в палитру **каждой** темы.
+
+Таблицы цветов ниже — палитра «Классики» (`themes.classic.colors`); у «Гравюры» те же роли, свои значения. Контраст по палитре темы: `scripts/contrast.py --theme engraved …`.
 
 Частоты в скобках сняты замером по `presentation/` (2026-10-03) — ориентир «что канон, а что исключение».
 
@@ -9,11 +11,12 @@
 | Что | Как |
 |---|---|
 | Цвет палитры приложения | `val colors = LocalDesignTokens.current.colors` → `colors.text.primary`, `colors.surface.card`, `colors.border.panel`, `colors.accent.heal` |
-| Цвет Material | `MaterialTheme.colorScheme.primary` и т.д. (значения те же, что в `colors.materialTheme`) |
+| Цвет Material | `MaterialTheme.colorScheme.primary` и т.д. (значения из `themes.<тема>.colors.materialTheme`; чего там нет — тёмные значения Material по умолчанию) |
+| Что тема рисует иначе, кроме цветов | `LocalThemeLook.current`: `frames` (`FrameStyle`), `portrait` (`PortraitStyle`), `xpBar` (`XpBarStyle`); фон темы — `LocalThemeBackdrop` (`presentation/theme/ThemeLook.kt`) |
 | Шкала шрифтов | `MaterialTheme.typography.bodyLarge` и т.д. |
 | Особый кегль | `val t = LocalDesignTokens.current.typography` → `MaterialTheme.typography.headlineMedium.copy(fontSize = t.hpCurrent.fontSizeSp.sp, lineHeight = (t.hpCurrent.lineHeightSp ?: t.hpCurrent.fontSizeSp).sp)`; у `hpMaximum` есть ещё `alpha` |
 
-Новый цвет добавляется в три места разом: `design_tokens.json` → data-класс группы в `DesignTokens.kt` (с дефолтом) → использование через токен. Только после одобрения.
+Новый цвет добавляется в три места разом: `design_tokens.json` (в палитру каждой темы) → data-класс группы в `DesignTokens.kt` (с дефолтом) → использование через токен. Только после одобрения.
 
 ## Шрифты
 
@@ -57,7 +60,7 @@
 | `shortRestCounterButton` | headlineMedium | 28 | «−» и «+» короткого отдыха |
 | `shortRestCounterValue` | headlineMedium | 40 | число костей к трате |
 
-## Палитра приложения (`colors.app`)
+## Палитра приложения (`themes.classic.colors.app`)
 
 | Группа.имя | Значение | Роль |
 |---|---|---|
@@ -92,7 +95,7 @@
 | `progress.xpFill` / `xpTrack` | #D7D1CC / #30FFFFFF | полоса опыта |
 | `ornament.*` | outer #20FFFFFF, middle #80C7C1BB, innerGlow #42FFFFFF, inner #E9E2D9, shadow #14000000, stroke #55A19892, dot #2D2730 | орнамент портрета |
 
-## Цвета Material (`colors.materialTheme`)
+## Цвета Material (`themes.classic.colors.materialTheme`)
 
 | Роль | Значение | Где видно |
 |---|---|---|

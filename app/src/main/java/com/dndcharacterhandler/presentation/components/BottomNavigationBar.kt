@@ -27,9 +27,13 @@ import androidx.compose.ui.unit.dp
 import com.dndcharacterhandler.presentation.AppScreen
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
-import com.dndcharacterhandler.presentation.theme.LocalEngravedOverview
+import com.dndcharacterhandler.presentation.theme.FrameStyle
+import com.dndcharacterhandler.presentation.theme.LocalThemeLook
 
-/** The tab bar: an outline over the screen's own background, with no fill of its own. */
+/**
+ * The tab bar: an outline over the screen's own background, with no fill of its own; with etched frames,
+ * a plate of the card colour, the picked tab framed like the portrait's crest.
+ */
 @Composable
 fun BottomNavigationBar(
     currentRoute: String,
@@ -37,15 +41,15 @@ fun BottomNavigationBar(
     onNavigate: (AppScreen) -> Unit
 ) {
     val colors = LocalDesignTokens.current.colors
-    val engraved = LocalEngravedOverview.current
+    val etched = LocalThemeLook.current.frames == FrameStyle.ETCHED
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .navigationBarsPadding()
             .padding(horizontal = 14.dp, vertical = 8.dp)
             .height(62.dp),
-        shape = RoundedCornerShape(if (engraved) 12.dp else 26.dp),
-        color = if (engraved) colors.surface.card.copy(alpha = 0.94f) else Color.Transparent,
+        shape = RoundedCornerShape(if (etched) 12.dp else 26.dp),
+        color = if (etched) colors.surface.card.copy(alpha = 0.94f) else Color.Transparent,
         border = BorderStroke(1.dp, colors.border.muted)
     ) {
         Row(
@@ -60,9 +64,9 @@ fun BottomNavigationBar(
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .clip(if (engraved) EngravedPortraitShape else RoundedCornerShape(18.dp))
+                        .clip(if (etched) EngravedPortraitShape else RoundedCornerShape(18.dp))
                         .background(if (selected) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent)
-                        .then(if (engraved && selected) Modifier.engravedBorder(colors.accent.inspiration) else Modifier)
+                        .then(if (etched && selected) Modifier.engravedBorder(colors.accent.inspiration) else Modifier)
                         .selectable(selected = selected, role = Role.Tab, onClick = { onNavigate(screen) })
                         .padding(horizontal = 2.dp, vertical = 10.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,

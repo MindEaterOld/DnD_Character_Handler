@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import com.dndcharacterhandler.presentation.DndCharacterApp
@@ -39,7 +40,10 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            DnDTheme {
+            // The theme the player picked in the settings, over the whole app, the splash included.
+            val characterManagerViewModel = remember { viewModelProvider.get(CharacterManagerViewModel::class.java) }
+            val managerState by characterManagerViewModel.uiState.collectAsStateWithLifecycle()
+            DnDTheme(theme = managerState.theme) {
                 // Build the app state (and instantiate the ViewModels) eagerly so their
                 // data loads start while the splash is showing, not after it closes.
                 val appState = remember {
@@ -52,7 +56,7 @@ class MainActivity : ComponentActivity() {
                         featuresViewModel = viewModelProvider.get(FeaturesViewModel::class.java),
                         biographyViewModel = viewModelProvider.get(BiographyViewModel::class.java),
                         notesViewModel = viewModelProvider.get(NotesViewModel::class.java),
-                        characterManagerViewModel = viewModelProvider.get(CharacterManagerViewModel::class.java),
+                        characterManagerViewModel = characterManagerViewModel,
                         diceSkinsViewModel = viewModelProvider.get(com.dndcharacterhandler.presentation.dice.DiceSkinsViewModel::class.java),
                         localizationRepository = container.localizationRepository
                     )
