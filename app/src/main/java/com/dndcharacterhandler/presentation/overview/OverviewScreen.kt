@@ -2084,22 +2084,41 @@ private fun PortraitViewerContent(
 internal const val HpActionTint = 0.12f
 
 /**
- * Healing or damage, hanging from the hit points' card beside the death saves' tab like a tab of its
- * own: the colour of what it does, faint behind its icon and label.
+ * Healing or damage under the hit points' card, either side of the death saves' bookmark: a button of its
+ * own, its whole outline in the colour of what it does, the icon and label too, 2dp below the card, as
+ * tall as the bookmark (owner's choice from boards, 2026-10-06: R3). The engraving draws it etched, the
+ * colour faint behind.
  */
 @Composable
 private fun HpActionButton(label: String, icon: ImageVector, color: Color, modifier: Modifier = Modifier, onClick: () -> Unit) {
     val token = LocalDesignTokens.current.typography.actionButtonLabel
     val etched = LocalThemeLook.current.frames == FrameStyle.ETCHED
     val colors = LocalDesignTokens.current.colors
-    val shape = if (etched) RoundedCornerShape(4.dp) else RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp)
+    val shape = if (etched) RoundedCornerShape(4.dp) else RoundedCornerShape(HpActionCornerRadius)
     Row(
         modifier = modifier
-            .offset(y = (-1).dp)
-            .height(if (etched) 48.dp else 44.dp)
+            .then(
+                if (etched) {
+                    Modifier
+                        .offset(y = (-1).dp)
+                        .height(HpActionHeight)
+                } else {
+                    // Clear of the card, so its own top edge shows; its bottom level with the bookmark's.
+                    Modifier
+                        .padding(top = HpActionGap)
+                        .height(HpActionHeight - HpActionGap)
+                }
+            )
             .clip(shape)
-            .background(color.copy(alpha = HpActionTint))
-            .then(if (etched) Modifier.engravedBorder(color.copy(alpha = .7f)) else Modifier)
+            .then(
+                if (etched) {
+                    Modifier
+                        .background(color.copy(alpha = HpActionTint))
+                        .engravedBorder(color.copy(alpha = .7f))
+                } else {
+                    Modifier.border(1.dp, color.copy(alpha = .7f), shape)
+                }
+            )
             .clickable(onClick = onClick)
             .padding(horizontal = 10.dp),
         horizontalArrangement = Arrangement.Center,
@@ -2120,6 +2139,15 @@ private fun HpActionButton(label: String, icon: ImageVector, color: Color, modif
         )
     }
 }
+
+/** The HP actions' and the death saves' bookmark's height, from the card's bottom edge. */
+private val HpActionHeight = 48.dp
+
+/** The HP actions' corners (the bookmark's bottom ones too): softer than the card's 30. */
+private val HpActionCornerRadius = 20.dp
+
+/** The room between the card's edge and an HP action's own top edge. */
+private val HpActionGap = 2.dp
 
 /** The most hit points one change can take or give: four digits. */
 private const val MaxHpChange = 9999
@@ -2413,23 +2441,28 @@ private fun DeathSavesTray(
             verticalAlignment = Alignment.Top
         ) {
             start()
-            val tabShape = if (etched) RoundedCornerShape(4.dp) else RoundedCornerShape(bottomStart = 10.dp, bottomEnd = 10.dp)
+            // The bookmark: its top under the card's edge (no top outline), as tall as the HP actions.
+            val tabShape = if (etched) {
+                RoundedCornerShape(4.dp)
+            } else {
+                RoundedCornerShape(bottomStart = HpActionCornerRadius, bottomEnd = HpActionCornerRadius)
+            }
             Box(
                 modifier = Modifier
                     .offset(y = (-1).dp)
+                    .height(if (etched) HpActionHeight else HpActionHeight + 1.dp)
                     .clip(tabShape)
                     .background(colors.surface.card)
                     .border(1.dp, colors.border.panel, tabShape)
                     .clickable { open = !open }
-                    .then(if (etched) Modifier.height(48.dp) else Modifier)
-                    .padding(horizontal = 18.dp, vertical = 4.dp),
+                    .padding(horizontal = if (etched) 18.dp else 16.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = SkullIcon,
                     contentDescription = text("overview_death_saves"),
                     tint = if (dying) colors.accent.dangerHpZero else colors.text.label,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(if (etched) 20.dp else 26.dp)
                 )
             }
             end()
