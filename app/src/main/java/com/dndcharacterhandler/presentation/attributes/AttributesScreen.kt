@@ -1412,10 +1412,12 @@ private fun AbilityScoreCard(
 }
 
 /**
- * The skills in two columns, one frame per ability with its short name on the top border, as the ability
- * cards have it: Strength, Dexterity and Intelligence on the left, Wisdom and Charisma on the right — nine
- * rows each. The left column has one frame more, so it is taller; under Charisma a spider hangs into the
- * spare room.
+ * The skills on two shelves, one frame per ability with its short name on the top border, as the ability
+ * cards have it: Strength and Dexterity beside Wisdom, then Intelligence beside Charisma, so those two start
+ * level (owner's choice from boards, 2026-10-05). Every gap is [SkillGroupGap]. With the frames' inner
+ * padding Strength and Dexterity with a gap between them are about as tall as Wisdom's five rows; what the
+ * left has spare goes half into that gap, half under Dexterity, so the gaps stay even at any font scale.
+ * Charisma has a row less than Intelligence; a spider hangs into the room under it.
  */
 @Composable
 private fun SkillGroups(
@@ -1425,40 +1427,64 @@ private fun SkillGroups(
     checkEffects: Map<AbilityType, RollEffects> = emptyMap(),
     onSkillClick: (SkillRow) -> Unit = {}
 ) {
-    val groups = skillAbilities
-        .map { (type, key) -> key to skills.filter { it.abilityType == type } }
-        .filter { (_, groupSkills) -> groupSkills.isNotEmpty() }
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(IntrinsicSize.Min),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    @Composable
+    fun group(type: AbilityType) {
+        val (_, key) = skillAbilities.first { it.first == type }
+        val groupSkills = skills.filter { it.abilityType == type }
+        if (groupSkills.isNotEmpty()) SkillGroupCard(text(key), groupSkills, checkEffects, onSkillClick)
+    }
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(SkillGroupGap)
     ) {
-        Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            groups.take(3).forEach { (key, groupSkills) ->
-                SkillGroupCard(text(key), groupSkills, checkEffects, onSkillClick)
-            }
-        }
-        Column(
+        Row(
             modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight()
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            groups.drop(3).forEachIndexed { index, (key, groupSkills) ->
-                if (index > 0) Spacer(modifier = Modifier.height(12.dp))
-                SkillGroupCard(text(key), groupSkills, checkEffects, onSkillClick)
-            }
-            SkillsSpider(
+            Column(
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxWidth()
-            )
+                    .fillMaxHeight()
+            ) {
+                group(AbilityType.STRENGTH)
+                Spacer(modifier = Modifier.height(SkillGroupGap))
+                Spacer(modifier = Modifier.weight(1f))
+                group(AbilityType.DEXTERITY)
+                Spacer(modifier = Modifier.weight(1f))
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                group(AbilityType.WISDOM)
+            }
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                group(AbilityType.INTELLIGENCE)
+            }
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+            ) {
+                group(AbilityType.CHARISMA)
+                SkillsSpider(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                )
+            }
         }
     }
 }
+
+/** The gap between the skills' frames. */
+private val SkillGroupGap = 12.dp
 
 /**
  * The spider hanging under Charisma's frame into the skills' spare room (owner's choice from boards,
@@ -1534,7 +1560,11 @@ private val skillAbilities = listOf(
     AbilityType.CHARISMA to "ability_cha_short"
 )
 
-/** One ability's skills in one frame, its short name on the border; a tap on a row rolls that skill. */
+/**
+ * One ability's skills in one frame, its short name on the border; a tap on a row rolls that skill. The rows
+ * keep 8dp from the frame's top and 4dp from its bottom, so the label clears the first row and the gaps
+ * between frames come out even (owner's choice from boards, 2026-10-05).
+ */
 @Composable
 private fun SkillGroupCard(
     label: String,
@@ -1548,7 +1578,7 @@ private fun SkillGroupCard(
         labelStyle = abilityLabelStyle,
         cornerRadius = 7.dp
     ) {
-        Column {
+        Column(modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)) {
             skills.forEach { skill ->
                 SkillLine(
                     skill = skill,
