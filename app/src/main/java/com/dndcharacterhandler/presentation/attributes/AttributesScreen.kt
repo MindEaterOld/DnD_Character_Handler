@@ -30,9 +30,10 @@ import com.dndcharacterhandler.domain.rules.activeConditions
 import com.dndcharacterhandler.domain.rules.RollEffects
 import com.dndcharacterhandler.domain.rules.D20Test
 import androidx.compose.foundation.layout.widthIn
-import com.dndcharacterhandler.presentation.components.StatCardRow
+import com.dndcharacterhandler.presentation.components.StatStrip
+import com.dndcharacterhandler.presentation.components.StatStripCell
+import com.dndcharacterhandler.presentation.components.StatStripDivider
 import com.dndcharacterhandler.presentation.components.BorderLabelCard
-import com.dndcharacterhandler.presentation.components.MiniStatCardIcon
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -122,7 +123,6 @@ import com.dndcharacterhandler.domain.usecase.GetCharacterBundleUseCase
 import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
 import com.dndcharacterhandler.presentation.components.EditDialog
-import com.dndcharacterhandler.presentation.components.MiniStatCard
 import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
@@ -491,26 +491,23 @@ internal fun attributesSectionItems(
 
     val items: LazyListScope.() -> Unit = {
         item {
-            StatCardRow {
-                MiniStatCard(
-                    modifier = Modifier.weight(1f),
-                    label = text("stat_card_proficiency"),
-                    value = signed(proficiencyBonus),
-                    icon = { MiniStatCardIcon(Icons.Outlined.AutoAwesome) }
-                )
-                MiniStatCard(
-                    modifier = Modifier.weight(1f),
+            // The proficiency bonus and the senses: looked up now and then, so a slim strip under the
+            // fight's three (owner's choice from boards, 2026-10-05).
+            StatStrip {
+                StatStripCell(text("stat_card_proficiency"), signed(proficiencyBonus), Icons.Outlined.AutoAwesome)
+                StatStripDivider()
+                StatStripCell(
                     label = text("stat_card_passive_perception"),
                     value = passivePerception.toString(),
-                    icon = { MiniStatCardIcon(Icons.Outlined.Visibility) },
-                    onClick = { if (characterBundle != null) isPassiveDialogOpen = true }
+                    icon = Icons.Outlined.Visibility,
+                    onClick = { isPassiveDialogOpen = true }
                 )
-                MiniStatCard(
-                    modifier = Modifier.weight(1f),
+                StatStripDivider()
+                StatStripCell(
                     label = text("stat_card_darkvision"),
                     value = darkvisionValue,
-                    icon = { MiniStatCardIcon(Icons.Outlined.DarkMode) },
-                    onClick = { if (characterBundle != null) isDarkvisionDialogOpen = true }
+                    icon = Icons.Outlined.DarkMode,
+                    onClick = { isDarkvisionDialogOpen = true }
                 )
             }
         }

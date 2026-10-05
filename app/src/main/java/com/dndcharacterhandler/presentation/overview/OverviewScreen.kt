@@ -97,7 +97,6 @@ import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.Bedtime
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.LocalCafe
-import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -872,17 +871,8 @@ private fun OverviewContent(
         val initiativeEffects = rollEffects(D20Test.Initiative, active, exhaustion)
         val baseSpeed = character?.speed ?: 30
         val speed = effectiveSpeed(baseSpeed, active, exhaustion)
+        // In the row's order: the initiative, the armor class in its shield, the speed.
         listOf(
-            OverviewStat(
-                // The same label as the Combat screen's card.
-                labelKey = "stat_card_armor_class",
-                value = (character?.armorClass ?: 10).toString(),
-                icon = Icons.Outlined.Shield,
-                field = OverviewMiniStatField.ARMOR_CLASS,
-                // Attacks against the character with advantage: worse; with disadvantage: better.
-                worse = attacksAgainst(active) == RollMode.ADVANTAGE,
-                better = attacksAgainst(active) == RollMode.DISADVANTAGE
-            ),
             OverviewStat(
                 labelKey = "overview_initiative",
                 value = signed(calculateInitiative(character?.dexterity ?: 10, character?.initiativeBonus ?: 0) + initiativeEffects.modifier),
@@ -891,6 +881,16 @@ private fun OverviewContent(
                 worse = initiativeEffects.isWorse,
                 better = initiativeEffects.isBetter,
                 delta = initiativeEffects.modifier
+            ),
+            OverviewStat(
+                // The same label as the Combat screen's card.
+                labelKey = "stat_card_armor_class",
+                value = (character?.armorClass ?: 10).toString(),
+                icon = null,
+                field = OverviewMiniStatField.ARMOR_CLASS,
+                // Attacks against the character with advantage: worse; with disadvantage: better.
+                worse = attacksAgainst(active) == RollMode.ADVANTAGE,
+                better = attacksAgainst(active) == RollMode.DISADVANTAGE
             ),
             OverviewStat(
                 labelKey = "overview_speed",
@@ -1103,37 +1103,51 @@ private fun OverviewContent(
             }
 
             item {
-                // The app's stat cards, as on the other screens.
-                // With the pulls above it, 34dp above its place.
+                // The fight's three: the initiative, the armor class in its shield, the speed (owner's
+                // choice from boards, 2026-10-05). With the pulls above it, 34dp above its place.
+                val openStat: (OverviewStat) -> Unit = { stat ->
+                    if (stat.field == OverviewMiniStatField.INITIATIVE && character != null) {
+                        // Initiative rolls; its pop-up's "Edit" opens the bonus.
+                        isInitiativeRollOpen = true
+                    } else {
+                        activeMiniStatField = stat.field
+                        miniStatDraft = when (stat.field) {
+                            OverviewMiniStatField.ARMOR_CLASS -> (character?.armorClass ?: 10).toString()
+                            OverviewMiniStatField.INITIATIVE -> (character?.initiativeBonus ?: 0).toString()
+                            OverviewMiniStatField.SPEED -> (character?.speed ?: 30).toString()
+                        }
+                        if (stat.field == OverviewMiniStatField.ARMOR_CLASS) {
+                            armorClassBaseDraft = (character?.baseArmorClass ?: 10).toString()
+                            armorClassManualDraft = (character?.armorClass ?: 10).toString()
+                            armorClassModeDraft = character?.armorClassMode ?: ArmorClassMode.AUTOMATIC
+                        }
+                    }
+                }
                 StatCardRow(modifier = Modifier.pullUp(4.dp)) {
                     miniStats.forEach { stat ->
-                        val statIcon = stat.icon
-                        MiniStatCard(
-                            modifier = Modifier.weight(1f),
-                            value = stat.value,
-                            label = text(stat.labelKey),
-                            icon = if (statIcon == null) null else ({ MiniStatCardIcon(statIcon) }),
-                            valueMarker = if (stat.worse || stat.better) ({ RollMarker(worse = stat.worse, better = stat.better, size = 18.dp) }) else null,
-                            valueColor = changedValueColor(stat.delta),
-                            onClick = {
-                                // Initiative rolls; its pop-up's "Edit" opens the bonus.
-                                if (stat.field == OverviewMiniStatField.INITIATIVE && character != null) {
-                                    isInitiativeRollOpen = true
-                                    return@MiniStatCard
-                                }
-                                activeMiniStatField = stat.field
-                                miniStatDraft = when (stat.field) {
-                                    OverviewMiniStatField.ARMOR_CLASS -> (character?.armorClass ?: 10).toString()
-                                    OverviewMiniStatField.INITIATIVE -> (character?.initiativeBonus ?: 0).toString()
-                                    OverviewMiniStatField.SPEED -> (character?.speed ?: 30).toString()
-                                }
-                                if (stat.field == OverviewMiniStatField.ARMOR_CLASS) {
-                                    armorClassBaseDraft = (character?.baseArmorClass ?: 10).toString()
-                                    armorClassManualDraft = (character?.armorClass ?: 10).toString()
-                                    armorClassModeDraft = character?.armorClassMode ?: ArmorClassMode.AUTOMATIC
-                                }
-                            }
-                        )
+                        if (stat.field == OverviewMiniStatField.ARMOR_CLASS) {
+                            ArmorClassShield(
+                                label = text(stat.labelKey),
+                                value = stat.value,
+                                modifier = Modifier.align(Alignment.CenterVertically),
+                                worse = stat.worse,
+                                better = stat.better,
+                                onClick = { openStat(stat) }
+                            )
+                        } else {
+                            val statIcon = stat.icon
+                            MiniStatCard(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .align(Alignment.CenterVertically),
+                                value = stat.value,
+                                label = text(stat.labelKey),
+                                icon = if (statIcon == null) null else ({ MiniStatCardIcon(statIcon) }),
+                                valueMarker = if (stat.worse || stat.better) ({ RollMarker(worse = stat.worse, better = stat.better, size = 18.dp) }) else null,
+                                valueColor = changedValueColor(stat.delta),
+                                onClick = { openStat(stat) }
+                            )
+                        }
                     }
                 }
             }
