@@ -2143,8 +2143,8 @@ private fun HpActionButton(label: String, icon: ImageVector, color: Color, modif
 /** The HP actions' and the death saves' bookmark's height, from the card's bottom edge. */
 private val HpActionHeight = 48.dp
 
-/** The HP actions' corners (the bookmark's bottom ones too): softer than the card's 30. */
-private val HpActionCornerRadius = 20.dp
+/** The HP actions' corners (the bookmark's bottom ones too): the stat cards' 10, as the card's. */
+private val HpActionCornerRadius = 10.dp
 
 /** The room between the card's edge and an HP action's own top edge. */
 private val HpActionGap = 2.dp
@@ -2367,11 +2367,12 @@ private fun DeathSavesTray(
         // Pulled out by the tab like a blind: the bottom edge comes down first, the tab riding on it.
         // The tray goes on from the hit points' card: its top hides under the card's rounded bottom,
         // so it comes out of the line where the card's sides stop being straight.
-        val trayShape = RoundedCornerShape(bottomStart = HpCardCornerRadius, bottomEnd = HpCardCornerRadius)
+        val cardRadius = hpCardCornerRadius()
+        val trayShape = RoundedCornerShape(bottomStart = cardRadius, bottomEnd = cardRadius)
         AnimatedVisibility(
             visible = open,
             modifier = Modifier.layout { measurable, constraints ->
-                val tucked = HpCardCornerRadius.roundToPx()
+                val tucked = cardRadius.roundToPx()
                 val placeable = measurable.measure(constraints)
                 layout(placeable.width, (placeable.height - tucked).coerceAtLeast(0)) {
                     placeable.place(0, -tucked)
@@ -2386,7 +2387,7 @@ private fun DeathSavesTray(
                     .clip(trayShape)
                     .background(colors.surface.card)
                     .border(1.dp, colors.border.panel, trayShape)
-                    .padding(start = 18.dp, end = 18.dp, top = HpCardCornerRadius + 10.dp, bottom = 10.dp),
+                    .padding(start = 18.dp, end = 18.dp, top = cardRadius + 10.dp, bottom = 10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -2436,7 +2437,7 @@ private fun DeathSavesTray(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = if (etched) 12.dp else HpCardCornerRadius),
+                .padding(horizontal = if (etched) 12.dp else cardRadius),
             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
             verticalAlignment = Alignment.Top
         ) {
@@ -2470,8 +2471,13 @@ private fun DeathSavesTray(
     }
 }
 
-/** The hit points' card corners; the death saves' tray hides this much of its top under the card. */
-private val HpCardCornerRadius = 30.dp
+/**
+ * The hit points' card corners; the death saves' tray hides this much of its top under the card. The
+ * stat cards' 10 (owner's choice from boards, 2026-10-06: K3); the engraving's etched frame keeps its 30
+ * under its cut corners.
+ */
+@Composable
+private fun hpCardCornerRadius(): Dp = if (LocalThemeLook.current.frames == FrameStyle.ETCHED) 30.dp else 10.dp
 
 /** Half a turn about the view: the d20 shows its front face standing on a corner. */
 private val HalfTurn = Quat.axisAngle(Vec3.UP, PI)
@@ -2518,7 +2524,7 @@ private fun OverviewHpCard(
         modifier = Modifier.fillMaxWidth(),
         labelStyle = MaterialTheme.typography.titleLarge.copy(fontSize = tokens.hpLabel.fontSizeSp.sp),
         labelColor = colors.text.label,
-        cornerRadius = HpCardCornerRadius,
+        cornerRadius = hpCardCornerRadius(),
         fill = colors.surface.card.copy(alpha = if (etched) 0.7f else 1f),
         border = colors.border.panel,
         onClick = onClick
