@@ -859,6 +859,7 @@
     "es": "Manual"
   },
   "attributes_proficiency_armor": {
+    "maxChars": 13,
     "en": "Armor",
     "ru": "Броня",
     "de": "Rüstung",
@@ -866,6 +867,7 @@
     "es": "Armadura"
   },
   "attributes_proficiency_weapons": {
+    "maxChars": 13,
     "en": "Weapons",
     "ru": "Оружие",
     "de": "Waffen",
@@ -873,6 +875,7 @@
     "es": "Armas"
   },
   "attributes_proficiency_tools": {
+    "maxChars": 13,
     "en": "Tools",
     "ru": "Инструменты",
     "de": "Werkzeuge",
@@ -880,6 +883,7 @@
     "es": "Herramientas"
   },
   "attributes_proficiency_languages": {
+    "maxChars": 13,
     "en": "Languages",
     "ru": "Языки",
     "de": "Sprachen",
@@ -893,6 +897,80 @@
     "de": "Waffenmeisterschaft",
     "fr": "Ma\u00eetrise des armes",
     "es": "Maestr\u00eda con armas"
+  },
+  "attributes_proficiency_masteries_short": {
+    "maxChars": 13,
+    "en": "Mastery",
+    "ru": "Мастерство",
+    "de": "Meisterschaft",
+    "fr": "Maîtrises",
+    "es": "Maestrías"
+  },
+  "attributes_defense_resistances_short": {
+    "maxChars": 13,
+    "en": "Resistant",
+    "ru": "Сопротивления",
+    "de": "Resistent",
+    "fr": "Résistant",
+    "es": "Resistente"
+  },
+  "attributes_defense_immunities_short": {
+    "maxChars": 13,
+    "en": "Immune",
+    "ru": "Иммунитеты",
+    "de": "Immun",
+    "fr": "Immunisé",
+    "es": "Inmune"
+  },
+  "attributes_defense_vulnerabilities_short": {
+    "maxChars": 13,
+    "en": "Vulnerable",
+    "ru": "Уязвимости",
+    "de": "Verwundbar",
+    "fr": "Vulnérable",
+    "es": "Vulnerable"
+  },
+  "attributes_damage_group_physical": {
+    "en": "Physical",
+    "ru": "Физический",
+    "de": "Physisch",
+    "fr": "Physiques",
+    "es": "Físicos"
+  },
+  "attributes_damage_group_elemental": {
+    "en": "Elemental",
+    "ru": "Стихии",
+    "de": "Elementar",
+    "fr": "Élémentaires",
+    "es": "Elementales"
+  },
+  "attributes_damage_group_other": {
+    "en": "Other",
+    "ru": "Прочие",
+    "de": "Sonstige",
+    "fr": "Autres",
+    "es": "Otros"
+  },
+  "attributes_group_all": {
+    "en": "All",
+    "ru": "Всё",
+    "de": "Alle",
+    "fr": "Tout",
+    "es": "Todo"
+  },
+  "attributes_group_custom": {
+    "en": "Custom",
+    "ru": "Свои",
+    "de": "Eigene",
+    "fr": "Personnalisés",
+    "es": "Propios"
+  },
+  "attributes_group_other": {
+    "en": "Other",
+    "ru": "Другое",
+    "de": "Sonstiges",
+    "fr": "Autres",
+    "es": "Otros"
   },
   "attributes_armor_dialog_title": {
     "en": "Armor Proficiencies",
@@ -950,27 +1028,6 @@
     "fr": "De guerre",
     "es": "Marciales"
   },
-  "attributes_show_simple_weapons": {
-    "en": "Show Simple list",
-    "ru": "Показать простое оружие",
-    "de": "Einfache Waffen zeigen",
-    "fr": "Afficher les armes courantes",
-    "es": "Mostrar armas sencillas"
-  },
-  "attributes_show_martial_weapons": {
-    "en": "Show Martial list",
-    "ru": "Показать воинское оружие",
-    "de": "Kriegswaffen zeigen",
-    "fr": "Afficher les armes de guerre",
-    "es": "Mostrar armas marciales"
-  },
-  "attributes_add_custom_tool": {
-    "en": "Add custom tool",
-    "ru": "Добавить свой инструмент",
-    "de": "Eigenes Werkzeug hinzufügen",
-    "fr": "Ajouter un outil personnalisé",
-    "es": "Añadir herramienta propia"
-  },
   "attributes_custom_tool": {
     "en": "Custom tool",
     "ru": "Свой инструмент",
@@ -978,12 +1035,124 @@
     "fr": "Outil personnalisé",
     "es": "Herramienta propia"
   },
-  "attributes_add_custom_language": {
-    "en": "Add custom language",
-    "ru": "Добавить свой язык",
-    "de": "Eigene Sprache hinzufügen",
-    "fr": "Ajouter une langue personnalisée",
-    "es": "Añadir idioma propio"
+  "proficiency_trade_alchemists_supplies": {
+    "en": "Alchemist",
+    "ru": "Алхимик",
+    "de": "Alchemist",
+    "fr": "Alchimiste",
+    "es": "Alquimista"
+  },
+  "proficiency_trade_brewers_supplies": {
+    "en": "Brewer",
+    "ru": "Пивовар",
+    "de": "Brauer",
+    "fr": "Brasseur",
+    "es": "Cervecero"
+  },
+  "proficiency_trade_calligraphers_supplies": {
+    "en": "Calligrapher",
+    "ru": "Каллиграф",
+    "de": "Kalligraf",
+    "fr": "Calligraphe",
+    "es": "Calígrafo"
+  },
+  "proficiency_trade_carpenters_tools": {
+    "en": "Carpenter",
+    "ru": "Плотник",
+    "de": "Zimmermann",
+    "fr": "Charpentier",
+    "es": "Carpintero"
+  },
+  "proficiency_trade_cartographers_tools": {
+    "en": "Cartographer",
+    "ru": "Картограф",
+    "de": "Kartograf",
+    "fr": "Cartographe",
+    "es": "Cartógrafo"
+  },
+  "proficiency_trade_cobblers_tools": {
+    "en": "Cobbler",
+    "ru": "Сапожник",
+    "de": "Schuster",
+    "fr": "Cordonnier",
+    "es": "Zapatero"
+  },
+  "proficiency_trade_cooks_utensils": {
+    "en": "Cook",
+    "ru": "Повар",
+    "de": "Koch",
+    "fr": "Cuisinier",
+    "es": "Cocinero"
+  },
+  "proficiency_trade_glassblowers_tools": {
+    "en": "Glassblower",
+    "ru": "Стеклодув",
+    "de": "Glasbläser",
+    "fr": "Souffleur de verre",
+    "es": "Soplador de vidrio"
+  },
+  "proficiency_trade_jewelers_tools": {
+    "en": "Jeweler",
+    "ru": "Ювелир",
+    "de": "Juwelier",
+    "fr": "Joaillier",
+    "es": "Joyero"
+  },
+  "proficiency_trade_leatherworkers_tools": {
+    "en": "Leatherworker",
+    "ru": "Кожевник",
+    "de": "Lederer",
+    "fr": "Maroquinier",
+    "es": "Peletero"
+  },
+  "proficiency_trade_masons_tools": {
+    "en": "Mason",
+    "ru": "Каменщик",
+    "de": "Steinmetz",
+    "fr": "Maçon",
+    "es": "Albañil"
+  },
+  "proficiency_trade_painters_supplies": {
+    "en": "Painter",
+    "ru": "Художник",
+    "de": "Maler",
+    "fr": "Peintre",
+    "es": "Pintor"
+  },
+  "proficiency_trade_potters_tools": {
+    "en": "Potter",
+    "ru": "Гончар",
+    "de": "Töpfer",
+    "fr": "Potier",
+    "es": "Alfarero"
+  },
+  "proficiency_trade_smiths_tools": {
+    "en": "Smith",
+    "ru": "Кузнец",
+    "de": "Schmied",
+    "fr": "Forgeron",
+    "es": "Herrero"
+  },
+  "proficiency_trade_tinkers_tools": {
+    "en": "Tinker",
+    "ru": "Ремонтник",
+    "de": "Kesselflicker",
+    "fr": "Bricoleur",
+    "es": "Hojalatero"
+  },
+  "proficiency_trade_weavers_tools": {
+    "en": "Weaver",
+    "ru": "Ткач",
+    "de": "Weber",
+    "fr": "Tisserand",
+    "es": "Tejedor"
+  },
+  "proficiency_trade_woodcarvers_tools": {
+    "en": "Woodcarver",
+    "ru": "Резчик по дереву",
+    "de": "Holzschnitzer",
+    "fr": "Sculpteur sur bois",
+    "es": "Tallista"
   },
   "attributes_custom_language": {
     "en": "Custom language",
@@ -3962,11 +4131,11 @@
     "es": "Fallo automático"
   },
   "attributes_defenses": {
-    "en": "Defenses",
-    "ru": "Защиты",
-    "de": "Verteidigung",
-    "fr": "Défenses",
-    "es": "Defensas"
+    "en": "Defenses & Weaknesses",
+    "ru": "Защиты и уязвимости",
+    "de": "Schutz & Schwächen",
+    "fr": "Défenses et faiblesses",
+    "es": "Defensas y debilidades"
   },
   "attributes_defense_resistances": {
     "en": "Damage resistances",
@@ -3988,13 +4157,6 @@
     "de": "Schadensanfälligkeiten",
     "fr": "Vulnérabilités aux dégâts",
     "es": "Vulnerabilidades al daño"
-  },
-  "attributes_defense_damage": {
-    "en": "Damage",
-    "ru": "Урон",
-    "de": "Schaden",
-    "fr": "Dégâts",
-    "es": "Daño"
   },
   "attributes_defense_conditions": {
     "en": "Conditions",

@@ -1,11 +1,18 @@
 package com.dndcharacterhandler.presentation.attributes
 
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.input.ImeAction
+import com.dndcharacterhandler.presentation.components.OutlinedPanel
+import com.dndcharacterhandler.presentation.components.StepButton
+import com.dndcharacterhandler.presentation.components.ToggleChip
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.material.icons.outlined.GppBad
-import androidx.compose.material.icons.outlined.GppGood
-import androidx.compose.material.icons.outlined.Security
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.ColorFilter
@@ -26,7 +33,6 @@ import androidx.compose.foundation.layout.widthIn
 import com.dndcharacterhandler.presentation.components.StatCardRow
 import com.dndcharacterhandler.presentation.components.BorderLabelCard
 import com.dndcharacterhandler.presentation.components.MiniStatCardIcon
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -41,17 +47,11 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.Chat
 import androidx.compose.material.icons.outlined.AutoAwesome
-import androidx.compose.material.icons.outlined.Build
-import androidx.compose.material.icons.outlined.MilitaryTech
 import androidx.compose.material.icons.outlined.DarkMode
-import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
@@ -63,8 +63,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -475,10 +475,9 @@ internal fun attributesSectionItems(
     var customToolDrafts by remember { mutableStateOf(emptyList<String>()) }
     var languageDraft by remember { mutableStateOf(emptySet<String>()) }
     var customLanguageDrafts by remember { mutableStateOf(emptyList<String>()) }
-    var simpleWeaponsExpanded by remember { mutableStateOf(false) }
-    var martialWeaponsExpanded by remember { mutableStateOf(false) }
-    var expandedToolCategories by remember { mutableStateOf(emptySet<String>()) }
-    var expandedLanguageCategories by remember { mutableStateOf(emptySet<String>()) }
+    /** What is typed in a pop-up's field for its own entry, not added as a chip yet; Save keeps it too. */
+    var customToolInput by remember { mutableStateOf("") }
+    var customLanguageInput by remember { mutableStateOf("") }
     var passiveDraft by remember(character.passivePerceptionBonus) {
         mutableStateOf(character.passivePerceptionBonus.toString())
     }
@@ -552,83 +551,64 @@ internal fun attributesSectionItems(
 
         item {
             AttributesSectionTitle(title = text("attributes_proficiencies"))
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    ProficiencyInfoCard(
-                        icon = Icons.Outlined.Shield,
-                        label = text("attributes_proficiency_armor"),
-                        value = formatSelectedProficiencies(
-                            selectedIds = decodeProficiencyIds(character.armorProficiencies),
-                            options = armorProficiencyOptions,
-                            strings = strings
-                        ),
-                        modifier = Modifier.weight(1f),
-                        onClick = {
-                            if (characterBundle != null) {
-                                armorDraft = decodeProficiencyIds(character.armorProficiencies)
-                                isArmorDialogOpen = true
-                            }
-                        }
-                    )
-                    ProficiencyInfoCard(
-                        icon = Icons.Outlined.AutoAwesome,
-                        label = text("attributes_proficiency_weapons"),
-                        value = formatWeaponProficiencies(decodeProficiencyIds(character.weaponProficiencies), strings),
-                        modifier = Modifier.weight(1f),
-                        onClick = {
-                            if (characterBundle != null) {
-                                weaponDraft = decodeProficiencyIds(character.weaponProficiencies)
-                                isWeaponDialogOpen = true
-                            }
-                        }
-                    )
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    ProficiencyInfoCard(
-                        icon = Icons.Outlined.Build,
-                        label = text("attributes_proficiency_tools"),
-                        value = formatToolProficiencies(decodeProficiencyIds(character.toolProficiencies), strings),
-                        modifier = Modifier.weight(1f),
-                        onClick = {
-                            if (characterBundle != null) {
-                                val selectedTools = decodeProficiencyIds(character.toolProficiencies)
-                                toolDraft = selectedTools.filterNot { it.startsWith(CustomProficiencyPrefix) }.toSet()
-                                customToolDrafts = selectedTools
-                                    .filter { it.startsWith(CustomProficiencyPrefix) }
-                                    .map { it.removePrefix(CustomProficiencyPrefix) }
-                                isToolsDialogOpen = true
-                            }
-                        }
-                    )
-                    ProficiencyInfoCard(
-                        icon = Icons.AutoMirrored.Outlined.Chat,
-                        label = text("attributes_proficiency_languages"),
-                        value = formatLanguageProficiencies(decodeProficiencyIds(character.languageProficiencies), strings),
-                        modifier = Modifier.weight(1f),
-                        onClick = {
-                            if (characterBundle != null) {
-                                val selectedLanguages = decodeProficiencyIds(character.languageProficiencies)
-                                languageDraft = selectedLanguages.filterNot { it.startsWith(CustomProficiencyPrefix) }.toSet()
-                                customLanguageDrafts = selectedLanguages
-                                    .filter { it.startsWith(CustomProficiencyPrefix) }
-                                    .map { it.removePrefix(CustomProficiencyPrefix) }
-                                isLanguagesDialogOpen = true
-                            }
-                        }
-                    )
-                }
-                ProficiencyInfoCard(
-                    icon = Icons.Outlined.MilitaryTech,
-                    label = text("attributes_proficiency_masteries"),
-                    value = formatWeaponMasteries(decodeProficiencyIds(character.weaponMasteries), characterCatalog, strings),
-                    modifier = Modifier.fillMaxWidth(),
-                    maxLines = Int.MAX_VALUE,
+            // One frame, a row a field (owner's choice from boards, 2026-10-05); a tap on a row edits it.
+            OutlinedPanel(modifier = Modifier.fillMaxWidth()) {
+                SheetRow(
+                    icon = ProficiencyIconArmor,
+                    label = text("attributes_proficiency_armor"),
+                    values = selectedProficiencyLabels(decodeProficiencyIds(character.armorProficiencies), armorProficiencyOptions, strings),
+                    onClick = {
+                        armorDraft = decodeProficiencyIds(character.armorProficiencies)
+                        isArmorDialogOpen = true
+                    }
+                )
+                SheetRow(
+                    icon = ProficiencyIconWeapons,
+                    label = text("attributes_proficiency_weapons"),
+                    values = weaponProficiencyLabels(decodeProficiencyIds(character.weaponProficiencies), strings),
+                    onClick = {
+                        weaponDraft = decodeProficiencyIds(character.weaponProficiencies)
+                        isWeaponDialogOpen = true
+                    }
+                )
+                SheetRow(
+                    icon = ProficiencyIconTools,
+                    label = text("attributes_proficiency_tools"),
+                    values = selectedProficiencyLabels(
+                        decodeProficiencyIds(character.toolProficiencies),
+                        toolProficiencyCategories.flatMap { it.options },
+                        strings
+                    ),
+                    onClick = {
+                        val selectedTools = decodeProficiencyIds(character.toolProficiencies)
+                        toolDraft = selectedTools.filterNot { it.startsWith(CustomProficiencyPrefix) }.toSet()
+                        customToolDrafts = customLabels(selectedTools)
+                        customToolInput = ""
+                        isToolsDialogOpen = true
+                    }
+                )
+                SheetRow(
+                    icon = ProficiencyIconLanguages,
+                    label = text("attributes_proficiency_languages"),
+                    values = selectedProficiencyLabels(
+                        decodeProficiencyIds(character.languageProficiencies),
+                        languageProficiencyCategories.flatMap { it.options },
+                        strings
+                    ),
+                    onClick = {
+                        val selectedLanguages = decodeProficiencyIds(character.languageProficiencies)
+                        languageDraft = selectedLanguages.filterNot { it.startsWith(CustomProficiencyPrefix) }.toSet()
+                        customLanguageDrafts = customLabels(selectedLanguages)
+                        customLanguageInput = ""
+                        isLanguagesDialogOpen = true
+                    }
+                )
+                // The weapons only: what their masteries do is the weapon's business (owner, 2026-10-05).
+                SheetRow(
+                    icon = ProficiencyIconMasteries,
+                    label = text("attributes_proficiency_masteries_short"),
+                    values = decodeProficiencyIds(character.weaponMasteries).map { weaponName(it, characterCatalog, strings) }.sorted(),
+                    divider = false,
                     onClick = {
                         masteryDraft = decodeProficiencyIds(character.weaponMasteries)
                         isMasteryDialogOpen = true
@@ -641,28 +621,20 @@ internal fun attributesSectionItems(
             // Resistances, immunities, vulnerabilities: what Character Wizard grants, and edits by hand.
             AttributesSectionTitle(title = text("attributes_defenses"))
             val defenses = decodeProficiencyIds(character.defenses)
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            OutlinedPanel(modifier = Modifier.fillMaxWidth()) {
                 listOf(
-                    Triple(Defenses.RESISTANCE, Icons.Outlined.Security, "attributes_defense_resistances"),
-                    Triple(Defenses.IMMUNITY, Icons.Outlined.GppGood, "attributes_defense_immunities"),
-                    Triple(Defenses.VULNERABILITY, Icons.Outlined.GppBad, "attributes_defense_vulnerabilities")
+                    Triple(Defenses.RESISTANCE, DefenseIconResistance, "attributes_defense_resistances_short"),
+                    Triple(Defenses.IMMUNITY, DefenseIconImmunity, "attributes_defense_immunities_short"),
+                    Triple(Defenses.VULNERABILITY, DefenseIconVulnerability, "attributes_defense_vulnerabilities_short")
                 ).forEach { (kind, icon, labelKey) ->
-                    val shown = if (kind == Defenses.IMMUNITY) {
-                        Defenses.ofKind(defenses, Defenses.IMMUNITY) + Defenses.ofKind(defenses, Defenses.CONDITION_IMMUNITY)
-                    } else {
-                        Defenses.ofKind(defenses, kind)
-                    }
-                    ProficiencyInfoCard(
+                    SheetRow(
                         icon = icon,
                         label = text(labelKey),
-                        value = shown.joinToString(", ") { defenseName(it, characterCatalog, strings) }.ifEmpty { strings["common_none"] },
-                        modifier = Modifier.fillMaxWidth(),
-                        maxLines = Int.MAX_VALUE,
+                        values = defenseLabels(defenses, kind, characterCatalog, strings),
+                        divider = kind != Defenses.VULNERABILITY,
                         onClick = {
-                            if (characterBundle != null) {
-                                defenseDraft = defenses
-                                editingDefenseKind = kind
-                            }
+                            defenseDraft = defenses
+                            editingDefenseKind = kind
                         }
                     )
                 }
@@ -943,7 +915,9 @@ internal fun attributesSectionItems(
         }
     }
 
-    if (isArmorDialogOpen && characterBundle != null) {
+    // The pop-ups of the sheet's rows: every option a chip, in groups that stay open, with how many are
+    // picked (owner's choice from boards, 2026-10-05).
+    if (isArmorDialogOpen) {
         EditDialog(
             title = text("attributes_armor_dialog_title"),
             onDismiss = { isArmorDialogOpen = false },
@@ -952,113 +926,61 @@ internal fun attributesSectionItems(
                 isArmorDialogOpen = false
             }
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            OptionGroup {
                 armorProficiencyOptions.forEach { option ->
-                    ProficiencyCheckboxRow(
-                        label = strings[option.labelKey],
-                        checked = option.id in armorDraft,
-                        onCheckedChange = { checked ->
-                            armorDraft = armorDraft.toggled(option.id, checked)
-                        }
-                    )
+                    OptionChip(strings[option.labelKey], option.id in armorDraft) { armorDraft = armorDraft.flipped(option.id) }
                 }
             }
         }
     }
 
-    if (isWeaponDialogOpen && characterBundle != null) {
+    if (isWeaponDialogOpen) {
         EditDialog(
             title = text("attributes_weapon_dialog_title"),
             onDismiss = { isWeaponDialogOpen = false },
             onConfirm = {
                 onUpdateWeaponProficiencies(characterBundle, weaponDraft)
                 isWeaponDialogOpen = false
-            },
-            scrollable = false
+            }
         ) {
-            LazyColumn(
-                modifier = Modifier.height(420.dp),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                item {
-                    ProficiencyCheckboxRow(
-                        label = text("attributes_weapon_simple"),
-                        checked = WeaponGroupSimpleId in weaponDraft,
-                        onCheckedChange = { checked ->
-                            weaponDraft = if (checked) {
-                                (weaponDraft - simpleWeaponOptions.map { it.id }.toSet()) + WeaponGroupSimpleId
-                            } else {
-                                weaponDraft - WeaponGroupSimpleId
-                            }
-                        }
-                    )
-                    TextButton(onClick = { simpleWeaponsExpanded = !simpleWeaponsExpanded }) {
-                        Text(text("attributes_show_simple_weapons"))
-                    }
-                }
-                if (simpleWeaponsExpanded) {
-                    simpleWeaponOptions.forEach { option ->
-                        item {
-                        val groupChecked = WeaponGroupSimpleId in weaponDraft
-                        ProficiencyCheckboxRow(
-                            label = strings[option.labelKey],
-                            checked = groupChecked || option.id in weaponDraft,
-                            enabled = !groupChecked,
-                            onCheckedChange = { checked ->
-                                weaponDraft = weaponDraft.toggled(option.id, checked)
-                            }
-                        )
+            // A group's «All» stands for every weapon of it; a tap on one of them then keeps the others.
+            listOf(
+                Triple(WeaponGroupSimpleId, "attributes_weapon_simple", simpleWeaponOptions),
+                Triple(WeaponGroupMartialId, "attributes_weapon_martial", martialWeaponOptions)
+            ).forEach { (groupId, titleKey, options) ->
+                val whole = groupId in weaponDraft
+                val ids = options.map { it.id }.toSet()
+                OptionGroup(
+                    title = text(titleKey),
+                    picked = if (whole) options.size else options.count { it.id in weaponDraft },
+                    all = whole,
+                    onAll = { weaponDraft = if (whole) weaponDraft - groupId else weaponDraft - ids + groupId }
+                ) {
+                    options.forEach { option ->
+                        OptionChip(strings[option.labelKey], whole || option.id in weaponDraft) {
+                            weaponDraft = if (whole) weaponDraft - groupId + (ids - option.id) else weaponDraft.flipped(option.id)
                         }
                     }
                 }
-                item {
-                    ProficiencyCheckboxRow(
-                        label = text("attributes_weapon_martial"),
-                        checked = WeaponGroupMartialId in weaponDraft,
-                        onCheckedChange = { checked ->
-                            weaponDraft = if (checked) {
-                                (weaponDraft - martialWeaponOptions.map { it.id }.toSet()) + WeaponGroupMartialId
-                            } else {
-                                weaponDraft - WeaponGroupMartialId
-                            }
-                        }
-                    )
-                    TextButton(onClick = { martialWeaponsExpanded = !martialWeaponsExpanded }) {
-                        Text(text("attributes_show_martial_weapons"))
-                    }
-                }
-                if (martialWeaponsExpanded) {
-                    martialWeaponOptions.forEach { option ->
-                        item {
-                        val groupChecked = WeaponGroupMartialId in weaponDraft
-                        ProficiencyCheckboxRow(
-                            label = strings[option.labelKey],
-                            checked = groupChecked || option.id in weaponDraft,
-                            enabled = !groupChecked,
-                            onCheckedChange = { checked ->
-                                weaponDraft = weaponDraft.toggled(option.id, checked)
-                            }
-                        )
-                        }
-                    }
+            }
+            // A weapon the sheet has no option for (a pistol from Foundry) can be taken off.
+            val custom = weaponDraft.filter { it.startsWith(CustomProficiencyPrefix) }
+            if (custom.isNotEmpty()) {
+                OptionGroup(title = text("attributes_group_custom"), picked = custom.size) {
+                    custom.forEach { id -> CustomEntryChip(id.removePrefix(CustomProficiencyPrefix)) { weaponDraft = weaponDraft - id } }
                 }
             }
         }
     }
 
     editingDefenseKind?.let { kind ->
-        // Each kind's own choices; the immunities hold the conditions too. Any key the lists lack
-        // (a Foundry extra, "all damage") stays and can be taken off.
-        val choices = buildList {
-            if (kind == Defenses.IMMUNITY) add(text("attributes_defense_damage") to null)
-            addAll(Defenses.DamageTypes.map { "$kind:$it" to it })
-            if (kind == Defenses.IMMUNITY) {
-                add(text("attributes_defense_conditions") to null)
-                addAll((Condition.entries.map { it.key } + "exhaustion").map { "${Defenses.CONDITION_IMMUNITY}:$it" to it })
-            }
-        }
-        val listed = choices.mapNotNull { (key, code) -> key.takeIf { code != null } }.toSet()
-        val extras = defenseDraft.filter { (it.startsWith("$kind:") || (kind == Defenses.IMMUNITY && it.startsWith("${Defenses.CONDITION_IMMUNITY}:"))) && it !in listed }
+        // The kind's damage types by group, the immunities with the conditions too. Any key the lists lack
+        // (a Foundry extra, "all damage") stays under Other and can be taken off.
+        val conditionKeys = (Condition.entries.map { it.key } + "exhaustion").map { "${Defenses.CONDITION_IMMUNITY}:$it" }
+        val listed = Defenses.DamageGroups.flatMap { (_, types) -> types.map { "$kind:$it" } } + conditionKeys
+        val extras = (decodeProficiencyIds(character.defenses) + defenseDraft)
+            .filter { (it.startsWith("$kind:") || (kind == Defenses.IMMUNITY && it.startsWith("${Defenses.CONDITION_IMMUNITY}:"))) && it !in listed }
+            .sortedBy { defenseName(it, characterCatalog, strings) }
         EditDialog(
             title = text(
                 when (kind) {
@@ -1069,26 +991,35 @@ internal fun attributesSectionItems(
             ),
             onDismiss = { editingDefenseKind = null },
             onConfirm = {
-                if (characterBundle != null) onUpdateDefenses(characterBundle, defenseDraft)
+                onUpdateDefenses(characterBundle, defenseDraft)
                 editingDefenseKind = null
-            },
-            scrollable = false
+            }
         ) {
-            LazyColumn(modifier = Modifier.height(420.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                items(choices + extras.map { it to it }) { (key, code) ->
-                    if (code == null) {
-                        Text(
-                            text = key,
-                            modifier = Modifier.padding(top = 8.dp, bottom = 2.dp),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = LocalDesignTokens.current.colors.text.label
-                        )
-                    } else {
-                        ProficiencyCheckboxRow(
-                            label = defenseName(key, characterCatalog, strings),
-                            checked = key in defenseDraft,
-                            onCheckedChange = { checked -> defenseDraft = defenseDraft.toggled(key, checked) }
-                        )
+            Defenses.DamageGroups.forEach { (group, types) ->
+                val keys = types.map { "$kind:$it" }
+                val whole = keys.all { it in defenseDraft }
+                OptionGroup(
+                    title = text("attributes_damage_group_$group"),
+                    picked = keys.count { it in defenseDraft },
+                    all = whole,
+                    onAll = { defenseDraft = if (whole) defenseDraft - keys.toSet() else defenseDraft + keys }
+                ) {
+                    keys.sortedBy { defenseName(it, characterCatalog, strings) }.forEach { key ->
+                        OptionChip(defenseName(key, characterCatalog, strings), key in defenseDraft) { defenseDraft = defenseDraft.flipped(key) }
+                    }
+                }
+            }
+            if (kind == Defenses.IMMUNITY) {
+                OptionGroup(title = text("attributes_defense_conditions"), picked = conditionKeys.count { it in defenseDraft }) {
+                    conditionKeys.forEach { key ->
+                        OptionChip(defenseName(key, characterCatalog, strings), key in defenseDraft) { defenseDraft = defenseDraft.flipped(key) }
+                    }
+                }
+            }
+            if (extras.isNotEmpty()) {
+                OptionGroup(title = text("attributes_group_other"), picked = extras.count { it in defenseDraft }) {
+                    extras.forEach { key ->
+                        OptionChip(defenseName(key, characterCatalog, strings), key in defenseDraft) { defenseDraft = defenseDraft.flipped(key) }
                     }
                 }
             }
@@ -1096,168 +1027,96 @@ internal fun attributesSectionItems(
     }
 
     if (isMasteryDialogOpen) {
-        val russian = strings.language == AppLanguage.RUSSIAN
-        // Every weapon with a mastery property, and any mastered one the sheet has no option for.
-        val weaponIds = (simpleWeaponOptions + martialWeaponOptions).map { it.id }
-            .filter { characterCatalog?.masteryOf(it) != null || it in masteryDraft } +
-            masteryDraft.filter { id -> (simpleWeaponOptions + martialWeaponOptions).none { it.id == id } }
+        // The weapons with a mastery property, simple and martial, as on the weapons' pop-up; a mastered one
+        // the sheet has no option for goes under Other.
+        val saved = decodeProficiencyIds(character.weaponMasteries)
+        val known = (simpleWeaponOptions + martialWeaponOptions).map { it.id }.toSet()
+        val extras = (saved + masteryDraft).filter { it !in known }.sortedBy { weaponName(it, characterCatalog, strings) }
         EditDialog(
             title = text("attributes_proficiency_masteries"),
             onDismiss = { isMasteryDialogOpen = false },
             onConfirm = {
                 onUpdateWeaponMasteries(characterBundle, masteryDraft)
                 isMasteryDialogOpen = false
-            },
-            scrollable = false
+            }
         ) {
-            LazyColumn(
-                modifier = Modifier.height(420.dp),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                items(weaponIds) { id ->
-                    val property = characterCatalog?.masteryOf(id)?.name?.get(russian)
-                    ProficiencyCheckboxRow(
-                        label = weaponName(id, characterCatalog, strings) + (property?.let { " · $it" } ?: ""),
-                        checked = id in masteryDraft,
-                        onCheckedChange = { checked -> masteryDraft = masteryDraft.toggled(id, checked) }
-                    )
+            listOf("attributes_weapon_simple" to simpleWeaponOptions, "attributes_weapon_martial" to martialWeaponOptions).forEach { (titleKey, options) ->
+                val shown = options.filter { characterCatalog?.masteryOf(it.id) != null || it.id in saved }
+                OptionGroup(title = text(titleKey), picked = shown.count { it.id in masteryDraft }) {
+                    shown.forEach { option ->
+                        OptionChip(strings[option.labelKey], option.id in masteryDraft) { masteryDraft = masteryDraft.flipped(option.id) }
+                    }
+                }
+            }
+            if (extras.isNotEmpty()) {
+                OptionGroup(title = text("attributes_group_other"), picked = extras.count { it in masteryDraft }) {
+                    extras.forEach { id ->
+                        OptionChip(weaponName(id, characterCatalog, strings), id in masteryDraft) { masteryDraft = masteryDraft.flipped(id) }
+                    }
                 }
             }
         }
     }
 
-    if (isToolsDialogOpen && characterBundle != null) {
+    if (isToolsDialogOpen) {
         EditDialog(
             title = text("attributes_tools_dialog_title"),
             onDismiss = { isToolsDialogOpen = false },
             onConfirm = {
-                val customTools = customToolDrafts
-                    .map { it.trim() }
-                    .filter { it.isNotEmpty() }
-                    .map { CustomProficiencyPrefix + it }
-                    .toSet()
-                onUpdateToolProficiencies(characterBundle, toolDraft + customTools)
+                onUpdateToolProficiencies(characterBundle, toolDraft + customEntryIds(customToolDrafts + customToolInput))
                 isToolsDialogOpen = false
-            },
-            scrollable = false
+            }
         ) {
-            LazyColumn(
-                modifier = Modifier.height(420.dp),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                toolProficiencyCategories.forEach { category ->
-                    item {
-                        TextButton(
-                            onClick = {
-                                expandedToolCategories = expandedToolCategories.toggled(category.id, category.id !in expandedToolCategories)
-                            }
-                        ) {
-                            Text(strings[category.labelKey])
-                        }
-                    }
-                    if (category.id in expandedToolCategories) {
-                        category.options.forEach { option ->
-                            item {
-                                ProficiencyCheckboxRow(
-                                    label = strings[option.labelKey],
-                                    checked = option.id in toolDraft,
-                                    onCheckedChange = { checked ->
-                                        toolDraft = toolDraft.toggled(option.id, checked)
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
-                item {
-                    TextButton(
-                        onClick = { customToolDrafts = customToolDrafts + "" }
-                    ) {
-                        Text(text("attributes_add_custom_tool"))
-                    }
-                }
-                customToolDrafts.forEachIndexed { index, value ->
-                    item {
-                        OutlinedTextField(
-                            value = value,
-                            onValueChange = { nextValue ->
-                                customToolDrafts = customToolDrafts.toMutableList().also { it[index] = nextValue }
-                            },
-                            label = { Text(text("attributes_custom_tool")) },
-                            singleLine = true
-                        )
+            toolProficiencyCategories.forEach { category ->
+                OptionGroup(title = strings[category.labelKey], picked = category.options.count { it.id in toolDraft }) {
+                    category.options.forEach { option ->
+                        // An artisan's tools by the trade: «Кузнец», not «Инструменты кузнеца» (owner's choice, T2).
+                        val label = if (category.id == ArtisansToolsCategory) strings["proficiency_trade_${option.id}"] else strings[option.labelKey]
+                        OptionChip(label, option.id in toolDraft) { toolDraft = toolDraft.flipped(option.id) }
                     }
                 }
             }
+            CustomEntries(
+                entries = customToolDrafts,
+                onRemove = { name -> customToolDrafts = customToolDrafts - name },
+                input = customToolInput,
+                onInputChange = { customToolInput = it },
+                inputLabel = text("attributes_custom_tool"),
+                onAdd = {
+                    customToolDrafts = (customToolDrafts + customToolInput.trim()).filter { it.isNotEmpty() }.distinct()
+                    customToolInput = ""
+                }
+            )
         }
     }
 
-    if (isLanguagesDialogOpen && characterBundle != null) {
+    if (isLanguagesDialogOpen) {
         EditDialog(
             title = text("attributes_languages_dialog_title"),
             onDismiss = { isLanguagesDialogOpen = false },
             onConfirm = {
-                val customLanguages = customLanguageDrafts
-                    .map { it.trim() }
-                    .filter { it.isNotEmpty() }
-                    .map { CustomProficiencyPrefix + it }
-                    .toSet()
-                onUpdateLanguageProficiencies(characterBundle, languageDraft + customLanguages)
+                onUpdateLanguageProficiencies(characterBundle, languageDraft + customEntryIds(customLanguageDrafts + customLanguageInput))
                 isLanguagesDialogOpen = false
-            },
-            scrollable = false
+            }
         ) {
-            LazyColumn(
-                modifier = Modifier.height(420.dp),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                languageProficiencyCategories.forEach { category ->
-                    item {
-                        TextButton(
-                            onClick = {
-                                expandedLanguageCategories = expandedLanguageCategories.toggled(
-                                    category.id,
-                                    category.id !in expandedLanguageCategories
-                                )
-                            }
-                        ) {
-                            Text(strings[category.labelKey])
-                        }
-                    }
-                    if (category.id in expandedLanguageCategories) {
-                        category.options.forEach { option ->
-                            item {
-                                ProficiencyCheckboxRow(
-                                    label = strings[option.labelKey],
-                                    checked = option.id in languageDraft,
-                                    onCheckedChange = { checked ->
-                                        languageDraft = languageDraft.toggled(option.id, checked)
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
-                item {
-                    TextButton(
-                        onClick = { customLanguageDrafts = customLanguageDrafts + "" }
-                    ) {
-                        Text(text("attributes_add_custom_language"))
-                    }
-                }
-                customLanguageDrafts.forEachIndexed { index, value ->
-                    item {
-                        OutlinedTextField(
-                            value = value,
-                            onValueChange = { nextValue ->
-                                customLanguageDrafts = customLanguageDrafts.toMutableList().also { it[index] = nextValue }
-                            },
-                            label = { Text(text("attributes_custom_language")) },
-                            singleLine = true
-                        )
+            languageProficiencyCategories.forEach { category ->
+                OptionGroup(title = strings[category.labelKey], picked = category.options.count { it.id in languageDraft }) {
+                    category.options.forEach { option ->
+                        OptionChip(strings[option.labelKey], option.id in languageDraft) { languageDraft = languageDraft.flipped(option.id) }
                     }
                 }
             }
+            CustomEntries(
+                entries = customLanguageDrafts,
+                onRemove = { name -> customLanguageDrafts = customLanguageDrafts - name },
+                input = customLanguageInput,
+                onInputChange = { customLanguageInput = it },
+                inputLabel = text("attributes_custom_language"),
+                onAdd = {
+                    customLanguageDrafts = (customLanguageDrafts + customLanguageInput.trim()).filter { it.isNotEmpty() }.distinct()
+                    customLanguageInput = ""
+                }
+            )
         }
     }
     return items
@@ -1645,74 +1504,182 @@ private fun SkillLine(skill: SkillRow, effects: RollEffects?, modifier: Modifier
     }
 }
 
+/** A sheet row's icon and name; the value takes the rest. 22 + 8 + 110dp: 13 characters at 14sp (maxChars). */
+private val SheetLabelWidth = 140.dp
+
+/**
+ * A row of the sheet's panels (owner's choice from boards, 2026-10-05): the field's icon and name on the left,
+ * its values on the right, «None» quiet; a tap edits it. A line under it unless it is the panel's last.
+ */
 @Composable
-private fun ProficiencyInfoCard(
+private fun SheetRow(
     icon: ImageVector,
     label: String,
-    value: String,
-    modifier: Modifier = Modifier,
-    maxLines: Int = 2,
-    onClick: (() -> Unit)? = null
+    values: List<String>,
+    onClick: () -> Unit,
+    divider: Boolean = true
 ) {
     val colors = LocalDesignTokens.current.colors
-    Surface(
-        modifier = modifier
-            .heightIn(min = 92.dp)
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
-        shape = RoundedCornerShape(10.dp),
-        color = colors.surface.card.copy(alpha = 0.66f),
-        border = BorderStroke(1.dp, colors.border.miniCard)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .heightIn(min = 48.dp)
+            .padding(horizontal = 14.dp, vertical = 12.dp)
     ) {
+        // The name sits on the value's first line: their baselines meet.
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 92.dp)
-                .padding(horizontal = 18.dp, vertical = 12.dp),
+                .width(SheetLabelWidth)
+                .alignByBaseline(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = colors.text.label,
-                modifier = Modifier.size(34.dp)
+            Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(22.dp), tint = colors.text.label)
+            Text(
+                text = label,
+                modifier = Modifier.padding(start = 8.dp),
+                style = MaterialTheme.typography.bodyMedium,
+                color = colors.text.label,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
-            Column(modifier = Modifier.padding(start = 16.dp)) {
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = colors.text.label
-                )
-                Text(
-                    text = value,
-                    modifier = Modifier.padding(top = 4.dp),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = colors.text.primary,
-                    maxLines = maxLines,
-                    overflow = TextOverflow.Ellipsis
-                )
+        }
+        Text(
+            text = values.joinToString(", ").ifEmpty { LocalStrings.current["common_none"] },
+            modifier = Modifier
+                .weight(1f)
+                .alignByBaseline(),
+            style = MaterialTheme.typography.bodyLarge,
+            color = if (values.isEmpty()) colors.text.subtle else colors.text.primary
+        )
+    }
+    if (divider) {
+        Box(
+            modifier = Modifier
+                .padding(horizontal = 14.dp)
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(colors.border.muted)
+        )
+    }
+}
+
+/**
+ * A group of a pop-up's options (owner's choice from boards, 2026-10-05): its name with how many are picked,
+ * and an «All» for the whole group when [onAll] is given; under it the options as chips.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun OptionGroup(
+    title: String? = null,
+    picked: Int = 0,
+    all: Boolean = false,
+    onAll: (() -> Unit)? = null,
+    content: @Composable () -> Unit
+) {
+    val colors = LocalDesignTokens.current.colors
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        if (title != null) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = title,
+                        modifier = Modifier.weight(1f, fill = false),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = colors.text.primary
+                    )
+                    if (picked > 0) {
+                        Text(text = "  ·  $picked", style = MaterialTheme.typography.bodyMedium, color = colors.text.label)
+                    }
+                }
+                if (onAll != null) {
+                    ToggleChip(label = text("attributes_group_all"), selected = all, onClick = onAll, role = Role.Checkbox)
+                }
             }
+        }
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            content()
         }
     }
 }
 
+/** An option of a pop-up: a chip, gold while picked; several can be. */
 @Composable
-private fun ProficiencyCheckboxRow(
-    label: String,
-    checked: Boolean,
-    enabled: Boolean = true,
-    onCheckedChange: (Boolean) -> Unit
-) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Checkbox(
-            checked = checked,
-            enabled = enabled,
-            onCheckedChange = onCheckedChange
-        )
+private fun OptionChip(label: String, selected: Boolean, onToggle: () -> Unit) {
+    ToggleChip(label = label, selected = selected, onClick = onToggle, role = Role.Checkbox)
+}
+
+/** An entry the player typed: picked, with a cross; a tap takes it off. */
+@Composable
+private fun CustomEntryChip(label: String, onRemove: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .height(32.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(toggleFill(true))
+            .clickable(onClickLabel = text("common_delete"), onClick = onRemove)
+            .padding(start = 14.dp, end = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
-            color = if (enabled) Color.Unspecified else LocalDesignTokens.current.colors.text.primary.copy(alpha = 0.5f)
+            color = toggleContent(true),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
+        Icon(
+            imageVector = Icons.Outlined.Close,
+            contentDescription = text("common_delete"),
+            modifier = Modifier
+                .padding(start = 6.dp)
+                .size(16.dp),
+            tint = toggleContent(true)
+        )
+    }
+}
+
+/** A pop-up's own entries, under «Custom»: a chip each, then a field and a «+» to add one. */
+@Composable
+private fun CustomEntries(
+    entries: List<String>,
+    onRemove: (String) -> Unit,
+    input: String,
+    onInputChange: (String) -> Unit,
+    inputLabel: String,
+    onAdd: () -> Unit
+) {
+    OptionGroup(title = text("attributes_group_custom"), picked = entries.size) {
+        entries.forEach { name -> CustomEntryChip(name) { onRemove(name) } }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            OutlinedTextField(
+                value = input,
+                onValueChange = onInputChange,
+                modifier = Modifier.weight(1f),
+                label = { Text(inputLabel) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = { onAdd() })
+            )
+            StepButton(
+                icon = Icons.Outlined.Add,
+                contentDescription = text("common_add"),
+                onClick = onAdd,
+                enabled = input.isNotBlank()
+            )
+        }
     }
 }
 
@@ -1816,22 +1783,25 @@ private fun skillTrainingBonus(skill: Skill?, proficiencyBonus: Int): Int =
 
 private fun signed(value: Int): String = if (value >= 0) "+$value" else value.toString()
 
-private fun Set<String>.toggled(id: String, checked: Boolean): Set<String> =
-    if (checked) this + id else this - id
+/** The tools category whose chips carry the trade («Кузнец»): its options have "proficiency_trade_" keys. */
+private const val ArtisansToolsCategory = "artisans_tools"
 
-private fun formatSelectedProficiencies(
+private fun Set<String>.flipped(id: String): Set<String> = if (id in this) this - id else this + id
+
+/** A field's values for its row: the picked options, then the entries the sheet has no option for. */
+private fun selectedProficiencyLabels(
     selectedIds: Set<String>,
     options: List<ProficiencyOption>,
-    strings: com.dndcharacterhandler.data.localization.LocalizedStrings,
-    emptyText: String = strings["common_none"]
-): String {
-    val labels = options.filter { it.id in selectedIds }.map { strings[it.labelKey] } + customLabels(selectedIds)
-    return labels.takeIf { it.isNotEmpty() }?.joinToString(", ") ?: emptyText
-}
+    strings: com.dndcharacterhandler.data.localization.LocalizedStrings
+): List<String> = options.filter { it.id in selectedIds }.map { strings[it.labelKey] } + customLabels(selectedIds)
 
 /** Entries the sheet has no option for, by name ("custom:Пистолет"). */
 private fun customLabels(selectedIds: Set<String>): List<String> =
     selectedIds.filter { it.startsWith(CustomProficiencyPrefix) }.map { it.removePrefix(CustomProficiencyPrefix) }
+
+/** Typed entries as a field's ids ("custom:Пистолет"), blank ones dropped. */
+private fun customEntryIds(names: List<String>): Set<String> =
+    names.map { it.trim() }.filter { it.isNotEmpty() }.map { CustomProficiencyPrefix + it }.toSet()
 
 /** A weapon's name: the sheet's option, a custom entry's name, or Foundry's name for a weapon the sheet lacks. */
 private fun weaponName(id: String, catalog: CharacterCatalog?, strings: com.dndcharacterhandler.data.localization.LocalizedStrings): String {
@@ -1841,61 +1811,40 @@ private fun weaponName(id: String, catalog: CharacterCatalog?, strings: com.dndc
     return name?.get(strings.language == AppLanguage.RUSSIAN) ?: id
 }
 
-/** "Longsword — Sap", one weapon a line. */
-private fun formatWeaponMasteries(
+/** The weapons' row: a whole group by its short name («Простое»), else its weapons one by one. */
+private fun weaponProficiencyLabels(
     selectedIds: Set<String>,
+    strings: com.dndcharacterhandler.data.localization.LocalizedStrings
+): List<String> = buildList {
+    if (WeaponGroupSimpleId in selectedIds) {
+        add(strings["attributes_weapon_simple_short"])
+    } else {
+        addAll(simpleWeaponOptions.filter { it.id in selectedIds }.map { strings[it.labelKey] })
+    }
+    if (WeaponGroupMartialId in selectedIds) {
+        add(strings["attributes_weapon_martial_short"])
+    } else {
+        addAll(martialWeaponOptions.filter { it.id in selectedIds }.map { strings[it.labelKey] })
+    }
+    addAll(customLabels(selectedIds))
+}
+
+/**
+ * A kind's defenses for its row: the damage types group by group (physical, elemental, other), then any key
+ * the groups lack; the immunities end with the conditions.
+ */
+private fun defenseLabels(
+    defenses: Set<String>,
+    kind: String,
     catalog: CharacterCatalog?,
     strings: com.dndcharacterhandler.data.localization.LocalizedStrings
-): String {
-    val russian = strings.language == AppLanguage.RUSSIAN
-    val lines = selectedIds.sortedBy { weaponName(it, catalog, strings) }.map { id ->
-        weaponName(id, catalog, strings) + (catalog?.masteryOf(id)?.let { " — ${it.name.get(russian)}" } ?: "")
-    }
-    return lines.takeIf { it.isNotEmpty() }?.joinToString("\n") ?: strings["common_none"]
-}
-
-private fun formatWeaponProficiencies(
-    selectedIds: Set<String>,
-    strings: com.dndcharacterhandler.data.localization.LocalizedStrings
-): String {
-    val labels = buildList {
-        if (WeaponGroupSimpleId in selectedIds) {
-            add(strings["attributes_weapon_simple_short"])
-        } else {
-            addAll(simpleWeaponOptions.filter { it.id in selectedIds }.map { strings[it.labelKey] })
-        }
-        if (WeaponGroupMartialId in selectedIds) {
-            add(strings["attributes_weapon_martial_short"])
-        } else {
-            addAll(martialWeaponOptions.filter { it.id in selectedIds }.map { strings[it.labelKey] })
-        }
-        addAll(customLabels(selectedIds))
-    }
-    return labels.takeIf { it.isNotEmpty() }?.joinToString(", ") ?: strings["common_none"]
-}
-
-private fun formatToolProficiencies(
-    selectedIds: Set<String>,
-    strings: com.dndcharacterhandler.data.localization.LocalizedStrings
-): String {
-    val knownOptions = toolProficiencyCategories.flatMap { it.options }
-    val labels = buildList {
-        addAll(knownOptions.filter { it.id in selectedIds }.map { strings[it.labelKey] })
-        addAll(selectedIds.filter { it.startsWith(CustomProficiencyPrefix) }.map { it.removePrefix(CustomProficiencyPrefix) })
-    }
-    return labels.takeIf { it.isNotEmpty() }?.joinToString(", ") ?: strings["common_none"]
-}
-
-private fun formatLanguageProficiencies(
-    selectedIds: Set<String>,
-    strings: com.dndcharacterhandler.data.localization.LocalizedStrings
-): String {
-    val knownOptions = languageProficiencyCategories.flatMap { it.options }
-    val labels = buildList {
-        addAll(knownOptions.filter { it.id in selectedIds }.map { strings[it.labelKey] })
-        addAll(selectedIds.filter { it.startsWith(CustomProficiencyPrefix) }.map { it.removePrefix(CustomProficiencyPrefix) })
-    }
-    return labels.takeIf { it.isNotEmpty() }?.joinToString(", ") ?: strings["common_none"]
+): List<String> {
+    val grouped = Defenses.DamageGroups.map { (_, types) -> types.map { "$kind:$it" } }
+    val listed = grouped.flatten().toSet()
+    val keys = grouped.flatMap { keys -> keys.filter { it in defenses }.sortedBy { defenseName(it, catalog, strings) } } +
+        Defenses.ofKind(defenses, kind).filter { it !in listed } +
+        (if (kind == Defenses.IMMUNITY) Defenses.ofKind(defenses, Defenses.CONDITION_IMMUNITY) else emptyList())
+    return keys.map { defenseName(it, catalog, strings) }
 }
 
 internal fun previewFallbackCharacter(): Character =

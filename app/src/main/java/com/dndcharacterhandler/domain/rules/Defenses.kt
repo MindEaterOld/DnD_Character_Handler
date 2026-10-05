@@ -22,6 +22,16 @@ object Defenses {
         "piercing", "poison", "psychic", "radiant", "slashing", "thunder"
     )
 
+    /**
+     * The damage types in the sheet's groups, by key: "physical" (a weapon's: bludgeoning, piercing,
+     * slashing), "elemental" and "other". A Barbarian's Rage resists the whole physical group.
+     */
+    val DamageGroups = listOf(
+        "physical" to listOf("bludgeoning", "piercing", "slashing"),
+        "elemental" to listOf("acid", "cold", "fire", "lightning", "thunder"),
+        "other" to listOf("force", "necrotic", "poison", "psychic", "radiant")
+    )
+
     fun isDefense(key: String): Boolean = key.substringBefore(':') in Kinds
 
     fun ofKind(defenses: Set<String>, kind: String): List<String> = defenses.filter { it.startsWith("$kind:") }.sorted()

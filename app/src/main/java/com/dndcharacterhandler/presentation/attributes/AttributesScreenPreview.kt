@@ -34,6 +34,12 @@ fun AttributesScreenPreview() {
             "attributes_proficiency_tools" to "Tools",
             "attributes_proficiency_languages" to "Languages",
             "attributes_proficiency_masteries" to "Weapon Mastery",
+            "attributes_proficiency_masteries_short" to "Mastery",
+            "attributes_defenses" to "Defenses & Weaknesses",
+            "attributes_defense_resistances_short" to "Resistant",
+            "attributes_defense_immunities_short" to "Immune",
+            "attributes_defense_vulnerabilities_short" to "Vulnerable",
+            "condition_poisoned" to "Poisoned",
             "attributes_weapon_simple_short" to "Simple",
             "attributes_weapon_martial_short" to "Martial",
             "common_none" to "None",
@@ -97,12 +103,13 @@ fun AttributesScreenPreview() {
             // The section as the overview lists it, below its own cards.
             val items = attributesSectionItems(
                 characterBundle = CharacterBundle(
-                    // A Fighter's proficiencies as the sheet stores them, with three weapon masteries.
+                    // A Fighter's proficiencies as the sheet stores them, with three weapon masteries and a dwarf's defenses.
                     character = previewFallbackCharacter().copy(
                         armorProficiencies = "heavy_armor|light_armor|medium_armor|shields",
                         weaponProficiencies = "martial_weapons|simple_weapons",
                         languageProficiencies = "common|custom:Chondathan|elvish",
-                        weaponMasteries = "battleaxe|greatsword|longsword"
+                        weaponMasteries = "battleaxe|greatsword|longsword",
+                        defenses = "ci:poisoned|di:poison|dr:fire|dr:slashing"
                     ),
                     skills = listOf(
                         Skill(name = "skill_arcana", isProficient = true),
