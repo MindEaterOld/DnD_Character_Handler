@@ -31,8 +31,7 @@ import com.dndcharacterhandler.domain.rules.RollEffects
 import com.dndcharacterhandler.domain.rules.D20Test
 import androidx.compose.foundation.layout.widthIn
 import com.dndcharacterhandler.presentation.components.StatStrip
-import com.dndcharacterhandler.presentation.components.StatStripCell
-import com.dndcharacterhandler.presentation.components.StatStripDivider
+import com.dndcharacterhandler.presentation.components.StatStripItem
 import com.dndcharacterhandler.presentation.components.BorderLabelCard
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -493,23 +492,17 @@ internal fun attributesSectionItems(
         item {
             // The proficiency bonus and the senses: looked up now and then, so a slim strip under the
             // fight's three (owner's choice from boards, 2026-10-05).
-            StatStrip {
-                StatStripCell(text("stat_card_proficiency"), signed(proficiencyBonus), Icons.Outlined.AutoAwesome)
-                StatStripDivider()
-                StatStripCell(
-                    label = text("stat_card_passive_perception"),
-                    value = passivePerception.toString(),
-                    icon = Icons.Outlined.Visibility,
-                    onClick = { isPassiveDialogOpen = true }
+            StatStrip(
+                listOf(
+                    StatStripItem(text("stat_card_proficiency"), signed(proficiencyBonus), Icons.Outlined.AutoAwesome),
+                    StatStripItem(text("stat_card_passive_perception"), passivePerception.toString(), Icons.Outlined.Visibility) {
+                        isPassiveDialogOpen = true
+                    },
+                    StatStripItem(text("stat_card_darkvision"), darkvisionValue, Icons.Outlined.DarkMode) {
+                        isDarkvisionDialogOpen = true
+                    }
                 )
-                StatStripDivider()
-                StatStripCell(
-                    label = text("stat_card_darkvision"),
-                    value = darkvisionValue,
-                    icon = Icons.Outlined.DarkMode,
-                    onClick = { isDarkvisionDialogOpen = true }
-                )
-            }
+            )
         }
 
         item {
