@@ -2759,7 +2759,7 @@
     "es": "Apariencia"
   },
   "size_label": {
-    "maxChars": 17,
+    "maxChars": 13,
     "en": "Size",
     "ru": "\u0420\u0430\u0437\u043c\u0435\u0440",
     "de": "Gr\u00f6\u00dfe",
@@ -2976,7 +2976,7 @@
     "es": "Tierra natal"
   },
   "biography_age": {
-    "maxChars": 17,
+    "maxChars": 13,
     "en": "Age",
     "ru": "Возраст",
     "de": "Alter",
@@ -2984,7 +2984,7 @@
     "es": "Edad"
   },
   "biography_gender": {
-    "maxChars": 17,
+    "maxChars": 13,
     "en": "Gender",
     "ru": "Пол",
     "de": "Geschlecht",
@@ -3027,7 +3027,7 @@
     "es": "kg"
   },
   "biography_height": {
-    "maxChars": 17,
+    "maxChars": 13,
     "en": "Height",
     "ru": "Рост",
     "de": "Größe",
@@ -3035,7 +3035,7 @@
     "es": "Altura"
   },
   "biography_weight": {
-    "maxChars": 17,
+    "maxChars": 13,
     "en": "Weight",
     "ru": "Вес",
     "de": "Gewicht",
@@ -3043,7 +3043,7 @@
     "es": "Peso"
   },
   "biography_eyes": {
-    "maxChars": 17,
+    "maxChars": 13,
     "en": "Eyes",
     "ru": "Глаза",
     "de": "Augen",
@@ -3051,7 +3051,7 @@
     "es": "Ojos"
   },
   "biography_hair": {
-    "maxChars": 17,
+    "maxChars": 13,
     "en": "Hair",
     "ru": "Волосы",
     "de": "Haare",
@@ -3059,7 +3059,7 @@
     "es": "Pelo"
   },
   "biography_skin": {
-    "maxChars": 17,
+    "maxChars": 13,
     "en": "Skin",
     "ru": "Кожа",
     "de": "Haut",

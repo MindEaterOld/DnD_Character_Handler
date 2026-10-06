@@ -8,11 +8,9 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
@@ -46,8 +45,10 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -68,6 +69,7 @@ import com.dndcharacterhandler.presentation.SelectedCharacterHolder
 import com.dndcharacterhandler.presentation.components.CharacterScreenHeader
 import com.dndcharacterhandler.presentation.components.EditDialog
 import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
+import com.dndcharacterhandler.presentation.components.OutlinedPanel
 import com.dndcharacterhandler.presentation.components.ScreenBackground
 import com.dndcharacterhandler.presentation.components.ScreenTopActions
 import com.dndcharacterhandler.presentation.components.SizeToggle
@@ -313,52 +315,30 @@ internal fun BiographyContent(
 }
 
 /**
- * The rows two to a line (owner's choice from boards, 2026-10-06: G2): the lines parted by a line, the
- * two halves by a shorter one.
+ * The appearance two to a line, no rules: the space parts them (owner's choice from boards, 2026-10-06: S4).
+ * A tap on a cell opens its editor.
  */
 @Composable
 private fun BiographyGrid(rows: List<BiographyRow>) {
-    val colors = LocalDesignTokens.current.colors
-    val lines = rows.chunked(2)
-    Column(modifier = Modifier.padding(horizontal = 12.dp)) {
-        lines.forEachIndexed { index, line ->
-            Row(modifier = Modifier.height(IntrinsicSize.Min)) {
-                BiographyGridCell(line[0], Modifier.weight(1f), PaddingValues(end = 12.dp))
-                Box(
-                    modifier = Modifier
-                        .width(1.dp)
-                        .fillMaxHeight()
-                        .padding(vertical = 8.dp)
-                        .background(colors.border.muted)
-                )
-                if (line.size > 1) {
-                    BiographyGridCell(line[1], Modifier.weight(1f), PaddingValues(start = 12.dp))
-                } else {
-                    Spacer(modifier = Modifier.weight(1f))
-                }
-            }
-            if (index != lines.lastIndex) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(1.dp)
-                        .background(colors.border.muted)
-                )
+    Column(modifier = Modifier.padding(bottom = 4.dp)) {
+        rows.chunked(2).forEach { line ->
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                line.forEach { row -> BiographyGridCell(row, Modifier.weight(1f)) }
+                if (line.size == 1) Spacer(modifier = Modifier.weight(1f))
             }
         }
     }
 }
 
-/** A half of the grid's line: the icon, and the label small over the value. */
+/** A cell of the grid: the icon, and the label over the value; an empty value is a quiet dash. */
 @Composable
-private fun BiographyGridCell(row: BiographyRow, modifier: Modifier, padding: PaddingValues) {
+private fun BiographyGridCell(row: BiographyRow, modifier: Modifier) {
     val colors = LocalDesignTokens.current.colors
     Row(
         modifier = modifier
-            .fillMaxHeight()
+            .clip(RoundedCornerShape(8.dp))
             .clickable(onClick = row.onClick)
-            .padding(padding)
-            .padding(vertical = 8.dp),
+            .padding(vertical = 7.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
@@ -367,24 +347,82 @@ private fun BiographyGridCell(row: BiographyRow, modifier: Modifier, padding: Pa
             modifier = Modifier.size(BiographyIconSize),
             tint = colors.text.label
         )
-        Column(modifier = Modifier.padding(start = 10.dp)) {
-            Text(
-                text = row.label,
-                style = MaterialTheme.typography.labelMedium,
-                color = colors.text.label,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+        Column(modifier = Modifier.padding(start = PersonaIconGap)) {
+            BiographyLabel(row.label)
             Text(
                 text = row.value.ifBlank { text("common_dash") },
                 style = MaterialTheme.typography.bodyLarge,
-                color = colors.text.primary,
+                color = if (row.value.isBlank()) colors.text.subtle else colors.text.primary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
         }
     }
 }
+
+/** A field's label: gold capitals, spaced out, as a printed character sheet's (owner's choice from boards, 2026-10-06: S2). */
+@Composable
+private fun BiographyLabel(label: String, modifier: Modifier = Modifier) {
+    Text(
+        text = label.uppercase(),
+        modifier = modifier,
+        style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 1.sp),
+        color = MaterialTheme.colorScheme.primary,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis
+    )
+}
+
+/** A rule with a small diamond in its middle, the ornament of the section titles' lines. */
+@Composable
+private fun BiographyOrnament() {
+    val colors = LocalDesignTokens.current.colors
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(modifier = Modifier.weight(1f).height(1.dp).background(colors.ornament.stroke))
+        Canvas(modifier = Modifier.padding(horizontal = 8.dp).size(9.dp)) {
+            val diamond = Path().apply {
+                moveTo(size.width / 2, 0f)
+                lineTo(size.width, size.height / 2)
+                lineTo(size.width / 2, size.height)
+                lineTo(0f, size.height / 2)
+                close()
+            }
+            drawPath(diamond, colors.ornament.middle)
+        }
+        Box(modifier = Modifier.weight(1f).height(1.dp).background(colors.ornament.stroke))
+    }
+}
+
+/** The alignment's seal on the frame's top edge: its icon in its colour inside a ring; a tap opens the cards. */
+@Composable
+private fun AlignmentSeal(alignment: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val colors = LocalDesignTokens.current.colors
+    Box(
+        modifier = modifier
+            .size(SealSize)
+            .clip(CircleShape)
+            .background(colors.surface.card)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Canvas(modifier = Modifier.size(SealSize)) {
+            drawCircle(
+                color = colors.border.miniCard,
+                radius = size.minDimension / 2 - 0.5.dp.toPx(),
+                style = Stroke(width = 1.dp.toPx())
+            )
+        }
+        AlignmentIcon(alignment, Icons.Outlined.Shield, Modifier.size(SealIconSize))
+    }
+}
+
+private val SealSize = 56.dp
+private val SealIconSize = 30.dp
 
 @Composable
 private fun BiographySectionTitle(title: String) {
@@ -420,10 +458,11 @@ private fun BiographySectionTitle(title: String) {
 }
 
 /**
- * Who the character is (owner's choice from boards, 2026-10-06: P3 in one frame): the alignment, then the ideals,
- * bonds and flaws, as the character sheet has them. The alignment opens its cards; the three are written right on
- * the sheet, each its label over it and a quiet hint while empty, and saved when the field is left, as the history.
- * Under a line, in the same frame, the [appearance] two to a line (M1b: one block saves a title and a gap).
+ * Who the character is (owner's choices from boards, 2026-10-06): the alignment, then the ideals, bonds and flaws,
+ * as the character sheet has them (P3), and the appearance two to a line, all in one frame (M1b). Drawn as S4 with
+ * S2's labels: the alignment is a seal on the frame's top edge with its name centred under it, ornaments part the
+ * three parts, the labels are gold capitals. The alignment opens its cards; the three texts are written right on
+ * the sheet with a quiet hint while empty and saved when the field is left, as the history; a cell opens its editor.
  * The sheet no longer shows the background, faith, homeland and traits; their text stays in the character.
  */
 @Composable
@@ -445,36 +484,39 @@ private fun BiographyPersonaSection(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         BiographySectionTitle(text("biography_identity"))
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(10.dp),
-            color = colors.surface.card.copy(alpha = 0.62f),
-            border = BorderStroke(1.dp, colors.border.muted)
-        ) {
-            Column {
-                Column(modifier = Modifier.padding(horizontal = 12.dp)) {
-                    PersonaEntry(
-                        icon = { iconModifier -> AlignmentIcon(character.alignment, Icons.Outlined.Shield, iconModifier) },
-                        label = text("biography_alignment"),
-                        modifier = Modifier.clickable(onClick = onEditAlignment)
+        Box(modifier = Modifier.fillMaxWidth()) {
+            OutlinedPanel(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = SealSize / 2)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(horizontal = 14.dp)
+                        .padding(top = SealSize / 2 + 4.dp, bottom = 6.dp)
+                ) {
+                    // The alignment's name under its seal; none picked: a quiet hint to tap.
+                    val none = character.alignment.isBlank()
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(10.dp))
+                            .clickable(onClick = onEditAlignment)
+                            .padding(vertical = 4.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        // None picked: a quiet hint to tap, as the texts' hints.
-                        val none = character.alignment.isBlank()
+                        BiographyLabel(text("biography_alignment"))
                         Text(
                             text = if (none) text("biography_alignment_hint") else localizedAlignment(character.alignment),
-                            style = MaterialTheme.typography.bodyLarge,
+                            style = if (none) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.titleMedium,
                             color = if (none) colors.text.subtle else colors.text.primary,
-                            maxLines = if (none) 1 else Int.MAX_VALUE,
+                            textAlign = TextAlign.Center,
+                            maxLines = if (none) 1 else 2,
                             overflow = TextOverflow.Ellipsis
                         )
                     }
+                    BiographyOrnament()
                     texts.forEach { entry ->
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(1.dp)
-                                .background(colors.border.muted)
-                        )
                         // A tap on the label puts the cursor in its text, as a tap on the text does.
                         val focus = remember { FocusRequester() }
                         PersonaEntry(
@@ -499,15 +541,15 @@ private fun BiographyPersonaSection(
                             )
                         }
                     }
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(1.dp)
-                            .background(colors.border.muted)
-                    )
+                    BiographyOrnament()
+                    BiographyGrid(appearance)
                 }
-                BiographyGrid(appearance)
             }
+            AlignmentSeal(
+                alignment = character.alignment,
+                onClick = onEditAlignment,
+                modifier = Modifier.align(Alignment.TopCenter)
+            )
         }
     }
 }
@@ -531,9 +573,9 @@ private class PersonaText(
 // of the label and the first line under it, 16 + 24.
 private val BiographyIconSize = 24.dp
 private val PersonaIconTop = 8.dp
-private val PersonaIconGap = 10.dp
+private val PersonaIconGap = 12.dp
 
-/** An entry of the persona: its icon beside the label small over the content, as tall as their first two lines. */
+/** An entry of the persona: its icon beside the label over the content, at the middle of their first two lines. */
 @Composable
 private fun PersonaEntry(
     icon: @Composable (Modifier) -> Unit,
@@ -544,7 +586,7 @@ private fun PersonaEntry(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 10.dp)
+            .padding(vertical = 8.dp)
     ) {
         icon(
             Modifier
@@ -552,11 +594,7 @@ private fun PersonaEntry(
                 .size(BiographyIconSize)
         )
         Column(modifier = Modifier.padding(start = PersonaIconGap)) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium,
-                color = LocalDesignTokens.current.colors.text.label
-            )
+            BiographyLabel(label)
             content()
         }
     }
