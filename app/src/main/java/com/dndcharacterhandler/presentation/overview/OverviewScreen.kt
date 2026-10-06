@@ -2423,8 +2423,8 @@ private fun XpMedallionBar(
                 text = text("levelup_badge"),
                 modifier = Modifier
                     .align(Alignment.CenterStart)
-                    // Clear of the octagon's slanted edge.
-                    .padding(start = XpMedallionSize + 16.dp)
+                    // Right after the octagon: over the bar its edge slants away, which leaves the gap.
+                    .padding(start = XpMedallionSize)
                     .overXpBar()
                     .clickable(onClick = onLevelUp),
                 style = MaterialTheme.typography.labelMedium,
