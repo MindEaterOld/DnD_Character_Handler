@@ -47,7 +47,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -78,28 +77,19 @@ import com.dndcharacterhandler.domain.rules.gainTemporaryHitPoints
 import com.dndcharacterhandler.domain.rules.heal
 import com.dndcharacterhandler.presentation.components.StepButton
 import androidx.compose.material.icons.Icons
-import androidx.compose.foundation.shape.GenericShape
 import com.dndcharacterhandler.presentation.components.toggleContent
 import com.dndcharacterhandler.presentation.components.toggleFill
 import com.dndcharacterhandler.presentation.components.toggleRadioColors
 import kotlin.math.cos
-import kotlin.math.sin
 import androidx.compose.material.icons.outlined.HeartBroken
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.HealthAndSafety
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.dndcharacterhandler.presentation.components.ScreenTopActionButton
 import com.dndcharacterhandler.presentation.components.InspirationCandle
 import androidx.compose.material.icons.automirrored.outlined.DirectionsRun
-import androidx.compose.material.icons.outlined.AutoAwesome
-import androidx.compose.material.icons.outlined.Bedtime
 import androidx.compose.material.icons.outlined.Image
-import androidx.compose.material.icons.outlined.LocalCafe
 import androidx.compose.material.icons.outlined.Visibility
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -110,13 +100,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -616,6 +606,18 @@ private data class OverviewStat(
 )
 
 /**
+ * The conditions and the rests stand at the portrait's sides from where its sides run straight (owner's choice from
+ * boards, 2026-10-07: B3): the frame is drawn 47dp above its place, its straight sides start at 36.6 % of its height.
+ */
+private val PortraitSidesTop = GothicPortraitHeight * 0.366f - 47.dp
+
+/**
+ * ...6dp off the frame's outer line (12.8 % in from its artwork's edge in both themes), so they never line up with
+ * the header's menu and dice: the columns' middles, from the portrait's.
+ */
+private val PortraitSideColumnX = GothicPortraitWidth * (0.5f - 0.128f) + 6.dp + PortraitSideButtonSize / 2
+
+/**
  * The room the big name and the race · class line under the portrait took, closed since they left it: the name
  * for the pinned header, the race and the class for the Features screen (owner's choices, 2026-10-06).
  */
@@ -670,7 +672,6 @@ fun OverviewScreen(
     onOpenLevelUp: (targetLevel: Int) -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    val catalog by viewModel.catalog.collectAsStateWithLifecycle()
     // Only re-sync AC when an input that actually affects it changes (keys compare structurally),
     // not on every HP/XP/name edit — or when another character is selected.
     LaunchedEffect(
@@ -686,7 +687,6 @@ fun OverviewScreen(
         OverviewContent(
             characterBundle = state.character,
             moreItems = attributesItems,
-            catalog = catalog,
             onOpenLevelUp = onOpenLevelUp,
             onOpenDrawer = onOpenDrawer,
             onOpenDice = onOpenDice,
@@ -746,7 +746,6 @@ fun OverviewLevelUpOverlay(viewModel: OverviewViewModel, targetLevel: Int, onClo
 @Composable
 private fun OverviewContent(
     characterBundle: CharacterBundle?,
-    catalog: CharacterCatalog? = null,
     onOpenLevelUp: (Int) -> Unit = {},
     onOpenDrawer: () -> Unit,
     onOpenDice: () -> Unit,
@@ -932,7 +931,8 @@ private fun OverviewContent(
                                     }
                                 }
                             )
-                            // The conditions down the left, as the rests go down the right.
+                            // The conditions down the left, as the rests go down the right: from where the frame's
+                            // sides run straight, a little off them (owner's choice from boards, 2026-10-07: B3).
                             if (character != null) {
                                 ConditionsColumn(
                                     // Unconscious at 0 hit points too: it explains the arrows.
@@ -942,36 +942,30 @@ private fun OverviewContent(
                                     onOpenPicker = { isConditionsDialogOpen = true },
                                     onOpenConcentration = { isEndConcentrationOpen = true },
                                     modifier = Modifier
-                                        .align(Alignment.TopStart)
-                                        .offset(y = (-2).dp)
+                                        .align(Alignment.TopCenter)
+                                        .offset(x = -PortraitSideColumnX, y = PortraitSidesTop)
                                 )
                             }
-                            // The rests: bare icons in a column under the dice button, like the top bar's own.
+                            // The rests: the same buttons, the short rest level with the conditions' button.
                             Column(
                                 modifier = Modifier
-                                    .align(Alignment.TopEnd)
-                                    .offset(y = (-2).dp),
+                                    .align(Alignment.TopCenter)
+                                    .offset(x = PortraitSideColumnX, y = PortraitSidesTop),
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                ScreenTopActionButton(onClick = {
-                                    hitDiceSpendCount = 0
-                                    isShortRestDialogOpen = true
-                                }) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.LocalCafe,
-                                        contentDescription = text("overview_short_rest"),
-                                        tint = colors.text.icon,
-                                        modifier = Modifier.size(28.dp)
-                                    )
-                                }
-                                ScreenTopActionButton(onClick = { isLongRestDialogOpen = true }) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.Bedtime,
-                                        contentDescription = text("overview_long_rest"),
-                                        tint = colors.text.icon,
-                                        modifier = Modifier.size(28.dp)
-                                    )
-                                }
+                                PortraitSideButton(
+                                    icon = SideIconShortRest,
+                                    contentDescription = text("overview_short_rest"),
+                                    onClick = {
+                                        hitDiceSpendCount = 0
+                                        isShortRestDialogOpen = true
+                                    }
+                                )
+                                PortraitSideButton(
+                                    icon = SideIconLongRest,
+                                    contentDescription = text("overview_long_rest"),
+                                    onClick = { isLongRestDialogOpen = true }
+                                )
                             }
                             // Inspiration: the theme's candle rests on the portrait's lower-right bevel.
                             Box(

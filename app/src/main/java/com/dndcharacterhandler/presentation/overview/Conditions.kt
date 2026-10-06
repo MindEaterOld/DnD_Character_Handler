@@ -27,9 +27,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -58,19 +58,18 @@ import com.dndcharacterhandler.presentation.components.nameKey
 import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
-import com.dndcharacterhandler.presentation.theme.FrameStyle
-import com.dndcharacterhandler.presentation.theme.LocalThemeLook
 
-/** How many marks the column holds before the rest fold into "+N": with "+" under them, the portrait's height. */
+/** How many marks the column holds before the rest fold into "+N": under the button, down the frame's straight side. */
 private const val ColumnMarks = 3
 
-private val MarkSize = 44.dp
+private val MarkSize = PortraitSideButtonSize
 
 /**
  * The character's conditions down the left of the portrait, as the rests go down the right (owner's
- * choice, 2026-10-03): an outlined mark each, as stats are; exhaustion as its level in orange;
- * concentration in gold; then a filled "+" that opens the picker. A condition's mark opens the
- * picker too; concentration's offers to end it.
+ * choices, 2026-10-03 and 2026-10-07): first the conditions' button, a figure in an aura with a small "+"
+ * ([PortraitSideButton]), level with the short rest; under it an outlined mark each, as stats are; exhaustion
+ * as its level in orange; concentration in gold. The button and a condition's mark open the picker;
+ * concentration's offers to end it.
  */
 @Composable
 internal fun ConditionsColumn(
@@ -83,7 +82,6 @@ internal fun ConditionsColumn(
 ) {
     val strings = LocalStrings.current
     val colors = LocalDesignTokens.current.colors
-    val etched = LocalThemeLook.current.frames == FrameStyle.ETCHED
     // Exhaustion's level and concentration first: they matter most and stay in sight.
     val marks = buildList<@Composable () -> Unit> {
         if (exhaustion > 0) {
@@ -126,18 +124,14 @@ internal fun ConditionsColumn(
         },
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        PortraitSideButton(
+            icon = SideIconConditions,
+            contentDescription = text("conditions_add"),
+            onClick = onOpenPicker,
+            add = true,
+            iconSize = 26.dp
+        )
         shown.forEach { it() }
-        Box(
-            modifier = Modifier
-                .size(MarkSize)
-                .clip(CircleShape)
-                .background(if (etched) colors.surface.card.copy(alpha = 0.85f) else colors.surface.button)
-                .then(if (etched) Modifier.border(1.dp, colors.accent.inspiration, CircleShape) else Modifier)
-                .clickable(onClick = onOpenPicker),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(Icons.Outlined.Add, contentDescription = text("conditions_add"), tint = colors.text.primary, modifier = Modifier.size(22.dp))
-        }
     }
 }
 

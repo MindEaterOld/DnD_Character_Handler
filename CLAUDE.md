@@ -42,7 +42,7 @@ What can be pressed as an action and what shows a value must look different at a
 - So: **fill = button, outline without a fill = stat.** Never give a stat a button's fill, and never make a button outline-only (an outlined `Surface` or `OutlinedButton` as an action).
 - Only **significant, often pressed** actions are buttons with a fill (Save, Inspiration, the floating buttons, steppers; the HP actions are outlined in their colour instead, see below). Minor actions stay plain text buttons (`TextButton`) — Cancel, a link in a list, "Edit" at the bottom of an unfolded card. That is the one exception.
 - A **toggle** (one option of a row to pick from, or an on/off button like Inspiration) is a button too: the picked option differs from the others by its fill's colour or transparency, not only by its outline.
-- **The top bar's icons are the one exception**: the menu, the dice and (on the overview) the rests in a column under the dice are bare icons with no fill (`ScreenTopActionButton`) — the owner's choice, 2026-10-03.
+- **The top bar's icons are the one exception**: the menu and the dice are bare icons with no fill (`ScreenTopActionButton`) — the owner's choice, 2026-10-03.
 - **Button palette** (approved 2026-10-03; fills and their text/icon colours by role):
   - **standard button**: `surface.button` #3B3840 (1.58:1 against the cards), text and icon `text.primary`;
   - main action (Save) and a toggle that is on: `materialTheme.primary` #C6A36C, text and icon `onPrimary`;
@@ -60,7 +60,7 @@ What can be pressed as an action and what shows a value must look different at a
 
 ## Conditions — how the sheet shows them (owner's choices, 2026-10-03)
 
-- **On the overview** the conditions go down the left of the portrait, as the rests go down the right: an outlined mark each (they are stats), exhaustion as its level in `accent.damageFire`, concentration's mark in `primary` gold, then a filled "+" that opens the picker. Three marks at most, the rest fold into "+N".
+- **On the overview** the conditions go down the left of the portrait, as the rests go down the right, both from where the frame's sides run straight, 6dp off its outer line (owner's choice from boards, 2026-10-07: B3). The side buttons are of one kind (`PortraitSideButton`, K1): a filled circle, the theme's way, its icon in `text.primary` — the conditions' (a figure in an aura with a small grey "+" on its corner, P3) level with the short rest's (a cup), the long rest's (a moon asleep) under it. Under the conditions' button an outlined mark each (they are stats), exhaustion as its level in `accent.damageFire`, concentration's mark in `primary` gold. Three marks at most, the rest fold into "+N".
 - **A value the conditions change** (a check, a save, a skill, initiative, an attack bonus, speed, AC against attacks) shows the value as it is now, and two things that combine (owner's choice, 2026-10-04):
   - **how the d20 is rolled** — `RollMarker` beside the value: two arrows down in `accent.dangerHpZero` for disadvantage, two up in `accent.heal` for advantage, a red cross for an outright fail (no roll);
   - **how far the value moved** — its colour, `changedValueColor`: `accent.dangerHpZero` when lower (exhaustion's −2), `accent.heal` when higher. Speed has only the colour; AC only the arrows (how attacks against the character are rolled).
