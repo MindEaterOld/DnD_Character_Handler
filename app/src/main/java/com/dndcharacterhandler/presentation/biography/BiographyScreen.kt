@@ -341,11 +341,12 @@ private fun BiographyGridCell(row: BiographyRow, modifier: Modifier) {
             .padding(vertical = 7.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // Gold, as the labels (owner's choice, 2026-10-06); only the alignment keeps its own colour.
         Icon(
             imageVector = row.icon,
             contentDescription = null,
             modifier = Modifier.size(BiographyIconSize),
-            tint = colors.text.label
+            tint = MaterialTheme.colorScheme.primary
         )
         Column(modifier = Modifier.padding(start = PersonaIconGap)) {
             BiographyLabel(row.label)
@@ -521,7 +522,7 @@ private fun BiographyPersonaSection(
                         val focus = remember { FocusRequester() }
                         PersonaEntry(
                             icon = { iconModifier ->
-                                Icon(entry.icon, contentDescription = null, tint = colors.text.label, modifier = iconModifier)
+                                Icon(entry.icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = iconModifier)
                             },
                             label = entry.label,
                             modifier = Modifier.clickable(
