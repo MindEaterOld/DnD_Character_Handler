@@ -3066,26 +3066,37 @@
     "fr": "Peau",
     "es": "Piel"
   },
+  "biography_alignment_hint": {
+    "maxChars": 33,
+    "en": "Tap to choose an alignment",
+    "ru": "Нажмите и выберите мировоззрение",
+    "de": "Tippen und Gesinnung wählen",
+    "fr": "Touchez pour choisir l’alignement",
+    "es": "Toca para elegir el alineamiento"
+  },
   "biography_ideals_hint": {
-    "en": "What your character believes in and strives for",
-    "ru": "Во что персонаж верит, к чему стремится",
-    "de": "Woran der Charakter glaubt, wonach er strebt",
-    "fr": "Ce en quoi le personnage croit, ce qu’il poursuit",
-    "es": "En qué cree el personaje y qué persigue"
+    "maxChars": 33,
+    "en": "Beliefs and what they strive for",
+    "ru": "Во что верит, к чему стремится",
+    "de": "Woran er glaubt, wonach er strebt",
+    "fr": "Ses convictions et ses buts",
+    "es": "En qué cree y qué persigue"
   },
   "biography_bonds_hint": {
+    "maxChars": 33,
     "en": "Who and what matter to them most",
     "ru": "Кто и что ему дороже всего",
-    "de": "Wer und was ihm am meisten bedeutet",
-    "fr": "Ce qui et ceux qui comptent le plus pour lui",
+    "de": "Wer und was ihm teuer ist",
+    "fr": "Ce qui compte le plus pour lui",
     "es": "Quién y qué le importa más"
   },
   "biography_flaws_hint": {
+    "maxChars": 33,
     "en": "A vice, a fear or a weak spot",
     "ru": "Порок, страх или слабое место",
-    "de": "Ein Laster, eine Angst oder eine Schwäche",
-    "fr": "Un vice, une peur ou un point faible",
-    "es": "Un vicio, un miedo o un punto débil"
+    "de": "Laster, Angst oder Schwäche",
+    "fr": "Vice, peur ou point faible",
+    "es": "Vicio, miedo o punto débil"
   },
   "biography_personality_traits": {
     "en": "Personality Traits",

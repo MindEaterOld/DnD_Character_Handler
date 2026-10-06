@@ -489,10 +489,14 @@ private fun BiographyPersonaSection(
                     label = text("biography_alignment"),
                     modifier = Modifier.clickable(onClick = onEditAlignment)
                 ) {
+                    // None picked: a quiet hint to tap, as the texts' hints.
+                    val none = character.alignment.isBlank()
                     Text(
-                        text = localizedAlignment(character.alignment),
+                        text = if (none) text("biography_alignment_hint") else localizedAlignment(character.alignment),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = colors.text.primary
+                        color = if (none) colors.text.subtle else colors.text.primary,
+                        maxLines = if (none) 1 else Int.MAX_VALUE,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
                 texts.forEach { entry ->
@@ -607,7 +611,8 @@ private fun BiographyInlineText(
         decorationBox = { field ->
             Box {
                 if (draft.isEmpty()) {
-                    Text(text = hint, style = style, color = colors.text.subtle)
+                    // One line in every language (their maxChars); cut, never wrapped, if a font runs wide.
+                    Text(text = hint, style = style, color = colors.text.subtle, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
                 field()
             }
