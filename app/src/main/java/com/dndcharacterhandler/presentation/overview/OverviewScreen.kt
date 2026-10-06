@@ -2418,20 +2418,19 @@ private fun XpMedallionBar(
             color = colors.text.label,
             maxLines = 1
         )
-        if (canLevelUp) {
-            Text(
-                text = text("levelup_badge"),
-                modifier = Modifier
-                    .align(Alignment.CenterStart)
-                    // Right after the octagon: over the bar its edge slants away, which leaves the gap.
-                    .padding(start = XpMedallionSize)
-                    .overXpBar()
-                    .clickable(onClick = onLevelUp),
-                style = MaterialTheme.typography.labelMedium,
-                color = colors.accent.inspiration,
-                maxLines = 1
-            )
-        }
+        // Over the bar's start, level with the experience: "Level", or "Level UP" in gold when one is due.
+        Text(
+            text = if (canLevelUp) text("levelup_badge") else text("overview_level"),
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                // Right after the octagon: over the bar its edge slants away, which leaves the gap.
+                .padding(start = XpMedallionSize)
+                .overXpBar()
+                .then(if (canLevelUp) Modifier.clickable(onClick = onLevelUp) else Modifier),
+            style = MaterialTheme.typography.labelMedium,
+            color = if (canLevelUp) colors.accent.inspiration else colors.text.label,
+            maxLines = 1
+        )
         Box(
             modifier = Modifier
                 .align(Alignment.CenterStart)
@@ -3067,6 +3066,7 @@ private fun OverviewPreviewContent(
             "placeholder_class" to "Wizard",
             "overview_subtitle_format" to "%1\$s • %2\$s • Level %3\$s",
             "overview_level_format" to "Level %1\$s",
+            "overview_level" to "Level",
             "overview_short_rest" to "Short Rest",
             "overview_long_rest" to "Long Rest",
             "overview_long_rest_confirm" to "Confirm that this character takes a long rest of up to 8 hours?",
