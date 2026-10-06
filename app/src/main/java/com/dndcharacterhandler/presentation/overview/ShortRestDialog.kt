@@ -134,9 +134,12 @@ private fun hitDiceFormula(counts: Map<Int, Int>, constitution: Int): String {
     }
 }
 
-/** The hit points now, the bar beneath them, and [gain] — what the rest may add — in the healing's green. */
+/**
+ * The hit points now, the bar beneath them, and [gain] — what the rest adds — in the healing's green: "≈ +13"
+ * while it is an average (the short rest's dice), "+24" when [exact] (the long rest's).
+ */
 @Composable
-internal fun RestHitPoints(current: Int, max: Int, gain: Int) {
+internal fun RestHitPoints(current: Int, max: Int, gain: Int, exact: Boolean = false) {
     val colors = LocalDesignTokens.current.colors
     val now = current.coerceIn(0, max.coerceAtLeast(0))
     val added = gain.coerceIn(0, (max - now).coerceAtLeast(0))
@@ -151,7 +154,11 @@ internal fun RestHitPoints(current: Int, max: Int, gain: Int) {
             Text(text = "$now", style = MaterialTheme.typography.titleLarge, color = colors.text.primary)
             Text(text = " / $max", style = MaterialTheme.typography.bodyLarge, color = colors.text.label)
             if (added > 0) {
-                Text(text = "  ≈ +$added", style = MaterialTheme.typography.bodyLarge, color = colors.accent.heal)
+                Text(
+                    text = if (exact) "  +$added" else "  ≈ +$added",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = colors.accent.heal
+                )
             }
         }
         Row(
@@ -171,16 +178,19 @@ internal fun RestHitPoints(current: Int, max: Int, gain: Int) {
 
 /**
  * The hit dice by size. With more than one size each row is headed by its classes; a character whose
- * class is only text has the die's size beside the title, to change.
+ * class is only text has the die's size beside the title, to change ([onUpdateHitDieSides]). [onToggle]
+ * picks a die at hand (the short rest); without it the dice only show. [spentComeBack]: the spent dice
+ * are lit as coming back (the long rest).
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun HitDicePools(
+internal fun HitDicePools(
     pools: List<HitDicePool>,
     catalog: CharacterCatalog?,
-    picked: Map<Int, Set<Int>>,
-    onToggle: (sides: Int, index: Int) -> Unit,
-    onUpdateHitDieSides: (Int) -> Unit
+    picked: Map<Int, Set<Int>> = emptyMap(),
+    onToggle: ((sides: Int, index: Int) -> Unit)? = null,
+    onUpdateHitDieSides: ((Int) -> Unit)? = null,
+    spentComeBack: Boolean = false
 ) {
     val colors = LocalDesignTokens.current.colors
     val russian = LocalStrings.current.language == AppLanguage.RUSSIAN
@@ -193,7 +203,7 @@ private fun HitDicePools(
                 color = colors.text.primary
             )
             val single = pools.singleOrNull()
-            if (single != null && single.classIds.isEmpty()) {
+            if (single != null && single.classIds.isEmpty() && onUpdateHitDieSides != null) {
                 HitDieSidesPicker(sides = single.sides, onPick = onUpdateHitDieSides)
             }
         }
@@ -214,11 +224,15 @@ private fun HitDicePools(
                 ) {
                     repeat(pool.total) { index ->
                         val state = when {
-                            index >= pool.available -> HitDieState.SPENT
+                            index >= pool.available -> if (spentComeBack) HitDieState.RETURNING else HitDieState.SPENT
                             index in picked[pool.sides].orEmpty() -> HitDieState.PICKED
                             else -> HitDieState.AVAILABLE
                         }
-                        HitDieToken(die = die, state = state, onToggle = { onToggle(pool.sides, index) })
+                        HitDieToken(
+                            die = die,
+                            state = state,
+                            onToggle = onToggle?.let { toggle -> { toggle(pool.sides, index) } }
+                        )
                     }
                 }
             }
@@ -226,14 +240,15 @@ private fun HitDicePools(
     }
 }
 
-private enum class HitDieState { AVAILABLE, PICKED, SPENT }
+private enum class HitDieState { AVAILABLE, PICKED, SPENT, RETURNING }
 
 /**
  * A hit die: the die itself in the player's skin, on a toggle's fill — gold when picked, the button's
- * when at hand — or faded in an outline when spent, until the long rest.
+ * when at hand — or faded in an outline when spent, until the long rest, which lights it in the
+ * healing's colour at 12 % as coming back. Without [onToggle] it only shows.
  */
 @Composable
-private fun HitDieToken(die: DieType, state: HitDieState, onToggle: () -> Unit) {
+private fun HitDieToken(die: DieType, state: HitDieState, onToggle: (() -> Unit)?) {
     val colors = LocalDesignTokens.current.colors
     val shape = RoundedCornerShape(10.dp)
     Box(
@@ -245,14 +260,27 @@ private fun HitDieToken(die: DieType, state: HitDieState, onToggle: () -> Unit) 
                     HitDieState.PICKED -> MaterialTheme.colorScheme.primary
                     HitDieState.AVAILABLE -> colors.surface.button
                     HitDieState.SPENT -> Color.Transparent
+                    HitDieState.RETURNING -> colors.accent.heal.copy(alpha = 0.12f)
                 }
             )
-            .then(if (state == HitDieState.SPENT) Modifier.border(1.dp, colors.border.muted, shape) else Modifier)
-            .toggleable(
-                value = state == HitDieState.PICKED,
-                enabled = state != HitDieState.SPENT,
-                role = Role.Checkbox,
-                onValueChange = { onToggle() }
+            .then(
+                when (state) {
+                    HitDieState.SPENT -> Modifier.border(1.dp, colors.border.muted, shape)
+                    HitDieState.RETURNING -> Modifier.border(1.dp, colors.accent.heal, shape)
+                    else -> Modifier
+                }
+            )
+            .then(
+                if (onToggle != null) {
+                    Modifier.toggleable(
+                        value = state == HitDieState.PICKED,
+                        enabled = state == HitDieState.AVAILABLE || state == HitDieState.PICKED,
+                        role = Role.Checkbox,
+                        onValueChange = { onToggle() }
+                    )
+                } else {
+                    Modifier
+                }
             )
             .semantics { contentDescription = die.label },
         contentAlignment = Alignment.Center
@@ -297,20 +325,25 @@ private fun RestRestores(characterBundle: CharacterBundle) {
     val rows = buildList {
         characterBundle.combatResources
             .filter { it.restoresOnShortRest && it.maximumUses > 0 && it.currentUses < it.maximumUses }
-            .forEach { add(RestRow(Icons.Outlined.Bolt, it.name, it.currentUses, it.maximumUses)) }
+            .forEach { add(RestRow(Icons.Outlined.Bolt, it.name, restChange(it.currentUses, it.maximumUses))) }
         if (character.spellSlotsRestoreOnShortRest) {
             val remaining = spellSlots(character.spellSlotRemaining).sum()
             val maximum = spellSlots(character.spellSlotMaximums).sum()
-            if (remaining < maximum) add(RestRow(Icons.Outlined.AutoAwesome, text("levelup_summary_spell_slots"), remaining, maximum))
+            if (remaining < maximum) {
+                add(RestRow(Icons.Outlined.AutoAwesome, text("levelup_summary_spell_slots"), restChange(remaining, maximum)))
+            }
         }
     }
-    RestRows(title = text("overview_short_rest_restores"), rows = rows)
+    RestRows(title = text("overview_rest_restores"), rows = rows)
 }
 
-/** One thing a rest gives back: its name and its count before and after. */
-internal class RestRow(val icon: ImageVector, val name: String, val from: Int, val to: Int)
+/** "1 → 2": a count before a rest and after it. */
+internal fun restChange(from: Int, to: Int): String = "$from → $to"
 
-/** A rest's list of what it gives back, under [title]; nothing when there's nothing. */
+/** One thing a rest changes: its name, its count before and after ([change], if it has one), its icon's colour. */
+internal class RestRow(val icon: ImageVector, val name: String, val change: String?, val tint: Color? = null)
+
+/** A rest's list of what it changes, under [title]; nothing when there's nothing. Icons are gold unless a row has its own colour. */
 @Composable
 internal fun RestRows(title: String, rows: List<RestRow>) {
     if (rows.isEmpty()) return
@@ -322,7 +355,7 @@ internal fun RestRows(title: String, rows: List<RestRow>) {
                 Icon(
                     imageVector = row.icon,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = row.tint ?: MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(20.dp)
                 )
                 Text(
@@ -333,11 +366,9 @@ internal fun RestRows(title: String, rows: List<RestRow>) {
                     style = MaterialTheme.typography.bodyLarge,
                     color = colors.text.primary
                 )
-                Text(
-                    text = "${row.from} → ${row.to}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = colors.text.label
-                )
+                row.change?.let { change ->
+                    Text(text = change, style = MaterialTheme.typography.bodyMedium, color = colors.text.label)
+                }
             }
         }
     }

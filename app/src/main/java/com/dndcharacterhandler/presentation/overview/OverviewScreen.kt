@@ -1607,21 +1607,15 @@ private fun OverviewContent(
     }
 
     if (isLongRestDialogOpen && characterBundle != null) {
-        EditDialog(
-            title = text("overview_long_rest"),
+        LongRestDialog(
+            characterBundle = characterBundle,
+            catalog = catalog,
             onDismiss = { isLongRestDialogOpen = false },
-            onConfirm = {
+            onRest = {
                 onLongRest(characterBundle)
                 isLongRestDialogOpen = false
-            },
-            confirmLabel = text("overview_long_rest_confirm_button")
-        ) {
-            Text(
-                text = text("overview_long_rest_confirm"),
-                style = MaterialTheme.typography.bodyLarge,
-                color = colors.text.muted
-            )
-        }
+            }
+        )
     }
 
     if (isPortraitMenuOpen && characterBundle != null) {
@@ -2928,7 +2922,11 @@ private fun OverviewPreviewContent(
             "overview_level" to "Level",
             "overview_short_rest" to "Short Rest",
             "overview_long_rest" to "Long Rest",
-            "overview_long_rest_confirm" to "Confirm that this character takes a long rest of up to 8 hours?",
+            "overview_long_rest_ends" to "Ends",
+            "overview_long_rest_dice_hint" to "The spent hit dice come back.",
+            "overview_long_rest_concentration" to "Concentration: %1\$s",
+            "overview_long_rest_temporary" to "Temporary hit points",
+            "overview_long_rest_all_full" to "Hit points, hit dice and abilities are already full.",
             "overview_long_rest_confirm_button" to "Rest",
             "overview_inspiration" to "Inspiration",
             "levelup_badge" to "Level UP",
@@ -2959,7 +2957,7 @@ private fun OverviewPreviewContent(
             "overview_hp_max" to "Max HP",
             "overview_hit_dice" to "Hit Point Dice",
             "overview_short_rest_dice_hint" to "Tap a die to pick it for the roll. Spent dice come back after a long rest.",
-            "overview_short_rest_restores" to "Restores",
+            "overview_rest_restores" to "Restores",
             "overview_short_rest_roll" to "Roll %1\$s",
             "overview_short_rest_confirm" to "Rest",
             "overview_ac_full" to "Armor Class",
