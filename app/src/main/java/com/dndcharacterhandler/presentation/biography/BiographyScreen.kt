@@ -25,11 +25,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AutoAwesome
-import androidx.compose.material.icons.outlined.Badge
-import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material.icons.outlined.Shield
-import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -247,27 +243,21 @@ internal fun BiographyContent(
                 BiographyPersonaSection(
                     character = resolvedCharacter,
                     onEditAlignment = { editingField = BiographyField.ALIGNMENT },
-                    onUpdateField = { field, value -> onUpdateField(resolvedBundle, field, value) }
-                )
-            }
-            item {
-                BiographySection(
-                    modifier = Modifier.padding(top = 14.dp),
-                    title = text("biography_appearance"),
-                    rows = listOf(
-                        // The size's icon is its own figure: a gnome, a human or a giant.
+                    onUpdateField = { field, value -> onUpdateField(resolvedBundle, field, value) },
+                    appearance = listOf(
+                        // The size's and the gender's icons change with their value.
                         BiographyRow(
                             resolvedCharacter.size.figure,
                             text("size_label"),
                             text(resolvedCharacter.size.labelKey)
                         ) { editingSize = true },
-                        row(BiographyField.AGE, Icons.Outlined.Inventory2, text("biography_age"), resolvedCharacter.age),
-                        row(BiographyField.GENDER, Icons.Outlined.Badge, text("biography_gender"), localizedGender(resolvedCharacter.gender)),
-                        row(BiographyField.HEIGHT, Icons.Outlined.Badge, text("biography_height"), localizedMeasuredValue(resolvedCharacter.height)),
-                        row(BiographyField.WEIGHT, Icons.Outlined.Inventory2, text("biography_weight"), localizedMeasuredValue(resolvedCharacter.weight)),
-                        row(BiographyField.EYES, Icons.Outlined.Visibility, text("biography_eyes"), resolvedCharacter.eyes),
-                        row(BiographyField.HAIR, Icons.Outlined.AutoAwesome, text("biography_hair"), resolvedCharacter.hair),
-                        row(BiographyField.SKIN, Icons.Outlined.Badge, text("biography_skin"), resolvedCharacter.skin)
+                        row(BiographyField.AGE, BiographyIconAge, text("biography_age"), resolvedCharacter.age),
+                        row(BiographyField.GENDER, genderIcon(resolvedCharacter.gender), text("biography_gender"), localizedGender(resolvedCharacter.gender)),
+                        row(BiographyField.HEIGHT, BiographyIconHeight, text("biography_height"), localizedMeasuredValue(resolvedCharacter.height)),
+                        row(BiographyField.WEIGHT, BiographyIconWeight, text("biography_weight"), localizedMeasuredValue(resolvedCharacter.weight)),
+                        row(BiographyField.EYES, BiographyIconEyes, text("biography_eyes"), resolvedCharacter.eyes),
+                        row(BiographyField.HAIR, BiographyIconHair, text("biography_hair"), resolvedCharacter.hair),
+                        row(BiographyField.SKIN, BiographyIconSkin, text("biography_skin"), resolvedCharacter.skin)
                     )
                 )
             }
@@ -318,30 +308,6 @@ internal fun BiographyContent(
                 },
                 framed = false
             )
-        }
-    }
-}
-
-/** A section of short values under its title: the rows two to a line, in one frame. */
-@Composable
-private fun BiographySection(
-    title: String,
-    rows: List<BiographyRow>,
-    modifier: Modifier = Modifier
-) {
-    val colors = LocalDesignTokens.current.colors
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        BiographySectionTitle(title)
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(10.dp),
-            color = colors.surface.card.copy(alpha = 0.62f),
-            border = BorderStroke(1.dp, colors.border.muted)
-        ) {
-            BiographyGrid(rows)
         }
     }
 }
@@ -398,7 +364,7 @@ private fun BiographyGridCell(row: BiographyRow, modifier: Modifier, padding: Pa
         Icon(
             imageVector = row.icon,
             contentDescription = null,
-            modifier = Modifier.size(22.dp),
+            modifier = Modifier.size(BiographyIconSize),
             tint = colors.text.label
         )
         Column(modifier = Modifier.padding(start = 10.dp)) {
@@ -457,6 +423,7 @@ private fun BiographySectionTitle(title: String) {
  * Who the character is (owner's choice from boards, 2026-10-06: P3 in one frame): the alignment, then the ideals,
  * bonds and flaws, as the character sheet has them. The alignment opens its cards; the three are written right on
  * the sheet, each its label over it and a quiet hint while empty, and saved when the field is left, as the history.
+ * Under a line, in the same frame, the [appearance] two to a line (M1b: one block saves a title and a gap).
  * The sheet no longer shows the background, faith, homeland and traits; their text stays in the character.
  */
 @Composable
@@ -464,13 +431,14 @@ private fun BiographyPersonaSection(
     character: Character,
     onEditAlignment: () -> Unit,
     onUpdateField: (BiographyField, String) -> Unit,
+    appearance: List<BiographyRow>,
     modifier: Modifier = Modifier
 ) {
     val colors = LocalDesignTokens.current.colors
     val texts = listOf(
-        PersonaText(BiographyField.IDEALS, PersonaIconIdeals, text("biography_ideals"), text("biography_ideals_hint"), character.ideals),
-        PersonaText(BiographyField.BONDS, PersonaIconBonds, text("biography_bonds"), text("biography_bonds_hint"), character.bonds),
-        PersonaText(BiographyField.FLAWS, PersonaIconFlaws, text("biography_flaws"), text("biography_flaws_hint"), character.flaws)
+        PersonaText(BiographyField.IDEALS, BiographyIconIdeals, text("biography_ideals"), text("biography_ideals_hint"), character.ideals),
+        PersonaText(BiographyField.BONDS, BiographyIconBonds, text("biography_bonds"), text("biography_bonds_hint"), character.bonds),
+        PersonaText(BiographyField.FLAWS, BiographyIconFlaws, text("biography_flaws"), text("biography_flaws_hint"), character.flaws)
     )
     Column(
         modifier = modifier,
@@ -483,56 +451,72 @@ private fun BiographyPersonaSection(
             color = colors.surface.card.copy(alpha = 0.62f),
             border = BorderStroke(1.dp, colors.border.muted)
         ) {
-            Column(modifier = Modifier.padding(horizontal = 12.dp)) {
-                PersonaEntry(
-                    icon = { iconModifier -> AlignmentIcon(character.alignment, Icons.Outlined.Shield, iconModifier) },
-                    label = text("biography_alignment"),
-                    modifier = Modifier.clickable(onClick = onEditAlignment)
-                ) {
-                    // None picked: a quiet hint to tap, as the texts' hints.
-                    val none = character.alignment.isBlank()
-                    Text(
-                        text = if (none) text("biography_alignment_hint") else localizedAlignment(character.alignment),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = if (none) colors.text.subtle else colors.text.primary,
-                        maxLines = if (none) 1 else Int.MAX_VALUE,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-                texts.forEach { entry ->
+            Column {
+                Column(modifier = Modifier.padding(horizontal = 12.dp)) {
+                    PersonaEntry(
+                        icon = { iconModifier -> AlignmentIcon(character.alignment, Icons.Outlined.Shield, iconModifier) },
+                        label = text("biography_alignment"),
+                        modifier = Modifier.clickable(onClick = onEditAlignment)
+                    ) {
+                        // None picked: a quiet hint to tap, as the texts' hints.
+                        val none = character.alignment.isBlank()
+                        Text(
+                            text = if (none) text("biography_alignment_hint") else localizedAlignment(character.alignment),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = if (none) colors.text.subtle else colors.text.primary,
+                            maxLines = if (none) 1 else Int.MAX_VALUE,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    texts.forEach { entry ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(1.dp)
+                                .background(colors.border.muted)
+                        )
+                        // A tap on the label puts the cursor in its text, as a tap on the text does.
+                        val focus = remember { FocusRequester() }
+                        PersonaEntry(
+                            icon = { iconModifier ->
+                                Icon(entry.icon, contentDescription = null, tint = colors.text.label, modifier = iconModifier)
+                            },
+                            label = entry.label,
+                            modifier = Modifier.clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                                onClick = { focus.requestFocus() }
+                            )
+                        ) {
+                            BiographyInlineText(
+                                characterId = character.id,
+                                value = entry.value,
+                                hint = entry.hint,
+                                onCommit = { onUpdateField(entry.field, it) },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .focusRequester(focus)
+                            )
+                        }
+                    }
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(1.dp)
                             .background(colors.border.muted)
                     )
-                    // A tap on the label puts the cursor in its text, as a tap on the text does.
-                    val focus = remember { FocusRequester() }
-                    PersonaEntry(
-                        icon = { iconModifier ->
-                            Icon(entry.icon, contentDescription = null, tint = colors.text.label, modifier = iconModifier)
-                        },
-                        label = entry.label,
-                        modifier = Modifier.clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null,
-                            onClick = { focus.requestFocus() }
-                        )
-                    ) {
-                        BiographyInlineText(
-                            characterId = character.id,
-                            value = entry.value,
-                            hint = entry.hint,
-                            onCommit = { onUpdateField(entry.field, it) },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .focusRequester(focus)
-                        )
-                    }
                 }
+                BiographyGrid(appearance)
             }
         }
     }
+}
+
+/** The gender's sign as it is picked: male, female, or a DNA helix for any other or none (owner's choice, 2026-10-06). */
+private fun genderIcon(value: String): ImageVector = when (value) {
+    GenderMaleOption -> BiographyIconMale
+    GenderFemaleOption -> BiographyIconFemale
+    else -> BiographyIconGenderOther
 }
 
 private class PersonaText(
@@ -543,9 +527,10 @@ private class PersonaText(
     val value: String
 )
 
-// The icon is as tall as the label and the first line under it, 16 + 24 (owner's choice, 2026-10-06).
-private val PersonaIconSize = 32.dp
-private val PersonaIconTop = 4.dp
+// Every icon of the block is 24dp (owner's choice from boards, 2026-10-06); in the persona it stands at the middle
+// of the label and the first line under it, 16 + 24.
+private val BiographyIconSize = 24.dp
+private val PersonaIconTop = 8.dp
 private val PersonaIconGap = 10.dp
 
 /** An entry of the persona: its icon beside the label small over the content, as tall as their first two lines. */
@@ -564,7 +549,7 @@ private fun PersonaEntry(
         icon(
             Modifier
                 .padding(top = PersonaIconTop)
-                .size(PersonaIconSize)
+                .size(BiographyIconSize)
         )
         Column(modifier = Modifier.padding(start = PersonaIconGap)) {
             Text(
