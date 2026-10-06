@@ -463,7 +463,13 @@ internal fun SpellsContent(
                 }
 
                 spellLevelOrder.forEach { level ->
+                    // The cantrips always; a level only when the character has its slots or spells of it
+                    // (owner's choice, 2026-10-06). While searching, a level with nothing found keeps out.
+                    val hasSpells = displayedSpells.any { it.level == level }
+                    val hasSlots = level > 0 && slotMaximums[level - 1] > 0
                     val spellsAtLevel = filteredSpells.filter { it.level == level }
+                    val searching = query.isNotBlank()
+                    if (level != 0 && (!(hasSlots || hasSpells) || (searching && spellsAtLevel.isEmpty()))) return@forEach
                     item(key = "section_$level") {
                         SpellLevelSectionTitle(
                             level = level,
@@ -487,8 +493,11 @@ internal fun SpellsContent(
                     }
 
                     if (spellsAtLevel.isEmpty()) {
-                        item(key = "empty_$level") {
-                            SpellEmptyRow(level)
+                        // "None yet" only when there are none: not when the search found none of them.
+                        if (!hasSpells) {
+                            item(key = "empty_$level") {
+                                SpellEmptyRow(level)
+                            }
                         }
                     } else {
                         items(spellsAtLevel, key = { "${level}_${it.id}_${it.name}" }) { spell ->
