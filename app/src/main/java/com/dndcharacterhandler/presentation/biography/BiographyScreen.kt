@@ -38,6 +38,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import com.dndcharacterhandler.presentation.components.FloatingAddButton
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
@@ -161,7 +162,7 @@ fun BiographyScreen(
     onOpenDice: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    NotesSection(viewModel = notesViewModel) { notesItems ->
+    NotesSection(viewModel = notesViewModel) { notesItems, onAddNote ->
         BiographyContent(
             characterBundle = state.character,
             onOpenDrawer = onOpenDrawer,
@@ -169,7 +170,8 @@ fun BiographyScreen(
             onUpdateBiography = viewModel::updateBiography,
             onUpdateField = viewModel::updateBiographyField,
             onUpdateSize = viewModel::updateSize,
-            moreItems = notesItems
+            moreItems = notesItems,
+            onAddNote = onAddNote
         )
     }
 }
@@ -183,7 +185,9 @@ internal fun BiographyContent(
     onUpdateField: (CharacterBundle, BiographyField, String) -> Unit = { _, _, _ -> },
     onUpdateSize: (CharacterBundle, CreatureSize) -> Unit = { _, _ -> },
     /** The list's items after the biography's own: the notes section. */
-    moreItems: LazyListScope.() -> Unit = {}
+    moreItems: LazyListScope.() -> Unit = {},
+    /** The screen's "+", which starts a note (owner's choice, 2026-10-06); null hides it. */
+    onAddNote: (() -> Unit)? = null
 ) {
     val colors = LocalDesignTokens.current.colors
     val character = characterBundle?.character
@@ -213,6 +217,7 @@ internal fun BiographyContent(
     val resolvedCharacter = character
     val resolvedBundle = characterBundle
     ScreenBackground {
+        Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 4.dp, bottom = LocalFloatingButtonsInset.current),
@@ -282,6 +287,15 @@ internal fun BiographyContent(
             }
 
             moreItems()
+        }
+        onAddNote?.let { add ->
+            FloatingAddButton(
+                onClick = add,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 24.dp, bottom = 15.dp)
+            )
+        }
         }
     }
 

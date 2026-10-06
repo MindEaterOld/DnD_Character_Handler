@@ -3050,13 +3050,19 @@
     "fr": "Rechercher des notes",
     "es": "Buscar notas"
   },
-  "notes_add": {
-    "maxChars": 23,
-    "en": "Add note",
-    "ru": "Добавить заметку",
-    "de": "Notiz hinzufügen",
-    "fr": "Ajouter une note",
-    "es": "Añadir nota"
+  "notes_none_yet": {
+    "en": "No notes yet.",
+    "ru": "Пока нет заметок.",
+    "de": "Noch keine Notizen.",
+    "fr": "Pas encore de notes.",
+    "es": "Aún no hay notas."
+  },
+  "notes_search_empty": {
+    "en": "No notes found.",
+    "ru": "Заметки не найдены.",
+    "de": "Keine Notizen gefunden.",
+    "fr": "Aucune note trouvée.",
+    "es": "No se encontraron notas."
   },
   "notes_new_note": {
     "en": "New Note",

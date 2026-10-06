@@ -397,7 +397,8 @@ private val routesWithAddButton = setOf(
     AppScreen.Combat.route,
     AppScreen.Inventory.route,
     AppScreen.Spells.route,
-    AppScreen.Features.route
+    AppScreen.Features.route,
+    AppScreen.Biography.route
 )
 
 private fun suggestCharacterArchiveName(characterName: String?): String {

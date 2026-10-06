@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
-import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material.icons.outlined.Search
@@ -83,14 +82,14 @@ class NotesViewModel(
 
 /**
  * The notes as a section of another screen's list: the biography's, below its own sections (owner's
- * choice, 2026-10-04: the notes screen merged into the biography). [content] lays the list out and puts
- * the section's items where they go; the note's editor is the section's own. Until the character loads
- * there are no items.
+ * choice, 2026-10-04: the notes screen merged into the biography). [content] lays the list out, puts the
+ * section's items where they go and gives the screen's "+" the way to start a note (null until the
+ * character loads); the note's editor is the section's own. Until the character loads there are no items.
  */
 @Composable
 fun NotesSection(
     viewModel: NotesViewModel,
-    content: @Composable (items: LazyListScope.() -> Unit) -> Unit
+    content: @Composable (items: LazyListScope.() -> Unit, onAddNote: (() -> Unit)?) -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val bundle = state.character
@@ -101,11 +100,11 @@ fun NotesSection(
         notesSectionItems(
             characterBundle = bundle,
             onOpenNote = { editingNote = it },
-            onAddNote = { editingNote = newDraftNote() },
             onTogglePinned = viewModel::togglePinned
         )
     }
-    content(items)
+    val onAddNote: (() -> Unit)? = bundle?.let { { editingNote = newDraftNote() } }
+    content(items, onAddNote)
 
     val note = editingNote
     if (note != null && bundle != null) {
@@ -126,15 +125,14 @@ private val NoItems: LazyListScope.() -> Unit = {}
 private const val NotesKeyPrefix = "notes:"
 
 /**
- * The section's list items: its title, the search, the notes — the pinned first, then the latest — and
- * last the card that adds one, there even when there are none (owner's choice, 2026-10-04). They space
- * themselves, as the biography's list has no spacing of its own.
+ * The section's list items: its title, the search, the notes — the pinned first, then the latest — or a
+ * quiet "none yet" / "none found". A note is started by the screen's "+", as on every screen (owner's
+ * choice, 2026-10-06). They space themselves, as the biography's list has no spacing of its own.
  */
 @Composable
 internal fun notesSectionItems(
     characterBundle: CharacterBundle,
     onOpenNote: (Note) -> Unit = {},
-    onAddNote: () -> Unit = {},
     onTogglePinned: (CharacterBundle, Note) -> Unit = { _, _ -> }
 ): LazyListScope.() -> Unit {
     var query by remember { mutableStateOf("") }
@@ -170,47 +168,16 @@ internal fun notesSectionItems(
                 modifier = Modifier.padding(top = 10.dp)
             )
         }
-        item(key = "${NotesKeyPrefix}add") {
-            AddNoteCard(
-                onClick = onAddNote,
-                modifier = Modifier.padding(top = 10.dp)
-            )
-        }
-    }
-}
-
-/**
- * The notes' last card, which starts a new one (owner's choice from boards, 2026-10-04): a note card's size
- * and shape, the "+" where a pinned note has its pin — in the button fill, as it is pressed, not read.
- */
-@Composable
-private fun AddNoteCard(onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val colors = LocalDesignTokens.current.colors
-    Surface(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(10.dp),
-        color = colors.surface.button
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 14.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.Add,
-                contentDescription = null,
-                tint = colors.text.primary,
-                modifier = Modifier
-                    .padding(end = 12.dp)
-                    .size(28.dp)
-            )
-            Text(
-                text = text("notes_add"),
-                style = MaterialTheme.typography.titleLarge,
-                color = colors.text.primary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+        if (visibleNotes.isEmpty()) {
+            item(key = "${NotesKeyPrefix}empty") {
+                // Plain quiet text, as on the other screens: none at all, or none the search finds.
+                Text(
+                    text = if (characterBundle.notes.isEmpty()) text("notes_none_yet") else text("notes_search_empty"),
+                    modifier = Modifier.padding(start = 2.dp, top = 12.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = LocalDesignTokens.current.colors.text.subtle
+                )
+            }
         }
     }
 }
