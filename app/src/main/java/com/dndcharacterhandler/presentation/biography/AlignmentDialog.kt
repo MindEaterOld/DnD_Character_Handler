@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
@@ -58,12 +59,8 @@ internal fun AlignmentDialog(
 @Composable
 private fun AlignmentCardView(card: AlignmentCard, picked: Boolean, onClick: () -> Unit, modifier: Modifier) {
     val colors = LocalDesignTokens.current.colors
-    // Good blue, evil red, neutral ivory; picked, the neutral row is gold, as the other toggles.
-    val tint = when (card.moral) {
-        Moral.GOOD -> colors.accent.hpTemporary
-        Moral.NEUTRAL -> colors.text.primary
-        Moral.EVIL -> colors.accent.dangerHpZero
-    }
+    val tint = moralTint(card.moral)
+    // Picked, the neutral row is gold, as the other toggles.
     val pickedColor = if (card.moral == Moral.NEUTRAL) MaterialTheme.colorScheme.primary else tint
     val shape = RoundedCornerShape(10.dp)
     Column(
@@ -86,6 +83,29 @@ private fun AlignmentCardView(card: AlignmentCard, picked: Boolean, onClick: () 
             maxLines = 2,
             overflow = TextOverflow.Ellipsis
         )
+    }
+}
+
+/** The alignment's icon in its moral's colour, as on its card; [fallback], in the labels' colour, for none. */
+@Composable
+internal fun AlignmentIcon(value: String, fallback: ImageVector, modifier: Modifier = Modifier) {
+    val card = AlignmentCards.firstOrNull { it.value == value }
+    Icon(
+        imageVector = card?.icon ?: fallback,
+        contentDescription = null,
+        tint = if (card != null) moralTint(card.moral) else LocalDesignTokens.current.colors.text.label,
+        modifier = modifier
+    )
+}
+
+/** Good blue, evil red, neutral ivory. */
+@Composable
+private fun moralTint(moral: Moral): Color {
+    val colors = LocalDesignTokens.current.colors
+    return when (moral) {
+        Moral.GOOD -> colors.accent.hpTemporary
+        Moral.NEUTRAL -> colors.text.primary
+        Moral.EVIL -> colors.accent.dangerHpZero
     }
 }
 

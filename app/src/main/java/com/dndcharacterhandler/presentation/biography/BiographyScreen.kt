@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,12 +22,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.Badge
-import androidx.compose.material.icons.outlined.Description
-import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.Visibility
@@ -45,13 +45,17 @@ import androidx.compose.ui.Alignment
 import com.dndcharacterhandler.presentation.components.FloatingAddButton
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -240,31 +244,16 @@ internal fun BiographyContent(
                 )
             }
             item {
-                BiographySection(
-                    title = text("biography_identity"),
-                    rows = listOf(
-                        row(
-                            BiographyField.ALIGNMENT,
-                            Icons.Outlined.Shield,
-                            text("biography_alignment"),
-                            localizedAlignment(resolvedCharacter.alignment)
-                        ),
-                        row(BiographyField.BACKGROUND, Icons.Outlined.Description, text("biography_background"), resolvedCharacter.background),
-                        row(BiographyField.FAITH, Icons.Outlined.AutoAwesome, text("biography_faith"), resolvedCharacter.faith),
-                        row(BiographyField.HOMELAND, Icons.Outlined.Home, text("biography_homeland"), resolvedCharacter.homeland),
-                        row(BiographyField.PERSONALITY_TRAITS, Icons.Outlined.Badge, text("biography_personality_traits"), resolvedCharacter.personalityTraits),
-                        row(BiographyField.IDEALS, Icons.Outlined.AutoAwesome, text("biography_ideals"), resolvedCharacter.ideals),
-                        row(BiographyField.BONDS, Icons.Outlined.Shield, text("biography_bonds"), resolvedCharacter.bonds),
-                        row(BiographyField.FLAWS, Icons.Outlined.Description, text("biography_flaws"), resolvedCharacter.flaws)
-                    ),
-                    valueWeight = 1.45f
+                BiographyPersonaSection(
+                    character = resolvedCharacter,
+                    onEditAlignment = { editingField = BiographyField.ALIGNMENT },
+                    onUpdateField = { field, value -> onUpdateField(resolvedBundle, field, value) }
                 )
             }
             item {
                 BiographySection(
                     modifier = Modifier.padding(top = 14.dp),
                     title = text("biography_appearance"),
-                    twoColumns = true,
                     rows = listOf(
                         // The size's icon is its own figure: a gnome, a human or a giant.
                         BiographyRow(
@@ -333,14 +322,12 @@ internal fun BiographyContent(
     }
 }
 
+/** A section of short values under its title: the rows two to a line, in one frame. */
 @Composable
 private fun BiographySection(
     title: String,
     rows: List<BiographyRow>,
-    modifier: Modifier = Modifier,
-    valueWeight: Float = 1f,
-    /** Two rows to a line, each its label over its value: the appearance's short values. */
-    twoColumns: Boolean = false
+    modifier: Modifier = Modifier
 ) {
     val colors = LocalDesignTokens.current.colors
     Column(
@@ -354,27 +341,7 @@ private fun BiographySection(
             color = colors.surface.card.copy(alpha = 0.62f),
             border = BorderStroke(1.dp, colors.border.muted)
         ) {
-            if (twoColumns) {
-                BiographyGrid(rows)
-            } else {
-                Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)) {
-                    rows.forEachIndexed { index, row ->
-                        BiographyValueRow(
-                            row = row,
-                            valueWeight = valueWeight,
-                            onClick = row.onClick
-                        )
-                        if (index != rows.lastIndex) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(1.dp)
-                                    .background(colors.border.muted)
-                            )
-                        }
-                    }
-                }
-            }
+            BiographyGrid(rows)
         }
     }
 }
@@ -486,48 +453,166 @@ private fun BiographySectionTitle(title: String) {
     }
 }
 
+/**
+ * Who the character is (owner's choice from boards, 2026-10-06: P3 in one frame): the alignment, then the ideals,
+ * bonds and flaws, as the character sheet has them. The alignment opens its cards; the three are written right on
+ * the sheet, each its label over it and a quiet hint while empty, and saved when the field is left, as the history.
+ * The sheet no longer shows the background, faith, homeland and traits; their text stays in the character.
+ */
 @Composable
-private fun BiographyValueRow(
-    row: BiographyRow,
-    valueWeight: Float,
-    onClick: () -> Unit
+private fun BiographyPersonaSection(
+    character: Character,
+    onEditAlignment: () -> Unit,
+    onUpdateField: (BiographyField, String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val colors = LocalDesignTokens.current.colors
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(44.dp)
-            .clickable(onClick = onClick),
-        verticalAlignment = Alignment.CenterVertically
+    val texts = listOf(
+        PersonaText(BiographyField.IDEALS, PersonaIconIdeals, text("biography_ideals"), text("biography_ideals_hint"), character.ideals),
+        PersonaText(BiographyField.BONDS, PersonaIconBonds, text("biography_bonds"), text("biography_bonds_hint"), character.bonds),
+        PersonaText(BiographyField.FLAWS, PersonaIconFlaws, text("biography_flaws"), text("biography_flaws_hint"), character.flaws)
+    )
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Icon(
-            imageVector = row.icon,
-            contentDescription = null,
-            modifier = Modifier.size(22.dp),
-            tint = colors.text.label
-        )
-        Text(
-            text = row.label,
-            modifier = Modifier
-                .padding(start = 12.dp)
-                .weight(1f),
-            style = MaterialTheme.typography.bodyLarge,
-            color = colors.text.muted,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-        Text(
-            text = row.value.ifBlank { text("common_dash") },
-            modifier = Modifier
-                .padding(start = 12.dp)
-                .weight(valueWeight),
-            style = MaterialTheme.typography.bodyLarge,
-            color = colors.text.primary,
-            textAlign = TextAlign.End,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
+        BiographySectionTitle(text("biography_identity"))
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(10.dp),
+            color = colors.surface.card.copy(alpha = 0.62f),
+            border = BorderStroke(1.dp, colors.border.muted)
+        ) {
+            Column(modifier = Modifier.padding(horizontal = 12.dp)) {
+                PersonaEntry(
+                    icon = { AlignmentIcon(character.alignment, Icons.Outlined.Shield, Modifier.size(PersonaIconSize)) },
+                    label = text("biography_alignment"),
+                    modifier = Modifier.clickable(onClick = onEditAlignment)
+                ) {
+                    Text(
+                        text = localizedAlignment(character.alignment),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = colors.text.primary
+                    )
+                }
+                texts.forEach { entry ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(1.dp)
+                            .background(colors.border.muted)
+                    )
+                    // A tap on the label puts the cursor in its text, as a tap on the text does.
+                    val focus = remember { FocusRequester() }
+                    PersonaEntry(
+                        icon = {
+                            Icon(entry.icon, contentDescription = null, tint = colors.text.label, modifier = Modifier.size(PersonaIconSize))
+                        },
+                        label = entry.label,
+                        modifier = Modifier.clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = { focus.requestFocus() }
+                        )
+                    ) {
+                        BiographyInlineText(
+                            characterId = character.id,
+                            value = entry.value,
+                            hint = entry.hint,
+                            onCommit = { onUpdateField(entry.field, it) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .focusRequester(focus)
+                        )
+                    }
+                }
+            }
+        }
     }
+}
+
+private class PersonaText(
+    val field: BiographyField,
+    val icon: ImageVector,
+    val label: String,
+    val hint: String,
+    val value: String
+)
+
+private val PersonaIconSize = 20.dp
+
+/** An entry of the persona: its icon and label small on a line, its content under them. */
+@Composable
+private fun PersonaEntry(
+    icon: @Composable () -> Unit,
+    label: String,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            icon()
+            Text(
+                text = label,
+                modifier = Modifier.padding(start = 8.dp),
+                style = MaterialTheme.typography.labelMedium,
+                color = LocalDesignTokens.current.colors.text.label
+            )
+        }
+        Box(modifier = Modifier.padding(start = PersonaIconSize + 8.dp)) {
+            content()
+        }
+    }
+}
+
+/**
+ * A text written right on the sheet, no frame of its own: a draft while typing, saved once the field is left (or
+ * the screen goes), as the history — not a write per keystroke. Keyed on the character, so two characters with
+ * the same text never share a draft; [hint] stands in quiet grey while it is empty.
+ */
+@Composable
+private fun BiographyInlineText(
+    characterId: Long,
+    value: String,
+    hint: String,
+    onCommit: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val colors = LocalDesignTokens.current.colors
+    val draftState = remember(characterId, value) { mutableStateOf(value) }
+    var draft by draftState
+    var wasFocused by remember { mutableStateOf(false) }
+    DisposableEffect(draftState) {
+        val saveForThisCharacter = onCommit
+        onDispose { saveForThisCharacter(draftState.value) }
+    }
+    val style = MaterialTheme.typography.bodyLarge
+    BasicTextField(
+        value = draft,
+        onValueChange = { draft = it },
+        modifier = modifier.onFocusChanged { focusState ->
+            if (wasFocused && !focusState.isFocused) {
+                onCommit(draft)
+            }
+            wasFocused = focusState.isFocused
+        },
+        textStyle = style.copy(color = colors.text.primary),
+        cursorBrush = SolidColor(colors.text.warmPrimary),
+        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+        decorationBox = { field ->
+            Box {
+                if (draft.isEmpty()) {
+                    Text(text = hint, style = style, color = colors.text.subtle)
+                }
+                field()
+            }
+        }
+    )
 }
 
 @Composable

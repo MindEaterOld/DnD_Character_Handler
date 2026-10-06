@@ -45,6 +45,9 @@ fun BiographyScreenPreview() {
             "biography_skin" to "Skin",
             "biography_personality_traits" to "Personality Traits",
             "biography_ideals" to "Ideals",
+            "biography_ideals_hint" to "What your character believes in and strives for",
+            "biography_bonds_hint" to "Who and what matter to them most",
+            "biography_flaws_hint" to "A vice, a fear or a weak spot",
             "biography_bonds" to "Bonds",
             "biography_flaws" to "Flaws"
         )
