@@ -335,6 +335,19 @@ internal fun FeaturesContent(
                     )
                 }
 
+                if (groupedFeatures.isEmpty()) {
+                    item(key = "empty") {
+                        // Plain quiet text, as the spells' "none yet" (owner's choice, 2026-10-06): no features
+                        // at all, or none the search finds.
+                        Text(
+                            text = if (displayedFeatures.isEmpty()) text("features_empty") else text("features_catalog_empty"),
+                            modifier = Modifier.padding(start = 2.dp, top = 2.dp),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = LocalDesignTokens.current.colors.text.subtle
+                        )
+                    }
+                }
+
                 groupedFeatures.forEach { (source, features) ->
                     item(key = "section_${source.name}") {
                         FeaturesSectionTitle(featureSourceLabel(source))

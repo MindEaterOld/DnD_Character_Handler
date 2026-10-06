@@ -27,6 +27,8 @@ fun FeaturesScreenPreview() {
             "placeholder_loading_character" to "Loading character",
             "nav_features" to "Features",
             "features_search_placeholder" to "Search Features",
+            "features_empty" to "No features yet. Add a class, race or background.",
+            "features_catalog_empty" to "No features found.",
             "features_untitled" to "Untitled Feature",
             "features_edit_feature" to "Edit Feature",
             "features_editor_edit" to "Edit",

@@ -2576,6 +2576,13 @@
     "fr": "Aucun trait trouve.",
     "es": "No se encontraron rasgos."
   },
+  "features_empty": {
+    "en": "No features yet. Add a class, race or background.",
+    "ru": "У вас пока нет особенностей. Добавьте класс, расу или предысторию.",
+    "de": "Noch keine Merkmale. Füge eine Klasse, ein Volk oder einen Hintergrund hinzu.",
+    "fr": "Pas encore de traits. Ajoutez une classe, une race ou un historique.",
+    "es": "Aún no hay rasgos. Añade una clase, una raza o un trasfondo."
+  },
   "features_filter_all": {
     "en": "All",
     "ru": "\u0412\u0441\u0435",
