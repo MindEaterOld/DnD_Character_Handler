@@ -28,16 +28,26 @@ fun classWizardTarget(character: Character): Int? = when {
     else -> null
 }
 
-/** Hit dice of one size: how many the character has and how many are spent. */
-data class HitDicePool(val sides: Int, val total: Int, val spent: Int) {
+/**
+ * Hit dice of one size: how many the character has and how many are spent, and the classes they come
+ * from ([classIds], catalog ids; none for a character whose class the catalog doesn't know).
+ */
+data class HitDicePool(val sides: Int, val total: Int, val spent: Int, val classIds: List<String> = emptyList()) {
     val available: Int get() = (total - spent).coerceAtLeast(0)
 }
 
 /** Hit dice by size, largest first: a Fighter 5 / Wizard 2 has five d10 and two d6. */
 fun hitDicePools(classes: List<CharacterClassEntry>, catalog: CharacterCatalog): List<HitDicePool> =
-    classes.groupBy { entry -> catalog.classes.firstOrNull { it.id == entry.classId }?.hitDie ?: 8 }
-        .map { (sides, entries) -> HitDicePool(sides, entries.sumOf { it.levels }, entries.sumOf { it.spentHitDice }.coerceAtMost(entries.sumOf { it.levels })) }
+    classes.groupBy { entry -> classHitDie(entry, catalog) }
+        .map { (sides, entries) ->
+            val total = entries.sumOf { it.levels }
+            HitDicePool(sides, total, entries.sumOf { it.spentHitDice }.coerceAtMost(total), entries.map { it.classId })
+        }
         .sortedByDescending { it.sides }
+
+/** The hit die of a class: its catalog's, a d8 for a class the catalog doesn't have. */
+internal fun classHitDie(entry: CharacterClassEntry, catalog: CharacterCatalog): Int =
+    catalog.classes.firstOrNull { it.id == entry.classId }?.hitDie ?: 8
 
 /** Spell slots by spell level 1..9 (index 0 is 1st level), with Pact Magic counted in at its slot level. */
 data class SpellSlotTable(val slots: List<Int>, val pactSlots: Int, val pactSlotLevel: Int) {

@@ -106,18 +106,6 @@
         "baseStyle": "bodyLarge",
         "fontSizeSp": 16
       },
-      "shortRestDiceCount": {
-        "baseStyle": "headlineMedium",
-        "fontSizeSp": 32
-      },
-      "shortRestDieToken": {
-        "baseStyle": "bodyLarge",
-        "fontSizeSp": 18
-      },
-      "shortRestCounterButton": {
-        "baseStyle": "headlineMedium",
-        "fontSizeSp": 28
-      },
       "shortRestCounterValue": {
         "baseStyle": "headlineMedium",
         "fontSizeSp": 40

@@ -76,6 +76,9 @@ import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.text.input.ImeAction
 import com.dndcharacterhandler.domain.rules.gainTemporaryHitPoints
 import com.dndcharacterhandler.domain.rules.heal
+import com.dndcharacterhandler.domain.rules.classesWithSpentHitDice
+import com.dndcharacterhandler.domain.rules.hitDiceHealing
+import com.dndcharacterhandler.domain.rules.spendClassHitDice
 import com.dndcharacterhandler.presentation.components.StepButton
 import androidx.compose.material.icons.Icons
 import com.dndcharacterhandler.presentation.components.toggleContent
@@ -174,6 +177,7 @@ import androidx.compose.animation.core.tween
 import com.dndcharacterhandler.presentation.dice.DiceRollRequest
 import com.dndcharacterhandler.presentation.dice.DieIcon
 import com.dndcharacterhandler.presentation.dice.DieType
+import com.dndcharacterhandler.presentation.dice.dieTypeOf
 import com.dndcharacterhandler.presentation.dice.LocalDiceRoller
 import com.dndcharacterhandler.presentation.dice.LocalDiceSkin
 import com.dndcharacterhandler.presentation.dice.Quat
@@ -213,7 +217,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-private val hitDieSidesOptions = listOf(6, 8, 10, 12)
 
 class OverviewViewModel(
     private val characterRepository: CharacterRepository,
@@ -449,7 +452,7 @@ class OverviewViewModel(
     }
 
     fun updateHitDieSides(characterBundle: CharacterBundle, hitDieSides: Int) {
-        val sanitized = hitDieSides.takeIf { it in hitDieSidesOptions } ?: 8
+        val sanitized = hitDieSides.takeIf { it in HitDieSidesOptions } ?: 8
         val current = characterBundle.character
         if (sanitized == current.hitDieSides) return
 
@@ -462,19 +465,30 @@ class OverviewViewModel(
         }
     }
 
-    fun spendHitDice(characterBundle: CharacterBundle, amount: Int) {
+    /**
+     * A short rest's hit dice read off the dice table: the [picked] ones (sides to count) are spent,
+     * by class when the classes are known, and their [rolls] heal. Counted from [characterBundle] as
+     * it was when the throw began, so another throw on the same table replaces it.
+     */
+    fun spendHitDice(characterBundle: CharacterBundle, picked: Map<Int, Int>, rolls: List<Int>) {
         val current = characterBundle.character
-        val level = current.level.coerceAtLeast(1)
-        val available = (level - current.spentHitDice).coerceAtLeast(0)
-        val spent = amount.coerceAtLeast(0).coerceAtMost(available)
-        if (spent == 0) return
+        val count = picked.values.sum()
+        if (count <= 0) return
+        val catalog = _catalog.value
+        val healing = hitDiceHealing(rolls, abilityModifier(current.constitution))
 
         viewModelScope.launch {
-            characterRepository.updateHitDice(
-                characterId = current.id,
-                hitDieSides = current.hitDieSides,
-                spentHitDice = (current.spentHitDice + spent).coerceAtMost(level)
-            )
+            if (catalog != null && current.classes.isNotEmpty()) {
+                val classes = spendClassHitDice(classesWithSpentHitDice(current), catalog, picked)
+                characterRepository.updateSpentHitDice(current.id, classes, classes.sumOf { it.spentHitDice })
+            } else {
+                characterRepository.updateHitDice(
+                    characterId = current.id,
+                    hitDieSides = current.hitDieSides,
+                    spentHitDice = current.spentHitDice + count
+                )
+            }
+            characterRepository.updateHitPoints(current.id, heal(healing, current.currentHp, current.maxHp), current.temporaryHp)
         }
     }
 
@@ -518,11 +532,8 @@ class OverviewViewModel(
                 currentHp = current.maxHp,
                 temporaryHp = 0
             )
-            characterRepository.updateHitDice(
-                characterId = current.id,
-                hitDieSides = current.hitDieSides,
-                spentHitDice = 0
-            )
+            // Every hit die back (PHB 2024), those kept by class too.
+            characterRepository.updateSpentHitDice(current.id, current.classes.map { it.copy(spentHitDice = 0) }, 0)
             if (current.spellSlotsRestoreOnLongRest || current.spellSlotsRestoreOnShortRest) {
                 characterRepository.updateSpellSlotRemaining(current.id, current.spellSlotMaximums)
             }
@@ -684,9 +695,11 @@ fun OverviewScreen(
     ) {
         state.character?.let(viewModel::syncAutomaticArmorClass)
     }
+    val catalog by viewModel.catalog.collectAsStateWithLifecycle()
     AttributesSection(viewModel = attributesViewModel) { attributesItems ->
         OverviewContent(
             characterBundle = state.character,
+            catalog = catalog,
             moreItems = attributesItems,
             onOpenLevelUp = onOpenLevelUp,
             onOpenDrawer = onOpenDrawer,
@@ -747,6 +760,8 @@ fun OverviewLevelUpOverlay(viewModel: OverviewViewModel, targetLevel: Int, onClo
 @Composable
 private fun OverviewContent(
     characterBundle: CharacterBundle?,
+    /** For the hit dice by class; null while it loads (and in previews): one pool of the sheet's die. */
+    catalog: CharacterCatalog? = null,
     onOpenLevelUp: (Int) -> Unit = {},
     onOpenDrawer: () -> Unit,
     onOpenDice: () -> Unit,
@@ -765,7 +780,8 @@ private fun OverviewContent(
     onUpdateInitiative: (CharacterBundle, Int) -> Unit,
     onUpdateSpeed: (CharacterBundle, Int) -> Unit,
     onUpdateHitDieSides: (CharacterBundle, Int) -> Unit,
-    onSpendHitDice: (CharacterBundle, Int) -> Unit,
+    /** Hit dice of a short rest read off the table: the picked ones (sides to count) and their rolls. */
+    onSpendHitDice: (CharacterBundle, Map<Int, Int>, List<Int>) -> Unit,
     onToggleInspiration: (CharacterBundle) -> Unit,
     onShortRest: (CharacterBundle) -> Unit,
     onLongRest: (CharacterBundle) -> Unit,
@@ -836,7 +852,6 @@ private fun OverviewContent(
     }
     var isShortRestDialogOpen by remember { mutableStateOf(false) }
     var isLongRestDialogOpen by remember { mutableStateOf(false) }
-    var hitDiceSpendCount by remember(character?.id, character?.spentHitDice, character?.level) { mutableStateOf(0) }
     var draftText by remember(character?.id, character?.name, character?.race, character?.characterClass) {
         mutableStateOf("")
     }
@@ -957,10 +972,7 @@ private fun OverviewContent(
                                 PortraitSideButton(
                                     icon = SideIconShortRest,
                                     contentDescription = text("overview_short_rest"),
-                                    onClick = {
-                                        hitDiceSpendCount = 0
-                                        isShortRestDialogOpen = true
-                                    }
+                                    onClick = { isShortRestDialogOpen = true }
                                 )
                                 PortraitSideButton(
                                     icon = SideIconLongRest,
@@ -1569,117 +1581,29 @@ private fun OverviewContent(
     }
 
     if (isShortRestDialogOpen && characterBundle != null) {
-        val current = characterBundle.character
-        val totalHitDice = current.level.coerceAtLeast(1)
-        val spentHitDice = current.spentHitDice.coerceIn(0, totalHitDice)
-        val availableHitDice = totalHitDice - spentHitDice
-        val spendCount = hitDiceSpendCount.coerceIn(0, availableHitDice)
-        var isHitDieMenuOpen by remember { mutableStateOf(false) }
-
-        EditDialog(
-            title = text("overview_short_rest"),
+        ShortRestDialog(
+            characterBundle = characterBundle,
+            catalog = catalog,
             onDismiss = { isShortRestDialogOpen = false },
-            onConfirm = {
-                if (spendCount > 0) {
-                    onSpendHitDice(characterBundle, spendCount)
-                }
-                onShortRest(characterBundle)
-                hitDiceSpendCount = 0
+            onUpdateHitDieSides = { sides -> onUpdateHitDieSides(characterBundle, sides) },
+            onRest = { picked ->
                 isShortRestDialogOpen = false
-            },
-            confirmLabel = text("overview_short_rest")
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text(
-                    text = text("overview_hit_dice_remaining_hint"),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = colors.text.muted
-                )
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "$availableHitDice/$totalHitDice",
-                        style = MaterialTheme.typography.headlineMedium.copy(
-                            fontSize = typographyTokens.shortRestDiceCount.fontSizeSp.sp
-                        ),
-                        color = colors.text.primary
+                onShortRest(characterBundle)
+                // The picked dice go on the table; each throw that settles heals from the character
+                // as it was now, so a second throw replaces the first.
+                val selection = picked.mapNotNull { (sides, count) -> dieTypeOf(sides)?.let { it to count } }.toMap()
+                if (selection.isNotEmpty()) {
+                    val snapshot = characterBundle
+                    val constitution = abilityModifier(characterBundle.character.constitution)
+                    rollDice(
+                        DiceRollRequest(
+                            selection = selection,
+                            result = { dice -> ShortRestRollResult(dice, constitution) }
+                        ) { dice -> onSpendHitDice(snapshot, picked, dice.map { it.value() }) }
                     )
-                    Box(modifier = Modifier.padding(start = 12.dp)) {
-                        Surface(
-                            shape = RoundedCornerShape(14.dp),
-                            color = colors.surface.button,
-                            onClick = { isHitDieMenuOpen = true }
-                        ) {
-                            Text(
-                                text = "d${current.hitDieSides}",
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 9.dp),
-                                style = MaterialTheme.typography.bodyLarge.copy(
-                                    fontSize = typographyTokens.shortRestDieToken.fontSizeSp.sp
-                                ),
-                                color = colors.text.primary
-                            )
-                        }
-                        DropdownMenu(
-                            expanded = isHitDieMenuOpen,
-                            onDismissRequest = { isHitDieMenuOpen = false }
-                        ) {
-                            hitDieSidesOptions.forEach { sides ->
-                                DropdownMenuItem(
-                                    text = { Text("d$sides") },
-                                    onClick = {
-                                        onUpdateHitDieSides(characterBundle, sides)
-                                        isHitDieMenuOpen = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
-                Text(
-                    text = text("overview_hit_dice_spend_hint"),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = colors.text.muted
-                )
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    TextButton(
-                        onClick = { hitDiceSpendCount = (spendCount - 1).coerceAtLeast(0) },
-                        enabled = spendCount > 0
-                    ) {
-                        Text(
-                            text = "-",
-                            style = MaterialTheme.typography.headlineMedium.copy(
-                                fontSize = typographyTokens.shortRestCounterButton.fontSizeSp.sp
-                            )
-                        )
-                    }
-                    Text(
-                        text = spendCount.toString(),
-                        modifier = Modifier.padding(horizontal = 28.dp),
-                        style = MaterialTheme.typography.headlineMedium.copy(
-                            fontSize = typographyTokens.shortRestCounterValue.fontSizeSp.sp
-                        ),
-                        color = colors.text.primary,
-                        textAlign = TextAlign.Center
-                    )
-                    TextButton(
-                        onClick = { hitDiceSpendCount = (spendCount + 1).coerceAtMost(availableHitDice) },
-                        enabled = spendCount < availableHitDice
-                    ) {
-                        Text(
-                            text = "+",
-                            style = MaterialTheme.typography.headlineMedium.copy(
-                                fontSize = typographyTokens.shortRestCounterButton.fontSizeSp.sp
-                            )
-                        )
-                    }
                 }
             }
-        }
+        )
     }
 
     if (isLongRestDialogOpen && characterBundle != null) {
@@ -3033,9 +2957,11 @@ private fun OverviewPreviewContent(
             "overview_hp_heal" to "Heal",
             "overview_hp_max_dialog_title" to "Edit Max HP",
             "overview_hp_max" to "Max HP",
-            "overview_hit_dice_remaining_hint" to "You currently have",
-            "overview_hit_dice_spend_hint" to "Confirm how many hit dice you want to spend during the rest",
-            "overview_hit_dice_spend" to "Spend",
+            "overview_hit_dice" to "Hit Point Dice",
+            "overview_short_rest_dice_hint" to "Tap a die to pick it for the roll. Spent dice come back after a long rest.",
+            "overview_short_rest_restores" to "Restores",
+            "overview_short_rest_roll" to "Roll %1\$s",
+            "overview_short_rest_confirm" to "Rest",
             "overview_ac_full" to "Armor Class",
             "overview_ac_base" to "Base AC",
             "overview_ac_manual" to "Manual AC",
@@ -3150,7 +3076,7 @@ private fun OverviewPreviewContent(
                 onUpdateInitiative = { _, _ -> },
                 onUpdateSpeed = { _, _ -> },
                 onUpdateHitDieSides = { _, _ -> },
-                onSpendHitDice = { _, _ -> },
+                onSpendHitDice = { _, _, _ -> },
                 onToggleInspiration = {},
                 onShortRest = {},
                 onLongRest = {},

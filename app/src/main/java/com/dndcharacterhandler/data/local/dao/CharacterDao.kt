@@ -149,6 +149,17 @@ interface CharacterDao {
     @Query(
         """
         UPDATE characters
+        SET classesJson = :classesJson,
+            spentHitDice = :spentHitDice,
+            updatedAt = :updatedAt
+        WHERE id = :characterId
+        """
+    )
+    suspend fun updateSpentHitDice(characterId: Long, classesJson: String, spentHitDice: Int, updatedAt: Long)
+
+    @Query(
+        """
+        UPDATE characters
         SET hasInspiration = :hasInspiration,
             updatedAt = :updatedAt
         WHERE id = :characterId

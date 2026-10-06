@@ -3,6 +3,7 @@ package com.dndcharacterhandler.domain.repository
 import com.dndcharacterhandler.domain.model.Condition
 import com.dndcharacterhandler.domain.model.PortraitFraming
 import com.dndcharacterhandler.domain.model.CharacterBundle
+import com.dndcharacterhandler.domain.model.CharacterClassEntry
 import com.dndcharacterhandler.domain.model.CombatResource
 import com.dndcharacterhandler.domain.model.CreatureSize
 import com.dndcharacterhandler.domain.model.InventoryItem
@@ -32,6 +33,8 @@ interface CharacterRepository {
     suspend fun updateInitiative(characterId: Long, initiative: Int, initiativeBonus: Int)
     suspend fun updateSpeed(characterId: Long, speed: Int)
     suspend fun updateHitDice(characterId: Long, hitDieSides: Int, spentHitDice: Int)
+    /** The spent hit dice kept by class, and their total, together. */
+    suspend fun updateSpentHitDice(characterId: Long, classes: List<CharacterClassEntry>, spentHitDice: Int)
     suspend fun updateInspiration(characterId: Long, hasInspiration: Boolean)
     suspend fun updatePassivePerceptionBonus(characterId: Long, bonus: Int)
     suspend fun updateDarkvision(characterId: Long, mode: DarkvisionMode, manualFeet: Int)

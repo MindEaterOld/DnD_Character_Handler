@@ -9,6 +9,7 @@ import com.dndcharacterhandler.domain.model.PortraitFraming
 import com.dndcharacterhandler.domain.model.ArmorClassMode
 import com.dndcharacterhandler.domain.model.Attack
 import com.dndcharacterhandler.domain.model.CharacterBundle
+import com.dndcharacterhandler.domain.model.CharacterClassEntry
 import com.dndcharacterhandler.domain.model.CharacterProficiencyField
 import com.dndcharacterhandler.domain.model.CharacterTextField
 import com.dndcharacterhandler.domain.model.DarkvisionMode
@@ -163,6 +164,18 @@ class CharacterRepositoryImpl(
                 characterId = characterId,
                 hitDieSides = hitDieSides,
                 spentHitDice = spentHitDice.coerceIn(0, sanitizedLevel),
+                updatedAt = System.currentTimeMillis()
+            )
+        }
+    }
+
+    override suspend fun updateSpentHitDice(characterId: Long, classes: List<CharacterClassEntry>, spentHitDice: Int) {
+        writeMutex.withLock {
+            val current = characterDao.getCharacterEntity(characterId) ?: return@withLock
+            characterDao.updateSpentHitDice(
+                characterId = characterId,
+                classesJson = ProgressionJson.encodeClasses(classes),
+                spentHitDice = spentHitDice.coerceIn(0, current.level.coerceAtLeast(1)),
                 updatedAt = System.currentTimeMillis()
             )
         }

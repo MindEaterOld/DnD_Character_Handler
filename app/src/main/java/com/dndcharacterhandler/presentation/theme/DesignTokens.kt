@@ -37,9 +37,6 @@ data class DesignTypographyTokens(
     val miniStatValue: TextSizeToken,
     val miniStatLabel: TextSizeToken,
     val subtitleToken: TextSizeToken,
-    val shortRestDiceCount: TextSizeToken,
-    val shortRestDieToken: TextSizeToken,
-    val shortRestCounterButton: TextSizeToken,
     val shortRestCounterValue: TextSizeToken
 )
 
@@ -244,9 +241,6 @@ val DefaultDesignTokens = DesignTokens(
         miniStatValue = TextSizeToken(fontSizeSp = 28f, lineHeightSp = 30f),
         miniStatLabel = TextSizeToken(fontSizeSp = 12f),
         subtitleToken = TextSizeToken(fontSizeSp = 16f),
-        shortRestDiceCount = TextSizeToken(fontSizeSp = 32f),
-        shortRestDieToken = TextSizeToken(fontSizeSp = 18f),
-        shortRestCounterButton = TextSizeToken(fontSizeSp = 28f),
         shortRestCounterValue = TextSizeToken(fontSizeSp = 40f)
     ),
     colors = DefaultDesignColors
@@ -312,9 +306,6 @@ fun parseDesignTokenSet(json: String): DesignTokenSet {
                 miniStatValue = overview.textToken("miniStatValue", defaults.miniStatValue),
                 miniStatLabel = overview.textToken("miniStatLabel", defaults.miniStatLabel),
                 subtitleToken = overview.textToken("subtitleToken", defaults.subtitleToken),
-                shortRestDiceCount = overview.textToken("shortRestDiceCount", defaults.shortRestDiceCount),
-                shortRestDieToken = overview.textToken("shortRestDieToken", defaults.shortRestDieToken),
-                shortRestCounterButton = overview.textToken("shortRestCounterButton", defaults.shortRestCounterButton),
                 shortRestCounterValue = overview.textToken("shortRestCounterValue", defaults.shortRestCounterValue)
             ),
             palettes = AppTheme.entries.mapNotNull { theme ->

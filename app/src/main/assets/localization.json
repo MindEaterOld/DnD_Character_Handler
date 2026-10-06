@@ -4860,26 +4860,40 @@
     "fr": "pv max",
     "es": "PG máx."
   },
-  "overview_hit_dice_remaining_hint": {
-    "en": "You currently have",
-    "ru": "\u0421\u0435\u0439\u0447\u0430\u0441 \u0443 \u0432\u0430\u0441 \u043e\u0441\u0442\u0430\u043b\u043e\u0441\u044c",
-    "de": "Du hast derzeit",
-    "fr": "Il vous reste actuellement",
-    "es": "Actualmente tienes"
+  "overview_hit_dice": {
+    "en": "Hit Point Dice",
+    "ru": "Кости хитов",
+    "de": "Trefferpunktwürfel",
+    "fr": "Dés de vie",
+    "es": "Dados de golpe"
   },
-  "overview_hit_dice_spend_hint": {
-    "en": "Confirm how many hit dice you want to spend during the rest",
-    "ru": "\u041f\u043e\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u0435, \u0441\u043a\u043e\u043b\u044c\u043a\u043e \u043a\u043e\u0441\u0442\u0435\u0439 \u0445\u0438\u0442\u043e\u0432 \u0445\u043e\u0442\u0438\u0442\u0435 \u043f\u043e\u0442\u0440\u0430\u0442\u0438\u0442\u044c \u0432\u043e \u0432\u0440\u0435\u043c\u044f \u043e\u0442\u0434\u044b\u0445\u0430",
-    "de": "Bestätige, wie viele Trefferwürfel du während der Rast ausgeben möchtest",
-    "fr": "Indiquez combien de dés de vie vous voulez dépenser pendant le repos",
-    "es": "Confirma cuántos dados de golpe quieres gastar durante el descanso"
+  "overview_short_rest_dice_hint": {
+    "en": "Tap a die to pick it for the roll. Spent dice come back after a long rest.",
+    "ru": "Тап по кости — выбрать её для броска. Потраченные вернутся после долгого отдыха.",
+    "de": "Tippe einen Würfel an, um ihn für den Wurf zu wählen. Verbrauchte kommen nach einer langen Rast zurück.",
+    "fr": "Touchez un dé pour le lancer. Les dés dépensés reviennent après un repos long.",
+    "es": "Toca un dado para elegirlo para la tirada. Los gastados vuelven tras un descanso largo."
   },
-  "overview_hit_dice_spend": {
-    "en": "Spend",
-    "ru": "\u041f\u043e\u0442\u0440\u0430\u0442\u0438\u0442\u044c",
-    "de": "Ausgeben",
-    "fr": "Dépenser",
-    "es": "Gastar"
+  "overview_short_rest_restores": {
+    "en": "Restores",
+    "ru": "Восстановится",
+    "de": "Wird aufgefüllt",
+    "fr": "Récupéré",
+    "es": "Se recupera"
+  },
+  "overview_short_rest_roll": {
+    "en": "Roll %1$s",
+    "ru": "Бросить %1$s",
+    "de": "%1$s würfeln",
+    "fr": "Lancer %1$s",
+    "es": "Tirar %1$s"
+  },
+  "overview_short_rest_confirm": {
+    "en": "Rest",
+    "ru": "Отдохнуть",
+    "de": "Rasten",
+    "fr": "Se reposer",
+    "es": "Descansar"
   },
   "overview_edit_ac_title": {
     "en": "Edit Armor Class",
