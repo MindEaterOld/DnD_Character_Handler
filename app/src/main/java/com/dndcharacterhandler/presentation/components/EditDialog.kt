@@ -12,7 +12,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AlertDialogDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledIconButton
@@ -27,9 +30,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.unit.dp
 import com.dndcharacterhandler.presentation.localization.text
+import com.dndcharacterhandler.presentation.theme.FrameStyle
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
+import com.dndcharacterhandler.presentation.theme.LocalThemeLook
 
 /**
  * The app's pop-up: the title with a cross in the corner (closing without saving, no Cancel
@@ -42,6 +48,9 @@ import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
  * asks first ("Delete? This can't be undone."), in a pop-up of its own (owner's choice, 2026-10-04).
  * [scrollable] false for content that scrolls by itself (a LazyColumn). [titleActions] sit before
  * the cross (the dice picker's skin button); [titleLeading] before the title (a back arrow).
+ *
+ * Its title is in the app's serif (`titleLarge`), as the sheet's ([EditSheet]); in Engraving it is an etched panel
+ * with cut corners (owner's choice from boards, 2026-10-07: P1).
  */
 @Composable
 fun EditDialog(
@@ -59,14 +68,28 @@ fun EditDialog(
     content: @Composable ColumnScope.() -> Unit
 ) {
     val colors = LocalDesignTokens.current.colors
+    val etched = LocalThemeLook.current.frames == FrameStyle.ETCHED
     var confirmingDelete by remember { mutableStateOf(false) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        modifier = modifier,
+        // In Engraving the pop-up is an etched panel: its corners cut, its line drawn over its edge.
+        modifier = modifier.then(
+            if (etched) Modifier.drawWithContent {
+                drawContent()
+                drawEngravedFrame(colors.border.panel)
+            } else Modifier
+        ),
+        shape = if (etched) CutCornerShape(EtchedCornerCut) else AlertDialogDefaults.shape,
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 titleLeading?.invoke()
-                Text(text = title, modifier = Modifier.weight(1f))
+                // The app's serif, as its sections' titles (owner's choice from boards, 2026-10-07: P1).
+                Text(
+                    text = title,
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = colors.text.primary
+                )
                 titleActions?.invoke(this)
                 IconButton(onClick = onDismiss) {
                     Icon(

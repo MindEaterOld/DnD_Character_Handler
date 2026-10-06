@@ -951,7 +951,6 @@ internal fun attributesSectionItems(
                 val ids = options.map { it.id }.toSet()
                 OptionGroup(
                     title = text(titleKey),
-                    picked = if (whole) options.size else options.count { it.id in weaponDraft },
                     all = whole,
                     onAll = { weaponDraft = if (whole) weaponDraft - groupId else weaponDraft - ids + groupId }
                 ) {
@@ -965,7 +964,7 @@ internal fun attributesSectionItems(
             // A weapon the sheet has no option for (a pistol from Foundry) can be taken off.
             val custom = weaponDraft.filter { it.startsWith(CustomProficiencyPrefix) }
             if (custom.isNotEmpty()) {
-                OptionGroup(title = text("attributes_group_custom"), picked = custom.size) {
+                OptionGroup(title = text("attributes_group_custom")) {
                     custom.forEach { id -> CustomEntryChip(id.removePrefix(CustomProficiencyPrefix)) { weaponDraft = weaponDraft - id } }
                 }
             }
@@ -999,7 +998,6 @@ internal fun attributesSectionItems(
                 val whole = keys.all { it in defenseDraft }
                 OptionGroup(
                     title = text("attributes_damage_group_$group"),
-                    picked = keys.count { it in defenseDraft },
                     all = whole,
                     onAll = { defenseDraft = if (whole) defenseDraft - keys.toSet() else defenseDraft + keys }
                 ) {
@@ -1009,14 +1007,14 @@ internal fun attributesSectionItems(
                 }
             }
             if (kind == Defenses.IMMUNITY) {
-                OptionGroup(title = text("attributes_defense_conditions"), picked = conditionKeys.count { it in defenseDraft }) {
+                OptionGroup(title = text("attributes_defense_conditions")) {
                     conditionKeys.forEach { key ->
                         OptionChip(defenseName(key, characterCatalog, strings), key in defenseDraft) { defenseDraft = defenseDraft.flipped(key) }
                     }
                 }
             }
             if (extras.isNotEmpty()) {
-                OptionGroup(title = text("attributes_group_other"), picked = extras.count { it in defenseDraft }) {
+                OptionGroup(title = text("attributes_group_other")) {
                     extras.forEach { key ->
                         OptionChip(defenseName(key, characterCatalog, strings), key in defenseDraft) { defenseDraft = defenseDraft.flipped(key) }
                     }
@@ -1041,14 +1039,14 @@ internal fun attributesSectionItems(
         ) {
             listOf("attributes_weapon_simple" to simpleWeaponOptions, "attributes_weapon_martial" to martialWeaponOptions).forEach { (titleKey, options) ->
                 val shown = options.filter { characterCatalog?.masteryOf(it.id) != null || it.id in saved }
-                OptionGroup(title = text(titleKey), picked = shown.count { it.id in masteryDraft }) {
+                OptionGroup(title = text(titleKey)) {
                     shown.forEach { option ->
                         OptionChip(strings[option.labelKey], option.id in masteryDraft) { masteryDraft = masteryDraft.flipped(option.id) }
                     }
                 }
             }
             if (extras.isNotEmpty()) {
-                OptionGroup(title = text("attributes_group_other"), picked = extras.count { it in masteryDraft }) {
+                OptionGroup(title = text("attributes_group_other")) {
                     extras.forEach { id ->
                         OptionChip(weaponName(id, characterCatalog, strings), id in masteryDraft) { masteryDraft = masteryDraft.flipped(id) }
                     }
@@ -1067,7 +1065,7 @@ internal fun attributesSectionItems(
             }
         ) {
             toolProficiencyCategories.forEach { category ->
-                OptionGroup(title = strings[category.labelKey], picked = category.options.count { it.id in toolDraft }) {
+                OptionGroup(title = strings[category.labelKey]) {
                     category.options.forEach { option ->
                         // An artisan's tools by the trade: «Кузнец», not «Инструменты кузнеца» (owner's choice, T2).
                         val label = if (category.id == ArtisansToolsCategory) strings["proficiency_trade_${option.id}"] else strings[option.labelKey]
@@ -1099,7 +1097,7 @@ internal fun attributesSectionItems(
             }
         ) {
             languageProficiencyCategories.forEach { category ->
-                OptionGroup(title = strings[category.labelKey], picked = category.options.count { it.id in languageDraft }) {
+                OptionGroup(title = strings[category.labelKey]) {
                     category.options.forEach { option ->
                         OptionChip(strings[option.labelKey], option.id in languageDraft) { languageDraft = languageDraft.flipped(option.id) }
                     }
@@ -1513,7 +1511,6 @@ private fun SheetRow(
 @Composable
 private fun OptionGroup(
     title: String? = null,
-    picked: Int = 0,
     all: Boolean = false,
     onAll: (() -> Unit)? = null,
     content: @Composable () -> Unit
@@ -1527,17 +1524,12 @@ private fun OptionGroup(
                     .padding(top = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = title,
-                        modifier = Modifier.weight(1f, fill = false),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = colors.text.primary
-                    )
-                    if (picked > 0) {
-                        Text(text = "  ·  $picked", style = MaterialTheme.typography.bodyMedium, color = colors.text.label)
-                    }
-                }
+                Text(
+                    text = title,
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = colors.text.primary
+                )
                 if (onAll != null) {
                     ToggleChip(label = text("attributes_group_all"), selected = all, onClick = onAll, role = Role.Checkbox)
                 }
@@ -1598,7 +1590,7 @@ private fun CustomEntries(
     inputLabel: String,
     onAdd: () -> Unit
 ) {
-    OptionGroup(title = text("attributes_group_custom"), picked = entries.size) {
+    OptionGroup(title = text("attributes_group_custom")) {
         entries.forEach { name -> CustomEntryChip(name) { onRemove(name) } }
         Row(
             modifier = Modifier.fillMaxWidth(),

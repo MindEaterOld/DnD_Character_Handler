@@ -39,7 +39,7 @@ import androidx.compose.ui.unit.dp
 import com.dndcharacterhandler.domain.model.Condition
 import com.dndcharacterhandler.domain.rules.MAX_EXHAUSTION
 import com.dndcharacterhandler.presentation.components.ConcentrationIcon
-import com.dndcharacterhandler.presentation.components.EditDialog
+import com.dndcharacterhandler.presentation.components.EditSheet
 import com.dndcharacterhandler.presentation.components.accent
 import com.dndcharacterhandler.presentation.components.icon
 import com.dndcharacterhandler.presentation.components.nameKey
@@ -138,16 +138,18 @@ private fun ConditionMark(description: String, onClick: () -> Unit, content: @Co
 }
 
 /**
- * Putting conditions on and off (owner's choice from boards, 2026-10-07: U1): exhaustion's level as seven pills, 0 to 6,
- * with what it costs under them; then the conditions in groups — what hinders, what takes the character out, what
- * helps — each a row with its icon, its name and what it does, lit in its colour with a check while it is on.
- * Immunities are shown, not to be put on.
+ * Putting conditions on and off, in a sheet from the bottom (owner's choices from boards, 2026-10-07: U1, S3):
+ * exhaustion's level as seven pills, 0 to 6, with what it costs under them; then the conditions in groups — what
+ * hinders, what takes the character out, what helps — each a row with its icon, its name and what it does, lit in its
+ * colour with a check while it is on. What is ticked applies at once ([onConditions], [onExhaustion]); the sheet keeps
+ * its own picks, so quick taps never wait for the sheet's character. Immunities are shown, not to be put on.
  */
 @Composable
-internal fun ConditionsDialog(
+internal fun ConditionsSheet(
     initialConditions: Set<Condition>,
     initialExhaustion: Int,
-    onSave: (Set<Condition>, Int) -> Unit,
+    onConditions: (Set<Condition>) -> Unit,
+    onExhaustion: (Int) -> Unit,
     onDismiss: () -> Unit,
     /** Conditions the character is immune to: shown, not to be put on. */
     immune: Set<Condition> = emptySet(),
@@ -155,21 +157,27 @@ internal fun ConditionsDialog(
 ) {
     var picked by remember { mutableStateOf(initialConditions) }
     var exhaustion by remember { mutableStateOf(initialExhaustion) }
-    EditDialog(
-        title = text("conditions_title"),
-        onDismiss = onDismiss,
-        onConfirm = { onSave(picked, exhaustion) }
-    ) {
-        ExhaustionPicker(level = exhaustion, immune = exhaustionImmune, onPick = { exhaustion = it })
+    EditSheet(title = text("conditions_title"), onDismiss = onDismiss) {
+        ExhaustionPicker(
+            level = exhaustion,
+            immune = exhaustionImmune,
+            onPick = {
+                exhaustion = it
+                onExhaustion(it)
+            }
+        )
         ConditionGroups.forEach { (titleKey, conditions) ->
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                ConditionGroupTitle(text(titleKey), conditions.count { it in picked })
+                ConditionGroupTitle(text(titleKey))
                 conditions.forEach { condition ->
                     ConditionRow(
                         condition = condition,
                         on = condition in picked,
                         immune = condition in immune && condition !in picked,
-                        onToggle = { picked = if (condition in picked) picked - condition else picked + condition }
+                        onToggle = {
+                            picked = if (condition in picked) picked - condition else picked + condition
+                            onConditions(picked)
+                        }
                     )
                 }
             }
@@ -189,16 +197,15 @@ private val ConditionGroups = listOf(
     "conditions_group_helpful" to listOf(Condition.INVISIBLE)
 )
 
-/** A group's name and, when some are on, how many («· 2»), as the pick-of-many pop-ups have it. */
+/** A group's name, no count after it (owner's choice, 2026-10-07). */
 @Composable
-private fun ConditionGroupTitle(name: String, picked: Int) {
-    val colors = LocalDesignTokens.current.colors
-    Row(modifier = Modifier.padding(bottom = 4.dp), verticalAlignment = Alignment.Bottom) {
-        Text(text = name, style = MaterialTheme.typography.titleMedium, color = colors.text.primary)
-        if (picked > 0) {
-            Text(text = " · $picked", style = MaterialTheme.typography.bodyMedium, color = colors.text.label)
-        }
-    }
+private fun ConditionGroupTitle(name: String) {
+    Text(
+        text = name,
+        modifier = Modifier.padding(bottom = 4.dp),
+        style = MaterialTheme.typography.titleMedium,
+        color = LocalDesignTokens.current.colors.text.primary
+    )
 }
 
 /** Exhaustion's level: seven pills, 0 to 6, a tap sets it; the level is lit in exhaustion's orange; what it costs under. */
@@ -209,18 +216,20 @@ private fun ExhaustionPicker(level: Int, immune: Boolean, onPick: (Int) -> Unit)
     val fire = colors.accent.damageFire
     val shape = RoundedCornerShape(10.dp)
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        ConditionGroupTitle(text("condition_exhaustion"), if (level > 0) 1 else 0)
+        ConditionGroupTitle(text("condition_exhaustion"))
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             (0..MAX_EXHAUSTION).forEach { n ->
                 val on = n == level
+                // None is no harm: picked, it is outlined, not lit in exhaustion's orange.
+                val lit = on && n > 0
                 val enabled = !immune || n <= level
                 Box(
                     modifier = Modifier
                         .weight(1f)
                         .height(36.dp)
                         .clip(shape)
-                        .background(if (on) fire.copy(alpha = HpActionTint) else colors.surface.button)
-                        .then(if (on) Modifier.border(1.dp, fire, shape) else Modifier)
+                        .background(if (lit) fire.copy(alpha = HpActionTint) else colors.surface.button)
+                        .then(if (on) Modifier.border(1.dp, if (lit) fire else colors.text.label, shape) else Modifier)
                         .selectable(selected = on, enabled = enabled, role = Role.RadioButton, onClick = { onPick(n) }),
                     contentAlignment = Alignment.Center
                 ) {
@@ -228,7 +237,8 @@ private fun ExhaustionPicker(level: Int, immune: Boolean, onPick: (Int) -> Unit)
                         text = n.toString(),
                         style = MaterialTheme.typography.titleMedium,
                         color = when {
-                            on -> fire
+                            lit -> fire
+                            on -> colors.text.primary
                             !enabled || n == 0 -> colors.text.subtle
                             else -> colors.text.primary
                         }

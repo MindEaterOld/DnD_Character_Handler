@@ -532,16 +532,16 @@ class OverviewViewModel(
         }
     }
 
+    /** Always written: the conditions' sheet sends each tick at once, before the character it holds is updated. */
     fun updateConditions(characterBundle: CharacterBundle, conditions: Set<Condition>) {
         val current = characterBundle.character
-        if (conditions == current.conditions) return
         viewModelScope.launch { characterRepository.updateConditions(current.id, conditions) }
     }
 
+    /** Always written, as [updateConditions]. */
     fun updateExhaustion(characterBundle: CharacterBundle, exhaustion: Int) {
         val current = characterBundle.character
         val level = exhaustion.coerceIn(0, MAX_EXHAUSTION)
-        if (level == current.exhaustion) return
         viewModelScope.launch { characterRepository.updateExhaustion(current.id, level) }
     }
 
@@ -1739,14 +1739,11 @@ private fun OverviewContent(
     }
 
     if (isConditionsDialogOpen && characterBundle != null) {
-        ConditionsDialog(
+        ConditionsSheet(
             initialConditions = characterBundle.character.conditions,
             initialExhaustion = characterBundle.character.exhaustion,
-            onSave = { conditions, exhaustion ->
-                onUpdateConditions(characterBundle, conditions)
-                onUpdateExhaustion(characterBundle, exhaustion)
-                isConditionsDialogOpen = false
-            },
+            onConditions = { conditions -> onUpdateConditions(characterBundle, conditions) },
+            onExhaustion = { exhaustion -> onUpdateExhaustion(characterBundle, exhaustion) },
             onDismiss = { isConditionsDialogOpen = false },
             immune = Defenses.immuneConditions(decodeProficiencyIds(characterBundle.character.defenses)),
             exhaustionImmune = Defenses.immuneToExhaustion(decodeProficiencyIds(characterBundle.character.defenses))
