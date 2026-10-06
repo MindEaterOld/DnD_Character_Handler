@@ -205,6 +205,7 @@
             "innerGlow": "#42FFFFFF",
             "inner": "#E9E2D9",
             "shadow": "#14000000",
+            "dropShadow": "#8C000000",
             "stroke": "#55A19892",
             "dot": "#2D2730"
           }
@@ -299,6 +300,7 @@
             "innerGlow": "#40D8C7A6",
             "inner": "#D8C7A6",
             "shadow": "#20201F1D",
+            "dropShadow": "#8C000000",
             "stroke": "#709E8850",
             "dot": "#72352F"
           }

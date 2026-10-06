@@ -121,6 +121,8 @@ data class OrnamentColorTokens(
     val innerGlow: Color,
     val inner: Color,
     val shadow: Color,
+    /** A shadow that reads on the dark backgrounds: under the portrait's side buttons. */
+    val dropShadow: Color,
     val stroke: Color,
     val dot: Color
 )
@@ -217,6 +219,7 @@ val DefaultDesignColors = DesignColorTokens(
         innerGlow = Color(0x42FFFFFF),
         inner = Color(0xFFE9E2D9),
         shadow = Color(0x14000000),
+        dropShadow = Color(0x8C000000),
         stroke = Color(0x55A19892),
         dot = Color(0xFF2D2730)
     )
@@ -442,6 +445,7 @@ private fun loadColorTokens(app: JsonObject?): DesignColorTokens {
             innerGlow = ornament.colorToken("innerGlow", defaults.ornament.innerGlow),
             inner = ornament.colorToken("inner", defaults.ornament.inner),
             shadow = ornament.colorToken("shadow", defaults.ornament.shadow),
+            dropShadow = ornament.colorToken("dropShadow", defaults.ornament.dropShadow),
             stroke = ornament.colorToken("stroke", defaults.ornament.stroke),
             dot = ornament.colorToken("dot", defaults.ornament.dot)
         )

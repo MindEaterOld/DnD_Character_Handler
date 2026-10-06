@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation.overview
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -15,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -25,9 +27,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.dndcharacterhandler.presentation.theme.FrameStyle
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
-import com.dndcharacterhandler.presentation.theme.LocalThemeLook
 
 // The side buttons' icons are from Game Icons (game-icons.net), CC BY 3.0: "Aura" by Lorc, "Coffee cup" and
 // "Night sleep" by Delapouite (owner's choice from boards, 2026-10-07). Filled paths on the 24 grid.
@@ -109,10 +109,11 @@ internal val SideIconLongRest: ImageVector get() = NightSleepIcon
 internal val PortraitSideButtonSize = 44.dp
 
 /**
- * A button at the portrait's sides (owner's choice from boards, 2026-10-07: K1): the conditions' on the left, the
- * rests' on the right, all of one kind — a filled circle, the theme's way (the button fill; in Engraving the card's
- * colour in a gold line), its icon in the text's colour. [add] puts a small grey "+" on its lower-right corner, on a
- * dot of the background so it stands apart: the conditions' button adds a condition (P3).
+ * A button at the portrait's sides (owner's choices from boards, 2026-10-07: K1, T4): the conditions' on the left,
+ * the rests' on the right, all of one kind — a coin: the card's dark fill, an outline light above and dim below,
+ * and under it a drop shadow ([ornament.dropShadow]); the shadow is what says "press me", where a stat's mark has
+ * none. Its icon is in the text's colour. [add] puts a small grey "+" on its lower-right corner, on a dot of the
+ * background so it stands apart: the conditions' button adds a condition (P3).
  */
 @Composable
 internal fun PortraitSideButton(
@@ -124,7 +125,6 @@ internal fun PortraitSideButton(
     iconSize: Dp = 24.dp
 ) {
     val colors = LocalDesignTokens.current.colors
-    val etched = LocalThemeLook.current.frames == FrameStyle.ETCHED
     Box(
         modifier = modifier
             .size(PortraitSideButtonSize)
@@ -133,12 +133,27 @@ internal fun PortraitSideButton(
                 role = Role.Button
             }
     ) {
+        // The coin's shadow: a little below it, fading out 5dp past its edge.
+        Canvas(modifier = Modifier.matchParentSize()) {
+            val radius = size.minDimension / 2 + CoinShadowSpread.toPx()
+            val center = center.copy(y = center.y + CoinShadowDrop.toPx())
+            drawCircle(
+                brush = Brush.radialGradient(
+                    0.6f to colors.ornament.dropShadow,
+                    1f to Color.Transparent,
+                    center = center,
+                    radius = radius
+                ),
+                radius = radius,
+                center = center
+            )
+        }
         Box(
             modifier = Modifier
                 .size(PortraitSideButtonSize)
                 .clip(CircleShape)
-                .background(if (etched) colors.surface.card.copy(alpha = 0.85f) else colors.surface.button)
-                .then(if (etched) Modifier.border(1.dp, colors.accent.inspiration, CircleShape) else Modifier)
+                .background(colors.surface.card)
+                .border(1.dp, Brush.verticalGradient(listOf(colors.text.label, colors.border.muted)), CircleShape)
                 .clickable(onClick = onClick),
             contentAlignment = Alignment.Center
         ) {
@@ -169,3 +184,6 @@ internal fun PortraitSideButton(
         }
     }
 }
+
+private val CoinShadowDrop = 2.dp
+private val CoinShadowSpread = 5.dp
