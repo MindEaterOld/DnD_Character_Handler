@@ -13,13 +13,6 @@ import com.dndcharacterhandler.presentation.components.StepButton
 import com.dndcharacterhandler.presentation.components.ToggleChip
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.drawscope.translate
-import androidx.compose.ui.graphics.vector.addPathNodes
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.TextStyle
 import com.dndcharacterhandler.domain.model.Condition
 import com.dndcharacterhandler.domain.rules.Defenses
@@ -1350,64 +1343,6 @@ private fun SkillGroups(
 
 /** The gap between the skills' frames. */
 private val SkillGroupGap = 12.dp
-
-/**
- * The spider hanging under Charisma's frame into the skills' spare room (owner's choice from boards,
- * 2026-10-04): a decoration in the colour of the frames' outline, 22dp in from the column's left edge. Its
- * feet are at the room's bottom, level with the left column's, and its thread runs up to the frame, as long
- * as the room makes it. A [Spacer]: it draws in the height it is given and asks for none, so the columns
- * stay level.
- */
-@Composable
-private fun SkillsSpider(modifier: Modifier = Modifier) {
-    val painter = rememberVectorPainter(SkillsSpiderBody)
-    val tint = LocalDesignTokens.current.colors.border.miniCard
-    Spacer(
-        modifier = modifier.drawBehind {
-            // The icon's own units at 1.3dp each: 26dp from the thread's top to the feet, as the icon draws it.
-            val unit = 1.3.dp.toPx()
-            val bodyWidth = SkillsSpiderBody.viewportWidth * unit
-            val bodyHeight = SkillsSpiderBody.viewportHeight * unit
-            val left = 22.dp.toPx()
-            val bodyTop = size.height - bodyHeight
-            // The thread is two units wide over the body's middle and stops short of the legs, as in the icon.
-            drawRect(
-                color = tint,
-                topLeft = Offset(left + 9.55f * unit, 0f),
-                size = Size(2f * unit, (bodyTop - 1.84f * unit).coerceAtLeast(0f))
-            )
-            translate(left, bodyTop) {
-                with(painter) { draw(Size(bodyWidth, bodyHeight), colorFilter = ColorFilter.tint(tint)) }
-            }
-        }
-    )
-}
-
-/**
- * The spider's body: the "spider-thread" of Material Design Icons by Pictogrammers (Apache 2.0) without its
- * thread, the viewport cut to the figure; [SkillsSpider] draws the thread to the length it needs.
- */
-private val SkillsSpiderBody: ImageVector by lazy {
-    ImageVector.Builder(
-        name = "SkillsSpiderBody",
-        defaultWidth = 21.1.dp,
-        defaultHeight = 13.08.dp,
-        viewportWidth = 21.1f,
-        viewportHeight = 13.08f
-    )
-        .addGroup(translationX = -1.45f, translationY = -8.92f)
-        .addPath(
-            pathData = addPathNodes(
-                "M16.9 15a5 5 0 0 1-.17.55L20 17.42V22h-2v-3.42l-2.26-1.29a4.94 4.94 0 0 1-7.48 0L6 18.58V22H4v-4.58l3.27-1.87A5 5 0 0 1 7.1 15H5.3" +
-                    "l-2.75 1.83l-1.1-1.66L4.7 13h2.4a5 5 0 0 1 .27-.88l-1.56-1l-3.57.88l-.48-2l4.43-1.08l2.31 1.53a5 5 0 0 1 7 0l2.27-1.53L22.24 10" +
-                    "l-.48 2l-3.57-.89l-1.56 1a5 5 0 0 1 .27.89h2.4l3.25 2.16l-1.1 1.66L18.7 15" +
-                    "M11 14a1 1 0 1 0-1 1a1 1 0 0 0 1-1m4 0a1 1 0 1 0-1 1a1 1 0 0 0 1-1"
-            ),
-            fill = SolidColor(Color.Black)
-        )
-        .clearGroup()
-        .build()
-}
 
 /**
  * An ability's short name on a frame's top border: the ability cards' title style, and the skills' groups
