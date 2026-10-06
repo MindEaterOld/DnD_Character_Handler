@@ -32,6 +32,8 @@ fun BiographyScreenPreview() {
             "biography_background" to "Background",
             "biography_faith" to "Faith",
             "biography_homeland" to "Homeland",
+            "size_label" to "Size",
+            "size_medium" to "Medium",
             "biography_age" to "Age",
             "biography_gender" to "Gender",
             "biography_gender_male" to "Male",

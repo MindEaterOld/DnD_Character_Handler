@@ -30,51 +30,71 @@ import com.dndcharacterhandler.presentation.localization.text
 
 /**
  * The character's size: a gnome, a human and a giant, each drawn at its size, in a stat card's
- * frame. [sizes] limits the cells (a species that is Small or Medium); a tap picks one.
+ * frame. [sizes] limits the cells (a species that is Small or Medium); a tap picks one. Without
+ * the frame ([framed] false) where a title already names it: the biography's size pop-up.
  */
 @Composable
 fun SizeToggle(
     selected: CreatureSize?,
     onSelect: (CreatureSize) -> Unit,
     modifier: Modifier = Modifier,
-    sizes: List<CreatureSize> = CreatureSize.entries
+    sizes: List<CreatureSize> = CreatureSize.entries,
+    framed: Boolean = true
 ) {
-    BorderLabelCard(label = text("size_label"), modifier = modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 6.dp, end = 6.dp, top = 10.dp, bottom = 6.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            sizes.forEach { size ->
-                val isSelected = size == selected
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(toggleFill(isSelected))
-                        .clickable { onSelect(size) }
-                        .padding(horizontal = 4.dp, vertical = 8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    // The figures stand on one line, so their heights compare.
-                    Box(modifier = Modifier.height(LargestFigure), contentAlignment = Alignment.BottomCenter) {
-                        Icon(
-                            imageVector = size.figure,
-                            contentDescription = null,
-                            tint = toggleContent(isSelected),
-                            modifier = Modifier.size(size.figureSize)
-                        )
-                    }
-                    Text(
-                        text = text(size.labelKey),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = toggleContent(isSelected),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+    if (framed) {
+        BorderLabelCard(label = text("size_label"), modifier = modifier.fillMaxWidth()) {
+            SizeOptions(
+                selected = selected,
+                onSelect = onSelect,
+                sizes = sizes,
+                modifier = Modifier.padding(start = 6.dp, end = 6.dp, top = 10.dp, bottom = 6.dp)
+            )
+        }
+    } else {
+        SizeOptions(selected = selected, onSelect = onSelect, sizes = sizes, modifier = modifier)
+    }
+}
+
+/** The toggle's cells in a row: each size's figure over its name. */
+@Composable
+private fun SizeOptions(
+    selected: CreatureSize?,
+    onSelect: (CreatureSize) -> Unit,
+    sizes: List<CreatureSize>,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        sizes.forEach { size ->
+            val isSelected = size == selected
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(toggleFill(isSelected))
+                    .clickable { onSelect(size) }
+                    .padding(horizontal = 4.dp, vertical = 8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                // The figures stand on one line, so their heights compare.
+                Box(modifier = Modifier.height(LargestFigure), contentAlignment = Alignment.BottomCenter) {
+                    Icon(
+                        imageVector = size.figure,
+                        contentDescription = null,
+                        tint = toggleContent(isSelected),
+                        modifier = Modifier.size(size.figureSize)
                     )
                 }
+                Text(
+                    text = text(size.labelKey),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = toggleContent(isSelected),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
         }
     }
@@ -97,7 +117,8 @@ private val CreatureSize.figureSize: Dp
         CreatureSize.LARGE -> LargestFigure
     }
 
-private val CreatureSize.figure: ImageVector
+/** The size's figure: the toggle's cell, and the size's icon on the biography (it changes with the size). */
+val CreatureSize.figure: ImageVector
     get() = when (this) {
         CreatureSize.SMALL -> GnomeFigure
         CreatureSize.MEDIUM -> HumanFigure

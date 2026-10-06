@@ -7,13 +7,17 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -67,6 +71,8 @@ import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
 import com.dndcharacterhandler.presentation.components.ScreenBackground
 import com.dndcharacterhandler.presentation.components.ScreenTopActions
 import com.dndcharacterhandler.presentation.components.SizeToggle
+import com.dndcharacterhandler.presentation.components.figure
+import com.dndcharacterhandler.presentation.components.labelKey
 import com.dndcharacterhandler.presentation.components.toggleContent
 import com.dndcharacterhandler.presentation.components.toggleFill
 import com.dndcharacterhandler.presentation.localization.text
@@ -192,6 +198,9 @@ internal fun BiographyContent(
     val colors = LocalDesignTokens.current.colors
     val character = characterBundle?.character
     var editingField by remember { mutableStateOf<BiographyField?>(null) }
+    var editingSize by remember { mutableStateOf(false) }
+    fun row(field: BiographyField, icon: ImageVector, label: String, value: String) =
+        BiographyRow(icon, label, value) { editingField = field }
     if (character == null) {
         ScreenBackground {
             Box(
@@ -234,45 +243,43 @@ internal fun BiographyContent(
                 BiographySection(
                     title = text("biography_identity"),
                     rows = listOf(
-                        BiographyRow(
+                        row(
                             BiographyField.ALIGNMENT,
                             Icons.Outlined.Shield,
                             text("biography_alignment"),
                             localizedAlignment(resolvedCharacter.alignment)
                         ),
-                        BiographyRow(BiographyField.BACKGROUND, Icons.Outlined.Description, text("biography_background"), resolvedCharacter.background),
-                        BiographyRow(BiographyField.FAITH, Icons.Outlined.AutoAwesome, text("biography_faith"), resolvedCharacter.faith),
-                        BiographyRow(BiographyField.HOMELAND, Icons.Outlined.Home, text("biography_homeland"), resolvedCharacter.homeland),
-                        BiographyRow(BiographyField.PERSONALITY_TRAITS, Icons.Outlined.Badge, text("biography_personality_traits"), resolvedCharacter.personalityTraits),
-                        BiographyRow(BiographyField.IDEALS, Icons.Outlined.AutoAwesome, text("biography_ideals"), resolvedCharacter.ideals),
-                        BiographyRow(BiographyField.BONDS, Icons.Outlined.Shield, text("biography_bonds"), resolvedCharacter.bonds),
-                        BiographyRow(BiographyField.FLAWS, Icons.Outlined.Description, text("biography_flaws"), resolvedCharacter.flaws)
+                        row(BiographyField.BACKGROUND, Icons.Outlined.Description, text("biography_background"), resolvedCharacter.background),
+                        row(BiographyField.FAITH, Icons.Outlined.AutoAwesome, text("biography_faith"), resolvedCharacter.faith),
+                        row(BiographyField.HOMELAND, Icons.Outlined.Home, text("biography_homeland"), resolvedCharacter.homeland),
+                        row(BiographyField.PERSONALITY_TRAITS, Icons.Outlined.Badge, text("biography_personality_traits"), resolvedCharacter.personalityTraits),
+                        row(BiographyField.IDEALS, Icons.Outlined.AutoAwesome, text("biography_ideals"), resolvedCharacter.ideals),
+                        row(BiographyField.BONDS, Icons.Outlined.Shield, text("biography_bonds"), resolvedCharacter.bonds),
+                        row(BiographyField.FLAWS, Icons.Outlined.Description, text("biography_flaws"), resolvedCharacter.flaws)
                     ),
-                    valueWeight = 1.45f,
-                    onRowClick = { editingField = it.field }
+                    valueWeight = 1.45f
                 )
             }
             item {
                 BiographySection(
                     modifier = Modifier.padding(top = 14.dp),
                     title = text("biography_appearance"),
-                    top = {
-                        SizeToggle(
-                            selected = resolvedCharacter.size,
-                            onSelect = { onUpdateSize(resolvedBundle, it) },
-                            modifier = Modifier.padding(bottom = 4.dp)
-                        )
-                    },
+                    twoColumns = true,
                     rows = listOf(
-                        BiographyRow(BiographyField.AGE, Icons.Outlined.Inventory2, text("biography_age"), resolvedCharacter.age),
-                        BiographyRow(BiographyField.GENDER, Icons.Outlined.Badge, text("biography_gender"), localizedGender(resolvedCharacter.gender)),
-                        BiographyRow(BiographyField.HEIGHT, Icons.Outlined.Badge, text("biography_height"), localizedMeasuredValue(resolvedCharacter.height)),
-                        BiographyRow(BiographyField.WEIGHT, Icons.Outlined.Inventory2, text("biography_weight"), localizedMeasuredValue(resolvedCharacter.weight)),
-                        BiographyRow(BiographyField.EYES, Icons.Outlined.Visibility, text("biography_eyes"), resolvedCharacter.eyes),
-                        BiographyRow(BiographyField.HAIR, Icons.Outlined.AutoAwesome, text("biography_hair"), resolvedCharacter.hair),
-                        BiographyRow(BiographyField.SKIN, Icons.Outlined.Badge, text("biography_skin"), resolvedCharacter.skin)
-                    ),
-                    onRowClick = { editingField = it.field }
+                        // The size's icon is its own figure: a gnome, a human or a giant.
+                        BiographyRow(
+                            resolvedCharacter.size.figure,
+                            text("size_label"),
+                            text(resolvedCharacter.size.labelKey)
+                        ) { editingSize = true },
+                        row(BiographyField.AGE, Icons.Outlined.Inventory2, text("biography_age"), resolvedCharacter.age),
+                        row(BiographyField.GENDER, Icons.Outlined.Badge, text("biography_gender"), localizedGender(resolvedCharacter.gender)),
+                        row(BiographyField.HEIGHT, Icons.Outlined.Badge, text("biography_height"), localizedMeasuredValue(resolvedCharacter.height)),
+                        row(BiographyField.WEIGHT, Icons.Outlined.Inventory2, text("biography_weight"), localizedMeasuredValue(resolvedCharacter.weight)),
+                        row(BiographyField.EYES, Icons.Outlined.Visibility, text("biography_eyes"), resolvedCharacter.eyes),
+                        row(BiographyField.HAIR, Icons.Outlined.AutoAwesome, text("biography_hair"), resolvedCharacter.hair),
+                        row(BiographyField.SKIN, Icons.Outlined.Badge, text("biography_skin"), resolvedCharacter.skin)
+                    )
                 )
             }
             item {
@@ -311,6 +318,19 @@ internal fun BiographyContent(
             }
         )
     }
+    if (editingSize) {
+        // The three figures; a tap picks the size and closes (owner's choice from boards, 2026-10-06).
+        EditDialog(title = text("size_label"), onDismiss = { editingSize = false }) {
+            SizeToggle(
+                selected = resolvedCharacter.size,
+                onSelect = { size ->
+                    onUpdateSize(resolvedBundle, size)
+                    editingSize = false
+                },
+                framed = false
+            )
+        }
+    }
 }
 
 @Composable
@@ -319,9 +339,8 @@ private fun BiographySection(
     rows: List<BiographyRow>,
     modifier: Modifier = Modifier,
     valueWeight: Float = 1f,
-    /** Shown between the title and the rows (the size of the appearance section). */
-    top: (@Composable () -> Unit)? = null,
-    onRowClick: (BiographyRow) -> Unit = {}
+    /** Two rows to a line, each its label over its value: the appearance's short values. */
+    twoColumns: Boolean = false
 ) {
     val colors = LocalDesignTokens.current.colors
     Column(
@@ -329,30 +348,107 @@ private fun BiographySection(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         BiographySectionTitle(title)
-        top?.invoke()
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(10.dp),
             color = colors.surface.card.copy(alpha = 0.62f),
             border = BorderStroke(1.dp, colors.border.muted)
         ) {
-            Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)) {
-                rows.forEachIndexed { index, row ->
-                    BiographyValueRow(
-                        row = row,
-                        valueWeight = valueWeight,
-                        onClick = { onRowClick(row) }
-                    )
-                    if (index != rows.lastIndex) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(1.dp)
-                                .background(colors.border.muted)
+            if (twoColumns) {
+                BiographyGrid(rows)
+            } else {
+                Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)) {
+                    rows.forEachIndexed { index, row ->
+                        BiographyValueRow(
+                            row = row,
+                            valueWeight = valueWeight,
+                            onClick = row.onClick
                         )
+                        if (index != rows.lastIndex) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(1.dp)
+                                    .background(colors.border.muted)
+                            )
+                        }
                     }
                 }
             }
+        }
+    }
+}
+
+/**
+ * The rows two to a line (owner's choice from boards, 2026-10-06: G2): the lines parted by a line, the
+ * two halves by a shorter one.
+ */
+@Composable
+private fun BiographyGrid(rows: List<BiographyRow>) {
+    val colors = LocalDesignTokens.current.colors
+    val lines = rows.chunked(2)
+    Column(modifier = Modifier.padding(horizontal = 12.dp)) {
+        lines.forEachIndexed { index, line ->
+            Row(modifier = Modifier.height(IntrinsicSize.Min)) {
+                BiographyGridCell(line[0], Modifier.weight(1f), PaddingValues(end = 12.dp))
+                Box(
+                    modifier = Modifier
+                        .width(1.dp)
+                        .fillMaxHeight()
+                        .padding(vertical = 8.dp)
+                        .background(colors.border.muted)
+                )
+                if (line.size > 1) {
+                    BiographyGridCell(line[1], Modifier.weight(1f), PaddingValues(start = 12.dp))
+                } else {
+                    Spacer(modifier = Modifier.weight(1f))
+                }
+            }
+            if (index != lines.lastIndex) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(colors.border.muted)
+                )
+            }
+        }
+    }
+}
+
+/** A half of the grid's line: the icon, and the label small over the value. */
+@Composable
+private fun BiographyGridCell(row: BiographyRow, modifier: Modifier, padding: PaddingValues) {
+    val colors = LocalDesignTokens.current.colors
+    Row(
+        modifier = modifier
+            .fillMaxHeight()
+            .clickable(onClick = row.onClick)
+            .padding(padding)
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = row.icon,
+            contentDescription = null,
+            modifier = Modifier.size(22.dp),
+            tint = colors.text.label
+        )
+        Column(modifier = Modifier.padding(start = 10.dp)) {
+            Text(
+                text = row.label,
+                style = MaterialTheme.typography.labelMedium,
+                color = colors.text.label,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = row.value.ifBlank { text("common_dash") },
+                style = MaterialTheme.typography.bodyLarge,
+                color = colors.text.primary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }
@@ -764,10 +860,10 @@ private fun UnitSwitcher(
 }
 
 private data class BiographyRow(
-    val field: BiographyField,
     val icon: ImageVector,
     val label: String,
-    val value: String
+    val value: String,
+    val onClick: () -> Unit
 )
 
 private data class BiographyChoiceOption(
