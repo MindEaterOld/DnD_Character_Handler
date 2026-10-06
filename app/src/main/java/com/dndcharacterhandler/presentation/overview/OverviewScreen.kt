@@ -1027,6 +1027,7 @@ private fun OverviewContent(
                 Box(modifier = Modifier.pullUp(if (crest) 34.dp else 24.dp)) {
                     OverviewXpBlock(
                         xpInfo = xpInfo,
+                        level = character?.level ?: 1,
                         levelLabel = levelLabel,
                         onEditLevel = { activeField = OverviewEditableField.LEVEL },
                         canLevelUp = character != null &&
@@ -2259,6 +2260,7 @@ private fun HpChange(before: HpPreview, after: HpPreview) {
 @Composable
 private fun OverviewXpBlock(
     xpInfo: XpProgressInfo,
+    level: Int,
     /** "Уровень 3" at the left of the bar's line; a tap on it picks the level. */
     levelLabel: String,
     onEditLevel: () -> Unit,
@@ -2271,7 +2273,25 @@ private fun OverviewXpBlock(
     val colors = LocalDesignTokens.current.colors
     val progressColor = if (xpInfo.hasReachedLevelCap) colors.accent.xpCapped else colors.progress.xpFill
     val trackColor = colors.progress.xpTrack
-    val hairline = LocalThemeLook.current.xpBar == XpBarStyle.HAIRLINE
+    val experience = if (xpInfo.isMaxLevel) {
+        formatter.format(xpInfo.currentXp)
+    } else {
+        "${formatter.format(xpInfo.currentXp)} / ${formatter.format(xpInfo.nextLevelXp)}"
+    }
+    if (LocalThemeLook.current.xpBar == XpBarStyle.MEDALLION) {
+        XpMedallionBar(
+            progress = xpInfo.progress,
+            level = level,
+            levelLabel = levelLabel,
+            experience = experience,
+            fill = progressColor,
+            canLevelUp = canLevelUp,
+            onEditLevel = onEditLevel,
+            onLevelUp = onLevelUp,
+            onClick = onClick
+        )
+        return
+    }
 
     Column(
         modifier = Modifier.clickable(onClick = onClick),
@@ -2303,11 +2323,7 @@ private fun OverviewXpBlock(
             }
             Spacer(modifier = Modifier.weight(1f))
             Text(
-                text = if (xpInfo.isMaxLevel) {
-                    formatter.format(xpInfo.currentXp)
-                } else {
-                    "${formatter.format(xpInfo.currentXp)} / ${formatter.format(xpInfo.nextLevelXp)}"
-                },
+                text = experience,
                 modifier = Modifier
                     .alignByBaseline()
                     .padding(start = 12.dp),
@@ -2321,7 +2337,7 @@ private fun OverviewXpBlock(
                 .fillMaxWidth()
                 .height(16.dp)
         ) {
-            val stroke = (if (hairline) 3.dp else 11.dp).toPx()
+            val stroke = 3.dp.toPx()
             drawLine(
                 color = trackColor,
                 start = Offset(stroke / 2, center.y),
@@ -2336,12 +2352,128 @@ private fun OverviewXpBlock(
                 strokeWidth = stroke,
                 cap = StrokeCap.Round
             )
-            if (hairline) {
-                drawCircle(progressColor, 4.dp.toPx(), Offset((size.width - stroke) * xpInfo.progress + stroke / 2, center.y))
-            }
+            drawCircle(progressColor, 4.dp.toPx(), Offset((size.width - stroke) * xpInfo.progress + stroke / 2, center.y))
         }
     }
 }
+
+/**
+ * Classic's experience (owner's choice from boards, 2026-10-06: C3, D3): the level in an octagon, as the
+ * portrait's frame, on the start of a bar whose ends are cut as the octagon's corners — a stat's outline
+ * round a dark track, the experience filling it. The numbers stand over the bar's end, flush with where its
+ * cut begins. When the experience allows a level up, the octagon and the fill turn gold and "Level UP"
+ * stands over the bar's start. A tap on the octagon picks the level, on the rest adds experience.
+ */
+@Composable
+private fun XpMedallionBar(
+    progress: Float,
+    level: Int,
+    levelLabel: String,
+    experience: String,
+    fill: Color,
+    canLevelUp: Boolean,
+    onEditLevel: () -> Unit,
+    onLevelUp: () -> Unit,
+    onClick: () -> Unit
+) {
+    val colors = LocalDesignTokens.current.colors
+    val mark = if (canLevelUp) colors.accent.inspiration else colors.border.miniCard
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(XpMedallionSize + 4.dp)
+            .clickable(onClick = onClick)
+    ) {
+        Canvas(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = XpMedallionSize / 2 + 14.dp)
+                .height(XpBarHeight)
+                .align(Alignment.CenterStart)
+        ) {
+            val stroke = 1.dp.toPx()
+            val cut = XpBarChamfer.toPx()
+            val outline = chamferedBar(0f, 0f, size.width, size.height, cut)
+            drawPath(outline, colors.surface.card)
+            drawPath(outline, colors.border.miniCard, style = Stroke(stroke))
+            val inset = 3.dp.toPx()
+            val filled = (size.width - 2 * inset) * progress.coerceIn(0f, 1f)
+            if (filled > 0f) {
+                drawPath(
+                    chamferedBar(inset, inset, filled, size.height - 2 * inset, cut * 0.6f),
+                    if (canLevelUp) colors.accent.inspiration else fill
+                )
+            }
+        }
+        // Its right edge where the bar's cut begins.
+        Text(
+            text = experience,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(end = XpBarChamfer),
+            style = MaterialTheme.typography.labelMedium,
+            color = colors.text.label,
+            maxLines = 1
+        )
+        if (canLevelUp) {
+            Text(
+                text = text("levelup_badge"),
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(start = XpMedallionSize + 8.dp)
+                    .clickable(onClick = onLevelUp),
+                style = MaterialTheme.typography.labelMedium,
+                color = colors.accent.inspiration,
+                maxLines = 1
+            )
+        }
+        Box(
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .size(XpMedallionSize)
+                .clip(OctagonShape)
+                .clickable(onClick = onEditLevel)
+                .semantics(mergeDescendants = true) { contentDescription = levelLabel },
+            contentAlignment = Alignment.Center
+        ) {
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                val octagon = octagonPath(center, size.minDimension / 2 - 1.dp.toPx())
+                drawPath(octagon, colors.surface.card)
+                drawPath(octagon, mark, style = Stroke(1.dp.toPx()))
+            }
+            Text(
+                text = level.toString(),
+                style = MaterialTheme.typography.titleLarge,
+                color = if (canLevelUp) colors.accent.inspiration else colors.text.primary
+            )
+        }
+    }
+}
+
+/** A bar's outline from ([left], [top]), [width] × [height], its corners cut by [cut]. */
+private fun chamferedBar(left: Float, top: Float, width: Float, height: Float, cut: Float): Path = Path().apply {
+    val c = minOf(cut, height / 2, width / 2)
+    val right = left + width
+    val bottom = top + height
+    moveTo(left + c, top)
+    lineTo(right - c, top)
+    lineTo(right, top + c)
+    lineTo(right, bottom - c)
+    lineTo(right - c, bottom)
+    lineTo(left + c, bottom)
+    lineTo(left, bottom - c)
+    lineTo(left, top + c)
+    close()
+}
+
+/** The level's octagon on the experience bar. */
+private val XpMedallionSize = 52.dp
+
+/** The experience bar's height, its outline included. */
+private val XpBarHeight = 14.dp
+
+/** How far the experience bar's corners are cut. */
+private val XpBarChamfer = 4.dp
 
 /**
  * The death saving throws under the hit points, as Foundry has them: a tab with a skull pulls the

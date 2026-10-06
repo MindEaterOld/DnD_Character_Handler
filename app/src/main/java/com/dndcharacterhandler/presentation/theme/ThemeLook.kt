@@ -40,8 +40,11 @@ enum class PortraitStyle {
 
 /** The overview's experience bar. */
 enum class XpBarStyle {
-    /** A thick rounded bar. */
-    THICK,
+    /**
+     * The level in an octagon, as the portrait's frame, on the start of a bar whose ends are cut as the
+     * octagon's corners (owner's choice from boards, 2026-10-06: C3, D3).
+     */
+    MEDALLION,
 
     /** A hairline with a dot where the progress ends. */
     HAIRLINE
@@ -52,7 +55,7 @@ val ClassicLook = ThemeLook(
     backdrop = null,
     frames = FrameStyle.ROUNDED,
     portrait = PortraitStyle.OCTAGON,
-    xpBar = XpBarStyle.THICK
+    xpBar = XpBarStyle.MEDALLION
 )
 
 /** Ivory ink on charcoal paper over an engraving of a dragon (ChatGPT, 2026-10-04). */
