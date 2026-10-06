@@ -58,9 +58,9 @@ import kotlin.math.roundToInt
 /**
  * The height and the size together, opened from either cell (owner's choice from boards, 2026-10-06: H2): a rod
  * of heights with a gold knob dragged up and down (or a tap on the rod), by it the figure as tall as the height — the
- * size's own: a gnome, the caped human, a golem — and right of it a quiet human of 175 cm for scale; under them the
- * size the height makes, as the rules have it ([sizeForHeightCm]). The units switch between cm and ft. Saving writes
- * both.
+ * size's own: a gnome, the caped human, a golem — and behind, right of it, a see-through human of 175 cm for scale
+ * without a caption; under them the size the height makes, as the rules have it ([sizeForHeightCm]). The units
+ * switch between cm and ft. Saving writes both.
  */
 @Composable
 internal fun HeightSizeDialog(
@@ -183,13 +183,14 @@ private fun HeightRod(cm: Float, unit: HeightUnit, onChange: (Float) -> Unit) {
         val nameStyle = MaterialTheme.typography.labelMedium.copy(letterSpacing = 1.sp, shadow = haloText)
         val numberStyle = MaterialTheme.typography.labelMedium.copy(shadow = haloText)
 
-        // The figures are the background (owner's choice, 2026-10-06); the human of 175 cm stands before a golem.
+        // The figures are the background (owner's choice, 2026-10-06); the human of 175 cm is the very back of it,
+        // see-through, so a golem in front of it does not cut a grey shape out of it.
         @Composable
         fun scaleHuman() {
             Icon(
                 imageVector = HumanFit.icon,
                 contentDescription = null,
-                tint = colors.text.subtle,
+                tint = colors.text.primary.copy(alpha = ScaleHumanAlpha),
                 modifier = Modifier
                     .absoluteOffset(x = humanX - humanBox / 2, y = rodY(ScaleHumanCm) - humanBox * HumanFit.top)
                     .size(humanBox)
@@ -207,13 +208,8 @@ private fun HeightRod(cm: Float, unit: HeightUnit, onChange: (Float) -> Unit) {
                     .size(width = boxWidth, height = box)
             )
         }
-        if (large) {
-            figure()
-            scaleHuman()
-        } else {
-            scaleHuman()
-            figure()
-        }
+        scaleHuman()
+        figure()
 
         // Over them: the zones' borders, the ground, the rod and its ticks.
         Canvas(modifier = Modifier.fillMaxSize()) {
@@ -256,13 +252,6 @@ private fun HeightRod(cm: Float, unit: HeightUnit, onChange: (Float) -> Unit) {
                 color = if (zone == size) gold else colors.text.label
             )
         }
-        // The scale human's height over its head.
-        Text(
-            text = heightAmount(ScaleHumanCm, unit),
-            modifier = Modifier.absoluteOffset(x = humanX - 12.dp, y = rodY(ScaleHumanCm) - 20.dp),
-            style = numberStyle,
-            color = colors.text.label
-        )
         // The mark from the rod to the figure's head, and the knob, on top.
         Canvas(modifier = Modifier.fillMaxSize()) {
             val x = RodX.toPx()
@@ -276,6 +265,9 @@ private fun HeightRod(cm: Float, unit: HeightUnit, onChange: (Float) -> Unit) {
 }
 
 private val ZoneNamesWidth = 92.dp
+
+// The human of 175 cm is a see-through shadow of the text's ivory (owner's choice, 2026-10-06).
+private const val ScaleHumanAlpha = 0.3f
 
 /** The rod's ticks, (height in cm, a long one): every 10 cm and 50 long, or every half foot and each foot long. */
 private fun ticks(unit: HeightUnit): List<Pair<Float, Boolean>> =
