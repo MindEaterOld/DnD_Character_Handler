@@ -13,6 +13,22 @@ fun abilityModifier(score: Int): Int = Math.floorDiv(score - 10, 2)
 fun carryingCapacity(strength: Int, size: CreatureSize): Double =
     strength.coerceAtLeast(1) * 15.0 * if (size == CreatureSize.LARGE) 2 else 1
 
+/**
+ * Heights by size, in cm. The PHB (2024) gives a Small species about 2–4 ft and a Medium one about 4–8 ft (a goliath,
+ * 7–8 ft, is Medium); beyond is Large. The sheet's height runs from 2 ft to about 10.
+ */
+const val SmallestHeightCm = 61.0
+const val SmallMaxHeightCm = 122.0
+const val MediumMaxHeightCm = 244.0
+const val TallestHeightCm = 300.0
+
+/** The size a height makes: Small under 4 ft, Medium up to 8 ft, Large beyond. */
+fun sizeForHeightCm(cm: Double): CreatureSize = when {
+    cm < SmallMaxHeightCm -> CreatureSize.SMALL
+    cm <= MediumMaxHeightCm -> CreatureSize.MEDIUM
+    else -> CreatureSize.LARGE
+}
+
 fun proficiencyBonusForLevel(level: Int): Int = 2 + ((level.coerceIn(1, 20) - 1) / 4)
 
 fun calculateInitiative(dexterityScore: Int, initiativeBonus: Int): Int =

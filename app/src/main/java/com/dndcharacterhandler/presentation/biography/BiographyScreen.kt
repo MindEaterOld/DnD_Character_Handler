@@ -72,7 +72,6 @@ import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
 import com.dndcharacterhandler.presentation.components.OutlinedPanel
 import com.dndcharacterhandler.presentation.components.ScreenBackground
 import com.dndcharacterhandler.presentation.components.ScreenTopActions
-import com.dndcharacterhandler.presentation.components.SizeToggle
 import com.dndcharacterhandler.presentation.components.figure
 import com.dndcharacterhandler.presentation.components.labelKey
 import com.dndcharacterhandler.presentation.components.toggleContent
@@ -200,7 +199,6 @@ internal fun BiographyContent(
     val colors = LocalDesignTokens.current.colors
     val character = characterBundle?.character
     var editingField by remember { mutableStateOf<BiographyField?>(null) }
-    var editingSize by remember { mutableStateOf(false) }
     fun row(field: BiographyField, icon: ImageVector, label: String, value: String) =
         BiographyRow(icon, label, value) { editingField = field }
     if (character == null) {
@@ -246,19 +244,21 @@ internal fun BiographyContent(
                     character = resolvedCharacter,
                     onEditAlignment = { editingField = BiographyField.ALIGNMENT },
                     onUpdateField = { field, value -> onUpdateField(resolvedBundle, field, value) },
+                    // Two to a line: the size, height, age and weight down the left, the gender, eyes, hair and skin
+                    // down the right (owner's choice, 2026-10-06). The size and the height open one pop-up; the size's
+                    // and the gender's icons change with their value.
                     appearance = listOf(
-                        // The size's and the gender's icons change with their value.
                         BiographyRow(
                             resolvedCharacter.size.figure,
                             text("size_label"),
                             text(resolvedCharacter.size.labelKey)
-                        ) { editingSize = true },
-                        row(BiographyField.AGE, BiographyIconAge, text("biography_age"), resolvedCharacter.age),
+                        ) { editingField = BiographyField.HEIGHT },
                         row(BiographyField.GENDER, genderIcon(resolvedCharacter.gender), text("biography_gender"), localizedGender(resolvedCharacter.gender)),
                         row(BiographyField.HEIGHT, BiographyIconHeight, text("biography_height"), localizedMeasuredValue(resolvedCharacter.height)),
-                        row(BiographyField.WEIGHT, BiographyIconWeight, text("biography_weight"), localizedMeasuredValue(resolvedCharacter.weight)),
                         row(BiographyField.EYES, BiographyIconEyes, text("biography_eyes"), resolvedCharacter.eyes),
+                        row(BiographyField.AGE, BiographyIconAge, text("biography_age"), resolvedCharacter.age),
                         row(BiographyField.HAIR, BiographyIconHair, text("biography_hair"), resolvedCharacter.hair),
+                        row(BiographyField.WEIGHT, BiographyIconWeight, text("biography_weight"), localizedMeasuredValue(resolvedCharacter.weight)),
                         row(BiographyField.SKIN, BiographyIconSkin, text("biography_skin"), resolvedCharacter.skin)
                     )
                 )
@@ -288,7 +288,18 @@ internal fun BiographyContent(
     }
 
     val field = editingField
-    if (field != null) {
+    if (field == BiographyField.HEIGHT) {
+        HeightSizeDialog(
+            currentHeight = resolvedCharacter.height,
+            currentSize = resolvedCharacter.size,
+            onDismiss = { editingField = null },
+            onSave = { height, size ->
+                onUpdateField(resolvedBundle, BiographyField.HEIGHT, height)
+                onUpdateSize(resolvedBundle, size)
+                editingField = null
+            }
+        )
+    } else if (field != null) {
         BiographyEditDialog(
             field = field,
             currentValue = field.valueFrom(resolvedCharacter),
@@ -298,19 +309,6 @@ internal fun BiographyContent(
                 editingField = null
             }
         )
-    }
-    if (editingSize) {
-        // The three figures; a tap picks the size and closes (owner's choice from boards, 2026-10-06).
-        EditDialog(title = text("size_label"), onDismiss = { editingSize = false }) {
-            SizeToggle(
-                selected = resolvedCharacter.size,
-                onSelect = { size ->
-                    onUpdateSize(resolvedBundle, size)
-                    editingSize = false
-                },
-                framed = false
-            )
-        }
     }
 }
 
@@ -363,7 +361,7 @@ private fun BiographyGridCell(row: BiographyRow, modifier: Modifier) {
 
 /** A field's label: gold capitals, spaced out, as a printed character sheet's (owner's choice from boards, 2026-10-06: S2). */
 @Composable
-private fun BiographyLabel(label: String, modifier: Modifier = Modifier) {
+internal fun BiographyLabel(label: String, modifier: Modifier = Modifier) {
     Text(
         text = label.uppercase(),
         modifier = modifier,
@@ -737,11 +735,8 @@ private fun BiographyEditDialog(
             onSave = onSave
         )
 
-        BiographyEditor.HEIGHT -> BiographyHeightDialog(
-            currentValue = currentValue,
-            onDismiss = onDismiss,
-            onSave = onSave
-        )
+        // The height opens HeightSizeDialog with the size instead (see BiographyContent).
+        BiographyEditor.HEIGHT -> Unit
 
         BiographyEditor.WEIGHT -> BiographyWeightDialog(
             currentValue = currentValue,
@@ -852,42 +847,6 @@ private fun BiographySelectionOption(
             style = MaterialTheme.typography.bodyLarge,
             color = toggleContent(selected)
         )
-    }
-}
-
-@Composable
-private fun BiographyHeightDialog(
-    currentValue: String,
-    onDismiss: () -> Unit,
-    onSave: (String) -> Unit
-) {
-    var unit by remember(currentValue) { mutableStateOf(detectHeightUnit(currentValue)) }
-    var amount by remember(currentValue) { mutableStateOf(parseLeadingNumber(currentValue)?.let(::formatNumber).orEmpty()) }
-    val cmLabel = text(HeightUnit.CM.labelKey)
-    val ftLabel = text(HeightUnit.FT.labelKey)
-    EditDialog(
-        title = text("biography_height"),
-        onDismiss = onDismiss,
-        onConfirm = { onSave(formatMeasuredValue(amount, unit.code)) }
-    ) {
-        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            UnitSwitcher(
-                first = cmLabel,
-                second = ftLabel,
-                selected = if (unit == HeightUnit.CM) cmLabel else ftLabel,
-                onSelected = { next ->
-                    val nextUnit = if (next == cmLabel) HeightUnit.CM else HeightUnit.FT
-                    amount = convertHeightAmount(amount, unit, nextUnit)
-                    unit = nextUnit
-                }
-            )
-            OutlinedTextField(
-                value = amount,
-                onValueChange = { amount = it },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
-            )
-        }
     }
 }
 
@@ -1027,7 +986,7 @@ enum class BiographyEditor {
 }
 
 /** [code] is what gets saved in the character ("180 cm"); [labelKey] is how it's shown. */
-private enum class HeightUnit(val code: String, val labelKey: String) {
+internal enum class HeightUnit(val code: String, val labelKey: String) {
     CM("cm", "biography_unit_cm"),
     FT("ft", "inventory_unit_feet")
 }
@@ -1084,25 +1043,14 @@ private fun localizedGender(value: String): String =
         else -> value
     }
 
-private fun detectHeightUnit(value: String): HeightUnit =
+internal fun detectHeightUnit(value: String): HeightUnit =
     if (value.contains("ft", ignoreCase = true) || value.contains("'") || value.contains("\"")) HeightUnit.FT else HeightUnit.CM
 
 private fun detectWeightUnit(value: String): WeightUnit =
     if (value.contains("kg", ignoreCase = true)) WeightUnit.KG else WeightUnit.LB
 
-private fun parseLeadingNumber(value: String): Double? =
+internal fun parseLeadingNumber(value: String): Double? =
     Regex("""-?\d+(?:[.,]\d+)?""").find(value)?.value?.replace(',', '.')?.toDoubleOrNull()
-
-private fun convertHeightAmount(value: String, from: HeightUnit, to: HeightUnit): String {
-    val amount = value.replace(',', '.').toDoubleOrNull() ?: return value
-    if (from == to) return formatNumber(amount)
-    val converted = when {
-        from == HeightUnit.CM && to == HeightUnit.FT -> amount / 30.48
-        from == HeightUnit.FT && to == HeightUnit.CM -> amount * 30.48
-        else -> amount
-    }
-    return formatNumber(converted)
-}
 
 private fun convertWeightAmount(value: String, from: WeightUnit, to: WeightUnit): String {
     val amount = value.replace(',', '.').toDoubleOrNull() ?: return value
@@ -1115,13 +1063,13 @@ private fun convertWeightAmount(value: String, from: WeightUnit, to: WeightUnit)
     return formatNumber(converted)
 }
 
-private fun formatMeasuredValue(amount: String, unit: String): String =
+internal fun formatMeasuredValue(amount: String, unit: String): String =
     amount.trim().takeIf { it.isNotEmpty() }?.let { value ->
         val numeric = value.replace(',', '.').toDoubleOrNull()
         "${numeric?.let(::formatNumber) ?: value} $unit"
     }.orEmpty()
 
-private fun formatNumber(value: Double): String {
+internal fun formatNumber(value: Double): String {
     val rounded = kotlin.math.round(value * 10.0) / 10.0
     return if (rounded % 1.0 == 0.0) rounded.toInt().toString() else rounded.toString()
 }

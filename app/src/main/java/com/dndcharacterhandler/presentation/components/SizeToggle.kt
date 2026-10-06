@@ -30,28 +30,22 @@ import com.dndcharacterhandler.presentation.localization.text
 
 /**
  * The character's size: a gnome, a vampire and a rock golem, each drawn at its size, in a stat card's
- * frame. [sizes] limits the cells (a species that is Small or Medium); a tap picks one. Without
- * the frame ([framed] false) where a title already names it: the biography's size pop-up.
+ * frame. [sizes] limits the cells (a species that is Small or Medium); a tap picks one.
  */
 @Composable
 fun SizeToggle(
     selected: CreatureSize?,
     onSelect: (CreatureSize) -> Unit,
     modifier: Modifier = Modifier,
-    sizes: List<CreatureSize> = CreatureSize.entries,
-    framed: Boolean = true
+    sizes: List<CreatureSize> = CreatureSize.entries
 ) {
-    if (framed) {
-        BorderLabelCard(label = text("size_label"), modifier = modifier.fillMaxWidth()) {
-            SizeOptions(
-                selected = selected,
-                onSelect = onSelect,
-                sizes = sizes,
-                modifier = Modifier.padding(start = 6.dp, end = 6.dp, top = 10.dp, bottom = 6.dp)
-            )
-        }
-    } else {
-        SizeOptions(selected = selected, onSelect = onSelect, sizes = sizes, modifier = modifier)
+    BorderLabelCard(label = text("size_label"), modifier = modifier.fillMaxWidth()) {
+        SizeOptions(
+            selected = selected,
+            onSelect = onSelect,
+            sizes = sizes,
+            modifier = Modifier.padding(start = 6.dp, end = 6.dp, top = 10.dp, bottom = 6.dp)
+        )
     }
 }
 
@@ -117,7 +111,7 @@ private val CreatureSize.figureSize: Dp
         CreatureSize.LARGE -> LargestFigure
     }
 
-/** The size's figure: the toggle's cell, and the size's icon on the biography (it changes with the size). */
+/** The size's figure: the toggle's cell, the size's icon on the biography (it changes with the size), the height pop-up's. */
 val CreatureSize.figure: ImageVector
     get() = when (this) {
         CreatureSize.SMALL -> GnomeFigure

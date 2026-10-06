@@ -3026,6 +3026,20 @@
     "fr": "kg",
     "es": "kg"
   },
+  "biography_height_size_title": {
+    "en": "Height and size",
+    "ru": "Рост и размер",
+    "de": "Körpergröße und Größe",
+    "fr": "Taille et catégorie",
+    "es": "Estatura y tamaño"
+  },
+  "biography_range_from": {
+    "en": "from %s",
+    "ru": "от %s",
+    "de": "ab %s",
+    "fr": "dès %s",
+    "es": "desde %s"
+  },
   "biography_height": {
     "maxChars": 13,
     "en": "Height",

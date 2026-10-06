@@ -1,6 +1,7 @@
 package com.dndcharacterhandler.domain.rules
 
 import com.dndcharacterhandler.domain.model.Character
+import com.dndcharacterhandler.domain.model.CreatureSize
 import com.dndcharacterhandler.domain.model.InventoryArmorDetails
 import com.dndcharacterhandler.domain.model.InventoryArmorType
 import com.dndcharacterhandler.domain.model.InventoryCategory
@@ -21,6 +22,17 @@ class CharacterRulesTest {
         assertEquals(-1, abilityModifier(9))
         assertEquals(5, abilityModifier(20))
         assertEquals(-5, abilityModifier(1))
+    }
+
+    @Test
+    fun sizeForHeight_followsThePhbRanges() {
+        assertEquals(CreatureSize.SMALL, sizeForHeightCm(61.0))
+        assertEquals(CreatureSize.SMALL, sizeForHeightCm(121.9))
+        assertEquals(CreatureSize.MEDIUM, sizeForHeightCm(122.0))
+        assertEquals(CreatureSize.MEDIUM, sizeForHeightCm(180.0))
+        assertEquals(CreatureSize.MEDIUM, sizeForHeightCm(244.0))
+        assertEquals(CreatureSize.LARGE, sizeForHeightCm(244.1))
+        assertEquals(CreatureSize.LARGE, sizeForHeightCm(300.0))
     }
 
     @Test
