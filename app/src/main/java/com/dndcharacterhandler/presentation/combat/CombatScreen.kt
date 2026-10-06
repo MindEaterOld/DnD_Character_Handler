@@ -111,7 +111,9 @@ import com.dndcharacterhandler.domain.repository.SpellCatalogRepository
 import com.dndcharacterhandler.domain.usecase.GetCharacterBundleUseCase
 import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
-import com.dndcharacterhandler.presentation.components.CharacterScreenHeader
+import com.dndcharacterhandler.presentation.components.CharacterHeaderInset
+import com.dndcharacterhandler.presentation.components.PinnedCharacterHeader
+import com.dndcharacterhandler.presentation.components.fadeUnderHeader
 import com.dndcharacterhandler.presentation.components.EditDialog
 import com.dndcharacterhandler.presentation.components.WeaponMasteryDialog
 import com.dndcharacterhandler.presentation.components.FloatingAddButton
@@ -448,18 +450,12 @@ internal fun CombatContent(
     ScreenBackground {
         Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 4.dp, bottom = LocalFloatingButtonsInset.current),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .fadeUnderHeader(),
+                contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = CharacterHeaderInset + 10.dp, bottom = LocalFloatingButtonsInset.current),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                item {
-                    CharacterScreenHeader(
-                        character = character,
-                        onOpenDrawer = onOpenDrawer,
-                        onOpenDice = onOpenDice
-                    )
-                }
-
                 item {
                     StatCardRow {
                         val attacksAgainstMode = attacksAgainst(activeConditions(character.conditions, character.currentHp))
@@ -553,6 +549,7 @@ internal fun CombatContent(
                     }
                 }
             }
+            PinnedCharacterHeader(character = character, onOpenDrawer = onOpenDrawer, onOpenDice = onOpenDice)
 
             FloatingAddButton(
                 onClick = { isAddEntryDialogOpen = true },

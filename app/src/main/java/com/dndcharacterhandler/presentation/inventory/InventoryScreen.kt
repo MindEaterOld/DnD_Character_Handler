@@ -99,7 +99,9 @@ import com.dndcharacterhandler.domain.repository.InventoryCatalogRepository
 import com.dndcharacterhandler.domain.usecase.GetCharacterBundleUseCase
 import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
-import com.dndcharacterhandler.presentation.components.CharacterScreenHeader
+import com.dndcharacterhandler.presentation.components.CharacterHeaderInset
+import com.dndcharacterhandler.presentation.components.PinnedCharacterHeader
+import com.dndcharacterhandler.presentation.components.fadeUnderHeader
 import com.dndcharacterhandler.presentation.components.CardActionButton
 import com.dndcharacterhandler.presentation.components.CardEditButton
 import com.dndcharacterhandler.presentation.components.EditDialog
@@ -472,18 +474,12 @@ internal fun InventoryContent(
         Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
                 state = listState,
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 4.dp, bottom = LocalFloatingButtonsInset.current),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .fadeUnderHeader(),
+                contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = CharacterHeaderInset + 12.dp, bottom = LocalFloatingButtonsInset.current),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                item(key = "header") {
-                    CharacterScreenHeader(
-                        character = character,
-                        onOpenDrawer = onOpenDrawer,
-                        onOpenDice = onOpenDice
-                    )
-                }
-
                 item(key = "currency_row") {
                     CurrencyCardRow(
                         copperPieces = character.copperPieces,
@@ -538,6 +534,7 @@ internal fun InventoryContent(
                     }
                 }
             }
+            PinnedCharacterHeader(character = character, onOpenDrawer = onOpenDrawer, onOpenDice = onOpenDice)
 
             FloatingAddButton(
                 onClick = onAddItem,

@@ -66,7 +66,9 @@ import com.dndcharacterhandler.domain.repository.CharacterRepository
 import com.dndcharacterhandler.domain.usecase.GetCharacterBundleUseCase
 import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
-import com.dndcharacterhandler.presentation.components.CharacterScreenHeader
+import com.dndcharacterhandler.presentation.components.CharacterHeaderInset
+import com.dndcharacterhandler.presentation.components.PinnedCharacterHeader
+import com.dndcharacterhandler.presentation.components.fadeUnderHeader
 import com.dndcharacterhandler.presentation.components.EditDialog
 import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
 import com.dndcharacterhandler.presentation.components.OutlinedPanel
@@ -228,17 +230,12 @@ internal fun BiographyContent(
     ScreenBackground {
         Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 4.dp, bottom = LocalFloatingButtonsInset.current),
+            modifier = Modifier
+                .fillMaxSize()
+                .fadeUnderHeader(),
+            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = CharacterHeaderInset, bottom = LocalFloatingButtonsInset.current),
             verticalArrangement = Arrangement.spacedBy(0.dp)
         ) {
-            item {
-                CharacterScreenHeader(
-                    character = resolvedCharacter,
-                    onOpenDrawer = onOpenDrawer,
-                    onOpenDice = onOpenDice
-                )
-            }
             item {
                 BiographyPersonaSection(
                     character = resolvedCharacter,
@@ -276,6 +273,7 @@ internal fun BiographyContent(
 
             moreItems()
         }
+        PinnedCharacterHeader(character = resolvedCharacter, onOpenDrawer = onOpenDrawer, onOpenDice = onOpenDice)
         onAddNote?.let { add ->
             FloatingAddButton(
                 onClick = add,

@@ -98,7 +98,9 @@ import com.dndcharacterhandler.presentation.SelectedCharacterHolder
 import com.dndcharacterhandler.presentation.components.AutoSizeText
 import com.dndcharacterhandler.presentation.components.CardEditButton
 import com.dndcharacterhandler.presentation.components.EditDialog
-import com.dndcharacterhandler.presentation.components.CharacterScreenHeader
+import com.dndcharacterhandler.presentation.components.CharacterHeaderInset
+import com.dndcharacterhandler.presentation.components.PinnedCharacterHeader
+import com.dndcharacterhandler.presentation.components.fadeUnderHeader
 import com.dndcharacterhandler.presentation.components.ExpandableCard
 import com.dndcharacterhandler.presentation.components.FloatingAddButton
 import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
@@ -286,18 +288,12 @@ internal fun FeaturesContent(
     ScreenBackground {
         Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 4.dp, bottom = LocalFloatingButtonsInset.current),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .fadeUnderHeader(),
+                contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = CharacterHeaderInset + 10.dp, bottom = LocalFloatingButtonsInset.current),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                item {
-                    CharacterScreenHeader(
-                        character = character,
-                        onOpenDrawer = onOpenDrawer,
-                        onOpenDice = onOpenDice
-                    )
-                }
-
                 item {
                     StatCardRow {
                         MiniStatCard(
@@ -366,6 +362,7 @@ internal fun FeaturesContent(
                     }
                 }
             }
+            PinnedCharacterHeader(character = character, onOpenDrawer = onOpenDrawer, onOpenDice = onOpenDice)
 
             FloatingAddButton(
                 onClick = { isAddEntryDialogOpen = true },

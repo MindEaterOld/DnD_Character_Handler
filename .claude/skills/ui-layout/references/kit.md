@@ -8,6 +8,7 @@
 |---|---|---|
 | `ScreenBackground { }` | 9 | Фон темы на всё окно (радиальный градиент или иллюстрация темы — `LocalThemeBackdrop`); экран рисует только свою часть, фон бесшовно продолжается под нижней панелью и системными полосами |
 | `CharacterScreenHeader(character, onOpenDrawer, onOpenDice)` | 7 | Шапка экрана персонажа: меню, кубы, имя и подзаголовок |
+| `PinnedCharacterHeader(…)`, `Modifier.fadeUnderHeader()`, `CharacterHeaderInset` | 5 | Шапка закреплена сверху поверх списка (выбор владельца 2026-10-06): список — `contentPadding(top = CharacterHeaderInset + свой отступ)` и `.fadeUnderHeader()` (уходящее под шапку растворяется), шапка — после списка в том же `Box`, чтобы меню и кубы получали нажатия |
 | `ScreenTopActions(onOpenDrawer, onOpenDice)` | 9 | Верхний ряд: «гамбургер» слева, d20 справа (кнопки 44dp, иконки 28) |
 | `ScreenTopActionButton(onClick) { Icon }` | 2 | Голая иконка верхней панели без заливки, тап-зона 44dp — единственная кнопка без подложки (меню, кубы, отдых столбиком под кубами на обзоре) |
 | `BottomNavigationBar` | — | Панель вкладок: обводка поверх фона, без своей заливки |
