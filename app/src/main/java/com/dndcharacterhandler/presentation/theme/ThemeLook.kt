@@ -3,6 +3,8 @@ package com.dndcharacterhandler.presentation.theme
 import androidx.annotation.DrawableRes
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.dndcharacterhandler.R
 import com.dndcharacterhandler.domain.model.AppTheme
 
@@ -20,6 +22,10 @@ data class ThemeLook(
     val xpBar: XpBarStyle,
     /** White portrait artwork; its geometry is shared, its tint comes from the palette. */
     @DrawableRes val portraitArtwork: Int = R.drawable.gothic_portrait_frame,
+    /** The artwork's transparent margin at its top, as a fraction of its height: where its frame really starts. */
+    val portraitArtworkTop: Float = 0f,
+    /** How far the artwork's ornament hangs below the frame (the engraving's spike): what follows keeps clear of it. */
+    val portraitFoot: Dp = 0.dp,
     val inspiration: InspirationArtwork
 )
 
@@ -75,6 +81,7 @@ val ClassicLook = ThemeLook(
     portrait = PortraitStyle.GOTHIC_FRAME,
     xpBar = XpBarStyle.MEDALLION,
     portraitArtwork = R.drawable.classic_portrait_frame,
+    portraitArtworkTop = 235f / 1422f,
     inspiration = InspirationArtwork(R.drawable.inspiration_classic_off, R.drawable.inspiration_classic_on)
 )
 
@@ -83,6 +90,7 @@ val EngravedLook = ThemeLook(
     backdrop = R.drawable.engraved_overview_background,
     frames = FrameStyle.ETCHED,
     portrait = PortraitStyle.GOTHIC_FRAME,
+    portraitFoot = 26.dp,
     xpBar = XpBarStyle.HAIRLINE,
     inspiration = InspirationArtwork(
         R.drawable.inspiration_engraved_off, R.drawable.inspiration_engraved_on,

@@ -23,7 +23,10 @@ val CharacterHeaderInset = 60.dp
 
 // Under the header the list is clear down to the name's foot and comes back to full where the list starts at rest.
 private val FadeClearTo = 44.dp
-private val FadeFullFrom = 64.dp
+
+/** Where the fade under the header ends: what stands lower is never faded. */
+val CharacterHeaderFadeEnd = 64.dp
+private val FadeFullFrom = CharacterHeaderFadeEnd
 
 /**
  * Fades what scrolls under the pinned header: clear above the name's foot, full again where the list's content
@@ -53,12 +56,24 @@ fun BoxScope.PinnedCharacterHeader(
     onOpenDrawer: () -> Unit,
     onOpenDice: () -> Unit
 ) {
+    PinnedCharacterHeader(name = character.name, onOpenDrawer = onOpenDrawer, onOpenDice = onOpenDice)
+}
+
+/** The same by the name alone, where the character may not be loaded yet; [onNameClick] lets the name rename. */
+@Composable
+fun BoxScope.PinnedCharacterHeader(
+    name: String,
+    onOpenDrawer: () -> Unit,
+    onOpenDice: () -> Unit,
+    onNameClick: (() -> Unit)? = null
+) {
     CharacterScreenHeader(
-        character = character,
+        name = name,
         onOpenDrawer = onOpenDrawer,
         onOpenDice = onOpenDice,
         modifier = Modifier
             .align(Alignment.TopCenter)
-            .padding(start = 24.dp, end = 24.dp, top = 4.dp)
+            .padding(start = 24.dp, end = 24.dp, top = 4.dp),
+        onNameClick = onNameClick
     )
 }

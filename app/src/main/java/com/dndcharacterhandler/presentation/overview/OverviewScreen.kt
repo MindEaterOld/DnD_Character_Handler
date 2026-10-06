@@ -158,8 +158,6 @@ import com.dndcharacterhandler.domain.model.InventoryItem
 import com.dndcharacterhandler.domain.model.AppLanguage
 import com.dndcharacterhandler.domain.rules.MAX_CHARACTER_LEVEL
 import com.dndcharacterhandler.domain.rules.abilityModifier
-import com.dndcharacterhandler.domain.rules.classLabel
-import com.dndcharacterhandler.domain.rules.classWizardTarget
 import com.dndcharacterhandler.domain.rules.levelForExperience
 import com.dndcharacterhandler.domain.rules.calculateArmorClass
 import com.dndcharacterhandler.domain.rules.calculateInitiative
@@ -206,7 +204,10 @@ import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
 import com.dndcharacterhandler.presentation.components.OverlayCloseButton
 import com.dndcharacterhandler.presentation.levelup.LevelUpWizard
 import com.dndcharacterhandler.presentation.components.ScreenBackground
-import com.dndcharacterhandler.presentation.components.ScreenTopActions
+import com.dndcharacterhandler.presentation.components.CharacterHeaderFadeEnd
+import com.dndcharacterhandler.presentation.components.CharacterHeaderInset
+import com.dndcharacterhandler.presentation.components.PinnedCharacterHeader
+import com.dndcharacterhandler.presentation.components.fadeUnderHeader
 import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.DnDTheme
@@ -615,6 +616,12 @@ private data class OverviewStat(
 )
 
 /**
+ * The room the big name and the race · class line under the portrait took, closed since they left it: the name
+ * for the pinned header, the race and the class for the Features screen (owner's choices, 2026-10-06).
+ */
+private val PortraitTextsGap = 44.dp
+
+/**
  * Draws the item [by] higher than its place and gives that room back, so what follows moves up with it:
  * an offset alone would leave the gap below, under the next item.
  */
@@ -835,16 +842,6 @@ private fun OverviewContent(
     }
     val displayName = character?.name?.ifBlank { text("overview_name_placeholder") }
         ?: text("overview_name_placeholder")
-    val raceLabel = character?.race?.ifBlank { text("placeholder_race") } ?: text("placeholder_race")
-    val russian = strings.language == AppLanguage.RUSSIAN
-    val classLabel = remember(character, strings, catalog) {
-        val classes = character?.classes.orEmpty()
-        if (classes.isNotEmpty() && catalog != null) {
-            classLabel(classes, catalog, russian).ifBlank { buildOverviewClassLabel(character, strings) }
-        } else {
-            buildOverviewClassLabel(character, strings)
-        }
-    }
     val rollDice = LocalDiceRoller.current
     // The Wilhelm scream: once, when the character dies (the third failed death save, however it
     // came: a hit, the d20, a circle). Not for one who was dead already when the sheet opened.
@@ -855,8 +852,6 @@ private fun OverviewContent(
         if (wasDead == false && dead) playAssetSound(context, "sounds/wilhelm_scream.mp3")
         wasDead = dead
     }
-    // Two classes and more don't fit at the usual size.
-    val isMulticlass = (character?.classes?.size ?: 0) > 1
     val levelLabel = strings.format("overview_level_format", character?.level ?: 1)
     val xpInfo = remember(character) { buildXpInfo(character) }
 
@@ -906,260 +901,243 @@ private fun OverviewContent(
     }
 
     ScreenBackground {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 4.dp, bottom = LocalFloatingButtonsInset.current),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            item {
-                ScreenTopActions(
-                    onOpenDrawer = onOpenDrawer,
-                    onOpenDice = onOpenDice
-                )
-            }
-
-            item {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
-                        PortraitFrame(
-                            portraitUri = character?.portraitUri,
-                            characterName = displayName,
-                            dead = dead,
-                            framing = character?.portraitFraming ?: PortraitFraming(),
-                            onClick = {
-                                if (characterBundle != null) {
-                                    isPortraitMenuOpen = true
+        // The header is pinned over the list, the name in it (owner's choice, 2026-10-06): the frame, drawn
+        // 47dp above its place, starts below the header's fade, whatever margin its artwork has.
+        val listTop = maxOf(
+            CharacterHeaderInset,
+            CharacterHeaderFadeEnd + 47.dp - GothicPortraitHeight * LocalThemeLook.current.portraitArtworkTop + 4.dp
+        )
+        Box(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .fadeUnderHeader(),
+                contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = listTop, bottom = LocalFloatingButtonsInset.current),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                item {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
+                            PortraitFrame(
+                                portraitUri = character?.portraitUri,
+                                characterName = displayName,
+                                dead = dead,
+                                framing = character?.portraitFraming ?: PortraitFraming(),
+                                onClick = {
+                                    if (characterBundle != null) {
+                                        isPortraitMenuOpen = true
+                                    }
+                                }
+                            )
+                            // The conditions down the left, as the rests go down the right.
+                            if (character != null) {
+                                ConditionsColumn(
+                                    // Unconscious at 0 hit points too: it explains the arrows.
+                                    conditions = activeConditions(character.conditions, character.currentHp),
+                                    exhaustion = character.exhaustion,
+                                    concentrating = concentrationSpell != null,
+                                    onOpenPicker = { isConditionsDialogOpen = true },
+                                    onOpenConcentration = { isEndConcentrationOpen = true },
+                                    modifier = Modifier
+                                        .align(Alignment.TopStart)
+                                        .offset(y = (-2).dp)
+                                )
+                            }
+                            // The rests: bare icons in a column under the dice button, like the top bar's own.
+                            Column(
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .offset(y = (-2).dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                ScreenTopActionButton(onClick = {
+                                    hitDiceSpendCount = 0
+                                    isShortRestDialogOpen = true
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.LocalCafe,
+                                        contentDescription = text("overview_short_rest"),
+                                        tint = colors.text.icon,
+                                        modifier = Modifier.size(28.dp)
+                                    )
+                                }
+                                ScreenTopActionButton(onClick = { isLongRestDialogOpen = true }) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.Bedtime,
+                                        contentDescription = text("overview_long_rest"),
+                                        tint = colors.text.icon,
+                                        modifier = Modifier.size(28.dp)
+                                    )
                                 }
                             }
-                        )
-                        // The conditions down the left, as the rests go down the right.
-                        if (character != null) {
-                            ConditionsColumn(
-                                // Unconscious at 0 hit points too: it explains the arrows.
-                                conditions = activeConditions(character.conditions, character.currentHp),
-                                exhaustion = character.exhaustion,
-                                concentrating = concentrationSpell != null,
-                                onOpenPicker = { isConditionsDialogOpen = true },
-                                onOpenConcentration = { isEndConcentrationOpen = true },
+                            // Inspiration: the theme's candle rests on the portrait's lower-right bevel.
+                            Box(
                                 modifier = Modifier
-                                    .align(Alignment.TopStart)
-                                    .offset(y = (-2).dp)
-                            )
-                        }
-                        // The rests: bare icons in a column under the dice button, like the top bar's own.
-                        Column(
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .offset(y = (-2).dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            ScreenTopActionButton(onClick = {
-                                hitDiceSpendCount = 0
-                                isShortRestDialogOpen = true
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Outlined.LocalCafe,
-                                    contentDescription = text("overview_short_rest"),
-                                    tint = colors.text.icon,
-                                    modifier = Modifier.size(28.dp)
+                                    .offset(y = (-47).dp)
+                                    .then(if (gothic) Modifier.size(GothicPortraitWidth, GothicPortraitHeight)
+                                        else Modifier.size(if (crest) 222.dp else 238.dp)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                InspirationCandle(
+                                    inspired = character?.hasInspiration ?: false,
+                                    onToggle = { if (characterBundle != null) onToggleInspiration(characterBundle) },
+                                    contentDescription = text("overview_inspiration"),
+                                    modifier = if (gothic) Modifier.offset(
+                                        x = GothicPortraitWidth * (963f / 1106f - .5f),
+                                        y = GothicPortraitHeight * (1297f / 1422f - .5f)
+                                    )
+                                        else Modifier.offset(x = PortraitCornerOffset, y = PortraitCornerOffset)
                                 )
                             }
-                            ScreenTopActionButton(onClick = { isLongRestDialogOpen = true }) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Bedtime,
-                                    contentDescription = text("overview_long_rest"),
-                                    tint = colors.text.icon,
-                                    modifier = Modifier.size(28.dp)
-                                )
-                            }
-                        }
-                        // Inspiration: the theme's candle rests on the portrait's lower-right bevel.
-                        Box(
-                            modifier = Modifier
-                                .offset(y = (-47).dp)
-                                .then(if (gothic) Modifier.size(GothicPortraitWidth, GothicPortraitHeight)
-                                    else Modifier.size(if (crest) 222.dp else 238.dp)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            InspirationCandle(
-                                inspired = character?.hasInspiration ?: false,
-                                onToggle = { if (characterBundle != null) onToggleInspiration(characterBundle) },
-                                contentDescription = text("overview_inspiration"),
-                                modifier = if (gothic) Modifier.offset(
-                                    x = GothicPortraitWidth * (963f / 1106f - .5f),
-                                    y = GothicPortraitHeight * (1297f / 1422f - .5f)
-                                )
-                                    else Modifier.offset(x = PortraitCornerOffset, y = PortraitCornerOffset)
-                            )
                         }
                     }
-                    Text(
-                        text = displayName,
-                        modifier = Modifier
-                            .offset(y = (-36).dp)
-                            .clickable {
-                                draftText = character?.name.orEmpty()
-                                activeField = OverviewEditableField.NAME
-                            },
-                        style = MaterialTheme.typography.headlineMedium.copy(
-                            fontSize = typographyTokens.characterName.fontSizeSp.sp,
-                            lineHeight = (typographyTokens.characterName.lineHeightSp ?: typographyTokens.characterName.fontSizeSp).sp
-                        ),
-                        color = colors.text.primary,
-                        textAlign = TextAlign.Center,
-                        maxLines = 2
-                    )
-                    OverviewSubtitleRow(
-                        raceLabel = raceLabel,
-                        classLabel = classLabel,
-                        compactClass = isMulticlass,
-                        modifier = Modifier
-                            .offset(y = (-34).dp)
-                            .padding(top = 2.dp),
-                        onEditRace = {
-                            draftText = character?.race.orEmpty()
-                            activeField = OverviewEditableField.RACE
-                        },
-                        // The class is chosen in the level-up wizard, not typed in.
-                        onEditClass = { character?.let(::classWizardTarget)?.let(onOpenLevelUp) }
-                    )
                 }
-            }
 
-            item {
-                Box(modifier = Modifier.pullUp(if (crest) 34.dp else 24.dp)) {
-                    OverviewXpBlock(
-                        xpInfo = xpInfo,
-                        level = character?.level ?: 1,
-                        levelLabel = levelLabel,
-                        onEditLevel = { activeField = OverviewEditableField.LEVEL },
-                        canLevelUp = character != null &&
-                            character.level < MAX_CHARACTER_LEVEL && levelForExperience(character.experience) > character.level,
-                        onLevelUp = { character?.let { onOpenLevelUp(levelForExperience(it.experience)) } },
-                        onClick = {
-                            experienceEditMode = OverviewExperienceEditMode.ADD
-                            experienceDraft = ""
-                            isExperienceDialogOpen = true
-                        }
-                    )
-                }
-            }
-
-            item {
-                Column(
-                    // With the XP bar's 24dp, 30dp above its place.
-                    modifier = Modifier.pullUp(6.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    // Over the death saves' tray, which slides out from under it.
-                    Box(modifier = Modifier.zIndex(1f)) {
-                        OverviewHpCard(
-                            currentHp = character?.currentHp ?: 0,
-                            maxHp = character?.maxHp ?: 0,
-                            temporaryHp = character?.temporaryHp ?: 0,
-                            hpLabel = text("overview_hp"),
-                            onClick = { openHpDialog(OverviewHpEditMode.DAMAGE) },
-                            onMaxHpClick = {
-                                maxHpDraft = (character?.maxHp ?: 0).toString()
-                                isMaxHpDialogOpen = true
-                            }
-                        )
-                    }
-                    if (characterBundle != null) {
-                        val dying = characterBundle.character.currentHp == 0
-                        DeathSavesTray(
-                            characterId = characterBundle.character.id,
-                            dying = dying,
-                            initiallyOpen = deathSavesOpen,
-                            successes = characterBundle.character.deathSaveSuccesses,
-                            failures = characterBundle.character.deathSaveFailures,
-                            onSetSaves = { successes, failures -> onSetDeathSaves(characterBundle, successes, failures) },
-                            onRoll = {
-                                // Counted from the saves as they are now, so a second throw on the table replaces the first.
-                                val before = DeathSaves(characterBundle.character.deathSaveSuccesses, characterBundle.character.deathSaveFailures)
-                                val snapshot = characterBundle
-                                rollDice(DiceRollRequest(mapOf(DieType.D20 to 1)) { dice ->
-                                    dice.firstOrNull()?.let { onDeathSave(snapshot, before, it.value()) }
-                                })
-                            },
-                            // Healing on the left, damage on the right, each into its own pop-up.
-                            start = {
-                                HpActionButton(
-                                    label = text("overview_hp_heal"),
-                                    icon = Icons.Outlined.Favorite,
-                                    color = colors.accent.heal,
-                                    modifier = Modifier.weight(1f),
-                                    onClick = { openHpDialog(OverviewHpEditMode.HEAL) }
-                                )
-                            },
-                            end = {
-                                HpActionButton(
-                                    label = text("overview_hp_damage"),
-                                    icon = Icons.Outlined.HeartBroken,
-                                    color = colors.accent.dangerHpZero,
-                                    modifier = Modifier.weight(1f),
-                                    onClick = { openHpDialog(OverviewHpEditMode.DAMAGE) }
-                                )
+                item {
+                    Box(modifier = Modifier.pullUp((if (crest) 34.dp else 24.dp) + PortraitTextsGap - LocalThemeLook.current.portraitFoot)) {
+                        OverviewXpBlock(
+                            xpInfo = xpInfo,
+                            level = character?.level ?: 1,
+                            levelLabel = levelLabel,
+                            onEditLevel = { activeField = OverviewEditableField.LEVEL },
+                            canLevelUp = character != null &&
+                                character.level < MAX_CHARACTER_LEVEL && levelForExperience(character.experience) > character.level,
+                            onLevelUp = { character?.let { onOpenLevelUp(levelForExperience(it.experience)) } },
+                            onClick = {
+                                experienceEditMode = OverviewExperienceEditMode.ADD
+                                experienceDraft = ""
+                                isExperienceDialogOpen = true
                             }
                         )
                     }
                 }
-            }
 
-            item {
-                // The fight's three: the initiative, the armor class in its shield, the speed (owner's
-                // choice from boards, 2026-10-05). With the pulls above it, 34dp above its place.
-                val openStat: (OverviewStat) -> Unit = { stat ->
-                    if (stat.field == OverviewMiniStatField.INITIATIVE && character != null) {
-                        // Initiative rolls; its pop-up's "Edit" opens the bonus.
-                        isInitiativeRollOpen = true
-                    } else {
-                        activeMiniStatField = stat.field
-                        miniStatDraft = when (stat.field) {
-                            OverviewMiniStatField.ARMOR_CLASS -> (character?.armorClass ?: 10).toString()
-                            OverviewMiniStatField.INITIATIVE -> (character?.initiativeBonus ?: 0).toString()
-                            OverviewMiniStatField.SPEED -> (character?.speed ?: 30).toString()
+                item {
+                    Column(
+                        // With the XP bar's 24dp, 30dp above its place.
+                        modifier = Modifier.pullUp(6.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        // Over the death saves' tray, which slides out from under it.
+                        Box(modifier = Modifier.zIndex(1f)) {
+                            OverviewHpCard(
+                                currentHp = character?.currentHp ?: 0,
+                                maxHp = character?.maxHp ?: 0,
+                                temporaryHp = character?.temporaryHp ?: 0,
+                                hpLabel = text("overview_hp"),
+                                onClick = { openHpDialog(OverviewHpEditMode.DAMAGE) },
+                                onMaxHpClick = {
+                                    maxHpDraft = (character?.maxHp ?: 0).toString()
+                                    isMaxHpDialogOpen = true
+                                }
+                            )
                         }
-                        if (stat.field == OverviewMiniStatField.ARMOR_CLASS) {
-                            armorClassBaseDraft = (character?.baseArmorClass ?: 10).toString()
-                            armorClassManualDraft = (character?.armorClass ?: 10).toString()
-                            armorClassModeDraft = character?.armorClassMode ?: ArmorClassMode.AUTOMATIC
+                        if (characterBundle != null) {
+                            val dying = characterBundle.character.currentHp == 0
+                            DeathSavesTray(
+                                characterId = characterBundle.character.id,
+                                dying = dying,
+                                initiallyOpen = deathSavesOpen,
+                                successes = characterBundle.character.deathSaveSuccesses,
+                                failures = characterBundle.character.deathSaveFailures,
+                                onSetSaves = { successes, failures -> onSetDeathSaves(characterBundle, successes, failures) },
+                                onRoll = {
+                                    // Counted from the saves as they are now, so a second throw on the table replaces the first.
+                                    val before = DeathSaves(characterBundle.character.deathSaveSuccesses, characterBundle.character.deathSaveFailures)
+                                    val snapshot = characterBundle
+                                    rollDice(DiceRollRequest(mapOf(DieType.D20 to 1)) { dice ->
+                                        dice.firstOrNull()?.let { onDeathSave(snapshot, before, it.value()) }
+                                    })
+                                },
+                                // Healing on the left, damage on the right, each into its own pop-up.
+                                start = {
+                                    HpActionButton(
+                                        label = text("overview_hp_heal"),
+                                        icon = Icons.Outlined.Favorite,
+                                        color = colors.accent.heal,
+                                        modifier = Modifier.weight(1f),
+                                        onClick = { openHpDialog(OverviewHpEditMode.HEAL) }
+                                    )
+                                },
+                                end = {
+                                    HpActionButton(
+                                        label = text("overview_hp_damage"),
+                                        icon = Icons.Outlined.HeartBroken,
+                                        color = colors.accent.dangerHpZero,
+                                        modifier = Modifier.weight(1f),
+                                        onClick = { openHpDialog(OverviewHpEditMode.DAMAGE) }
+                                    )
+                                }
+                            )
                         }
                     }
                 }
-                StatCardRow(modifier = Modifier.pullUp(4.dp)) {
-                    miniStats.forEach { stat ->
-                        if (stat.field == OverviewMiniStatField.ARMOR_CLASS) {
-                            ArmorClassShield(
-                                label = text(stat.labelKey),
-                                value = stat.value,
-                                modifier = Modifier.align(Alignment.CenterVertically),
-                                worse = stat.worse,
-                                better = stat.better,
-                                onClick = { openStat(stat) }
-                            )
+
+                item {
+                    // The fight's three: the initiative, the armor class in its shield, the speed (owner's
+                    // choice from boards, 2026-10-05). With the pulls above it, 34dp above its place.
+                    val openStat: (OverviewStat) -> Unit = { stat ->
+                        if (stat.field == OverviewMiniStatField.INITIATIVE && character != null) {
+                            // Initiative rolls; its pop-up's "Edit" opens the bonus.
+                            isInitiativeRollOpen = true
                         } else {
-                            val statIcon = stat.icon
-                            MiniStatCard(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .align(Alignment.CenterVertically),
-                                value = stat.value,
-                                label = text(stat.labelKey),
-                                icon = if (statIcon == null) null else ({ MiniStatCardIcon(statIcon) }),
-                                valueMarker = if (stat.worse || stat.better) ({ RollMarker(worse = stat.worse, better = stat.better, size = 18.dp) }) else null,
-                                valueColor = changedValueColor(stat.delta),
-                                onClick = { openStat(stat) }
-                            )
+                            activeMiniStatField = stat.field
+                            miniStatDraft = when (stat.field) {
+                                OverviewMiniStatField.ARMOR_CLASS -> (character?.armorClass ?: 10).toString()
+                                OverviewMiniStatField.INITIATIVE -> (character?.initiativeBonus ?: 0).toString()
+                                OverviewMiniStatField.SPEED -> (character?.speed ?: 30).toString()
+                            }
+                            if (stat.field == OverviewMiniStatField.ARMOR_CLASS) {
+                                armorClassBaseDraft = (character?.baseArmorClass ?: 10).toString()
+                                armorClassManualDraft = (character?.armorClass ?: 10).toString()
+                                armorClassModeDraft = character?.armorClassMode ?: ArmorClassMode.AUTOMATIC
+                            }
+                        }
+                    }
+                    StatCardRow(modifier = Modifier.pullUp(4.dp)) {
+                        miniStats.forEach { stat ->
+                            if (stat.field == OverviewMiniStatField.ARMOR_CLASS) {
+                                ArmorClassShield(
+                                    label = text(stat.labelKey),
+                                    value = stat.value,
+                                    modifier = Modifier.align(Alignment.CenterVertically),
+                                    worse = stat.worse,
+                                    better = stat.better,
+                                    onClick = { openStat(stat) }
+                                )
+                            } else {
+                                val statIcon = stat.icon
+                                MiniStatCard(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .align(Alignment.CenterVertically),
+                                    value = stat.value,
+                                    label = text(stat.labelKey),
+                                    icon = if (statIcon == null) null else ({ MiniStatCardIcon(statIcon) }),
+                                    valueMarker = if (stat.worse || stat.better) ({ RollMarker(worse = stat.worse, better = stat.better, size = 18.dp) }) else null,
+                                    valueColor = changedValueColor(stat.delta),
+                                    onClick = { openStat(stat) }
+                                )
+                            }
                         }
                     }
                 }
-            }
 
-            moreItems()
+                moreItems()
+            }
+            PinnedCharacterHeader(
+                name = character?.name.orEmpty(),
+                onOpenDrawer = onOpenDrawer,
+                onOpenDice = onOpenDice,
+                // The name renames here, as the big name under the portrait used to.
+                onNameClick = {
+                    draftText = character?.name.orEmpty()
+                    activeField = OverviewEditableField.NAME
+                }
+            )
         }
     }
 
@@ -1836,53 +1814,6 @@ private fun ExperienceModeButton(
             textAlign = TextAlign.Center
         )
     }
-}
-
-@Composable
-private fun OverviewSubtitleRow(
-    raceLabel: String,
-    classLabel: String,
-    compactClass: Boolean,
-    modifier: Modifier = Modifier,
-    onEditRace: () -> Unit,
-    onEditClass: () -> Unit
-) {
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        SubtitleToken(text = raceLabel, onClick = onEditRace)
-        SubtitleDivider()
-        SubtitleToken(text = classLabel, onClick = onEditClass, compact = compactClass)
-    }
-}
-
-@Composable
-private fun SubtitleToken(
-    text: String,
-    onClick: () -> Unit,
-    compact: Boolean = false
-) {
-    val token = LocalDesignTokens.current.typography.subtitleToken
-    Text(
-        text = text,
-        modifier = Modifier.clickable(onClick = onClick),
-        // Several classes ("Fighter 5 / Rogue 2") step down to the body size of the type scale.
-        style = if (compact) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.bodyLarge.copy(fontSize = token.fontSizeSp.sp),
-        color = LocalDesignTokens.current.colors.text.subtle,
-        textAlign = TextAlign.Center
-    )
-}
-
-@Composable
-private fun SubtitleDivider() {
-    val token = LocalDesignTokens.current.typography.subtitleToken
-    Text(
-        text = " • ",
-        style = MaterialTheme.typography.bodyLarge.copy(fontSize = token.fontSizeSp.sp),
-        color = LocalDesignTokens.current.colors.text.subtle
-    )
 }
 
 @Composable
@@ -2950,14 +2881,6 @@ private val levelThresholds = listOf(
     355000
 )
 
-private fun buildOverviewClassLabel(
-    character: Character?,
-    strings: LocalizedStrings
-): String {
-    val classLabel = character?.characterClass?.ifBlank { strings["placeholder_class"] } ?: strings["placeholder_class"]
-    val subclass = character?.subclass?.ifBlank { null }
-    return if (subclass != null) "$subclass $classLabel" else classLabel
-}
 
 private fun buildXpInfo(character: Character?): XpProgressInfo {
     val currentXp = character?.experience ?: 0

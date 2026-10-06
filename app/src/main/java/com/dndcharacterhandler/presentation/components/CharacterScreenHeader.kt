@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -13,17 +14,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.dndcharacterhandler.domain.model.Character
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 
+/** The character screens' header: the menu, the character's [name] (a placeholder while blank), the dice. */
 @Composable
 fun CharacterScreenHeader(
-    character: Character,
+    name: String,
     onOpenDrawer: () -> Unit,
     onOpenDice: () -> Unit,
-    showTopActions: Boolean = true,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    /** A tap on the name: the overview renames the character there. */
+    onNameClick: (() -> Unit)? = null
 ) {
     val tokens = LocalDesignTokens.current.typography
     val colors = LocalDesignTokens.current.colors
@@ -34,16 +36,16 @@ fun CharacterScreenHeader(
             .height(56.dp),
         contentAlignment = Alignment.Center
     ) {
-        if (showTopActions) {
-            ScreenTopActions(
-                onOpenDrawer = onOpenDrawer,
-                onOpenDice = onOpenDice,
-                modifier = Modifier.align(Alignment.Center)
-            )
-        }
+        ScreenTopActions(
+            onOpenDrawer = onOpenDrawer,
+            onOpenDice = onOpenDice,
+            modifier = Modifier.align(Alignment.Center)
+        )
         Text(
-            text = character.name.ifBlank { text("overview_name_placeholder") },
-            modifier = Modifier.padding(horizontal = 52.dp),
+            text = name.ifBlank { text("overview_name_placeholder") },
+            modifier = Modifier
+                .padding(horizontal = 52.dp)
+                .then(if (onNameClick != null) Modifier.clickable(onClick = onNameClick) else Modifier),
             style = MaterialTheme.typography.titleLarge.copy(fontSize = tokens.titleLarge.fontSizeSp.sp),
             color = colors.text.primary,
             maxLines = 1,
