@@ -4527,6 +4527,153 @@
     "fr": "États",
     "es": "Estados"
   },
+  "condition_poisoned_effect": {
+    "maxChars": 54,
+    "en": "Disadvantage on attacks and checks",
+    "ru": "Помеха на атаки и проверки",
+    "de": "Nachteil bei Angriffen und Proben",
+    "fr": "Désavantage aux attaques et aux tests",
+    "es": "Desventaja en ataques y pruebas"
+  },
+  "condition_frightened_effect": {
+    "maxChars": 54,
+    "en": "Disadvantage on attacks and checks; can’t approach",
+    "ru": "Помеха на атаки и проверки; к источнику не подойти",
+    "de": "Nachteil bei Angriffen und Proben; nicht näherkommen",
+    "fr": "Désavantage aux attaques et tests ; pas d’approche",
+    "es": "Desventaja en ataques y pruebas; no puedes acercarte"
+  },
+  "condition_charmed_effect": {
+    "maxChars": 54,
+    "en": "Can’t attack the charmer; easier for it to sway you",
+    "ru": "Не атакуете очарователя; ему легче вас убедить",
+    "de": "Kein Angriff auf den Bezauberer; er überzeugt leicht",
+    "fr": "Ne peut attaquer le charmeur ; il vous convainc mieux",
+    "es": "No atacas al hechizador; te convence más fácil"
+  },
+  "condition_blinded_effect": {
+    "maxChars": 54,
+    "en": "Your attacks: disadvantage; attacks on you: advantage",
+    "ru": "Ваши атаки с помехой, по вам — с преимуществом",
+    "de": "Eigene Angriffe mit Nachteil, gegen dich mit Vorteil",
+    "fr": "Vos attaques : désavantage ; contre vous : avantage",
+    "es": "Tus ataques con desventaja; contra ti, con ventaja"
+  },
+  "condition_deafened_effect": {
+    "maxChars": 54,
+    "en": "Can’t hear; hearing checks fail",
+    "ru": "Не слышите; проверки на слух проваливаются",
+    "de": "Hörst nichts; Proben aufs Hören misslingen",
+    "fr": "N’entend rien ; tests d’ouïe ratés",
+    "es": "No oyes; fallas las pruebas de oído"
+  },
+  "condition_grappled_effect": {
+    "maxChars": 54,
+    "en": "Speed 0; disadvantage on attacks not on the grappler",
+    "ru": "Скорость 0; помеха на атаки не по схватившему",
+    "de": "Tempo 0; Nachteil bei Angriffen gegen andere",
+    "fr": "Vitesse 0 ; désavantage aux attaques sur d’autres",
+    "es": "Velocidad 0; desventaja al atacar a otros"
+  },
+  "condition_restrained_effect": {
+    "maxChars": 54,
+    "en": "Speed 0; disadvantage on attacks and Dex saves",
+    "ru": "Скорость 0; помеха на атаки и спасброски Лов",
+    "de": "Tempo 0; Nachteil bei Angriffen und GE-Rettungswürfen",
+    "fr": "Vitesse 0 ; désavantage aux attaques et JS de Dex",
+    "es": "Velocidad 0; desventaja en ataques y salvaciones Des"
+  },
+  "condition_prone_effect": {
+    "maxChars": 54,
+    "en": "Crawl; disadvantage on attacks; easy to hit up close",
+    "ru": "Ползком; помеха на атаки; вблизи по вам — преимущество",
+    "de": "Kriechen; Nachteil beim Angriff; nah leicht getroffen",
+    "fr": "Ramper ; désavantage aux attaques ; touché de près",
+    "es": "Gateas; atacas con desventaja; de cerca te aciertan"
+  },
+  "condition_incapacitated_effect": {
+    "maxChars": 54,
+    "en": "No actions or reactions; concentration breaks",
+    "ru": "Ни действий, ни реакций; концентрация прерывается",
+    "de": "Keine Aktionen oder Reaktionen; Konzentration endet",
+    "fr": "Ni actions ni réactions ; la concentration cesse",
+    "es": "Sin acciones ni reacciones; la concentración acaba"
+  },
+  "condition_stunned_effect": {
+    "maxChars": 54,
+    "en": "Incapacitated; Str and Dex saves fail",
+    "ru": "Выход из строя; спасброски Сил и Лов проваливаются",
+    "de": "Kampfunfähig; ST- und GE-Rettungswürfe misslingen",
+    "fr": "Neutralisé ; JS de For et Dex ratés",
+    "es": "Incapacitado; fallas salvaciones de Fue y Des"
+  },
+  "condition_paralyzed_effect": {
+    "maxChars": 54,
+    "en": "Incapacitated, speed 0; hits up close are critical",
+    "ru": "Выход из строя, скорость 0; удар вблизи — критический",
+    "de": "Kampfunfähig, Tempo 0; Nahtreffer sind kritisch",
+    "fr": "Neutralisé, vitesse 0 ; coups de près critiques",
+    "es": "Incapacitado, velocidad 0; golpes cerca son críticos"
+  },
+  "condition_unconscious_effect": {
+    "maxChars": 54,
+    "en": "Incapacitated, prone; hits up close are critical",
+    "ru": "Выход из строя, лежит; удар вблизи — критический",
+    "de": "Kampfunfähig, liegend; Nahtreffer sind kritisch",
+    "fr": "Neutralisé, à terre ; coups de près critiques",
+    "es": "Incapacitado, tumbado; golpes cerca son críticos"
+  },
+  "condition_petrified_effect": {
+    "maxChars": 54,
+    "en": "Stone: incapacitated, resistance to all damage",
+    "ru": "Камень: выход из строя, сопротивление всему урону",
+    "de": "Stein: kampfunfähig, resistent gegen allen Schaden",
+    "fr": "Pierre : neutralisé, résistance à tous les dégâts",
+    "es": "Piedra: incapacitado, resistencia a todo daño"
+  },
+  "condition_invisible_effect": {
+    "maxChars": 54,
+    "en": "Your attacks: advantage; attacks on you: disadvantage",
+    "ru": "Ваши атаки с преимуществом, по вам — с помехой",
+    "de": "Eigene Angriffe mit Vorteil, gegen dich mit Nachteil",
+    "fr": "Vos attaques : avantage ; contre vous : désavantage",
+    "es": "Tus ataques con ventaja; contra ti, con desventaja"
+  },
+  "conditions_group_hindering": {
+    "en": "Hindering",
+    "ru": "Мешают",
+    "de": "Hinderlich",
+    "fr": "Gênants",
+    "es": "Perjudiciales"
+  },
+  "conditions_group_incapacitating": {
+    "en": "Taking you out",
+    "ru": "Выводят из строя",
+    "de": "Außer Gefecht",
+    "fr": "Neutralisants",
+    "es": "Incapacitantes"
+  },
+  "conditions_group_helpful": {
+    "en": "Helpful",
+    "ru": "Помогают",
+    "de": "Hilfreich",
+    "fr": "Utiles",
+    "es": "Útiles"
+  },
+  "conditions_exhaustion_cost": {
+    "en": "−%1$d to d20 rolls · speed −%2$d %3$s · death at 6",
+    "ru": "−%1$d к броскам d20 · скорость −%2$d %3$s · на 6 — смерть",
+    "de": "−%1$d auf W20-Würfe · Tempo −%2$d %3$s · bei 6 Tod",
+    "fr": "−%1$d aux jets de d20 · vitesse −%2$d %3$s · à 6, la mort",
+    "es": "−%1$d a tiradas de d20 · velocidad −%2$d %3$s · a 6, muerte"
+  },
+  "conditions_exhaustion_death": {
+    "en": "Death",
+    "ru": "Смерть",
+    "de": "Tod",
+    "fr": "Mort",
+    "es": "Muerte"
+  },
   "conditions_add": {
     "en": "Add a condition",
     "ru": "Добавить состояние",
@@ -4540,76 +4687,6 @@
     "de": "Erschöpfung %1$d",
     "fr": "Épuisement %1$d",
     "es": "Agotamiento %1$d"
-  },
-  "conditions_exhaustion_effect": {
-    "en": "−%1$d to d20 · −%2$d %3$s",
-    "ru": "−%1$d к d20 · −%2$d %3$s",
-    "de": "−%1$d auf W20 · −%2$d %3$s",
-    "fr": "−%1$d au d20 · −%2$d %3$s",
-    "es": "−%1$d al d20 · −%2$d %3$s"
-  },
-  "conditions_summary_attack_disadvantage": {
-    "en": "disadvantage on attacks",
-    "ru": "помеха на атаки",
-    "de": "Nachteil bei Angriffen",
-    "fr": "désavantage aux attaques",
-    "es": "desventaja en ataques"
-  },
-  "conditions_summary_attack_advantage": {
-    "en": "advantage on attacks",
-    "ru": "преимущество на атаки",
-    "de": "Vorteil bei Angriffen",
-    "fr": "avantage aux attaques",
-    "es": "ventaja en ataques"
-  },
-  "conditions_summary_check_disadvantage": {
-    "en": "disadvantage on ability checks",
-    "ru": "помеха на проверки",
-    "de": "Nachteil bei Attributswürfen",
-    "fr": "désavantage aux tests de caractéristique",
-    "es": "desventaja en pruebas de característica"
-  },
-  "conditions_summary_initiative_disadvantage": {
-    "en": "disadvantage on initiative",
-    "ru": "помеха на инициативу",
-    "de": "Nachteil bei der Initiative",
-    "fr": "désavantage à l'initiative",
-    "es": "desventaja en iniciativa"
-  },
-  "conditions_summary_initiative_advantage": {
-    "en": "advantage on initiative",
-    "ru": "преимущество на инициативу",
-    "de": "Vorteil bei der Initiative",
-    "fr": "avantage à l'initiative",
-    "es": "ventaja en iniciativa"
-  },
-  "conditions_summary_save_fail": {
-    "en": "Strength and Dexterity saves fail",
-    "ru": "спасброски Силы и Ловкости проваливаются",
-    "de": "Stärke- und Geschicklichkeitsrettungswürfe misslingen",
-    "fr": "échec aux jets de sauvegarde de Force et de Dextérité",
-    "es": "fallan las salvaciones de Fuerza y Destreza"
-  },
-  "conditions_summary_dex_save_disadvantage": {
-    "en": "disadvantage on Dexterity saves",
-    "ru": "помеха на спасброски Ловкости",
-    "de": "Nachteil bei Geschicklichkeitsrettungswürfen",
-    "fr": "désavantage aux sauvegardes de Dextérité",
-    "es": "desventaja en salvaciones de Destreza"
-  },
-  "conditions_summary_speed_zero": {
-    "en": "speed 0",
-    "ru": "скорость 0",
-    "de": "Bewegungsrate 0",
-    "fr": "vitesse 0",
-    "es": "velocidad 0"
-  },
-  "conditions_summary_incapacitated": {
-    "en": "no actions or reactions, concentration ends",
-    "ru": "нет действий и реакций, концентрация прерывается",
-    "de": "keine Aktionen oder Reaktionen, Konzentration endet",
-    "fr": "ni actions ni réactions, la concentration prend fin",
-    "es": "sin acciones ni reacciones, la concentración termina"
   },
   "concentration_title": {
     "en": "Concentration",

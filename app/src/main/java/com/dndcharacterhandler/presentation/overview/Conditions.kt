@@ -8,20 +8,17 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.Remove
+import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -37,21 +34,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.dndcharacterhandler.data.localization.LocalizedStrings
 import com.dndcharacterhandler.domain.model.Condition
-import com.dndcharacterhandler.domain.model.SpellcastingAbility
-import com.dndcharacterhandler.domain.rules.D20Test
 import com.dndcharacterhandler.domain.rules.MAX_EXHAUSTION
-import com.dndcharacterhandler.domain.rules.RollMode
-import com.dndcharacterhandler.domain.rules.effectiveConditions
-import com.dndcharacterhandler.domain.rules.effectiveSpeed
-import com.dndcharacterhandler.domain.rules.rollEffects
 import com.dndcharacterhandler.presentation.components.ConcentrationIcon
 import com.dndcharacterhandler.presentation.components.EditDialog
-import com.dndcharacterhandler.presentation.components.StepButton
 import com.dndcharacterhandler.presentation.components.accent
 import com.dndcharacterhandler.presentation.components.icon
 import com.dndcharacterhandler.presentation.components.nameKey
@@ -150,10 +138,11 @@ private fun ConditionMark(description: String, onClick: () -> Unit, content: @Co
 }
 
 /**
- * Putting conditions on and off: exhaustion's level by steps (with what it costs), the conditions as
- * toggles, and what they all do together to the rolls in one line under them.
+ * Putting conditions on and off (owner's choice from boards, 2026-10-07: U1): exhaustion's level as seven pills, 0 to 6,
+ * with what it costs under them; then the conditions in groups — what hinders, what takes the character out, what
+ * helps — each a row with its icon, its name and what it does, lit in its colour with a check while it is on.
+ * Immunities are shown, not to be put on.
  */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun ConditionsDialog(
     initialConditions: Set<Condition>,
@@ -164,8 +153,6 @@ internal fun ConditionsDialog(
     immune: Set<Condition> = emptySet(),
     exhaustionImmune: Boolean = false
 ) {
-    val strings = LocalStrings.current
-    val colors = LocalDesignTokens.current.colors
     var picked by remember { mutableStateOf(initialConditions) }
     var exhaustion by remember { mutableStateOf(initialExhaustion) }
     EditDialog(
@@ -173,140 +160,165 @@ internal fun ConditionsDialog(
         onDismiss = onDismiss,
         onConfirm = { onSave(picked, exhaustion) }
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(
-                text = text("condition_exhaustion"),
-                modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.bodyLarge,
-                color = colors.text.primary
-            )
-            StepButton(
-                icon = Icons.Outlined.Remove,
-                contentDescription = text("common_decrease"),
-                onClick = { exhaustion -= 1 },
-                enabled = exhaustion > 0,
-                size = 40.dp
-            )
-            Text(
-                text = exhaustion.toString(),
-                modifier = Modifier.widthIn(min = 20.dp),
-                style = MaterialTheme.typography.titleLarge,
-                color = if (exhaustion > 0) colors.accent.damageFire else colors.text.subtle,
-                textAlign = TextAlign.Center
-            )
-            StepButton(
-                icon = Icons.Outlined.Add,
-                contentDescription = text("common_increase"),
-                onClick = { exhaustion += 1 },
-                enabled = exhaustion < MAX_EXHAUSTION && !exhaustionImmune,
-                size = 40.dp
-            )
-        }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            ExhaustionPips(exhaustion)
-            Spacer(modifier = Modifier.weight(1f))
-            if (exhaustion > 0) {
-                Text(
-                    text = strings.format("conditions_exhaustion_effect", 2 * exhaustion, 5 * exhaustion, strings["inventory_unit_feet"]),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = colors.text.muted
-                )
+        ExhaustionPicker(level = exhaustion, immune = exhaustionImmune, onPick = { exhaustion = it })
+        ConditionGroups.forEach { (titleKey, conditions) ->
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                ConditionGroupTitle(text(titleKey), conditions.count { it in picked })
+                conditions.forEach { condition ->
+                    ConditionRow(
+                        condition = condition,
+                        on = condition in picked,
+                        immune = condition in immune && condition !in picked,
+                        onToggle = { picked = if (condition in picked) picked - condition else picked + condition }
+                    )
+                }
             }
-        }
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Condition.entries.forEach { condition ->
-                ConditionToggle(
-                    condition = condition,
-                    on = condition in picked,
-                    immune = condition in immune && condition !in picked,
-                    onToggle = { picked = if (condition in picked) picked - condition else picked + condition }
-                )
-            }
-        }
-        conditionsSummary(picked, strings)?.let { summary ->
-            Text(text = summary, style = MaterialTheme.typography.bodyMedium, color = colors.text.muted)
         }
     }
 }
 
-/** A condition to pick: its colour at 12 % with its colour's text while on, the standard button fill while off. */
+/** The groups, each condition once: what hinders, what takes the character out, what helps. */
+private val ConditionGroups = listOf(
+    "conditions_group_hindering" to listOf(
+        Condition.POISONED, Condition.FRIGHTENED, Condition.CHARMED, Condition.BLINDED,
+        Condition.DEAFENED, Condition.GRAPPLED, Condition.RESTRAINED, Condition.PRONE
+    ),
+    "conditions_group_incapacitating" to listOf(
+        Condition.INCAPACITATED, Condition.STUNNED, Condition.PARALYZED, Condition.UNCONSCIOUS, Condition.PETRIFIED
+    ),
+    "conditions_group_helpful" to listOf(Condition.INVISIBLE)
+)
+
+/** A group's name and, when some are on, how many («· 2»), as the pick-of-many pop-ups have it. */
 @Composable
-private fun ConditionToggle(condition: Condition, on: Boolean, immune: Boolean = false, onToggle: () -> Unit) {
+private fun ConditionGroupTitle(name: String, picked: Int) {
     val colors = LocalDesignTokens.current.colors
-    val accent = condition.accent()
-    Row(
-        modifier = Modifier
-            .height(36.dp)
-            .clip(RoundedCornerShape(18.dp))
-            .background(if (on) accent.copy(alpha = HpActionTint) else colors.surface.button)
-            .toggleable(value = on, enabled = !immune, role = Role.Checkbox, onValueChange = { onToggle() })
-            .padding(horizontal = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(condition.icon, contentDescription = null, tint = if (on) accent else if (immune) colors.text.subtle else colors.text.primary, modifier = Modifier.size(16.dp))
+    Row(modifier = Modifier.padding(bottom = 4.dp), verticalAlignment = Alignment.Bottom) {
+        Text(text = name, style = MaterialTheme.typography.titleMedium, color = colors.text.primary)
+        if (picked > 0) {
+            Text(text = " · $picked", style = MaterialTheme.typography.bodyMedium, color = colors.text.label)
+        }
+    }
+}
+
+/** Exhaustion's level: seven pills, 0 to 6, a tap sets it; the level is lit in exhaustion's orange; what it costs under. */
+@Composable
+private fun ExhaustionPicker(level: Int, immune: Boolean, onPick: (Int) -> Unit) {
+    val strings = LocalStrings.current
+    val colors = LocalDesignTokens.current.colors
+    val fire = colors.accent.damageFire
+    val shape = RoundedCornerShape(10.dp)
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        ConditionGroupTitle(text("condition_exhaustion"), if (level > 0) 1 else 0)
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            (0..MAX_EXHAUSTION).forEach { n ->
+                val on = n == level
+                val enabled = !immune || n <= level
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(36.dp)
+                        .clip(shape)
+                        .background(if (on) fire.copy(alpha = HpActionTint) else colors.surface.button)
+                        .then(if (on) Modifier.border(1.dp, fire, shape) else Modifier)
+                        .selectable(selected = on, enabled = enabled, role = Role.RadioButton, onClick = { onPick(n) }),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = n.toString(),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = when {
+                            on -> fire
+                            !enabled || n == 0 -> colors.text.subtle
+                            else -> colors.text.primary
+                        }
+                    )
+                }
+            }
+        }
         Text(
-            text = if (immune) "${text(condition.nameKey)} · ${text("conditions_immune")}" else text(condition.nameKey),
-            modifier = Modifier.padding(start = 6.dp),
-            style = MaterialTheme.typography.bodyMedium,
-            color = when {
-                on -> accent
-                immune -> colors.text.subtle
-                else -> colors.text.primary
+            text = when {
+                immune && level == 0 -> text("conditions_immune")
+                level == 0 -> text("common_none")
+                level >= MAX_EXHAUSTION -> text("conditions_exhaustion_death")
+                else -> strings.format("conditions_exhaustion_cost", 2 * level, 5 * level, strings["inventory_unit_feet"])
             },
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            style = MaterialTheme.typography.labelMedium,
+            color = if (level == 0) colors.text.subtle else colors.text.muted
         )
     }
 }
 
-/** Exhaustion's six levels as pips, the reached ones in its orange. */
+/**
+ * A condition to put on or off: its icon, its name and what it does; while on, the row is lit in its colour at 12 %
+ * with a check in it. An immunity is quiet and can't be put on.
+ */
 @Composable
-private fun ExhaustionPips(level: Int) {
+private fun ConditionRow(condition: Condition, on: Boolean, immune: Boolean, onToggle: () -> Unit) {
     val colors = LocalDesignTokens.current.colors
-    Row(horizontalArrangement = Arrangement.spacedBy(5.dp), verticalAlignment = Alignment.CenterVertically) {
-        repeat(MAX_EXHAUSTION) { index ->
-            val reached = index < level
-            Box(
-                modifier = Modifier
-                    .size(12.dp)
-                    .clip(CircleShape)
-                    .background(if (reached) colors.accent.damageFire else Color.Transparent)
-                    .border(1.5.dp, if (reached) colors.accent.damageFire else colors.text.label, CircleShape)
+    val accent = condition.accent()
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .background(if (on) accent.copy(alpha = HpActionTint) else Color.Transparent)
+            .toggleable(value = on, enabled = !immune, role = Role.Checkbox, onValueChange = { onToggle() })
+            .padding(horizontal = 8.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = condition.icon,
+            contentDescription = null,
+            tint = when {
+                on -> accent
+                immune -> colors.text.subtle
+                else -> colors.text.label
+            },
+            modifier = Modifier.size(22.dp)
+        )
+        Column(
+            modifier = Modifier
+                .padding(start = 12.dp)
+                .weight(1f)
+        ) {
+            Text(
+                text = if (immune) "${text(condition.nameKey)} · ${text("conditions_immune")}" else text(condition.nameKey),
+                style = MaterialTheme.typography.bodyLarge,
+                color = when {
+                    on -> accent
+                    immune -> colors.text.subtle
+                    else -> colors.text.primary
+                },
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
+            Text(
+                text = text(condition.effectKey),
+                style = MaterialTheme.typography.labelMedium,
+                color = colors.text.subtle,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        Box(
+            modifier = Modifier
+                .padding(start = 8.dp)
+                .size(22.dp)
+                .clip(CircleShape)
+                .then(if (on) Modifier.background(accent) else Modifier.border(1.5.dp, colors.border.panel, CircleShape)),
+            contentAlignment = Alignment.Center
+        ) {
+            if (on) {
+                Icon(
+                    imageVector = Icons.Outlined.Check,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
         }
     }
 }
 
-/** What the picked conditions do to the rolls, in one line; null when they do nothing there. */
-private fun conditionsSummary(conditions: Set<Condition>, strings: LocalizedStrings): String? {
-    if (conditions.isEmpty()) return null
-    val attack = rollEffects(D20Test.Attack, conditions, 0)
-    val check = rollEffects(D20Test.AbilityCheck(SpellcastingAbility.STRENGTH), conditions, 0)
-    val dexteritySave = rollEffects(D20Test.SavingThrow(SpellcastingAbility.DEXTERITY), conditions, 0)
-    val initiative = rollEffects(D20Test.Initiative, conditions, 0)
-    val parts = buildList {
-        when (attack.mode) {
-            RollMode.DISADVANTAGE -> add(strings["conditions_summary_attack_disadvantage"])
-            RollMode.ADVANTAGE -> add(strings["conditions_summary_attack_advantage"])
-            RollMode.NORMAL -> Unit
-        }
-        if (check.mode == RollMode.DISADVANTAGE) add(strings["conditions_summary_check_disadvantage"])
-        // Initiative is a check: only what's its own.
-        if (initiative.mode != check.mode) {
-            when (initiative.mode) {
-                RollMode.DISADVANTAGE -> add(strings["conditions_summary_initiative_disadvantage"])
-                RollMode.ADVANTAGE -> add(strings["conditions_summary_initiative_advantage"])
-                RollMode.NORMAL -> Unit
-            }
-        }
-        if (dexteritySave.autoFail.isNotEmpty()) {
-            add(strings["conditions_summary_save_fail"])
-        } else if (dexteritySave.mode == RollMode.DISADVANTAGE) {
-            add(strings["conditions_summary_dex_save_disadvantage"])
-        }
-        if (effectiveSpeed(30, conditions, 0) == 0) add(strings["conditions_summary_speed_zero"])
-        if (Condition.INCAPACITATED in effectiveConditions(conditions)) add(strings["conditions_summary_incapacitated"])
-    }
-    if (parts.isEmpty()) return null
-    return parts.joinToString(", ").replaceFirstChar { it.uppercase() }
-}
+/** The text key of what a condition does, in a line or two. */
+private val Condition.effectKey: String get() = "condition_${key}_effect"
