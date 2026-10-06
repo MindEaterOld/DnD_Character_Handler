@@ -1,4 +1,5 @@
 package com.dndcharacterhandler.presentation.overview
+import com.dndcharacterhandler.presentation.components.FadingLazyColumn
 import com.dndcharacterhandler.domain.model.AppTheme
 import com.dndcharacterhandler.presentation.theme.FrameStyle
 import com.dndcharacterhandler.presentation.theme.LocalThemeLook
@@ -1153,7 +1154,7 @@ private fun OverviewContent(
                 onDismiss = { activeField = null },
                 scrollable = false
             ) {
-                LazyColumn(
+                FadingLazyColumn(
                     modifier = Modifier.heightIn(max = 320.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {

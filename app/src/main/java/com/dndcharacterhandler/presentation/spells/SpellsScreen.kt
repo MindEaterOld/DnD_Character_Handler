@@ -1,5 +1,7 @@
 package com.dndcharacterhandler.presentation.spells
 
+import com.dndcharacterhandler.presentation.components.fadingVerticalScroll
+import com.dndcharacterhandler.presentation.components.FadingLazyColumn
 import androidx.compose.material.icons.outlined.AutoFixHigh
 import com.dndcharacterhandler.domain.repository.castSpell
 import com.dndcharacterhandler.domain.repository.undoCast
@@ -46,7 +48,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
@@ -898,7 +899,7 @@ private fun SpellsAddEntryDialog(
                     }
 
                     else -> {
-                        LazyColumn(
+                        FadingLazyColumn(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .heightIn(max = 280.dp),
@@ -1678,7 +1679,7 @@ private fun SpellSlotsConfigBody(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .verticalScroll(scrollState),
+            .fadingVerticalScroll(scrollState),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         (1..9).chunked(3).forEach { rowLevels ->
@@ -1944,7 +1945,7 @@ private fun <T> SelectionDialog(
         onDismiss = onDismiss,
         scrollable = false
     ) {
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        FadingLazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             items(options) { option ->
                 val isSelected = option == selected
                 Surface(

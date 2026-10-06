@@ -63,6 +63,7 @@ What can be pressed as an action and what shows a value must look different at a
 
 - **A pop-up** (`EditDialog`, P1) for a short decision that fits without scrolling: a confirmation, one value, a small pick seen whole (the alignment), anything with its own vertical gesture (the height rod). Its title in the app's serif (`titleLarge`), a cross in the corner, Delete apart on the left, the main action on the right.
 - **A sheet from the bottom** (`EditSheet`, S3) for what is browsed and ticked — a list of options, a description to read: a handle, the same serif title, the content scrolling, **no buttons** (what is ticked applies at once) and **no cross** (a swipe down, a tap above it or Back closes it). It never takes more than 75 % of the screen's height, so the sheet above it stays in sight to tap.
+- **What scrolls in them has soft edges**, never a hard cut (owner's wish, 2026-10-07): `EditDialog` and `EditSheet` do it themselves; a list inside a pop-up is a `FadingLazyColumn`, a column of its own scrolls with `Modifier.fadingVerticalScroll()` (`components/FadingEdges.kt`). An edge fades only while there is more to scroll that way.
 - **A full screen** for a big or multi-step edit: Character Wizard, the spell and item editors, a long note.
 - In Engraving both are etched panels with cut corners (`EtchedCornerCut`); the sheet's frame has no bottom edge. Which windows move to sheets is in `docs/BACKLOG.md`.
 

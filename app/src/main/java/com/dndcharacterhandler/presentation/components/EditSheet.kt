@@ -6,10 +6,8 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -31,7 +29,7 @@ internal val EtchedCornerCut = 6.dp
 /**
  * The app's sheet from the bottom (owner's choice from boards, 2026-10-07: S3): for what is browsed and ticked — a
  * list of options, a description to read. A handle on top, the title in the app's serif as the pop-up's
- * ([EditDialog]), the content under it scrolling as a whole. No buttons: what is ticked applies at once, so there is
+ * ([EditDialog]) staying put, the content under it scrolling with soft edges ([fadingEdges]). No buttons: what is ticked applies at once, so there is
  * nothing to save, and no cross — a swipe down, a tap above it or Back closes it (the handle says so to TalkBack);
  * it never takes the whole screen, so there is always room above it to tap.
  * The pop-up's colour and corners; in Engraving an etched panel, its top corners cut, its sides running off the
@@ -71,12 +69,23 @@ fun EditSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(max = maxHeight)
-                .verticalScroll(rememberScrollState())
-                .padding(start = 24.dp, end = 24.dp, bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(start = 24.dp, end = 24.dp, bottom = 24.dp)
         ) {
-            Text(text = title, style = MaterialTheme.typography.titleLarge, color = colors.text.primary)
-            content()
+            // The title stays; what is under it scrolls, its edges soft.
+            Text(
+                text = title,
+                modifier = Modifier.padding(bottom = 4.dp),
+                style = MaterialTheme.typography.titleLarge,
+                color = colors.text.primary
+            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fadingVerticalScroll()
+                    .padding(top = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                content = content
+            )
         }
     }
 }

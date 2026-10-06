@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Delete
@@ -102,7 +100,7 @@ fun EditDialog(
         },
         text = {
             Column(
-                modifier = if (scrollable) Modifier.verticalScroll(rememberScrollState()) else Modifier,
+                modifier = if (scrollable) Modifier.fadingVerticalScroll() else Modifier,
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 content = content
             )

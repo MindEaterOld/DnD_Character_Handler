@@ -13,6 +13,7 @@
 | `ScreenTopActionButton(onClick) { Icon }` | 2 | Голая иконка верхней панели без заливки, тап-зона 44dp — единственная кнопка без подложки (меню, кубы, отдых столбиком под кубами на обзоре) |
 | `PortraitSideButton(icon, contentDescription, onClick, add)` | 3 | Кнопка у портрета на обзоре: «монета» 44dp — подложка `surface.card`, обводка от `text.label` сверху к `border.muted` снизу, тень `ornament.dropShadow` на 2dp ниже; иконка 24dp `text.primary`; `add = true` — маленький серый «+» в углу (кнопка состояний). Иконки `SideIconConditions`, `SideIconShortRest`, `SideIconLongRest` |
 | `BottomNavigationBar` | — | Панель вкладок: обводка поверх фона, без своей заливки |
+| `FadingLazyColumn(…)`, `Modifier.fadingVerticalScroll()`, `Modifier.fadingEdges(state)` | 15 | Мягкие края прокрутки в поп-апах и шторках: уходящее за край растворяется на 24dp, край — только пока туда есть что листать |
 | `EditSheet(title, onDismiss) { … }` | 1 | Шторка снизу: ручка, заголовок `titleLarge` засечками, содержимое прокручивается, без кнопок и крестика (отметки применяются сразу), не выше 75 % экрана; в «Гравюре» гравированная панель без нижней кромки |
 | `FloatingAddButton(onClick)` | 5 | Круглая плавающая «+» 58dp в правом нижнем углу (`padding(end = 24.dp, bottom = 15.dp)`) |
 | `LocalFloatingButtonsInset` | — | Нижнее поле списка, чтобы последние элементы выезжали из-под плавающих кнопок; приложение задаёт на экран (`SingleFloatingButtonInset` 110, `NoFloatingButtonInset` 16) |

@@ -1,5 +1,7 @@
 package com.dndcharacterhandler.presentation.combat
 
+import com.dndcharacterhandler.presentation.components.fadingVerticalScroll
+import com.dndcharacterhandler.presentation.components.FadingLazyColumn
 import com.dndcharacterhandler.domain.repository.castSpell
 import com.dndcharacterhandler.domain.repository.undoCast
 import com.dndcharacterhandler.domain.rules.asIn
@@ -50,8 +52,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Bolt
@@ -949,7 +949,7 @@ private fun SpellAttackPickerDialog(
             )
         } else {
             Column(
-                modifier = Modifier.verticalScroll(rememberScrollState()),
+                modifier = Modifier.fadingVerticalScroll(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 spells.forEach { spell ->
@@ -1705,7 +1705,7 @@ private fun AttackEditDialog(
         scrollable = false
     ) {
         Column(
-            modifier = Modifier.verticalScroll(rememberScrollState()),
+            modifier = Modifier.fadingVerticalScroll(),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             OutlinedTextField(
@@ -2304,7 +2304,7 @@ private fun <T> SelectionDialog(
         onDismiss = onDismiss,
         scrollable = false
     ) {
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        FadingLazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             items(options) { option ->
                 val isSelected = option == selected
                 Surface(

@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation.inventory
 
+import com.dndcharacterhandler.presentation.components.FadingLazyColumn
 import com.dndcharacterhandler.domain.rules.carryingCapacity
 import com.dndcharacterhandler.presentation.components.NumberStepperField
 import com.dndcharacterhandler.presentation.components.StatCardRow
@@ -933,7 +934,7 @@ private fun InventoryAddEntryDialog(
                     }
 
                     else -> {
-                        LazyColumn(
+                        FadingLazyColumn(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .heightIn(max = 280.dp),
@@ -1003,7 +1004,7 @@ private fun InventoryBaseItemDialog(
             }
         }
         InventoryDialogSection(text("inventory_enchant_choose_base"))
-        LazyColumn(
+        FadingLazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(max = 300.dp),
@@ -1081,7 +1082,7 @@ private fun InventoryCategoryPickerDialog(
         onDismiss = onDismiss,
         scrollable = false
     ) {
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        FadingLazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(InventoryCategory.entries) { category ->
                 Surface(
                     modifier = Modifier
@@ -1370,7 +1371,7 @@ private fun InventoryMoveDialog(
         onDismiss = onDismiss,
         scrollable = false
     ) {
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        FadingLazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(options) { (containerId, label) ->
                 val selected = containerId == current
                 Surface(
@@ -2215,7 +2216,7 @@ private fun <T> SelectionDialog(
         onDismiss = onDismiss,
         scrollable = false
     ) {
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        FadingLazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             items(options) { option ->
                 val isSelected = option == selected
                 Surface(
@@ -2253,7 +2254,7 @@ private fun <T> MultiSelectionDialog(
         onConfirm = onDismiss,
         scrollable = false
     ) {
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        FadingLazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             items(options) { option ->
                 val isSelected = option in selected
                 Surface(

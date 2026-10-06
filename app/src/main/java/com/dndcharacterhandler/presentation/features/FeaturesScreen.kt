@@ -1,12 +1,11 @@
 package com.dndcharacterhandler.presentation.features
 
+import com.dndcharacterhandler.presentation.components.FadingLazyColumn
 import com.dndcharacterhandler.presentation.components.StatCardRow
 import com.dndcharacterhandler.presentation.components.MiniStatCard
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -643,7 +642,7 @@ private fun FeaturesAddEntryDialog(
                         )
                     }
                     else -> {
-                        LazyColumn(
+                        FadingLazyColumn(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .heightIn(max = 280.dp),
