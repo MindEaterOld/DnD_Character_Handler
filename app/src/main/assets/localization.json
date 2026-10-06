@@ -2867,6 +2867,78 @@
     "fr": "Chaotique mauvais",
     "es": "Caotico malvado"
   },
+  "alignment_lawful_good_short": {
+    "maxChars": 23,
+    "en": "Lawful Good",
+    "ru": "Законопосл. добрый",
+    "de": "Rechtsch. gut",
+    "fr": "Loyal bon",
+    "es": "Legal bueno"
+  },
+  "alignment_neutral_good_short": {
+    "maxChars": 23,
+    "en": "Neutral Good",
+    "ru": "Нейтральный добрый",
+    "de": "Neutral gut",
+    "fr": "Neutre bon",
+    "es": "Neutral bueno"
+  },
+  "alignment_chaotic_good_short": {
+    "maxChars": 23,
+    "en": "Chaotic Good",
+    "ru": "Хаотичный добрый",
+    "de": "Chaotisch gut",
+    "fr": "Chaotique bon",
+    "es": "Caótico bueno"
+  },
+  "alignment_lawful_neutral_short": {
+    "maxChars": 23,
+    "en": "Lawful Neutral",
+    "ru": "Законопосл. нейтральный",
+    "de": "Rechtsch. neutral",
+    "fr": "Loyal neutre",
+    "es": "Legal neutral"
+  },
+  "alignment_true_neutral_short": {
+    "maxChars": 23,
+    "en": "True Neutral",
+    "ru": "Истинно нейтральный",
+    "de": "Neutral",
+    "fr": "Neutre strict",
+    "es": "Neutral auténtico"
+  },
+  "alignment_chaotic_neutral_short": {
+    "maxChars": 23,
+    "en": "Chaotic Neutral",
+    "ru": "Хаотичный нейтральный",
+    "de": "Chaotisch neutral",
+    "fr": "Chaotique neutre",
+    "es": "Caótico neutral"
+  },
+  "alignment_lawful_evil_short": {
+    "maxChars": 23,
+    "en": "Lawful Evil",
+    "ru": "Законопосл. злой",
+    "de": "Rechtsch. böse",
+    "fr": "Loyal mauvais",
+    "es": "Legal malvado"
+  },
+  "alignment_neutral_evil_short": {
+    "maxChars": 23,
+    "en": "Neutral Evil",
+    "ru": "Нейтральный злой",
+    "de": "Neutral böse",
+    "fr": "Neutre mauvais",
+    "es": "Neutral malvado"
+  },
+  "alignment_chaotic_evil_short": {
+    "maxChars": 23,
+    "en": "Chaotic Evil",
+    "ru": "Хаотичный злой",
+    "de": "Chaotisch böse",
+    "fr": "Chaotique mauvais",
+    "es": "Caótico malvado"
+  },
   "alignment_unaligned": {
     "en": "Unaligned",
     "ru": "Без мировоззрения",

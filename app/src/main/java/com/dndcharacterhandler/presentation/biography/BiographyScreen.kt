@@ -608,10 +608,8 @@ private fun BiographyEditDialog(
     onSave: (String) -> Unit
 ) {
     when (field.editor) {
-        BiographyEditor.ALIGNMENT -> BiographyChoiceDialog(
-            title = field.label(),
+        BiographyEditor.ALIGNMENT -> AlignmentDialog(
             currentValue = currentValue,
-            options = alignmentOptions,
             onDismiss = onDismiss,
             onSelect = onSave
         )
@@ -649,30 +647,6 @@ private fun BiographyEditDialog(
             onDismiss = onDismiss,
             onSave = onSave
         )
-    }
-}
-
-@Composable
-private fun BiographyChoiceDialog(
-    title: String,
-    currentValue: String,
-    options: List<BiographyChoiceOption>,
-    onDismiss: () -> Unit,
-    onSelect: (String) -> Unit
-) {
-    EditDialog(
-        title = title,
-        onDismiss = onDismiss
-    ) {
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            options.forEach { option ->
-                BiographySelectionOption(
-                    text = text(option.labelKey),
-                    selected = option.value == currentValue,
-                    onClick = { onSelect(option.value) }
-                )
-            }
-        }
     }
 }
 
