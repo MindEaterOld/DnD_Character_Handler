@@ -828,22 +828,18 @@ private fun SpellCard(
     )
 }
 
+/**
+ * "None yet" under a level's title: plain quiet text, no frame or fill — the quietest thing on the screen,
+ * the title marks the place (owner's choice from boards, 2026-10-06: E1).
+ */
 @Composable
 private fun SpellEmptyRow(level: Int) {
-    val colors = LocalDesignTokens.current.colors
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(10.dp),
-        color = colors.ornament.outer,
-        border = BorderStroke(1.dp, colors.ornament.outer)
-    ) {
-        Text(
-            text = if (level == 0) text("spells_empty_cantrips") else text("spells_empty_level"),
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-            style = MaterialTheme.typography.bodyMedium,
-            color = colors.text.muted
-        )
-    }
+    Text(
+        text = if (level == 0) text("spells_empty_cantrips") else text("spells_empty_level"),
+        modifier = Modifier.padding(start = 2.dp, top = 2.dp, bottom = 6.dp),
+        style = MaterialTheme.typography.bodyMedium,
+        color = LocalDesignTokens.current.colors.text.subtle
+    )
 }
 
 @Composable
