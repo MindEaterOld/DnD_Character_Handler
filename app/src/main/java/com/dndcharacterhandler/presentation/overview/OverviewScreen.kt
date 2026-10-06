@@ -91,7 +91,7 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.dndcharacterhandler.presentation.components.ScreenTopActionButton
-import com.dndcharacterhandler.presentation.components.InspirationStar
+import com.dndcharacterhandler.presentation.components.InspirationCandle
 import androidx.compose.material.icons.automirrored.outlined.DirectionsRun
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.Bedtime
@@ -775,6 +775,7 @@ private fun OverviewContent(
     val typographyTokens = LocalDesignTokens.current.typography
     val colors = LocalDesignTokens.current.colors
     val crest = LocalThemeLook.current.portrait == PortraitStyle.ETCHED_CREST
+    val gothic = LocalThemeLook.current.portrait == PortraitStyle.GOTHIC_FRAME
     val portraitScope = rememberCoroutineScope()
     val portraitPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
@@ -975,20 +976,23 @@ private fun OverviewContent(
                                 )
                             }
                         }
-                        // Inspiration: a compass rose in the frame's lower right corner, lit gold while the
-                        // character has it. Laid out in the portrait's own square, so it moves with the frame.
+                        // Inspiration: the theme's candle rests on the portrait's lower-right bevel.
                         Box(
                             modifier = Modifier
                                 .offset(y = (-47).dp)
-                                .size(if (crest) 222.dp else 238.dp),
+                                .then(if (gothic) Modifier.size(GothicPortraitWidth, GothicPortraitHeight)
+                                    else Modifier.size(if (crest) 222.dp else 238.dp)),
                             contentAlignment = Alignment.Center
                         ) {
-                            InspirationStar(
+                            InspirationCandle(
                                 inspired = character?.hasInspiration ?: false,
                                 onToggle = { if (characterBundle != null) onToggleInspiration(characterBundle) },
                                 contentDescription = text("overview_inspiration"),
-                                size = if (crest) 82.dp else 96.dp,
-                                modifier = Modifier.offset(x = PortraitCornerOffset, y = PortraitCornerOffset)
+                                modifier = if (gothic) Modifier.offset(
+                                    x = GothicPortraitWidth * (963f / 1106f - .5f),
+                                    y = GothicPortraitHeight * (1297f / 1422f - .5f)
+                                )
+                                    else Modifier.offset(x = PortraitCornerOffset, y = PortraitCornerOffset)
                             )
                         }
                     }
@@ -1895,6 +1899,22 @@ private fun PortraitFrame(
     val crest = LocalThemeLook.current.portrait == PortraitStyle.ETCHED_CREST
     val shape = if (crest) EngravedPortraitShape else OctagonShape
     val saturation by animateFloatAsState(if (dead) 0f else 1f, animationSpec = tween(durationMillis = 1200), label = "portraitSaturation")
+
+    if (LocalThemeLook.current.portrait == PortraitStyle.GOTHIC_FRAME) {
+        GothicPortraitFrame(onClick = onClick, modifier = Modifier.offset(y = (-47).dp)) {
+            Box(Modifier.fillMaxSize().saturation(saturation)) {
+                AppImage(
+                    imageRef = portraitReference,
+                    contentDescription = characterName,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop,
+                    framing = framing,
+                    fallback = { PortraitFallback(characterName) }
+                )
+            }
+        }
+        return
+    }
 
     // An octagon with flat sides, a heraldic frame: its shadow, a double contour, the portrait inside.
     Box(

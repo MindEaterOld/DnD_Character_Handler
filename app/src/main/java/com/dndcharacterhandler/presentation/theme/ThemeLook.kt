@@ -17,7 +17,22 @@ data class ThemeLook(
     @DrawableRes val backdrop: Int?,
     val frames: FrameStyle,
     val portrait: PortraitStyle,
-    val xpBar: XpBarStyle
+    val xpBar: XpBarStyle,
+    /** White portrait artwork; its geometry is shared, its tint comes from the palette. */
+    @DrawableRes val portraitArtwork: Int = R.drawable.gothic_portrait_frame,
+    val inspiration: InspirationArtwork
+)
+
+/** Approved candle state images; scale compensates for their different transparent margins. */
+data class InspirationArtwork(
+    @DrawableRes val off: Int,
+    @DrawableRes val on: Int,
+    val scale: Float = 1f,
+    /** Registration correction for the lit raster, as a fraction of its full canvas height. */
+    val litOffsetY: Float = 0f,
+    /** Visible saucer edges in the unlit source canvas, excluding transparent padding. */
+    val dishRight: Float = 985f / 1254f,
+    val dishBottom: Float = 1085f / 1254f
 )
 
 /** Cards, stats, the tab bar and the hit points' buttons. */
@@ -31,6 +46,9 @@ enum class FrameStyle {
 
 /** The overview's portrait. */
 enum class PortraitStyle {
+    /** The approved white fantasy frame, tinted with the theme's ornament.inner. */
+    GOTHIC_FRAME,
+
     /** An octagon in a double contour with a shadow. */
     OCTAGON,
 
@@ -54,16 +72,23 @@ enum class XpBarStyle {
 val ClassicLook = ThemeLook(
     backdrop = null,
     frames = FrameStyle.ROUNDED,
-    portrait = PortraitStyle.OCTAGON,
-    xpBar = XpBarStyle.MEDALLION
+    portrait = PortraitStyle.GOTHIC_FRAME,
+    xpBar = XpBarStyle.MEDALLION,
+    portraitArtwork = R.drawable.classic_portrait_frame,
+    inspiration = InspirationArtwork(R.drawable.inspiration_classic_off, R.drawable.inspiration_classic_on)
 )
 
 /** Ivory ink on charcoal paper over an engraving of a dragon (ChatGPT, 2026-10-04). */
 val EngravedLook = ThemeLook(
     backdrop = R.drawable.engraved_overview_background,
     frames = FrameStyle.ETCHED,
-    portrait = PortraitStyle.ETCHED_CREST,
-    xpBar = XpBarStyle.HAIRLINE
+    portrait = PortraitStyle.GOTHIC_FRAME,
+    xpBar = XpBarStyle.HAIRLINE,
+    inspiration = InspirationArtwork(
+        R.drawable.inspiration_engraved_off, R.drawable.inspiration_engraved_on,
+        scale = .82f, litOffsetY = -80f / 1254f,
+        dishRight = 1069f / 1254f, dishBottom = 1136f / 1254f
+    )
 )
 
 fun AppTheme.look(): ThemeLook = when (this) {
