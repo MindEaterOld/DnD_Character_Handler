@@ -2101,7 +2101,7 @@ private fun HpActionButton(label: String, icon: ImageVector, color: Color, modif
                 if (etched) {
                     Modifier
                         .offset(y = (-1).dp)
-                        .height(HpActionHeight)
+                        .height(HpActionEtchedHeight)
                 } else {
                     // Clear of the card, so its own top edge shows; its bottom level with the bookmark's.
                     Modifier
@@ -2140,8 +2140,14 @@ private fun HpActionButton(label: String, icon: ImageVector, color: Color, modif
     }
 }
 
-/** The HP actions' and the death saves' bookmark's height, from the card's bottom edge. */
-private val HpActionHeight = 48.dp
+/**
+ * The HP actions' and the death saves' bookmark's height, from the card's bottom edge: lower than a stat
+ * card, so the row doesn't vie with the hit points (owner's choice from boards, 2026-10-06: V2).
+ */
+private val HpActionHeight = 40.dp
+
+/** The engraving's etched HP actions and bookmark: as tall as before. */
+private val HpActionEtchedHeight = 48.dp
 
 /** The HP actions' corners (the bookmark's bottom ones too): the stat cards' 10, as the card's. */
 private val HpActionCornerRadius = 10.dp
@@ -2451,7 +2457,7 @@ private fun DeathSavesTray(
             Box(
                 modifier = Modifier
                     .offset(y = (-1).dp)
-                    .height(if (etched) HpActionHeight else HpActionHeight + 1.dp)
+                    .height(if (etched) HpActionEtchedHeight else HpActionHeight + 1.dp)
                     .clip(tabShape)
                     .background(colors.surface.card)
                     .border(1.dp, colors.border.panel, tabShape)
@@ -2463,7 +2469,7 @@ private fun DeathSavesTray(
                     imageVector = SkullIcon,
                     contentDescription = text("overview_death_saves"),
                     tint = if (dying) colors.accent.dangerHpZero else colors.text.label,
-                    modifier = Modifier.size(if (etched) 20.dp else 26.dp)
+                    modifier = Modifier.size(if (etched) 20.dp else 22.dp)
                 )
             }
             end()
