@@ -485,7 +485,7 @@ private fun BiographyPersonaSection(
         ) {
             Column(modifier = Modifier.padding(horizontal = 12.dp)) {
                 PersonaEntry(
-                    icon = { AlignmentIcon(character.alignment, Icons.Outlined.Shield, Modifier.size(PersonaIconSize)) },
+                    icon = { iconModifier -> AlignmentIcon(character.alignment, Icons.Outlined.Shield, iconModifier) },
                     label = text("biography_alignment"),
                     modifier = Modifier.clickable(onClick = onEditAlignment)
                 ) {
@@ -509,8 +509,8 @@ private fun BiographyPersonaSection(
                     // A tap on the label puts the cursor in its text, as a tap on the text does.
                     val focus = remember { FocusRequester() }
                     PersonaEntry(
-                        icon = {
-                            Icon(entry.icon, contentDescription = null, tint = colors.text.label, modifier = Modifier.size(PersonaIconSize))
+                        icon = { iconModifier ->
+                            Icon(entry.icon, contentDescription = null, tint = colors.text.label, modifier = iconModifier)
                         },
                         label = entry.label,
                         modifier = Modifier.clickable(
@@ -543,32 +543,35 @@ private class PersonaText(
     val value: String
 )
 
-private val PersonaIconSize = 20.dp
+// The icon is as tall as the label and the first line under it, 16 + 24 (owner's choice, 2026-10-06).
+private val PersonaIconSize = 32.dp
+private val PersonaIconTop = 4.dp
+private val PersonaIconGap = 10.dp
 
-/** An entry of the persona: its icon and label small on a line, its content under them. */
+/** An entry of the persona: its icon beside the label small over the content, as tall as their first two lines. */
 @Composable
 private fun PersonaEntry(
-    icon: @Composable () -> Unit,
+    icon: @Composable (Modifier) -> Unit,
     label: String,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
-    Column(
+    Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 10.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+            .padding(vertical = 10.dp)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            icon()
+        icon(
+            Modifier
+                .padding(top = PersonaIconTop)
+                .size(PersonaIconSize)
+        )
+        Column(modifier = Modifier.padding(start = PersonaIconGap)) {
             Text(
                 text = label,
-                modifier = Modifier.padding(start = 8.dp),
                 style = MaterialTheme.typography.labelMedium,
                 color = LocalDesignTokens.current.colors.text.label
             )
-        }
-        Box(modifier = Modifier.padding(start = PersonaIconSize + 8.dp)) {
             content()
         }
     }

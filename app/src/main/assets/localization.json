@@ -3067,23 +3067,23 @@
     "es": "Piel"
   },
   "biography_alignment_hint": {
-    "maxChars": 33,
+    "maxChars": 32,
     "en": "Tap to choose an alignment",
     "ru": "Нажмите и выберите мировоззрение",
     "de": "Tippen und Gesinnung wählen",
-    "fr": "Touchez pour choisir l’alignement",
+    "fr": "Choisissez un alignement",
     "es": "Toca para elegir el alineamiento"
   },
   "biography_ideals_hint": {
-    "maxChars": 33,
+    "maxChars": 32,
     "en": "Beliefs and what they strive for",
     "ru": "Во что верит, к чему стремится",
-    "de": "Woran er glaubt, wonach er strebt",
+    "de": "Woran er glaubt, was er anstrebt",
     "fr": "Ses convictions et ses buts",
     "es": "En qué cree y qué persigue"
   },
   "biography_bonds_hint": {
-    "maxChars": 33,
+    "maxChars": 32,
     "en": "Who and what matter to them most",
     "ru": "Кто и что ему дороже всего",
     "de": "Wer und was ihm teuer ist",
@@ -3091,7 +3091,7 @@
     "es": "Quién y qué le importa más"
   },
   "biography_flaws_hint": {
-    "maxChars": 33,
+    "maxChars": 32,
     "en": "A vice, a fear or a weak spot",
     "ru": "Порок, страх или слабое место",
     "de": "Laster, Angst oder Schwäche",
