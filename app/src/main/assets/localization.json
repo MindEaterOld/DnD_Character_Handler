@@ -2436,6 +2436,13 @@
     "fr": "Aucun objet trouve.",
     "es": "No se encontraron objetos."
   },
+  "inventory_none_yet": {
+    "en": "No items yet.",
+    "ru": "У вас пока нет предметов.",
+    "de": "Noch keine Gegenstände.",
+    "fr": "Pas encore d'objets.",
+    "es": "Aún no hay objetos."
+  },
   "spells_section_spellbook_title": {
     "en": "Spellbook",
     "ru": "Книга заклинаний",

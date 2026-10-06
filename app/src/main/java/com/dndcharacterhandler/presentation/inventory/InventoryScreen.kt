@@ -534,7 +534,7 @@ internal fun InventoryContent(
 
                 if (items.isEmpty()) {
                     item(key = "empty_inventory") {
-                        EmptyInventoryMessage()
+                        EmptyInventoryMessage(nothingYet = characterBundle.inventoryItems.isEmpty())
                     }
                 }
             }
@@ -2317,22 +2317,18 @@ private fun <T> EnumSelectorRow(
     }
 }
 
+/**
+ * Plain quiet text under the search, as the spells' and the features' "none yet" (owner's choice,
+ * 2026-10-06): no items at all ([nothingYet]), or none the search finds.
+ */
 @Composable
-private fun EmptyInventoryMessage() {
-    val colors = LocalDesignTokens.current.colors
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(10.dp),
-        color = colors.surface.card.copy(alpha = 0.42f),
-        border = BorderStroke(1.dp, colors.border.muted)
-    ) {
-        Text(
-            text = text("inventory_empty"),
-            modifier = Modifier.padding(18.dp),
-            style = MaterialTheme.typography.bodyLarge,
-            color = colors.text.muted
-        )
-    }
+private fun EmptyInventoryMessage(nothingYet: Boolean) {
+    Text(
+        text = if (nothingYet) text("inventory_none_yet") else text("inventory_empty"),
+        modifier = Modifier.padding(start = 2.dp, top = 2.dp),
+        style = MaterialTheme.typography.bodyMedium,
+        color = LocalDesignTokens.current.colors.text.subtle
+    )
 }
 
 @OptIn(ExperimentalLayoutApi::class)

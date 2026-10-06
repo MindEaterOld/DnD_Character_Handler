@@ -263,6 +263,7 @@ private fun inventoryPreviewStrings(): LocalizedStrings = LocalizedStrings(
         "inventory_category_consumable" to "Consumable",
         "inventory_category_other" to "Other",
         "inventory_empty" to "No items found.",
+        "inventory_none_yet" to "No items yet.",
         "inventory_catalog_title" to "Add from catalog",
         "inventory_catalog_loading" to "Loading catalog...",
         "inventory_catalog_empty" to "No matching items found.",
