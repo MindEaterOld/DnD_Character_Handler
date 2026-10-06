@@ -1413,22 +1413,18 @@ private fun CombatTag(value: String, textColor: Color) {
     }
 }
 
+/**
+ * "None yet" under a section's title: plain quiet text, no frame — as the spells', the features' and the
+ * inventory's (owner's choice, 2026-10-06).
+ */
 @Composable
 private fun CombatEmptyCard(label: String) {
-    val colors = LocalDesignTokens.current.colors
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(10.dp),
-        color = colors.surface.card.copy(alpha = 0.62f),
-        border = BorderStroke(1.dp, colors.border.muted)
-    ) {
-        Text(
-            text = label,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 18.dp),
-            style = MaterialTheme.typography.bodyLarge,
-            color = colors.text.muted
-        )
-    }
+    Text(
+        text = label,
+        modifier = Modifier.padding(start = 2.dp, top = 2.dp, bottom = 6.dp),
+        style = MaterialTheme.typography.bodyMedium,
+        color = LocalDesignTokens.current.colors.text.subtle
+    )
 }
 
 @Composable
