@@ -197,6 +197,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.layout.FirstBaseline
+import androidx.compose.ui.layout.AlignmentLine
 import androidx.compose.ui.zIndex
 import com.dndcharacterhandler.presentation.components.AppImage
 import com.dndcharacterhandler.presentation.components.EditDialog
@@ -2405,12 +2407,13 @@ private fun XpMedallionBar(
                 )
             }
         }
-        // Its right edge where the bar's cut begins.
+        // Its right edge where the bar's cut begins, its baseline a little over the bar.
         Text(
             text = experience,
             modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(end = XpBarChamfer),
+                .align(Alignment.CenterEnd)
+                .padding(end = XpBarChamfer)
+                .overXpBar(),
             style = MaterialTheme.typography.labelMedium,
             color = colors.text.label,
             maxLines = 1
@@ -2419,8 +2422,9 @@ private fun XpMedallionBar(
             Text(
                 text = text("levelup_badge"),
                 modifier = Modifier
-                    .align(Alignment.TopStart)
+                    .align(Alignment.CenterStart)
                     .padding(start = XpMedallionSize + 8.dp)
+                    .overXpBar()
                     .clickable(onClick = onLevelUp),
                 style = MaterialTheme.typography.labelMedium,
                 color = colors.accent.inspiration,
@@ -2469,8 +2473,22 @@ private fun chamferedBar(left: Float, top: Float, width: Float, height: Float, c
 /** The level's octagon on the experience bar. */
 private val XpMedallionSize = 52.dp
 
-/** The experience bar's height, its outline included. */
-private val XpBarHeight = 14.dp
+/** The experience bar's height, its outline included (owner's choice from boards, 2026-10-06: W6). */
+private val XpBarHeight = 16.dp
+
+/** From a label's baseline over the experience bar down to the bar's top. */
+private val XpLabelGap = 5.dp
+
+/**
+ * Stands a label, centred in the bar's box, with its baseline [XpLabelGap] over the bar's top: the same
+ * height whatever the font gives the line.
+ */
+private fun Modifier.overXpBar(): Modifier = layout { measurable, constraints ->
+    val placeable = measurable.measure(constraints)
+    val baseline = placeable[FirstBaseline].takeIf { it != AlignmentLine.Unspecified } ?: placeable.height
+    val y = placeable.height / 2 - baseline - (XpBarHeight / 2 + XpLabelGap).roundToPx()
+    layout(placeable.width, placeable.height) { placeable.place(0, y) }
+}
 
 /** How far the experience bar's corners are cut. */
 private val XpBarChamfer = 4.dp
