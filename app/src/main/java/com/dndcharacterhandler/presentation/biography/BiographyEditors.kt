@@ -388,7 +388,8 @@ internal fun WeightDialog(currentValue: String, height: String, onDismiss: () ->
                     color = colors.text.label
                 )
             }
-        } else {
+        } else if (heightInCm(height) == null) {
+            // With a height the scale waits for a weight; without one, it says what it needs.
             Text(text = text("biography_bmi_no_height"), style = MaterialTheme.typography.bodyMedium, color = colors.text.subtle)
         }
     }
