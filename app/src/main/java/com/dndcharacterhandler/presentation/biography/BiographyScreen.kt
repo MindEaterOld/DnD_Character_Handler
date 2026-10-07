@@ -58,9 +58,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
@@ -213,8 +211,8 @@ internal fun BiographyContent(
     val colors = LocalDesignTokens.current.colors
     val character = characterBundle?.character
     var editingField by remember { mutableStateOf<BiographyField?>(null) }
-    fun row(field: BiographyField, icon: ImageVector, label: String, value: String, dot: Color? = null, note: String? = null) =
-        BiographyRow(icon, label, value, dot, note) { editingField = field }
+    fun row(field: BiographyField, icon: ImageVector, label: String, value: String, dot: Color? = null) =
+        BiographyRow(icon, label, value, dot) { editingField = field }
 
     // A colour picked from the swatches: its name in the language in use and a dot of it; the player's own word as is.
     @Composable
@@ -281,13 +279,8 @@ internal fun BiographyContent(
                         swatchRow(BiographyField.EYES, SwatchGroup.EYES, BiographyIconEyes, resolvedCharacter.eyes),
                         row(BiographyField.AGE, BiographyIconAge, text("biography_age"), ageDisplay(resolvedCharacter.age)),
                         swatchRow(BiographyField.HAIR, SwatchGroup.HAIR, BiographyIconHair, resolvedCharacter.hair),
-                        row(
-                            BiographyField.WEIGHT,
-                            BiographyIconWeight,
-                            text("biography_weight"),
-                            localizedMeasuredValue(resolvedCharacter.weight),
-                            note = weightBuild(resolvedCharacter.weight, resolvedCharacter.height)
-                        ),
+                        // The weight alone: its build is the weight pop-up's guide, not the sheet's (owner's wish, 2026-10-08).
+                        row(BiographyField.WEIGHT, BiographyIconWeight, text("biography_weight"), localizedMeasuredValue(resolvedCharacter.weight)),
                         swatchRow(BiographyField.SKIN, SwatchGroup.SKIN, BiographyIconSkin, resolvedCharacter.skin)
                     )
                 )
@@ -392,14 +385,8 @@ private fun BiographyGridCell(row: BiographyRow, modifier: Modifier) {
                     SwatchDot(dot, SwatchDotSize)
                     Spacer(modifier = Modifier.width(6.dp))
                 }
-                // What the value tells besides — the build after the weight — small and grey on its line, so every
-                // cell is two lines (owner's wish, 2026-10-08: «157 кг крепкий»).
-                val noteStyle = MaterialTheme.typography.labelMedium.toSpanStyle().copy(color = colors.text.subtle)
                 Text(
-                    text = buildAnnotatedString {
-                        append(row.value.ifBlank { text("common_dash") })
-                        row.note?.let { note -> withStyle(noteStyle) { append(" $note") } }
-                    },
+                    text = row.value.ifBlank { text("common_dash") },
                     style = MaterialTheme.typography.bodyLarge,
                     color = if (row.value.isBlank()) colors.text.subtle else colors.text.primary,
                     maxLines = 1,
@@ -880,8 +867,6 @@ private data class BiographyRow(
     val value: String,
     /** The colour the value names, a dot before it: the eyes', the hair's, the skin's swatch. */
     val dot: Color? = null,
-    /** A quiet word after the value, small and grey: the weight's build. */
-    val note: String? = null,
     val onClick: () -> Unit
 )
 

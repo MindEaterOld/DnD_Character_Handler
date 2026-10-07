@@ -316,11 +316,6 @@ internal fun bodyMassIndex(weight: String, height: String): Float? {
 
 private const val KgPerPound = 0.45359237
 
-/** The build the weight's cell notes under the weight, "стройный"; none without a height to reckon it by. */
-@Composable
-internal fun weightBuild(weight: String, height: String): String? =
-    bodyMassIndex(weight, height)?.let { text(Build.of(it).key).lowercase() }
-
 /**
  * The weight (owner's choice from boards, 2026-10-07: W1): its units, the number (typed or dragged along the ruler)
  * and, with a height, the BMI scale under it — the builds' bands in their colours, apart — the build named under it.
