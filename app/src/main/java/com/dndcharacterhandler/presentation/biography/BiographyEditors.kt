@@ -149,7 +149,13 @@ internal fun AgeDialog(currentValue: String, onDismiss: () -> Unit, onSave: (Str
         onConfirm = { onSave(draft) },
         scrollable = false
     ) {
-        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        // The steppers close by the number (owner's wish, 2026-10-08), the number's place as wide as four digits so
+        // they stay put under the finger as it grows.
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(AgeStepGap, Alignment.CenterHorizontally),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             val decrease = { draft = ((draft.toIntOrNull() ?: 0) - 1).coerceAtLeast(0).toString() }
             val increase = { draft = ((draft.toIntOrNull() ?: 0) + 1).coerceAtMost(MaxAge).toString() }
             StepButton(
@@ -159,7 +165,7 @@ internal fun AgeDialog(currentValue: String, onDismiss: () -> Unit, onSave: (Str
                 modifier = Modifier.repeatWhileHeld(decrease),
                 enabled = age > 0
             )
-            Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(modifier = Modifier.width(AgeNumberWidth), horizontalAlignment = Alignment.CenterHorizontally) {
                 BigNumberField(value = draft, onValueChange = { draft = it.filter(Char::isDigit).take(5) }, hint = "0")
                 Text(text = yearsWord(age), style = MaterialTheme.typography.bodyMedium, color = colors.text.label)
             }
@@ -174,6 +180,8 @@ internal fun AgeDialog(currentValue: String, onDismiss: () -> Unit, onSave: (Str
 }
 
 private const val MaxAge = 99999
+private val AgeStepGap = 16.dp
+private val AgeNumberWidth = 80.dp
 
 /** Held, a stepper keeps stepping: after a moment, quicker and quicker — an elf's 120 years without 120 taps. */
 @Composable
