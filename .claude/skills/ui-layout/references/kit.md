@@ -63,7 +63,7 @@
 | `octagonPath(center, radius)`, `OctagonShape` (`overview/PortraitFramingDialog.kt`) | 2 | Восьмиугольник портрета: контур для `Canvas` и форма для `clip` |
 | `Modifier.saturation(s)` | 1 | Насыщенность содержимого: 1 как есть, 0 — чёрно-белое (портрет погибшего); работает на любом содержимом |
 | `SkullIcon` | 1 | Череп спасбросков от смерти (`ImageVector`, тонируется `Icon`) |
-| `GothicPortraitFrame(onClick, progress, progressColor, plaque) { портрет }` | 1 | Рама портрета на обзоре — она же полоса опыта: кольцо 4dp по контуру от левого края таблички в нижней грани обратно в неё; в «Классике» рисованный восьмиугольник, в «Гравюре» — картинка темы, кольцо внутри; `plaque` — табличка уровня (`LevelPlaque`) |
+| `GothicPortraitFrame(onClick, progress, progressColor, badge, badgeDescription, onBadgeClick, onBadgeLongClick) { портрет }` | 1 | Рама портрета на обзоре — она же полоса опыта: в «Классике» рисованная арка (прямые бока, скруглённый низ, полукруг +30 %), в «Гравюре» — картинка темы, кольцо внутри; кольцо 4dp от левого края выреза в нижней грани по кругу к правому, концы с засечками; `badge` — подпись уровня в вырезе («I lvl», ширина выреза по тексту); `portraitSideMiddleY()`, `portraitSideColumnX(gap)`, `portraitFrameFoot()` — где ставить боковые кнопки и что под рамой |
 | `D20Outline` (`dice/D20Outline.kt`) | — | Контурный d20 кнопки кубов |
 
 ## Кубики (`presentation/dice/`)

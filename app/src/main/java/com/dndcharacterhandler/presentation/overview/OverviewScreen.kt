@@ -99,6 +99,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import com.dndcharacterhandler.domain.rules.romanNumeral
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.CompositionLocalProvider
@@ -615,12 +621,6 @@ private data class OverviewStat(
 
 
 /**
- * ...6dp off the frame's outer line (12.8 % in from its artwork's edge in both themes), so they never line up with
- * the header's menu and dice: the columns' middles, from the portrait's.
- */
-private val PortraitSideColumnX = GothicPortraitWidth * (0.5f - 0.128f) + 6.dp + PortraitSideButtonSize / 2
-
-/**
  * Draws the item [by] higher than its place and gives that room back, so what follows moves up with it:
  * an offset alone would leave the gap below, under the next item.
  */
@@ -932,30 +932,34 @@ private fun OverviewContent(
                                     }
                                 },
                                 progress = xpInfo.progress,
-                                plaqueLit = canLevelUp,
                                 progressColor = when {
                                     canLevelUp -> colors.accent.inspiration
                                     xpInfo.hasReachedLevelCap -> colors.accent.xpCapped
                                     else -> colors.progress.xpFill
                                 },
-                                plaque = {
-                                    LevelPlaque(
-                                        levelLabel = levelLabel,
-                                        experience = xpInfo.label(),
-                                        canLevelUp = canLevelUp,
-                                        onLevelUp = { character?.let { onOpenLevelUp(levelForExperience(it.experience)) } },
-                                        onExperience = {
-                                            experienceEditMode = OverviewExperienceEditMode.ADD
-                                            experienceDraft = ""
-                                            isExperienceDialogOpen = true
-                                        }
-                                    )
+                                // «I lvl» in the gap of the frame's bottom edge (owner's choice, 2026-10-07). A tap adds
+                                // experience, or opens the level up when one is due; a long press adds experience always.
+                                badge = levelBadge(character?.level ?: 1, canLevelUp),
+                                badgeDescription = levelLabel,
+                                onBadgeClick = {
+                                    if (canLevelUp) {
+                                        character?.let { onOpenLevelUp(levelForExperience(it.experience)) }
+                                    } else {
+                                        experienceEditMode = OverviewExperienceEditMode.ADD
+                                        experienceDraft = ""
+                                        isExperienceDialogOpen = true
+                                    }
+                                },
+                                onBadgeLongClick = {
+                                    experienceEditMode = OverviewExperienceEditMode.ADD
+                                    experienceDraft = ""
+                                    isExperienceDialogOpen = true
                                 }
                             )
                             // The conditions down the left, the rests and inspiration down the right, a little off the
                             // frame's sides (B3), each column centred on the middle of the straight side (owner's wish,
                             // 2026-10-07); the frame is drawn PortraitRaise above its place.
-                            val sidesMiddle = portraitSideMiddleY(LocalThemeLook.current) - PortraitRaise
+                            val sidesMiddle = portraitSideMiddleY() - PortraitRaise
                             if (character != null) {
                                 ConditionsColumn(
                                     // Unconscious at 0 hit points too: it explains the arrows.
@@ -966,7 +970,7 @@ private fun OverviewContent(
                                     onOpenConcentration = { isEndConcentrationOpen = true },
                                     modifier = Modifier
                                         .align(Alignment.TopCenter)
-                                        .offset(x = -PortraitSideColumnX, y = sidesMiddle),
+                                        .offset(x = -portraitSideColumnX(6.dp), y = sidesMiddle),
                                     // Inspiration over the conditions: a coin like the rests', lit in gold while it
                                     // is on (owner's choice, 2026-10-07).
                                     leading = {
@@ -983,7 +987,7 @@ private fun OverviewContent(
                             Column(
                                 modifier = Modifier
                                     .align(Alignment.TopCenter)
-                                    .offset(x = PortraitSideColumnX, y = sidesMiddle - portraitSideColumnHeight(2) / 2),
+                                    .offset(x = portraitSideColumnX(6.dp), y = sidesMiddle - portraitSideColumnHeight(2) / 2),
                                 verticalArrangement = Arrangement.spacedBy(PortraitSideGap)
                             ) {
                                 PortraitSideButton(
@@ -1004,7 +1008,7 @@ private fun OverviewContent(
                 item {
                     Column(
                         // Up under the plaque, or under the frame's ornament where it hangs lower.
-                        modifier = Modifier.pullUp(portraitBlockSlack(LocalThemeLook.current)),
+                        modifier = Modifier.pullUp(portraitBlockSlack()),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         // Over the death saves' tray, which slides out from under it.
@@ -1721,8 +1725,10 @@ private fun PortraitFrame(
     framing: PortraitFraming = PortraitFraming(),
     progress: Float = 0f,
     progressColor: Color = LocalDesignTokens.current.colors.progress.xpFill,
-    plaqueLit: Boolean = false,
-    plaque: (@Composable () -> Unit)? = null
+    badge: AnnotatedString? = null,
+    badgeDescription: String = "",
+    onBadgeClick: () -> Unit = {},
+    onBadgeLongClick: () -> Unit = {}
 ) {
     val portraitReference = portraitUri ?: AssetReferences.portraitPlaceholderPath("portrait_placeholder.png")
     val saturation by animateFloatAsState(if (dead) 0f else 1f, animationSpec = tween(durationMillis = 1200), label = "portraitSaturation")
@@ -1731,8 +1737,10 @@ private fun PortraitFrame(
         modifier = Modifier.offset(y = -PortraitRaise),
         progress = progress,
         progressColor = progressColor,
-        plaqueLit = plaqueLit,
-        plaque = plaque
+        badge = badge,
+        badgeDescription = badgeDescription,
+        onBadgeClick = onBadgeClick,
+        onBadgeLongClick = onBadgeLongClick
     ) {
         Box(Modifier.fillMaxSize().saturation(saturation)) {
             AppImage(
@@ -1750,67 +1758,33 @@ private fun PortraitFrame(
 /** How far above its place the frame is drawn: its artwork's margin over the header's fade. */
 private val PortraitRaise = 47.dp
 
-/** From the portrait's block (the plaque, or the frame's ornament if it hangs lower) to the hit points' card. */
+/** From the portrait's block (the frame's bottom edge, or its ornament if it hangs lower) to the hit points' card. */
 private val PortraitHpGap = 27.dp
 
 /**
  * How much of the portrait's item is empty under it: the frame's box is as tall as its artwork, drawn
- * [PortraitRaise] higher; the plaque hangs from the frame's bottom edge, an engraving's spike lower still.
+ * [PortraitRaise] higher; Classic's arch ends above the box's bottom, an engraving's spike reaches it.
  */
-private fun portraitBlockSlack(look: com.dndcharacterhandler.presentation.theme.ThemeLook): Dp {
-    val plaqueBottom = portraitPlaqueCenterY(look) + PortraitPlaqueHeight / 2
-    // Classic's drawn octagon ends above its box; an engraving's artwork fills it down to its spike's tip.
-    val ornamentBottom = if (look.portraitArtwork == null) 0.dp else GothicPortraitHeight
+@Composable
+@ReadOnlyComposable
+private fun portraitBlockSlack(): Dp =
     // The list's 10dp between items counts too.
-    return GothicPortraitHeight + 10.dp - maxOf(plaqueBottom, ornamentBottom) + PortraitRaise - PortraitHpGap
-}
+    GothicPortraitHeight + 10.dp - portraitFrameFoot() + PortraitRaise - PortraitHpGap
 
 /**
- * The level's plaque in the portrait frame's bottom edge (owner's choice, 2026-10-07): "Уровень 1" and the
- * experience under it — a stat's outline ([portraitPlaqueShape]): its corners cut by the ring's own end, the bottom
- * ones mirroring the top; the lines trimmed of their leading, to keep it low. When the experience allows a level up,
- * it turns gold and says "Level UP". A tap adds experience ([onExperience]), or opens the level up when one is
- * due ([onLevelUp]); a long press opens the experience then too, to put a slip right.
+ * The level as the portrait frame writes it (owner's choice, 2026-10-07): the Roman numeral and «lvl», one serif,
+ * «lvl» in the label's grey; both gold when a level up is due, as the ring is.
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun LevelPlaque(
-    levelLabel: String,
-    experience: String,
-    canLevelUp: Boolean,
-    onLevelUp: () -> Unit,
-    onExperience: () -> Unit
-) {
+private fun levelBadge(level: Int, canLevelUp: Boolean): AnnotatedString {
     val colors = LocalDesignTokens.current.colors
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .combinedClickable(onClick = if (canLevelUp) onLevelUp else onExperience, onLongClick = onExperience)
-            .semantics(mergeDescendants = true) {},
-        contentAlignment = Alignment.Center
-    ) {
-        val tight = LineHeightStyle(alignment = LineHeightStyle.Alignment.Center, trim = LineHeightStyle.Trim.Both)
-        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(
-                text = levelLabel,
-                style = MaterialTheme.typography.titleMedium.copy(lineHeightStyle = tight),
-                color = if (canLevelUp) colors.accent.inspiration else colors.text.primary,
-                maxLines = 1
-            )
-            Text(
-                text = if (canLevelUp) text("levelup_badge") else experience,
-                style = MaterialTheme.typography.labelMedium.copy(lineHeightStyle = tight),
-                color = if (canLevelUp) colors.accent.inspiration else colors.text.label,
-                maxLines = 1
-            )
-        }
+    val numeral = if (canLevelUp) colors.accent.inspiration else colors.text.primary
+    val label = if (canLevelUp) colors.accent.inspiration else colors.text.label
+    val lvl = text("overview_level_short")
+    return buildAnnotatedString {
+        withStyle(SpanStyle(color = numeral)) { append(romanNumeral(level)) }
+        withStyle(SpanStyle(color = label)) { append(" $lvl") }
     }
-}
-
-/** "130 / 300": the experience and what the next level needs; at the last level, the experience alone. */
-private fun XpProgressInfo.label(): String {
-    val formatter = NumberFormat.getIntegerInstance()
-    return if (isMaxLevel) formatter.format(currentXp) else "${formatter.format(currentXp)} / ${formatter.format(nextLevelXp)}"
 }
 
 @Composable
@@ -2700,6 +2674,7 @@ private fun OverviewPreviewContent(
             "overview_long_rest_confirm_button" to "Rest",
             "overview_inspiration" to "Inspiration",
             "levelup_badge" to "Level UP",
+            "overview_level_short" to "lvl",
             "overview_hp" to "HP",
             "overview_death_saves" to "Death saves",
             "overview_death_saves_successes" to "Successes",
@@ -2853,3 +2828,4 @@ private fun OverviewPreviewContent(
         }
     }
 }
+

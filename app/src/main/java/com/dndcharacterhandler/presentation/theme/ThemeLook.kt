@@ -37,7 +37,8 @@ enum class FrameStyle {
 val ClassicLook = ThemeLook(
     backdrop = null,
     frames = FrameStyle.ROUNDED,
-    portraitArtworkTop = .186f
+    // The drawn arch's apex, less half its ring.
+    portraitArtworkTop = .104f
 )
 
 /** Ivory ink on charcoal paper over an engraving of a dragon (ChatGPT, 2026-10-04). */

@@ -3266,6 +3266,14 @@
     "fr": "%1$s \u2022 %2$s \u2022 Niveau %3$s",
     "es": "%1$s \u2022 %2$s \u2022 Nivel %3$s"
   },
+  "overview_level_short": {
+    "maxChars": 4,
+    "en": "lvl",
+    "ru": "lvl",
+    "de": "lvl",
+    "fr": "lvl",
+    "es": "lvl"
+  },
   "overview_level_format": {
     "en": "Level %1$s",
     "ru": "\u0423\u0440\u043e\u0432\u0435\u043d\u044c %1$s",
