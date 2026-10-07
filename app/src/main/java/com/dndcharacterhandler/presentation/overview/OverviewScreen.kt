@@ -115,6 +115,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
@@ -1770,8 +1771,8 @@ private fun portraitBlockSlack(look: com.dndcharacterhandler.presentation.theme.
 
 /**
  * The level's plaque in the portrait frame's bottom edge (owner's choice, 2026-10-07): "Уровень 1" and the
- * experience under it — a stat's outline; its top corners square, where the ring runs into them, its bottom ones
- * cut as the frame's. When the experience allows a level up,
+ * experience under it — a stat's outline ([portraitPlaqueShape]): its top corners cut by the ring's own end, its
+ * bottom ones as the frame's. When the experience allows a level up,
  * it turns gold and says "Level UP". A tap adds experience ([onExperience]), or opens the level up when one is
  * due ([onLevelUp]); a long press opens the experience then too, to put a slip right.
  */
@@ -1793,19 +1794,11 @@ private fun LevelPlaque(
             .semantics(mergeDescendants = true) {},
         contentAlignment = Alignment.Center
     ) {
+        val shape = portraitPlaqueShape(LocalThemeLook.current)
         Canvas(modifier = Modifier.fillMaxSize()) {
-            val cut = PlaqueChamfer.toPx()
-            val outline = Path().apply {
-                moveTo(0f, 0f)
-                lineTo(size.width, 0f)
-                lineTo(size.width, size.height - cut)
-                lineTo(size.width - cut, size.height)
-                lineTo(cut, size.height)
-                lineTo(0f, size.height - cut)
-                close()
-            }
-            drawPath(outline, colors.surface.card)
-            drawPath(outline, mark, style = Stroke(1.dp.toPx()))
+            val outline = shape.createOutline(size, layoutDirection, this)
+            drawOutline(outline, colors.surface.card)
+            drawOutline(outline, mark, style = Stroke(1.dp.toPx()))
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
@@ -1823,9 +1816,6 @@ private fun LevelPlaque(
         }
     }
 }
-
-/** How far the plaque's corners are cut. */
-private val PlaqueChamfer = 6.dp
 
 /** "130 / 300": the experience and what the next level needs; at the last level, the experience alone. */
 private fun XpProgressInfo.label(): String {

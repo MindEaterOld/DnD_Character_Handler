@@ -27,7 +27,7 @@ import androidx.compose.ui.graphics.PathMeasure
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Density
@@ -74,18 +74,60 @@ private fun ringInset(look: ThemeLook): Dp = if (look.portraitArtwork == null) 0
 internal fun portraitPlaqueCenterY(look: ThemeLook): Dp =
     GothicPortraitHeight * ringPolygon(look).first().y - ringInset(look)
 
+/** How far the plaque's bottom corners are cut, as the frame's. */
+private val PlaqueBottomCut = 6.dp
+
+/** The ring's lower-left bevel, in dp: its foot (the bottom edge's left end) and its direction down to that foot. */
+private fun lowerBevel(look: ThemeLook): Pair<Offset, Offset> {
+    val ring = inset(scaled(ringPolygon(look), Size(GothicPortraitWidth.value, GothicPortraitHeight.value)), ringInset(look).value)
+    val foot = ring[0]
+    val top = ring[1]
+    val length = hypot(foot.x - top.x, foot.y - top.y)
+    return foot to Offset((foot.x - top.x) / length, (foot.y - top.y) / length)
+}
+
 /**
- * The plaque, centred on the ring's bottom edge, as wide as puts its top corners on the ring's lower bevels: the
- * ring comes down each bevel straight into a corner of it (owner's wish, 2026-10-07).
+ * The cut of the plaque's top corners: square across the bevel and as long as the ring is wide — the ring's own
+ * end (owner's wish, 2026-10-07). [DpSize.width] along the top edge, [DpSize.height] down the side.
+ */
+private fun plaqueTopCut(look: ThemeLook): DpSize {
+    val (_, down) = lowerBevel(look)
+    return DpSize(PortraitRingWidth * down.y, PortraitRingWidth * down.x)
+}
+
+/**
+ * The plaque, centred on the ring's bottom edge, as wide as puts the cuts of its top corners square across the
+ * ring's lower bevels: the ring comes down each bevel and ends in that cut.
  */
 internal fun portraitPlaqueSize(look: ThemeLook): DpSize {
-    val ring = inset(scaled(ringPolygon(look), Size(GothicPortraitWidth.value, GothicPortraitHeight.value)), ringInset(look).value)
-    val corner = ring[0]
-    val bevelTop = ring[1]
-    // Up the bevel by half the plaque's height, from its foot at the bottom edge's left end.
-    val run = (corner.x - bevelTop.x) / (corner.y - bevelTop.y) * PortraitPlaqueHeight.value / 2
-    val halfWidth = GothicPortraitWidth.value / 2 - corner.x + run
-    return DpSize((halfWidth * 2).dp, PortraitPlaqueHeight)
+    val (foot, down) = lowerBevel(look)
+    val cut = plaqueTopCut(look)
+    // The ring's middle meets the cut's middle, half a cut below the plaque's top.
+    val up = (PortraitPlaqueHeight.value / 2 - cut.height.value / 2) / down.y
+    val left = foot.x - down.x * up - cut.width.value / 2
+    return DpSize(((GothicPortraitWidth.value / 2 - left) * 2).dp, PortraitPlaqueHeight)
+}
+
+/** The plaque's outline: its top corners cut by the ring's end ([plaqueTopCut]), its bottom ones as the frame's. */
+internal fun portraitPlaqueShape(look: ThemeLook): Shape = PlaqueShape(plaqueTopCut(look), PlaqueBottomCut)
+
+private class PlaqueShape(private val top: DpSize, private val bottom: Dp) : Shape {
+    override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density): Outline = with(density) {
+        val topX = top.width.toPx()
+        val topY = top.height.toPx()
+        val cut = bottom.toPx()
+        Outline.Generic(Path().apply {
+            moveTo(topX, 0f)
+            lineTo(size.width - topX, 0f)
+            lineTo(size.width, topY)
+            lineTo(size.width, size.height - cut)
+            lineTo(size.width - cut, size.height)
+            lineTo(cut, size.height)
+            lineTo(0f, size.height - cut)
+            lineTo(0f, topY)
+            close()
+        })
+    }
 }
 
 /**
@@ -167,11 +209,22 @@ internal fun GothicPortraitFrame(
                     measure.getSegment(start - reach, start + (end - start) * progress.coerceIn(0f, 1f), it, true)
                 }
                 val inner = if (drawn) ringPath(inset(ring, 5.dp.toPx())) else null
+                // The plaque's own outline, where it stands: what cuts the ring's ends.
+                val plaqueOutline = plaqueArea?.let { area ->
+                    val outline = portraitPlaqueShape(look).createOutline(area.size, layoutDirection, this)
+                    Path().apply {
+                        addPath((outline as Outline.Generic).path, area.topLeft)
+                    }
+                }
                 val stroke = Stroke(ringWidth, cap = StrokeCap.Butt, join = StrokeJoin.Miter)
                 onDrawBehind {
                     inner?.let { drawPath(it, hairline, style = Stroke(.75.dp.toPx())) }
-                    val area = plaqueArea ?: Rect.Zero
-                    clipRect(area.left, area.top, area.right, area.bottom, ClipOp.Difference) {
+                    if (plaqueOutline != null) {
+                        clipPath(plaqueOutline, ClipOp.Difference) {
+                            drawPath(trackPath, track, style = stroke)
+                            if (progress > 0f) drawPath(filled, progressColor, style = stroke)
+                        }
+                    } else {
                         drawPath(trackPath, track, style = stroke)
                         if (progress > 0f) drawPath(filled, progressColor, style = stroke)
                     }
