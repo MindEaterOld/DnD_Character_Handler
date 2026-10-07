@@ -1772,8 +1772,9 @@ private fun portraitBlockSlack(): Dp =
     GothicPortraitHeight + 10.dp - portraitFrameFoot() + PortraitRaise - PortraitHpGap
 
 /**
- * The level as the portrait frame writes it (owner's choice, 2026-10-07): the Roman numeral and «lvl», one serif,
- * «lvl» in the label's grey; both gold when a level up is due, as the ring is.
+ * The level as the portrait frame writes it (owner's choices, 2026-10-07): the Roman numeral and «lvl», one serif —
+ * the numeral the larger (`headlineMedium`), «lvl» `titleMedium` in the label's grey, on one baseline; both gold
+ * when a level up is due, as the ring is.
  */
 @Composable
 private fun levelBadge(level: Int, canLevelUp: Boolean): AnnotatedString {
@@ -1783,7 +1784,7 @@ private fun levelBadge(level: Int, canLevelUp: Boolean): AnnotatedString {
     val lvl = text("overview_level_short")
     return buildAnnotatedString {
         withStyle(SpanStyle(color = numeral)) { append(romanNumeral(level)) }
-        withStyle(SpanStyle(color = label)) { append(" $lvl") }
+        withStyle(MaterialTheme.typography.titleMedium.toSpanStyle().copy(color = label)) { append(" $lvl") }
     }
 }
 

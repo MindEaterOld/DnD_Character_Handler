@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
@@ -28,6 +29,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathMeasure
 import androidx.compose.ui.graphics.Shape
@@ -76,17 +78,24 @@ private val GothicOpening = listOf(
 /** The experience's ring. */
 private val PortraitRingWidth = 4.dp
 
-/** The level's words in the gap: as far from the ring's ends each side, and as tall a place to tap. */
-private val BadgeAir = 9.dp
-private val BadgeTapHeight = 40.dp
+/** The level's plate: round its words this much air across and up and down, its corners rounded. */
+private val PlateAirAcross = 10.dp
+private val PlateAirDown = 5.dp
+private val PlateCorner = 6.dp
+
+/** Between the plate and the ring's ends. */
+private val GapAir = 5.dp
 
 /** The serifs the ring ends in at the gap. */
 private val GapSerif = 12.dp
 
-/** The level's words: one serif, trimmed of their leading so they sit on the ring's line. */
+/** How far the level's plate hangs below the ring's line, for what follows the frame. */
+private val PlateFoot = 20.dp
+
+/** The level's words: the numeral's size (the caller sets «lvl» smaller), trimmed of their leading. */
 @Composable
 @ReadOnlyComposable
-private fun badgeStyle() = MaterialTheme.typography.titleMedium.copy(
+private fun badgeStyle() = MaterialTheme.typography.headlineMedium.copy(
     lineHeightStyle = LineHeightStyle(alignment = LineHeightStyle.Alignment.Center, trim = LineHeightStyle.Trim.Both)
 )
 
@@ -184,14 +193,14 @@ internal fun portraitSideColumnX(gap: Dp): Dp =
 @Composable
 @ReadOnlyComposable
 internal fun portraitFrameFoot(): Dp =
-    if (LocalThemeLook.current.portraitArtwork == null) GothicPortraitHeight * ArchBottom + BadgeTapHeight / 4 else GothicPortraitHeight
+    if (LocalThemeLook.current.portraitArtwork == null) GothicPortraitHeight * ArchBottom + PlateFoot else GothicPortraitHeight
 
 /**
  * The overview's portrait (owner's choices from boards and the screen, 2026-10-07: V2, A2, E2, W1): the frame is the
  * experience bar. A ring round the portrait fills with [progress] from the gap in the bottom edge — its left end —
  * round the frame, back to the gap's right end; the ring ends at the gap in serifs, and [badge] (the level, «I lvl»)
- * is written in it, on the ring's line. Classic draws its arch, the ring on its line; an engraving keeps its white
- * artwork, tinted with the palette, the ring inside its opening, the words on a dark patch over the moulding. The
+ * is written in it, on the ring's line, on a dark plate. Classic draws its arch, the ring on its line; an engraving
+ * keeps its white artwork, tinted with the palette, the ring inside its opening. The
  * picture darkens toward the frame's edges, sunk into it. A tap on the words is [onBadgeClick], a long press
  * [onBadgeLongClick].
  */
@@ -222,9 +231,10 @@ internal fun GothicPortraitFrame(
     val style = badgeStyle()
     val measurer = rememberTextMeasurer()
     val badgeSize = badge?.let { measurer.measure(it, style).size }
-    val gap = with(density) { badgeSize?.let { it.width.toDp() + BadgeAir * 2 } ?: 0.dp }
-    val gapPx = with(density) { gap.toPx() }
-    val badgeHeightPx = badgeSize?.height?.toFloat() ?: 0f
+    val plate = with(density) {
+        badgeSize?.let { Size(it.width + PlateAirAcross.toPx() * 2, it.height + PlateAirDown.toPx() * 2) } ?: Size.Zero
+    }
+    val gapPx = if (badge != null) plate.width + with(density) { GapAir.toPx() } * 2 else 0f
     Box(modifier = modifier.size(GothicPortraitWidth, GothicPortraitHeight)) {
         Box(
             modifier = Modifier.fillMaxSize().clip(opening)
@@ -272,24 +282,40 @@ internal fun GothicPortraitFrame(
                 val stroke = Stroke(ringWidth, cap = StrokeCap.Butt, join = StrokeJoin.Miter)
                 val cx = size.width / 2
                 val serif = GapSerif.toPx() / 2
+                val serifWidth = 2.dp.toPx()
+                // The serifs stand just outside the ring's ends, flush with them.
+                val leftSerif = cx - half - serifWidth / 2
+                val rightSerif = cx + half + serifWidth / 2
+                val layer = Paint().apply { alpha = track.alpha }
+                val corner = CornerRadius(PlateCorner.toPx())
                 onDrawBehind {
-                    if (!geometry.drawn && badge != null) {
-                        // Over the engraving's moulding, a dark patch for the words to read on.
-                        val patch = badgeHeightPx / 2 + 5.dp.toPx()
-                        drawRect(colors.surface.card, Offset(cx - half, bottom - patch), Size(half * 2, patch * 2))
-                    }
-                    drawPath(ring, track, style = stroke)
-                    if (progress > 0f) drawPath(filled, progressColor, style = stroke)
+                    // The empty ring and its serifs in one layer, solid, then laid down at the track's alpha: where
+                    // they meet nothing doubles.
+                    drawContext.canvas.saveLayer(Rect(Offset.Zero, size), layer)
+                    val solid = track.copy(alpha = 1f)
+                    drawPath(ring, solid, style = stroke)
                     if (badge != null) {
-                        // The ring ends at the gap in serifs: the left one lit as soon as there is experience,
-                        // the right one at the full ring.
-                        drawLine(
-                            if (progress > 0f) progressColor else track,
-                            Offset(cx - half, bottom - serif), Offset(cx - half, bottom + serif), 2.dp.toPx()
-                        )
-                        drawLine(
-                            if (progress >= 1f) progressColor else track,
-                            Offset(cx + half, bottom - serif), Offset(cx + half, bottom + serif), 2.dp.toPx()
+                        drawLine(solid, Offset(leftSerif, bottom - serif), Offset(leftSerif, bottom + serif), serifWidth)
+                        drawLine(solid, Offset(rightSerif, bottom - serif), Offset(rightSerif, bottom + serif), serifWidth)
+                    }
+                    drawContext.canvas.restore()
+                    // The experience over it; the left serif lit with it, the right one at the full ring.
+                    if (progress > 0f) {
+                        drawPath(filled, progressColor, style = stroke)
+                        if (badge != null) {
+                            drawLine(progressColor, Offset(leftSerif, bottom - serif), Offset(leftSerif, bottom + serif), serifWidth)
+                        }
+                    }
+                    if (progress >= 1f && badge != null) {
+                        drawLine(progressColor, Offset(rightSerif, bottom - serif), Offset(rightSerif, bottom + serif), serifWidth)
+                    }
+                    if (badge != null) {
+                        // The level's plate: dark, for its words to read on the picture and the moulding.
+                        drawRoundRect(
+                            colors.surface.card,
+                            topLeft = Offset(cx - plate.width / 2, bottom - plate.height / 2),
+                            size = plate,
+                            cornerRadius = corner
                         )
                     }
                 }
@@ -300,8 +326,8 @@ internal fun GothicPortraitFrame(
             Box(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
-                    .offset(y = bottom - BadgeTapHeight / 2)
-                    .size(gap, BadgeTapHeight)
+                    .offset(y = bottom - with(density) { plate.height.toDp() } / 2)
+                    .size(with(density) { plate.width.toDp() }, with(density) { plate.height.toDp() })
                     .combinedClickable(onClick = onBadgeClick, onLongClick = onBadgeLongClick)
                     .semantics(mergeDescendants = true) { contentDescription = badgeDescription },
                 contentAlignment = Alignment.Center
