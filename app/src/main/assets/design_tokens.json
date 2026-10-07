@@ -292,6 +292,50 @@
       }
     }
   },
+  "swatches": {
+    "comment": "The colours a character's eyes, hair and skin are picked from (owner's choice from boards, 2026-10-07: C2): the character's own colours, the same in every theme, not the interface's. Each a name — its text is biography_swatch_<group>_<name> — and its hex; the order is the pop-up's.",
+    "eyes": {
+      "brown": "#5B3A1E",
+      "hazel": "#8A6A3A",
+      "amber": "#C68A2E",
+      "green": "#4E8A4A",
+      "grey": "#8C9399",
+      "lightBlue": "#6C9FD0",
+      "blue": "#3A5FA8",
+      "violet": "#7A4FA0",
+      "red": "#A8322E",
+      "gold": "#D4AF37",
+      "black": "#1E1A1A",
+      "white": "#E8E4DC"
+    },
+    "hair": {
+      "black": "#1C1714",
+      "chestnut": "#4A2C1A",
+      "lightBrown": "#8A6B4A",
+      "blond": "#D8C08A",
+      "red": "#B0532A",
+      "grey": "#B8B4AE",
+      "white": "#ECE8E0",
+      "silver": "#C9CDD3",
+      "blue": "#3A5FA8",
+      "green": "#4E8A4A",
+      "violet": "#7A4FA0"
+    },
+    "skin": {
+      "pale": "#E8DCCF",
+      "fair": "#F1D3B8",
+      "tan": "#C08A62",
+      "brown": "#7A4E30",
+      "dark": "#3E2A20",
+      "grey": "#8C8C8C",
+      "green": "#7FA05A",
+      "blue": "#5A7FB0",
+      "red": "#A8443A",
+      "copper": "#A8643A",
+      "golden": "#C9A85A",
+      "lilac": "#8A6AA0"
+    }
+  },
   "spacingDp": {
     "xs": 4,
     "sm": 8,

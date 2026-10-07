@@ -32,14 +32,15 @@ fun NotesScreenPreview() {
             "notes_search_placeholder" to "Search Notes",
             "notes_none_yet" to "No notes yet.",
             "notes_search_empty" to "No notes found.",
-            "notes_new_note" to "New Note",
-            "notes_edit_note" to "Edit Note",
             "notes_title" to "Title",
-            "notes_content" to "Content",
+            "notes_text_hint" to "Note text",
             "notes_pin" to "Pin note",
-            "notes_pinned" to "Pinned",
+            "notes_unpin" to "Unpin note",
             "notes_untitled" to "Untitled Note",
-            "notes_empty_content" to "No content yet.",
+            "notes_changed" to "Edited %1\$s",
+            "notes_delete" to "Delete note",
+            "notes_expand" to "Open note",
+            "notes_collapse" to "Close note",
             "common_save" to "Save",
             "common_cancel" to "Cancel"
         )
@@ -98,7 +99,9 @@ fun NotesScreenPreview() {
                     spells = emptyList(),
                     features = emptyList(),
                     notes = notes
-                )
+                ),
+                // The first note unfolded, as it is written in place.
+                expandedId = 1
             )
             ScreenBackground {
                 LazyColumn(contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 4.dp)) {

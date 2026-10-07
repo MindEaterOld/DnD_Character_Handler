@@ -10,7 +10,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -35,6 +39,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import com.dndcharacterhandler.presentation.components.FloatingAddButton
@@ -82,6 +87,7 @@ import com.dndcharacterhandler.presentation.components.labelKey
 import com.dndcharacterhandler.presentation.components.toggleContent
 import com.dndcharacterhandler.presentation.components.toggleFill
 import com.dndcharacterhandler.presentation.localization.text
+import com.dndcharacterhandler.presentation.notes.NotesNewNoteItem
 import com.dndcharacterhandler.presentation.notes.NotesSection
 import com.dndcharacterhandler.presentation.notes.NotesViewModel
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
@@ -188,6 +194,7 @@ fun BiographyScreen(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun BiographyContent(
     characterBundle: CharacterBundle?,
@@ -204,8 +211,15 @@ internal fun BiographyContent(
     val colors = LocalDesignTokens.current.colors
     val character = characterBundle?.character
     var editingField by remember { mutableStateOf<BiographyField?>(null) }
-    fun row(field: BiographyField, icon: ImageVector, label: String, value: String) =
-        BiographyRow(icon, label, value) { editingField = field }
+    fun row(field: BiographyField, icon: ImageVector, label: String, value: String, dot: Color? = null, note: String? = null) =
+        BiographyRow(icon, label, value, dot, note) { editingField = field }
+
+    // A colour picked from the swatches: its name in the language in use and a dot of it; the player's own word as is.
+    @Composable
+    fun swatchRow(field: BiographyField, group: SwatchGroup, icon: ImageVector, value: String): BiographyRow {
+        val swatch = swatchOf(group, value)
+        return row(field, icon, field.label(), swatch?.let { swatchName(group, it) } ?: value, swatch?.color)
+    }
     if (character == null) {
         ScreenBackground {
             Box(
@@ -231,9 +245,12 @@ internal fun BiographyContent(
     val resolvedCharacter = character
     val resolvedBundle = characterBundle
     val focusManager = LocalFocusManager.current
+    val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
     ScreenBackground {
         Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
+            state = listState,
             modifier = Modifier
                 .fillMaxSize()
                 .fadeUnderHeader()
@@ -259,11 +276,17 @@ internal fun BiographyContent(
                         ) { editingField = BiographyField.HEIGHT },
                         row(BiographyField.GENDER, genderIcon(resolvedCharacter.gender), text("biography_gender"), localizedGender(resolvedCharacter.gender)),
                         row(BiographyField.HEIGHT, BiographyIconHeight, text("biography_height"), localizedMeasuredValue(resolvedCharacter.height)),
-                        row(BiographyField.EYES, BiographyIconEyes, text("biography_eyes"), resolvedCharacter.eyes),
-                        row(BiographyField.AGE, BiographyIconAge, text("biography_age"), resolvedCharacter.age),
-                        row(BiographyField.HAIR, BiographyIconHair, text("biography_hair"), resolvedCharacter.hair),
-                        row(BiographyField.WEIGHT, BiographyIconWeight, text("biography_weight"), localizedMeasuredValue(resolvedCharacter.weight)),
-                        row(BiographyField.SKIN, BiographyIconSkin, text("biography_skin"), resolvedCharacter.skin)
+                        swatchRow(BiographyField.EYES, SwatchGroup.EYES, BiographyIconEyes, resolvedCharacter.eyes),
+                        row(BiographyField.AGE, BiographyIconAge, text("biography_age"), ageDisplay(resolvedCharacter.age)),
+                        swatchRow(BiographyField.HAIR, SwatchGroup.HAIR, BiographyIconHair, resolvedCharacter.hair),
+                        row(
+                            BiographyField.WEIGHT,
+                            BiographyIconWeight,
+                            text("biography_weight"),
+                            localizedMeasuredValue(resolvedCharacter.weight),
+                            note = weightBuild(resolvedCharacter.weight, resolvedCharacter.height)
+                        ),
+                        swatchRow(BiographyField.SKIN, SwatchGroup.SKIN, BiographyIconSkin, resolvedCharacter.skin)
                     )
                 )
             }
@@ -281,9 +304,14 @@ internal fun BiographyContent(
             moreItems()
         }
         PinnedCharacterHeader(character = resolvedCharacter, onOpenDrawer = onOpenDrawer, onOpenDice = onOpenDice)
-        onAddNote?.let { add ->
+        // Hidden while the keyboard is up: nothing is started while typing, and it would lie on the note's foot.
+        onAddNote?.takeUnless { WindowInsets.isImeVisible }?.let { add ->
             FloatingAddButton(
-                onClick = add,
+                onClick = {
+                    add()
+                    // The new note opens at the top of the notes, after the biography's own two items.
+                    scope.launch { listState.animateScrollToItem(BiographyOwnItems + NotesNewNoteItem) }
+                },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(end = 24.dp, bottom = 15.dp)
@@ -308,6 +336,7 @@ internal fun BiographyContent(
         BiographyEditDialog(
             field = field,
             currentValue = field.valueFrom(resolvedCharacter),
+            height = resolvedCharacter.height,
             onDismiss = { editingField = null },
             onSave = { value ->
                 onUpdateField(resolvedBundle, field, value)
@@ -316,6 +345,9 @@ internal fun BiographyContent(
         )
     }
 }
+
+/** The biography's own items before the notes: who the character is and the history. */
+private const val BiographyOwnItems = 2
 
 /**
  * The appearance two to a line, no rules: the space parts them (owner's choice from boards, 2026-10-06: S4).
@@ -353,16 +385,34 @@ private fun BiographyGridCell(row: BiographyRow, modifier: Modifier) {
         )
         Column(modifier = Modifier.padding(start = PersonaIconGap)) {
             BiographyLabel(row.label)
-            Text(
-                text = row.value.ifBlank { text("common_dash") },
-                style = MaterialTheme.typography.bodyLarge,
-                color = if (row.value.isBlank()) colors.text.subtle else colors.text.primary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                row.dot?.let { dot ->
+                    SwatchDot(dot, SwatchDotSize)
+                    Spacer(modifier = Modifier.width(6.dp))
+                }
+                Text(
+                    text = row.value.ifBlank { text("common_dash") },
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = if (row.value.isBlank()) colors.text.subtle else colors.text.primary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            // What the value tells besides: the build under the weight, small and grey.
+            row.note?.let { note ->
+                Text(
+                    text = note,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = colors.text.subtle,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
     }
 }
+
+private val SwatchDotSize = 12.dp
 
 /** A field's label: gold capitals, spaced out, as a printed character sheet's (owner's choice from boards, 2026-10-06: S2). */
 @Composable
@@ -724,6 +774,8 @@ private fun BiographyHistorySection(
 private fun BiographyEditDialog(
     field: BiographyField,
     currentValue: String,
+    /** The height, for the weight's build. */
+    height: String,
     onDismiss: () -> Unit,
     onSave: (String) -> Unit
 ) {
@@ -734,7 +786,7 @@ private fun BiographyEditDialog(
             onSelect = onSave
         )
 
-        BiographyEditor.GENDER -> BiographyGenderDialog(
+        BiographyEditor.GENDER -> GenderDialog(
             currentValue = currentValue,
             onDismiss = onDismiss,
             onSave = onSave
@@ -743,16 +795,27 @@ private fun BiographyEditDialog(
         // The height opens HeightSizeDialog with the size instead (see BiographyContent).
         BiographyEditor.HEIGHT -> Unit
 
-        BiographyEditor.WEIGHT -> BiographyWeightDialog(
+        BiographyEditor.WEIGHT -> WeightDialog(
+            currentValue = currentValue,
+            height = height,
+            onDismiss = onDismiss,
+            onSave = onSave
+        )
+
+        BiographyEditor.AGE -> AgeDialog(
             currentValue = currentValue,
             onDismiss = onDismiss,
             onSave = onSave
         )
 
-        BiographyEditor.NUMBER -> BiographyTextInputDialog(
+        BiographyEditor.SWATCH -> SwatchDialog(
             title = field.label(),
+            group = when (field) {
+                BiographyField.EYES -> SwatchGroup.EYES
+                BiographyField.HAIR -> SwatchGroup.HAIR
+                else -> SwatchGroup.SKIN
+            },
             currentValue = currentValue,
-            keyboardType = KeyboardType.Number,
             onDismiss = onDismiss,
             onSave = onSave
         )
@@ -791,108 +854,7 @@ private fun BiographyTextInputDialog(
 }
 
 @Composable
-private fun BiographyGenderDialog(
-    currentValue: String,
-    onDismiss: () -> Unit,
-    onSave: (String) -> Unit
-) {
-    var selected by remember(currentValue) {
-        mutableStateOf(
-            when {
-                currentValue.isBlank() -> GenderMaleOption
-                currentValue in genderOptions -> currentValue
-                else -> GenderCustomOption
-            }
-        )
-    }
-    var custom by remember(currentValue) {
-        mutableStateOf(currentValue.takeUnless { it in genderOptions }.orEmpty())
-    }
-    EditDialog(
-        title = text("biography_gender"),
-        onDismiss = onDismiss,
-        onConfirm = { onSave(if (selected == GenderCustomOption) custom else selected) }
-    ) {
-        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            genderOptions.forEach { option ->
-                BiographySelectionOption(
-                    text = localizedGender(option),
-                    selected = selected == option,
-                    onClick = { selected = option }
-                )
-            }
-            if (selected == GenderCustomOption) {
-                OutlinedTextField(
-                    value = custom,
-                    onValueChange = { custom = it },
-                    singleLine = true
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun BiographySelectionOption(
-    text: String,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(10.dp),
-        color = toggleFill(selected)
-    ) {
-        Text(
-            text = text,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-            style = MaterialTheme.typography.bodyLarge,
-            color = toggleContent(selected)
-        )
-    }
-}
-
-@Composable
-private fun BiographyWeightDialog(
-    currentValue: String,
-    onDismiss: () -> Unit,
-    onSave: (String) -> Unit
-) {
-    var unit by remember(currentValue) { mutableStateOf(detectWeightUnit(currentValue)) }
-    var amount by remember(currentValue) { mutableStateOf(parseLeadingNumber(currentValue)?.let(::formatNumber).orEmpty()) }
-    val lbLabel = text(WeightUnit.LB.labelKey)
-    val kgLabel = text(WeightUnit.KG.labelKey)
-    EditDialog(
-        title = text("biography_weight"),
-        onDismiss = onDismiss,
-        onConfirm = { onSave(formatMeasuredValue(amount, unit.code)) }
-    ) {
-        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            UnitSwitcher(
-                first = lbLabel,
-                second = kgLabel,
-                selected = if (unit == WeightUnit.LB) lbLabel else kgLabel,
-                onSelected = { next ->
-                    val nextUnit = if (next == lbLabel) WeightUnit.LB else WeightUnit.KG
-                    amount = convertWeightAmount(amount, unit, nextUnit)
-                    unit = nextUnit
-                }
-            )
-            OutlinedTextField(
-                value = amount,
-                onValueChange = { amount = it },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
-            )
-        }
-    }
-}
-
-@Composable
-private fun UnitSwitcher(
+internal fun UnitSwitcher(
     first: String,
     second: String,
     selected: String,
@@ -918,6 +880,10 @@ private data class BiographyRow(
     val icon: ImageVector,
     val label: String,
     val value: String,
+    /** The colour the value names, a dot before it: the eyes', the hair's, the skin's swatch. */
+    val dot: Color? = null,
+    /** A quiet line under the value: the weight's build. */
+    val note: String? = null,
     val onClick: () -> Unit
 )
 
@@ -935,13 +901,13 @@ enum class BiographyField(val editor: BiographyEditor) {
     IDEALS(BiographyEditor.TEXT),
     BONDS(BiographyEditor.TEXT),
     FLAWS(BiographyEditor.TEXT),
-    AGE(BiographyEditor.NUMBER),
+    AGE(BiographyEditor.AGE),
     GENDER(BiographyEditor.GENDER),
     HEIGHT(BiographyEditor.HEIGHT),
     WEIGHT(BiographyEditor.WEIGHT),
-    EYES(BiographyEditor.TEXT),
-    HAIR(BiographyEditor.TEXT),
-    SKIN(BiographyEditor.TEXT);
+    EYES(BiographyEditor.SWATCH),
+    HAIR(BiographyEditor.SWATCH),
+    SKIN(BiographyEditor.SWATCH);
 
     @Composable
     fun label(): String = when (this) {
@@ -984,10 +950,11 @@ enum class BiographyField(val editor: BiographyEditor) {
 enum class BiographyEditor {
     ALIGNMENT,
     TEXT,
-    NUMBER,
+    AGE,
     GENDER,
     HEIGHT,
-    WEIGHT
+    WEIGHT,
+    SWATCH
 }
 
 /** [code] is what gets saved in the character ("180 cm"); [labelKey] is how it's shown. */
@@ -996,7 +963,7 @@ internal enum class HeightUnit(val code: String, val labelKey: String) {
     FT("ft", "inventory_unit_feet")
 }
 
-private enum class WeightUnit(val code: String, val labelKey: String) {
+internal enum class WeightUnit(val code: String, val labelKey: String) {
     LB("lb", "inventory_unit_pounds"),
     KG("kg", "biography_unit_kg")
 }
@@ -1005,7 +972,7 @@ private val measuredValueRegex = Regex("""^(-?\d+(?:[.,]\d+)?)\s*(cm|ft|lb|kg)$"
 
 /** Shows a saved "180 cm" / "150 lb" value with the unit in the current language; other text as is. */
 @Composable
-private fun localizedMeasuredValue(value: String): String {
+internal fun localizedMeasuredValue(value: String): String {
     val match = measuredValueRegex.matchEntire(value.trim()) ?: return value
     val (amount, code) = match.destructured
     val labelKey = HeightUnit.entries.firstOrNull { it.code.equals(code, ignoreCase = true) }?.labelKey
@@ -1034,10 +1001,9 @@ private val alignmentOptions = listOf(
 )
 
 // Stored as these English codes (like alignment) and shown through localization keys.
-private const val GenderCustomOption = "Custom"
-private const val GenderMaleOption = "Male"
-private const val GenderFemaleOption = "Female"
-private val genderOptions = listOf(GenderMaleOption, GenderFemaleOption, GenderCustomOption)
+internal const val GenderCustomOption = "Custom"
+internal const val GenderMaleOption = "Male"
+internal const val GenderFemaleOption = "Female"
 
 @Composable
 private fun localizedGender(value: String): String =
@@ -1051,13 +1017,13 @@ private fun localizedGender(value: String): String =
 internal fun detectHeightUnit(value: String): HeightUnit =
     if (value.contains("ft", ignoreCase = true) || value.contains("'") || value.contains("\"")) HeightUnit.FT else HeightUnit.CM
 
-private fun detectWeightUnit(value: String): WeightUnit =
+internal fun detectWeightUnit(value: String): WeightUnit =
     if (value.contains("kg", ignoreCase = true)) WeightUnit.KG else WeightUnit.LB
 
 internal fun parseLeadingNumber(value: String): Double? =
     Regex("""-?\d+(?:[.,]\d+)?""").find(value)?.value?.replace(',', '.')?.toDoubleOrNull()
 
-private fun convertWeightAmount(value: String, from: WeightUnit, to: WeightUnit): String {
+internal fun convertWeightAmount(value: String, from: WeightUnit, to: WeightUnit): String {
     val amount = value.replace(',', '.').toDoubleOrNull() ?: return value
     if (from == to) return formatNumber(amount)
     val converted = when {

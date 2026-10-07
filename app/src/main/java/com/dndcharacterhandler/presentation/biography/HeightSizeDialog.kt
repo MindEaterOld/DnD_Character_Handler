@@ -104,7 +104,7 @@ private fun heightAmount(cm: Float, unit: HeightUnit): String =
     if (unit == HeightUnit.CM) cm.roundToInt().toString() else formatNumber((cm / CmPerFoot).toDouble())
 
 /** A saved height ("180 cm", "5.9 ft") in centimetres, kept within the rod; null when there is none. */
-private fun heightInCm(value: String): Double? {
+internal fun heightInCm(value: String): Double? {
     val amount = parseLeadingNumber(value) ?: return null
     val cm = if (detectHeightUnit(value) == HeightUnit.FT) amount * CmPerFoot else amount
     return cm.coerceIn(SmallestHeightCm, TallestHeightCm)

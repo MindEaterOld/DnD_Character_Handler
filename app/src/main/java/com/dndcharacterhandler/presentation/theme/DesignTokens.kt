@@ -136,8 +136,20 @@ data class DesignColorTokens(
 /** The type scale and the colours of the theme in use. */
 data class DesignTokens(
     val typography: DesignTypographyTokens,
-    val colors: DesignColorTokens
+    val colors: DesignColorTokens,
+    /** The colours a character's eyes, hair and skin are picked from: the same in every theme. */
+    val swatches: SwatchTokens = SwatchTokens.Empty
 )
+
+/** A colour to pick for a character: its [name] (the text key's last part) and the colour itself. */
+data class Swatch(val name: String, val color: Color)
+
+/** The swatches of design_tokens.json (`swatches`), by what they colour, in the pop-up's order. */
+data class SwatchTokens(val eyes: List<Swatch>, val hair: List<Swatch>, val skin: List<Swatch>) {
+    companion object {
+        val Empty = SwatchTokens(emptyList(), emptyList(), emptyList())
+    }
+}
 
 /** A theme's palette as design_tokens.json gives it (`themes.<key>.colors`): the app's roles and the Material scheme. */
 data class ThemePalette(
@@ -148,11 +160,12 @@ data class ThemePalette(
 /** Every theme's palette and the type scale they share; a theme the file lacks gets the classic palette. */
 data class DesignTokenSet(
     val typography: DesignTypographyTokens,
-    val palettes: Map<AppTheme, ThemePalette>
+    val palettes: Map<AppTheme, ThemePalette>,
+    val swatches: SwatchTokens = SwatchTokens.Empty
 ) {
     fun palette(theme: AppTheme): ThemePalette = palettes[theme] ?: palettes[AppTheme.CLASSIC] ?: DefaultThemePalette
 
-    fun tokens(theme: AppTheme): DesignTokens = DesignTokens(typography, palette(theme).colors)
+    fun tokens(theme: AppTheme): DesignTokens = DesignTokens(typography, palette(theme).colors, swatches)
 }
 
 val DefaultDesignColors = DesignColorTokens(
@@ -311,7 +324,8 @@ fun parseDesignTokenSet(json: String): DesignTokenSet {
                     colors = loadColorTokens(colors.optObject("app")),
                     material = colors.optObject("materialTheme").materialColors()
                 )
-            }.toMap()
+            }.toMap(),
+            swatches = root.optObject("swatches").swatchTokens()
         )
     }.getOrDefault(DefaultDesignTokenSet)
 }
@@ -438,6 +452,19 @@ private fun loadColorTokens(app: JsonObject?): DesignColorTokens {
             dot = ornament.colorToken("dot", defaults.ornament.dot)
         )
     )
+}
+
+/** The `swatches` section: each group's names and colours in the file's order; a malformed colour is left out. */
+private fun JsonObject?.swatchTokens(): SwatchTokens {
+    if (this == null) return SwatchTokens.Empty
+    fun group(name: String): List<Swatch> {
+        val entries = optObject(name) ?: return emptyList()
+        return entries.keys.mapNotNull { key ->
+            val color = entries.colorToken(key, Color.Unspecified)
+            if (color == Color.Unspecified) null else Swatch(key, color)
+        }
+    }
+    return SwatchTokens(eyes = group("eyes"), hair = group("hair"), skin = group("skin"))
 }
 
 /** Parses "#RRGGBB" (opaque) or "#AARRGGBB" hex into a [Color]; falls back on malformed values. */

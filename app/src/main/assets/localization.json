@@ -2991,6 +2991,396 @@
     "fr": "Genre",
     "es": "Género"
   },
+  "biography_gender_custom_hint": {
+    "en": "For example, agender",
+    "ru": "Например, бесполый",
+    "de": "Zum Beispiel: agender",
+    "fr": "Par exemple : agenre",
+    "es": "Por ejemplo, agénero"
+  },
+  "biography_swatch_custom": {
+    "en": "Custom",
+    "ru": "Свой",
+    "de": "Eigene",
+    "fr": "Autre",
+    "es": "Otro"
+  },
+  "biography_swatch_custom_hint": {
+    "en": "Your own colour",
+    "ru": "Свой цвет",
+    "de": "Eigene Farbe",
+    "fr": "Votre couleur",
+    "es": "Tu color"
+  },
+  "biography_swatch_eyes_brown": {
+    "en": "Brown",
+    "ru": "Карие",
+    "de": "Braun",
+    "fr": "Marron",
+    "es": "Marrones"
+  },
+  "biography_swatch_eyes_hazel": {
+    "en": "Hazel",
+    "ru": "Ореховые",
+    "de": "Haselnuss",
+    "fr": "Noisette",
+    "es": "Avellana"
+  },
+  "biography_swatch_eyes_amber": {
+    "en": "Amber",
+    "ru": "Янтарные",
+    "de": "Bernstein",
+    "fr": "Ambre",
+    "es": "Ámbar"
+  },
+  "biography_swatch_eyes_green": {
+    "en": "Green",
+    "ru": "Зелёные",
+    "de": "Grün",
+    "fr": "Verts",
+    "es": "Verdes"
+  },
+  "biography_swatch_eyes_grey": {
+    "en": "Grey",
+    "ru": "Серые",
+    "de": "Grau",
+    "fr": "Gris",
+    "es": "Grises"
+  },
+  "biography_swatch_eyes_lightBlue": {
+    "en": "Light blue",
+    "ru": "Голубые",
+    "de": "Hellblau",
+    "fr": "Bleu clair",
+    "es": "Celestes"
+  },
+  "biography_swatch_eyes_blue": {
+    "en": "Blue",
+    "ru": "Синие",
+    "de": "Blau",
+    "fr": "Bleus",
+    "es": "Azules"
+  },
+  "biography_swatch_eyes_violet": {
+    "en": "Violet",
+    "ru": "Фиолетовые",
+    "de": "Violett",
+    "fr": "Violets",
+    "es": "Violetas"
+  },
+  "biography_swatch_eyes_red": {
+    "en": "Red",
+    "ru": "Красные",
+    "de": "Rot",
+    "fr": "Rouges",
+    "es": "Rojos"
+  },
+  "biography_swatch_eyes_gold": {
+    "en": "Gold",
+    "ru": "Золотые",
+    "de": "Golden",
+    "fr": "Dorés",
+    "es": "Dorados"
+  },
+  "biography_swatch_eyes_black": {
+    "en": "Black",
+    "ru": "Чёрные",
+    "de": "Schwarz",
+    "fr": "Noirs",
+    "es": "Negros"
+  },
+  "biography_swatch_eyes_white": {
+    "en": "White",
+    "ru": "Белые",
+    "de": "Weiß",
+    "fr": "Blancs",
+    "es": "Blancos"
+  },
+  "biography_swatch_hair_black": {
+    "en": "Black",
+    "ru": "Чёрные",
+    "de": "Schwarz",
+    "fr": "Noirs",
+    "es": "Negro"
+  },
+  "biography_swatch_hair_chestnut": {
+    "en": "Chestnut",
+    "ru": "Каштановые",
+    "de": "Kastanienbraun",
+    "fr": "Châtains",
+    "es": "Castaño"
+  },
+  "biography_swatch_hair_lightBrown": {
+    "en": "Light brown",
+    "ru": "Русые",
+    "de": "Hellbraun",
+    "fr": "Châtain clair",
+    "es": "Castaño claro"
+  },
+  "biography_swatch_hair_blond": {
+    "en": "Blond",
+    "ru": "Светлые",
+    "de": "Blond",
+    "fr": "Blonds",
+    "es": "Rubio"
+  },
+  "biography_swatch_hair_red": {
+    "en": "Red",
+    "ru": "Рыжие",
+    "de": "Rot",
+    "fr": "Roux",
+    "es": "Pelirrojo"
+  },
+  "biography_swatch_hair_grey": {
+    "en": "Grey",
+    "ru": "Седые",
+    "de": "Grau",
+    "fr": "Gris",
+    "es": "Canoso"
+  },
+  "biography_swatch_hair_white": {
+    "en": "White",
+    "ru": "Белые",
+    "de": "Weiß",
+    "fr": "Blancs",
+    "es": "Blanco"
+  },
+  "biography_swatch_hair_silver": {
+    "en": "Silver",
+    "ru": "Серебристые",
+    "de": "Silbern",
+    "fr": "Argentés",
+    "es": "Plateado"
+  },
+  "biography_swatch_hair_blue": {
+    "en": "Blue",
+    "ru": "Синие",
+    "de": "Blau",
+    "fr": "Bleus",
+    "es": "Azul"
+  },
+  "biography_swatch_hair_green": {
+    "en": "Green",
+    "ru": "Зелёные",
+    "de": "Grün",
+    "fr": "Verts",
+    "es": "Verde"
+  },
+  "biography_swatch_hair_violet": {
+    "en": "Violet",
+    "ru": "Фиолетовые",
+    "de": "Violett",
+    "fr": "Violets",
+    "es": "Violeta"
+  },
+  "biography_swatch_skin_pale": {
+    "en": "Pale",
+    "ru": "Бледная",
+    "de": "Blass",
+    "fr": "Pâle",
+    "es": "Pálida"
+  },
+  "biography_swatch_skin_fair": {
+    "en": "Fair",
+    "ru": "Светлая",
+    "de": "Hell",
+    "fr": "Claire",
+    "es": "Clara"
+  },
+  "biography_swatch_skin_tan": {
+    "en": "Tan",
+    "ru": "Смуглая",
+    "de": "Gebräunt",
+    "fr": "Mate",
+    "es": "Morena"
+  },
+  "biography_swatch_skin_brown": {
+    "en": "Brown",
+    "ru": "Тёмная",
+    "de": "Braun",
+    "fr": "Brune",
+    "es": "Oscura"
+  },
+  "biography_swatch_skin_dark": {
+    "en": "Dark",
+    "ru": "Чёрная",
+    "de": "Dunkel",
+    "fr": "Foncée",
+    "es": "Negra"
+  },
+  "biography_swatch_skin_grey": {
+    "en": "Grey",
+    "ru": "Серая",
+    "de": "Grau",
+    "fr": "Grise",
+    "es": "Gris"
+  },
+  "biography_swatch_skin_green": {
+    "en": "Green",
+    "ru": "Зелёная",
+    "de": "Grün",
+    "fr": "Verte",
+    "es": "Verde"
+  },
+  "biography_swatch_skin_blue": {
+    "en": "Blue",
+    "ru": "Синяя",
+    "de": "Blau",
+    "fr": "Bleue",
+    "es": "Azul"
+  },
+  "biography_swatch_skin_red": {
+    "en": "Red",
+    "ru": "Красная",
+    "de": "Rot",
+    "fr": "Rouge",
+    "es": "Roja"
+  },
+  "biography_swatch_skin_copper": {
+    "en": "Copper",
+    "ru": "Медная",
+    "de": "Kupfern",
+    "fr": "Cuivrée",
+    "es": "Cobriza"
+  },
+  "biography_swatch_skin_golden": {
+    "en": "Golden",
+    "ru": "Золотистая",
+    "de": "Golden",
+    "fr": "Dorée",
+    "es": "Dorada"
+  },
+  "biography_swatch_skin_lilac": {
+    "en": "Lilac",
+    "ru": "Лиловая",
+    "de": "Lila",
+    "fr": "Lilas",
+    "es": "Lila"
+  },
+  "biography_years_one": {
+    "en": "year",
+    "ru": "год",
+    "de": "Jahr",
+    "fr": "an",
+    "es": "año"
+  },
+  "biography_years_few": {
+    "en": "years",
+    "ru": "года",
+    "de": "Jahre",
+    "fr": "ans",
+    "es": "años"
+  },
+  "biography_years_many": {
+    "en": "years",
+    "ru": "лет",
+    "de": "Jahre",
+    "fr": "ans",
+    "es": "años"
+  },
+  "biography_build_thin": {
+    "maxChars": 6,
+    "en": "Thin",
+    "ru": "Худой",
+    "de": "Dünn",
+    "fr": "Mince",
+    "es": "Flaco"
+  },
+  "biography_build_slim": {
+    "maxChars": 8,
+    "en": "Slim",
+    "ru": "Стройный",
+    "de": "Schlank",
+    "fr": "Svelte",
+    "es": "Esbelto"
+  },
+  "biography_build_sturdy": {
+    "maxChars": 7,
+    "en": "Sturdy",
+    "ru": "Крепкий",
+    "de": "Kräftig",
+    "fr": "Robuste",
+    "es": "Robusto"
+  },
+  "biography_build_heavy": {
+    "maxChars": 7,
+    "en": "Heavy",
+    "ru": "Полный",
+    "de": "Füllig",
+    "fr": "Fort",
+    "es": "Rollizo"
+  },
+  "biography_build_bulky": {
+    "maxChars": 7,
+    "en": "Bulky",
+    "ru": "Грузный",
+    "de": "Massig",
+    "fr": "Massif",
+    "es": "Grueso"
+  },
+  "biography_bmi": {
+    "en": "BMI %1$s · height %2$s",
+    "ru": "ИМТ %1$s · рост %2$s",
+    "de": "BMI %1$s · Größe %2$s",
+    "fr": "IMC %1$s · taille %2$s",
+    "es": "IMC %1$s · altura %2$s"
+  },
+  "biography_bmi_no_height": {
+    "en": "Set the height to see the build",
+    "ru": "Укажите рост, чтобы увидеть телосложение",
+    "de": "Gib die Größe an, um den Körperbau zu sehen",
+    "fr": "Indiquez la taille pour voir la corpulence",
+    "es": "Indica la altura para ver la complexión"
+  },
+  "notes_text_hint": {
+    "en": "Note text",
+    "ru": "Текст заметки",
+    "de": "Notiztext",
+    "fr": "Texte de la note",
+    "es": "Texto de la nota"
+  },
+  "notes_changed": {
+    "en": "Edited %1$s",
+    "ru": "Изменено %1$s",
+    "de": "Geändert %1$s",
+    "fr": "Modifiée le %1$s",
+    "es": "Editada %1$s"
+  },
+  "notes_delete": {
+    "en": "Delete note",
+    "ru": "Удалить заметку",
+    "de": "Notiz löschen",
+    "fr": "Supprimer la note",
+    "es": "Eliminar nota"
+  },
+  "notes_deleted": {
+    "en": "Note deleted",
+    "ru": "Заметка удалена",
+    "de": "Notiz gelöscht",
+    "fr": "Note supprimée",
+    "es": "Nota eliminada"
+  },
+  "notes_unpin": {
+    "en": "Unpin note",
+    "ru": "Открепить заметку",
+    "de": "Notiz lösen",
+    "fr": "Désépingler la note",
+    "es": "Desfijar nota"
+  },
+  "notes_expand": {
+    "en": "Open note",
+    "ru": "Развернуть заметку",
+    "de": "Notiz öffnen",
+    "fr": "Ouvrir la note",
+    "es": "Abrir nota"
+  },
+  "notes_collapse": {
+    "en": "Close note",
+    "ru": "Свернуть заметку",
+    "de": "Notiz schließen",
+    "fr": "Fermer la note",
+    "es": "Cerrar nota"
+  },
   "biography_gender_male": {
     "en": "Male",
     "ru": "Мужской",
@@ -3189,33 +3579,12 @@
     "fr": "Aucune note trouvée.",
     "es": "No se encontraron notas."
   },
-  "notes_new_note": {
-    "en": "New Note",
-    "ru": "Новая заметка",
-    "de": "Neue Notiz",
-    "fr": "Nouvelle note",
-    "es": "Nueva nota"
-  },
-  "notes_edit_note": {
-    "en": "Edit Note",
-    "ru": "Редактировать заметку",
-    "de": "Notiz bearbeiten",
-    "fr": "Modifier la note",
-    "es": "Editar nota"
-  },
   "notes_title": {
     "en": "Title",
     "ru": "Заголовок",
     "de": "Titel",
     "fr": "Titre",
     "es": "Titulo"
-  },
-  "notes_content": {
-    "en": "Content",
-    "ru": "Текст",
-    "de": "Inhalt",
-    "fr": "Contenu",
-    "es": "Contenido"
   },
   "notes_date": {
     "en": "Date (yyyy-MM-dd HH:mm:ss)",
@@ -3231,26 +3600,12 @@
     "fr": "Epingler la note",
     "es": "Fijar nota"
   },
-  "notes_pinned": {
-    "en": "Pinned",
-    "ru": "Закреплена",
-    "de": "Angeheftet",
-    "fr": "Epinglee",
-    "es": "Fijada"
-  },
   "notes_untitled": {
     "en": "Untitled Note",
     "ru": "Без названия",
     "de": "Unbenannte Notiz",
     "fr": "Note sans titre",
     "es": "Nota sin titulo"
-  },
-  "notes_empty_content": {
-    "en": "No content yet.",
-    "ru": "Пока нет текста.",
-    "de": "Noch kein Inhalt.",
-    "fr": "Aucun contenu pour le moment.",
-    "es": "Sin contenido todavia."
   },
   "overview_name_placeholder": {
     "en": "Character Name",
