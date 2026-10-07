@@ -13,6 +13,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -135,7 +138,8 @@ private class PlaqueShape(private val cut: DpSize) : Shape {
  * bar. A ring round the portrait fills with [progress] from the left side of the plaque in the bottom edge, round
  * the frame, back into its right side; [plaque] (the level and the experience) sits in that edge. Classic draws
  * its octagon — the ring alone on its line, the portrait filling it; an engraving keeps its white artwork, tinted with the
- * palette, and the ring runs inside its opening. The plaque is a stat's outline, lit as the ring's fill when
+ * palette, and the ring runs inside its opening. The picture darkens toward the frame's edges, sunk into it. The
+ * plaque is a stat's outline, lit as the ring's fill when
  * [plaqueLit] (a level up is due).
  */
 @Composable
@@ -156,10 +160,26 @@ internal fun GothicPortraitFrame(
     val opening = remember(polygon, drawn) { PolygonShape(polygon, if (drawn) PortraitRingWidth / 2 else 0.dp) }
     val track = if (drawn) colors.border.miniCard else colors.progress.xpTrack
     val plaqueMark = if (plaqueLit) progressColor else colors.border.miniCard
+    val dark = colors.ornament.dropShadow
     Box(modifier = modifier.size(GothicPortraitWidth, GothicPortraitHeight)) {
         Box(
             modifier = Modifier.fillMaxSize().clip(opening)
                 .background(colors.surface.portrait).clickable(onClick = onClick)
+                .drawWithContent {
+                    drawContent()
+                    // The picture sunk into the frame (owner's choice from boards, 2026-10-07: D1): an oval over
+                    // the opening's box, clear in the middle, darkening to its edges.
+                    val box = openingBox(polygon)
+                    val center = Offset(size.width * box.center.x, size.height * box.center.y)
+                    val radius = size.width * box.width / 2 * 1.04f
+                    scale(1f, size.height * box.height / (size.width * box.width), pivot = center) {
+                        drawCircle(
+                            brush = Brush.radialGradient(.55f to Color.Transparent, 1f to dark, center = center, radius = radius),
+                            radius = radius * 2f,
+                            center = center
+                        )
+                    }
+                }
         ) {
             // Crop/framing operates on the opening's own box, not on the roof and transparent margins: the
             // picture covers the whole octagon, corner to corner.
