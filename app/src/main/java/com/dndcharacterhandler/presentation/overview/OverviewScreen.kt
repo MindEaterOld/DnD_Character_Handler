@@ -966,14 +966,24 @@ private fun OverviewContent(
                                     onOpenConcentration = { isEndConcentrationOpen = true },
                                     modifier = Modifier
                                         .align(Alignment.TopCenter)
-                                        .offset(x = -PortraitSideColumnX, y = sidesMiddle)
+                                        .offset(x = -PortraitSideColumnX, y = sidesMiddle),
+                                    // Inspiration over the conditions: a coin like the rests', lit in gold while it
+                                    // is on (owner's choice, 2026-10-07).
+                                    leading = {
+                                        PortraitSideButton(
+                                            icon = SideIconInspiration,
+                                            contentDescription = text("overview_inspiration"),
+                                            onClick = { characterBundle?.let(onToggleInspiration) },
+                                            on = character.hasInspiration
+                                        )
+                                    }
                                 )
                             }
-                            // The rests and inspiration: the same buttons.
+                            // The rests: the same buttons.
                             Column(
                                 modifier = Modifier
                                     .align(Alignment.TopCenter)
-                                    .offset(x = PortraitSideColumnX, y = sidesMiddle - portraitSideColumnHeight(3) / 2),
+                                    .offset(x = PortraitSideColumnX, y = sidesMiddle - portraitSideColumnHeight(2) / 2),
                                 verticalArrangement = Arrangement.spacedBy(PortraitSideGap)
                             ) {
                                 PortraitSideButton(
@@ -985,13 +995,6 @@ private fun OverviewContent(
                                     icon = SideIconLongRest,
                                     contentDescription = text("overview_long_rest"),
                                     onClick = { isLongRestDialogOpen = true }
-                                )
-                                // Inspiration: a coin like the rests', lit in gold while it is on.
-                                PortraitSideButton(
-                                    icon = SideIconInspiration,
-                                    contentDescription = text("overview_inspiration"),
-                                    onClick = { if (characterBundle != null) onToggleInspiration(characterBundle) },
-                                    on = character?.hasInspiration ?: false
                                 )
                             }
                         }

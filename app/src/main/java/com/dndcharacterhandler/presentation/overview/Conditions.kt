@@ -67,7 +67,9 @@ internal fun ConditionsColumn(
     concentrating: Boolean,
     onOpenPicker: () -> Unit,
     onOpenConcentration: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    /** A button over the conditions' one, part of the column (inspiration, owner's choice 2026-10-07). */
+    leading: (@Composable () -> Unit)? = null
 ) {
     val strings = LocalStrings.current
     val colors = LocalDesignTokens.current.colors
@@ -107,7 +109,8 @@ internal fun ConditionsColumn(
     }
     // Centred on where it is put (the middle of the frame's side), gliding up half a row as a mark comes; over the
     // portrait's box, never stretching it: the column takes no height of its own.
-    val lift by animateDpAsState(portraitSideColumnHeight(1 + shown.size) / 2, label = "conditionsColumnLift")
+    val rows = (if (leading != null) 1 else 0) + 1 + shown.size
+    val lift by animateDpAsState(portraitSideColumnHeight(rows) / 2, label = "conditionsColumnLift")
     Column(
         modifier = modifier.layout { measurable, constraints ->
             val placeable = measurable.measure(constraints.copy(maxHeight = Constraints.Infinity))
@@ -115,6 +118,7 @@ internal fun ConditionsColumn(
         },
         verticalArrangement = Arrangement.spacedBy(PortraitSideGap)
     ) {
+        leading?.invoke()
         PortraitSideButton(
             icon = SideIconConditions,
             contentDescription = text("conditions_add"),
