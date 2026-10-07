@@ -4,6 +4,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
@@ -122,7 +123,10 @@ internal fun PortraitSideButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     add: Boolean = false,
-    iconSize: Dp = 24.dp
+    iconSize: Dp = 24.dp,
+    /** A toggle's state (inspiration): on, it is lit in [accent] at 12 % and its icon is in it. Null: a plain button. */
+    on: Boolean? = null,
+    accent: Color = LocalDesignTokens.current.colors.accent.inspiration
 ) {
     val colors = LocalDesignTokens.current.colors
     Box(
@@ -130,7 +134,7 @@ internal fun PortraitSideButton(
             .size(PortraitSideButtonSize)
             .semantics {
                 this.contentDescription = contentDescription
-                role = Role.Button
+                if (on == null) role = Role.Button
             }
     ) {
         // The coin's shadow: a little below it, fading out 5dp past its edge.
@@ -153,14 +157,21 @@ internal fun PortraitSideButton(
                 .size(PortraitSideButtonSize)
                 .clip(CircleShape)
                 .background(colors.surface.card)
+                .background(if (on == true) accent.copy(alpha = .12f) else Color.Transparent)
                 .border(1.dp, Brush.verticalGradient(listOf(colors.text.label, colors.border.muted)), CircleShape)
-                .clickable(onClick = onClick),
+                .then(
+                    if (on != null) {
+                        Modifier.toggleable(value = on, role = Role.Switch, onValueChange = { onClick() })
+                    } else {
+                        Modifier.clickable(onClick = onClick)
+                    }
+                ),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = colors.text.primary,
+                tint = if (on == true) accent else colors.text.primary,
                 modifier = Modifier.size(iconSize)
             )
         }

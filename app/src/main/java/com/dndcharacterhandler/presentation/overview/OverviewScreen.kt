@@ -940,6 +940,7 @@ private fun OverviewContent(
                                     }
                                 },
                                 progress = xpInfo.progress,
+                                plaqueLit = canLevelUp,
                                 progressColor = when {
                                     canLevelUp -> colors.accent.inspiration
                                     xpInfo.hasReachedLevelCap -> colors.accent.xpCapped
@@ -1728,6 +1729,7 @@ private fun PortraitFrame(
     framing: PortraitFraming = PortraitFraming(),
     progress: Float = 0f,
     progressColor: Color = LocalDesignTokens.current.colors.progress.xpFill,
+    plaqueLit: Boolean = false,
     plaque: (@Composable () -> Unit)? = null
 ) {
     val portraitReference = portraitUri ?: AssetReferences.portraitPlaceholderPath("portrait_placeholder.png")
@@ -1737,6 +1739,7 @@ private fun PortraitFrame(
         modifier = Modifier.offset(y = -PortraitRaise),
         progress = progress,
         progressColor = progressColor,
+        plaqueLit = plaqueLit,
         plaque = plaque
     ) {
         Box(Modifier.fillMaxSize().saturation(saturation)) {
@@ -1756,7 +1759,7 @@ private fun PortraitFrame(
 private val PortraitRaise = 47.dp
 
 /** From the portrait's block (the plaque, or the frame's ornament if it hangs lower) to the hit points' card. */
-private val PortraitHpGap = 22.dp
+private val PortraitHpGap = 27.dp
 
 /**
  * How much of the portrait's item is empty under it: the frame's box is as tall as its artwork, drawn
@@ -1787,7 +1790,6 @@ private fun LevelPlaque(
     onExperience: () -> Unit
 ) {
     val colors = LocalDesignTokens.current.colors
-    val mark = if (canLevelUp) colors.accent.inspiration else colors.border.miniCard
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -1795,12 +1797,6 @@ private fun LevelPlaque(
             .semantics(mergeDescendants = true) {},
         contentAlignment = Alignment.Center
     ) {
-        val shape = portraitPlaqueShape(LocalThemeLook.current)
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val outline = shape.createOutline(size, layoutDirection, this)
-            drawOutline(outline, colors.surface.card)
-            drawOutline(outline, mark, style = Stroke(1.dp.toPx()))
-        }
         val tight = LineHeightStyle(alignment = LineHeightStyle.Alignment.Center, trim = LineHeightStyle.Trim.Both)
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(

@@ -53,7 +53,7 @@ fun InspirationCandle(
             }
         }
         Icon(
-            imageVector = CandleIcon,
+            imageVector = InspirationCandleIcon,
             contentDescription = null,
             tint = if (inspired) colors.accent.inspiration else colors.text.label,
             modifier = Modifier.size(40.dp)
@@ -65,7 +65,7 @@ fun InspirationCandle(
 val InspirationCandleSize = 56.dp
 
 /** A candle in its holder (Game Icons, Delapouite, CC BY 3.0). */
-private val CandleIcon: ImageVector by lazy {
+internal val InspirationCandleIcon: ImageVector by lazy {
     ImageVector.Builder(
         name = "candle-holder", defaultWidth = 24.dp, defaultHeight = 24.dp, viewportWidth = 24f, viewportHeight = 24f
     )
