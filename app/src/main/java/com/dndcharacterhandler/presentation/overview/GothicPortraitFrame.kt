@@ -8,44 +8,97 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathMeasure
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 import com.dndcharacterhandler.presentation.theme.LocalThemeLook
+import com.dndcharacterhandler.presentation.theme.ThemeLook
+import kotlin.math.hypot
 
 internal val GothicPortraitWidth = 252.dp
 internal val GothicPortraitHeight = GothicPortraitWidth * (1422f / 1106f)
 
-/** Opening measured against the approved 1106 × 1422 raster, inside its white moulding. */
-private val GothicPortraitOpening = GenericShape { size, _ ->
-    moveTo(size.width * .165f, size.height * .366f)
-    lineTo(size.width * .377f, size.height * .202f)
-    lineTo(size.width * .623f, size.height * .202f)
-    lineTo(size.width * .835f, size.height * .366f)
-    lineTo(size.width * .835f, size.height * .752f)
-    lineTo(size.width * .656f, size.height * .893f)
-    lineTo(size.width * .344f, size.height * .893f)
-    lineTo(size.width * .165f, size.height * .752f)
-    close()
-}
+/**
+ * Classic's octagon, drawn (it replaced the white raster, owner's choice from boards, 2026-10-07: V2): its
+ * corners as fractions of the frame, from the bottom edge's left end round to its right end.
+ */
+private val ClassicOctagon = listOf(
+    Offset(.34f, .912f), Offset(.131f, .763f), Offset(.131f, .359f), Offset(.375f, .186f),
+    Offset(.625f, .186f), Offset(.869f, .359f), Offset(.869f, .763f), Offset(.66f, .912f)
+)
 
-/** Shared portrait geometry; each theme supplies its white artwork and palette tint. */
+/** The engraving's opening, measured against its 1106 × 1422 raster, inside the white moulding; in the same order. */
+private val GothicOpening = listOf(
+    Offset(.344f, .893f), Offset(.165f, .752f), Offset(.165f, .366f), Offset(.377f, .202f),
+    Offset(.623f, .202f), Offset(.835f, .366f), Offset(.835f, .752f), Offset(.656f, .893f)
+)
+
+/** The experience's ring: as thick as the classic frame's line. */
+private val PortraitRingWidth = 4.dp
+
+/** The level's plaque in the frame's bottom edge (owner's choice, 2026-10-07): the ring stops at its sides. */
+internal val PortraitPlaqueSize = DpSize(120.dp, 46.dp)
+
+/** The polygon the ring follows: Classic's drawn octagon; in an engraving, its opening, the ring inside it. */
+private fun ringPolygon(look: ThemeLook): List<Offset> = if (look.portraitArtwork == null) ClassicOctagon else GothicOpening
+
+/** How far in the ring lies from its polygon: on Classic's line; inside the engraving's opening, clear of its moulding. */
+private fun ringInset(look: ThemeLook): Dp = if (look.portraitArtwork == null) 0.dp else PortraitRingWidth / 2
+
+/** The plaque's centre from the frame's top: on the ring's bottom edge. */
+internal fun portraitPlaqueCenterY(look: ThemeLook): Dp =
+    GothicPortraitHeight * ringPolygon(look).first().y - ringInset(look)
+
+/**
+ * The overview's portrait (owner's choices from boards, 2026-10-07: V2, the plaque): the frame is the experience
+ * bar. A ring round the portrait fills with [progress] from the left side of the plaque in the bottom edge, round
+ * the frame, back into its right side; [plaque] (the level and the experience) sits in that edge. Classic draws
+ * its octagon — the ring on its line and a hairline inside; an engraving keeps its white artwork, tinted with the
+ * palette, and the ring runs inside its opening.
+ */
 @Composable
 internal fun GothicPortraitFrame(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    progress: Float = 0f,
+    progressColor: Color = LocalDesignTokens.current.colors.progress.xpFill,
+    plaque: (@Composable () -> Unit)? = null,
     portrait: @Composable BoxScope.() -> Unit
 ) {
     val colors = LocalDesignTokens.current.colors
+    val look = LocalThemeLook.current
+    val drawn = look.portraitArtwork == null
+    val polygon = ringPolygon(look)
+    // Classic's portrait reaches the ring's inner edge; an engraving's fills its opening.
+    val opening = remember(polygon, drawn) { PolygonShape(polygon, if (drawn) PortraitRingWidth / 2 else 0.dp) }
+    val track = if (drawn) colors.border.miniCard else colors.progress.xpTrack
+    val hairline = colors.ornament.middle
     Box(modifier = modifier.size(GothicPortraitWidth, GothicPortraitHeight)) {
         Box(
-            modifier = Modifier.fillMaxSize().clip(GothicPortraitOpening)
+            modifier = Modifier.fillMaxSize().clip(opening)
                 .background(colors.surface.portrait).clickable(onClick = onClick)
         ) {
             // Crop/framing operates on the portrait opening, not on the roof and transparent margins.
@@ -55,12 +108,108 @@ internal fun GothicPortraitFrame(
                 content = portrait
             )
         }
-        Image(
-            painter = painterResource(LocalThemeLook.current.portraitArtwork),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.FillBounds,
-            colorFilter = ColorFilter.tint(colors.ornament.inner)
+        look.portraitArtwork?.let { artwork ->
+            Image(
+                painter = painterResource(artwork),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.FillBounds,
+                colorFilter = ColorFilter.tint(colors.ornament.inner)
+            )
+        }
+        Box(
+            modifier = Modifier.fillMaxSize().drawWithCache {
+                val ringWidth = PortraitRingWidth.toPx()
+                val ring = inset(scaled(polygon, size), ringInset(look).toPx())
+                val path = ringPath(ring)
+                // Where the ring leaves the plaque and comes back to it.
+                val bottom = ring.first().y
+                val plaqueArea = if (plaque != null) {
+                    Rect(
+                        left = (size.width - PortraitPlaqueSize.width.toPx()) / 2,
+                        top = bottom - PortraitPlaqueSize.height.toPx() / 2,
+                        right = (size.width + PortraitPlaqueSize.width.toPx()) / 2,
+                        bottom = bottom + PortraitPlaqueSize.height.toPx() / 2
+                    )
+                } else {
+                    null
+                }
+                val measure = PathMeasure().apply { setPath(path, false) }
+                val length = measure.length
+                var start = 0f
+                var end = length
+                if (plaqueArea != null) {
+                    while (start < length && plaqueArea.contains(measure.getPosition(start))) start += 1f
+                    while (end > start && plaqueArea.contains(measure.getPosition(end))) end -= 1f
+                }
+                val trackPath = Path().also { measure.getSegment(start, end, it, true) }
+                val filled = Path().also { measure.getSegment(start, start + (end - start) * progress.coerceIn(0f, 1f), it, true) }
+                val inner = if (drawn) ringPath(inset(ring, 5.dp.toPx())) else null
+                val stroke = Stroke(ringWidth, cap = StrokeCap.Butt, join = StrokeJoin.Miter)
+                onDrawBehind {
+                    inner?.let { drawPath(it, hairline, style = Stroke(.75.dp.toPx())) }
+                    drawPath(trackPath, track, style = stroke)
+                    if (progress > 0f) drawPath(filled, progressColor, style = stroke)
+                }
+            }
         )
+        if (plaque != null) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .offset(y = portraitPlaqueCenterY(look) - PortraitPlaqueSize.height / 2)
+                    .size(PortraitPlaqueSize),
+                contentAlignment = Alignment.Center
+            ) { plaque() }
+        }
     }
+}
+
+/** A polygon given as [fractions] of the shape's size, moved in by [inset]. */
+private class PolygonShape(private val fractions: List<Offset>, private val inset: Dp) : Shape {
+    override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density): Outline {
+        val points = inset(scaled(fractions, size), with(density) { inset.toPx() })
+        return Outline.Generic(Path().apply {
+            moveTo(points.first().x, points.first().y)
+            points.drop(1).forEach { lineTo(it.x, it.y) }
+            close()
+        })
+    }
+}
+
+/** [fractions] of a frame of [size], in px. */
+private fun scaled(fractions: List<Offset>, size: Size): List<Offset> =
+    fractions.map { Offset(it.x * size.width, it.y * size.height) }
+
+/** A convex polygon moved in by [by] px: each edge shifted toward the middle, the corners where they meet again. */
+private fun inset(points: List<Offset>, by: Float): List<Offset> {
+    if (by == 0f) return points
+    val middle = Offset(points.map { it.x }.average().toFloat(), points.map { it.y }.average().toFloat())
+    val n = points.size
+    // Each edge as a point on it, moved in, and its direction.
+    val edges = (0 until n).map { i ->
+        val a = points[i]
+        val b = points[(i + 1) % n]
+        val length = hypot(b.x - a.x, b.y - a.y)
+        val direction = Offset((b.x - a.x) / length, (b.y - a.y) / length)
+        var normal = Offset(-direction.y, direction.x)
+        if ((middle.x - a.x) * normal.x + (middle.y - a.y) * normal.y < 0) normal = Offset(-normal.x, -normal.y)
+        Offset(a.x + normal.x * by, a.y + normal.y * by) to direction
+    }
+    return (0 until n).map { i ->
+        val (p1, d1) = edges[(i - 1 + n) % n]
+        val (p2, d2) = edges[i]
+        val cross = d1.x * d2.y - d1.y * d2.x
+        val t = ((p2.x - p1.x) * d2.y - (p2.y - p1.y) * d2.x) / cross
+        Offset(p1.x + d1.x * t, p1.y + d1.y * t)
+    }
+}
+
+/** The ring round [points]: from the bottom edge's middle, left first, round to the middle again. */
+private fun ringPath(points: List<Offset>): Path = Path().apply {
+    val first = points.first()
+    val last = points.last()
+    moveTo((first.x + last.x) / 2, (first.y + last.y) / 2)
+    points.forEach { lineTo(it.x, it.y) }
+    close()
 }

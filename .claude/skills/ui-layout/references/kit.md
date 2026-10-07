@@ -63,7 +63,8 @@
 | `octagonPath(center, radius)`, `OctagonShape` (`overview/PortraitFramingDialog.kt`) | 2 | Восьмиугольник портрета: контур для `Canvas` и форма для `clip` |
 | `Modifier.saturation(s)` | 1 | Насыщенность содержимого: 1 как есть, 0 — чёрно-белое (портрет погибшего); работает на любом содержимом |
 | `SkullIcon` | 1 | Череп спасбросков от смерти (`ImageVector`, тонируется `Icon`) |
-| `InspirationStar(inspired, onToggle, contentDescription)` | 1 | Вдохновение: роза ветров 96dp без обводки в нижнем правом углу восьмиугольника портрета; выкл. — `text.label`, вкл. — золото с белым сердцем и пульсирующим свечением; переключатель (`Role.Switch`) |
+| `InspirationCandle(inspired, onToggle, contentDescription)` | 1 | Вдохновение: свеча-иконка 40dp в 56dp на нижнем правом скосе рамы портрета; не горит — `text.label`, горит — `accent.inspiration` со свечением; переключатель (`Role.Switch`) |
+| `GothicPortraitFrame(onClick, progress, progressColor, plaque) { портрет }` | 1 | Рама портрета на обзоре — она же полоса опыта: кольцо 4dp по контуру от левого края таблички в нижней грани обратно в неё; в «Классике» рисованный восьмиугольник, в «Гравюре» — картинка темы, кольцо внутри; `plaque` — табличка уровня (`LevelPlaque`) |
 | `D20Outline` (`dice/D20Outline.kt`) | — | Контурный d20 кнопки кубов |
 
 ## Кубики (`presentation/dice/`)

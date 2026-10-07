@@ -69,10 +69,6 @@
         "fontSizeSp": 12,
         "lineHeightSp": 13
       },
-      "xpLabel": {
-        "baseStyle": "bodyLarge",
-        "fontSizeSp": 16
-      },
       "hpCurrent": {
         "baseStyle": "headlineMedium",
         "fontSizeSp": 64,

@@ -3,12 +3,7 @@ import com.dndcharacterhandler.presentation.components.FadingLazyColumn
 import com.dndcharacterhandler.domain.model.AppTheme
 import com.dndcharacterhandler.presentation.theme.FrameStyle
 import com.dndcharacterhandler.presentation.theme.LocalThemeLook
-import com.dndcharacterhandler.presentation.theme.PortraitStyle
-import com.dndcharacterhandler.presentation.theme.XpBarStyle
-import com.dndcharacterhandler.presentation.components.EngravedPortraitShape
-import com.dndcharacterhandler.presentation.components.engravedPortraitPath
 import com.dndcharacterhandler.presentation.components.engravedBorder
-import com.dndcharacterhandler.presentation.components.drawEtchedStar
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.ui.unit.Dp
@@ -43,6 +38,8 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -84,13 +81,13 @@ import androidx.compose.material.icons.Icons
 import com.dndcharacterhandler.presentation.components.toggleContent
 import com.dndcharacterhandler.presentation.components.toggleFill
 import com.dndcharacterhandler.presentation.components.toggleRadioColors
-import kotlin.math.cos
 import androidx.compose.material.icons.outlined.HeartBroken
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.HealthAndSafety
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.dndcharacterhandler.presentation.components.InspirationCandle
+import com.dndcharacterhandler.presentation.components.InspirationCandleSize
 import androidx.compose.material.icons.automirrored.outlined.DirectionsRun
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.Visibility
@@ -630,12 +627,6 @@ private val PortraitSidesTop = GothicPortraitHeight * 0.366f - 47.dp
 private val PortraitSideColumnX = GothicPortraitWidth * (0.5f - 0.128f) + 6.dp + PortraitSideButtonSize / 2
 
 /**
- * The room the big name and the race · class line under the portrait took, closed since they left it: the name
- * for the pinned header, the race and the class for the Features screen (owner's choices, 2026-10-06).
- */
-private val PortraitTextsGap = 44.dp
-
-/**
  * Draws the item [by] higher than its place and gives that room back, so what follows moves up with it:
  * an offset alone would leave the gap below, under the next item.
  */
@@ -797,8 +788,6 @@ private fun OverviewContent(
     val strings = LocalStrings.current
     val typographyTokens = LocalDesignTokens.current.typography
     val colors = LocalDesignTokens.current.colors
-    val crest = LocalThemeLook.current.portrait == PortraitStyle.ETCHED_CREST
-    val gothic = LocalThemeLook.current.portrait == PortraitStyle.GOTHIC_FRAME
     val portraitScope = rememberCoroutineScope()
     val portraitPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
@@ -920,7 +909,7 @@ private fun OverviewContent(
         // 47dp above its place, starts below the header's fade, whatever margin its artwork has.
         val listTop = maxOf(
             CharacterHeaderInset,
-            CharacterHeaderFadeEnd + 47.dp - GothicPortraitHeight * LocalThemeLook.current.portraitArtworkTop + 4.dp
+            CharacterHeaderFadeEnd + PortraitRaise - GothicPortraitHeight * LocalThemeLook.current.portraitArtworkTop + 4.dp
         )
         Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
@@ -936,6 +925,8 @@ private fun OverviewContent(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
+                            val canLevelUp = character != null &&
+                                character.level < MAX_CHARACTER_LEVEL && levelForExperience(character.experience) > character.level
                             PortraitFrame(
                                 portraitUri = character?.portraitUri,
                                 characterName = displayName,
@@ -945,6 +936,25 @@ private fun OverviewContent(
                                     if (characterBundle != null) {
                                         isPortraitMenuOpen = true
                                     }
+                                },
+                                progress = xpInfo.progress,
+                                progressColor = when {
+                                    canLevelUp -> colors.accent.inspiration
+                                    xpInfo.hasReachedLevelCap -> colors.accent.xpCapped
+                                    else -> colors.progress.xpFill
+                                },
+                                plaque = {
+                                    LevelPlaque(
+                                        levelLabel = levelLabel,
+                                        experience = xpInfo.label(),
+                                        canLevelUp = canLevelUp,
+                                        onLevelUp = { character?.let { onOpenLevelUp(levelForExperience(it.experience)) } },
+                                        onExperience = {
+                                            experienceEditMode = OverviewExperienceEditMode.ADD
+                                            experienceDraft = ""
+                                            isExperienceDialogOpen = true
+                                        }
+                                    )
                                 }
                             )
                             // The conditions down the left, as the rests go down the right: from where the frame's
@@ -980,52 +990,26 @@ private fun OverviewContent(
                                     onClick = { isLongRestDialogOpen = true }
                                 )
                             }
-                            // Inspiration: the theme's candle rests on the portrait's lower-right bevel.
-                            Box(
+                            // Inspiration: the candle stands on the portrait's lower-right bevel.
+                            InspirationCandle(
+                                inspired = character?.hasInspiration ?: false,
+                                onToggle = { if (characterBundle != null) onToggleInspiration(characterBundle) },
+                                contentDescription = text("overview_inspiration"),
                                 modifier = Modifier
-                                    .offset(y = (-47).dp)
-                                    .then(if (gothic) Modifier.size(GothicPortraitWidth, GothicPortraitHeight)
-                                        else Modifier.size(if (crest) 222.dp else 238.dp)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                InspirationCandle(
-                                    inspired = character?.hasInspiration ?: false,
-                                    onToggle = { if (characterBundle != null) onToggleInspiration(characterBundle) },
-                                    contentDescription = text("overview_inspiration"),
-                                    modifier = if (gothic) Modifier.offset(
-                                        x = GothicPortraitWidth * (963f / 1106f - .5f),
-                                        y = GothicPortraitHeight * (1297f / 1422f - .5f)
+                                    .align(Alignment.TopCenter)
+                                    .offset(
+                                        x = GothicPortraitWidth * .30f,
+                                        y = GothicPortraitHeight * .80f - InspirationCandleSize / 2 - PortraitRaise
                                     )
-                                        else Modifier.offset(x = PortraitCornerOffset, y = PortraitCornerOffset)
-                                )
-                            }
+                            )
                         }
                     }
                 }
 
                 item {
-                    Box(modifier = Modifier.pullUp((if (crest) 34.dp else 24.dp) + PortraitTextsGap - LocalThemeLook.current.portraitFoot)) {
-                        OverviewXpBlock(
-                            xpInfo = xpInfo,
-                            level = character?.level ?: 1,
-                            levelLabel = levelLabel,
-                            onEditLevel = { activeField = OverviewEditableField.LEVEL },
-                            canLevelUp = character != null &&
-                                character.level < MAX_CHARACTER_LEVEL && levelForExperience(character.experience) > character.level,
-                            onLevelUp = { character?.let { onOpenLevelUp(levelForExperience(it.experience)) } },
-                            onClick = {
-                                experienceEditMode = OverviewExperienceEditMode.ADD
-                                experienceDraft = ""
-                                isExperienceDialogOpen = true
-                            }
-                        )
-                    }
-                }
-
-                item {
                     Column(
-                        // With the XP bar's 24dp, 30dp above its place.
-                        modifier = Modifier.pullUp(6.dp),
+                        // Up under the plaque, or under the frame's ornament where it hangs lower.
+                        modifier = Modifier.pullUp(portraitBlockSlack(LocalThemeLook.current)),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         // Over the death saves' tray, which slides out from under it.
@@ -1291,6 +1275,12 @@ private fun OverviewContent(
                 style = MaterialTheme.typography.bodyLarge,
                 color = colors.text.primary
             )
+            TextButton(
+                onClick = {
+                    isExperienceDialogOpen = false
+                    activeField = OverviewEditableField.LEVEL
+                }
+            ) { Text(text("overview_level_picker_title")) }
         }
     }
 
@@ -1733,80 +1723,105 @@ private fun PortraitFrame(
     /** Three failed death saves: the portrait drains to black and white. */
     dead: Boolean,
     onClick: () -> Unit,
-    framing: PortraitFraming = PortraitFraming()
+    framing: PortraitFraming = PortraitFraming(),
+    progress: Float = 0f,
+    progressColor: Color = LocalDesignTokens.current.colors.progress.xpFill,
+    plaque: (@Composable () -> Unit)? = null
 ) {
     val portraitReference = portraitUri ?: AssetReferences.portraitPlaceholderPath("portrait_placeholder.png")
-    val colors = LocalDesignTokens.current.colors
-    val crest = LocalThemeLook.current.portrait == PortraitStyle.ETCHED_CREST
-    val shape = if (crest) EngravedPortraitShape else OctagonShape
     val saturation by animateFloatAsState(if (dead) 0f else 1f, animationSpec = tween(durationMillis = 1200), label = "portraitSaturation")
-
-    if (LocalThemeLook.current.portrait == PortraitStyle.GOTHIC_FRAME) {
-        GothicPortraitFrame(onClick = onClick, modifier = Modifier.offset(y = (-47).dp)) {
-            Box(Modifier.fillMaxSize().saturation(saturation)) {
-                AppImage(
-                    imageRef = portraitReference,
-                    contentDescription = characterName,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop,
-                    framing = framing,
-                    fallback = { PortraitFallback(characterName) }
-                )
-            }
-        }
-        return
-    }
-
-    // An octagon with flat sides, a heraldic frame: its shadow, a double contour, the portrait inside.
-    Box(
-        modifier = Modifier
-            .offset(y = (-47).dp)
-            .size(if (crest) 222.dp else 238.dp)
-            .clip(shape)
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
+    GothicPortraitFrame(
+        onClick = onClick,
+        modifier = Modifier.offset(y = -PortraitRaise),
+        progress = progress,
+        progressColor = progressColor,
+        plaque = plaque
     ) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            if (crest) {
-                drawPath(engravedPortraitPath(size), colors.ornament.inner, style = Stroke(1.dp.toPx()))
-                scale(.94f, .94f) {
-                    drawPath(engravedPortraitPath(size), colors.ornament.middle, style = Stroke(.65.dp.toPx()))
-                }
-                drawEtchedStar(Offset(center.x, 14.dp.toPx()), 10.dp.toPx(), colors.ornament.inner)
-            } else {
-            drawPath(octagonPath(center, 114.dp.toPx()), color = colors.ornament.shadow)
-            drawPath(octagonPath(center, 110.dp.toPx()), color = colors.ornament.middle, style = Stroke(width = 3.dp.toPx()))
-            drawPath(octagonPath(center, 103.dp.toPx()), color = colors.ornament.inner, style = Stroke(width = 1.dp.toPx()))
-            }
-        }
-
-        Box(
-            modifier = Modifier
-                .size(if (crest) 198.dp else 196.dp)
-                .clip(shape)
-                .background(colors.surface.portrait)
-                .saturation(saturation)
-        ) {
+        Box(Modifier.fillMaxSize().saturation(saturation)) {
             AppImage(
                 imageRef = portraitReference,
                 contentDescription = characterName,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop,
                 framing = framing,
-                fallback = {
-                    PortraitFallback(characterName)
-                }
+                fallback = { PortraitFallback(characterName) }
             )
         }
     }
 }
 
-/**
- * From the portrait's centre to the middle of the frame's diagonal side, along each axis: the outer
- * contour's inner radius (110dp × cos 22.5°) times cos 45°, about 72dp.
- */
-private val PortraitCornerOffset = (110.0 * cos(PI / 8) * cos(PI / 4)).toFloat().dp
+/** How far above its place the frame is drawn: its artwork's margin over the header's fade. */
+private val PortraitRaise = 47.dp
 
+/** From the portrait's block (the plaque, or the frame's ornament if it hangs lower) to the hit points' card. */
+private val PortraitHpGap = 22.dp
+
+/**
+ * How much of the portrait's item is empty under it: the frame's box is as tall as its artwork, drawn
+ * [PortraitRaise] higher; the plaque hangs from the frame's bottom edge, an engraving's spike lower still.
+ */
+private fun portraitBlockSlack(look: com.dndcharacterhandler.presentation.theme.ThemeLook): Dp {
+    val plaqueBottom = portraitPlaqueCenterY(look) + PortraitPlaqueSize.height / 2
+    // Classic's drawn octagon ends above its box; an engraving's artwork fills it down to its spike's tip.
+    val ornamentBottom = if (look.portraitArtwork == null) 0.dp else GothicPortraitHeight
+    // The list's 10dp between items counts too.
+    return GothicPortraitHeight + 10.dp - maxOf(plaqueBottom, ornamentBottom) + PortraitRaise - PortraitHpGap
+}
+
+/**
+ * The level's plaque in the portrait frame's bottom edge (owner's choice, 2026-10-07): "Уровень 1" and the
+ * experience under it — a stat's outline, its corners cut as the frame's. When the experience allows a level up,
+ * it turns gold and says "Level UP". A tap adds experience ([onExperience]), or opens the level up when one is
+ * due ([onLevelUp]); a long press opens the experience then too, to put a slip right.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun LevelPlaque(
+    levelLabel: String,
+    experience: String,
+    canLevelUp: Boolean,
+    onLevelUp: () -> Unit,
+    onExperience: () -> Unit
+) {
+    val colors = LocalDesignTokens.current.colors
+    val mark = if (canLevelUp) colors.accent.inspiration else colors.border.miniCard
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .combinedClickable(onClick = if (canLevelUp) onLevelUp else onExperience, onLongClick = onExperience)
+            .semantics(mergeDescendants = true) {},
+        contentAlignment = Alignment.Center
+    ) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val outline = chamferedBar(0f, 0f, size.width, size.height, PlaqueChamfer.toPx())
+            drawPath(outline, colors.surface.card)
+            drawPath(outline, mark, style = Stroke(1.dp.toPx()))
+        }
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = levelLabel,
+                style = MaterialTheme.typography.titleMedium,
+                color = if (canLevelUp) colors.accent.inspiration else colors.text.primary,
+                maxLines = 1
+            )
+            Text(
+                text = if (canLevelUp) text("levelup_badge") else experience,
+                style = MaterialTheme.typography.labelMedium,
+                color = if (canLevelUp) colors.accent.inspiration else colors.text.label,
+                maxLines = 1
+            )
+        }
+    }
+}
+
+/** How far the plaque's corners are cut. */
+private val PlaqueChamfer = 6.dp
+
+/** "130 / 300": the experience and what the next level needs; at the last level, the experience alone. */
+private fun XpProgressInfo.label(): String {
+    val formatter = NumberFormat.getIntegerInstance()
+    return if (isMaxLevel) formatter.format(currentXp) else "${formatter.format(currentXp)} / ${formatter.format(nextLevelXp)}"
+}
 
 @Composable
 private fun PortraitFallback(characterName: String) {
@@ -2120,201 +2135,6 @@ private fun HpChange(before: HpPreview, after: HpPreview) {
     }
 }
 
-@Composable
-private fun OverviewXpBlock(
-    xpInfo: XpProgressInfo,
-    level: Int,
-    /** "Уровень 3" at the left of the bar's line; a tap on it picks the level. */
-    levelLabel: String,
-    onEditLevel: () -> Unit,
-    canLevelUp: Boolean = false,
-    onLevelUp: () -> Unit = {},
-    onClick: () -> Unit
-) {
-    val formatter = remember { NumberFormat.getIntegerInstance() }
-    val token = LocalDesignTokens.current.typography.xpLabel
-    val colors = LocalDesignTokens.current.colors
-    val progressColor = if (xpInfo.hasReachedLevelCap) colors.accent.xpCapped else colors.progress.xpFill
-    val trackColor = colors.progress.xpTrack
-    val experience = if (xpInfo.isMaxLevel) {
-        formatter.format(xpInfo.currentXp)
-    } else {
-        "${formatter.format(xpInfo.currentXp)} / ${formatter.format(xpInfo.nextLevelXp)}"
-    }
-    if (LocalThemeLook.current.xpBar == XpBarStyle.MEDALLION) {
-        XpMedallionBar(
-            progress = xpInfo.progress,
-            level = level,
-            levelLabel = levelLabel,
-            experience = experience,
-            fill = progressColor,
-            canLevelUp = canLevelUp,
-            onEditLevel = onEditLevel,
-            onLevelUp = onLevelUp,
-            onClick = onClick
-        )
-        return
-    }
-
-    Column(
-        modifier = Modifier.clickable(onClick = onClick),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        // Above the bar: the level at the left ("Level UP" after it when the experience allows one),
-        // the experience at the right, as plain numbers.
-        Row(modifier = Modifier.fillMaxWidth()) {
-            Text(
-                text = levelLabel,
-                modifier = Modifier
-                    .alignByBaseline()
-                    .clickable(onClick = onEditLevel),
-                style = MaterialTheme.typography.bodyLarge.copy(fontSize = token.fontSizeSp.sp),
-                color = colors.text.action,
-                maxLines = 1
-            )
-            if (canLevelUp) {
-                Text(
-                    text = text("levelup_badge"),
-                    modifier = Modifier
-                        .alignByBaseline()
-                        .padding(start = 12.dp)
-                        .clickable(onClick = onLevelUp),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = colors.accent.inspiration,
-                    maxLines = 1
-                )
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            Text(
-                text = experience,
-                modifier = Modifier
-                    .alignByBaseline()
-                    .padding(start = 12.dp),
-                style = MaterialTheme.typography.bodyLarge.copy(fontSize = token.fontSizeSp.sp),
-                color = colors.text.action,
-                maxLines = 1
-            )
-        }
-        Canvas(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(16.dp)
-        ) {
-            val stroke = 3.dp.toPx()
-            drawLine(
-                color = trackColor,
-                start = Offset(stroke / 2, center.y),
-                end = Offset(size.width - stroke / 2, center.y),
-                strokeWidth = stroke,
-                cap = StrokeCap.Round
-            )
-            drawLine(
-                color = progressColor,
-                start = Offset(stroke / 2, center.y),
-                end = Offset((size.width - stroke) * xpInfo.progress + stroke / 2, center.y),
-                strokeWidth = stroke,
-                cap = StrokeCap.Round
-            )
-            drawCircle(progressColor, 4.dp.toPx(), Offset((size.width - stroke) * xpInfo.progress + stroke / 2, center.y))
-        }
-    }
-}
-
-/**
- * Classic's experience (owner's choice from boards, 2026-10-06: C3, D3): the level in an octagon, as the
- * portrait's frame, on the start of a bar whose ends are cut as the octagon's corners — a stat's outline
- * round a dark track, the experience filling it. The numbers stand over the bar's end, flush with where its
- * cut begins. When the experience allows a level up, the octagon and the fill turn gold and "Level UP"
- * stands over the bar's start. A tap on the octagon picks the level, on the rest adds experience.
- */
-@Composable
-private fun XpMedallionBar(
-    progress: Float,
-    level: Int,
-    levelLabel: String,
-    experience: String,
-    fill: Color,
-    canLevelUp: Boolean,
-    onEditLevel: () -> Unit,
-    onLevelUp: () -> Unit,
-    onClick: () -> Unit
-) {
-    val colors = LocalDesignTokens.current.colors
-    val mark = if (canLevelUp) colors.accent.inspiration else colors.border.miniCard
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(XpMedallionSize + 4.dp)
-            .clickable(onClick = onClick)
-    ) {
-        Canvas(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = XpMedallionSize / 2 + 14.dp)
-                .height(XpBarHeight)
-                .align(Alignment.CenterStart)
-        ) {
-            val stroke = 1.dp.toPx()
-            val cut = XpBarChamfer.toPx()
-            val outline = chamferedBar(0f, 0f, size.width, size.height, cut)
-            drawPath(outline, colors.surface.card)
-            drawPath(outline, colors.border.miniCard, style = Stroke(stroke))
-            val inset = 3.dp.toPx()
-            val filled = (size.width - 2 * inset) * progress.coerceIn(0f, 1f)
-            if (filled > 0f) {
-                drawPath(
-                    chamferedBar(inset, inset, filled, size.height - 2 * inset, cut * 0.6f),
-                    if (canLevelUp) colors.accent.inspiration else fill
-                )
-            }
-        }
-        // Its right edge where the bar's cut begins, its baseline a little over the bar.
-        Text(
-            text = experience,
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(end = XpBarChamfer)
-                .overXpBar(),
-            style = MaterialTheme.typography.labelMedium,
-            color = colors.text.label,
-            maxLines = 1
-        )
-        // Over the bar's start, level with the experience: "Level", or "Level UP" in gold when one is due.
-        Text(
-            text = if (canLevelUp) text("levelup_badge") else text("overview_level"),
-            modifier = Modifier
-                .align(Alignment.CenterStart)
-                // Right after the octagon: over the bar its edge slants away, which leaves the gap.
-                .padding(start = XpMedallionSize)
-                .overXpBar()
-                .then(if (canLevelUp) Modifier.clickable(onClick = onLevelUp) else Modifier),
-            style = MaterialTheme.typography.labelMedium,
-            color = if (canLevelUp) colors.accent.inspiration else colors.text.label,
-            maxLines = 1
-        )
-        Box(
-            modifier = Modifier
-                .align(Alignment.CenterStart)
-                .size(XpMedallionSize)
-                .clip(OctagonShape)
-                .clickable(onClick = onEditLevel)
-                .semantics(mergeDescendants = true) { contentDescription = levelLabel },
-            contentAlignment = Alignment.Center
-        ) {
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                val octagon = octagonPath(center, size.minDimension / 2 - 1.dp.toPx())
-                drawPath(octagon, colors.surface.card)
-                drawPath(octagon, mark, style = Stroke(1.dp.toPx()))
-            }
-            Text(
-                text = level.toString(),
-                style = MaterialTheme.typography.titleLarge,
-                color = if (canLevelUp) colors.accent.inspiration else colors.text.primary
-            )
-        }
-    }
-}
-
 /** A bar's outline from ([left], [top]), [width] × [height], its corners cut by [cut]. */
 private fun chamferedBar(left: Float, top: Float, width: Float, height: Float, cut: Float): Path = Path().apply {
     val c = minOf(cut, height / 2, width / 2)
@@ -2330,29 +2150,6 @@ private fun chamferedBar(left: Float, top: Float, width: Float, height: Float, c
     lineTo(left, top + c)
     close()
 }
-
-/** The level's octagon on the experience bar. */
-private val XpMedallionSize = 52.dp
-
-/** The experience bar's height, its outline included (owner's choice from boards, 2026-10-06: W6). */
-private val XpBarHeight = 16.dp
-
-/** From a label's baseline over the experience bar down to the bar's top. */
-private val XpLabelGap = 5.dp
-
-/**
- * Stands a label, centred in the bar's box, with its baseline [XpLabelGap] over the bar's top: the same
- * height whatever the font gives the line.
- */
-private fun Modifier.overXpBar(): Modifier = layout { measurable, constraints ->
-    val placeable = measurable.measure(constraints)
-    val baseline = placeable[FirstBaseline].takeIf { it != AlignmentLine.Unspecified } ?: placeable.height
-    val y = placeable.height / 2 - baseline - (XpBarHeight / 2 + XpLabelGap).roundToPx()
-    layout(placeable.width, placeable.height) { placeable.place(0, y) }
-}
-
-/** How far the experience bar's corners are cut. */
-private val XpBarChamfer = 4.dp
 
 /**
  * The death saving throws under the hit points, as Foundry has them: a tab with a skull pulls the
@@ -2919,7 +2716,6 @@ private fun OverviewPreviewContent(
             "placeholder_class" to "Wizard",
             "overview_subtitle_format" to "%1\$s • %2\$s • Level %3\$s",
             "overview_level_format" to "Level %1\$s",
-            "overview_level" to "Level",
             "overview_short_rest" to "Short Rest",
             "overview_long_rest" to "Long Rest",
             "overview_long_rest_ends" to "Ends",
