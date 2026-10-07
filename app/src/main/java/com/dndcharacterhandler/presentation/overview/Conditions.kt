@@ -2,6 +2,7 @@ package com.dndcharacterhandler.presentation.overview
 
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.layout.layout
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -104,13 +105,15 @@ internal fun ConditionsColumn(
     } else {
         marks
     }
-    // Over the portrait's box, never stretching it: the column takes no height of its own.
+    // Centred on where it is put (the middle of the frame's side), gliding up half a row as a mark comes; over the
+    // portrait's box, never stretching it: the column takes no height of its own.
+    val lift by animateDpAsState(portraitSideColumnHeight(1 + shown.size) / 2, label = "conditionsColumnLift")
     Column(
         modifier = modifier.layout { measurable, constraints ->
             val placeable = measurable.measure(constraints.copy(maxHeight = Constraints.Infinity))
-            layout(placeable.width, 0) { placeable.place(0, 0) }
+            layout(placeable.width, 0) { placeable.place(0, -lift.roundToPx()) }
         },
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(PortraitSideGap)
     ) {
         PortraitSideButton(
             icon = SideIconConditions,

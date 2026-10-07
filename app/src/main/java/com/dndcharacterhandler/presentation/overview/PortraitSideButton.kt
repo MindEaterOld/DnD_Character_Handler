@@ -131,6 +131,12 @@ internal val SideIconInspiration: ImageVector get() = CandleIcon
 /** A side button's size; the column of the conditions' marks keeps to it. */
 internal val PortraitSideButtonSize = 44.dp
 
+/** Between the buttons, and the marks, of a side's column. */
+internal val PortraitSideGap = 8.dp
+
+/** A side's column of [rows] buttons or marks, from its top button's top to its bottom one's bottom. */
+internal fun portraitSideColumnHeight(rows: Int): Dp = PortraitSideButtonSize * rows + PortraitSideGap * (rows - 1)
+
 /**
  * A button at the portrait's sides (owner's choices from boards, 2026-10-07: K1, T4): the conditions' on the left,
  * the rests' on the right, all of one kind — a coin: the card's dark fill, an outline light above and dim below,

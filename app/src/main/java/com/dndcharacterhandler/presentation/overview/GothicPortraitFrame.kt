@@ -70,6 +70,10 @@ private fun ringPolygon(look: ThemeLook): List<Offset> = if (look.portraitArtwor
 /** How far in the ring lies from its polygon: on Classic's line; inside the engraving's opening, clear of its moulding. */
 private fun ringInset(look: ThemeLook): Dp = if (look.portraitArtwork == null) 0.dp else PortraitRingWidth / 2
 
+/** The middle of the frame's straight sides, from its top: where the side buttons' columns are centred. */
+internal fun portraitSideMiddleY(look: ThemeLook): Dp =
+    GothicPortraitHeight * ((ringPolygon(look)[1].y + ringPolygon(look)[2].y) / 2)
+
 /** The plaque's centre from the frame's top: on the ring's bottom edge. */
 internal fun portraitPlaqueCenterY(look: ThemeLook): Dp =
     GothicPortraitHeight * ringPolygon(look).first().y - ringInset(look)

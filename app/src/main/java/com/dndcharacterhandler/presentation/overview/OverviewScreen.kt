@@ -613,11 +613,6 @@ private data class OverviewStat(
     val delta: Int = 0
 )
 
-/**
- * The conditions and the rests stand at the portrait's sides from where its sides run straight (owner's choice from
- * boards, 2026-10-07: B3): the frame is drawn 47dp above its place, its straight sides start at 36.6 % of its height.
- */
-private val PortraitSidesTop = GothicPortraitHeight * 0.366f - 47.dp
 
 /**
  * ...6dp off the frame's outer line (12.8 % in from its artwork's edge in both themes), so they never line up with
@@ -957,8 +952,10 @@ private fun OverviewContent(
                                     )
                                 }
                             )
-                            // The conditions down the left, as the rests go down the right: from where the frame's
-                            // sides run straight, a little off them (owner's choice from boards, 2026-10-07: B3).
+                            // The conditions down the left, the rests and inspiration down the right, a little off the
+                            // frame's sides (B3), each column centred on the middle of the straight side (owner's wish,
+                            // 2026-10-07); the frame is drawn PortraitRaise above its place.
+                            val sidesMiddle = portraitSideMiddleY(LocalThemeLook.current) - PortraitRaise
                             if (character != null) {
                                 ConditionsColumn(
                                     // Unconscious at 0 hit points too: it explains the arrows.
@@ -969,15 +966,15 @@ private fun OverviewContent(
                                     onOpenConcentration = { isEndConcentrationOpen = true },
                                     modifier = Modifier
                                         .align(Alignment.TopCenter)
-                                        .offset(x = -PortraitSideColumnX, y = PortraitSidesTop)
+                                        .offset(x = -PortraitSideColumnX, y = sidesMiddle)
                                 )
                             }
-                            // The rests: the same buttons, the short rest level with the conditions' button.
+                            // The rests and inspiration: the same buttons.
                             Column(
                                 modifier = Modifier
                                     .align(Alignment.TopCenter)
-                                    .offset(x = PortraitSideColumnX, y = PortraitSidesTop),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    .offset(x = PortraitSideColumnX, y = sidesMiddle - portraitSideColumnHeight(3) / 2),
+                                verticalArrangement = Arrangement.spacedBy(PortraitSideGap)
                             ) {
                                 PortraitSideButton(
                                     icon = SideIconShortRest,
