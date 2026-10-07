@@ -78,13 +78,14 @@ private val GothicOpening = listOf(
 /** The experience's ring. */
 private val PortraitRingWidth = 4.dp
 
-/** The level's plate: round its words this much air across and up and down, its corners rounded. */
-private val PlateAirAcross = 10.dp
+/**
+ * The level's plate (owner's wishes, 2026-10-07): the whole gap from serif to serif, this much air round its words
+ * across and below them, its bottom corners rounded; over the picture it fades up [PlateFade] to nothing.
+ */
+private val PlateAirAcross = 14.dp
 private val PlateAirDown = 5.dp
 private val PlateCorner = 6.dp
-
-/** Between the plate and the ring's ends. */
-private val GapAir = 5.dp
+private val PlateFade = 30.dp
 
 /** The serifs the ring ends in at the gap. */
 private val GapSerif = 12.dp
@@ -199,7 +200,7 @@ internal fun portraitFrameFoot(): Dp =
  * The overview's portrait (owner's choices from boards and the screen, 2026-10-07: V2, A2, E2, W1): the frame is the
  * experience bar. A ring round the portrait fills with [progress] from the gap in the bottom edge — its left end —
  * round the frame, back to the gap's right end; the ring ends at the gap in serifs, and [badge] (the level, «I lvl»)
- * is written in it, on the ring's line, on a dark plate. Classic draws its arch, the ring on its line; an engraving
+ * is written in it, on the ring's line, on a dark plate filling the gap and fading up over the picture. Classic draws its arch, the ring on its line; an engraving
  * keeps its white artwork, tinted with the palette, the ring inside its opening. The
  * picture darkens toward the frame's edges, sunk into it. A tap on the words is [onBadgeClick], a long press
  * [onBadgeLongClick].
@@ -234,7 +235,8 @@ internal fun GothicPortraitFrame(
     val plate = with(density) {
         badgeSize?.let { Size(it.width + PlateAirAcross.toPx() * 2, it.height + PlateAirDown.toPx() * 2) } ?: Size.Zero
     }
-    val gapPx = if (badge != null) plate.width + with(density) { GapAir.toPx() } * 2 else 0f
+    // The ring ends where the plate begins.
+    val gapPx = plate.width
     Box(modifier = modifier.size(GothicPortraitWidth, GothicPortraitHeight)) {
         Box(
             modifier = Modifier.fillMaxSize().clip(opening)
@@ -283,12 +285,32 @@ internal fun GothicPortraitFrame(
                 val cx = size.width / 2
                 val serif = GapSerif.toPx() / 2
                 val serifWidth = 2.dp.toPx()
-                // The serifs stand just outside the ring's ends, flush with them.
+                // The serifs on the ring's last stretch, flush with its ends: on the plate's edges.
                 val leftSerif = cx - half - serifWidth / 2
                 val rightSerif = cx + half + serifWidth / 2
                 val layer = Paint().apply { alpha = track.alpha }
                 val corner = CornerRadius(PlateCorner.toPx())
+                // The plate: solid from below its words down, fading up over the picture to nothing.
+                val plateBottom = bottom + plate.height / 2
+                val plateSolid = bottom - plate.height / 2
+                val plateTop = plateSolid - PlateFade.toPx()
+                val plateBrush = Brush.verticalGradient(
+                    0f to colors.surface.card.copy(alpha = 0f),
+                    (plateSolid - plateTop) / (plateBottom - plateTop) to colors.surface.card,
+                    1f to colors.surface.card,
+                    startY = plateTop,
+                    endY = plateBottom
+                )
                 onDrawBehind {
+                    if (badge != null) {
+                        // Under the ring and its serifs, which end on its edges.
+                        drawRoundRect(
+                            plateBrush,
+                            topLeft = Offset(cx - half, plateTop),
+                            size = Size(half * 2, plateBottom - plateTop),
+                            cornerRadius = corner
+                        )
+                    }
                     // The empty ring and its serifs in one layer, solid, then laid down at the track's alpha: where
                     // they meet nothing doubles.
                     drawContext.canvas.saveLayer(Rect(Offset.Zero, size), layer)
@@ -308,15 +330,6 @@ internal fun GothicPortraitFrame(
                     }
                     if (progress >= 1f && badge != null) {
                         drawLine(progressColor, Offset(rightSerif, bottom - serif), Offset(rightSerif, bottom + serif), serifWidth)
-                    }
-                    if (badge != null) {
-                        // The level's plate: dark, for its words to read on the picture and the moulding.
-                        drawRoundRect(
-                            colors.surface.card,
-                            topLeft = Offset(cx - plate.width / 2, bottom - plate.height / 2),
-                            size = plate,
-                            cornerRadius = corner
-                        )
                     }
                 }
             }
