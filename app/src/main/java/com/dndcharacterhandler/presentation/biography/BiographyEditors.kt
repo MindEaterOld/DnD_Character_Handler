@@ -2,7 +2,6 @@ package com.dndcharacterhandler.presentation.biography
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -579,7 +578,7 @@ internal fun SwatchDialog(title: String, group: SwatchGroup, currentValue: Strin
     }
 }
 
-/** A swatch's dot, a faint ring round it so the darkest and the lightest show on the dark. */
+/** A swatch's dot: the colour alone, no ring (owner's choice from boards, 2026-10-08: O2) — its name stands beside it. */
 @Composable
 internal fun SwatchDot(color: Color, size: androidx.compose.ui.unit.Dp) {
     Box(
@@ -587,6 +586,5 @@ internal fun SwatchDot(color: Color, size: androidx.compose.ui.unit.Dp) {
             .size(size)
             .clip(CircleShape)
             .background(color)
-            .border(1.dp, LocalDesignTokens.current.colors.border.muted, CircleShape)
     )
 }
