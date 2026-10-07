@@ -29,15 +29,9 @@ val CharacterHeaderFadeEnd = 64.dp
 private val FadeFullFrom = CharacterHeaderFadeEnd
 
 /**
- * The fade into the tab bar at the list's foot (owner's wish, 2026-10-08): as tall as the least room a list leaves
- * under its last item, so at rest nothing is faded there either.
- */
-private val FadeBottom = NoFloatingButtonInset
-
-/**
  * Fades what scrolls under the pinned header: clear above the name's foot, full again where the list's content
- * starts at rest, so nothing is cut off while the list is at its top; and at the foot, what goes down toward the tab
- * bar dissolves into it instead of being cut. The colours here are the mask's alpha only.
+ * starts at rest, so nothing is cut off while the list is at its top. At the foot the list is cut clean on the tab
+ * bar's top edge, no fade (owner's choice, 2026-10-08). The colours here are the mask's alpha only.
  */
 fun Modifier.fadeUnderHeader(): Modifier = this
     .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
@@ -47,9 +41,7 @@ fun Modifier.fadeUnderHeader(): Modifier = this
             brush = Brush.verticalGradient(
                 0f to Color.Transparent,
                 FadeClearTo.toPx() / size.height to Color.Transparent,
-                FadeFullFrom.toPx() / size.height to Color.Black,
-                1f - FadeBottom.toPx() / size.height to Color.Black,
-                1f to Color.Transparent
+                FadeFullFrom.toPx() / size.height to Color.Black
             ),
             blendMode = BlendMode.DstIn
         )

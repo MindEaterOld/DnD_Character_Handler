@@ -222,7 +222,7 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                         )
                     }
                 ) { padding ->
-                    // The screens reach down into the air over the tab bar's plate: a list dissolves onto its top edge.
+                    // The screens reach down into the air over the tab bar's plate: a list is cut on its top edge.
                     val layoutDirection = LocalLayoutDirection.current
                     Surface(
                         modifier = Modifier

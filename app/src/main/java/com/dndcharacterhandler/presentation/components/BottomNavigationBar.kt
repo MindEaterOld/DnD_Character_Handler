@@ -32,7 +32,7 @@ import com.dndcharacterhandler.presentation.theme.LocalThemeLook
 
 /**
  * The air round the tab bar's plate, over it and under it. The screens' area reaches down into the air over it, so a
- * list dissolves right onto the plate's top edge (owner's wish, 2026-10-08).
+ * list is cut on the plate's top edge, not above it (owner's wishes, 2026-10-08).
  */
 val TabBarGap = 8.dp
 
