@@ -1388,11 +1388,16 @@ private fun SkillGroupCard(
     }
 }
 
-/** A skill's line: the training dot, the name, the roll's marker and the bonus as it is now. */
+/**
+ * A skill's line: the training dot, the name, the roll's marker and the bonus as it is now. What the character is
+ * trained in is gold (owner's choice from boards, 2026-10-08: N4): the dot, the name and the bonus; expertise is the
+ * gold dot in a gold ring, a jack of all trades' half training a faint gold dot in the plain ring.
+ */
 @Composable
 private fun SkillLine(skill: SkillRow, effects: RollEffects?, modifier: Modifier = Modifier) {
     val strings = LocalStrings.current
     val colors = LocalDesignTokens.current.colors
+    val gold = MaterialTheme.colorScheme.primary
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -1401,23 +1406,19 @@ private fun SkillLine(skill: SkillRow, effects: RollEffects?, modifier: Modifier
         verticalAlignment = Alignment.CenterVertically
     ) {
         Canvas(modifier = Modifier.size(12.dp)) {
-            val expertiseColor = colors.accent.inspiration
-            val fillColor = when {
-                skill.expertise -> expertiseColor
-                skill.proficient -> colors.text.primary
-                skill.jackOfAllTrades -> colors.text.primary.copy(alpha = 0.5f)
-                else -> Color.Transparent
+            val ring = Stroke(width = 1.dp.toPx())
+            when {
+                skill.expertise -> {
+                    drawCircle(gold, radius = 5.5.dp.toPx(), style = ring)
+                    drawCircle(gold, radius = 3.dp.toPx())
+                }
+                skill.proficient -> drawCircle(gold, radius = 5.dp.toPx())
+                skill.jackOfAllTrades -> {
+                    drawCircle(gold.copy(alpha = 0.4f), radius = 5.dp.toPx())
+                    drawCircle(colors.text.label, radius = 5.dp.toPx(), style = ring)
+                }
+                else -> drawCircle(colors.text.label, radius = 5.dp.toPx(), style = ring)
             }
-            val strokeColor = if (skill.expertise) expertiseColor else colors.text.label
-            drawCircle(
-                color = fillColor,
-                radius = 5.dp.toPx()
-            )
-            drawCircle(
-                color = strokeColor,
-                radius = 5.dp.toPx(),
-                style = Stroke(width = 1.dp.toPx())
-            )
         }
         Text(
             // The row's own name, cut with a dot to its maxChars; the pop-ups take the full one.
@@ -1426,7 +1427,7 @@ private fun SkillLine(skill: SkillRow, effects: RollEffects?, modifier: Modifier
                 .padding(start = 6.dp)
                 .weight(1f),
             style = MaterialTheme.typography.bodyMedium,
-            color = colors.text.muted,
+            color = if (skill.proficient) gold else colors.text.muted,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -1437,7 +1438,8 @@ private fun SkillLine(skill: SkillRow, effects: RollEffects?, modifier: Modifier
                 .padding(start = 4.dp)
                 .widthIn(min = 24.dp),
             style = MaterialTheme.typography.bodyLarge,
-            color = changedValueColor(effects?.modifier ?: 0) ?: colors.text.primary,
+            // A value the conditions moved keeps its colour, as everywhere.
+            color = changedValueColor(effects?.modifier ?: 0) ?: if (skill.proficient) gold else colors.text.primary,
             textAlign = TextAlign.End
         )
     }
