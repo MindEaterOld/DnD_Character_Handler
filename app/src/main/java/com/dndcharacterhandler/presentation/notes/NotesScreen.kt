@@ -397,48 +397,55 @@ private fun NoteCard(
 @Composable
 private fun NoteFolded(note: Note, onUnfold: () -> Unit) {
     val colors = LocalDesignTokens.current.colors
-    Row(
+    // Laid out as the unfolded card: the pin moves only the title, the text starts at the card's edge either way
+    // (owner's wish, 2026-10-08), so nothing jumps as a note folds and unfolds.
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onUnfold)
             .padding(start = 14.dp, end = 8.dp, top = 12.dp, bottom = 12.dp)
     ) {
-        if (note.isPinned) {
-            Icon(
-                imageVector = Icons.Outlined.PushPin,
-                contentDescription = text("notes_pin"),
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .padding(top = 4.dp, end = 10.dp)
-                    .size(20.dp)
-            )
-        }
-        Column(modifier = Modifier.weight(1f)) {
+        Row {
+            if (note.isPinned) NotePinMark()
             Text(
                 text = note.title.ifBlank { text("notes_untitled") },
+                modifier = Modifier.weight(1f),
                 style = MaterialTheme.typography.titleLarge,
                 color = colors.text.primary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            if (note.content.isNotBlank()) {
-                Text(
-                    text = note.content,
-                    modifier = Modifier.padding(top = 4.dp),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = colors.text.muted,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
+            Icon(
+                imageVector = Icons.Outlined.KeyboardArrowDown,
+                contentDescription = text("notes_expand"),
+                tint = colors.text.muted,
+                modifier = Modifier.padding(start = 6.dp, top = 4.dp)
+            )
         }
-        Icon(
-            imageVector = Icons.Outlined.KeyboardArrowDown,
-            contentDescription = text("notes_expand"),
-            tint = colors.text.muted,
-            modifier = Modifier.padding(start = 6.dp, top = 4.dp)
-        )
+        if (note.content.isNotBlank()) {
+            Text(
+                text = note.content,
+                modifier = Modifier.padding(top = 6.dp, end = 6.dp),
+                style = MaterialTheme.typography.bodyLarge,
+                color = colors.text.muted,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
     }
+}
+
+/** A pinned note's mark before its title, folded or not: a gold pin on the title's first line. */
+@Composable
+private fun NotePinMark() {
+    Icon(
+        imageVector = Icons.Outlined.PushPin,
+        contentDescription = text("notes_pin"),
+        tint = MaterialTheme.colorScheme.primary,
+        modifier = Modifier
+            .padding(top = 4.dp, end = 8.dp)
+            .size(20.dp)
+    )
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -505,6 +512,7 @@ private fun NoteEditor(
             .padding(start = 14.dp, end = 8.dp, top = 12.dp, bottom = 10.dp)
     ) {
         Row {
+            if (note.isPinned) NotePinMark()
             NoteField(
                 value = title,
                 onValueChange = { title = it },
