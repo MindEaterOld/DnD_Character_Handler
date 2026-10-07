@@ -328,9 +328,11 @@ internal fun weightBuild(weight: String, height: String): String? =
 @Composable
 internal fun WeightDialog(currentValue: String, height: String, onDismiss: () -> Unit, onSave: (String) -> Unit) {
     val colors = LocalDesignTokens.current.colors
-    var unit by remember(currentValue) { mutableStateOf(if (currentValue.isBlank()) WeightUnit.KG else detectWeightUnit(currentValue)) }
+    val initialUnit = if (currentValue.isBlank()) WeightUnit.KG else detectWeightUnit(currentValue)
+    var unit by remember(currentValue) { mutableStateOf(initialUnit) }
+    // No weight yet: the pop-up starts at the ruler's middle, not empty (owner's wish, 2026-10-08); only Save keeps it.
     var draft by remember(currentValue) {
-        mutableStateOf(parseLeadingNumber(currentValue)?.let(::formatNumber) ?: "")
+        mutableStateOf(parseLeadingNumber(currentValue)?.let(::formatNumber) ?: weightRuler(initialUnit, height).middle().roundToInt().toString())
     }
     val kgLabel = text(WeightUnit.KG.labelKey)
     val lbLabel = text(WeightUnit.LB.labelKey)
@@ -373,7 +375,7 @@ internal fun WeightDialog(currentValue: String, height: String, onDismiss: () ->
         }
         WeightRuler(
             value = amount?.toFloat(),
-            range = if (unit == WeightUnit.KG) 20f..250f else 44f..550f,
+            range = weightRuler(unit, height),
             onChange = { draft = it.roundToInt().toString() }
         )
         if (bmi != null) {
@@ -401,6 +403,24 @@ internal fun WeightDialog(currentValue: String, height: String, onDismiss: () ->
         }
     }
 }
+
+/**
+ * The ruler's span. With a height, the BMI scale's whole stretch for it, so every build is in reach of a drag and
+ * the ruler's middle is the scale's (a sturdy build: 83 kg at 175 cm, 154 at 239); without one, a halfling to a
+ * goliath, its middle a usual weight (80 kg).
+ */
+private fun weightRuler(unit: WeightUnit, height: String): ClosedFloatingPointRange<Float> {
+    val kg = heightInCm(height)?.let { cm ->
+        val squareMetres = (cm / 100) * (cm / 100)
+        (RulerBmiFrom * squareMetres).toFloat()..(RulerBmiTo * squareMetres).toFloat()
+    } ?: 10f..150f
+    return if (unit == WeightUnit.KG) kg else (kg.start / KgPerPound).toFloat()..(kg.endInclusive / KgPerPound).toFloat()
+}
+
+private const val RulerBmiFrom = 12.0
+private const val RulerBmiTo = 42.0
+
+private fun ClosedFloatingPointRange<Float>.middle(): Float = (start + endInclusive) / 2
 
 /** A ruler for the weight: ticks every 5 (longer every 25), a gold knob at [value]; a drag or a tap moves it. */
 @Composable
