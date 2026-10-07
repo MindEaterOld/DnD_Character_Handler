@@ -16,12 +16,10 @@ data class ThemeLook(
     @DrawableRes val backdrop: Int?,
     val frames: FrameStyle,
     /**
-     * The portrait's white artwork, tinted with the palette; null — Classic's octagon, drawn, the experience on
-     * its line (owner's choice from boards, 2026-10-07: V2).
+     * The portrait's white artwork, tinted with the palette; null — Classic's rectangle, drawn, the experience on
+     * its line, the level in its top edge (owner's choices from boards, 2026-10-07 and 2026-10-08: V2, R2).
      */
-    @DrawableRes val portraitArtwork: Int? = null,
-    /** The frame's transparent margin at its top, as a fraction of its height: where its frame really starts. */
-    val portraitArtworkTop: Float = 0f
+    @DrawableRes val portraitArtwork: Int? = null
 )
 
 /** Cards, stats, the tab bar and the hit points' buttons. */
@@ -36,9 +34,7 @@ enum class FrameStyle {
 /** The look that was the app's only one until themes. */
 val ClassicLook = ThemeLook(
     backdrop = null,
-    frames = FrameStyle.ROUNDED,
-    // The drawn arch's apex, less half its ring.
-    portraitArtworkTop = .104f
+    frames = FrameStyle.ROUNDED
 )
 
 /** Ivory ink on charcoal paper over an engraving of a dragon (ChatGPT, 2026-10-04). */

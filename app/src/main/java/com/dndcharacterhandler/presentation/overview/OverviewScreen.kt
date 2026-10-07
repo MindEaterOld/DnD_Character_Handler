@@ -900,11 +900,9 @@ private fun OverviewContent(
 
     ScreenBackground {
         // The header is pinned over the list, the name in it (owner's choice, 2026-10-06): the frame, drawn
-        // 47dp above its place, starts below the header's fade, whatever margin its artwork has.
-        val listTop = maxOf(
-            CharacterHeaderInset,
-            CharacterHeaderFadeEnd + PortraitRaise - GothicPortraitHeight * LocalThemeLook.current.portraitArtworkTop + 4.dp
-        )
+        // 47dp above its place, starts right where the header's fade ends — its highest point, the level over
+        // Classic's top edge, not bitten by it at rest, and no more room than that (owner's wish, 2026-10-08).
+        val listTop = maxOf(CharacterHeaderInset, CharacterHeaderFadeEnd + PortraitRaise - portraitFrameHead())
         Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
                 modifier = Modifier
@@ -937,7 +935,7 @@ private fun OverviewContent(
                                     xpInfo.hasReachedLevelCap -> colors.accent.xpCapped
                                     else -> colors.progress.xpFill
                                 },
-                                // «I lvl» in the gap of the frame's bottom edge (owner's choice, 2026-10-07). A tap adds
+                                // «I lvl» in the gap of the frame's edge (owner's choices, 2026-10-07, 2026-10-08). A tap adds
                                 // experience, or opens the level up when one is due; a long press adds experience always.
                                 badge = levelBadge(character?.level ?: 1, canLevelUp),
                                 badgeDescription = levelLabel,
@@ -1758,9 +1756,6 @@ private fun PortraitFrame(
 /** How far above its place the frame is drawn: its artwork's margin over the header's fade. */
 private val PortraitRaise = 47.dp
 
-/** From the portrait's block (the frame's bottom edge, or its ornament if it hangs lower) to the hit points' card. */
-private val PortraitHpGap = 27.dp
-
 /**
  * How much of the portrait's item is empty under it: the frame's box is as tall as its artwork, drawn
  * [PortraitRaise] higher; Classic's arch ends above the box's bottom, an engraving's spike reaches it.
@@ -1769,7 +1764,7 @@ private val PortraitHpGap = 27.dp
 @ReadOnlyComposable
 private fun portraitBlockSlack(): Dp =
     // The list's 10dp between items counts too.
-    GothicPortraitHeight + 10.dp - portraitFrameFoot() + PortraitRaise - PortraitHpGap
+    GothicPortraitHeight + 10.dp - portraitFrameFoot() + PortraitRaise - portraitHpGap()
 
 /**
  * The level as the portrait frame writes it (owner's choices, 2026-10-07): the Roman numeral and «lvl», one serif —
