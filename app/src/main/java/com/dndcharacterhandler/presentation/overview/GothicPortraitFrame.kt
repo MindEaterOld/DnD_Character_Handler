@@ -80,12 +80,15 @@ private val PortraitRingWidth = 4.dp
 
 /**
  * The level's plate (owner's wishes, 2026-10-07): the whole gap from serif to serif, this much air round its words
- * across and below them, its bottom corners rounded; over the picture it fades up [PlateFade] to nothing.
+ * across; low, not as tall as the words — solid [PlateBelow] under the ring's line and [PlateAbove] over it, then
+ * fading up [PlateFade] to nothing over the picture; its bottom corners rounded.
  */
 private val PlateAirAcross = 14.dp
 private val PlateAirDown = 5.dp
 private val PlateCorner = 6.dp
-private val PlateFade = 30.dp
+private val PlateBelow = 9.dp
+private val PlateAbove = 3.dp
+private val PlateFade = 10.dp
 
 /** The serifs the ring ends in at the gap. */
 private val GapSerif = 12.dp
@@ -200,7 +203,7 @@ internal fun portraitFrameFoot(): Dp =
  * The overview's portrait (owner's choices from boards and the screen, 2026-10-07: V2, A2, E2, W1): the frame is the
  * experience bar. A ring round the portrait fills with [progress] from the gap in the bottom edge — its left end —
  * round the frame, back to the gap's right end; the ring ends at the gap in serifs, and [badge] (the level, «I lvl»)
- * is written in it, on the ring's line, on a dark plate filling the gap and fading up over the picture. Classic draws its arch, the ring on its line; an engraving
+ * is written in it, on the ring's line, on a low dark plate filling the gap and fading up over the picture. Classic draws its arch, the ring on its line; an engraving
  * keeps its white artwork, tinted with the palette, the ring inside its opening. The
  * picture darkens toward the frame's edges, sunk into it. A tap on the words is [onBadgeClick], a long press
  * [onBadgeLongClick].
@@ -291,8 +294,8 @@ internal fun GothicPortraitFrame(
                 val layer = Paint().apply { alpha = track.alpha }
                 val corner = CornerRadius(PlateCorner.toPx())
                 // The plate: solid from below its words down, fading up over the picture to nothing.
-                val plateBottom = bottom + plate.height / 2
-                val plateSolid = bottom - plate.height / 2
+                val plateBottom = bottom + PlateBelow.toPx()
+                val plateSolid = bottom - PlateAbove.toPx()
                 val plateTop = plateSolid - PlateFade.toPx()
                 val plateBrush = Brush.verticalGradient(
                     0f to colors.surface.card.copy(alpha = 0f),
