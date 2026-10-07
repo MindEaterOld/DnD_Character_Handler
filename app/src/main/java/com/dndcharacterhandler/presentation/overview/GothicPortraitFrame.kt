@@ -18,6 +18,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ClipOp
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Shape
@@ -26,6 +27,7 @@ import androidx.compose.ui.graphics.PathMeasure
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Density
@@ -59,8 +61,8 @@ private val GothicOpening = listOf(
 /** The experience's ring: as thick as the classic frame's line. */
 private val PortraitRingWidth = 4.dp
 
-/** The level's plaque in the frame's bottom edge (owner's choice, 2026-10-07): the ring stops at its sides. */
-internal val PortraitPlaqueSize = DpSize(120.dp, 46.dp)
+/** The level's plaque in the frame's bottom edge (owner's choice, 2026-10-07): as tall as two lines of text. */
+internal val PortraitPlaqueHeight = 46.dp
 
 /** The polygon the ring follows: Classic's drawn octagon; in an engraving, its opening, the ring inside it. */
 private fun ringPolygon(look: ThemeLook): List<Offset> = if (look.portraitArtwork == null) ClassicOctagon else GothicOpening
@@ -71,6 +73,20 @@ private fun ringInset(look: ThemeLook): Dp = if (look.portraitArtwork == null) 0
 /** The plaque's centre from the frame's top: on the ring's bottom edge. */
 internal fun portraitPlaqueCenterY(look: ThemeLook): Dp =
     GothicPortraitHeight * ringPolygon(look).first().y - ringInset(look)
+
+/**
+ * The plaque, centred on the ring's bottom edge, as wide as puts its top corners on the ring's lower bevels: the
+ * ring comes down each bevel straight into a corner of it (owner's wish, 2026-10-07).
+ */
+internal fun portraitPlaqueSize(look: ThemeLook): DpSize {
+    val ring = inset(scaled(ringPolygon(look), Size(GothicPortraitWidth.value, GothicPortraitHeight.value)), ringInset(look).value)
+    val corner = ring[0]
+    val bevelTop = ring[1]
+    // Up the bevel by half the plaque's height, from its foot at the bottom edge's left end.
+    val run = (corner.x - bevelTop.x) / (corner.y - bevelTop.y) * PortraitPlaqueHeight.value / 2
+    val halfWidth = GothicPortraitWidth.value / 2 - corner.x + run
+    return DpSize((halfWidth * 2).dp, PortraitPlaqueHeight)
+}
 
 /**
  * The overview's portrait (owner's choices from boards, 2026-10-07: V2, the plaque): the frame is the experience
@@ -124,12 +140,13 @@ internal fun GothicPortraitFrame(
                 val path = ringPath(ring)
                 // Where the ring leaves the plaque and comes back to it.
                 val bottom = ring.first().y
+                val plaqueSize = portraitPlaqueSize(look)
                 val plaqueArea = if (plaque != null) {
                     Rect(
-                        left = (size.width - PortraitPlaqueSize.width.toPx()) / 2,
-                        top = bottom - PortraitPlaqueSize.height.toPx() / 2,
-                        right = (size.width + PortraitPlaqueSize.width.toPx()) / 2,
-                        bottom = bottom + PortraitPlaqueSize.height.toPx() / 2
+                        left = (size.width - plaqueSize.width.toPx()) / 2,
+                        top = bottom - plaqueSize.height.toPx() / 2,
+                        right = (size.width + plaqueSize.width.toPx()) / 2,
+                        bottom = bottom + plaqueSize.height.toPx() / 2
                     )
                 } else {
                     null
@@ -142,14 +159,22 @@ internal fun GothicPortraitFrame(
                     while (start < length && plaqueArea.contains(measure.getPosition(start))) start += 1f
                     while (end > start && plaqueArea.contains(measure.getPosition(end))) end -= 1f
                 }
-                val trackPath = Path().also { measure.getSegment(start, end, it, true) }
-                val filled = Path().also { measure.getSegment(start, start + (end - start) * progress.coerceIn(0f, 1f), it, true) }
+                // The ends reach into the plaque and its outline cuts them: the ring meets its corners squarely,
+                // not with an end cut across the bevel.
+                val reach = if (plaqueArea != null) ringWidth * 2 else 0f
+                val trackPath = Path().also { measure.getSegment(start - reach, end + reach, it, true) }
+                val filled = Path().also {
+                    measure.getSegment(start - reach, start + (end - start) * progress.coerceIn(0f, 1f), it, true)
+                }
                 val inner = if (drawn) ringPath(inset(ring, 5.dp.toPx())) else null
                 val stroke = Stroke(ringWidth, cap = StrokeCap.Butt, join = StrokeJoin.Miter)
                 onDrawBehind {
                     inner?.let { drawPath(it, hairline, style = Stroke(.75.dp.toPx())) }
-                    drawPath(trackPath, track, style = stroke)
-                    if (progress > 0f) drawPath(filled, progressColor, style = stroke)
+                    val area = plaqueArea ?: Rect.Zero
+                    clipRect(area.left, area.top, area.right, area.bottom, ClipOp.Difference) {
+                        drawPath(trackPath, track, style = stroke)
+                        if (progress > 0f) drawPath(filled, progressColor, style = stroke)
+                    }
                 }
             }
         )
@@ -157,8 +182,8 @@ internal fun GothicPortraitFrame(
             Box(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
-                    .offset(y = portraitPlaqueCenterY(look) - PortraitPlaqueSize.height / 2)
-                    .size(PortraitPlaqueSize),
+                    .offset(y = portraitPlaqueCenterY(look) - PortraitPlaqueHeight / 2)
+                    .size(portraitPlaqueSize(look)),
                 contentAlignment = Alignment.Center
             ) { plaque() }
         }

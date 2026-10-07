@@ -1761,7 +1761,7 @@ private val PortraitHpGap = 22.dp
  * [PortraitRaise] higher; the plaque hangs from the frame's bottom edge, an engraving's spike lower still.
  */
 private fun portraitBlockSlack(look: com.dndcharacterhandler.presentation.theme.ThemeLook): Dp {
-    val plaqueBottom = portraitPlaqueCenterY(look) + PortraitPlaqueSize.height / 2
+    val plaqueBottom = portraitPlaqueCenterY(look) + PortraitPlaqueHeight / 2
     // Classic's drawn octagon ends above its box; an engraving's artwork fills it down to its spike's tip.
     val ornamentBottom = if (look.portraitArtwork == null) 0.dp else GothicPortraitHeight
     // The list's 10dp between items counts too.
@@ -1770,7 +1770,8 @@ private fun portraitBlockSlack(look: com.dndcharacterhandler.presentation.theme.
 
 /**
  * The level's plaque in the portrait frame's bottom edge (owner's choice, 2026-10-07): "Уровень 1" and the
- * experience under it — a stat's outline, its corners cut as the frame's. When the experience allows a level up,
+ * experience under it — a stat's outline; its top corners square, where the ring runs into them, its bottom ones
+ * cut as the frame's. When the experience allows a level up,
  * it turns gold and says "Level UP". A tap adds experience ([onExperience]), or opens the level up when one is
  * due ([onLevelUp]); a long press opens the experience then too, to put a slip right.
  */
@@ -1793,7 +1794,16 @@ private fun LevelPlaque(
         contentAlignment = Alignment.Center
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
-            val outline = chamferedBar(0f, 0f, size.width, size.height, PlaqueChamfer.toPx())
+            val cut = PlaqueChamfer.toPx()
+            val outline = Path().apply {
+                moveTo(0f, 0f)
+                lineTo(size.width, 0f)
+                lineTo(size.width, size.height - cut)
+                lineTo(size.width - cut, size.height)
+                lineTo(cut, size.height)
+                lineTo(0f, size.height - cut)
+                close()
+            }
             drawPath(outline, colors.surface.card)
             drawPath(outline, mark, style = Stroke(1.dp.toPx()))
         }
@@ -2133,22 +2143,6 @@ private fun HpChange(before: HpPreview, after: HpPreview) {
             )
         }
     }
-}
-
-/** A bar's outline from ([left], [top]), [width] × [height], its corners cut by [cut]. */
-private fun chamferedBar(left: Float, top: Float, width: Float, height: Float, cut: Float): Path = Path().apply {
-    val c = minOf(cut, height / 2, width / 2)
-    val right = left + width
-    val bottom = top + height
-    moveTo(left + c, top)
-    lineTo(right - c, top)
-    lineTo(right, top + c)
-    lineTo(right, bottom - c)
-    lineTo(right - c, bottom)
-    lineTo(left + c, bottom)
-    lineTo(left, bottom - c)
-    lineTo(left, top + c)
-    close()
 }
 
 /**
