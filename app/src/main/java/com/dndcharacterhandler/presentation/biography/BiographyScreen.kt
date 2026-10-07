@@ -39,6 +39,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import com.dndcharacterhandler.presentation.components.FloatingAddButton
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -227,12 +230,16 @@ internal fun BiographyContent(
     }
     val resolvedCharacter = character
     val resolvedBundle = characterBundle
+    val focusManager = LocalFocusManager.current
     ScreenBackground {
         Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .fadeUnderHeader(),
+                .fadeUnderHeader()
+                // A tap that nothing else takes — off the texts, the buttons and the cells — ends the typing, and
+                // what was typed is saved as the field is left (owner's wish, 2026-10-07).
+                .pointerInput(Unit) { detectTapGestures(onTap = { focusManager.clearFocus() }) },
             contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = CharacterHeaderInset, bottom = LocalFloatingButtonsInset.current),
             verticalArrangement = Arrangement.spacedBy(0.dp)
         ) {
