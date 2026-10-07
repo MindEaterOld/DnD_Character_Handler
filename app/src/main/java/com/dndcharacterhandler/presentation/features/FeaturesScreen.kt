@@ -102,6 +102,7 @@ import com.dndcharacterhandler.presentation.components.PinnedCharacterHeader
 import com.dndcharacterhandler.presentation.components.fadeUnderHeader
 import com.dndcharacterhandler.presentation.components.ExpandableCard
 import com.dndcharacterhandler.presentation.components.FloatingAddButton
+import com.dndcharacterhandler.presentation.components.FloatingAddButtonBottom
 import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
 import com.dndcharacterhandler.presentation.components.ScreenBackground
 import com.dndcharacterhandler.presentation.components.ScreenTopActions
@@ -367,7 +368,7 @@ internal fun FeaturesContent(
                 onClick = { isAddEntryDialogOpen = true },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(end = 24.dp, bottom = 15.dp)
+                    .padding(end = 24.dp, bottom = FloatingAddButtonBottom)
             )
         }
     }

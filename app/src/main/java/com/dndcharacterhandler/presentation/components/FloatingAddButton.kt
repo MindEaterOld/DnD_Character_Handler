@@ -25,6 +25,12 @@ val FloatingActionButtonSize = 58.dp
 /** Bottom content padding that lets a list scroll clear of one floating button. */
 val SingleFloatingButtonInset = 110.dp
 
+/**
+ * From the screens' area's foot to the floating "+": the area reaches [TabBarGap] down under the tab bar's air, the
+ * button stands 15dp over the bar's plate.
+ */
+val FloatingAddButtonBottom = 15.dp + TabBarGap
+
 /** Bottom content padding of a screen without a floating button. */
 val NoFloatingButtonInset = 16.dp
 

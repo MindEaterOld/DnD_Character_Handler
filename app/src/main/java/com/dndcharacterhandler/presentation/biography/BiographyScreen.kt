@@ -43,6 +43,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import com.dndcharacterhandler.presentation.components.FloatingAddButton
+import com.dndcharacterhandler.presentation.components.FloatingAddButtonBottom
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.input.pointer.pointerInput
@@ -309,7 +310,7 @@ internal fun BiographyContent(
                 },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(end = 24.dp, bottom = 15.dp)
+                    .padding(end = 24.dp, bottom = FloatingAddButtonBottom)
             )
         }
         }

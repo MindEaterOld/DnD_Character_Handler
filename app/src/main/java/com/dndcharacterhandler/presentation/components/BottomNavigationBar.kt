@@ -31,6 +31,12 @@ import com.dndcharacterhandler.presentation.theme.FrameStyle
 import com.dndcharacterhandler.presentation.theme.LocalThemeLook
 
 /**
+ * The air round the tab bar's plate, over it and under it. The screens' area reaches down into the air over it, so a
+ * list dissolves right onto the plate's top edge (owner's wish, 2026-10-08).
+ */
+val TabBarGap = 8.dp
+
+/**
  * The tab bar: an outline over the screen's own background, with no fill of its own; with etched frames,
  * a plate of the card colour, the picked tab framed like the portrait's crest.
  */
@@ -46,7 +52,7 @@ fun BottomNavigationBar(
         modifier = Modifier
             .fillMaxWidth()
             .navigationBarsPadding()
-            .padding(horizontal = 14.dp, vertical = 8.dp)
+            .padding(horizontal = 14.dp, vertical = TabBarGap)
             .height(62.dp),
         shape = RoundedCornerShape(if (etched) 12.dp else 26.dp),
         color = if (etched) colors.surface.card.copy(alpha = 0.94f) else Color.Transparent,

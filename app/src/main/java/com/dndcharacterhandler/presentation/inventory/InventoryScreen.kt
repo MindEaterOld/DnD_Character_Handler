@@ -107,6 +107,7 @@ import com.dndcharacterhandler.presentation.components.CardActionButton
 import com.dndcharacterhandler.presentation.components.CardEditButton
 import com.dndcharacterhandler.presentation.components.EditDialog
 import com.dndcharacterhandler.presentation.components.FloatingAddButton
+import com.dndcharacterhandler.presentation.components.FloatingAddButtonBottom
 import com.dndcharacterhandler.presentation.components.LimitProgressBar
 import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
 import com.dndcharacterhandler.presentation.components.ScreenBackground
@@ -541,7 +542,7 @@ internal fun InventoryContent(
                 onClick = onAddItem,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(end = 24.dp, bottom = 15.dp)
+                    .padding(end = 24.dp, bottom = FloatingAddButtonBottom)
             )
         }
     }
