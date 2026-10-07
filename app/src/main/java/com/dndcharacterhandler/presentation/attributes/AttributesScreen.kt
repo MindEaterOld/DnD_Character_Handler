@@ -8,6 +8,7 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
+import com.dndcharacterhandler.presentation.biography.BiographyLabel
 import com.dndcharacterhandler.presentation.components.OutlinedPanel
 import com.dndcharacterhandler.presentation.components.StepButton
 import com.dndcharacterhandler.presentation.components.ToggleChip
@@ -550,8 +551,9 @@ internal fun attributesSectionItems(
 
         item {
             AttributesSectionTitle(title = text("attributes_proficiencies"))
-            // One frame, a row a field (owner's choice from boards, 2026-10-05); a tap on a row edits it.
-            OutlinedPanel(modifier = Modifier.fillMaxWidth()) {
+            // One frame, a field under another, drawn as the biography's (owner's wishes, 2026-10-05, 2026-10-08); a tap
+            // on a field edits it.
+            SheetPanel {
                 SheetRow(
                     icon = ProficiencyIconArmor,
                     label = text("attributes_proficiency_armor"),
@@ -607,7 +609,6 @@ internal fun attributesSectionItems(
                     icon = ProficiencyIconMasteries,
                     label = text("attributes_proficiency_masteries_short"),
                     values = decodeProficiencyIds(character.weaponMasteries).map { weaponName(it, characterCatalog, strings) }.sorted(),
-                    divider = false,
                     onClick = {
                         masteryDraft = decodeProficiencyIds(character.weaponMasteries)
                         isMasteryDialogOpen = true
@@ -620,7 +621,7 @@ internal fun attributesSectionItems(
             // Resistances, immunities, vulnerabilities: what Character Wizard grants, and edits by hand.
             AttributesSectionTitle(title = text("attributes_defenses"))
             val defenses = decodeProficiencyIds(character.defenses)
-            OutlinedPanel(modifier = Modifier.fillMaxWidth()) {
+            SheetPanel {
                 listOf(
                     Triple(Defenses.RESISTANCE, DefenseIconResistance, "attributes_defense_resistances_short"),
                     Triple(Defenses.IMMUNITY, DefenseIconImmunity, "attributes_defense_immunities_short"),
@@ -630,7 +631,6 @@ internal fun attributesSectionItems(
                         icon = icon,
                         label = text(labelKey),
                         values = defenseLabels(defenses, kind, characterCatalog, strings),
-                        divider = kind != Defenses.VULNERABILITY,
                         onClick = {
                             defenseDraft = defenses
                             editingDefenseKind = kind
@@ -1443,63 +1443,50 @@ private fun SkillLine(skill: SkillRow, effects: RollEffects?, modifier: Modifier
     }
 }
 
-/** A sheet row's icon and name; the value takes the rest. 22 + 8 + 110dp: 13 characters at 14sp (maxChars). */
-private val SheetLabelWidth = 140.dp
-
 /**
- * A row of the sheet's panels (owner's choice from boards, 2026-10-05): the field's icon and name on the left,
- * its values on the right, «None» quiet; a tap edits it. A line under it unless it is the panel's last.
+ * A field of the sheet's panels, drawn as the biography's (owner's wish, 2026-10-08): its icon in gold at the middle
+ * of the name and the first line, the name in gold spaced capitals over its values, «None» quiet; the space parts
+ * the fields, no rules. A tap edits it.
  */
 @Composable
 private fun SheetRow(
     icon: ImageVector,
     label: String,
     values: List<String>,
-    onClick: () -> Unit,
-    divider: Boolean = true
+    onClick: () -> Unit
 ) {
     val colors = LocalDesignTokens.current.colors
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
             .clickable(onClick = onClick)
-            .heightIn(min = 48.dp)
-            .padding(horizontal = 14.dp, vertical = 12.dp)
+            .padding(vertical = 8.dp)
     ) {
-        // The name sits on the value's first line: their baselines meet.
-        Row(
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
             modifier = Modifier
-                .width(SheetLabelWidth)
-                .alignByBaseline(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(22.dp), tint = colors.text.label)
+                .padding(top = 8.dp)
+                .size(24.dp),
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Column(modifier = Modifier.padding(start = 12.dp)) {
+            BiographyLabel(label)
             Text(
-                text = label,
-                modifier = Modifier.padding(start = 8.dp),
-                style = MaterialTheme.typography.bodyMedium,
-                color = colors.text.label,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                text = values.joinToString(", ").ifEmpty { LocalStrings.current["common_none"] },
+                style = MaterialTheme.typography.bodyLarge,
+                color = if (values.isEmpty()) colors.text.subtle else colors.text.primary
             )
         }
-        Text(
-            text = values.joinToString(", ").ifEmpty { LocalStrings.current["common_none"] },
-            modifier = Modifier
-                .weight(1f)
-                .alignByBaseline(),
-            style = MaterialTheme.typography.bodyLarge,
-            color = if (values.isEmpty()) colors.text.subtle else colors.text.primary
-        )
     }
-    if (divider) {
-        Box(
-            modifier = Modifier
-                .padding(horizontal = 14.dp)
-                .fillMaxWidth()
-                .height(1.dp)
-                .background(colors.border.muted)
-        )
+}
+
+/** The fields of a sheet's panel, in its frame: the biography's air round them. */
+@Composable
+private fun SheetPanel(content: @Composable () -> Unit) {
+    OutlinedPanel(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)) { content() }
     }
 }
 
