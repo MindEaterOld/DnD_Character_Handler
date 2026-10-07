@@ -134,7 +134,7 @@ private class PlaqueShape(private val cut: DpSize) : Shape {
  * The overview's portrait (owner's choices from boards, 2026-10-07: V2, the plaque): the frame is the experience
  * bar. A ring round the portrait fills with [progress] from the left side of the plaque in the bottom edge, round
  * the frame, back into its right side; [plaque] (the level and the experience) sits in that edge. Classic draws
- * its octagon — the ring on its line and a hairline inside; an engraving keeps its white artwork, tinted with the
+ * its octagon — the ring alone on its line, the portrait filling it; an engraving keeps its white artwork, tinted with the
  * palette, and the ring runs inside its opening. The plaque is a stat's outline, lit as the ring's fill when
  * [plaqueLit] (a level up is due).
  */
@@ -155,17 +155,18 @@ internal fun GothicPortraitFrame(
     // Classic's portrait reaches the ring's inner edge; an engraving's fills its opening.
     val opening = remember(polygon, drawn) { PolygonShape(polygon, if (drawn) PortraitRingWidth / 2 else 0.dp) }
     val track = if (drawn) colors.border.miniCard else colors.progress.xpTrack
-    val hairline = colors.ornament.middle
     val plaqueMark = if (plaqueLit) progressColor else colors.border.miniCard
     Box(modifier = modifier.size(GothicPortraitWidth, GothicPortraitHeight)) {
         Box(
             modifier = Modifier.fillMaxSize().clip(opening)
                 .background(colors.surface.portrait).clickable(onClick = onClick)
         ) {
-            // Crop/framing operates on the portrait opening, not on the roof and transparent margins.
+            // Crop/framing operates on the opening's own box, not on the roof and transparent margins: the
+            // picture covers the whole octagon, corner to corner.
+            val box = remember(polygon) { openingBox(polygon) }
             Box(
-                modifier = Modifier.offset(x = GothicPortraitWidth * .165f, y = GothicPortraitHeight * .202f)
-                    .size(GothicPortraitWidth * .67f, GothicPortraitHeight * .691f),
+                modifier = Modifier.offset(x = GothicPortraitWidth * box.left, y = GothicPortraitHeight * box.top)
+                    .size(GothicPortraitWidth * box.width, GothicPortraitHeight * box.height),
                 content = portrait
             )
         }
@@ -218,10 +219,8 @@ internal fun GothicPortraitFrame(
                         addPath((outline as Outline.Generic).path, area.topLeft)
                     }
                 }
-                val inner = if (drawn) ringPath(inset(ring, 5.dp.toPx())) else null
                 val stroke = Stroke(ringWidth, cap = StrokeCap.Butt, join = StrokeJoin.Miter)
                 onDrawBehind {
-                    inner?.let { drawPath(it, hairline, style = Stroke(.75.dp.toPx())) }
                     if (plaqueOutline != null) {
                         clipPath(plaqueOutline, ClipOp.Difference) {
                             drawPath(trackPath, track, style = stroke)
@@ -259,6 +258,14 @@ private class PolygonShape(private val fractions: List<Offset>, private val inse
         })
     }
 }
+
+/** The box round an opening given as fractions of the frame: where the portrait's picture is laid. */
+private fun openingBox(fractions: List<Offset>): Rect = Rect(
+    left = fractions.minOf { it.x },
+    top = fractions.minOf { it.y },
+    right = fractions.maxOf { it.x },
+    bottom = fractions.maxOf { it.y }
+)
 
 /** [fractions] of a frame of [size], in px. */
 private fun scaled(fractions: List<Offset>, size: Size): List<Offset> =
