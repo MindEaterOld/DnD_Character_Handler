@@ -78,7 +78,7 @@ What can be pressed as an action and what shows a value must look different at a
 
 ## Skills — what is trained is gold (owner's choice from boards, 2026-10-08: N4)
 
-- A skill the character is trained in is gold `primary` on its line: the dot, the name and the bonus; expertise is the gold dot in a gold ring; a jack of all trades' half training is a faint gold dot (40 %) in the plain ring; an untrained skill has the plain ring, its name `text.muted`, its bonus `text.primary`. A bonus the conditions moved keeps `changedValueColor`. The groups' labels (СИЛ, ЛОВ…) stay as the ability cards' titles. Tried and turned down: gold labels, gold dots alone.
+- A skill the character is trained in is gold `primary` on its line: the dot, the name and the bonus; expertise is the gold dot in a gold ring; a jack of all trades' half training is the gold ring half filled — its left half (J1, 2026-10-08), the name and bonus as untrained; an untrained skill has the plain ring, its name `text.muted`, its bonus `text.primary`. A bonus the conditions moved keeps `changedValueColor`. The groups' labels (СИЛ, ЛОВ…) stay as the ability cards' titles. Tried and turned down: gold labels, gold dots alone.
 
 ## Conditions — how the sheet shows them (owner's choices, 2026-10-03)
 

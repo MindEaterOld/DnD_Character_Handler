@@ -65,6 +65,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -1391,7 +1392,8 @@ private fun SkillGroupCard(
 /**
  * A skill's line: the training dot, the name, the roll's marker and the bonus as it is now. What the character is
  * trained in is gold (owner's choice from boards, 2026-10-08: N4): the dot, the name and the bonus; expertise is the
- * gold dot in a gold ring, a jack of all trades' half training a faint gold dot in the plain ring.
+ * gold dot in a gold ring; a jack of all trades' half training is the gold ring half filled (J1), its name and bonus
+ * as an untrained skill's.
  */
 @Composable
 private fun SkillLine(skill: SkillRow, effects: RollEffects?, modifier: Modifier = Modifier) {
@@ -1414,8 +1416,16 @@ private fun SkillLine(skill: SkillRow, effects: RollEffects?, modifier: Modifier
                 }
                 skill.proficient -> drawCircle(gold, radius = 5.dp.toPx())
                 skill.jackOfAllTrades -> {
-                    drawCircle(gold.copy(alpha = 0.4f), radius = 5.dp.toPx())
-                    drawCircle(colors.text.label, radius = 5.dp.toPx(), style = ring)
+                    val radius = 5.dp.toPx()
+                    drawArc(
+                        gold,
+                        startAngle = 90f,
+                        sweepAngle = 180f,
+                        useCenter = true,
+                        topLeft = Offset(center.x - radius, center.y - radius),
+                        size = Size(radius * 2, radius * 2)
+                    )
+                    drawCircle(gold, radius = radius, style = ring)
                 }
                 else -> drawCircle(colors.text.label, radius = 5.dp.toPx(), style = ring)
             }
