@@ -131,29 +131,16 @@ private class PlaqueShape(private val cut: DpSize) : Shape {
  * bar. A ring round the portrait fills with [progress] from the left side of the plaque in the bottom edge, round
  * the frame, back into its right side; [plaque] (the level and the experience) sits in that edge. Classic draws
  * its octagon — the ring on its line and a hairline inside; an engraving keeps its white artwork, tinted with the
- * palette, and the ring runs inside its opening.
+ * palette, and the ring runs inside its opening. The plaque is a stat's outline, lit as the ring's fill when
+ * [plaqueLit] (a level up is due).
  */
-/** How the ring's empty part is drawn: being chosen from a board (2026-10-07). */
-internal enum class PortraitTrack {
-    /** The track as solid as a stat's outline. */
-    SOLID,
-
-    /** Fainter: an empty groove the light fills. */
-    DIM,
-
-    /** A dark channel between two thin edges, the light filling it. */
-    GROOVE
-}
-
 @Composable
 internal fun GothicPortraitFrame(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     progress: Float = 0f,
     progressColor: Color = LocalDesignTokens.current.colors.progress.xpFill,
-    /** The plaque's outline lit as the ring's fill: a level up is due. */
     plaqueLit: Boolean = false,
-    trackStyle: PortraitTrack = PortraitTrack.SOLID,
     plaque: (@Composable () -> Unit)? = null,
     portrait: @Composable BoxScope.() -> Unit
 ) {
@@ -163,11 +150,9 @@ internal fun GothicPortraitFrame(
     val polygon = ringPolygon(look)
     // Classic's portrait reaches the ring's inner edge; an engraving's fills its opening.
     val opening = remember(polygon, drawn) { PolygonShape(polygon, if (drawn) PortraitRingWidth / 2 else 0.dp) }
-    val track = when (trackStyle) {
-        PortraitTrack.DIM -> colors.ornament.outer
-        else -> if (drawn) colors.border.miniCard else colors.progress.xpTrack
-    }
-    val channel = colors.surface.card
+    val track = if (drawn) colors.border.miniCard else colors.progress.xpTrack
+    val hairline = colors.ornament.middle
+    val plaqueMark = if (plaqueLit) progressColor else colors.border.miniCard
     Box(modifier = modifier.size(GothicPortraitWidth, GothicPortraitHeight)) {
         Box(
             modifier = Modifier.fillMaxSize().clip(opening)
@@ -229,28 +214,19 @@ internal fun GothicPortraitFrame(
                         addPath((outline as Outline.Generic).path, area.topLeft)
                     }
                 }
+                val inner = if (drawn) ringPath(inset(ring, 5.dp.toPx())) else null
                 val stroke = Stroke(ringWidth, cap = StrokeCap.Butt, join = StrokeJoin.Miter)
-                val edges = Stroke(ringWidth + 2.dp.toPx(), cap = StrokeCap.Butt, join = StrokeJoin.Miter)
-                val groove = trackStyle == PortraitTrack.GROOVE
                 onDrawBehind {
-                    fun empty(of: Path) {
-                        if (groove) {
-                            drawPath(of, track, style = edges)
-                            drawPath(of, channel, style = stroke)
-                        } else {
-                            drawPath(of, track, style = stroke)
-                        }
-                    }
+                    inner?.let { drawPath(it, hairline, style = Stroke(.75.dp.toPx())) }
                     if (plaqueOutline != null) {
                         clipPath(plaqueOutline, ClipOp.Difference) {
-                            empty(trackPath)
+                            drawPath(trackPath, track, style = stroke)
                             if (progress > 0f) drawPath(filled, progressColor, style = stroke)
                         }
-                        // The plaque, outlined as the ring's track: the ring runs on into its outline.
                         drawPath(plaqueOutline, colors.surface.card)
-                        if (plaqueLit) drawPath(plaqueOutline, progressColor, style = stroke) else empty(plaqueOutline)
+                        drawPath(plaqueOutline, plaqueMark, style = Stroke(1.dp.toPx()))
                     } else {
-                        empty(trackPath)
+                        drawPath(trackPath, track, style = stroke)
                         if (progress > 0f) drawPath(filled, progressColor, style = stroke)
                     }
                 }

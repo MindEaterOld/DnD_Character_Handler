@@ -86,8 +86,6 @@ import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.HealthAndSafety
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.dndcharacterhandler.presentation.components.InspirationCandle
-import com.dndcharacterhandler.presentation.components.InspirationCandleSize
 import androidx.compose.material.icons.automirrored.outlined.DirectionsRun
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.Visibility
@@ -115,7 +113,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
@@ -992,19 +989,14 @@ private fun OverviewContent(
                                     contentDescription = text("overview_long_rest"),
                                     onClick = { isLongRestDialogOpen = true }
                                 )
+                                // Inspiration: a coin like the rests', lit in gold while it is on.
+                                PortraitSideButton(
+                                    icon = SideIconInspiration,
+                                    contentDescription = text("overview_inspiration"),
+                                    onClick = { if (characterBundle != null) onToggleInspiration(characterBundle) },
+                                    on = character?.hasInspiration ?: false
+                                )
                             }
-                            // Inspiration: the candle stands on the portrait's lower-right bevel.
-                            InspirationCandle(
-                                inspired = character?.hasInspiration ?: false,
-                                onToggle = { if (characterBundle != null) onToggleInspiration(characterBundle) },
-                                contentDescription = text("overview_inspiration"),
-                                modifier = Modifier
-                                    .align(Alignment.TopCenter)
-                                    .offset(
-                                        x = GothicPortraitWidth * .30f,
-                                        y = GothicPortraitHeight * .80f - InspirationCandleSize / 2 - PortraitRaise
-                                    )
-                            )
                         }
                     }
                 }
