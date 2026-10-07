@@ -61,8 +61,8 @@ private val GothicOpening = listOf(
 /** The experience's ring: as thick as the classic frame's line. */
 private val PortraitRingWidth = 4.dp
 
-/** The level's plaque in the frame's bottom edge (owner's choice, 2026-10-07): as tall as two lines of text. */
-internal val PortraitPlaqueHeight = 46.dp
+/** The level's plaque in the frame's bottom edge (owner's choice, 2026-10-07): as low as its two lines allow. */
+internal val PortraitPlaqueHeight = 40.dp
 
 /** The polygon the ring follows: Classic's drawn octagon; in an engraving, its opening, the ring inside it. */
 private fun ringPolygon(look: ThemeLook): List<Offset> = if (look.portraitArtwork == null) ClassicOctagon else GothicOpening
@@ -73,9 +73,6 @@ private fun ringInset(look: ThemeLook): Dp = if (look.portraitArtwork == null) 0
 /** The plaque's centre from the frame's top: on the ring's bottom edge. */
 internal fun portraitPlaqueCenterY(look: ThemeLook): Dp =
     GothicPortraitHeight * ringPolygon(look).first().y - ringInset(look)
-
-/** How far the plaque's bottom corners are cut, as the frame's. */
-private val PlaqueBottomCut = 6.dp
 
 /** The ring's lower-left bevel, in dp: its foot (the bottom edge's left end) and its direction down to that foot. */
 private fun lowerBevel(look: ThemeLook): Pair<Offset, Offset> {
@@ -108,23 +105,22 @@ internal fun portraitPlaqueSize(look: ThemeLook): DpSize {
     return DpSize(((GothicPortraitWidth.value / 2 - left) * 2).dp, PortraitPlaqueHeight)
 }
 
-/** The plaque's outline: its top corners cut by the ring's end ([plaqueTopCut]), its bottom ones as the frame's. */
-internal fun portraitPlaqueShape(look: ThemeLook): Shape = PlaqueShape(plaqueTopCut(look), PlaqueBottomCut)
+/** The plaque's outline: every corner cut as the top ones are, by the ring's end ([plaqueTopCut]); the bottom mirrors it. */
+internal fun portraitPlaqueShape(look: ThemeLook): Shape = PlaqueShape(plaqueTopCut(look))
 
-private class PlaqueShape(private val top: DpSize, private val bottom: Dp) : Shape {
+private class PlaqueShape(private val cut: DpSize) : Shape {
     override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density): Outline = with(density) {
-        val topX = top.width.toPx()
-        val topY = top.height.toPx()
-        val cut = bottom.toPx()
+        val x = cut.width.toPx()
+        val y = cut.height.toPx()
         Outline.Generic(Path().apply {
-            moveTo(topX, 0f)
-            lineTo(size.width - topX, 0f)
-            lineTo(size.width, topY)
-            lineTo(size.width, size.height - cut)
-            lineTo(size.width - cut, size.height)
-            lineTo(cut, size.height)
-            lineTo(0f, size.height - cut)
-            lineTo(0f, topY)
+            moveTo(x, 0f)
+            lineTo(size.width - x, 0f)
+            lineTo(size.width, y)
+            lineTo(size.width, size.height - y)
+            lineTo(size.width - x, size.height)
+            lineTo(x, size.height)
+            lineTo(0f, size.height - y)
+            lineTo(0f, y)
             close()
         })
     }

@@ -122,6 +122,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.input.KeyboardType
@@ -1771,8 +1772,8 @@ private fun portraitBlockSlack(look: com.dndcharacterhandler.presentation.theme.
 
 /**
  * The level's plaque in the portrait frame's bottom edge (owner's choice, 2026-10-07): "Уровень 1" and the
- * experience under it — a stat's outline ([portraitPlaqueShape]): its top corners cut by the ring's own end, its
- * bottom ones as the frame's. When the experience allows a level up,
+ * experience under it — a stat's outline ([portraitPlaqueShape]): its corners cut by the ring's own end, the bottom
+ * ones mirroring the top; the lines trimmed of their leading, to keep it low. When the experience allows a level up,
  * it turns gold and says "Level UP". A tap adds experience ([onExperience]), or opens the level up when one is
  * due ([onLevelUp]); a long press opens the experience then too, to put a slip right.
  */
@@ -1800,16 +1801,17 @@ private fun LevelPlaque(
             drawOutline(outline, colors.surface.card)
             drawOutline(outline, mark, style = Stroke(1.dp.toPx()))
         }
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        val tight = LineHeightStyle(alignment = LineHeightStyle.Alignment.Center, trim = LineHeightStyle.Trim.Both)
+        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(
                 text = levelLabel,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleMedium.copy(lineHeightStyle = tight),
                 color = if (canLevelUp) colors.accent.inspiration else colors.text.primary,
                 maxLines = 1
             )
             Text(
                 text = if (canLevelUp) text("levelup_badge") else experience,
-                style = MaterialTheme.typography.labelMedium,
+                style = MaterialTheme.typography.labelMedium.copy(lineHeightStyle = tight),
                 color = if (canLevelUp) colors.accent.inspiration else colors.text.label,
                 maxLines = 1
             )
