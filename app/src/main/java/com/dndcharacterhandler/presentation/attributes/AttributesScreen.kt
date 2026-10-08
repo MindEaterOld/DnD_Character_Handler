@@ -10,6 +10,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
 import com.dndcharacterhandler.presentation.biography.BiographyLabel
 import com.dndcharacterhandler.presentation.components.OutlinedPanel
+import androidx.compose.foundation.layout.RowScope
+import com.dndcharacterhandler.presentation.components.PanelStat
 import com.dndcharacterhandler.presentation.components.StepButton
 import com.dndcharacterhandler.presentation.components.ToggleChip
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -361,14 +363,15 @@ private fun AbilityType.toSpellcastingAbility(): SpellcastingAbility =
 @Composable
 fun AttributesSection(
     viewModel: AttributesViewModel,
-    content: @Composable (items: LazyListScope.() -> Unit) -> Unit
+    /** [senses]: the proficiency bonus and the senses, for the overview's stats frame; null until the character loads. */
+    content: @Composable (items: LazyListScope.() -> Unit, senses: (@Composable RowScope.() -> Unit)?) -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val darkvisionCatalog by viewModel.darkvisionCatalog.collectAsStateWithLifecycle()
     val characterCatalog by viewModel.characterCatalog.collectAsStateWithLifecycle()
     val bundle = state.character
-    val items = if (bundle == null) {
-        NoItems
+    val parts = if (bundle == null) {
+        null
     } else {
         attributesSectionItems(
             characterBundle = bundle,
@@ -389,8 +392,14 @@ fun AttributesSection(
             onDeleteFeature = viewModel::deleteFeature
         )
     }
-    content(items)
+    content(parts?.items ?: NoItems, parts?.senses)
 }
+
+/** The attributes' part of the overview: the list's items, and the senses for the stats frame above them. */
+internal class AttributesSectionParts(
+    val items: LazyListScope.() -> Unit,
+    val senses: @Composable RowScope.() -> Unit
+)
 
 private val NoItems: LazyListScope.() -> Unit = {}
 
@@ -417,7 +426,7 @@ internal fun attributesSectionItems(
     onUpdateDarkvisionManualFeet: (CharacterBundle, Int) -> Unit = { _, _ -> },
     onUpsertFeature: (CharacterBundle, Feature) -> Unit = { _, _ -> },
     onDeleteFeature: (CharacterBundle, Feature) -> Unit = { _, _ -> }
-): LazyListScope.() -> Unit {
+): AttributesSectionParts {
     val character = characterBundle.character
     val strings = LocalStrings.current
     val abilityScores = remember(character) { buildAbilityScores(character) }
@@ -485,36 +494,30 @@ internal fun attributesSectionItems(
         mutableStateOf(character.darkvisionManualFeet.takeIf { it > 0 }?.toString().orEmpty())
     }
 
+    // The proficiency bonus and the senses: looked up now and then, under the fight's three in the overview's stats
+    // frame (owner's choices from boards, 2026-10-06: S4; 2026-10-08: U2). Their pop-ups are this section's.
+    val proficiencyLabel = text("stat_card_proficiency")
+    val passiveLabel = text("stat_card_passive_perception")
+    val darkvisionLabel = text("stat_card_darkvision")
+    val senses: @Composable RowScope.() -> Unit = {
+        PanelStat(label = proficiencyLabel, value = signed(proficiencyBonus), icon = Icons.Outlined.AutoAwesome, compact = true)
+        PanelStat(
+            label = passiveLabel,
+            value = passivePerception.toString(),
+            icon = Icons.Outlined.Visibility,
+            compact = true,
+            onClick = { isPassiveDialogOpen = true }
+        )
+        PanelStat(
+            label = darkvisionLabel,
+            value = darkvisionValue,
+            icon = Icons.Outlined.DarkMode,
+            compact = true,
+            onClick = { isDarkvisionDialogOpen = true }
+        )
+    }
+
     val items: LazyListScope.() -> Unit = {
-        item {
-            // The proficiency bonus and the senses: looked up now and then, so three compact cards under
-            // the fight's three (owner's choice from boards, 2026-10-06: S4).
-            StatCardRow {
-                MiniStatCard(
-                    label = text("stat_card_proficiency"),
-                    value = signed(proficiencyBonus),
-                    modifier = Modifier.weight(1f),
-                    icon = { MiniStatCardIcon(Icons.Outlined.AutoAwesome, MiniStatCardCompactIconSize) },
-                    compact = true
-                )
-                MiniStatCard(
-                    label = text("stat_card_passive_perception"),
-                    value = passivePerception.toString(),
-                    modifier = Modifier.weight(1f),
-                    icon = { MiniStatCardIcon(Icons.Outlined.Visibility, MiniStatCardCompactIconSize) },
-                    onClick = { isPassiveDialogOpen = true },
-                    compact = true
-                )
-                MiniStatCard(
-                    label = text("stat_card_darkvision"),
-                    value = darkvisionValue,
-                    modifier = Modifier.weight(1f),
-                    icon = { MiniStatCardIcon(Icons.Outlined.DarkMode, MiniStatCardCompactIconSize) },
-                    onClick = { isDarkvisionDialogOpen = true },
-                    compact = true
-                )
-            }
-        }
 
         item {
             AttributesSectionTitle(title = text("attributes_ability_scores"))
@@ -1117,7 +1120,7 @@ internal fun attributesSectionItems(
             )
         }
     }
-    return items
+    return AttributesSectionParts(items = items, senses = senses)
 }
 
 @Composable

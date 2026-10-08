@@ -201,6 +201,11 @@ import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
 import com.dndcharacterhandler.presentation.components.OverlayCloseButton
 import com.dndcharacterhandler.presentation.levelup.LevelUpWizard
 import com.dndcharacterhandler.presentation.components.ScreenBackground
+import com.dndcharacterhandler.presentation.components.PanelStat
+import com.dndcharacterhandler.presentation.components.PanelStatLabelGap
+import com.dndcharacterhandler.presentation.components.PanelStatTop
+import com.dndcharacterhandler.presentation.components.SheetLabel
+import com.dndcharacterhandler.presentation.components.StatsPanel
 import com.dndcharacterhandler.presentation.components.CharacterHeaderFadeEnd
 import com.dndcharacterhandler.presentation.components.CharacterHeaderInset
 import com.dndcharacterhandler.presentation.components.PinnedCharacterHeader
@@ -681,11 +686,12 @@ fun OverviewScreen(
         state.character?.let(viewModel::syncAutomaticArmorClass)
     }
     val catalog by viewModel.catalog.collectAsStateWithLifecycle()
-    AttributesSection(viewModel = attributesViewModel) { attributesItems ->
+    AttributesSection(viewModel = attributesViewModel) { attributesItems, senses ->
         OverviewContent(
             characterBundle = state.character,
             catalog = catalog,
             moreItems = attributesItems,
+            senses = senses,
             onOpenLevelUp = onOpenLevelUp,
             onOpenDrawer = onOpenDrawer,
             onOpenDice = onOpenDice,
@@ -775,7 +781,9 @@ private fun OverviewContent(
     /** The death saving throws' tray starts open (the screen preview). */
     deathSavesOpen: Boolean = false,
     /** The list's items after the overview's own: the stats section. */
-    moreItems: LazyListScope.() -> Unit = {}
+    moreItems: LazyListScope.() -> Unit = {},
+    /** The proficiency bonus and the senses, under the fight's three in their frame: the stats section's. */
+    senses: (@Composable RowScope.() -> Unit)? = null
 ) {
     val character = characterBundle?.character
     val context = LocalContext.current
@@ -1066,7 +1074,7 @@ private fun OverviewContent(
 
                 item {
                     // The fight's three: the initiative, the armor class in its shield, the speed (owner's
-                    // choice from boards, 2026-10-05). With the pulls above it, 34dp above its place.
+                    // choice from boards, 2026-10-05), in one frame with the senses under them (U2, 2026-10-08).
                     val openStat: (OverviewStat) -> Unit = { stat ->
                         if (stat.field == OverviewMiniStatField.INITIATIVE && character != null) {
                             // Initiative rolls; its pop-up's "Edit" opens the bonus.
@@ -1085,33 +1093,42 @@ private fun OverviewContent(
                             }
                         }
                     }
-                    StatCardRow(modifier = Modifier.pullUp(4.dp)) {
-                        miniStats.forEach { stat ->
-                            if (stat.field == OverviewMiniStatField.ARMOR_CLASS) {
-                                ArmorClassShield(
-                                    label = text(stat.labelKey),
-                                    value = stat.value,
-                                    modifier = Modifier.align(Alignment.CenterVertically),
-                                    worse = stat.worse,
-                                    better = stat.better,
-                                    onClick = { openStat(stat) }
-                                )
-                            } else {
-                                val statIcon = stat.icon
-                                MiniStatCard(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .align(Alignment.CenterVertically),
-                                    value = stat.value,
-                                    label = text(stat.labelKey),
-                                    icon = if (statIcon == null) null else ({ MiniStatCardIcon(statIcon) }),
-                                    valueMarker = if (stat.worse || stat.better) ({ RollMarker(worse = stat.worse, better = stat.better, size = 18.dp) }) else null,
-                                    valueColor = changedValueColor(stat.delta),
-                                    onClick = { openStat(stat) }
-                                )
+                    StatsPanel(
+                        modifier = Modifier.pullUp(4.dp),
+                        top = {
+                            miniStats.forEach { stat ->
+                                if (stat.field == OverviewMiniStatField.ARMOR_CLASS) {
+                                    // Level with the initiative and the speed (owner's wish, 2026-10-08): its label on
+                                    // their labels' line, its number on their values' line.
+                                    Column(
+                                        modifier = Modifier.padding(top = PanelStatTop),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        SheetLabel(text(stat.labelKey))
+                                        ArmorClassShield(
+                                            label = null,
+                                            value = stat.value,
+                                            modifier = Modifier.padding(top = PanelStatLabelGap),
+                                            worse = stat.worse,
+                                            better = stat.better,
+                                            onClick = { openStat(stat) }
+                                        )
+                                    }
+                                } else {
+                                    PanelStat(
+                                        label = text(stat.labelKey),
+                                        value = stat.value,
+                                        valueBand = ArmorClassShieldNumberBand,
+                                        icon = stat.icon,
+                                        valueMarker = if (stat.worse || stat.better) ({ RollMarker(worse = stat.worse, better = stat.better, size = 18.dp) }) else null,
+                                        valueColor = changedValueColor(stat.delta),
+                                        onClick = { openStat(stat) }
+                                    )
+                                }
                             }
-                        }
-                    }
+                        },
+                        bottom = senses
+                    )
                 }
 
                 moreItems()

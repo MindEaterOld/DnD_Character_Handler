@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dndcharacterhandler.presentation.components.RollMarker
+import com.dndcharacterhandler.presentation.components.SheetLabel
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 
 /**
@@ -28,9 +29,13 @@ import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
  * inside it, its edge; the class's name over the number, the conditions' arrows before it. A tap edits it,
  * its ripple kept inside the shield.
  */
+/** The band under the shield's top the number is centred in: what stands beside the shield centres its value in it. */
+internal val ArmorClassShieldNumberBand = 114.dp
+
 @Composable
 fun ArmorClassShield(
-    label: String,
+    /** Inside, over the number; null when it is written over the shield (the overview's stats frame). */
+    label: String?,
     value: String,
     modifier: Modifier = Modifier,
     /** Attacks against the character have advantage. */
@@ -57,12 +62,7 @@ fun ArmorClassShield(
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(bottom = 10.dp)) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.bodyLarge.copy(fontSize = typography.miniStatLabel.fontSizeSp.sp),
-                color = colors.text.miniLabel,
-                maxLines = 1
-            )
+            label?.let { SheetLabel(it) }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 RollMarker(worse = worse, better = better, size = 18.dp)
                 Text(

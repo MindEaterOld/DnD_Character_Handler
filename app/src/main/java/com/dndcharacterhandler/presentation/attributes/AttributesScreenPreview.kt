@@ -12,6 +12,7 @@ import com.dndcharacterhandler.domain.model.AppLanguage
 import com.dndcharacterhandler.domain.model.CharacterBundle
 import com.dndcharacterhandler.domain.model.Skill
 import com.dndcharacterhandler.presentation.components.ScreenBackground
+import com.dndcharacterhandler.presentation.components.StatsPanel
 import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.theme.DnDTheme
 
@@ -101,7 +102,7 @@ fun AttributesScreenPreview() {
     CompositionLocalProvider(LocalStrings provides strings) {
         DnDTheme {
             // The section as the overview lists it, below its own cards.
-            val items = attributesSectionItems(
+            val parts = attributesSectionItems(
                 characterBundle = CharacterBundle(
                     // A Fighter's proficiencies as the sheet stores them, with three weapon masteries and a dwarf's defenses.
                     character = previewFallbackCharacter().copy(
@@ -133,7 +134,8 @@ fun AttributesScreenPreview() {
                     contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 4.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    items()
+                    item { StatsPanel(top = parts.senses) }
+                    parts.items(this)
                 }
             }
         }

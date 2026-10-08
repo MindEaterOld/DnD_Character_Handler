@@ -53,7 +53,7 @@ val MiniStatCardHeight = 80.dp
 val MiniStatCardCompactHeight = 60.dp
 
 /** A plain number ("11", "+3", "-1", "387"), maybe with a unit ("60 фт"): the number at the full value size. */
-private val NUMBER = Regex("""^([+\-−]?\d+)(?:\s+(\S{1,4}))?$""")
+internal val StatNumberPattern = Regex("""^([+\-−]?\d+)(?:\s+(\S{1,4}))?$""")
 
 /**
  * The row of stat cards at the top of a screen (Features, Spells, Inventory, Combat, Attributes):
@@ -207,7 +207,7 @@ fun MiniStatCard(
                 )
             }
             val shown = value.ifBlank { "—" }
-            val number = NUMBER.matchEntire(shown)
+            val number = StatNumberPattern.matchEntire(shown)
             if (number != null) {
                 // AC, bonuses, DCs, coins, ranges: the same size on every screen, never shrunk by a
                 // word beside them; a unit follows in body text.

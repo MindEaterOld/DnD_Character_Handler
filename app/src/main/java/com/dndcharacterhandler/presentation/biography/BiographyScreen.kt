@@ -81,6 +81,8 @@ import com.dndcharacterhandler.presentation.components.fadeUnderHeader
 import com.dndcharacterhandler.presentation.components.EditDialog
 import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
 import com.dndcharacterhandler.presentation.components.OutlinedPanel
+import com.dndcharacterhandler.presentation.components.SheetLabel
+import com.dndcharacterhandler.presentation.components.SheetOrnament
 import com.dndcharacterhandler.presentation.components.ScreenBackground
 import com.dndcharacterhandler.presentation.components.ScreenTopActions
 import com.dndcharacterhandler.presentation.components.figure
@@ -402,41 +404,11 @@ private val SwatchDotSize = 12.dp
 
 /** A field's label: gold capitals, spaced out, as a printed character sheet's (owner's choice from boards, 2026-10-06: S2). */
 @Composable
-internal fun BiographyLabel(label: String, modifier: Modifier = Modifier) {
-    Text(
-        text = label.uppercase(),
-        modifier = modifier,
-        style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 1.sp),
-        color = MaterialTheme.colorScheme.primary,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis
-    )
-}
+internal fun BiographyLabel(label: String, modifier: Modifier = Modifier) = SheetLabel(label, modifier)
 
 /** A rule with a small diamond in its middle, the ornament of the section titles' lines. */
 @Composable
-private fun BiographyOrnament() {
-    val colors = LocalDesignTokens.current.colors
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(modifier = Modifier.weight(1f).height(1.dp).background(colors.ornament.stroke))
-        Canvas(modifier = Modifier.padding(horizontal = 8.dp).size(9.dp)) {
-            val diamond = Path().apply {
-                moveTo(size.width / 2, 0f)
-                lineTo(size.width, size.height / 2)
-                lineTo(size.width / 2, size.height)
-                lineTo(0f, size.height / 2)
-                close()
-            }
-            drawPath(diamond, colors.ornament.middle)
-        }
-        Box(modifier = Modifier.weight(1f).height(1.dp).background(colors.ornament.stroke))
-    }
-}
+private fun BiographyOrnament() = SheetOrnament()
 
 /** The alignment's seal on the frame's top edge: its icon in its colour inside a ring; a tap opens the cards. */
 @Composable
