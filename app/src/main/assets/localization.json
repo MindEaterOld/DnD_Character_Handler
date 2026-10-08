@@ -740,12 +740,60 @@
     "fr": "Maîtrise du jet de sauvegarde (%s)",
     "es": "Competencia en tiradas de salvación de %s"
   },
-  "attributes_saving_throw_short": {
-    "en": "Save",
-    "ru": "Спас.",
-    "de": "RW",
-    "fr": "Sauv.",
-    "es": "Salv."
+  "attributes_saving_throws": {
+    "en": "Saving Throws",
+    "ru": "Спасброски",
+    "de": "Rettungswürfe",
+    "fr": "Jets de sauvegarde",
+    "es": "Tiradas de salvación"
+  },
+  "attributes_save_strength": {
+    "maxChars": 14,
+    "en": "Strength",
+    "ru": "Сила",
+    "de": "Stärke",
+    "fr": "Force",
+    "es": "Fuerza"
+  },
+  "attributes_save_dexterity": {
+    "maxChars": 14,
+    "en": "Dexterity",
+    "ru": "Ловкость",
+    "de": "Geschickl.",
+    "fr": "Dextérité",
+    "es": "Destreza"
+  },
+  "attributes_save_constitution": {
+    "maxChars": 14,
+    "en": "Constitution",
+    "ru": "Телосложение",
+    "de": "Konstitution",
+    "fr": "Constitution",
+    "es": "Constitución"
+  },
+  "attributes_save_intelligence": {
+    "maxChars": 14,
+    "en": "Intelligence",
+    "ru": "Интеллект",
+    "de": "Intelligenz",
+    "fr": "Intelligence",
+    "es": "Inteligencia"
+  },
+  "attributes_save_wisdom": {
+    "maxChars": 14,
+    "en": "Wisdom",
+    "ru": "Мудрость",
+    "de": "Weisheit",
+    "fr": "Sagesse",
+    "es": "Sabiduría"
+  },
+  "attributes_save_charisma": {
+    "maxChars": 14,
+    "en": "Charisma",
+    "ru": "Харизма",
+    "de": "Charisma",
+    "fr": "Charisme",
+    "es": "Carisma"
   },
   "ability_str_short": {
     "maxChars": 7,

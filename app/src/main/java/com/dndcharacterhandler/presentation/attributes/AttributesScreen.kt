@@ -530,18 +530,26 @@ internal fun attributesSectionItems(
                         rowScores.forEach { score ->
                             AbilityScoreCard(
                                 score = score,
-                                proficiencyBonus = proficiencyBonus,
                                 modifier = Modifier.weight(1f),
                                 checkEffects = checkEffects[score.type],
-                                saveEffects = saveEffects[score.type],
                                 // A tap rolls; the pop-up's "Edit" opens the editor.
-                                onClick = { if (characterBundle != null) rolling = AbilityRoll(score, save = false) },
-                                onSaveClick = { if (characterBundle != null) rolling = AbilityRoll(score, save = true) }
+                                onClick = { if (characterBundle != null) rolling = AbilityRoll(score, save = false) }
                             )
                         }
                     }
                 }
             }
+        }
+
+        item {
+            // The saving throws as a section of their own, out of the ability cards (owner's wish, 2026-10-08).
+            AttributesSectionTitle(title = text("attributes_saving_throws"))
+            SavingThrowGroups(
+                scores = abilityScores,
+                proficiencyBonus = proficiencyBonus,
+                saveEffects = saveEffects,
+                onSaveClick = { score -> if (characterBundle != null) rolling = AbilityRoll(score, save = true) }
+            )
         }
 
         item {
@@ -1190,14 +1198,10 @@ private fun AttributesSectionTitle(title: String) {
 @Composable
 private fun AbilityScoreCard(
     score: AbilityScore,
-    proficiencyBonus: Int,
     modifier: Modifier = Modifier,
-    /** The conditions on this ability's checks and saves: the values as they are now, with arrows. */
+    /** The conditions on this ability's checks: the value as it is now, with arrows. */
     checkEffects: RollEffects? = null,
-    saveEffects: RollEffects? = null,
-    onClick: () -> Unit = {},
-    /** A tap on the save line: its own roll. */
-    onSaveClick: () -> Unit = onClick
+    onClick: () -> Unit = {}
 ) {
     val tokens = LocalDesignTokens.current.typography
     val colors = LocalDesignTokens.current.colors
@@ -1210,7 +1214,7 @@ private fun AbilityScoreCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 5.dp),
+                .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(1.dp)
         ) {
@@ -1227,46 +1231,6 @@ private fun AbilityScoreCard(
                 style = MaterialTheme.typography.titleLarge,
                 color = colors.text.label
             )
-            Spacer(modifier = Modifier.height(5.dp))
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .background(colors.border.muted)
-            )
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable(onClick = onSaveClick)
-                    .padding(top = 2.dp),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Canvas(modifier = Modifier.size(12.dp)) {
-                    drawCircle(
-                        color = if (score.saveProficient) colors.text.primary else Color.Transparent,
-                        radius = 5.dp.toPx()
-                    )
-                    drawCircle(
-                        color = colors.text.label,
-                        radius = 5.dp.toPx(),
-                        style = Stroke(width = 1.dp.toPx())
-                    )
-                }
-                Text(
-                    text = text("attributes_saving_throw_short"),
-                    modifier = Modifier.padding(start = 4.dp),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = colors.text.muted
-                )
-                RollMarker(saveEffects, modifier = Modifier.padding(start = 4.dp), size = 14.dp)
-                Text(
-                    text = signed(score.saveModifier(proficiencyBonus) + (saveEffects?.modifier ?: 0)),
-                    modifier = Modifier.padding(start = 4.dp),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = changedValueColor(saveEffects?.modifier ?: 0) ?: colors.text.muted
-                )
-            }
         }
     }
 }
@@ -1410,29 +1374,7 @@ private fun SkillLine(skill: SkillRow, effects: RollEffects?, modifier: Modifier
             .padding(horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Canvas(modifier = Modifier.size(12.dp)) {
-            val ring = Stroke(width = 1.dp.toPx())
-            when {
-                skill.expertise -> {
-                    drawCircle(gold, radius = 5.5.dp.toPx(), style = ring)
-                    drawCircle(gold, radius = 3.dp.toPx())
-                }
-                skill.proficient -> drawCircle(gold, radius = 5.dp.toPx())
-                skill.jackOfAllTrades -> {
-                    val radius = 5.dp.toPx()
-                    drawArc(
-                        gold,
-                        startAngle = 90f,
-                        sweepAngle = 180f,
-                        useCenter = true,
-                        topLeft = Offset(center.x - radius, center.y - radius),
-                        size = Size(radius * 2, radius * 2)
-                    )
-                    drawCircle(gold, radius = radius, style = ring)
-                }
-                else -> drawCircle(colors.text.label, radius = 5.dp.toPx(), style = ring)
-            }
-        }
+        TrainingDot(proficient = skill.proficient, expertise = skill.expertise, jackOfAllTrades = skill.jackOfAllTrades)
         Text(
             // The row's own name, cut with a dot to its maxChars; the pop-ups take the full one.
             text = strings["${skill.nameKey}_short"],
@@ -1453,6 +1395,106 @@ private fun SkillLine(skill: SkillRow, effects: RollEffects?, modifier: Modifier
             style = MaterialTheme.typography.bodyLarge,
             // A value the conditions moved keeps its colour, as everywhere.
             color = changedValueColor(effects?.modifier ?: 0) ?: if (skill.proficient) gold else colors.text.primary,
+            textAlign = TextAlign.End
+        )
+    }
+}
+
+/**
+ * A training's mark (owner's choices from boards, 2026-10-08: N4, J1): trained, a gold dot; expertise, the gold dot in
+ * a gold ring; a jack of all trades' half training, the gold ring half filled; untrained, the plain ring.
+ */
+@Composable
+private fun TrainingDot(proficient: Boolean, expertise: Boolean = false, jackOfAllTrades: Boolean = false) {
+    val colors = LocalDesignTokens.current.colors
+    val gold = MaterialTheme.colorScheme.primary
+    Canvas(modifier = Modifier.size(12.dp)) {
+        val ring = Stroke(width = 1.dp.toPx())
+        when {
+            expertise -> {
+                drawCircle(gold, radius = 5.5.dp.toPx(), style = ring)
+                drawCircle(gold, radius = 3.dp.toPx())
+            }
+            proficient -> drawCircle(gold, radius = 5.dp.toPx())
+            jackOfAllTrades -> {
+                val radius = 5.dp.toPx()
+                drawArc(
+                    gold,
+                    startAngle = 90f,
+                    sweepAngle = 180f,
+                    useCenter = true,
+                    topLeft = Offset(center.x - radius, center.y - radius),
+                    size = Size(radius * 2, radius * 2)
+                )
+                drawCircle(gold, radius = radius, style = ring)
+            }
+            else -> drawCircle(colors.text.label, radius = 5.dp.toPx(), style = ring)
+        }
+    }
+}
+
+/**
+ * The saving throws (owner's choices from boards, 2026-10-08: S1, in two frames as the skills): the body's three beside
+ * the mind's three, each a frame as a skills' group, a line each as a skill's — the training's dot, the name, the
+ * conditions' arrows and the bonus, gold when trained; a tap rolls the save.
+ */
+@Composable
+private fun SavingThrowGroups(
+    scores: List<AbilityScore>,
+    proficiencyBonus: Int,
+    saveEffects: Map<AbilityType, RollEffects>,
+    onSaveClick: (AbilityScore) -> Unit
+) {
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        scores.chunked(3).forEach { group ->
+            OutlinedPanel(modifier = Modifier.weight(1f), cornerRadius = 7.dp) {
+                Column(modifier = Modifier.padding(vertical = 4.dp)) {
+                    group.forEach { score ->
+                        SaveLine(
+                            score = score,
+                            proficiencyBonus = proficiencyBonus,
+                            effects = saveEffects[score.type],
+                            modifier = Modifier.clickable { onSaveClick(score) }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** A saving throw's line, as a skill's: the training's dot, the name, the roll's marker and the bonus as it is now. */
+@Composable
+private fun SaveLine(score: AbilityScore, proficiencyBonus: Int, effects: RollEffects?, modifier: Modifier = Modifier) {
+    val colors = LocalDesignTokens.current.colors
+    val gold = MaterialTheme.colorScheme.primary
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(36.dp)
+            .padding(horizontal = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        TrainingDot(proficient = score.saveProficient)
+        Text(
+            // Its own name, cut with a dot to its maxChars: half the row's width.
+            text = text("attributes_save_" + score.displayNameKey.removePrefix("ability_")),
+            modifier = Modifier
+                .padding(start = 6.dp)
+                .weight(1f),
+            style = MaterialTheme.typography.bodyMedium,
+            color = if (score.saveProficient) gold else colors.text.muted,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        RollMarker(effects, modifier = Modifier.padding(start = 4.dp), size = 16.dp)
+        Text(
+            text = signed(score.saveModifier(proficiencyBonus) + (effects?.modifier ?: 0)),
+            modifier = Modifier
+                .padding(start = 4.dp)
+                .widthIn(min = 24.dp),
+            style = MaterialTheme.typography.bodyLarge,
+            color = changedValueColor(effects?.modifier ?: 0) ?: if (score.saveProficient) gold else colors.text.primary,
             textAlign = TextAlign.End
         )
     }
