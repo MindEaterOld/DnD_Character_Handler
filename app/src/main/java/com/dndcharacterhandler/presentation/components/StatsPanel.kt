@@ -27,7 +27,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.layout.AlignmentLine
 import androidx.compose.ui.layout.HorizontalAlignmentLine
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.unit.sp
@@ -46,14 +48,14 @@ fun SheetLabel(label: String, modifier: Modifier = Modifier) {
     )
 }
 
-/** A rule with a small diamond in its middle: what parts the parts of a sheet's panel. */
+/** A rule with a small diamond in its middle: what parts the parts of a sheet's panel, [air] over and under it. */
 @Composable
-fun SheetOrnament(modifier: Modifier = Modifier) {
+fun SheetOrnament(modifier: Modifier = Modifier, air: Dp = 10.dp) {
     val colors = LocalDesignTokens.current.colors
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 10.dp),
+            .padding(vertical = air),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(modifier = Modifier.weight(1f).height(1.dp).background(colors.ornament.stroke))
@@ -105,11 +107,13 @@ fun StatsPanel(
 ) {
     // Not clipped: the shield is let out over the edge.
     OutlinedPanel(modifier = modifier.fillMaxWidth(), clip = false) {
-        Column(modifier = Modifier.padding(horizontal = 6.dp, vertical = 8.dp)) {
+        // One step of air all round (owner's wish, 2026-10-08): the frame's edge to a label, a value to the rule, the
+        // rule to a label and a value to the frame's edge are all [StatsPanelStep].
+        Column(modifier = Modifier.padding(horizontal = 6.dp, vertical = StatsPanelStep - PanelStatTop)) {
             // Over the ornament, which the shield reaches down onto.
             Row(modifier = Modifier.fillMaxWidth().zIndex(1f), content = top)
             if (bottom != null) {
-                SheetOrnament(modifier = Modifier.padding(horizontal = 8.dp))
+                SheetOrnament(modifier = Modifier.padding(horizontal = 8.dp), air = StatsPanelStep - PanelStatTop)
                 Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, content = bottom)
             }
         }
@@ -120,7 +124,10 @@ fun StatsPanel(
 val PanelStatLabelGap = 2.dp
 
 /** A [PanelStat]'s air over its label: a cell of the frame's own keeps it, for the labels to stand on one line. */
-val PanelStatTop = 6.dp
+val PanelStatTop = 4.dp
+
+/** The air between the parts of a [StatsPanel]. */
+val StatsPanelStep = 14.dp
 
 /**
  * A stat in a [StatsPanel]: its gold label over its value, centred, an [icon] in gold before the value. [compact]: the
@@ -137,11 +144,13 @@ fun RowScope.PanelStat(
     /** Beside the value: the conditions' arrows (RollMarker); they take the icon's place. */
     valueMarker: (@Composable () -> Unit)? = null,
     /** The value's colour when the conditions moved it (changedValueColor). */
-    valueColor: Color? = null
+    valueColor: Color? = null,
+    /** The value's size, when not the [compact] or the stat cards' one. */
+    valueStyle: TextStyle? = null
 ) {
     val colors = LocalDesignTokens.current.colors
     val typography = LocalDesignTokens.current.typography
-    val valueStyle = if (compact) {
+    val valueStyle = valueStyle ?: if (compact) {
         MaterialTheme.typography.titleLarge
     } else {
         MaterialTheme.typography.headlineMedium.copy(

@@ -24,6 +24,7 @@ import com.dndcharacterhandler.presentation.components.SheetLabel
 import com.dndcharacterhandler.presentation.components.statValueCenter
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.text.TextStyle
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 
 /**
@@ -46,7 +47,9 @@ fun ArmorClassShield(
     width: Dp = 108.dp,
     height: Dp = 124.dp,
     /** The surface inside: opaque where the shield lies over a rule (the overview's stats frame). */
-    fill: Color = LocalDesignTokens.current.colors.surface.card.copy(alpha = 0.62f)
+    fill: Color = LocalDesignTokens.current.colors.surface.card.copy(alpha = 0.62f),
+    /** The number's size; by default the temporary hit points' (40). */
+    valueStyle: TextStyle? = null
 ) {
     val colors = LocalDesignTokens.current.colors
     val typography = LocalDesignTokens.current.typography
@@ -73,7 +76,7 @@ fun ArmorClassShield(
                 Text(
                     text = value,
                     // The temporary hit points' size for now: the class has no size token of its own yet.
-                    style = MaterialTheme.typography.headlineMedium.copy(
+                    style = valueStyle ?: MaterialTheme.typography.headlineMedium.copy(
                         fontSize = typography.hpTemporary.fontSizeSp.sp,
                         lineHeight = (typography.hpTemporary.lineHeightSp ?: typography.hpTemporary.fontSizeSp).sp
                     ),
