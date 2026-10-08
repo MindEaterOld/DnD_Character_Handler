@@ -1225,11 +1225,11 @@ private fun abilityArt(type: AbilityType): Int = when (type) {
 }
 
 /**
- * An ability's card (owner's choices from boards, 2026-10-08: three to a row, В2): as tall as a tarot card, its
- * art over the modifier, a short gold rule and the score, the short name in the top edge's gap. The art fades
- * into the card toward the numbers and darkens toward the edges, as the portrait does; the modifier has a deep
- * soft shadow to read on a light art. The frame is the stat cards' ([BorderLabelCard]), drawn over the art, 2dp
- * in Classic.
+ * An ability's card (owner's choices from boards, 2026-10-08: three to a row, В2, Д1): as tall as a tarot card,
+ * its art over the modifier, a short gold rule and the score. The art fades into the card toward the numbers and
+ * darkens toward the edges, as the portrait does. The frame is the stat cards' ([BorderLabelCard]) in gold, drawn
+ * over the art, with a diamond at each end of the gap for the short name; the name and the modifier have a deep
+ * soft shadow under them — no plate — to read on a light art.
  */
 @Composable
 private fun AbilityScoreCard(
@@ -1246,9 +1246,13 @@ private fun AbilityScoreCard(
     BorderLabelCard(
         label = text(score.shortNameKey),
         modifier = modifier,
-        labelStyle = abilityLabelStyle,
-        borderWidth = 2.dp,
+        labelStyle = MaterialTheme.typography.titleLarge.copy(shadow = shadow),
+        labelColor = colors.text.primary,
+        // Drawn thrice, as the modifier: one shadow is too faint on a light art.
+        labelModifier = Modifier.drawWithContent { repeat(3) { drawContent() } },
+        border = MaterialTheme.colorScheme.primary,
         frameOverContent = true,
+        notchMarks = true,
         onClick = onClick
     ) {
         Box(
@@ -1406,8 +1410,8 @@ private fun SkillGroups(
 private val SkillGroupGap = 12.dp
 
 /**
- * An ability's short name on a frame's top border: the ability cards' title style, and the skills' groups
- * take it from them (owner's choice, 2026-10-04).
+ * An ability's short name on a skills' group's top border (owner's choice, 2026-10-04); the ability cards have
+ * theirs larger, over the art (Д1, 2026-10-08).
  */
 private val abilityLabelStyle: TextStyle
     @Composable get() = MaterialTheme.typography.titleMedium

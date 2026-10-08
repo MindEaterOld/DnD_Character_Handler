@@ -31,6 +31,7 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.ClipOp
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -85,16 +86,18 @@ fun BorderLabelCard(
         fontSize = LocalDesignTokens.current.typography.miniStatLabel.fontSizeSp.sp
     ),
     labelColor: Color = LocalDesignTokens.current.colors.text.miniLabel,
+    /** On the label's text: what its style can't say (the ability cards draw it thrice, for a deep shadow). */
+    labelModifier: Modifier = Modifier,
     cornerRadius: Dp = 10.dp,
     fill: Color = LocalDesignTokens.current.colors.surface.card.copy(alpha = 0.62f),
     border: Color = LocalDesignTokens.current.colors.border.miniCard,
-    /** The frame's line in Classic; the engraving's etched frame keeps its own. */
-    borderWidth: Dp = 1.dp,
     /**
      * The frame drawn over [content] instead of under it: for a picture filling the card to its edges (the
      * ability cards' art), which would cover the line.
      */
     frameOverContent: Boolean = false,
+    /** A small diamond of the frame's colour at each end of the label's gap, the gap wider for them. */
+    notchMarks: Boolean = false,
     onClick: (() -> Unit)? = null,
     content: @Composable BoxScope.() -> Unit
 ) {
@@ -103,7 +106,7 @@ fun BorderLabelCard(
     var notch by remember { mutableStateOf(Rect.Zero) }
     Layout(
         modifier = modifier.drawWithContent {
-            val stroke = borderWidth.toPx()
+            val stroke = 1.dp.toPx()
             val top = notch.center.y
             val radius = cornerRadius.toPx()
             drawRoundRect(
@@ -127,6 +130,20 @@ fun BorderLabelCard(
                         )
                     }
                 }
+                if (notchMarks) {
+                    val half = 3.5.dp.toPx()
+                    val y = top + if (etched) 1.dp.toPx() else stroke / 2
+                    listOf(notch.left, notch.right).forEach { x ->
+                        val diamond = Path().apply {
+                            moveTo(x, y - half)
+                            lineTo(x + half, y)
+                            lineTo(x, y + half)
+                            lineTo(x - half, y)
+                            close()
+                        }
+                        drawPath(diamond, border)
+                    }
+                }
             }
             if (!frameOverContent) frame()
             drawContent()
@@ -135,7 +152,9 @@ fun BorderLabelCard(
         content = {
             Text(
                 text = label,
-                modifier = Modifier.padding(horizontal = 4.dp),
+                modifier = Modifier
+                    .padding(horizontal = if (notchMarks) 8.dp else 4.dp)
+                    .then(labelModifier),
                 style = labelStyle,
                 color = labelColor,
                 maxLines = 1,
