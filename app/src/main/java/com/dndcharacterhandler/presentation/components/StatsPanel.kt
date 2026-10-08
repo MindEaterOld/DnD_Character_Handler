@@ -25,9 +25,14 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.layout.AlignmentLine
+import androidx.compose.ui.layout.FirstBaseline
 import androidx.compose.ui.layout.HorizontalAlignmentLine
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.isSpecified
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -37,11 +42,11 @@ import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 
 /** A field's label on the sheet's panels: gold capitals, spaced out, as a printed character sheet's (S2, 2026-10-06). */
 @Composable
-fun SheetLabel(label: String, modifier: Modifier = Modifier) {
+fun SheetLabel(label: String, modifier: Modifier = Modifier, fontSize: TextUnit = TextUnit.Unspecified) {
     Text(
         text = label.uppercase(),
         modifier = modifier,
-        style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 1.sp),
+        style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 1.sp).let { if (fontSize.isSpecified) it.copy(fontSize = fontSize) else it },
         color = MaterialTheme.colorScheme.primary,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis
@@ -50,12 +55,12 @@ fun SheetLabel(label: String, modifier: Modifier = Modifier) {
 
 /** A rule with a small diamond in its middle: what parts the parts of a sheet's panel, [air] over and under it. */
 @Composable
-fun SheetOrnament(modifier: Modifier = Modifier, air: Dp = 10.dp) {
+fun SheetOrnament(modifier: Modifier = Modifier, airAbove: Dp = 10.dp, airBelow: Dp = airAbove) {
     val colors = LocalDesignTokens.current.colors
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = air),
+            .padding(top = airAbove, bottom = airBelow),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(modifier = Modifier.weight(1f).height(1.dp).background(colors.ornament.stroke))
@@ -83,14 +88,36 @@ fun Modifier.statValueCenter(): Modifier = layout { measurable, constraints ->
 }
 
 /**
- * Hangs what it wraps by its [StatValueCenter] and takes no height of its own: in a row aligned by the line, its value
- * is level with the others' and the rest of it reaches over and under the row (the armor class's shield, owner's wish,
- * 2026-10-08).
+ * A cell of a [StatsPanel]'s row with something larger behind it (the armor class's shield, owner's choice from boards,
+ * 2026-10-08: Б): [front] — a [PanelStat] — gives the cell its size, its label on the labels' line and its value's line;
+ * [back] is laid behind it, centred, its own [StatValueCenter] on the front's, and reaches over the neighbours and the
+ * frame's edge as it is. The front's label is drawn over the back.
  */
-fun Modifier.hangByStatValue(): Modifier = layout { measurable, constraints ->
-    val placeable = measurable.measure(constraints.copy(minHeight = 0, maxHeight = Constraints.Infinity))
-    val line = placeable[StatValueCenter].takeIf { it != AlignmentLine.Unspecified } ?: (placeable.height / 2)
-    layout(placeable.width, 0, mapOf(StatValueCenter to 0)) { placeable.place(0, -line) }
+@Composable
+fun RowScope.BackedStat(
+    back: @Composable () -> Unit,
+    front: @Composable RowScope.() -> Unit,
+    /** Drawn over the back, centred, its baseline on the front's first (its label's): a label larger than the row's. */
+    label: (@Composable () -> Unit)? = null
+) {
+    Layout(
+        contents = listOf(back, { Row(content = front) }, label ?: {}),
+        modifier = Modifier.weight(1f).alignBy(StatValueCenter)
+    ) { (backs, fronts, labels), constraints ->
+        val f = fronts.first().measure(constraints.copy(minHeight = 0))
+        val b = backs.first().measure(constraints.copy(minWidth = 0, minHeight = 0, maxHeight = Constraints.Infinity))
+        val l = labels.firstOrNull()?.measure(constraints.copy(minWidth = 0, minHeight = 0))
+        val frontLine = f[StatValueCenter].takeIf { it != AlignmentLine.Unspecified } ?: (f.height / 2)
+        val backLine = b[StatValueCenter].takeIf { it != AlignmentLine.Unspecified } ?: (b.height / 2)
+        val frontBaseline = f[FirstBaseline]
+        layout(f.width, f.height, mapOf(StatValueCenter to frontLine)) {
+            b.place((f.width - b.width) / 2, frontLine - backLine)
+            f.place(0, 0)
+            if (l != null && frontBaseline != AlignmentLine.Unspecified) {
+                l.place((f.width - l.width) / 2, frontBaseline - l[FirstBaseline])
+            }
+        }
+    }
 }
 
 /**
@@ -107,13 +134,25 @@ fun StatsPanel(
 ) {
     // Not clipped: the shield is let out over the edge.
     OutlinedPanel(modifier = modifier.fillMaxWidth(), clip = false) {
-        // One step of air all round (owner's wish, 2026-10-08): the frame's edge to a label, a value to the rule, the
-        // rule to a label and a value to the frame's edge are all [StatsPanelStep].
-        Column(modifier = Modifier.padding(horizontal = 6.dp, vertical = StatsPanelStep - PanelStatTop)) {
+        // One step of air all round, as the eye sees it (owner's wish, 2026-10-08): the frame's edge to a label's
+        // letters, a value's figures to the rule, the rule to a label's letters and a value's figures to the frame's edge
+        // are all [StatsPanelStep] — less what the text and the rule carry of their own.
+        Column(
+            modifier = Modifier.padding(
+                start = 6.dp,
+                end = 6.dp,
+                top = StatsPanelStep - LabelAirInBox - PanelStatTop,
+                bottom = StatsPanelStep - ValueAirInBox - PanelStatTop
+            )
+        ) {
             // Over the ornament, which the shield reaches down onto.
             Row(modifier = Modifier.fillMaxWidth().zIndex(1f), content = top)
             if (bottom != null) {
-                SheetOrnament(modifier = Modifier.padding(horizontal = 8.dp), air = StatsPanelStep - PanelStatTop)
+                SheetOrnament(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    airAbove = StatsPanelStep - ValueAirInBox - PanelStatTop - OrnamentHalf,
+                    airBelow = StatsPanelStep - LabelAirInBox - PanelStatTop - OrnamentHalf
+                )
                 Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, content = bottom)
             }
         }
@@ -126,8 +165,16 @@ val PanelStatLabelGap = 2.dp
 /** A [PanelStat]'s air over its label: a cell of the frame's own keeps it, for the labels to stand on one line. */
 val PanelStatTop = 4.dp
 
-/** The air between the parts of a [StatsPanel]. */
-val StatsPanelStep = 14.dp
+/** The visible air between the parts of a [StatsPanel]: from an edge or the rule to the letters and the figures. */
+val StatsPanelStep = 18.dp
+
+/**
+ * What the text and the rule carry of their own, measured on the emulator (2026-10-08): a label's box over its capitals,
+ * a value's box under its figures, the ornament's diamond either side of its line.
+ */
+private val LabelAirInBox = 1.5.dp
+private val ValueAirInBox = 4.5.dp
+private val OrnamentHalf = 4.5.dp
 
 /**
  * A stat in a [StatsPanel]: its gold label over its value, centred, an [icon] in gold before the value. [compact]: the
@@ -146,7 +193,9 @@ fun RowScope.PanelStat(
     /** The value's colour when the conditions moved it (changedValueColor). */
     valueColor: Color? = null,
     /** The value's size, when not the [compact] or the stat cards' one. */
-    valueStyle: TextStyle? = null
+    valueStyle: TextStyle? = null,
+    /** False: the label keeps its room but isn't drawn — a [BackedStat] writes it larger over its back. */
+    labelVisible: Boolean = true
 ) {
     val colors = LocalDesignTokens.current.colors
     val typography = LocalDesignTokens.current.typography
@@ -167,7 +216,7 @@ fun RowScope.PanelStat(
             .padding(vertical = PanelStatTop, horizontal = 2.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        SheetLabel(label)
+        SheetLabel(label, modifier = if (labelVisible) Modifier else Modifier.alpha(0f))
         Row(
             modifier = Modifier
                 .padding(top = PanelStatLabelGap)

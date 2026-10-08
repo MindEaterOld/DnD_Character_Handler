@@ -203,7 +203,8 @@ import com.dndcharacterhandler.presentation.levelup.LevelUpWizard
 import com.dndcharacterhandler.presentation.components.ScreenBackground
 import com.dndcharacterhandler.presentation.components.PanelStat
 import com.dndcharacterhandler.presentation.components.StatValueCenter
-import com.dndcharacterhandler.presentation.components.hangByStatValue
+import com.dndcharacterhandler.presentation.components.BackedStat
+import com.dndcharacterhandler.presentation.components.SheetLabel
 import com.dndcharacterhandler.presentation.components.StatsPanel
 import com.dndcharacterhandler.presentation.components.CharacterHeaderFadeEnd
 import com.dndcharacterhandler.presentation.components.CharacterHeaderInset
@@ -1097,28 +1098,39 @@ private fun OverviewContent(
                         top = {
                             miniStats.forEach { stat ->
                                 if (stat.field == OverviewMiniStatField.ARMOR_CLASS) {
-                                    // A smaller shield, «КБ» over its number (40, as an ability's modifier), hung by the
-                                    // number on the values' line: it reaches over the frame's top and onto the ornament,
-                                    // so the row stays as low as the initiative and the speed. A third of the row, as
-                                    // every cell, so the columns stand over the ones below (owner's wishes, 2026-10-08).
-                                    Box(
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .alignBy(StatValueCenter)
-                                            .hangByStatValue(),
-                                        contentAlignment = Alignment.TopCenter
-                                    ) {
-                                        ArmorClassShield(
-                                            label = text("stat_card_armor_class_short"),
-                                            value = stat.value,
-                                            worse = stat.worse,
-                                            better = stat.better,
-                                            onClick = { openStat(stat) },
-                                            width = StatsShieldWidth,
-                                            height = StatsShieldHeight,
-                                            fill = colors.surface.card
-                                        )
-                                    }
+                                    // A smaller shield, its number (40, as an ability's modifier) on the values' line: it
+                                    // reaches over the frame's top and onto the ornament, so the row stays as low as the
+                                    // initiative and the speed. «КБ» is written on the labels' line, over the shield (Б).
+                                    // A third of the row, as every cell, so the columns stand over the ones below
+                                    // (owner's wishes, 2026-10-08).
+                                    val shortLabel = text("stat_card_armor_class_short")
+                                    BackedStat(
+                                        back = {
+                                            ArmorClassShield(
+                                                label = shortLabel,
+                                                value = stat.value,
+                                                worse = stat.worse,
+                                                better = stat.better,
+                                                onClick = { openStat(stat) },
+                                                width = StatsShieldWidth,
+                                                height = StatsShieldHeight,
+                                                fill = colors.surface.card,
+                                                labelVisible = false
+                                            )
+                                        },
+                                        front = {
+                                            // The row's lines only: the label is written larger below, the number is the shield's.
+                                            PanelStat(
+                                                label = shortLabel,
+                                                value = stat.value,
+                                                compact = true,
+                                                valueColor = Color.Transparent,
+                                                labelVisible = false
+                                            )
+                                        },
+                                        // Its foot on the labels' line, larger, into the shield's empty top (owner's wish, 2026-10-08).
+                                        label = { SheetLabel(shortLabel, fontSize = LocalDesignTokens.current.typography.titleMedium.fontSizeSp.sp) }
+                                    )
                                 } else {
                                     // The size of the stats under them (22, as an ability's score).
                                     PanelStat(

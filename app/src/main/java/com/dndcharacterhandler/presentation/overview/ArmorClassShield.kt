@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dndcharacterhandler.presentation.components.RollMarker
+import androidx.compose.ui.draw.alpha
 import com.dndcharacterhandler.presentation.components.SheetLabel
 import com.dndcharacterhandler.presentation.components.statValueCenter
 import androidx.compose.ui.graphics.Color
@@ -49,7 +50,12 @@ fun ArmorClassShield(
     /** The surface inside: opaque where the shield lies over a rule (the overview's stats frame). */
     fill: Color = LocalDesignTokens.current.colors.surface.card.copy(alpha = 0.62f),
     /** The number's size; by default the temporary hit points' (40). */
-    valueStyle: TextStyle? = null
+    valueStyle: TextStyle? = null,
+    /**
+     * False: the label keeps its room, so the number stands where it would, but isn't drawn — it is written over the
+     * shield on its row's labels' line (the overview's stats frame).
+     */
+    labelVisible: Boolean = true
 ) {
     val colors = LocalDesignTokens.current.colors
     val typography = LocalDesignTokens.current.typography
@@ -69,7 +75,7 @@ fun ArmorClassShield(
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(bottom = height * 0.08f)) {
-            label?.let { SheetLabel(it) }
+            label?.let { SheetLabel(it, modifier = if (labelVisible) Modifier else Modifier.alpha(0f)) }
             // Its middle is the value's line: a stats frame lines the shield up by it.
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.statValueCenter()) {
                 RollMarker(worse = worse, better = better, size = 18.dp)
