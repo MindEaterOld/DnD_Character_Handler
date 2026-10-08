@@ -32,6 +32,16 @@ import com.dndcharacterhandler.presentation.components.MiniStatCardIcon
 import com.dndcharacterhandler.presentation.components.StatCardRow
 import com.dndcharacterhandler.presentation.components.BorderLabelCard
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
+import com.dndcharacterhandler.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -1195,6 +1205,32 @@ private fun AttributesSectionTitle(title: String) {
     }
 }
 
+/** An ability card's body is a tarot card's, 7:12 (owner's choice from boards, 2026-10-08: В2). */
+private const val AbilityCardAspect = 7f / 12f
+
+/** The room under an ability card's art: its modifier stands on the art's foot, the rule and the score below. */
+private val AbilityCardNumbersRoom = 42.dp
+
+/** How far up an ability card's art fades into the card toward the numbers. */
+private val AbilityCardArtFade = 34.dp
+
+/** Each ability's art on its card. */
+private fun abilityArt(type: AbilityType): Int = when (type) {
+    AbilityType.STRENGTH -> R.drawable.ability_art_strength
+    AbilityType.DEXTERITY -> R.drawable.ability_art_dexterity
+    AbilityType.CONSTITUTION -> R.drawable.ability_art_constitution
+    AbilityType.INTELLIGENCE -> R.drawable.ability_art_intelligence
+    AbilityType.WISDOM -> R.drawable.ability_art_wisdom
+    AbilityType.CHARISMA -> R.drawable.ability_art_charisma
+}
+
+/**
+ * An ability's card (owner's choices from boards, 2026-10-08: three to a row, В2): as tall as a tarot card, its
+ * art over the modifier, a short gold rule and the score, the short name in the top edge's gap. The art fades
+ * into the card toward the numbers and darkens toward the edges, as the portrait does; the modifier has a deep
+ * soft shadow to read on a light art. The frame is the stat cards' ([BorderLabelCard]), drawn over the art, 2dp
+ * in Classic.
+ */
 @Composable
 private fun AbilityScoreCard(
     score: AbilityScore,
@@ -1205,32 +1241,91 @@ private fun AbilityScoreCard(
 ) {
     val tokens = LocalDesignTokens.current.typography
     val colors = LocalDesignTokens.current.colors
+    val shade = colors.ornament.dropShadow
+    val shadow = with(LocalDensity.current) { Shadow(shade, Offset(0f, 1.dp.toPx()), 12.dp.toPx()) }
     BorderLabelCard(
         label = text(score.shortNameKey),
         modifier = modifier,
         labelStyle = abilityLabelStyle,
+        borderWidth = 2.dp,
+        frameOverContent = true,
         onClick = onClick
     ) {
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(1.dp)
+                .aspectRatio(AbilityCardAspect)
+                .background(colors.surface.card)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                RollMarker(checkEffects, size = 20.dp)
+            Image(
+                painter = painterResource(abilityArt(score.type)),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight()
+                    .padding(bottom = AbilityCardNumbersRoom)
+                    .drawWithContent {
+                        drawContent()
+                        val fade = AbilityCardArtFade.toPx()
+                        drawRect(
+                            Brush.verticalGradient(
+                                0f to Color.Transparent,
+                                1f to colors.surface.card,
+                                startY = size.height - fade,
+                                endY = size.height
+                            ),
+                            topLeft = Offset(0f, size.height - fade),
+                            size = Size(size.width, fade)
+                        )
+                    },
+                contentScale = ContentScale.Crop,
+                alignment = Alignment.TopCenter
+            )
+            // The portrait's vignette: an oval from clear to the shade toward the frame.
+            Canvas(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
+                val middle = Offset(size.width / 2, size.height / 2)
+                val radius = size.width / 2 * 1.04f
+                scale(1f, size.height / size.width, pivot = middle) {
+                    drawCircle(
+                        Brush.radialGradient(.55f to Color.Transparent, 1f to shade, center = middle, radius = radius),
+                        radius = radius * 2f,
+                        center = middle
+                    )
+                }
+            }
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    RollMarker(checkEffects, size = 20.dp)
+                    Text(
+                        text = signed(score.modifier + (checkEffects?.modifier ?: 0)),
+                        // Drawn thrice: one shadow is too faint on a light art.
+                        modifier = Modifier.drawWithContent { repeat(3) { drawContent() } },
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontSize = tokens.hpTemporary.fontSizeSp.sp,
+                            lineHeight = (tokens.hpTemporary.lineHeightSp ?: tokens.hpTemporary.fontSizeSp).sp,
+                            shadow = shadow
+                        ),
+                        color = changedValueColor(checkEffects?.modifier ?: 0) ?: colors.text.primary
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .padding(vertical = 3.dp)
+                        .width(22.dp)
+                        .height(1.dp)
+                        .background(MaterialTheme.colorScheme.primary)
+                )
                 Text(
-                    text = signed(score.modifier + (checkEffects?.modifier ?: 0)),
-                    style = MaterialTheme.typography.headlineMedium.copy(fontSize = tokens.hpTemporary.fontSizeSp.sp),
-                    color = changedValueColor(checkEffects?.modifier ?: 0) ?: colors.text.primary
+                    text = score.value.toString(),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = colors.text.label
                 )
             }
-            Text(
-                text = score.value.toString(),
-                style = MaterialTheme.typography.titleLarge,
-                color = colors.text.label
-            )
         }
     }
 }

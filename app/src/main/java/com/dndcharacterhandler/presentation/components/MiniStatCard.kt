@@ -24,7 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -88,6 +88,13 @@ fun BorderLabelCard(
     cornerRadius: Dp = 10.dp,
     fill: Color = LocalDesignTokens.current.colors.surface.card.copy(alpha = 0.62f),
     border: Color = LocalDesignTokens.current.colors.border.miniCard,
+    /** The frame's line in Classic; the engraving's etched frame keeps its own. */
+    borderWidth: Dp = 1.dp,
+    /**
+     * The frame drawn over [content] instead of under it: for a picture filling the card to its edges (the
+     * ability cards' art), which would cover the line.
+     */
+    frameOverContent: Boolean = false,
     onClick: (() -> Unit)? = null,
     content: @Composable BoxScope.() -> Unit
 ) {
@@ -95,8 +102,8 @@ fun BorderLabelCard(
     val etched = LocalThemeLook.current.frames == FrameStyle.ETCHED
     var notch by remember { mutableStateOf(Rect.Zero) }
     Layout(
-        modifier = modifier.drawBehind {
-            val stroke = 1.dp.toPx()
+        modifier = modifier.drawWithContent {
+            val stroke = borderWidth.toPx()
             val top = notch.center.y
             val radius = cornerRadius.toPx()
             drawRoundRect(
@@ -106,19 +113,24 @@ fun BorderLabelCard(
                 size = Size(size.width, size.height - top),
                 cornerRadius = CornerRadius(radius)
             )
-            clipRect(left = notch.left, top = 0f, right = notch.right, bottom = top + stroke, clipOp = ClipOp.Difference) {
-                if (etched) {
-                    drawEngravedFrame(border, top)
-                } else {
-                    drawRoundRect(
-                        color = border,
-                        topLeft = Offset(stroke / 2, top + stroke / 2),
-                        size = Size(size.width - stroke, size.height - top - stroke),
-                        cornerRadius = CornerRadius(radius - stroke / 2),
-                        style = Stroke(width = stroke)
-                    )
+            val frame: () -> Unit = {
+                clipRect(left = notch.left, top = 0f, right = notch.right, bottom = top + stroke, clipOp = ClipOp.Difference) {
+                    if (etched) {
+                        drawEngravedFrame(border, top)
+                    } else {
+                        drawRoundRect(
+                            color = border,
+                            topLeft = Offset(stroke / 2, top + stroke / 2),
+                            size = Size(size.width - stroke, size.height - top - stroke),
+                            cornerRadius = CornerRadius(radius - stroke / 2),
+                            style = Stroke(width = stroke)
+                        )
+                    }
                 }
             }
+            if (!frameOverContent) frame()
+            drawContent()
+            if (frameOverContent) frame()
         },
         content = {
             Text(
