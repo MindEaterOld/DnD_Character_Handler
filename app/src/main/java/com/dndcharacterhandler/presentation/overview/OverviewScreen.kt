@@ -202,9 +202,8 @@ import com.dndcharacterhandler.presentation.components.OverlayCloseButton
 import com.dndcharacterhandler.presentation.levelup.LevelUpWizard
 import com.dndcharacterhandler.presentation.components.ScreenBackground
 import com.dndcharacterhandler.presentation.components.PanelStat
-import com.dndcharacterhandler.presentation.components.PanelStatLabelGap
-import com.dndcharacterhandler.presentation.components.PanelStatTop
-import com.dndcharacterhandler.presentation.components.SheetLabel
+import com.dndcharacterhandler.presentation.components.StatValueCenter
+import com.dndcharacterhandler.presentation.components.hangByStatValue
 import com.dndcharacterhandler.presentation.components.StatsPanel
 import com.dndcharacterhandler.presentation.components.CharacterHeaderFadeEnd
 import com.dndcharacterhandler.presentation.components.CharacterHeaderInset
@@ -1098,27 +1097,26 @@ private fun OverviewContent(
                         top = {
                             miniStats.forEach { stat ->
                                 if (stat.field == OverviewMiniStatField.ARMOR_CLASS) {
-                                    // Level with the initiative and the speed (owner's wish, 2026-10-08): its label on
-                                    // their labels' line, its number on their values' line.
-                                    Column(
-                                        modifier = Modifier.padding(top = PanelStatTop),
-                                        horizontalAlignment = Alignment.CenterHorizontally
-                                    ) {
-                                        SheetLabel(text(stat.labelKey))
-                                        ArmorClassShield(
-                                            label = null,
-                                            value = stat.value,
-                                            modifier = Modifier.padding(top = PanelStatLabelGap),
-                                            worse = stat.worse,
-                                            better = stat.better,
-                                            onClick = { openStat(stat) }
-                                        )
-                                    }
+                                    // A smaller shield, «КБ» over its number, hung by the number on the values' line:
+                                    // it reaches over the frame's top and onto the ornament, so the row stays as low
+                                    // as the initiative and the speed (owner's wishes, 2026-10-08).
+                                    ArmorClassShield(
+                                        label = text("stat_card_armor_class_short"),
+                                        value = stat.value,
+                                        modifier = Modifier
+                                            .alignBy(StatValueCenter)
+                                            .hangByStatValue(),
+                                        worse = stat.worse,
+                                        better = stat.better,
+                                        onClick = { openStat(stat) },
+                                        width = StatsShieldWidth,
+                                        height = StatsShieldHeight,
+                                        fill = colors.surface.card
+                                    )
                                 } else {
                                     PanelStat(
                                         label = text(stat.labelKey),
                                         value = stat.value,
-                                        valueBand = ArmorClassShieldNumberBand,
                                         icon = stat.icon,
                                         valueMarker = if (stat.worse || stat.better) ({ RollMarker(worse = stat.worse, better = stat.better, size = 18.dp) }) else null,
                                         valueColor = changedValueColor(stat.delta),
@@ -1769,6 +1767,10 @@ private fun PortraitFrame(
         }
     }
 }
+
+/** The armor class's shield in the stats frame: smaller than on its own, the frame's row as low as its neighbours. */
+private val StatsShieldWidth = 84.dp
+private val StatsShieldHeight = 96.dp
 
 /** How far above its place the frame is drawn: its artwork's margin over the header's fade. */
 private val PortraitRaise = 47.dp

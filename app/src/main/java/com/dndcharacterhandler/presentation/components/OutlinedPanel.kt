@@ -29,6 +29,8 @@ fun OutlinedPanel(
     cornerRadius: Dp = 10.dp,
     fill: Color = LocalDesignTokens.current.colors.surface.card.copy(alpha = 0.62f),
     border: Color = LocalDesignTokens.current.colors.border.miniCard,
+    /** Keep what is inside within the corners; off when something is let out over the frame (the stats' shield). */
+    clip: Boolean = true,
     content: @Composable ColumnScope.() -> Unit
 ) {
     val etched = LocalThemeLook.current.frames == FrameStyle.ETCHED
@@ -51,7 +53,7 @@ fun OutlinedPanel(
                     )
                 }
             }
-            .clip(RoundedCornerShape(cornerRadius)),
+            .then(if (clip) Modifier.clip(RoundedCornerShape(cornerRadius)) else Modifier),
         content = content
     )
 }

@@ -5379,6 +5379,14 @@
     "fr": "DD sort",
     "es": "CD conj."
   },
+  "stat_card_armor_class_short": {
+    "maxChars": 4,
+    "en": "AC",
+    "ru": "КБ",
+    "de": "RK",
+    "fr": "CA",
+    "es": "CA"
+  },
   "stat_card_armor_class": {
     "maxChars": 11,
     "en": "Armor Class",

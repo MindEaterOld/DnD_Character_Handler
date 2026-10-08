@@ -24,8 +24,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.layout.AlignmentLine
+import androidx.compose.ui.layout.HorizontalAlignmentLine
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.unit.sp
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 
@@ -67,10 +71,31 @@ fun SheetOrnament(modifier: Modifier = Modifier) {
     }
 }
 
+/** The middle of a stat's value: the cells of a [StatsPanel]'s row line their values up on it. */
+val StatValueCenter = HorizontalAlignmentLine(merger = { first, _ -> first })
+
+/** Marks the middle of what it wraps as [StatValueCenter]: a stat's value. */
+fun Modifier.statValueCenter(): Modifier = layout { measurable, constraints ->
+    val placeable = measurable.measure(constraints)
+    layout(placeable.width, placeable.height, mapOf(StatValueCenter to placeable.height / 2)) { placeable.place(0, 0) }
+}
+
+/**
+ * Hangs what it wraps by its [StatValueCenter] and takes no height of its own: in a row aligned by the line, its value
+ * is level with the others' and the rest of it reaches over and under the row (the armor class's shield, owner's wish,
+ * 2026-10-08).
+ */
+fun Modifier.hangByStatValue(): Modifier = layout { measurable, constraints ->
+    val placeable = measurable.measure(constraints.copy(minHeight = 0, maxHeight = Constraints.Infinity))
+    val line = placeable[StatValueCenter].takeIf { it != AlignmentLine.Unspecified } ?: (placeable.height / 2)
+    layout(placeable.width, 0, mapOf(StatValueCenter to 0)) { placeable.place(0, -line) }
+}
+
 /**
  * The overview's stats in one frame, drawn as the biography's panels (owner's choice from boards, 2026-10-08: U2):
- * the fight's three on top — the armor class's shield in the middle, level with the initiative and the speed — and,
- * under an ornament, the stats looked up now and then ([bottom]).
+ * the fight's three on top, their values on one line ([StatValueCenter]) — the armor class's shield in the middle,
+ * hung by its number, reaching over the frame's top edge and down over the ornament so the row is only as tall as the
+ * initiative and the speed — and, under an ornament, the stats looked up now and then ([bottom]).
  */
 @Composable
 fun StatsPanel(
@@ -78,10 +103,11 @@ fun StatsPanel(
     bottom: (@Composable RowScope.() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
-    OutlinedPanel(modifier = modifier.fillMaxWidth()) {
+    // Not clipped: the shield is let out over the edge.
+    OutlinedPanel(modifier = modifier.fillMaxWidth(), clip = false) {
         Column(modifier = Modifier.padding(horizontal = 6.dp, vertical = 8.dp)) {
-            // The labels on one line: each cell starts at the top.
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top, content = top)
+            // Over the ornament, which the shield reaches down onto.
+            Row(modifier = Modifier.fillMaxWidth().zIndex(1f), content = top)
             if (bottom != null) {
                 SheetOrnament(modifier = Modifier.padding(horizontal = 8.dp))
                 Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, content = bottom)
@@ -111,9 +137,7 @@ fun RowScope.PanelStat(
     /** Beside the value: the conditions' arrows (RollMarker); they take the icon's place. */
     valueMarker: (@Composable () -> Unit)? = null,
     /** The value's colour when the conditions moved it (changedValueColor). */
-    valueColor: Color? = null,
-    /** A band the value is centred in, under the label: level with a taller neighbour's number (the shield's). */
-    valueBand: Dp? = null
+    valueColor: Color? = null
 ) {
     val colors = LocalDesignTokens.current.colors
     val typography = LocalDesignTokens.current.typography
@@ -128,6 +152,7 @@ fun RowScope.PanelStat(
     Column(
         modifier = modifier
             .weight(1f)
+            .alignBy(StatValueCenter)
             .clip(RoundedCornerShape(10.dp))
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
             .padding(vertical = PanelStatTop, horizontal = 2.dp),
@@ -137,7 +162,7 @@ fun RowScope.PanelStat(
         Row(
             modifier = Modifier
                 .padding(top = PanelStatLabelGap)
-                .then(if (valueBand != null) Modifier.height(valueBand) else Modifier),
+                .statValueCenter(),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {

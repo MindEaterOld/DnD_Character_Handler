@@ -21,6 +21,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dndcharacterhandler.presentation.components.RollMarker
 import com.dndcharacterhandler.presentation.components.SheetLabel
+import com.dndcharacterhandler.presentation.components.statValueCenter
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 
 /**
@@ -29,12 +32,9 @@ import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
  * inside it, its edge; the class's name over the number, the conditions' arrows before it. A tap edits it,
  * its ripple kept inside the shield.
  */
-/** The band under the shield's top the number is centred in: what stands beside the shield centres its value in it. */
-internal val ArmorClassShieldNumberBand = 114.dp
-
 @Composable
 fun ArmorClassShield(
-    /** Inside, over the number; null when it is written over the shield (the overview's stats frame). */
+    /** Inside, over the number. */
     label: String?,
     value: String,
     modifier: Modifier = Modifier,
@@ -42,18 +42,22 @@ fun ArmorClassShield(
     worse: Boolean = false,
     /** Attacks against the character have disadvantage. */
     better: Boolean = false,
-    onClick: (() -> Unit)? = null
+    onClick: (() -> Unit)? = null,
+    width: Dp = 108.dp,
+    height: Dp = 124.dp,
+    /** The surface inside: opaque where the shield lies over a rule (the overview's stats frame). */
+    fill: Color = LocalDesignTokens.current.colors.surface.card.copy(alpha = 0.62f)
 ) {
     val colors = LocalDesignTokens.current.colors
     val typography = LocalDesignTokens.current.typography
     val shape = GenericShape { size, _ -> addPath(shieldOutline(size, inset = 0f)) }
     Box(
         modifier = modifier
-            .size(width = 108.dp, height = 124.dp)
+            .size(width = width, height = height)
             .drawBehind {
                 val stroke = 1.dp.toPx()
                 val outer = shieldOutline(size, inset = 0f)
-                drawPath(outer, colors.surface.card.copy(alpha = 0.62f))
+                drawPath(outer, fill)
                 drawPath(outer, colors.border.miniCard, style = Stroke(stroke))
                 drawPath(shieldOutline(size, inset = 5f), colors.border.muted, style = Stroke(stroke))
             }
@@ -61,9 +65,10 @@ fun ArmorClassShield(
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
         contentAlignment = Alignment.Center
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(bottom = 10.dp)) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(bottom = height * 0.08f)) {
             label?.let { SheetLabel(it) }
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            // Its middle is the value's line: a stats frame lines the shield up by it.
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.statValueCenter()) {
                 RollMarker(worse = worse, better = better, size = 18.dp)
                 Text(
                     text = value,
