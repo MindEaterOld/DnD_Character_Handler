@@ -1208,11 +1208,14 @@ private fun AttributesSectionTitle(title: String) {
 /** An ability card's body is a tarot card's, 7:12 (owner's choice from boards, 2026-10-08: В2). */
 private const val AbilityCardAspect = 7f / 12f
 
-/** The room under an ability card's art: its modifier stands on the art's foot, the rule and the score below. */
-private val AbilityCardNumbersRoom = 42.dp
+/**
+ * How far up from an ability card's foot its art darkens: from the rule under the modifier down, the art clear
+ * above it (owner's wish, 2026-10-08).
+ */
+private val AbilityCardArtFade = 42.dp
 
-/** How far up an ability card's art fades into the card toward the numbers. */
-private val AbilityCardArtFade = 34.dp
+/** The rule between an ability's modifier and score: this share of the card, melting away toward its ends (Р3). */
+private const val AbilityCardRuleShare = .76f
 
 /** Each ability's art on its card. */
 private fun abilityArt(type: AbilityType): Int = when (type) {
@@ -1225,10 +1228,10 @@ private fun abilityArt(type: AbilityType): Int = when (type) {
 }
 
 /**
- * An ability's card (owner's choices from boards, 2026-10-08: three to a row, В2, Д1): as tall as a tarot card,
- * its art over the modifier, a short gold rule and the score. The art fades into the card toward the numbers and
- * darkens toward the edges, as the portrait does. The frame is the stat cards' ([BorderLabelCard]) in gold, drawn
- * over the art, with a diamond at each end of the gap for the short name; the name and the modifier have a deep
+ * An ability's card (owner's choices from boards, 2026-10-08: three to a row, В2, Д1, Р3): as tall as a tarot
+ * card, its art over the modifier, a long gold rule melting away toward its ends and the score. The art is clear
+ * down to the rule and darkens from it to the card's foot, and toward the edges as the portrait does. The frame is the stat cards' ([BorderLabelCard]) in gold, drawn
+ * over the art, with a diamond at each end of the gap for the short name; the name and the numbers have a deep
  * soft shadow under them — no plate — to read on a light art.
  */
 @Composable
@@ -1267,7 +1270,6 @@ private fun AbilityScoreCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight()
-                    .padding(bottom = AbilityCardNumbersRoom)
                     .drawWithContent {
                         drawContent()
                         val fade = AbilityCardArtFade.toPx()
@@ -1317,16 +1319,19 @@ private fun AbilityScoreCard(
                         color = changedValueColor(checkEffects?.modifier ?: 0) ?: colors.text.primary
                     )
                 }
+                val gold = MaterialTheme.colorScheme.primary
                 Box(
                     modifier = Modifier
                         .padding(vertical = 3.dp)
-                        .width(22.dp)
+                        .fillMaxWidth(AbilityCardRuleShare)
                         .height(1.dp)
-                        .background(MaterialTheme.colorScheme.primary)
+                        .background(Brush.horizontalGradient(listOf(Color.Transparent, gold, gold, Color.Transparent)))
                 )
                 Text(
                     text = score.value.toString(),
-                    style = MaterialTheme.typography.titleLarge,
+                    // On the art's darkening foot: the modifier's shadow, drawn thrice too.
+                    modifier = Modifier.drawWithContent { repeat(3) { drawContent() } },
+                    style = MaterialTheme.typography.titleLarge.copy(shadow = shadow),
                     color = colors.text.label
                 )
             }
