@@ -4,7 +4,7 @@ package com.dndcharacterhandler.domain.model
  * Which part of a portrait shows in its frame: the point of the picture at the frame's centre
  * ([focusX], [focusY], from 0 to 1 across the picture) and how far in it is ([zoom]: 1 = the picture
  * just covers the frame, as a centre crop would). It doesn't depend on the frame's size, so the
- * overview's octagon and the drawer's small circle show the same part.
+ * overview's portrait across the screen and the drawer's small circle show the same part.
  */
 data class PortraitFraming(
     val focusX: Float = 0.5f,

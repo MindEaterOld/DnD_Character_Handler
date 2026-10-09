@@ -1,5 +1,8 @@
 package com.dndcharacterhandler.presentation.overview
 
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -49,6 +52,45 @@ private val PortraitHeroFade = 220.dp
  */
 private const val PortraitHeroSideFade = 0.32f
 private const val PortraitHeroTopFade = 0.28f
+
+/** The portrait's height on a screen [width] wide under a status bar [topInset] tall. */
+internal fun portraitHeroHeight(width: Dp, topInset: Dp): Dp = minOf(width / PortraitHeroAspect, PortraitHeroMaxHeight) + topInset
+
+/** The share of the portrait's height its foot melts over, for [height] (from [portraitHeroHeight]). */
+internal fun portraitHeroFootShare(height: Dp): Float = (PortraitHeroFade / height).coerceIn(0f, 1f)
+
+/**
+ * The portrait's edges melting away over [area] (DstIn: the masks' alpha only, in a layer of their own): the sides and
+ * the top as a vignette, the foot over [foot] px. The overview's portrait and its framing pop-up draw the same.
+ */
+internal fun DrawScope.portraitVignette(area: Rect, foot: Float, opaque: Color) {
+    val clear = opaque.copy(alpha = 0f)
+    drawRect(
+        Brush.horizontalGradient(
+            0f to clear,
+            PortraitHeroSideFade to opaque,
+            1f - PortraitHeroSideFade to opaque,
+            1f to clear,
+            startX = area.left,
+            endX = area.right
+        ),
+        topLeft = area.topLeft,
+        size = area.size,
+        blendMode = BlendMode.DstIn
+    )
+    drawRect(
+        Brush.verticalGradient(0f to clear, PortraitHeroTopFade to opaque, startY = area.top, endY = area.bottom),
+        topLeft = area.topLeft,
+        size = area.size,
+        blendMode = BlendMode.DstIn
+    )
+    drawRect(
+        Brush.verticalGradient(0f to opaque, 1f to clear, startY = area.bottom - foot, endY = area.bottom),
+        topLeft = Offset(area.left, area.bottom - foot),
+        size = Size(area.width, foot),
+        blendMode = BlendMode.DstIn
+    )
+}
 
 /** A deep soft shadow under what is written on the art, for it to read on a light one. */
 @Composable
@@ -108,30 +150,7 @@ internal fun PortraitHero(
                 .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
                 .drawWithContent {
                     drawContent()
-                    val opaque = colors.surface.portrait
-                    val clear = opaque.copy(alpha = 0f)
-                    drawRect(
-                        Brush.horizontalGradient(
-                            0f to clear,
-                            PortraitHeroSideFade to opaque,
-                            1f - PortraitHeroSideFade to opaque,
-                            1f to clear
-                        ),
-                        blendMode = BlendMode.DstIn
-                    )
-                    drawRect(Brush.verticalGradient(0f to clear, PortraitHeroTopFade to opaque), blendMode = BlendMode.DstIn)
-                    val fade = PortraitHeroFade.toPx()
-                    drawRect(
-                        Brush.verticalGradient(
-                            0f to colors.surface.portrait,
-                            1f to colors.surface.portrait.copy(alpha = 0f),
-                            startY = size.height - fade,
-                            endY = size.height
-                        ),
-                        topLeft = Offset(0f, size.height - fade),
-                        size = Size(size.width, fade),
-                        blendMode = BlendMode.DstIn
-                    )
+                    portraitVignette(Rect(Offset.Zero, size), PortraitHeroFade.toPx(), colors.surface.portrait)
                 }
                 .background(colors.surface.portrait)
                 .clickable(onClick = onClick)

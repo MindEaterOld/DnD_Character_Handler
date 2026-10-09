@@ -1,4 +1,5 @@
 package com.dndcharacterhandler.presentation.overview
+import androidx.compose.ui.platform.LocalConfiguration
 import com.dndcharacterhandler.domain.rules.proficiencyBonusForLevel
 import androidx.compose.material.icons.outlined.AutoAwesome
 import com.dndcharacterhandler.presentation.components.LocalAppSnackbar
@@ -1573,10 +1574,15 @@ private fun OverviewContent(
     }
 
     if (isPortraitFramingOpen && characterBundle != null) {
+        // The pop-up's window is the overview's portrait as this phone shows it: its width to its height, its foot.
+        val heroWidth = LocalConfiguration.current.screenWidthDp.dp
+        val heroHeight = portraitHeroHeight(heroWidth, WindowInsets.statusBars.asPaddingValues().calculateTopPadding())
         PortraitFramingDialog(
             portraitReference = characterBundle.character.portraitUri
                 ?: AssetReferences.portraitPlaceholderPath("portrait_placeholder.png"),
             initial = characterBundle.character.portraitFraming,
+            heroAspect = heroWidth / heroHeight,
+            footShare = portraitHeroFootShare(heroHeight),
             onSave = { framing ->
                 onUpdatePortraitFraming(characterBundle, framing)
                 isPortraitFramingOpen = false
