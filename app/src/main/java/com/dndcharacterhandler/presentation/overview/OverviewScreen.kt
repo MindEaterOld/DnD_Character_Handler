@@ -1,4 +1,6 @@
 package com.dndcharacterhandler.presentation.overview
+import com.dndcharacterhandler.domain.rules.proficiencyBonusForLevel
+import androidx.compose.material.icons.outlined.AutoAwesome
 import com.dndcharacterhandler.presentation.components.LocalAppSnackbar
 import androidx.compose.material.icons.outlined.Shield
 import com.dndcharacterhandler.presentation.components.HeaderLevel
@@ -973,6 +975,7 @@ private fun OverviewContent(
                                     concentrating = concentrationSpell != null,
                                     armorClass = miniStats.first { it.field == OverviewMiniStatField.ARMOR_CLASS },
                                     speed = miniStats.first { it.field == OverviewMiniStatField.SPEED },
+                                    proficiencyBonus = proficiencyBonusForLevel(character.level),
                                     onOpenConditions = { isConditionsDialogOpen = true },
                                     onOpenConcentration = { isEndConcentrationOpen = true },
                                     onDamage = { openHpDialog(OverviewHpEditMode.DAMAGE) },
@@ -1774,6 +1777,8 @@ private fun SurvivalBlock(
     concentrating: Boolean,
     armorClass: OverviewStat,
     speed: OverviewStat,
+    /** The proficiency bonus, by the level: shown only (it changes with the level). */
+    proficiencyBonus: Int,
     onOpenConditions: () -> Unit,
     onOpenConcentration: () -> Unit,
     onDamage: () -> Unit,
@@ -1821,13 +1826,21 @@ private fun SurvivalBlock(
                 onRoll = onRollSave
             )
         } else {
-            Row(horizontalArrangement = Arrangement.spacedBy(40.dp)) {
+            // The proficiency bonus, the armor class, the speed: a third of the row each (owner's wish, 2026-10-09).
+            Row(modifier = Modifier.fillMaxWidth()) {
+                ArtStat(
+                    label = text("stat_card_proficiency"),
+                    value = signed(proficiencyBonus),
+                    icon = Icons.Outlined.AutoAwesome,
+                    modifier = Modifier.weight(1f)
+                )
                 ArtStat(
                     label = text(armorClass.labelKey),
                     value = armorClass.value,
                     icon = Icons.Outlined.Shield,
                     worse = armorClass.worse,
                     better = armorClass.better,
+                    modifier = Modifier.weight(1f),
                     onClick = { onStat(armorClass) }
                 )
                 ArtStat(
@@ -1835,6 +1848,7 @@ private fun SurvivalBlock(
                     value = speed.value,
                     icon = speed.icon ?: Icons.AutoMirrored.Outlined.DirectionsRun,
                     valueColor = changedValueColor(speed.delta),
+                    modifier = Modifier.weight(1f),
                     onClick = { onStat(speed) }
                 )
             }
@@ -1892,16 +1906,19 @@ private fun ArtStat(
     label: String,
     value: String,
     icon: ImageVector,
-    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    /** A tap edits it; none for what only shows (the proficiency bonus). */
+    onClick: (() -> Unit)? = null,
     worse: Boolean = false,
     better: Boolean = false,
     valueColor: Color? = null
 ) {
     val colors = LocalDesignTokens.current.colors
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
     Column(
         modifier = Modifier
             .clip(RoundedCornerShape(10.dp))
-            .clickable(onClick = onClick)
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
             .padding(horizontal = 6.dp, vertical = 2.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -1919,6 +1936,7 @@ private fun ArtStat(
                 color = valueColor ?: colors.text.primary
             )
         }
+    }
     }
 }
 
