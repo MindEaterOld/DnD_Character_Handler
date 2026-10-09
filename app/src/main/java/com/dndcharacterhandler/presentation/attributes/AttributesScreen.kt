@@ -1629,34 +1629,38 @@ private fun SkillLine(skill: SkillRow, effects: RollEffects?, modifier: Modifier
 }
 
 /**
- * A training's mark (owner's choices from boards, 2026-10-08: N4, J1): trained, a gold dot; expertise, the gold dot in
- * a gold ring; a jack of all trades' half training, the gold ring half filled; untrained, the plain ring.
+ * A training's mark (owner's choices from boards, 2026-10-10: D for expertise, C for the half): untrained, the plain
+ * ring; trained, a gold dot; expertise, the same gold dot with a wide ring of gold at half round it, outside — the mark
+ * grows, the dot doesn't shrink; a jack of all trades' half training, the plain ring with a small gold half (the left)
+ * inside it. The 12dp box is the line's: expertise's ring is drawn past it, so nothing in the line moves.
  */
 @Composable
 private fun TrainingDot(proficient: Boolean, expertise: Boolean = false, jackOfAllTrades: Boolean = false) {
     val colors = LocalDesignTokens.current.colors
     val gold = MaterialTheme.colorScheme.primary
+    val halfAlpha = LocalDesignTokens.current.alpha.half
     Canvas(modifier = Modifier.size(12.dp)) {
         val ring = Stroke(width = 1.dp.toPx())
+        val dot = 5.dp.toPx()
         when {
             expertise -> {
-                drawCircle(gold, radius = 5.5.dp.toPx(), style = ring)
-                drawCircle(gold, radius = 3.dp.toPx())
+                drawCircle(gold, radius = dot)
+                drawCircle(gold.copy(alpha = halfAlpha), radius = 8.dp.toPx(), style = Stroke(width = 1.5.dp.toPx()))
             }
-            proficient -> drawCircle(gold, radius = 5.dp.toPx())
+            proficient -> drawCircle(gold, radius = dot)
             jackOfAllTrades -> {
-                val radius = 5.dp.toPx()
+                val half = 3.5.dp.toPx()
                 drawArc(
                     gold,
                     startAngle = 90f,
                     sweepAngle = 180f,
                     useCenter = true,
-                    topLeft = Offset(center.x - radius, center.y - radius),
-                    size = Size(radius * 2, radius * 2)
+                    topLeft = Offset(center.x - half, center.y - half),
+                    size = Size(half * 2, half * 2)
                 )
-                drawCircle(gold, radius = radius, style = ring)
+                drawCircle(colors.text.label, radius = dot, style = ring)
             }
-            else -> drawCircle(colors.text.label, radius = 5.dp.toPx(), style = ring)
+            else -> drawCircle(colors.text.label, radius = dot, style = ring)
         }
     }
 }
