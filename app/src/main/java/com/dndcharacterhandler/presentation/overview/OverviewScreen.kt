@@ -876,20 +876,11 @@ private fun OverviewContent(
     val miniStats = remember(character, strings) {
         val active = character?.let { activeConditions(it.conditions, it.currentHp) }.orEmpty()
         val exhaustion = character?.exhaustion ?: 0
-        val initiativeEffects = rollEffects(D20Test.Initiative, active, exhaustion)
         val baseSpeed = character?.speed ?: 30
         val speed = effectiveSpeed(baseSpeed, active, exhaustion)
-        // In the row's order: the initiative, the armor class in its shield, the speed.
+        // In the row's order: the armor class in its shield, the speed. The initiative is off the overview (owner's wish,
+        // 2026-10-09; its roll and its bonus's pop-ups wait for their new place, see the backlog).
         listOf(
-            OverviewStat(
-                labelKey = "overview_initiative",
-                value = signed(calculateInitiative(character?.dexterity ?: 10, character?.initiativeBonus ?: 0) + initiativeEffects.modifier),
-                icon = null,
-                field = OverviewMiniStatField.INITIATIVE,
-                worse = initiativeEffects.isWorse,
-                better = initiativeEffects.isBetter,
-                delta = initiativeEffects.modifier
-            ),
             OverviewStat(
                 // The same label as the Combat screen's card.
                 labelKey = "stat_card_armor_class",

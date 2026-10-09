@@ -457,11 +457,6 @@ internal fun attributesSectionItems(
             .filter { it.isDarkvisionFeature() }
             .localizedWith(darkvisionCatalogLookup, russian = strings.language == AppLanguage.RUSSIAN)
     }
-    val darkvisionFeet = when (character.darkvisionMode) {
-        DarkvisionMode.AUTO -> darkvisionFeatures.mapNotNull { it.darkvisionFeet() }.maxOrNull() ?: 0
-        DarkvisionMode.MANUAL -> character.darkvisionManualFeet
-    }
-    val darkvisionValue = if (darkvisionFeet > 0) "$darkvisionFeet ${text("inventory_unit_feet")}" else "—"
     val skillRows = remember(characterBundle?.skills, abilityScores, proficiencyBonus) {
         buildSkillRows(characterBundle?.skills.orEmpty(), abilityScores, proficiencyBonus)
     }
@@ -504,11 +499,11 @@ internal fun attributesSectionItems(
         mutableStateOf(character.darkvisionManualFeet.takeIf { it > 0 }?.toString().orEmpty())
     }
 
-    // The proficiency bonus and the senses: looked up now and then, under the fight's three in the overview's stats
-    // frame (owner's choices from boards, 2026-10-06: S4; 2026-10-08: U2). Their pop-ups are this section's.
+    // The proficiency bonus and the passive perception: looked up now and then, under the fight's stats in the overview's
+    // frame (owner's choices from boards, 2026-10-06: S4; 2026-10-08: U2). Their pop-ups are this section's. The darkvision
+    // is off the overview (owner's wish, 2026-10-09; its pop-up waits for its new place, see the backlog).
     val proficiencyLabel = text("stat_card_proficiency")
     val passiveLabel = text("stat_card_passive_perception")
-    val darkvisionLabel = text("stat_card_darkvision")
     val senses: @Composable RowScope.() -> Unit = {
         PanelStat(label = proficiencyLabel, value = signed(proficiencyBonus), icon = Icons.Outlined.AutoAwesome, compact = true)
         PanelStat(
@@ -517,13 +512,6 @@ internal fun attributesSectionItems(
             icon = Icons.Outlined.Visibility,
             compact = true,
             onClick = { isPassiveDialogOpen = true }
-        )
-        PanelStat(
-            label = darkvisionLabel,
-            value = darkvisionValue,
-            icon = Icons.Outlined.DarkMode,
-            compact = true,
-            onClick = { isDarkvisionDialogOpen = true }
         )
     }
 
