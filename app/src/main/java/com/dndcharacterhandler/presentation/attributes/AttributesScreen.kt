@@ -1223,8 +1223,9 @@ private fun Feature.darkvisionFeet(): Int? =
         ?.groupValues?.get(1)?.toIntOrNull()
 
 /**
- * A passive check's line in the senses' frame (owner's choice from boards, 2026-10-09: D), as a skill's: its icon in
- * gold, the skill's name, the passive value at the end — in the conditions' colour when they moved it; a tap may edit it.
+ * A passive check's line in the senses' frame (owner's choice from boards, 2026-10-09: D), as an untrained skill's: its
+ * icon in the plain ring's colour, the skill's name muted, the passive value at the end — in the conditions' colour when
+ * they moved it; a tap may edit it.
  */
 @Composable
 private fun SenseLine(
@@ -1246,14 +1247,16 @@ private fun SenseLine(
             .padding(start = 6.dp, end = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
+        // As an untrained skill's line (owner, 2026-10-10): the icon in the plain ring's colour, the name muted — no one
+        // is trained in a passive check.
+        Icon(icon, contentDescription = null, tint = colors.text.label, modifier = Modifier.size(16.dp))
         Text(
             text = label,
             modifier = Modifier
                 .padding(start = 4.dp)
                 .weight(1f),
             style = MaterialTheme.typography.bodyMedium,
-            color = colors.text.primary,
+            color = colors.text.muted,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
