@@ -1,5 +1,8 @@
 package com.dndcharacterhandler.presentation.components
 
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -57,11 +60,11 @@ import androidx.compose.ui.unit.dp
 import com.dndcharacterhandler.domain.model.Character
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 
-/** The header's own row, under the status bar: the name and the level under it. */
+/** The header's own row, under the status bar: the level and the name on the icons' line, the experience under them. */
 val CharacterHeaderRow = 64.dp
 
-/** The experience's rule beside the level, under the name. */
-private val LevelRuleWidth = 120.dp
+/** The experience's rule under the name. */
+private val LevelRuleWidth = 200.dp
 
 /**
  * The level the header writes under the name (owner's choice from boards, 2026-10-09: И): the character's [level] and
@@ -179,62 +182,80 @@ fun BoxScope.PinnedCharacterHeader(
             onNameClick = onNameClick,
             nameShadow = shadow,
             height = CharacterHeaderRow,
-            subtitle = level?.let { { HeaderLevelLine(it, shadow) } }
+            leading = level?.let { { HeaderLevelWords(it, shadow) } },
+            under = level?.let { { HeaderLevelRule(it) } }
+        )
+    }
+}
+
+/** A level up is due: the experience reached the next level's. */
+private fun HeaderLevel.due(): Boolean = level < MAX_CHARACTER_LEVEL && levelForExperience(experience) > level
+
+/** The level's taps: the overview's add experience or open Character Wizard; elsewhere none. */
+@OptIn(ExperimentalFoundationApi::class)
+private fun Modifier.levelTaps(level: HeaderLevel): Modifier =
+    if (level.onClick != null || level.onLongClick != null) {
+        combinedClickable(onClick = level.onClick ?: {}, onLongClick = level.onLongClick)
+    } else {
+        this
+    }
+
+/**
+ * «I LVL» before the name, on its baseline (owner's choices from boards, 2026-10-10: D1, U4): the Roman numeral as large
+ * as the name (`titleLarge`), «LVL» small (`labelMedium`), semibold and spaced, in `text.label`; both in
+ * `accent.inspiration` when a level up is due.
+ */
+@Composable
+private fun RowScope.HeaderLevelWords(level: HeaderLevel, shadow: Shadow) {
+    val colors = LocalDesignTokens.current.colors
+    val due = level.due()
+    val description = LocalStrings.current.format("overview_level_format", level.level)
+    val deep = Modifier.drawWithContent { repeat(3) { drawContent() } }
+    Row(
+        modifier = Modifier
+            .alignByBaseline()
+            .clip(RoundedCornerShape(8.dp))
+            .levelTaps(level)
+            .semantics(mergeDescendants = true) { contentDescription = description }
+            .padding(end = 10.dp),
+        verticalAlignment = Alignment.Bottom
+    ) {
+        Text(
+            text = romanNumeral(level.level),
+            modifier = Modifier.alignByBaseline().then(deep),
+            style = MaterialTheme.typography.titleLarge.copy(shadow = shadow),
+            color = if (due) colors.accent.inspiration else colors.text.primary,
+            maxLines = 1
+        )
+        Text(
+            text = " " + text("overview_level_short").uppercase(),
+            modifier = Modifier.alignByBaseline().then(deep),
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold, letterSpacing = 1.sp, shadow = shadow),
+            color = if (due) colors.accent.inspiration else colors.text.label,
+            maxLines = 1
         )
     }
 }
 
 /**
- * «I lvl» and the experience's rule under the name: the rule on the track `progress.xpTrack`, filled from the left in
- * gold — in `accent.inspiration`, the words too, when a level up is due; in `accent.xpCapped` at the last level.
+ * The experience's rule under the name: on the track `progress.xpTrack`, filled from the left in gold — in
+ * `accent.inspiration` when a level up is due, in `accent.xpCapped` at the last level. Its taps are the level's.
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun HeaderLevelLine(level: HeaderLevel, shadow: Shadow) {
+private fun HeaderLevelRule(level: HeaderLevel) {
     val colors = LocalDesignTokens.current.colors
-    val gold = MaterialTheme.colorScheme.primary
-    val due = level.level < MAX_CHARACTER_LEVEL && levelForExperience(level.experience) > level.level
     val fill = when {
-        due -> colors.accent.inspiration
+        level.due() -> colors.accent.inspiration
         level.level >= MAX_CHARACTER_LEVEL -> colors.accent.xpCapped
-        else -> gold
+        else -> MaterialTheme.colorScheme.primary
     }
     val progress = experienceProgress(level.level, level.experience)
-    val description = LocalStrings.current.format("overview_level_format", level.level)
-    val deep = Modifier.drawWithContent { repeat(3) { drawContent() } }
-    Row(
-        modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
-            .then(
-                if (level.onClick != null || level.onLongClick != null) {
-                    Modifier.combinedClickable(onClick = level.onClick ?: {}, onLongClick = level.onLongClick)
-                } else {
-                    Modifier
-                }
-            )
-            .semantics(mergeDescendants = true) { contentDescription = description }
-            .padding(horizontal = 6.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = romanNumeral(level.level),
-            modifier = deep,
-            style = MaterialTheme.typography.titleMedium.copy(shadow = shadow),
-            color = if (due) colors.accent.inspiration else colors.text.primary
-        )
-        Text(
-            text = " " + text("overview_level_short"),
-            modifier = deep,
-            style = MaterialTheme.typography.labelMedium.copy(shadow = shadow),
-            color = if (due) colors.accent.inspiration else colors.text.label
-        )
-        Canvas(modifier = Modifier.padding(start = 10.dp).width(LevelRuleWidth).height(8.dp)) {
-            val h = 3.dp.toPx()
-            val y = size.height / 2 - h / 2
-            val corner = CornerRadius(h / 2)
-            drawRoundRect(colors.progress.xpTrack, Offset(0f, y), Size(size.width, h), corner)
-            if (progress > 0f) drawRoundRect(fill, Offset(0f, y), Size(size.width * progress, h), corner)
-        }
+    Canvas(modifier = Modifier.clip(RoundedCornerShape(4.dp)).levelTaps(level).width(LevelRuleWidth).height(8.dp)) {
+        val h = 3.dp.toPx()
+        val y = size.height / 2 - h / 2
+        val corner = CornerRadius(h / 2)
+        drawRoundRect(colors.progress.xpTrack, Offset(0f, y), Size(size.width, h), corner)
+        if (progress > 0f) drawRoundRect(fill, Offset(0f, y), Size(size.width * progress, h), corner)
     }
 }
 

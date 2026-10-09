@@ -1,8 +1,10 @@
 package com.dndcharacterhandler.presentation.components
 
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -32,10 +34,12 @@ fun CharacterScreenHeader(
     onNameClick: (() -> Unit)? = null,
     /** A shadow under the name where the header lies on a picture (the overview's art); drawn deep, thrice. */
     nameShadow: Shadow? = null,
-    /** The row's height: the shared header makes room for its second line. */
+    /** The row's height. */
     height: Dp = 56.dp,
-    /** A second line under the name (the level and its experience). */
-    subtitle: (@Composable () -> Unit)? = null
+    /** Before the name, on its baseline (the level): the name stays on the icons' line either way. */
+    leading: (@Composable RowScope.() -> Unit)? = null,
+    /** Under the name, hanging from it (the experience's rule). */
+    under: (@Composable () -> Unit)? = null
 ) {
     val tokens = LocalDesignTokens.current.typography
     val colors = LocalDesignTokens.current.colors
@@ -51,20 +55,28 @@ fun CharacterScreenHeader(
             onOpenDice = onOpenDice,
             modifier = Modifier.align(Alignment.Center)
         )
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = name.ifBlank { text("overview_name_placeholder") },
-            modifier = Modifier
-                .padding(horizontal = 52.dp)
-                .then(if (onNameClick != null) Modifier.clickable(onClick = onNameClick) else Modifier)
-                .then(if (nameShadow != null) Modifier.drawWithContent { repeat(3) { drawContent() } } else Modifier),
-            style = MaterialTheme.typography.titleLarge.copy(fontSize = tokens.titleLarge.fontSizeSp.sp, shadow = nameShadow),
-            color = colors.text.primary,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Center
-        )
-        subtitle?.invoke()
+        // The name on the icons' line, whatever comes before it (owner's choice from boards, 2026-10-10: D).
+        Row(modifier = Modifier.padding(horizontal = 52.dp), verticalAlignment = Alignment.Bottom) {
+            leading?.invoke(this)
+            Text(
+                text = name.ifBlank { text("overview_name_placeholder") },
+                modifier = Modifier
+                    .alignByBaseline()
+                    .weight(1f, fill = false)
+                    .then(if (onNameClick != null) Modifier.clickable(onClick = onNameClick) else Modifier)
+                    .then(if (nameShadow != null) Modifier.drawWithContent { repeat(3) { drawContent() } } else Modifier),
+                style = MaterialTheme.typography.titleLarge.copy(fontSize = tokens.titleLarge.fontSizeSp.sp, shadow = nameShadow),
+                color = colors.text.primary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center
+            )
+        }
+        if (under != null) {
+            Box(modifier = Modifier.align(Alignment.Center).offset(y = UnderTheName)) { under() }
         }
     }
 }
+
+/** From the row's middle (the name's) down to what hangs under the name: the name's half and a little air. */
+private val UnderTheName = 18.dp
