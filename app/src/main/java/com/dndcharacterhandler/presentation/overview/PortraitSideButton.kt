@@ -1,8 +1,6 @@
 package com.dndcharacterhandler.presentation.overview
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.Box
@@ -105,22 +103,28 @@ internal val SideIconLongRest: ImageVector get() = NightSleepIcon
  */
 internal val SideIconInspiration: ImageVector get() = PolarStarIcon
 
-/** The polar star on its coin: nearly to the coin's edge, its thin points in sight. */
+/** The polar star: larger than the other icons, its thin points in sight. */
 internal val InspirationIconSize = 34.dp
 
-/** A side button's size; the column of the conditions' marks keeps to it. */
+/** A side button's icon: as the header's menu and dice. */
+internal val PortraitSideIconSize = 28.dp
+
+/** A side button's tap area, as the header's buttons'. */
 internal val PortraitSideButtonSize = 44.dp
 
-/** Between the buttons, and the marks, of a side's column. */
-internal val PortraitSideGap = 8.dp
+/**
+ * From one icon's middle to the next down a side: the header's icon, then the side's buttons, on one step (owner's
+ * choice from boards, 2026-10-10: B).
+ */
+internal val PortraitSideStep = 52.dp
 
 
 /**
- * A button at the portrait's sides (owner's choices from boards, 2026-10-07: K1, T4; 2026-10-09: И): the rests' on the
- * left, inspiration and the experience's on the right, all of one kind — a coin: the card's dark fill, an outline light
- * above and dim below, and under it a drop shadow ([ornament.dropShadow]); the shadow is what says "press me", where a
- * stat's mark has none. Its icon or word is in the text's colour. [add] puts a small «+» before it, inside the coin:
- * the experience's coin reads «+XP» (owner's wish, 2026-10-09).
+ * A button at the portrait's sides (owner's choices from boards, 2026-10-09: И; 2026-10-10: B): the rests' on the left,
+ * inspiration and the experience's on the right — a bare icon as the header's menu and dice (28dp in a 44dp tap area,
+ * white), under the header's on one step ([PortraitSideStep]), a soft shade of [ornament.dropShadow] round it to read
+ * on a bright art. Inspiration, a toggle, is lit in its accent while on. [add] puts a small «+» before a word: the
+ * experience's reads «+XP» (owner's wish, 2026-10-09).
  */
 @Composable
 internal fun PortraitSideButton(
@@ -129,8 +133,8 @@ internal fun PortraitSideButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     add: Boolean = false,
-    iconSize: Dp = 24.dp,
-    /** A toggle's state (inspiration): on, it is lit in [accent] at 12 % and its icon is in it. Null: a plain button. */
+    iconSize: Dp = PortraitSideIconSize,
+    /** A toggle's state (inspiration): on, its icon is lit in [accent]. Null: a plain button. */
     on: Boolean? = null,
     accent: Color = LocalDesignTokens.current.colors.accent.inspiration,
     /** A word in place of the icon, in the serif: the experience's coin writes «XP». */
@@ -138,28 +142,18 @@ internal fun PortraitSideButton(
 ) {
     val colors = LocalDesignTokens.current.colors
     Box(modifier = modifier.size(PortraitSideButtonSize)) {
-        // The coin's shadow: a little below it, fading out 5dp past its edge.
+        // A soft shade round the icon, so it reads on a bright art: no coin, no edge.
         Canvas(modifier = Modifier.matchParentSize()) {
-            val radius = size.minDimension / 2 + CoinShadowSpread.toPx()
-            val center = center.copy(y = center.y + CoinShadowDrop.toPx())
+            val radius = size.minDimension * IconShadeReach
             drawCircle(
-                brush = Brush.radialGradient(
-                    0.6f to colors.ornament.dropShadow,
-                    1f to Color.Transparent,
-                    center = center,
-                    radius = radius
-                ),
-                radius = radius,
-                center = center
+                brush = Brush.radialGradient(0f to colors.ornament.dropShadow, 1f to Color.Transparent, center = center, radius = radius),
+                radius = radius
             )
         }
         Box(
             modifier = Modifier
                 .size(PortraitSideButtonSize)
                 .clip(CircleShape)
-                .background(colors.surface.card)
-                .background(if (on == true) accent.copy(alpha = LocalDesignTokens.current.alpha.faint) else Color.Transparent)
-                .border(1.dp, Brush.verticalGradient(listOf(colors.text.label, colors.border.muted)), CircleShape)
                 .then(
                     if (on != null) {
                         Modifier.toggleable(value = on, role = Role.Switch, onValueChange = { onClick() })
@@ -192,7 +186,7 @@ internal fun PortraitSideButton(
                         } else {
                             Modifier
                         },
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.titleMedium.copy(shadow = artShadow()),
                         color = tint
                     )
                 } else if (icon != null) {
@@ -208,5 +202,5 @@ private val PlusSize = 7.dp
 private val PlusStroke = 2.1.dp
 private val PlusUnderWord = 1.5.dp
 
-private val CoinShadowDrop = 2.dp
-private val CoinShadowSpread = 5.dp
+/** How far the shade round an icon reaches: a share of the tap area. */
+private const val IconShadeReach = 0.62f

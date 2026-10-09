@@ -1,4 +1,5 @@
 package com.dndcharacterhandler.presentation.overview
+import com.dndcharacterhandler.presentation.components.CharacterHeaderRow
 import androidx.compose.ui.platform.LocalConfiguration
 import com.dndcharacterhandler.domain.rules.proficiencyBonusForLevel
 import androidx.compose.material.icons.outlined.AutoAwesome
@@ -935,7 +936,7 @@ private fun OverviewContent(
                                 modifier = Modifier
                                     .align(Alignment.TopStart)
                                     .padding(start = 24.dp, top = CharacterHeaderInset + PortraitCoinsTop),
-                                verticalArrangement = Arrangement.spacedBy(PortraitSideGap)
+                                verticalArrangement = Arrangement.spacedBy(PortraitSideStep - PortraitSideButtonSize)
                             ) {
                                 PortraitSideButton(
                                     icon = SideIconShortRest,
@@ -954,7 +955,7 @@ private fun OverviewContent(
                                     modifier = Modifier
                                         .align(Alignment.TopEnd)
                                         .padding(end = 24.dp, top = CharacterHeaderInset + PortraitCoinsTop),
-                                    verticalArrangement = Arrangement.spacedBy(PortraitSideGap)
+                                    verticalArrangement = Arrangement.spacedBy(PortraitSideStep - PortraitSideButtonSize)
                                 ) {
                                     PortraitSideButton(
                                         icon = SideIconInspiration,
@@ -1624,8 +1625,11 @@ private fun ExperienceModeButton(
     }
 }
 
-/** From the header's foot to the portrait's coins. */
-private val PortraitCoinsTop = 16.dp
+/**
+ * From the header's foot to the top of the side buttons' column: the first button's middle one [PortraitSideStep] under
+ * the header's icons' middle (owner's choice from boards, 2026-10-10: B).
+ */
+private val PortraitCoinsTop = PortraitSideStep - CharacterHeaderRow / 2 - PortraitSideButtonSize / 2
 
 @Composable
 private fun PortraitFallback(characterName: String) {
