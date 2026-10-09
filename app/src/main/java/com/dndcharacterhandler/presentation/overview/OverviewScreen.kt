@@ -1,4 +1,5 @@
 package com.dndcharacterhandler.presentation.overview
+import com.dndcharacterhandler.presentation.components.LocalAppSnackbar
 import androidx.compose.material.icons.outlined.Shield
 import com.dndcharacterhandler.presentation.components.HeaderLevel
 import com.dndcharacterhandler.presentation.components.CharacterHeaderInset
@@ -454,7 +455,7 @@ class OverviewViewModel(
     fun spendHitDice(characterBundle: CharacterBundle, picked: Map<Int, Int>, rolls: List<Int>) {
         val current = characterBundle.character
         val count = picked.values.sum()
-        if (count <= 0) return
+        if (count <= 0 || current.isDeadNow()) return
         val catalog = _catalog.value
         val healing = hitDiceHealing(rolls, abilityModifier(current.constitution))
 
@@ -509,6 +510,7 @@ class OverviewViewModel(
 
     fun longRest(characterBundle: CharacterBundle) {
         val current = characterBundle.character
+        if (current.isDeadNow()) return
         viewModelScope.launch {
             characterRepository.updateHitPoints(
                 characterId = current.id,
@@ -548,6 +550,7 @@ class OverviewViewModel(
 
     fun shortRest(characterBundle: CharacterBundle) {
         val current = characterBundle.character
+        if (current.isDeadNow()) return
         viewModelScope.launch {
             if (current.spellSlotsRestoreOnShortRest) {
                 characterRepository.updateSpellSlotRemaining(current.id, current.spellSlotMaximums)
@@ -810,7 +813,17 @@ private fun OverviewContent(
     val rollDice = LocalDiceRoller.current
     // The Wilhelm scream: once, when the character dies (the third failed death save, however it
     // came: a hit, the d20, a circle). Not for one who was dead already when the sheet opened.
-    val dead = character?.let { isDead(DeathSaves(it.deathSaveSuccesses, it.deathSaveFailures), it.exhaustion) } ?: false
+    val dead = character?.isDeadNow() ?: false
+    val snackbar = LocalAppSnackbar.current
+    // The dead don't rest (owner's choice, 2026-10-09): a rest's coin says so. Only healing raises one fallen at 0 hit
+    // points; one who died of exhaustion a rest can't help either.
+    fun restOrNotice(open: () -> Unit) {
+        when {
+            !dead -> open()
+            (character?.exhaustion ?: 0) >= MAX_EXHAUSTION -> snackbar.show(strings["overview_rest_dead_exhaustion"], null) {}
+            else -> snackbar.show(strings["overview_rest_dead"], null) {}
+        }
+    }
     var wasDead by remember(character?.id) { mutableStateOf<Boolean?>(null) }
     LaunchedEffect(character?.id, dead) {
         if (character == null) return@LaunchedEffect
@@ -924,12 +937,12 @@ private fun OverviewContent(
                                 PortraitSideButton(
                                     icon = SideIconShortRest,
                                     contentDescription = text("overview_short_rest"),
-                                    onClick = { isShortRestDialogOpen = true }
+                                    onClick = { restOrNotice { isShortRestDialogOpen = true } }
                                 )
                                 PortraitSideButton(
                                     icon = SideIconLongRest,
                                     contentDescription = text("overview_long_rest"),
-                                    onClick = { isLongRestDialogOpen = true }
+                                    onClick = { restOrNotice { isLongRestDialogOpen = true } }
                                 )
                             }
                             if (character != null) {
@@ -1910,6 +1923,9 @@ private fun ArtStat(
         }
     }
 }
+
+/** Dead: three failed death saves, or the last level of exhaustion. */
+private fun Character.isDeadNow(): Boolean = isDead(DeathSaves(deathSaveSuccesses, deathSaveFailures), exhaustion)
 
 /** The most hit points one change can take or give: four digits. */
 private const val MaxHpChange = 9999
