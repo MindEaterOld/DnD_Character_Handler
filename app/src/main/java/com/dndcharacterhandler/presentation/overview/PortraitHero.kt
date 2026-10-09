@@ -43,6 +43,13 @@ private val PortraitHeroMaxHeight = 640.dp
 /** How far up from its foot the art melts into the background. */
 private val PortraitHeroFade = 220.dp
 
+/**
+ * The vignette (owner's choice from boards, 2026-10-10: C): how much of the art's width each side, and of its height at
+ * the top, melts into the background — the header and the coins lie there, and they must read on a bright art.
+ */
+private const val PortraitHeroSideFade = 0.32f
+private const val PortraitHeroTopFade = 0.28f
+
 /** A deep soft shadow under what is written on the art, for it to read on a light one. */
 @Composable
 internal fun artShadow(): Shadow = with(LocalDensity.current) {
@@ -65,7 +72,8 @@ internal fun Modifier.bleed(margin: Dp): Modifier = layout { measurable, constra
 
 /**
  * The overview's portrait (owner's choices from boards, 2026-10-09: the art bleeding to the edges, 1; И): no frame — the
- * picture as wide as the screen from the phone's very top, its foot melting into the background; on it whatever
+ * picture as wide as the screen from the phone's very top, every edge melting into the background — its sides and its
+ * top as a vignette (2026-10-10: C), its foot under the hit points; on it whatever
  * [content] lays (the coins, the survival block). A tap on the picture is [onClick]. Three failed death saves drain
  * the picture to black and white.
  */
@@ -95,10 +103,23 @@ internal fun PortraitHero(
         Box(
             modifier = Modifier
                 .matchParentSize()
-                // Its foot melts into whatever is behind it: the colours here are the mask's alpha only.
+                // Its edges melt into whatever is behind it — the sides and the top as a vignette, the foot under the
+                // hit points: the colours here are the masks' alpha only.
                 .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
                 .drawWithContent {
                     drawContent()
+                    val opaque = colors.surface.portrait
+                    val clear = opaque.copy(alpha = 0f)
+                    drawRect(
+                        Brush.horizontalGradient(
+                            0f to clear,
+                            PortraitHeroSideFade to opaque,
+                            1f - PortraitHeroSideFade to opaque,
+                            1f to clear
+                        ),
+                        blendMode = BlendMode.DstIn
+                    )
+                    drawRect(Brush.verticalGradient(0f to clear, PortraitHeroTopFade to opaque), blendMode = BlendMode.DstIn)
                     val fade = PortraitHeroFade.toPx()
                     drawRect(
                         Brush.verticalGradient(
