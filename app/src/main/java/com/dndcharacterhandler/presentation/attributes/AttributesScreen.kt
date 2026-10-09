@@ -575,7 +575,7 @@ internal fun attributesSectionItems(
                 BorderLabelCard(
                     label = text("senses_group_passive"),
                     modifier = Modifier
-                        .weight(1.5f)
+                        .weight(1.25f)
                         .fillMaxHeight(),
                     labelStyle = abilityLabelStyle,
                     cornerRadius = 7.dp
@@ -607,7 +607,8 @@ internal fun attributesSectionItems(
                     }
                 }
                 BorderLabelCard(
-                    label = text("senses_group_sight"),
+                    // Named for the darkvision itself: «Зрение — Нет» read as a blind character (owner, 2026-10-09).
+                    label = text("senses_group_darkvision"),
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight(),
@@ -1261,7 +1262,7 @@ private fun SenseLine(
     }
 }
 
-/** The darkvision in the senses' «Зрение» frame: the moon, the feet large and «в темноте» under them; «Нет», quiet. */
+/** The darkvision in the senses' frame of its name: the moon and the feet large; «Нет», quiet. */
 @Composable
 private fun DarkvisionValue(feet: Int) {
     val colors = LocalDesignTokens.current.colors
@@ -1275,7 +1276,6 @@ private fun DarkvisionValue(feet: Int) {
         Icon(Icons.Outlined.DarkMode, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
         if (feet > 0) {
             Text("$feet ${text("inventory_unit_feet")}", style = MaterialTheme.typography.titleLarge, color = colors.text.primary)
-            Text(text("senses_darkvision_caption"), style = MaterialTheme.typography.labelMedium, color = colors.text.label)
         } else {
             Text(text("common_none"), style = MaterialTheme.typography.titleLarge, color = colors.text.subtle)
         }

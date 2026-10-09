@@ -626,21 +626,13 @@
     "fr": "Passives",
     "es": "Pasivas"
   },
-  "senses_group_sight": {
-    "maxChars": 8,
-    "en": "Sight",
-    "ru": "\u0417\u0440\u0435\u043d\u0438\u0435",
-    "de": "Sicht",
-    "fr": "Vue",
-    "es": "Vista"
-  },
-  "senses_darkvision_caption": {
-    "maxChars": 17,
-    "en": "in the dark",
-    "ru": "\u0432 \u0442\u0435\u043c\u043d\u043e\u0442\u0435",
-    "de": "im Dunkeln",
-    "fr": "dans le noir",
-    "es": "en la oscuridad"
+  "senses_group_darkvision": {
+    "maxChars": 11,
+    "en": "Darkvision",
+    "ru": "\u0422\u0451\u043c\u043d\u043e\u0435 \u0437\u0440.",
+    "de": "Dunkelsicht",
+    "fr": "Vision noir",
+    "es": "Visi\u00f3n osc."
   },
   "attributes_darkvision_mode_auto": {
     "en": "Auto",
