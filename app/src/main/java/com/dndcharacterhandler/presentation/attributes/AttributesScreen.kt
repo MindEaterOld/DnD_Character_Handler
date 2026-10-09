@@ -1587,15 +1587,14 @@ private fun SkillGroupCard(
 
 /**
  * A skill's line: the training dot, the name, the roll's marker and the bonus as it is now. What the character is
- * trained in is gold (owner's choice from boards, 2026-10-08: N4): the dot, the name and the bonus; expertise is the
- * gold dot in a gold ring; a jack of all trades' half training is the gold ring half filled (J1), its name and bonus
- * as an untrained skill's.
+ * trained in shows by its dot alone, in gold (owner's wish, 2026-10-10; before, the name and the bonus were gold too —
+ * N4, 2026-10-08): expertise is the gold dot in a gold ring, a jack of all trades' half training the gold ring half
+ * filled (J1); the name is muted and the bonus `text.primary` on every line.
  */
 @Composable
 private fun SkillLine(skill: SkillRow, effects: RollEffects?, modifier: Modifier = Modifier) {
     val strings = LocalStrings.current
     val colors = LocalDesignTokens.current.colors
-    val gold = MaterialTheme.colorScheme.primary
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -1611,7 +1610,7 @@ private fun SkillLine(skill: SkillRow, effects: RollEffects?, modifier: Modifier
                 .padding(start = 6.dp)
                 .weight(1f),
             style = MaterialTheme.typography.bodyMedium,
-            color = if (skill.proficient) gold else colors.text.muted,
+            color = colors.text.muted,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -1623,7 +1622,7 @@ private fun SkillLine(skill: SkillRow, effects: RollEffects?, modifier: Modifier
                 .widthIn(min = 24.dp),
             style = MaterialTheme.typography.bodyLarge,
             // A value the conditions moved keeps its colour, as everywhere.
-            color = changedValueColor(effects?.modifier ?: 0) ?: if (skill.proficient) gold else colors.text.primary,
+            color = changedValueColor(effects?.modifier ?: 0) ?: colors.text.primary,
             textAlign = TextAlign.End
         )
     }
@@ -1692,11 +1691,13 @@ private fun SavingThrowGroups(
     }
 }
 
-/** A saving throw's line, as a skill's: the training's dot, the name, the roll's marker and the bonus as it is now. */
+/**
+ * A saving throw's line, as a skill's: the training's dot (gold when trained, the only gold of the line), the name, the
+ * roll's marker and the bonus as it is now.
+ */
 @Composable
 private fun SaveLine(score: AbilityScore, proficiencyBonus: Int, effects: RollEffects?, modifier: Modifier = Modifier) {
     val colors = LocalDesignTokens.current.colors
-    val gold = MaterialTheme.colorScheme.primary
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -1712,7 +1713,7 @@ private fun SaveLine(score: AbilityScore, proficiencyBonus: Int, effects: RollEf
                 .padding(start = 6.dp)
                 .weight(1f),
             style = MaterialTheme.typography.bodyMedium,
-            color = if (score.saveProficient) gold else colors.text.muted,
+            color = colors.text.muted,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -1723,7 +1724,7 @@ private fun SaveLine(score: AbilityScore, proficiencyBonus: Int, effects: RollEf
                 .padding(start = 4.dp)
                 .widthIn(min = 24.dp),
             style = MaterialTheme.typography.bodyLarge,
-            color = changedValueColor(effects?.modifier ?: 0) ?: if (score.saveProficient) gold else colors.text.primary,
+            color = changedValueColor(effects?.modifier ?: 0) ?: colors.text.primary,
             textAlign = TextAlign.End
         )
     }

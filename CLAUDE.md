@@ -91,11 +91,11 @@ What can be pressed as an action and what shows a value must look different at a
 
 ## Saving throws — a section of their own (owner's choices from boards, 2026-10-08: S1, in two frames)
 
-- The saving throws are out of the ability cards (which show the modifier over the score only): a section «Спасброски» right after «Характеристики», the body's three (Strength, Dexterity, Constitution) in a frame beside the mind's three, each frame as a skills' group, a line each as a skill's — the training's dot, the name (`attributes_save_<ability>`, `maxChars` 14), the conditions' arrows and the bonus, gold when trained (as the skills). A tap rolls the save; its training is changed in the ability's editor, as before.
+- The saving throws are out of the ability cards (which show the modifier over the score only): a section «Спасброски» right after «Характеристики», the body's three (Strength, Dexterity, Constitution) in a frame beside the mind's three, each frame as a skills' group, a line each as a skill's — the training's dot, the name (`attributes_save_<ability>`, `maxChars` 14), the conditions' arrows and the bonus; a trained save's dot gold, its name and bonus as every line's (as the skills). A tap rolls the save; its training is changed in the ability's editor, as before.
 
-## Skills — what is trained is gold (owner's choice from boards, 2026-10-08: N4)
+## Skills — what is trained is a gold dot (owner's wish, 2026-10-10; before it, N4 from boards, 2026-10-08)
 
-- A skill the character is trained in is gold `primary` on its line: the dot, the name and the bonus; expertise is the gold dot in a gold ring; a jack of all trades' half training is the gold ring half filled — its left half (J1, 2026-10-08), the name and bonus as untrained; an untrained skill has the plain ring, its name `text.muted`, its bonus `text.primary`. A bonus the conditions moved keeps `changedValueColor`. The groups' labels (СИЛ, ЛОВ…) stay as the ability cards' titles. Tried and turned down: gold labels, gold dots alone.
+- A skill the character is trained in shows it by its dot alone, gold `primary` — the name and the bonus are as every line's, the name `text.muted`, the bonus `text.primary` (owner's wish, 2026-10-10: only the dots gold); expertise is the gold dot in a gold ring; a jack of all trades' half training is the gold ring half filled — its left half (J1, 2026-10-08), the name and bonus as untrained; an untrained skill has the plain ring, its name `text.muted`, its bonus `text.primary`. A bonus the conditions moved keeps `changedValueColor`. The groups' labels (СИЛ, ЛОВ…) stay as the ability cards' titles. Tried and turned down: gold labels, gold dots alone.
 
 ## Conditions — how the sheet shows them (owner's choices, 2026-10-03)
 
