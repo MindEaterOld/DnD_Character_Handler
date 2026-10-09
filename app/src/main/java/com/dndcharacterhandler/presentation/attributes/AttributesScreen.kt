@@ -574,8 +574,9 @@ internal fun attributesSectionItems(
             ) {
                 BorderLabelCard(
                     label = text("senses_group_passive"),
+                    // Near half and half: the darkvision's whole name fits its gap (owner's choice from boards, 2026-10-10: C).
                     modifier = Modifier
-                        .weight(1.25f)
+                        .weight(0.95f)
                         .fillMaxHeight(),
                     labelStyle = abilityLabelStyle,
                     cornerRadius = 7.dp
@@ -583,7 +584,7 @@ internal fun attributesSectionItems(
                     Column(modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)) {
                         SenseLine(
                             icon = Icons.Outlined.Visibility,
-                            label = text("skill_perception"),
+                            label = text("skill_perception_short"),
                             value = passivePerception.toString(),
                             valueColor = changedValueColor(passiveShift),
                             onClick = {
@@ -594,20 +595,20 @@ internal fun attributesSectionItems(
                         )
                         SenseLine(
                             icon = Icons.Outlined.Psychology,
-                            label = text("skill_insight"),
+                            label = text("skill_insight_short"),
                             value = passiveInsight.toString(),
                             valueColor = changedValueColor(passiveShift)
                         )
                         SenseLine(
                             icon = Icons.Outlined.Search,
-                            label = text("skill_investigation"),
+                            label = text("skill_investigation_short"),
                             value = passiveInvestigation.toString(),
                             valueColor = changedValueColor(investigationShift)
                         )
                     }
                 }
                 BorderLabelCard(
-                    // Named for the darkvision itself: «Зрение — Нет» read as a blind character (owner, 2026-10-09).
+                    // Named for the darkvision itself, whole: «Зрение — Нет» read as a blind character (owner, 2026-10-09).
                     label = text("senses_group_darkvision"),
                     modifier = Modifier
                         .weight(1f)
@@ -1239,14 +1240,14 @@ private fun SenseLine(
             .heightIn(min = 36.dp)
             .clip(RoundedCornerShape(8.dp))
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(horizontal = 8.dp),
+            .padding(horizontal = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
         Text(
             text = label,
             modifier = Modifier
-                .padding(start = 8.dp)
+                .padding(start = 6.dp)
                 .weight(1f),
             style = MaterialTheme.typography.bodyMedium,
             color = colors.text.primary,
