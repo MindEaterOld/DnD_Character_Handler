@@ -5,7 +5,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -55,11 +55,29 @@ private val TabBarBlur = 24.dp
 /** The tint over the blurred screens: the card's colour at the stat cards' fill, as the overview's header's. */
 private const val TabBarTint = .62f
 
+/** The plate's height: in Classic a pill, its ends half circles of half this. */
+private val TabBarHeight = 62.dp
+
+/** From the plate's edge to a tab's lamp, all round. */
+private val TabInset = 8.dp
+
+/**
+ * A tab and its lamp: as tall as the plate within [TabInset], a circle — the end tabs' concentric with the plate's
+ * half-circle ends.
+ */
+private val TabSize = TabBarHeight - TabInset * 2
+
+/** The picked tab's lamp: gold at 12 %, as what is on lights up (inspiration, the conditions). */
+private const val TabLampAlpha = .12f
+
 /**
  * The tab bar: a plate with an outline, the screens running down under it and showing through it blurred over the
  * card's colour and tinted with it, as the overview's header's back (owner's choice, 2026-10-09) — [backdrop] is the
- * screens' own layer, laid at [backdropOrigin] in the window. Android before 12 can't blur: the tint alone. With etched
- * frames the picked tab is framed like the portrait's crest.
+ * screens' own layer, laid at [backdropOrigin] in the window. Android before 12 can't blur: the tint alone. In Classic the
+ * plate is a pill and the picked tab a circle lit in gold at 12 %, the end tabs' circles concentric with its half-circle
+ * ends (owner's choice from boards, 2026-10-09); the picked icon gold, the others dimmed to `text.subtle`, so the pick
+ * stands out by shape, hue and brightness. With etched frames the plate keeps its cut corners and the picked tab is
+ * framed like the portrait's crest, lit the same.
  */
 @Composable
 fun BottomNavigationBar(
@@ -78,8 +96,8 @@ fun BottomNavigationBar(
             .fillMaxWidth()
             .navigationBarsPadding()
             .padding(horizontal = 14.dp, vertical = TabBarGap)
-            .height(62.dp),
-        shape = RoundedCornerShape(if (etched) 12.dp else 26.dp),
+            .height(TabBarHeight),
+        shape = if (etched) RoundedCornerShape(12.dp) else RoundedCornerShape(50),
         color = Color.Transparent,
         border = BorderStroke(1.dp, colors.border.muted)
     ) {
@@ -99,37 +117,32 @@ fun BottomNavigationBar(
                     drawRect(colors.surface.card.copy(alpha = TabBarTint))
                 }
         )
+        // The end tabs' centres on the centres of the plate's ends, the others shared out evenly between them.
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 10.dp, vertical = 8.dp),
+                .padding(TabInset),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            val gold = MaterialTheme.colorScheme.primary
             screens.forEach { screen ->
                 val selected = currentRoute == screen.route
-                Column(
+                Box(
                     modifier = Modifier
-                        .weight(1f)
-                        .clip(if (etched) EngravedPortraitShape else RoundedCornerShape(18.dp))
-                        .background(if (selected) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent)
+                        .size(TabSize)
+                        .clip(if (etched) EngravedPortraitShape else CircleShape)
+                        .background(if (selected) gold.copy(alpha = TabLampAlpha) else Color.Transparent)
                         .then(if (etched && selected) Modifier.engravedBorder(colors.accent.inspiration) else Modifier)
-                        .selectable(selected = selected, role = Role.Tab, onClick = { onNavigate(screen) })
-                        .padding(horizontal = 2.dp, vertical = 10.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+                        .selectable(selected = selected, role = Role.Tab, onClick = { onNavigate(screen) }),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Box(
-                        modifier = Modifier.size(26.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = screen.icon,
-                            contentDescription = text(screen.titleKey),
-                            modifier = Modifier.size(if (selected) 24.dp else 22.dp),
-                            tint = if (selected) colors.text.icon else colors.text.miniLabel
-                        )
-                    }
+                    Icon(
+                        imageVector = screen.icon,
+                        contentDescription = text(screen.titleKey),
+                        modifier = Modifier.size(if (selected) 28.dp else 26.dp),
+                        tint = if (selected) gold else colors.text.subtle
+                    )
                 }
             }
         }
