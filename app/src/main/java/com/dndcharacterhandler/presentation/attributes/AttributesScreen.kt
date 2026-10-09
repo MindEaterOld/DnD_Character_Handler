@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation.attributes
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Psychology
 import androidx.compose.material.icons.outlined.DarkMode
@@ -561,41 +562,61 @@ internal fun attributesSectionItems(
         }
 
         item {
-            // The senses (owner's wish, 2026-10-09): what the character notices with no roll, and how far it sees in the
-            // dark, a line each as the skills'. A tap on the passive perception edits its bonus, on the darkvision its
-            // source; the passive insight and investigation only show.
+            // The senses (owner's choice from boards, 2026-10-09: D), drawn as the saves: two frames side by side —
+            // «Пассивные», a line each as a skill's (a tap on the perception edits its bonus; the insight and the
+            // investigation only show), and «Зрение», the darkvision large (a tap opens its source, auto or by hand).
             AttributesSectionTitle(title = text("attributes_senses"))
-            SheetPanel {
-                SenseLine(
-                    icon = Icons.Outlined.Visibility,
-                    label = text("senses_passive_perception"),
-                    value = passivePerception.toString(),
-                    valueColor = changedValueColor(passiveShift),
-                    onClick = {
-                        // A fresh draft each time: what was typed and dismissed last time isn't kept.
-                        passiveDraft = character.passivePerceptionBonus.toString()
-                        isPassiveDialogOpen = true
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Min),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                BorderLabelCard(
+                    label = text("senses_group_passive"),
+                    modifier = Modifier
+                        .weight(1.5f)
+                        .fillMaxHeight(),
+                    labelStyle = abilityLabelStyle,
+                    cornerRadius = 7.dp
+                ) {
+                    Column(modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)) {
+                        SenseLine(
+                            icon = Icons.Outlined.Visibility,
+                            label = text("skill_perception"),
+                            value = passivePerception.toString(),
+                            valueColor = changedValueColor(passiveShift),
+                            onClick = {
+                                // A fresh draft each time: what was typed and dismissed last time isn't kept.
+                                passiveDraft = character.passivePerceptionBonus.toString()
+                                isPassiveDialogOpen = true
+                            }
+                        )
+                        SenseLine(
+                            icon = Icons.Outlined.Psychology,
+                            label = text("skill_insight"),
+                            value = passiveInsight.toString(),
+                            valueColor = changedValueColor(passiveShift)
+                        )
+                        SenseLine(
+                            icon = Icons.Outlined.Search,
+                            label = text("skill_investigation"),
+                            value = passiveInvestigation.toString(),
+                            valueColor = changedValueColor(investigationShift)
+                        )
                     }
-                )
-                SenseLine(
-                    icon = Icons.Outlined.DarkMode,
-                    label = text("attributes_darkvision_title"),
-                    value = if (darkvisionFeet > 0) "$darkvisionFeet ${text("inventory_unit_feet")}" else text("common_none"),
-                    quiet = darkvisionFeet <= 0,
+                }
+                BorderLabelCard(
+                    label = text("senses_group_sight"),
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
+                    labelStyle = abilityLabelStyle,
+                    cornerRadius = 7.dp,
                     onClick = { isDarkvisionDialogOpen = true }
-                )
-                SenseLine(
-                    icon = Icons.Outlined.Psychology,
-                    label = text("senses_passive_insight"),
-                    value = passiveInsight.toString(),
-                    valueColor = changedValueColor(passiveShift)
-                )
-                SenseLine(
-                    icon = Icons.Outlined.Search,
-                    label = text("senses_passive_investigation"),
-                    value = passiveInvestigation.toString(),
-                    valueColor = changedValueColor(investigationShift)
-                )
+                ) {
+                    DarkvisionValue(darkvisionFeet)
+                }
             }
         }
 
@@ -1199,8 +1220,8 @@ private fun Feature.darkvisionFeet(): Int? =
         ?.groupValues?.get(1)?.toIntOrNull()
 
 /**
- * A sense's line (owner's wish, 2026-10-09), as a skill's: its icon in gold, its name, its value at the end — in its
- * conditions' colour when they moved it, quiet when there is none; a tap may edit it.
+ * A passive check's line in the senses' frame (owner's choice from boards, 2026-10-09: D), as a skill's: its icon in
+ * gold, the skill's name, the passive value at the end — in the conditions' colour when they moved it; a tap may edit it.
  */
 @Composable
 private fun SenseLine(
@@ -1208,24 +1229,23 @@ private fun SenseLine(
     label: String,
     value: String,
     valueColor: Color? = null,
-    quiet: Boolean = false,
     onClick: (() -> Unit)? = null
 ) {
     val colors = LocalDesignTokens.current.colors
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 40.dp)
+            .heightIn(min = 36.dp)
             .clip(RoundedCornerShape(8.dp))
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(horizontal = 4.dp),
+            .padding(horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
         Text(
             text = label,
             modifier = Modifier
-                .padding(start = 12.dp)
+                .padding(start = 8.dp)
                 .weight(1f),
             style = MaterialTheme.typography.bodyMedium,
             color = colors.text.primary,
@@ -1234,10 +1254,31 @@ private fun SenseLine(
         )
         Text(
             text = value,
-            modifier = Modifier.padding(start = 8.dp),
+            modifier = Modifier.padding(start = 4.dp),
             style = MaterialTheme.typography.bodyLarge,
-            color = valueColor ?: if (quiet) colors.text.subtle else colors.text.primary
+            color = valueColor ?: colors.text.primary
         )
+    }
+}
+
+/** The darkvision in the senses' «Зрение» frame: the moon, the feet large and «в темноте» under them; «Нет», quiet. */
+@Composable
+private fun DarkvisionValue(feet: Int) {
+    val colors = LocalDesignTokens.current.colors
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(Icons.Outlined.DarkMode, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
+        if (feet > 0) {
+            Text("$feet ${text("inventory_unit_feet")}", style = MaterialTheme.typography.titleLarge, color = colors.text.primary)
+            Text(text("senses_darkvision_caption"), style = MaterialTheme.typography.labelMedium, color = colors.text.label)
+        } else {
+            Text(text("common_none"), style = MaterialTheme.typography.titleLarge, color = colors.text.subtle)
+        }
     }
 }
 

@@ -421,6 +421,7 @@
     "es": "Historia"
   },
   "skill_insight": {
+    "maxChars": 18,
     "en": "Insight",
     "ru": "Проницательность",
     "de": "Motiv erkennen",
@@ -451,6 +452,7 @@
     "es": "Intimidación"
   },
   "skill_investigation": {
+    "maxChars": 18,
     "en": "Investigation",
     "ru": "Анализ",
     "de": "Nachforschungen",
@@ -496,6 +498,7 @@
     "es": "Naturaleza"
   },
   "skill_perception": {
+    "maxChars": 18,
     "en": "Perception",
     "ru": "Внимательность",
     "de": "Wahrnehmung",
@@ -615,29 +618,29 @@
     "fr": "Sens",
     "es": "Sentidos"
   },
-  "senses_passive_perception": {
-    "maxChars": 30,
-    "en": "Passive Perception",
-    "ru": "\u041f\u0430\u0441\u0441\u0438\u0432\u043d\u0430\u044f \u0432\u043d\u0438\u043c\u0430\u0442\u0435\u043b\u044c\u043d\u043e\u0441\u0442\u044c",
-    "de": "Passive Wahrnehmung",
-    "fr": "Perception passive",
-    "es": "Percepci\u00f3n pasiva"
+  "senses_group_passive": {
+    "maxChars": 15,
+    "en": "Passive",
+    "ru": "\u041f\u0430\u0441\u0441\u0438\u0432\u043d\u044b\u0435",
+    "de": "Passiv",
+    "fr": "Passives",
+    "es": "Pasivas"
   },
-  "senses_passive_insight": {
-    "maxChars": 30,
-    "en": "Passive Insight",
-    "ru": "\u041f\u0430\u0441\u0441\u0438\u0432\u043d\u0430\u044f \u043f\u0440\u043e\u043d\u0438\u0446\u0430\u0442\u0435\u043b\u044c\u043d\u043e\u0441\u0442\u044c",
-    "de": "Passives Motiv erkennen",
-    "fr": "Intuition passive",
-    "es": "Perspicacia pasiva"
+  "senses_group_sight": {
+    "maxChars": 8,
+    "en": "Sight",
+    "ru": "\u0417\u0440\u0435\u043d\u0438\u0435",
+    "de": "Sicht",
+    "fr": "Vue",
+    "es": "Vista"
   },
-  "senses_passive_investigation": {
-    "maxChars": 30,
-    "en": "Passive Investigation",
-    "ru": "\u041f\u0430\u0441\u0441\u0438\u0432\u043d\u044b\u0439 \u0430\u043d\u0430\u043b\u0438\u0437",
-    "de": "Passive Nachforschungen",
-    "fr": "Investigation passive",
-    "es": "Investigaci\u00f3n pasiva"
+  "senses_darkvision_caption": {
+    "maxChars": 17,
+    "en": "in the dark",
+    "ru": "\u0432 \u0442\u0435\u043c\u043d\u043e\u0442\u0435",
+    "de": "im Dunkeln",
+    "fr": "dans le noir",
+    "es": "en la oscuridad"
   },
   "attributes_darkvision_mode_auto": {
     "en": "Auto",
