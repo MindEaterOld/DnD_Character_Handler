@@ -16,12 +16,6 @@ object Defenses {
 
     val Kinds = setOf(RESISTANCE, IMMUNITY, VULNERABILITY, CONDITION_IMMUNITY)
 
-    /** The damage types of the 2024 rules, as the catalog keys them. */
-    val DamageTypes = listOf(
-        "acid", "bludgeoning", "cold", "fire", "force", "lightning", "necrotic",
-        "piercing", "poison", "psychic", "radiant", "slashing", "thunder"
-    )
-
     /**
      * The damage types in the sheet's groups, by key: "physical" (a weapon's: bludgeoning, piercing,
      * slashing), "elemental" and "other". A Barbarian's Rage resists the whole physical group.

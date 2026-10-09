@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation.attributes
 
+import com.dndcharacterhandler.domain.rules.RollMode
 import com.dndcharacterhandler.presentation.components.SheetLabel
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -11,7 +12,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
 import com.dndcharacterhandler.presentation.biography.BiographyLabel
 import com.dndcharacterhandler.presentation.components.OutlinedPanel
-import androidx.compose.foundation.layout.RowScope
 import com.dndcharacterhandler.presentation.components.StepButton
 import com.dndcharacterhandler.presentation.components.ToggleChip
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -26,10 +26,6 @@ import com.dndcharacterhandler.domain.rules.activeConditions
 import com.dndcharacterhandler.domain.rules.RollEffects
 import com.dndcharacterhandler.domain.rules.D20Test
 import androidx.compose.foundation.layout.widthIn
-import com.dndcharacterhandler.presentation.components.MiniStatCard
-import com.dndcharacterhandler.presentation.components.MiniStatCardCompactIconSize
-import com.dndcharacterhandler.presentation.components.MiniStatCardIcon
-import com.dndcharacterhandler.presentation.components.StatCardRow
 import com.dndcharacterhandler.presentation.components.BorderLabelCard
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -51,7 +47,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -59,7 +54,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AutoAwesome
-import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
@@ -412,8 +406,9 @@ internal class AttributesSectionParts(
 private val NoItems: LazyListScope.() -> Unit = {}
 
 /**
- * The section's list items for [characterBundle]: the proficiency, passive perception and darkvision cards,
- * then the ability scores, skills, proficiencies and defenses. The pop-ups they open show where this is called.
+ * The section's list items for [characterBundle]: the ability scores, the saving throws, the skills with the proficiency
+ * bonus and the passive perception over them, the proficiencies and the defenses. The pop-ups they open show where this
+ * is called.
  */
 @Composable
 internal fun attributesSectionItems(
@@ -448,7 +443,14 @@ internal fun attributesSectionItems(
     }
     val proficiencyBonus = proficiencyBonusForLevel(character.level)
     val perceptionSkill = characterBundle?.skills?.firstOrNull { it.name == "skill_perception" }
-    val passivePerception = passivePerceptionValue(character, proficiencyBonus, perceptionSkill)
+    val passiveBase = passivePerceptionValue(character, proficiencyBonus, perceptionSkill)
+    // With advantage on the check +5, with disadvantage −5 (the rules' Passive Perception); not exhaustion's −2: no d20 is rolled.
+    val passiveShift = when (checkEffects.getValue(AbilityType.WISDOM).mode) {
+        RollMode.ADVANTAGE -> 5
+        RollMode.DISADVANTAGE -> -5
+        RollMode.NORMAL -> 0
+    }
+    val passivePerception = passiveBase + passiveShift
     val darkvisionCatalogLookup = remember(darkvisionCatalogItems) { FeatureCatalogLookup(darkvisionCatalogItems) }
     val darkvisionFeatures = remember(characterBundle?.features, darkvisionCatalogLookup, strings.language) {
         characterBundle?.features.orEmpty()
@@ -551,7 +553,12 @@ internal fun attributesSectionItems(
                     label = passiveLabel,
                     value = passivePerception.toString(),
                     icon = Icons.Outlined.Visibility,
-                    onClick = { isPassiveDialogOpen = true }
+                    valueColor = changedValueColor(passiveShift),
+                    onClick = {
+                        // A fresh draft each time: what was typed and dismissed last time isn't kept.
+                        passiveDraft = character.passivePerceptionBonus.toString()
+                        isPassiveDialogOpen = true
+                    }
                 )
             }
             SkillGroups(
@@ -658,18 +665,21 @@ internal fun attributesSectionItems(
             title = text("attributes_passive_perception_bonus_title"),
             onDismiss = { isPassiveDialogOpen = false },
             onConfirm = {
-                onUpdatePassivePerceptionBonus(characterBundle, passiveDraft.toIntOrNull() ?: 0)
+                // Empty is no bonus; what isn't a number leaves the bonus as it was.
+                val bonus = if (passiveDraft.isBlank()) 0 else passiveDraft.trim().toIntOrNull()
+                if (bonus != null) onUpdatePassivePerceptionBonus(characterBundle, bonus)
                 isPassiveDialogOpen = false
             }
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text(LocalStrings.current.format("attributes_base_value", passivePerception))
+                // The value before the bonus being edited.
+                Text(LocalStrings.current.format("attributes_base_value", passivePerception - character.passivePerceptionBonus))
                 OutlinedTextField(
                     value = passiveDraft,
                     onValueChange = { passiveDraft = it },
                     label = { Text(text("attributes_additional_bonus")) },
                     singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
             }
         }
@@ -926,8 +936,8 @@ internal fun attributesSectionItems(
         }
     }
 
-    // The pop-ups of the sheet's rows: every option a chip, in groups that stay open, with how many are
-    // picked (owner's choice from boards, 2026-10-05).
+    // The pop-ups of the sheet's rows: every option a chip, in groups that stay open (owner's choices from boards,
+    // 2026-10-05; no count after a group's name, 2026-10-07).
     if (isArmorDialogOpen) {
         EditDialog(
             title = text("attributes_armor_dialog_title"),
@@ -940,6 +950,13 @@ internal fun attributesSectionItems(
             OptionGroup {
                 armorProficiencyOptions.forEach { option ->
                     OptionChip(strings[option.labelKey], option.id in armorDraft) { armorDraft = armorDraft.flipped(option.id) }
+                }
+            }
+            // An armor the sheet has no option for (written by Foundry or Character Wizard) can be taken off.
+            val custom = armorDraft.filter { it.startsWith(CustomProficiencyPrefix) }
+            if (custom.isNotEmpty()) {
+                OptionGroup(title = text("attributes_group_custom")) {
+                    custom.forEach { id -> CustomEntryChip(id.removePrefix(CustomProficiencyPrefix)) { armorDraft = armorDraft - id } }
                 }
             }
         }
@@ -1164,7 +1181,7 @@ private fun Feature.darkvisionFeet(): Int? =
 
 /** A stat of the section's, under its title: its gold label over its value, an icon in gold before it; a tap may edit it. */
 @Composable
-private fun SectionStat(label: String, value: String, icon: ImageVector, onClick: (() -> Unit)? = null) {
+private fun SectionStat(label: String, value: String, icon: ImageVector, valueColor: Color? = null, onClick: (() -> Unit)? = null) {
     val colors = LocalDesignTokens.current.colors
     Column(
         modifier = Modifier
@@ -1176,7 +1193,7 @@ private fun SectionStat(label: String, value: String, icon: ImageVector, onClick
         SheetLabel(label)
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
-            Text(text = value, style = MaterialTheme.typography.titleLarge, color = colors.text.primary)
+            Text(text = value, style = MaterialTheme.typography.titleLarge, color = valueColor ?: colors.text.primary)
         }
     }
 }
