@@ -211,7 +211,7 @@ internal fun PortraitSideButton(
 }
 
 /** The «+» before a coin's word: its size and its strokes, as thick as the serif's; how far it runs under the word. */
-private val PlusSize = 10.dp
+private val PlusSize = 9.dp
 private val PlusStroke = 2.4.dp
 private val PlusUnderWord = 1.5.dp
 
