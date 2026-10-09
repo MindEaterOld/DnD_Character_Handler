@@ -18,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.StrokeCap
@@ -179,16 +180,28 @@ internal fun PortraitSideButton(
         ) {
             val tint = if (on == true) accent else colors.text.primary
             Row(verticalAlignment = Alignment.CenterVertically) {
-                if (add) {
-                    // Drawn, not the icon: the icon's own margins kept it off the word, and its strokes were thin.
-                    Canvas(modifier = Modifier.padding(end = 2.dp).size(PlusSize)) {
-                        val stroke = PlusStroke.toPx()
-                        drawLine(tint, Offset(0f, size.height / 2), Offset(size.width, size.height / 2), stroke, StrokeCap.Round)
-                        drawLine(tint, Offset(size.width / 2, 0f), Offset(size.width / 2, size.height), stroke, StrokeCap.Round)
-                    }
-                }
                 if (label != null) {
-                    Text(text = label, style = MaterialTheme.typography.titleMedium, color = tint)
+                    Text(
+                        text = label,
+                        // The «+» drawn under the word, its right end just under the first letter (owner's wishes, 2026-10-09);
+                        // drawn, not the icon: the icon's own margins kept it off the word, and its strokes were thin.
+                        modifier = if (add) {
+                            Modifier
+                                .padding(start = PlusSize - PlusUnderWord)
+                                .drawBehind {
+                                    val stroke = PlusStroke.toPx()
+                                    val plus = PlusSize.toPx()
+                                    val left = -(PlusSize - PlusUnderWord).toPx()
+                                    val middle = size.height / 2
+                                    drawLine(tint, Offset(left, middle), Offset(left + plus, middle), stroke, StrokeCap.Round)
+                                    drawLine(tint, Offset(left + plus / 2, middle - plus / 2), Offset(left + plus / 2, middle + plus / 2), stroke, StrokeCap.Round)
+                                }
+                        } else {
+                            Modifier
+                        },
+                        style = MaterialTheme.typography.titleMedium,
+                        color = tint
+                    )
                 } else if (icon != null) {
                     Icon(imageVector = icon, contentDescription = null, tint = tint, modifier = Modifier.size(iconSize))
                 }
@@ -197,9 +210,10 @@ internal fun PortraitSideButton(
     }
 }
 
-/** The «+» before a coin's word: its size and its strokes, as thick as the serif's. */
-private val PlusSize = 9.dp
-private val PlusStroke = 2.2.dp
+/** The «+» before a coin's word: its size and its strokes, as thick as the serif's; how far it runs under the word. */
+private val PlusSize = 10.dp
+private val PlusStroke = 2.4.dp
+private val PlusUnderWord = 1.5.dp
 
 private val CoinShadowDrop = 2.dp
 private val CoinShadowSpread = 5.dp
