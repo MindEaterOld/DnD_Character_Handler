@@ -452,7 +452,7 @@
   },
   "skill_investigation": {
     "en": "Investigation",
-    "ru": "Расследование",
+    "ru": "Анализ",
     "de": "Nachforschungen",
     "fr": "Investigation",
     "es": "Investigación"
@@ -460,7 +460,7 @@
   "skill_investigation_short": {
     "maxChars": 14,
     "en": "Investigation",
-    "ru": "Расследование",
+    "ru": "Анализ",
     "de": "Nachforsch.",
     "fr": "Investigation",
     "es": "Investigación"
