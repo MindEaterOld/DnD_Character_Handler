@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -137,11 +138,11 @@ internal val PortraitSideGap = 8.dp
 
 
 /**
- * A button at the portrait's sides (owner's choices from boards, 2026-10-07: K1, T4): the conditions' on the left,
- * the rests' on the right, all of one kind — a coin: the card's dark fill, an outline light above and dim below,
- * and under it a drop shadow ([ornament.dropShadow]); the shadow is what says "press me", where a stat's mark has
- * none. Its icon is in the text's colour. [add] puts a small grey "+" on its lower-right corner, on a dot of the
- * background so it stands apart: the conditions' button adds a condition (P3).
+ * A button at the portrait's sides (owner's choices from boards, 2026-10-07: K1, T4; 2026-10-09: И): the rests' on the
+ * left, inspiration and the experience's on the right, all of one kind — a coin: the card's dark fill, an outline light
+ * above and dim below, and under it a drop shadow ([ornament.dropShadow]); the shadow is what says "press me", where a
+ * stat's mark has none. Its icon or word is in the text's colour. [add] puts a small «+» before it, inside the coin:
+ * the experience's coin reads «+XP» (owner's wish, 2026-10-09).
  */
 @Composable
 internal fun PortraitSideButton(
@@ -197,33 +198,14 @@ internal fun PortraitSideButton(
                 ),
             contentAlignment = Alignment.Center
         ) {
-            if (label != null) {
-                Text(text = label, style = MaterialTheme.typography.titleMedium, color = if (on == true) accent else colors.text.primary)
-            } else if (icon != null) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = if (on == true) accent else colors.text.primary,
-                    modifier = Modifier.size(iconSize)
-                )
-            }
-        }
-        if (add) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .offset(x = 2.dp, y = 2.dp)
-                    .size(16.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.background),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Add,
-                    contentDescription = null,
-                    tint = colors.text.label,
-                    modifier = Modifier.size(14.dp)
-                )
+            val tint = if (on == true) accent else colors.text.primary
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (add) Icon(imageVector = Icons.Outlined.Add, contentDescription = null, tint = tint, modifier = Modifier.size(12.dp))
+                if (label != null) {
+                    Text(text = label, style = MaterialTheme.typography.titleMedium, color = tint)
+                } else if (icon != null) {
+                    Icon(imageVector = icon, contentDescription = null, tint = tint, modifier = Modifier.size(iconSize))
+                }
             }
         }
     }
