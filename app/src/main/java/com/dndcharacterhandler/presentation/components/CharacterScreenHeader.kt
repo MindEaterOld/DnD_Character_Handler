@@ -10,6 +10,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -25,7 +27,9 @@ fun CharacterScreenHeader(
     onOpenDice: () -> Unit,
     modifier: Modifier = Modifier,
     /** A tap on the name: the overview renames the character there. */
-    onNameClick: (() -> Unit)? = null
+    onNameClick: (() -> Unit)? = null,
+    /** A shadow under the name where the header lies on a picture (the overview's art); drawn deep, thrice. */
+    nameShadow: Shadow? = null
 ) {
     val tokens = LocalDesignTokens.current.typography
     val colors = LocalDesignTokens.current.colors
@@ -45,8 +49,9 @@ fun CharacterScreenHeader(
             text = name.ifBlank { text("overview_name_placeholder") },
             modifier = Modifier
                 .padding(horizontal = 52.dp)
-                .then(if (onNameClick != null) Modifier.clickable(onClick = onNameClick) else Modifier),
-            style = MaterialTheme.typography.titleLarge.copy(fontSize = tokens.titleLarge.fontSizeSp.sp),
+                .then(if (onNameClick != null) Modifier.clickable(onClick = onNameClick) else Modifier)
+                .then(if (nameShadow != null) Modifier.drawWithContent { repeat(3) { drawContent() } } else Modifier),
+            style = MaterialTheme.typography.titleLarge.copy(fontSize = tokens.titleLarge.fontSizeSp.sp, shadow = nameShadow),
             color = colors.text.primary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

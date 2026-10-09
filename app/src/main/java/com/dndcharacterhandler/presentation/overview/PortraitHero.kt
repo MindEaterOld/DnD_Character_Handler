@@ -101,6 +101,9 @@ internal fun PortraitHero(
     onBadgeClick: () -> Unit,
     onBadgeLongClick: () -> Unit,
     fallback: @Composable () -> Unit,
+    /** What lies over the art's top, the status bar: the art is that much taller. Where the level stands, under the header. */
+    topInset: Dp = 0.dp,
+    levelTop: Dp = 12.dp,
     modifier: Modifier = Modifier,
     content: @Composable BoxScope.() -> Unit = {}
 ) {
@@ -109,7 +112,7 @@ internal fun PortraitHero(
     val saturation by animateFloatAsState(if (dead) 0f else 1f, animationSpec = tween(durationMillis = 1200), label = "portraitSaturation")
     Box(
         modifier = modifier.layout { measurable, constraints ->
-            val height = min(constraints.maxWidth / PortraitHeroAspect, PortraitHeroMaxHeight.toPx()).toInt()
+            val height = (min(constraints.maxWidth / PortraitHeroAspect, PortraitHeroMaxHeight.toPx()) + topInset.toPx()).toInt()
             val placeable = measurable.measure(Constraints.fixed(constraints.maxWidth, height))
             layout(placeable.width, placeable.height) { placeable.place(0, 0) }
         }
@@ -154,7 +157,7 @@ internal fun PortraitHero(
             progressColor = progressColor,
             onClick = onBadgeClick,
             onLongClick = onBadgeLongClick,
-            modifier = Modifier.align(Alignment.TopCenter).padding(top = 12.dp)
+            modifier = Modifier.align(Alignment.TopCenter).padding(top = levelTop)
         )
         content()
     }
