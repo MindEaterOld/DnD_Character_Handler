@@ -1240,14 +1240,15 @@ private fun SenseLine(
             .heightIn(min = 36.dp)
             .clip(RoundedCornerShape(8.dp))
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(horizontal = 4.dp),
+            // The icon's middle on the skills' dots' line (14dp in), the name where theirs starts (26dp).
+            .padding(start = 6.dp, end = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
         Text(
             text = label,
             modifier = Modifier
-                .padding(start = 6.dp)
+                .padding(start = 4.dp)
                 .weight(1f),
             style = MaterialTheme.typography.bodyMedium,
             color = colors.text.primary,
