@@ -7,19 +7,14 @@ import com.dndcharacterhandler.R
 import com.dndcharacterhandler.domain.model.AppTheme
 
 /**
- * What a theme draws differently besides its colours (owner's choice, 2026-10-05): the backdrop, the frames
- * of cards, stats and buttons, and the portrait's frame. Components read it through [LocalThemeLook]; screens
- * don't ask which theme is on. The colours are the theme's palette in design_tokens.json.
+ * What a theme draws differently besides its colours (owner's choice, 2026-10-05): the backdrop and the frames
+ * of cards, stats and buttons. Components read it through [LocalThemeLook]; screens don't ask which theme is on.
+ * The colours are the theme's palette in design_tokens.json.
  */
 data class ThemeLook(
     /** An illustration over the palette's last background stop; null — the palette's radial gradient. */
     @DrawableRes val backdrop: Int?,
-    val frames: FrameStyle,
-    /**
-     * The portrait's white artwork, tinted with the palette; null — Classic's rectangle, drawn, the experience on
-     * its line, the level in its top edge (owner's choices from boards, 2026-10-07 and 2026-10-08: V2, R2).
-     */
-    @DrawableRes val portraitArtwork: Int? = null
+    val frames: FrameStyle
 )
 
 /** Cards, stats, the tab bar and the hit points' buttons. */
@@ -40,8 +35,7 @@ val ClassicLook = ThemeLook(
 /** Ivory ink on charcoal paper over an engraving of a dragon (ChatGPT, 2026-10-04). */
 val EngravedLook = ThemeLook(
     backdrop = R.drawable.engraved_overview_background,
-    frames = FrameStyle.ETCHED,
-    portraitArtwork = R.drawable.gothic_portrait_frame
+    frames = FrameStyle.ETCHED
 )
 
 fun AppTheme.look(): ThemeLook = when (this) {

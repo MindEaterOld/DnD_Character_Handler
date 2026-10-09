@@ -52,6 +52,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -194,7 +195,6 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.FirstBaseline
 import androidx.compose.ui.layout.AlignmentLine
-import androidx.compose.ui.zIndex
 import com.dndcharacterhandler.presentation.components.AppImage
 import com.dndcharacterhandler.presentation.components.EditDialog
 import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
@@ -206,7 +206,6 @@ import com.dndcharacterhandler.presentation.components.StatValueCenter
 import com.dndcharacterhandler.presentation.components.BackedStat
 import com.dndcharacterhandler.presentation.components.SheetLabel
 import com.dndcharacterhandler.presentation.components.StatsPanel
-import com.dndcharacterhandler.presentation.components.CharacterHeaderFadeEnd
 import com.dndcharacterhandler.presentation.components.CharacterHeaderInset
 import com.dndcharacterhandler.presentation.components.PinnedCharacterHeader
 import com.dndcharacterhandler.presentation.components.fadeUnderHeader
@@ -907,10 +906,9 @@ private fun OverviewContent(
     }
 
     ScreenBackground {
-        // The header is pinned over the list, the name in it (owner's choice, 2026-10-06): the frame, drawn
-        // 47dp above its place, starts right where the header's fade ends — its highest point, the level over
-        // Classic's top edge, not bitten by it at rest, and no more room than that (owner's wish, 2026-10-08).
-        val listTop = maxOf(CharacterHeaderInset, CharacterHeaderFadeEnd + PortraitRaise - portraitFrameHead())
+        // The header is pinned over the list, the name in it (owner's choice, 2026-10-06); the portrait starts right
+        // under its rule (owner's choice from boards, 2026-10-09).
+        val listTop = CharacterHeaderInset
         Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
                 modifier = Modifier
@@ -920,52 +918,50 @@ private fun OverviewContent(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 item {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
-                            val canLevelUp = character != null &&
-                                character.level < MAX_CHARACTER_LEVEL && levelForExperience(character.experience) > character.level
-                            PortraitFrame(
-                                portraitUri = character?.portraitUri,
-                                characterName = displayName,
-                                dead = dead,
-                                framing = character?.portraitFraming ?: PortraitFraming(),
-                                onClick = {
-                                    if (characterBundle != null) {
-                                        isPortraitMenuOpen = true
-                                    }
-                                },
-                                progress = xpInfo.progress,
-                                progressColor = when {
-                                    canLevelUp -> colors.accent.inspiration
-                                    xpInfo.hasReachedLevelCap -> colors.accent.xpCapped
-                                    else -> colors.progress.xpFill
-                                },
-                                // «I lvl» in the gap of the frame's edge (owner's choices, 2026-10-07, 2026-10-08). A tap adds
-                                // experience, or opens the level up when one is due; a long press adds experience always.
-                                badge = levelBadge(character?.level ?: 1, canLevelUp),
-                                badgeDescription = levelLabel,
-                                onBadgeClick = {
-                                    if (canLevelUp) {
-                                        character?.let { onOpenLevelUp(levelForExperience(it.experience)) }
-                                    } else {
-                                        experienceEditMode = OverviewExperienceEditMode.ADD
-                                        experienceDraft = ""
-                                        isExperienceDialogOpen = true
-                                    }
-                                },
-                                onBadgeLongClick = {
+                    // The portrait as wide as the screen, right under the header's rule, its foot melting into the
+                    // background; on it the level, the coins down its sides and the hit points on its foot (owner's
+                    // choice from boards, 2026-10-09: 1).
+                    Column(modifier = Modifier.bleed(24.dp)) {
+                        val canLevelUp = character != null &&
+                            character.level < MAX_CHARACTER_LEVEL && levelForExperience(character.experience) > character.level
+                        PortraitHero(
+                            portraitUri = character?.portraitUri,
+                            characterName = displayName,
+                            dead = dead,
+                            framing = character?.portraitFraming ?: PortraitFraming(),
+                            onClick = {
+                                if (characterBundle != null) {
+                                    isPortraitMenuOpen = true
+                                }
+                            },
+                            progress = xpInfo.progress,
+                            progressColor = when {
+                                canLevelUp -> colors.accent.inspiration
+                                xpInfo.hasReachedLevelCap -> colors.accent.xpCapped
+                                else -> MaterialTheme.colorScheme.primary
+                            },
+                            // «I lvl» over the art (owner's choices, 2026-10-07, 2026-10-09). A tap adds experience, or
+                            // opens the level up when one is due; a long press adds experience always.
+                            badge = levelBadge(character?.level ?: 1, canLevelUp),
+                            badgeDescription = levelLabel,
+                            onBadgeClick = {
+                                if (canLevelUp) {
+                                    character?.let { onOpenLevelUp(levelForExperience(it.experience)) }
+                                } else {
                                     experienceEditMode = OverviewExperienceEditMode.ADD
                                     experienceDraft = ""
                                     isExperienceDialogOpen = true
                                 }
-                            )
-                            // The conditions down the left, the rests and inspiration down the right, a little off the
-                            // frame's sides (B3), each column centred on the middle of the straight side (owner's wish,
-                            // 2026-10-07); the frame is drawn PortraitRaise above its place.
-                            val sidesMiddle = portraitSideMiddleY() - PortraitRaise
+                            },
+                            onBadgeLongClick = {
+                                experienceEditMode = OverviewExperienceEditMode.ADD
+                                experienceDraft = ""
+                                isExperienceDialogOpen = true
+                            },
+                            fallback = { PortraitFallback(displayName) }
+                        ) {
+                            // The conditions down the left, inspiration over them, the rests down the right, on the
+                            // column's edges, each column centred on the art's middle.
                             if (character != null) {
                                 ConditionsColumn(
                                     // Unconscious at 0 hit points too: it explains the arrows.
@@ -975,8 +971,8 @@ private fun OverviewContent(
                                     onOpenPicker = { isConditionsDialogOpen = true },
                                     onOpenConcentration = { isEndConcentrationOpen = true },
                                     modifier = Modifier
-                                        .align(Alignment.TopCenter)
-                                        .offset(x = -portraitSideColumnX(6.dp), y = sidesMiddle),
+                                        .align(Alignment.CenterStart)
+                                        .padding(start = 24.dp),
                                     // Inspiration over the conditions: a coin like the rests', lit in gold while it
                                     // is on (owner's choice, 2026-10-07).
                                     leading = {
@@ -989,11 +985,10 @@ private fun OverviewContent(
                                     }
                                 )
                             }
-                            // The rests: the same buttons.
                             Column(
                                 modifier = Modifier
-                                    .align(Alignment.TopCenter)
-                                    .offset(x = portraitSideColumnX(6.dp), y = sidesMiddle - portraitSideColumnHeight(2) / 2),
+                                    .align(Alignment.CenterEnd)
+                                    .padding(end = 24.dp),
                                 verticalArrangement = Arrangement.spacedBy(PortraitSideGap)
                             ) {
                                 PortraitSideButton(
@@ -1007,28 +1002,19 @@ private fun OverviewContent(
                                     onClick = { isLongRestDialogOpen = true }
                                 )
                             }
-                        }
-                    }
-                }
-
-                item {
-                    Column(
-                        // Up under the plaque, or under the frame's ornament where it hangs lower.
-                        modifier = Modifier.pullUp(portraitBlockSlack()),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        // Over the death saves' tray, which slides out from under it.
-                        Box(modifier = Modifier.zIndex(1f)) {
-                            OverviewHpCard(
+                            // The hit points on its melting foot, over heal, the death saves' tab and damage.
+                            HpNumbers(
                                 currentHp = character?.currentHp ?: 0,
                                 maxHp = character?.maxHp ?: 0,
                                 temporaryHp = character?.temporaryHp ?: 0,
-                                hpLabel = text("overview_hp"),
                                 onClick = { openHpDialog(OverviewHpEditMode.DAMAGE) },
                                 onMaxHpClick = {
                                     maxHpDraft = (character?.maxHp ?: 0).toString()
                                     isMaxHpDialogOpen = true
-                                }
+                                },
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .padding(bottom = hpRowRise() + HpNumbersAir)
                             )
                         }
                         if (characterBundle != null) {
@@ -1048,13 +1034,17 @@ private fun OverviewContent(
                                         dice.firstOrNull()?.let { onDeathSave(snapshot, before, it.value()) }
                                     })
                                 },
+                                // Up onto the art's foot; the tray, when out, goes on under it.
+                                modifier = Modifier
+                                    .padding(horizontal = 24.dp)
+                                    .pullUp(hpRowRise()),
                                 // Healing on the left, damage on the right, each into its own pop-up.
                                 start = {
                                     HpActionButton(
                                         label = text("overview_hp_heal"),
                                         icon = Icons.Outlined.Favorite,
                                         color = colors.accent.heal,
-                                        modifier = Modifier.weight(1f),
+                                        modifier = Modifier.width(HpActionWidth),
                                         onClick = { openHpDialog(OverviewHpEditMode.HEAL) }
                                     )
                                 },
@@ -1063,7 +1053,7 @@ private fun OverviewContent(
                                         label = text("overview_hp_damage"),
                                         icon = Icons.Outlined.HeartBroken,
                                         color = colors.accent.dangerHpZero,
-                                        modifier = Modifier.weight(1f),
+                                        modifier = Modifier.width(HpActionWidth),
                                         onClick = { openHpDialog(OverviewHpEditMode.DAMAGE) }
                                     )
                                 }
@@ -1094,7 +1084,7 @@ private fun OverviewContent(
                         }
                     }
                     StatsPanel(
-                        modifier = Modifier.pullUp(4.dp),
+                        modifier = Modifier.padding(top = 6.dp),
                         top = {
                             miniStats.forEach { stat ->
                                 if (stat.field == OverviewMiniStatField.ARMOR_CLASS) {
@@ -1748,67 +1738,14 @@ private fun ExperienceModeButton(
     }
 }
 
-@Composable
-private fun PortraitFrame(
-    portraitUri: String?,
-    characterName: String,
-    /** Three failed death saves: the portrait drains to black and white. */
-    dead: Boolean,
-    onClick: () -> Unit,
-    framing: PortraitFraming = PortraitFraming(),
-    progress: Float = 0f,
-    progressColor: Color = LocalDesignTokens.current.colors.progress.xpFill,
-    badge: AnnotatedString? = null,
-    badgeDescription: String = "",
-    onBadgeClick: () -> Unit = {},
-    onBadgeLongClick: () -> Unit = {}
-) {
-    val portraitReference = portraitUri ?: AssetReferences.portraitPlaceholderPath("portrait_placeholder.png")
-    val saturation by animateFloatAsState(if (dead) 0f else 1f, animationSpec = tween(durationMillis = 1200), label = "portraitSaturation")
-    GothicPortraitFrame(
-        onClick = onClick,
-        modifier = Modifier.offset(y = -PortraitRaise),
-        progress = progress,
-        progressColor = progressColor,
-        badge = badge,
-        badgeDescription = badgeDescription,
-        onBadgeClick = onBadgeClick,
-        onBadgeLongClick = onBadgeLongClick
-    ) {
-        Box(Modifier.fillMaxSize().saturation(saturation)) {
-            AppImage(
-                imageRef = portraitReference,
-                contentDescription = characterName,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop,
-                framing = framing,
-                fallback = { PortraitFallback(characterName) }
-            )
-        }
-    }
-}
-
 /** The armor class's shield in the stats frame: smaller than on its own, the frame's row as low as its neighbours. */
 private val StatsShieldWidth = 80.dp
 private val StatsShieldHeight = 92.dp
 
-/** How far above its place the frame is drawn: its artwork's margin over the header's fade. */
-private val PortraitRaise = 47.dp
-
 /**
- * How much of the portrait's item is empty under it: the frame's box is as tall as its artwork, drawn
- * [PortraitRaise] higher; Classic's arch ends above the box's bottom, an engraving's spike reaches it.
- */
-@Composable
-@ReadOnlyComposable
-private fun portraitBlockSlack(): Dp =
-    // The list's 10dp between items counts too.
-    GothicPortraitHeight + 10.dp - portraitFrameFoot() + PortraitRaise - portraitHpGap()
-
-/**
- * The level as the portrait frame writes it (owner's choices, 2026-10-07): the Roman numeral and «lvl», one serif —
- * the numeral the larger (`headlineMedium`), «lvl» `titleMedium` in the label's grey, on one baseline; both gold
- * when a level up is due, as the ring is.
+ * The level as the portrait writes it (owner's choices, 2026-10-07): the Roman numeral and «lvl», one serif — the
+ * numeral the larger (`headlineMedium`), «lvl» `titleMedium` in the label's grey, on one baseline; both gold when a
+ * level up is due, as the experience's rule is.
  */
 @Composable
 private fun levelBadge(level: Int, canLevelUp: Boolean): AnnotatedString {
@@ -1962,10 +1899,9 @@ private fun PortraitViewerContent(
 internal const val HpActionTint = 0.12f
 
 /**
- * Healing or damage under the hit points' card, either side of the death saves' bookmark: a button of its
- * own, its whole outline in the colour of what it does, the icon and label too, 2dp below the card, as
- * tall as the bookmark (owner's choice from boards, 2026-10-06: R3). The engraving draws it etched, the
- * colour faint behind.
+ * Healing or damage on the portrait's foot, either side of the death saves' tab: a button of its own, its whole
+ * outline in the colour of what it does, the icon and label too, as tall as the tab (owner's choices from boards,
+ * 2026-10-06: R3; on the art since 2026-10-09). The engraving draws it etched, the colour faint behind.
  */
 @Composable
 private fun HpActionButton(label: String, icon: ImageVector, color: Color, modifier: Modifier = Modifier, onClick: () -> Unit) {
@@ -1975,18 +1911,7 @@ private fun HpActionButton(label: String, icon: ImageVector, color: Color, modif
     val shape = if (etched) RoundedCornerShape(4.dp) else RoundedCornerShape(HpActionCornerRadius)
     Row(
         modifier = modifier
-            .then(
-                if (etched) {
-                    Modifier
-                        .offset(y = (-1).dp)
-                        .height(HpActionEtchedHeight)
-                } else {
-                    // Clear of the card, so its own top edge shows; its bottom level with the bookmark's.
-                    Modifier
-                        .padding(top = HpActionGap)
-                        .height(HpActionHeight - HpActionGap)
-                }
-            )
+            .height(hpActionHeight())
             .clip(shape)
             .then(
                 if (etched) {
@@ -2019,19 +1944,34 @@ private fun HpActionButton(label: String, icon: ImageVector, color: Color, modif
 }
 
 /**
- * The HP actions' and the death saves' bookmark's height, from the card's bottom edge: lower than a stat
- * card, so the row doesn't vie with the hit points (owner's choice from boards, 2026-10-06: V2).
+ * The HP actions' and the death saves' tab's height: lower than a stat card, so the row doesn't vie with the hit
+ * points (owner's choice from boards, 2026-10-06: V2).
  */
 private val HpActionHeight = 40.dp
 
-/** The engraving's etched HP actions and bookmark: as tall as before. */
+/** The engraving's etched HP actions and tab: as tall as before. */
 private val HpActionEtchedHeight = 48.dp
 
-/** The HP actions' corners (the bookmark's bottom ones too): the stat cards' 10, as the card's. */
+@Composable
+@ReadOnlyComposable
+private fun hpActionHeight(): Dp = if (LocalThemeLook.current.frames == FrameStyle.ETCHED) HpActionEtchedHeight else HpActionHeight
+
+/** The HP actions' width: their longest label («Schaden», `maxChars` 9 at 12sp) beside the icon. */
+private val HpActionWidth = 104.dp
+
+/** The HP actions' and the tab's corners: the stat cards' 10. */
 private val HpActionCornerRadius = 10.dp
 
-/** The room between the card's edge and an HP action's own top edge. */
-private val HpActionGap = 2.dp
+/** Under the heal–damage row, the rest of the portrait's foot. */
+private val HpRowFoot = 8.dp
+
+/** Between the hit points and the row under them. */
+private val HpNumbersAir = 6.dp
+
+/** How far the heal–damage row rises onto the portrait's foot: its own height and [HpRowFoot] under it. */
+@Composable
+@ReadOnlyComposable
+private fun hpRowRise(): Dp = hpActionHeight() + HpRowFoot
 
 /** The most hit points one change can take or give: four digits. */
 private const val MaxHpChange = 9999
@@ -2135,11 +2075,11 @@ private fun HpChange(before: HpPreview, after: HpPreview) {
 }
 
 /**
- * The death saving throws under the hit points, as Foundry has them: a tab with a skull pulls the
- * tray out like a blind and stays under it, a second tap rolls it back — successes on the left,
- * failures on the right, and a d20 with a skull on its front in the middle. A tap on the die throws it on the dice table and counts the result; a tap on a circle
- * sets the count (on the last filled one, takes it back). The tray opens by itself at 0 hit points.
- * Whatever goes in [start] and [end] hangs beside the tab and rides down with it.
+ * Heal and damage either side of the death saves' tab on the portrait's foot, and the death saving throws under them,
+ * as Foundry has them: the tab with a skull pulls the tray out below the row, a second tap rolls it back — successes
+ * on the left, failures on the right, and a d20 with a skull on its front in the middle. A tap on the die throws it on
+ * the dice table and counts the result; a tap on a circle sets the count (on the last filled one, takes it back). The
+ * tray opens by itself at 0 hit points.
  */
 @Composable
 private fun DeathSavesTray(
@@ -2150,6 +2090,7 @@ private fun DeathSavesTray(
     failures: Int,
     onSetSaves: (Int, Int) -> Unit,
     onRoll: () -> Unit,
+    modifier: Modifier = Modifier,
     start: @Composable RowScope.() -> Unit = {},
     end: @Composable RowScope.() -> Unit = {}
 ) {
@@ -2160,31 +2101,44 @@ private fun DeathSavesTray(
     var open by remember(characterId) { mutableStateOf(initiallyOpen || dying) }
     LaunchedEffect(dying) { if (dying) open = true }
     val saves = DeathSaves(successes, failures)
-    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-        // Pulled out by the tab like a blind: the bottom edge comes down first, the tab riding on it.
-        // The tray goes on from the hit points' card: its top hides under the card's rounded bottom,
-        // so it comes out of the line where the card's sides stop being straight.
-        val cardRadius = hpCardCornerRadius()
-        val trayShape = RoundedCornerShape(bottomStart = cardRadius, bottomEnd = cardRadius)
+    val shape = if (etched) RoundedCornerShape(4.dp) else RoundedCornerShape(HpActionCornerRadius)
+    val outline = if (etched) Modifier.engravedBorder(colors.border.panel) else Modifier.border(1.dp, colors.border.panel, shape)
+    Column(modifier = modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            start()
+            // The tab: a skull, red while dying.
+            Box(
+                modifier = Modifier
+                    .height(hpActionHeight())
+                    .clip(shape)
+                    .background(colors.surface.card)
+                    .then(outline)
+                    .clickable { open = !open }
+                    .padding(horizontal = 16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = SkullIcon,
+                    contentDescription = text("overview_death_saves"),
+                    tint = if (dying) colors.accent.dangerHpZero else colors.text.label,
+                    modifier = Modifier.size(if (etched) 20.dp else 22.dp)
+                )
+            }
+            end()
+        }
         AnimatedVisibility(
             visible = open,
-            modifier = Modifier.layout { measurable, constraints ->
-                val tucked = cardRadius.roundToPx()
-                val placeable = measurable.measure(constraints)
-                layout(placeable.width, (placeable.height - tucked).coerceAtLeast(0)) {
-                    placeable.place(0, -tucked)
-                }
-            },
-            enter = expandVertically(expandFrom = Alignment.Bottom),
-            exit = shrinkVertically(shrinkTowards = Alignment.Bottom)
+            enter = expandVertically(expandFrom = Alignment.Top),
+            exit = shrinkVertically(shrinkTowards = Alignment.Top)
         ) {
             Column(
                 modifier = Modifier
+                    .padding(top = 10.dp)
                     .fillMaxWidth()
-                    .clip(trayShape)
+                    .clip(shape)
                     .background(colors.surface.card)
-                    .border(1.dp, colors.border.panel, trayShape)
-                    .padding(start = 18.dp, end = 18.dp, top = cardRadius + 10.dp, bottom = 10.dp),
+                    .then(outline)
+                    .padding(horizontal = 18.dp, vertical = 10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -2229,52 +2183,8 @@ private fun DeathSavesTray(
                 }
             }
         }
-        // The tab hangs from the tray when it is out, from the hit points' card when it is in, and
-        // [start] and [end] hang beside it from the same straight edge.
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = if (etched) 12.dp else cardRadius),
-            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-            verticalAlignment = Alignment.Top
-        ) {
-            start()
-            // The bookmark: its top under the card's edge (no top outline), as tall as the HP actions.
-            val tabShape = if (etched) {
-                RoundedCornerShape(4.dp)
-            } else {
-                RoundedCornerShape(bottomStart = HpActionCornerRadius, bottomEnd = HpActionCornerRadius)
-            }
-            Box(
-                modifier = Modifier
-                    .offset(y = (-1).dp)
-                    .height(if (etched) HpActionEtchedHeight else HpActionHeight + 1.dp)
-                    .clip(tabShape)
-                    .background(colors.surface.card)
-                    .border(1.dp, colors.border.panel, tabShape)
-                    .clickable { open = !open }
-                    .padding(horizontal = if (etched) 18.dp else 16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = SkullIcon,
-                    contentDescription = text("overview_death_saves"),
-                    tint = if (dying) colors.accent.dangerHpZero else colors.text.label,
-                    modifier = Modifier.size(if (etched) 20.dp else 22.dp)
-                )
-            }
-            end()
-        }
     }
 }
-
-/**
- * The hit points' card corners; the death saves' tray hides this much of its top under the card. The
- * stat cards' 10 (owner's choice from boards, 2026-10-06: K3); the engraving's etched frame keeps its 30
- * under its cut corners.
- */
-@Composable
-private fun hpCardCornerRadius(): Dp = if (LocalThemeLook.current.frames == FrameStyle.ETCHED) 30.dp else 10.dp
 
 /** Half a turn about the view: the d20 shows its front face standing on a corner. */
 private val HalfTurn = Quat.axisAngle(Vec3.UP, PI)
@@ -2304,116 +2214,63 @@ private fun DeathSaveMarks(label: String, count: Int, color: Color, modifier: Mo
     }
 }
 
+/**
+ * The hit points on the portrait's foot (owner's choice from boards, 2026-10-09): now, the temporary ones in their
+ * blue, and the maximum smaller and dimmer, each with a deep shadow to read on the art. A tap opens the damage; a tap
+ * on the maximum changes it.
+ */
 @Composable
-private fun OverviewHpCard(
+private fun HpNumbers(
     currentHp: Int,
     maxHp: Int,
     temporaryHp: Int,
-    hpLabel: String,
     onClick: () -> Unit,
-    onMaxHpClick: () -> Unit
+    onMaxHpClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val tokens = LocalDesignTokens.current.typography
     val colors = LocalDesignTokens.current.colors
-    val etched = LocalThemeLook.current.frames == FrameStyle.ETCHED
-    BorderLabelCard(
-        label = hpLabel,
-        modifier = Modifier.fillMaxWidth(),
-        labelStyle = MaterialTheme.typography.titleLarge.copy(fontSize = tokens.hpLabel.fontSizeSp.sp),
-        labelColor = colors.text.label,
-        cornerRadius = hpCardCornerRadius(),
-        fill = colors.surface.card.copy(alpha = if (etched) 0.7f else 1f),
-        border = colors.border.panel,
-        onClick = onClick
+    val shadow = artShadow()
+    Row(
+        modifier = modifier
+            .clip(RoundedCornerShape(10.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 18.dp, vertical = 18.dp)
-        ) {
-            if (!etched) {
-                FrameCorner(modifier = Modifier.align(Alignment.TopStart))
-                FrameCorner(
-                    modifier = Modifier.align(Alignment.TopEnd).offset(x = 6.dp),
-                    mirrored = true
-                )
-                FrameCorner(
-                    modifier = Modifier.align(Alignment.BottomStart).offset(y = 6.dp),
-                    upsideDown = true
-                )
-                FrameCorner(
-                    modifier = Modifier.align(Alignment.BottomEnd).offset(x = 6.dp, y = 6.dp),
-                    mirrored = true,
-                    upsideDown = true
-                )
-            }
-
-            Row(
-                modifier = Modifier.align(Alignment.Center),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = currentHp.toString(),
-                    style = MaterialTheme.typography.headlineMedium.copy(
-                        fontSize = tokens.hpCurrent.fontSizeSp.sp,
-                        lineHeight = (tokens.hpCurrent.lineHeightSp ?: tokens.hpCurrent.fontSizeSp).sp
-                    ),
-                    color = if (currentHp == 0) colors.accent.dangerHpZero else colors.text.primary,
-                    textAlign = TextAlign.Center
-                )
-                if (temporaryHp > 0) {
-                    Text(
-                        text = "+$temporaryHp",
-                        style = MaterialTheme.typography.headlineMedium.copy(
-                            fontSize = tokens.hpTemporary.fontSizeSp.sp,
-                            lineHeight = (tokens.hpTemporary.lineHeightSp ?: tokens.hpTemporary.fontSizeSp).sp
-                        ),
-                        color = colors.accent.hpTemporary,
-                        textAlign = TextAlign.Center
-                    )
-                }
-                Text(
-                    text = " / $maxHp",
-                    modifier = Modifier.clickable(onClick = onMaxHpClick),
-                    style = MaterialTheme.typography.headlineMedium.copy(
-                        fontSize = tokens.hpMaximum.fontSizeSp.sp,
-                        lineHeight = (tokens.hpMaximum.lineHeightSp ?: tokens.hpMaximum.fontSizeSp).sp
-                    ),
-                    color = colors.text.primary.copy(alpha = tokens.hpMaximum.alpha ?: 0.62f),
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun FrameCorner(
-    modifier: Modifier = Modifier,
-    mirrored: Boolean = false,
-    upsideDown: Boolean = false
-) {
-    val lineColor = LocalDesignTokens.current.colors.border.panel
-    Canvas(modifier = modifier.size(24.dp)) {
-        val left = if (mirrored) size.width else 0f
-        val right = if (mirrored) size.width * 0.28f else size.width * 0.72f
-        val top = if (upsideDown) size.height else 0f
-        val bottom = if (upsideDown) size.height * 0.28f else size.height * 0.72f
-        val verticalNear = if (upsideDown) size.height * 0.8f else size.height * 0.2f
-        val horizontalNear = if (mirrored) size.width * 0.8f else size.width * 0.2f
-
-        drawLine(
-            color = lineColor,
-            start = Offset(left, bottom),
-            end = Offset(right, top),
-            strokeWidth = 1.dp.toPx()
+        Text(
+            text = currentHp.toString(),
+            modifier = Modifier.deepShadow(),
+            style = MaterialTheme.typography.headlineMedium.copy(
+                fontSize = tokens.hpCurrent.fontSizeSp.sp,
+                lineHeight = (tokens.hpCurrent.lineHeightSp ?: tokens.hpCurrent.fontSizeSp).sp,
+                shadow = shadow
+            ),
+            color = if (currentHp == 0) colors.accent.dangerHpZero else colors.text.primary
         )
-        drawLine(
-            color = lineColor,
-            start = Offset(left, verticalNear),
-            end = Offset(horizontalNear, top),
-            strokeWidth = 1.dp.toPx()
+        if (temporaryHp > 0) {
+            Text(
+                text = "+$temporaryHp",
+                modifier = Modifier.deepShadow(),
+                style = MaterialTheme.typography.headlineMedium.copy(
+                    fontSize = tokens.hpTemporary.fontSizeSp.sp,
+                    lineHeight = (tokens.hpTemporary.lineHeightSp ?: tokens.hpTemporary.fontSizeSp).sp,
+                    shadow = shadow
+                ),
+                color = colors.accent.hpTemporary
+            )
+        }
+        Text(
+            text = " / $maxHp",
+            modifier = Modifier
+                .clickable(onClick = onMaxHpClick)
+                .deepShadow(),
+            style = MaterialTheme.typography.headlineMedium.copy(
+                fontSize = tokens.hpMaximum.fontSizeSp.sp,
+                lineHeight = (tokens.hpMaximum.lineHeightSp ?: tokens.hpMaximum.fontSizeSp).sp,
+                shadow = shadow
+            ),
+            color = colors.text.primary.copy(alpha = tokens.hpMaximum.alpha ?: 0.62f)
         )
     }
 }

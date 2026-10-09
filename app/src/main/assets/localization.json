@@ -4581,7 +4581,7 @@
     "es": "Resultado: %1$s PX"
   },
   "overview_hp_damage": {
-    "maxChars": 10,
+    "maxChars": 9,
     "en": "Damage",
     "ru": "\u0423\u0440\u043e\u043d",
     "de": "Schaden",
@@ -5264,7 +5264,7 @@
     "es": "Los PG temporales no devuelven la consciencia"
   },
   "overview_hp_heal": {
-    "maxChars": 10,
+    "maxChars": 9,
     "en": "Heal",
     "ru": "\u0425\u0438\u043b",
     "de": "Heilen",

@@ -1,17 +1,19 @@
 package com.dndcharacterhandler.presentation.components
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.CompositingStrategy
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.unit.dp
+import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 import com.dndcharacterhandler.domain.model.Character
 
 /**
@@ -21,31 +23,20 @@ import com.dndcharacterhandler.domain.model.Character
  */
 val CharacterHeaderInset = 60.dp
 
-// Under the header the list is clear down to the name's foot and comes back to full where the list starts at rest.
-private val FadeClearTo = 44.dp
-
-/** Where the fade under the header ends: what stands lower is never faded. */
-val CharacterHeaderFadeEnd = 64.dp
-private val FadeFullFrom = CharacterHeaderFadeEnd
-
 /**
- * Fades what scrolls under the pinned header: clear above the name's foot, full again where the list's content
- * starts at rest, so nothing is cut off while the list is at its top. At the foot the list is cut clean on the tab
- * bar's top edge, no fade (owner's choice, 2026-10-08). The colours here are the mask's alpha only.
+ * Cuts what scrolls under the pinned header clean on the rule under it (tried 2026-10-08), as the list is cut on the
+ * tab bar's top edge at its foot.
  */
 fun Modifier.fadeUnderHeader(): Modifier = this
-    .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
     .drawWithContent {
-        drawContent()
-        drawRect(
-            brush = Brush.verticalGradient(
-                0f to Color.Transparent,
-                FadeClearTo.toPx() / size.height to Color.Transparent,
-                FadeFullFrom.toPx() / size.height to Color.Black
-            ),
-            blendMode = BlendMode.DstIn
-        )
+        clipRect(top = CharacterHeaderInset.toPx()) { this@drawWithContent.drawContent() }
     }
+
+/** The header's foot: a plain rule in the ornaments' colour, where the list is cut. */
+@Composable
+private fun HeaderRule(modifier: Modifier = Modifier) {
+    Box(modifier = modifier.height(1.dp).background(LocalDesignTokens.current.colors.ornament.stroke))
+}
 
 /**
  * The header pinned over a screen's list, with the list's side margins. Put it after the list in the same box, so
@@ -76,5 +67,12 @@ fun BoxScope.PinnedCharacterHeader(
             .align(Alignment.TopCenter)
             .padding(start = 24.dp, end = 24.dp, top = 4.dp),
         onNameClick = onNameClick
+    )
+    HeaderRule(
+        modifier = Modifier
+            .align(Alignment.TopCenter)
+            .padding(horizontal = 24.dp)
+            .offset(y = CharacterHeaderInset - 1.dp)
+            .fillMaxWidth()
     )
 }
