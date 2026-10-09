@@ -1797,8 +1797,9 @@ private fun SurvivalBlock(
         )
         Spacer(modifier = Modifier.height(6.dp))
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(HpButtonGap)) {
-            HpRoundButton(Icons.Outlined.HeartBroken, colors.accent.dangerHpZero, text("overview_hp_damage"), onDamage)
-            // What the buttons leave: the numbers fit into it, never pushing heal off the row.
+            // Heal on the left, damage on the right (owner's wish, 2026-10-09).
+            HpRoundButton(Icons.Outlined.Favorite, colors.accent.heal, text("overview_hp_heal"), onHeal)
+            // What the buttons leave: the numbers fit into it, never pushing the right button off the row.
             Column(modifier = Modifier.weight(1f, fill = false), horizontalAlignment = Alignment.CenterHorizontally) {
                 HpNumbers(
                     currentHp = character.currentHp,
@@ -1809,7 +1810,7 @@ private fun SurvivalBlock(
                 )
                 HpBar(character.currentHp, character.temporaryHp, character.maxHp)
             }
-            HpRoundButton(Icons.Outlined.Favorite, colors.accent.heal, text("overview_hp_heal"), onHeal)
+            HpRoundButton(Icons.Outlined.HeartBroken, colors.accent.dangerHpZero, text("overview_hp_damage"), onDamage)
         }
         Spacer(modifier = Modifier.height(14.dp))
         if (character.currentHp == 0) {
