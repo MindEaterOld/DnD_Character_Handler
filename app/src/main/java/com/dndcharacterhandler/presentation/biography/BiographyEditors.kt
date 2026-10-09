@@ -141,7 +141,9 @@ private fun RowScope.GenderCard(icon: ImageVector, label: String, selected: Bool
 @Composable
 internal fun AgeDialog(currentValue: String, onDismiss: () -> Unit, onSave: (String) -> Unit) {
     val colors = LocalDesignTokens.current.colors
-    var draft by remember(currentValue) { mutableStateOf(ageOf(currentValue)?.toString() ?: "") }
+    var draft by remember(currentValue) {
+        mutableStateOf((ageOf(currentValue) ?: parseLeadingNumber(currentValue)?.toInt()?.takeIf { it >= 0 })?.toString() ?: "")
+    }
     val age = draft.toIntOrNull() ?: 0
     EditDialog(
         title = text("biography_age"),
@@ -156,7 +158,10 @@ internal fun AgeDialog(currentValue: String, onDismiss: () -> Unit, onSave: (Str
             horizontalArrangement = Arrangement.spacedBy(AgeStepGap, Alignment.CenterHorizontally),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            val decrease = { draft = ((draft.toIntOrNull() ?: 0) - 1).coerceAtLeast(0).toString() }
+            val decrease: () -> Unit = {
+                val now = draft.toIntOrNull()
+                if (now != null && now > 0) draft = (now - 1).toString()
+            }
             val increase = { draft = ((draft.toIntOrNull() ?: 0) + 1).coerceAtMost(MaxAge).toString() }
             StepButton(
                 icon = Icons.Outlined.Remove,
@@ -180,6 +185,13 @@ internal fun AgeDialog(currentValue: String, onDismiss: () -> Unit, onSave: (Str
 }
 
 private const val MaxAge = 99999
+
+/** [value] with its first decimal separator only: what follows another is dropped. */
+private fun oneSeparator(value: String): String {
+    val first = value.indexOfFirst { it == '.' || it == ',' }
+    if (first < 0) return value
+    return value.substring(0, first + 1) + value.substring(first + 1).filter { it.isDigit() }
+}
 private val AgeStepGap = 16.dp
 private val AgeNumberWidth = 80.dp
 
@@ -191,17 +203,21 @@ private fun Modifier.repeatWhileHeld(step: () -> Unit): Modifier {
         coroutineScope {
             awaitEachGesture {
                 awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                var repeated = false
                 val repeating = launch {
                     delay(HoldDelayMs)
                     var pause = HoldFirstStepMs
                     while (true) {
+                        repeated = true
                         latest()
                         delay(pause)
                         pause = (pause * 4 / 5).coerceAtLeast(HoldFastestStepMs)
                     }
                 }
-                waitForUpOrCancellation(PointerEventPass.Initial)
+                val up = waitForUpOrCancellation(PointerEventPass.Initial)
                 repeating.cancel()
+                // The steps were the hold's: the button's own tap on lifting would be one too many.
+                if (repeated) up?.consume()
             }
         }
     }
@@ -354,7 +370,7 @@ internal fun WeightDialog(currentValue: String, height: String, onDismiss: () ->
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
             BigNumberField(
                 value = draft,
-                onValueChange = { draft = it.filter { c -> c.isDigit() || c == '.' || c == ',' }.take(6) },
+                onValueChange = { draft = oneSeparator(it.filter { c -> c.isDigit() || c == '.' || c == ',' }).take(6) },
                 hint = "—",
                 modifier = Modifier.alignByBaseline(),
                 fitted = true

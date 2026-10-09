@@ -1,5 +1,8 @@
 package com.dndcharacterhandler.presentation.notes
 
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Canvas
@@ -142,10 +145,12 @@ fun NotesSection(
     val bundle = state.character
     val snackbar = LocalAppSnackbar.current
     val strings = LocalStrings.current
-    var expandedId by remember { mutableStateOf<Long?>(null) }
-    var draft by remember { mutableStateOf<Note?>(null) }
+    // Kept per character: switching characters closes what is open, and the card that goes saves to its own character.
+    val characterId = bundle?.character?.id
+    var expandedId by remember(characterId) { mutableStateOf<Long?>(null) }
+    var draft by remember(characterId) { mutableStateOf<Note?>(null) }
     // A new note on its way to the database: it is saved once, whatever else leaves its card meanwhile.
-    var savingDraft by remember { mutableStateOf(false) }
+    var savingDraft by remember(characterId) { mutableStateOf(false) }
     val items = if (bundle == null) {
         NoItems
     } else {
@@ -221,7 +226,7 @@ internal fun notesSectionItems(
     onLeaveDraft: (Note) -> Unit = {},
     onDelete: (Note) -> Unit = {}
 ): LazyListScope.() -> Unit {
-    var query by remember { mutableStateOf("") }
+    var query by remember(characterBundle.character.id) { mutableStateOf("") }
     val visibleNotes = remember(characterBundle.notes, query) {
         characterBundle.notes
             .filter { note ->
@@ -486,6 +491,17 @@ private fun NoteEditor(
     }
     DisposableEffect(Unit) {
         onDispose { commit() }
+    }
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    DisposableEffect(lifecycle) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_STOP) {
+                val next = edited()
+                if (next.id != 0L || next.title.isNotBlank() || next.content.isNotBlank()) commit()
+            }
+        }
+        lifecycle.addObserver(observer)
+        onDispose { lifecycle.removeObserver(observer) }
     }
     val titleFocus = remember { FocusRequester() }
     val textFocus = remember { FocusRequester() }

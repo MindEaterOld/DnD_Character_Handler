@@ -1,5 +1,9 @@
 package com.dndcharacterhandler.presentation.biography
 
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.foundation.layout.statusBarsPadding
 import com.dndcharacterhandler.presentation.components.rememberHeaderBackdrop
 import com.dndcharacterhandler.presentation.components.headerBackdrop
@@ -636,6 +640,16 @@ private fun BiographyInlineText(
     DisposableEffect(draftState) {
         val saveForThisCharacter = onCommit
         onDispose { saveForThisCharacter(draftState.value) }
+    }
+    // Saved as the app goes to the background too: a killed process loses nothing typed.
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    val commitLatest by rememberUpdatedState(onCommit)
+    DisposableEffect(lifecycle, draftState) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_STOP && draftState.value != value) commitLatest(draftState.value)
+        }
+        lifecycle.addObserver(observer)
+        onDispose { lifecycle.removeObserver(observer) }
     }
     val style = MaterialTheme.typography.bodyLarge
     BasicTextField(

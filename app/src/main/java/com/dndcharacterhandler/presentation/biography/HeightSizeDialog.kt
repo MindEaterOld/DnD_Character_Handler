@@ -106,8 +106,15 @@ private fun heightAmount(cm: Float, unit: HeightUnit): String =
 /** A saved height ("180 cm", "5.9 ft") in centimetres, kept within the rod; null when there is none. */
 internal fun heightInCm(value: String): Double? {
     val amount = parseLeadingNumber(value) ?: return null
-    val cm = if (detectHeightUnit(value) == HeightUnit.FT) amount * CmPerFoot else amount
+    val cm = if (detectHeightUnit(value) == HeightUnit.FT) feetAndInches(value, amount) * CmPerFoot else amount
     return cm.coerceIn(SmallestHeightCm, TallestHeightCm)
+}
+
+/** A height in feet: [feet] and, after them, any inches ("5'10\"", "5 ft 10 in") as twelfths. */
+private fun feetAndInches(value: String, feet: Double): Double {
+    val inches = Regex("""\d+(?:[.,]\d+)?\s*(?:ft|feet|')\s*(\d+(?:[.,]\d+)?)""", RegexOption.IGNORE_CASE)
+        .find(value)?.groupValues?.get(1)?.replace(',', '.')?.toDoubleOrNull() ?: return feet
+    return feet + inches / 12
 }
 
 /** Where the knob starts when no height is set: about the middle of the size's heights. */
