@@ -28,6 +28,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.isImeVisible
+import com.dndcharacterhandler.presentation.components.LocalTabBarInset
+import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.layer.drawLayer
+import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
@@ -83,6 +92,7 @@ data class DndCharacterAppState(
     val localizationRepository: LocalizationRepository
 )
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DndCharacterApp(appState: DndCharacterAppState) {
     val navController = rememberNavController()
@@ -202,12 +212,18 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
             ) {
                 // The background is the screens' own gradient, under the bottom bar too: the bar has none.
                 ScreenBackground {
+                // The screens run down under the tab bar, drawn into a layer its plate shows blurred (owner's choice,
+                // 2026-10-09).
+                val screensLayer = rememberGraphicsLayer()
+                var screensOrigin by remember { mutableStateOf(Offset.Zero) }
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     containerColor = Color.Transparent,
                     contentWindowInsets = WindowInsets.systemBars,
                     bottomBar = {
-                        BottomNavigationBar(
+                        // Hidden while the keyboard is up: the screens run down under it, and what is being written
+                        // must not go under it.
+                        if (!WindowInsets.isImeVisible) BottomNavigationBar(
                             currentRoute = currentRoute,
                             screens = bottomNavigationScreens,
                             onNavigate = { screen ->
@@ -218,12 +234,15 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                                     launchSingleTop = true
                                     restoreState = true
                                 }
-                            }
+                            },
+                            backdrop = screensLayer,
+                            backdropOrigin = screensOrigin
                         )
                     }
                 ) { padding ->
-                    // The screens reach down into the air over the tab bar's plate: a list is cut on its top edge.
+                    // The screens reach down to the window's foot, under the tab bar; their lists leave it room at their end.
                     val layoutDirection = LocalLayoutDirection.current
+                    val tabBarInset = (padding.calculateBottomPadding() - TabBarGap).coerceAtLeast(0.dp)
                     Surface(
                         modifier = Modifier
                             .fillMaxSize()
@@ -233,8 +252,13 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                                 // its header on it (owner's choice, 2026-10-09).
                                 top = if (currentRoute == AppScreen.Overview.route) 0.dp else padding.calculateTopPadding(),
                                 end = padding.calculateEndPadding(layoutDirection),
-                                bottom = (padding.calculateBottomPadding() - TabBarGap).coerceAtLeast(0.dp)
-                            ),
+                                bottom = 0.dp
+                            )
+                            .onGloballyPositioned { screensOrigin = it.positionInRoot() }
+                            .drawWithContent {
+                                screensLayer.record { this@drawWithContent.drawContent() }
+                                drawLayer(screensLayer)
+                            },
                         color = Color.Transparent
                     ) {
                     Box(modifier = Modifier.fillMaxSize()) {
@@ -244,7 +268,10 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                     } else {
                         NoFloatingButtonInset
                     }
-                    CompositionLocalProvider(LocalFloatingButtonsInset provides floatingButtonsInset) {
+                    CompositionLocalProvider(
+                        LocalFloatingButtonsInset provides floatingButtonsInset + tabBarInset,
+                        LocalTabBarInset provides tabBarInset
+                    ) {
                     NavHost(
                         navController = navController,
                         startDestination = AppScreen.Overview.route

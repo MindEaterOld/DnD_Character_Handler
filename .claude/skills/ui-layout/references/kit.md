@@ -8,15 +8,15 @@
 |---|---|---|
 | `ScreenBackground { }` | 9 | Фон темы на всё окно (радиальный градиент или иллюстрация темы — `LocalThemeBackdrop`); экран рисует только свою часть, фон бесшовно продолжается под нижней панелью и системными полосами |
 | `CharacterScreenHeader(character, onOpenDrawer, onOpenDice)` | 7 | Шапка экрана персонажа: меню, кубы, имя и подзаголовок |
-| `PinnedCharacterHeader(…)`, `Modifier.fadeUnderHeader()`, `CharacterHeaderInset` | 6 | Шапка закреплена сверху поверх списка (выбор владельца 2026-10-06): список — `contentPadding(top = CharacterHeaderInset + свой отступ)` и `.fadeUnderHeader()` (уходящее под шапку растворяется, а внизу список обрезается жёстко, ровно по верхней обводке нав-бара, без растворения — владелец 2026-10-08: область экранов уходит на `TabBarGap` (8dp воздуха над плашкой нав-бара) вниз, поэтому плавающий «+» ставится с `padding(bottom = FloatingAddButtonBottom)`, не 15dp), шапка — после списка в том же `Box`, чтобы меню и кубы получали нажатия. Вариант `PinnedCharacterHeader(name, …, onNameClick)` — по имени, пока персонаж грузится; на обзоре тап по имени переименовывает. Что выше `CharacterHeaderFadeEnd`, в покое растворяется: обзор опускает портрет так, чтобы самая высокая точка рамы (`portraitFrameHead()`) начиналась ровно на этой линии |
+| `PinnedCharacterHeader(…)`, `Modifier.fadeUnderHeader()`, `CharacterHeaderInset` | 5 | Шапка закреплена сверху поверх списка (выбор владельца 2026-10-06): список — `contentPadding(top = CharacterHeaderInset + свой отступ)` и `.fadeUnderHeader()` (уходящее под шапку режется по её линии), шапка — после списка в том же `Box`, чтобы меню и кубы получали нажатия. Вариант `PinnedCharacterHeader(name, …, onNameClick)` — по имени, пока персонаж грузится. Обзор — своя `OverviewHeader` (см. ниже). Внизу экраны уходят под панель вкладок до низа окна (2026-10-09): конец списка — `LocalFloatingButtonsInset` (в нём и высота панели), плавающий «+» — `padding(bottom = FloatingAddButtonBottom)` (читает `LocalTabBarInset`) |
 | `ScreenTopActions(onOpenDrawer, onOpenDice)` | 9 | Верхний ряд: «гамбургер» слева, d20 справа (кнопки 44dp, иконки 28) |
 | `ScreenTopActionButton(onClick) { Icon }` | 2 | Голая иконка верхней панели без заливки, тап-зона 44dp — единственная кнопка без подложки (меню, кубы, отдых столбиком под кубами на обзоре) |
 | `PortraitSideButton(icon, contentDescription, onClick, add, on)` | 4 | Кнопка у портрета на обзоре: «монета» 44dp — подложка `surface.card`, обводка от `text.label` сверху к `border.muted` снизу, тень `ornament.dropShadow` на 2dp ниже; иконка 24dp `text.primary`; `add = true` — маленький серый «+» в углу (кнопка состояний); `on` — переключатель (вдохновение): вкл. — подсветка `accent.inspiration` 12 % и иконка в нём. Иконки `SideIconConditions`, `SideIconShortRest`, `SideIconLongRest`, `SideIconInspiration` |
-| `BottomNavigationBar` | — | Панель вкладок: обводка поверх фона, без своей заливки |
+| `BottomNavigationBar(…, backdrop, backdropOrigin)` | — | Панель вкладок: плашка с обводкой, сквозь неё размыто видны экраны (слой, который пишет `DndCharacterApp`; блюр 24dp поверх `surface.card` и тон `surface.card` 62 %, как у шапки обзора); при открытой клавиатуре скрыта |
 | `FadingLazyColumn(…)`, `Modifier.fadingVerticalScroll()`, `Modifier.fadingEdges(state)` | 15 | Мягкие края прокрутки в поп-апах и шторках: уходящее за край растворяется на 24dp, край — только пока туда есть что листать |
 | `EditSheet(title, onDismiss) { … }` | 1 | Шторка снизу: ручка, заголовок `titleLarge` засечками, содержимое прокручивается, без кнопок и крестика (отметки применяются сразу), не выше 75 % экрана; в «Гравюре» гравированная панель без нижней кромки |
 | `ShortRestDialog(…)`, `LongRestDialog(…)`, `RestHitPoints(current, max, gain, exact)`, `HitDicePools(…)`, `RestRows(title, rows)` | 2 | Короткий отдых (`overview/ShortRestDialog.kt`): хиты с полосой и прибавкой зелёным, кости хитов кубиками в скине игрока (выбрана — золото, доступна — заливка кнопки, потрачена — контур и 30 %), ряд на размер кости при мультиклассе, список «Восстановится»; `RestHitPoints`, `HitDicePools` (на долгом — потраченные зелёным, «вернутся») и `RestRows` (строка — иконка, имя, «было → станет», свой цвет иконки) — общие для окон отдыха |
-| `FloatingAddButton(onClick)` | 5 | Круглая плавающая «+» 58dp в правом нижнем углу (`padding(end = 24.dp, bottom = 15.dp)`) |
+| `FloatingAddButton(onClick)` | 5 | Круглая плавающая «+» 58dp в правом нижнем углу (`padding(end = 24.dp, bottom = FloatingAddButtonBottom)` — над панелью вкладок) |
 | `LocalFloatingButtonsInset` | — | Нижнее поле списка, чтобы последние элементы выезжали из-под плавающих кнопок; приложение задаёт на экран (`SingleFloatingButtonInset` 110, `NoFloatingButtonInset` 16) |
 | `OverlayCloseButton(onClick)` | 5 | Круглый крестик полноэкранного оверлея (портрет, стол кубов), сам держится вне системных полос |
 
@@ -88,7 +88,7 @@ ScreenBackground
       item StatCardRow { MiniStatCard ×3 (weight 1f) }
       item поиск / фильтр
       section title + items(ExpandableCard, key = id)
-    FloatingAddButton(align BottomEnd, padding end 24, bottom 15)
+    FloatingAddButton(align BottomEnd, padding end 24, bottom FloatingAddButtonBottom)
 поп-апы (EditDialog) — вне ScreenBackground, по флагам состояния
 ```
 

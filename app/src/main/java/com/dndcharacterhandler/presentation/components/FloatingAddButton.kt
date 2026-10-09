@@ -12,6 +12,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.Dp
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,10 +28,14 @@ val FloatingActionButtonSize = 58.dp
 val SingleFloatingButtonInset = 110.dp
 
 /**
- * From the screens' area's foot to the floating "+": the area reaches [TabBarGap] down under the tab bar's air, the
- * button stands 15dp over the bar's plate.
+ * How far the tab bar reaches up from the screens' area's foot: the screens run down under it to the window's foot
+ * (owner's choice, 2026-10-09). The app provides it.
  */
-val FloatingAddButtonBottom = 15.dp + TabBarGap
+val LocalTabBarInset = compositionLocalOf { 0.dp }
+
+/** From the screens' area's foot to the floating "+": over the tab bar's plate, 15dp over its air. */
+val FloatingAddButtonBottom: Dp
+    @Composable @ReadOnlyComposable get() = 15.dp + TabBarGap + LocalTabBarInset.current
 
 /** Bottom content padding of a screen without a floating button. */
 val NoFloatingButtonInset = 16.dp
