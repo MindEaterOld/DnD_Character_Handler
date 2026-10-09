@@ -18,6 +18,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -200,7 +203,14 @@ internal fun PortraitSideButton(
         ) {
             val tint = if (on == true) accent else colors.text.primary
             Row(verticalAlignment = Alignment.CenterVertically) {
-                if (add) Icon(imageVector = Icons.Outlined.Add, contentDescription = null, tint = tint, modifier = Modifier.size(12.dp))
+                if (add) {
+                    // Drawn, not the icon: the icon's own margins kept it off the word, and its strokes were thin.
+                    Canvas(modifier = Modifier.padding(end = 2.dp).size(PlusSize)) {
+                        val stroke = PlusStroke.toPx()
+                        drawLine(tint, Offset(0f, size.height / 2), Offset(size.width, size.height / 2), stroke, StrokeCap.Round)
+                        drawLine(tint, Offset(size.width / 2, 0f), Offset(size.width / 2, size.height), stroke, StrokeCap.Round)
+                    }
+                }
                 if (label != null) {
                     Text(text = label, style = MaterialTheme.typography.titleMedium, color = tint)
                 } else if (icon != null) {
@@ -210,6 +220,10 @@ internal fun PortraitSideButton(
         }
     }
 }
+
+/** The «+» before a coin's word: its size and its strokes, as thick as the serif's. */
+private val PlusSize = 9.dp
+private val PlusStroke = 2.2.dp
 
 private val CoinShadowDrop = 2.dp
 private val CoinShadowSpread = 5.dp
