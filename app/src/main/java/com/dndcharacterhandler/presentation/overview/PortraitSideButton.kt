@@ -35,8 +35,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 
-// The side buttons' icons are from Game Icons (game-icons.net), CC BY 3.0: "Aura" by Lorc, "Coffee cup" and
-// "Night sleep" by Delapouite (owner's choice from boards, 2026-10-07). Filled paths on the 24 grid.
+// The side buttons' icons are from Game Icons (game-icons.net), CC BY 3.0, by Delapouite: "Coffee cup" and "Night
+// sleep" (owner's choice from boards, 2026-10-07), "Polar star" (2026-10-09). Filled paths on the 24 grid.
 
 /** An icon on the 24 grid; the fill is a placeholder colour that `Icon` tints. */
 private fun sideIcon(name: String, pathData: String): ImageVector =
@@ -45,30 +45,6 @@ private fun sideIcon(name: String, pathData: String): ImageVector =
     )
         .addPath(pathData = addPathNodes(pathData), fill = SolidColor(Color.Black))
         .build()
-
-/** A figure in an aura of rays. */
-private val AuraIcon: ImageVector by lazy {
-    sideIcon(
-        "aura",
-        "M15.04 0.62C15.02 2.48 15.5 4.91 16.49 5.58C17.33 6.14 18.4 5.36 19.54 4.54C19.75 4.38 19.97 " +
-            "4.22 20.19 4.07C20.07 4.3 19.94 4.54 19.82 4.77C19.1 6.12 18.41 7.41 18.9 8.4C19.48 9.55 21.56 " +
-            "10.09 23.15 10.07C21.77 10.97 19.62 12.21 19.62 13.54C19.62 14.88 21.77 16.06 23.15 16.97C21.56 " +
-            "16.95 19.48 17.51 18.9 18.66C18.33 19.82 19.08 21.33 20.31 22.74C17.97 21.98 17.03 22.49 16.1 " +
-            "23.18H14.82C16.83 21.52 18.2 18.13 18.2 14.2C18.2 8.64 15.44 4.13 12.04 4.13C8.64 4.13 5.88 " +
-            "8.64 5.88 14.2C5.88 18.13 7.26 21.52 9.26 23.18H7.77C6.82 22.4 5.87 21.95 3.77 22.67C4.93 21.3 " +
-            "5.93 19.82 5.35 18.66C4.78 17.51 2.58 16.95 1 16.97C1.22 16.82 1.47 16.67 1.72 16.51C3.06 15.68 " +
-            "4.69 14.66 4.69 13.54C4.69 12.21 2.37 10.97 1 10.07C2.58 10.08 4.78 9.55 5.35 8.4C5.82 7.45 " +
-            "5.15 6.25 4.44 4.97C4.28 4.67 4.11 4.37 3.96 4.07C4.17 4.22 4.39 4.38 4.61 4.54C5.74 5.36 6.82 " +
-            "6.14 7.65 5.58C8.65 4.91 9.12 2.49 9.1 0.65C9.88 2.26 10.94 3.44 12.09 3.44C13.24 3.44 14.26 " +
-            "2.24 15.04 0.62ZM11.81 5.02H11.81C11.81 5.02 11.82 5.02 11.83 5.02C11.85 5.02 11.91 5.02 12 5.02" +
-            "C13.01 5.02 13.94 6.12 13.94 7.61C13.94 8.37 13.69 9.04 13.32 9.51L12.85 10.1L13.59 10.21C14.16 " +
-            "10.3 14.55 10.57 14.87 11C15.19 11.43 15.43 12.04 15.58 12.75C15.86 14.03 15.88 15.61 15.88 " +
-            "16.99H14.27L14.24 17.4L13.86 23.14H10.29L9.87 17.4L9.84 16.99H8.14C8.15 15.62 8.22 14.07 8.53 " +
-            "12.8C8.7 12.1 8.95 11.48 9.27 11.05C9.58 10.61 9.95 10.34 10.46 10.25L11.19 10.11L10.72 9.54" +
-            "C10.33 9.07 10.06 8.39 10.06 7.61C10.06 6.22 10.89 5.14 11.81 5.02ZM15.04 0.62C15.04 0.62 15.04 " +
-            "0.62 15.04 0.62L15.04 0.62Z"
-    )
-}
 
 /** A steaming cup on a saucer. */
 private val CoffeeCupIcon: ImageVector by lazy {
@@ -102,27 +78,21 @@ private val NightSleepIcon: ImageVector by lazy {
     )
 }
 
-/** A candle in its holder (Game Icons, Delapouite, CC BY 3.0). */
-private val CandleIcon: ImageVector by lazy {
+/** A four-pointed star with four shorter rays between its points (Game Icons, "Polar star" by Delapouite, CC BY 3.0). */
+private val PolarStarIcon: ImageVector by lazy {
     sideIcon(
-        "candle-holder",
-        "M5.33 13.38 5.33 13.38C5.63 13.38 5.94 13.43 6.25 13.55C7.72 14.09 8.47 15.44 8.36 16.7C8.31 17." +
-            "24 8.09 17.77 7.7 18.19H23.29C22.73 19.32 21.86 20.31 20.77 21.13H7.36C6.59 20.55 5.95 19.89 5.4" +
-            "4 19.15C5.43 19.15 5.42 19.15 5.41 19.15L5.41 19.1C5.21 18.81 5.03 18.5 4.87 18.19H6.08C7.02 17." +
-            "96 7.42 17.33 7.49 16.62C7.56 15.76 7.06 14.78 5.95 14.37C5.07 14.04 4.28 14.39 3.79 15.1C3.31 1" +
-            "5.81 3.16 16.87 3.8 17.98C4.33 18.93 4.15 19.97 3.55 20.56C2.94 21.15 1.87 21.21 1.05 20.45L1.64" +
-            " 19.81C2.21 20.33 2.63 20.23 2.93 19.93C3.24 19.63 3.4 19.06 3.03 18.42C2.25 17.04 2.39 15.59 3." +
-            "07 14.6C3.58 13.86 4.42 13.38 5.33 13.38ZM11.51 7.25C12.98 7.71 14.55 7.73 16.06 7.25V10.37C16.1" +
-            "4 10.89 16.36 11.21 16.57 11.51C16.8 11.83 17.01 12.13 17.01 12.63C16.99 13.47 16.37 13.74 16.06" +
-            " 13.39V17.31H11.51V10.48C11.27 10.82 10.71 10.6 10.7 9.88C10.69 9.46 10.87 9.21 11.06 8.94C11.28" +
-            " 8.63 11.52 8.29 11.5 7.62L11.51 7.81V7.25ZM13.63 0.69 13.63 0.69C14.27 0.69 15.85 2.75 15.85 4." +
-            "43C15.85 5.64 15.39 6.42 14.1 6.6C14.26 5.56 14.22 4.49 13.91 3.43L13.07 3.68C13.36 4.66 13.38 5" +
-            ".64 13.21 6.63C11.93 6.52 11.41 5.68 11.41 4.43C11.41 2.75 12.97 0.69 13.63 0.69ZM11.51 7.25Z"
+        "polar-star",
+        "M12 0.93C12.67 5.14 13.24 7.64 14.8 9.2C16.35 10.75 18.86 11.32 23.07 12C18.86 12.67 16.35 13.24" +
+            " 14.79 14.79C13.24 16.35 12.67 18.86 12 23.07C11.32 18.86 10.75 16.35 9.2 14.8C7.64 13.24 5.14 1" +
+            "2.67 0.93 12C5.14 11.32 7.64 10.75 9.2 9.2C10.75 7.64 11.32 5.14 12 0.93ZM16.53 14.55C17.16 16.0" +
+            "3 18.27 17.68 19.83 19.83C17.68 18.27 16.03 17.16 14.55 16.53C14.8 16.09 15.08 15.71 15.39 15.39" +
+            "C15.71 15.08 16.09 14.8 16.53 14.55ZM7.46 14.56C7.9 14.8 8.28 15.08 8.6 15.39C8.92 15.71 9.19 16" +
+            ".09 9.44 16.53C7.96 17.16 6.31 18.28 4.17 19.83C5.72 17.68 6.84 16.03 7.46 14.56ZM19.83 4.17C18." +
+            "28 6.31 17.16 7.96 16.53 9.44C16.09 9.19 15.71 8.92 15.39 8.6C15.08 8.28 14.8 7.9 14.56 7.46C16." +
+            "03 6.84 17.68 5.72 19.83 4.17ZM4.17 4.17C6.32 5.73 7.96 6.84 9.43 7.46C9.19 7.9 8.92 8.28 8.6 8." +
+            "6C8.28 8.92 7.9 9.19 7.46 9.43C6.84 7.96 5.73 6.32 4.17 4.17Z"
     )
 }
-
-/** The figure in an aura: the conditions' button. */
-internal val SideIconConditions: ImageVector get() = AuraIcon
 
 /** The cup: the short rest. */
 internal val SideIconShortRest: ImageVector get() = CoffeeCupIcon
@@ -130,8 +100,14 @@ internal val SideIconShortRest: ImageVector get() = CoffeeCupIcon
 /** The moon asleep: the long rest. */
 internal val SideIconLongRest: ImageVector get() = NightSleepIcon
 
-/** The candle: inspiration, under the rests, lit while it is on (owner's choice from boards, 2026-10-07: C2). */
-internal val SideIconInspiration: ImageVector get() = CandleIcon
+/**
+ * The polar star: inspiration, over the experience's coin, lit while it is on (owner's choice from boards, 2026-10-09);
+ * its rays are thin, so it is drawn larger than the other icons ([InspirationIconSize]).
+ */
+internal val SideIconInspiration: ImageVector get() = PolarStarIcon
+
+/** The polar star on its coin: nearly to the coin's edge, its thin points in sight. */
+internal val InspirationIconSize = 34.dp
 
 /** A side button's size; the column of the conditions' marks keeps to it. */
 internal val PortraitSideButtonSize = 44.dp

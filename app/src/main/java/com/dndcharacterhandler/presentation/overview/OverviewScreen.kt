@@ -971,6 +971,7 @@ private fun OverviewContent(
                                     PortraitSideButton(
                                         icon = SideIconInspiration,
                                         contentDescription = text("overview_inspiration"),
+                                        iconSize = InspirationIconSize,
                                         onClick = { characterBundle?.let(onToggleInspiration) },
                                         on = character.hasInspiration
                                     )
