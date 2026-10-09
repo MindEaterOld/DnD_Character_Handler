@@ -86,7 +86,7 @@ fun BorderLabelCard(
     /** On the label's text: what its style can't say (the ability cards draw it thrice, for a deep shadow). */
     labelModifier: Modifier = Modifier,
     cornerRadius: Dp = 10.dp,
-    fill: Color = LocalDesignTokens.current.colors.surface.card.copy(alpha = 0.62f),
+    fill: Color = LocalDesignTokens.current.colors.surface.card.copy(alpha = 0.7f),
     border: Color = LocalDesignTokens.current.colors.border.miniCard,
     /**
      * The frame drawn over [content] instead of under it: for a picture filling the card to its edges (the

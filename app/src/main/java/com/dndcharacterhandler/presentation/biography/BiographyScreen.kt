@@ -689,7 +689,7 @@ private fun BiographyHistorySection(
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(10.dp),
-            color = colors.surface.card.copy(alpha = 0.62f),
+            color = colors.surface.card.copy(alpha = 0.7f),
             border = BorderStroke(1.dp, colors.border.muted)
         ) {
             OutlinedTextField(

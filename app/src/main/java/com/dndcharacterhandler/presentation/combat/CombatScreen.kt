@@ -1117,7 +1117,7 @@ private fun AttackCard(
             .fillMaxWidth()
             .combinedClickable(onClick = onClick, onLongClick = onLongClick),
         shape = RoundedCornerShape(10.dp),
-        color = colors.surface.card.copy(alpha = 0.62f),
+        color = colors.surface.card.copy(alpha = 0.7f),
         border = BorderStroke(1.dp, colors.border.muted)
     ) {
         Row(
@@ -1231,7 +1231,7 @@ private fun SpellAttackCard(
             .fillMaxWidth()
             .combinedClickable(onClick = onClick, onLongClick = onLongClick),
         shape = RoundedCornerShape(10.dp),
-        color = colors.surface.card.copy(alpha = 0.62f),
+        color = colors.surface.card.copy(alpha = 0.7f),
         border = BorderStroke(1.dp, colors.border.muted)
     ) {
         Row(
@@ -1442,7 +1442,7 @@ private fun CombatResourceTile(
             .height(92.dp)
             .clickable { onEdit(resource) },
         shape = RoundedCornerShape(10.dp),
-        color = colors.surface.card.copy(alpha = 0.62f),
+        color = colors.surface.card.copy(alpha = 0.7f),
         border = BorderStroke(1.dp, colors.border.muted)
     ) {
         Column(

@@ -27,7 +27,7 @@ import com.dndcharacterhandler.presentation.theme.LocalThemeLook
 fun OutlinedPanel(
     modifier: Modifier = Modifier,
     cornerRadius: Dp = 10.dp,
-    fill: Color = LocalDesignTokens.current.colors.surface.card.copy(alpha = 0.62f),
+    fill: Color = LocalDesignTokens.current.colors.surface.card.copy(alpha = 0.7f),
     border: Color = LocalDesignTokens.current.colors.border.miniCard,
     /** Keep what is inside within the corners; off when something is let out over the frame (the stats' shield). */
     clip: Boolean = true,

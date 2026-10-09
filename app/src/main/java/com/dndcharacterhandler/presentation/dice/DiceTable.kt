@@ -155,7 +155,7 @@ internal fun DiceTableOverlay(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(colors.background.radialEnd.copy(alpha = 0.6f))
+            .background(colors.background.radialEnd.copy(alpha = 0.7f))
     ) {
         DiceCanvas(
             state = state,

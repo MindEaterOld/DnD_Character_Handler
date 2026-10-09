@@ -50,7 +50,7 @@
 | `xpLabel` | bodyLarge | 16 | «EXP 0 / 300» |
 | `hpCurrent` | headlineMedium | 64 / 68 | текущие хиты |
 | `hpTemporary` | headlineMedium | 40 / 44 | временные хиты |
-| `hpMaximum` | headlineMedium | 40 / 44, alpha 0.62 | максимум хитов |
+| `hpMaximum` | headlineMedium | 40 / 44, alpha 0.7 | максимум хитов |
 | `hpLabel` | titleLarge | 22 | «HP» на рамке |
 | `miniStatValue` | headlineMedium | 28 / 30 | значение карточки стата |
 | `miniStatLabel` | bodyLarge | 12 | подпись карточки стата |

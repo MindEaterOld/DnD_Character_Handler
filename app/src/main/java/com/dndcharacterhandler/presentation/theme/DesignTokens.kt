@@ -247,7 +247,7 @@ val DefaultDesignTokens = DesignTokens(
         actionButtonLabel = TextSizeToken(fontSizeSp = 12f, lineHeightSp = 13f),
         hpCurrent = TextSizeToken(fontSizeSp = 64f, lineHeightSp = 68f),
         hpTemporary = TextSizeToken(fontSizeSp = 40f, lineHeightSp = 44f),
-        hpMaximum = TextSizeToken(fontSizeSp = 40f, lineHeightSp = 44f, alpha = 0.62f),
+        hpMaximum = TextSizeToken(fontSizeSp = 40f, lineHeightSp = 44f, alpha = 0.7f),
         hpLabel = TextSizeToken(fontSizeSp = 22f),
         miniStatValue = TextSizeToken(fontSizeSp = 28f, lineHeightSp = 30f),
         miniStatLabel = TextSizeToken(fontSizeSp = 12f),

@@ -53,7 +53,7 @@ val TabBarGap = 8.dp
 private val TabBarBlur = 24.dp
 
 /** The tint over the blurred screens: the card's colour at the stat cards' fill, as the overview's header's. */
-private const val TabBarTint = .62f
+private const val TabBarTint = .7f
 
 /** The plate's height: in Classic a pill, its ends half circles of half this. */
 private val TabBarHeight = 62.dp

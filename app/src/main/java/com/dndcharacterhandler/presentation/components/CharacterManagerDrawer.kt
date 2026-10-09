@@ -192,7 +192,7 @@ private fun DrawerCharacterCard(
             .height(96.dp)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(8.dp),
-        color = colors.surface.card.copy(alpha = 0.72f),
+        color = colors.surface.card.copy(alpha = 0.7f),
         border = BorderStroke(1.dp, if (selected) MaterialTheme.colorScheme.primary else colors.border.miniCard)
     ) {
         Row(

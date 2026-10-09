@@ -83,7 +83,7 @@ private val HeaderBackScroll = 56.dp
 private val HeaderBlur = 24.dp
 
 /** The tint over the blurred list: the card's colour at the stat cards' fill, as the tab bar's. */
-private const val HeaderTint = .62f
+private const val HeaderTint = .7f
 
 /** What the header shows blurred behind it: the list's own layer, and how far the list has gone under the header. */
 @Stable

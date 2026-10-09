@@ -630,7 +630,7 @@ private fun SpellsSearchField(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
-        color = colors.surface.card.copy(alpha = 0.62f),
+        color = colors.surface.card.copy(alpha = 0.7f),
         border = BorderStroke(1.dp, colors.border.muted)
     ) {
         OutlinedTextField(
@@ -649,7 +649,7 @@ private fun SpellsSearchField(
                 Text(
                     text = text("spells_search_placeholder"),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = colors.text.muted.copy(alpha = 0.72f)
+                    color = colors.text.muted.copy(alpha = 0.7f)
                 )
             },
             singleLine = true,

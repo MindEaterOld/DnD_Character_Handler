@@ -2179,7 +2179,7 @@ private fun HpNumbers(
                     .clickable(onClick = onMaxHpClick)
                     .deepShadow(),
                 style = max,
-                color = colors.text.primary.copy(alpha = tokens.hpMaximum.alpha ?: 0.62f),
+                color = colors.text.primary.copy(alpha = tokens.hpMaximum.alpha ?: 0.7f),
                 maxLines = 1
             )
         }

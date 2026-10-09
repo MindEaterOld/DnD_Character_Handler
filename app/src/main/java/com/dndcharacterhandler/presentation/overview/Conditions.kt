@@ -107,7 +107,7 @@ private fun ConditionChip(icon: ImageVector?, name: String, accent: Color, onCli
         modifier = Modifier
             .height(32.dp)
             .clip(shape)
-            .background(colors.surface.card.copy(alpha = .62f))
+            .background(colors.surface.card.copy(alpha = .7f))
             .background(accent.copy(alpha = .12f))
             .border(1.dp, accent.copy(alpha = .7f), shape)
             .clickable(onClick = onClick)

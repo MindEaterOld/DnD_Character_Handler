@@ -613,7 +613,7 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawCoin(
         style = androidx.compose.ui.graphics.drawscope.Stroke(width = strokeWidth)
     )
     drawCircle(
-        color = color.copy(alpha = 0.8f),
+        color = color.copy(alpha = 0.7f),
         radius = radius * 0.42f,
         center = center,
         style = androidx.compose.ui.graphics.drawscope.Stroke(width = strokeWidth * 0.85f)
@@ -689,7 +689,7 @@ private fun InventorySearchField(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
-        color = colors.surface.card.copy(alpha = 0.62f),
+        color = colors.surface.card.copy(alpha = 0.7f),
         border = BorderStroke(1.dp, colors.border.muted)
     ) {
         OutlinedTextField(
@@ -708,7 +708,7 @@ private fun InventorySearchField(
                 Text(
                     text = text("inventory_search_placeholder"),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = colors.text.muted.copy(alpha = 0.72f)
+                    color = colors.text.muted.copy(alpha = 0.7f)
                 )
             },
             singleLine = true,
@@ -767,7 +767,7 @@ private fun InventoryCatalogRow(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
-        color = colors.surface.card.copy(alpha = 0.62f),
+        color = colors.surface.card.copy(alpha = 0.7f),
         border = BorderStroke(1.dp, colors.border.muted)
     ) {
         Row(
@@ -997,7 +997,7 @@ private fun InventoryBaseItemDialog(
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(10.dp),
-                    color = colors.surface.card.copy(alpha = 0.62f),
+                    color = colors.surface.card.copy(alpha = 0.7f),
                     border = BorderStroke(1.dp, colors.border.muted),
                     onClick = { onSelect(base, variant) }
                 ) {
@@ -1116,7 +1116,7 @@ internal fun InventorySectionCard(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
-        color = colors.surface.card.copy(alpha = 0.62f),
+        color = colors.surface.card.copy(alpha = 0.7f),
         border = BorderStroke(1.dp, colors.border.muted)
     ) {
         Column {

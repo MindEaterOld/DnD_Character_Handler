@@ -541,7 +541,7 @@ private fun WorkshopSection(title: String, content: @Composable () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .background(colors.surface.card.copy(alpha = 0.62f))
+            .background(colors.surface.card.copy(alpha = 0.7f))
             .border(1.dp, colors.border.muted, RoundedCornerShape(12.dp))
             .padding(14.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
