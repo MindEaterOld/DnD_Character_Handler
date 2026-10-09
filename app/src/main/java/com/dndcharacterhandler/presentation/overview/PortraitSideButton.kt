@@ -7,11 +7,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -139,14 +137,7 @@ internal fun PortraitSideButton(
     label: String? = null
 ) {
     val colors = LocalDesignTokens.current.colors
-    Box(
-        modifier = modifier
-            .size(PortraitSideButtonSize)
-            .semantics {
-                this.contentDescription = contentDescription
-                if (on == null) role = Role.Button
-            }
-    ) {
+    Box(modifier = modifier.size(PortraitSideButtonSize)) {
         // The coin's shadow: a little below it, fading out 5dp past its edge.
         Canvas(modifier = Modifier.matchParentSize()) {
             val radius = size.minDimension / 2 + CoinShadowSpread.toPx()
@@ -173,9 +164,11 @@ internal fun PortraitSideButton(
                     if (on != null) {
                         Modifier.toggleable(value = on, role = Role.Switch, onValueChange = { onClick() })
                     } else {
-                        Modifier.clickable(onClick = onClick)
+                        Modifier.clickable(role = Role.Button, onClick = onClick)
                     }
-                ),
+                )
+                // Its name on the node that acts: the reader says what the coin does, and its state.
+                .semantics { this.contentDescription = contentDescription },
             contentAlignment = Alignment.Center
         ) {
             val tint = if (on == true) accent else colors.text.primary

@@ -9,10 +9,8 @@ import com.dndcharacterhandler.presentation.components.FadingLazyColumn
 import com.dndcharacterhandler.domain.model.AppTheme
 import com.dndcharacterhandler.presentation.theme.FrameStyle
 import com.dndcharacterhandler.presentation.theme.LocalThemeLook
-import com.dndcharacterhandler.presentation.components.engravedBorder
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.ui.unit.Dp
 import com.dndcharacterhandler.domain.model.decodeProficiencyIds
 import com.dndcharacterhandler.domain.rules.Defenses
 import com.dndcharacterhandler.presentation.attributes.AttributesSection
@@ -22,8 +20,6 @@ import com.dndcharacterhandler.domain.rules.RollMode
 import com.dndcharacterhandler.domain.rules.damageTaken
 import com.dndcharacterhandler.domain.rules.attacksAgainst
 import com.dndcharacterhandler.presentation.components.EndConcentrationDialog
-import com.dndcharacterhandler.presentation.components.isBetter
-import com.dndcharacterhandler.presentation.components.isWorse
 import com.dndcharacterhandler.presentation.components.RollMarker
 import com.dndcharacterhandler.domain.rules.effectiveSpeed
 import com.dndcharacterhandler.domain.rules.activeConditions
@@ -44,8 +40,6 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -55,7 +49,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -69,7 +62,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import com.dndcharacterhandler.domain.model.PortraitFraming
 import androidx.compose.material.icons.outlined.Crop
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.outlined.Add
@@ -100,8 +92,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material.icons.automirrored.outlined.DirectionsRun
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.Visibility
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -110,12 +100,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import com.dndcharacterhandler.domain.rules.romanNumeral
-import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.CompositionLocalProvider
@@ -125,18 +109,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.input.KeyboardType
@@ -175,18 +160,11 @@ import com.dndcharacterhandler.domain.model.InventoryCatalogSource
 import com.dndcharacterhandler.domain.usecase.GetCharacterBundleUseCase
 import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
-import com.dndcharacterhandler.presentation.components.StatCardRow
-import com.dndcharacterhandler.presentation.components.MiniStatCardIcon
-import com.dndcharacterhandler.presentation.components.MiniStatCard
-import com.dndcharacterhandler.presentation.components.BorderLabelCard
 import com.dndcharacterhandler.domain.rules.DEATH_SAVES_TO_END
 import com.dndcharacterhandler.domain.rules.DeathSaves
 import com.dndcharacterhandler.domain.rules.deathSave
 import com.dndcharacterhandler.domain.rules.takeDamage
 import com.dndcharacterhandler.presentation.components.SkullIcon
-import com.dndcharacterhandler.presentation.components.saturation
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import com.dndcharacterhandler.presentation.dice.DiceRollRequest
 import com.dndcharacterhandler.presentation.dice.DieIcon
 import com.dndcharacterhandler.presentation.dice.DieType
@@ -199,12 +177,6 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import kotlin.math.PI
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.ui.layout.layout
-import androidx.compose.ui.layout.FirstBaseline
-import androidx.compose.ui.layout.AlignmentLine
 import com.dndcharacterhandler.presentation.components.AppImage
 import com.dndcharacterhandler.presentation.components.EditDialog
 import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
@@ -512,6 +484,8 @@ class OverviewViewModel(
      * when the throw began: another throw on the same table replaces it, a 20 included.
      */
     fun recordDeathSave(characterBundle: CharacterBundle, before: DeathSaves, roll: Int) {
+        // Dead or stable, nothing is rolled for any more.
+        if (before.isDead || before.isStable) return
         val current = characterBundle.character
         val result = deathSave(roll, before, rollEffects(D20Test.DeathSave, current.conditions, current.exhaustion).modifier)
         viewModelScope.launch {
@@ -843,8 +817,6 @@ private fun OverviewContent(
         if (wasDead == false && dead) playAssetSound(context, "sounds/wilhelm_scream.mp3")
         wasDead = dead
     }
-    val levelLabel = strings.format("overview_level_format", character?.level ?: 1)
-    val xpInfo = remember(character) { buildXpInfo(character) }
 
     val concentrationSpell = characterBundle?.spells?.firstOrNull { it.id == character?.concentrationSpellId }
 
@@ -1170,7 +1142,7 @@ private fun OverviewContent(
             OutlinedTextField(
                 value = experienceDraft,
                 onValueChange = { value ->
-                    experienceDraft = value.filter(Char::isDigit)
+                    experienceDraft = value.filter(Char::isDigit).take(MaxExperienceDigits)
                 },
                 singleLine = true,
                 label = {
@@ -1341,7 +1313,7 @@ private fun OverviewContent(
     }
 
     if (isMaxHpDialogOpen && characterBundle != null) {
-        val draftValue = maxHpDraft.toIntOrNull()?.coerceAtLeast(1) ?: 1
+        val draftValue = maxHpDraft.toIntOrNull()?.coerceAtLeast(1) ?: characterBundle.character.maxHp
 
         EditDialog(
             title = text("overview_hp_max_dialog_title"),
@@ -1354,7 +1326,7 @@ private fun OverviewContent(
             OutlinedTextField(
                 value = maxHpDraft,
                 onValueChange = { value ->
-                    maxHpDraft = value.filter(Char::isDigit)
+                    maxHpDraft = value.filter(Char::isDigit).take(MaxHpDigits)
                 },
                 singleLine = true,
                 label = { Text(text("overview_hp_max")) },
@@ -1816,7 +1788,8 @@ private fun SurvivalBlock(
         Spacer(modifier = Modifier.height(6.dp))
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(HpButtonGap)) {
             HpRoundButton(Icons.Outlined.HeartBroken, colors.accent.dangerHpZero, text("overview_hp_damage"), onDamage)
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            // What the buttons leave: the numbers fit into it, never pushing heal off the row.
+            Column(modifier = Modifier.weight(1f, fill = false), horizontalAlignment = Alignment.CenterHorizontally) {
                 HpNumbers(
                     currentHp = character.currentHp,
                     maxHp = character.maxHp,
@@ -1941,6 +1914,12 @@ private fun ArtStat(
 /** The most hit points one change can take or give: four digits. */
 private const val MaxHpChange = 9999
 
+/** The maximum hit points' field: as many digits as a change. */
+private const val MaxHpDigits = 4
+
+/** The experience's field: seven digits — the last level is 355 000, and adding them can't overflow. */
+private const val MaxExperienceDigits = 7
+
 /** Healing's two kinds, a toggle: the picked one in its colour at 12 %, the other on the option fill. */
 @Composable
 private fun HpKindToggle(temporary: Boolean, onPick: (OverviewHpEditMode) -> Unit) {
@@ -2064,7 +2043,8 @@ private fun DeathSavesRow(successes: Int, failures: Int, onSetSaves: (Int, Int) 
                     .padding(horizontal = 16.dp)
                     .size(64.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .clickable(onClick = onRoll),
+                    // Dead or stable, there is nothing more to roll for.
+                    .clickable(enabled = !saves.isDead && !saves.isStable, onClick = onRoll),
                 contentAlignment = Alignment.Center
             ) {
                 // Turned half round, the front triangle stands on its point: room for the skull's crown.
@@ -2109,7 +2089,8 @@ private fun DeathSaveMarks(label: String, count: Int, color: Color, modifier: Mo
                     modifier = Modifier
                         .size(26.dp)
                         .clip(CircleShape)
-                        .clickable { onSet(if (count == index + 1) index else index + 1) }
+                        .toggleable(value = filled, role = Role.Checkbox) { onSet(if (count == index + 1) index else index + 1) }
+                        .semantics { contentDescription = "$label ${index + 1}" }
                         .padding(2.dp)
                         .border(1.5.dp, if (filled) color else colors.text.label, CircleShape)
                         .padding(3.dp)
@@ -2139,57 +2120,55 @@ private fun HpNumbers(
     val tokens = LocalDesignTokens.current.typography
     val colors = LocalDesignTokens.current.colors
     val shadow = artShadow()
-    Row(
-        modifier = modifier
-            .clip(RoundedCornerShape(10.dp))
-            .clickable(onClick = onClick)
-            .padding(horizontal = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = currentHp.toString(),
-            modifier = Modifier.deepShadow(),
-            style = MaterialTheme.typography.headlineMedium.copy(
-                fontSize = tokens.hpCurrent.fontSizeSp.sp,
-                lineHeight = (tokens.hpCurrent.lineHeightSp ?: tokens.hpCurrent.fontSizeSp).sp,
-                shadow = shadow
-            ),
-            color = if (currentHp == 0) colors.accent.dangerHpZero else colors.text.primary
-        )
-        if (temporaryHp > 0) {
+    val headline = MaterialTheme.typography.headlineMedium
+    fun sized(token: com.dndcharacterhandler.presentation.theme.TextSizeToken) =
+        headline.copy(fontSize = token.fontSizeSp.sp, lineHeight = (token.lineHeightSp ?: token.fontSizeSp).sp, shadow = shadow)
+    // The hit points' sizes, then a step down the type scale for each while they don't fit: three-digit hit points,
+    // a narrow phone, a large font.
+    val scales = listOf(
+        Triple(sized(tokens.hpCurrent), sized(tokens.hpTemporary), sized(tokens.hpMaximum)),
+        Triple(sized(tokens.hpTemporary), headline.copy(shadow = shadow), headline.copy(shadow = shadow)),
+        Triple(headline.copy(shadow = shadow), MaterialTheme.typography.titleLarge.copy(shadow = shadow), MaterialTheme.typography.titleLarge.copy(shadow = shadow))
+    )
+    val temporary = if (temporaryHp > 0) "+$temporaryHp" else ""
+    val maximum = " / $maxHp"
+    val measurer = rememberTextMeasurer()
+    BoxWithConstraints(modifier = modifier) {
+        val room = constraints.maxWidth - with(LocalDensity.current) { 16.dp.roundToPx() }
+        val (current, extra, max) = scales.firstOrNull { (c, t, m) ->
+            measurer.measure(currentHp.toString(), c).size.width +
+                (if (temporary.isEmpty()) 0 else measurer.measure(temporary, t).size.width) +
+                measurer.measure(maximum, m).size.width <= room
+        } ?: scales.last()
+        Row(
+            modifier = Modifier
+                .clip(RoundedCornerShape(10.dp))
+                .clickable(onClick = onClick)
+                .padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text(
-                text = "+$temporaryHp",
+                text = currentHp.toString(),
                 modifier = Modifier.deepShadow(),
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    fontSize = tokens.hpTemporary.fontSizeSp.sp,
-                    lineHeight = (tokens.hpTemporary.lineHeightSp ?: tokens.hpTemporary.fontSizeSp).sp,
-                    shadow = shadow
-                ),
-                color = colors.accent.hpTemporary
+                style = current,
+                color = if (currentHp == 0) colors.accent.dangerHpZero else colors.text.primary,
+                maxLines = 1
+            )
+            if (temporary.isNotEmpty()) {
+                Text(text = temporary, modifier = Modifier.deepShadow(), style = extra, color = colors.accent.hpTemporary, maxLines = 1)
+            }
+            Text(
+                text = maximum,
+                modifier = Modifier
+                    .clickable(onClick = onMaxHpClick)
+                    .deepShadow(),
+                style = max,
+                color = colors.text.primary.copy(alpha = tokens.hpMaximum.alpha ?: 0.62f),
+                maxLines = 1
             )
         }
-        Text(
-            text = " / $maxHp",
-            modifier = Modifier
-                .clickable(onClick = onMaxHpClick)
-                .deepShadow(),
-            style = MaterialTheme.typography.headlineMedium.copy(
-                fontSize = tokens.hpMaximum.fontSizeSp.sp,
-                lineHeight = (tokens.hpMaximum.lineHeightSp ?: tokens.hpMaximum.fontSizeSp).sp,
-                shadow = shadow
-            ),
-            color = colors.text.primary.copy(alpha = tokens.hpMaximum.alpha ?: 0.62f)
-        )
     }
 }
-
-private data class XpProgressInfo(
-    val currentXp: Int,
-    val nextLevelXp: Int,
-    val progress: Float,
-    val isMaxLevel: Boolean,
-    val hasReachedLevelCap: Boolean
-)
 
 private data class HpPreview(
     val currentHp: Int,
@@ -2313,61 +2292,6 @@ private fun guessImageExtension(
     return pathExtension ?: "jpg"
 }
 
-private val levelThresholds = listOf(
-    0,
-    300,
-    900,
-    2700,
-    6500,
-    14000,
-    23000,
-    34000,
-    48000,
-    64000,
-    85000,
-    100000,
-    120000,
-    140000,
-    165000,
-    195000,
-    225000,
-    265000,
-    305000,
-    355000
-)
-
-
-private fun buildXpInfo(character: Character?): XpProgressInfo {
-    val currentXp = character?.experience ?: 0
-    val level = character?.level ?: 1
-    val currentThreshold = levelThreshold(level)
-    val nextThreshold = nextLevelThreshold(level)
-    val range = (nextThreshold - currentThreshold).coerceAtLeast(1)
-    val isMaxLevel = level >= 20
-    val hasReachedLevelCap = !isMaxLevel && currentXp >= nextThreshold
-    val progress = if (isMaxLevel) {
-        1f
-    } else {
-        ((currentXp - currentThreshold).coerceAtLeast(0).toFloat() / range.toFloat()).coerceIn(0f, 1f)
-    }
-
-    return XpProgressInfo(
-        currentXp = currentXp,
-        nextLevelXp = nextThreshold,
-        progress = progress,
-        isMaxLevel = isMaxLevel,
-        hasReachedLevelCap = hasReachedLevelCap
-    )
-}
-
-private fun levelThreshold(level: Int): Int {
-    return levelThresholds[level.coerceIn(1, 20) - 1]
-}
-
-private fun nextLevelThreshold(level: Int): Int {
-    return if (level >= 20) 355000 else levelThreshold(level + 1)
-}
-
 private fun signed(value: Int?): String {
     if (value == null) return "-"
     return if (value >= 0) "+$value" else value.toString()
@@ -2475,6 +2399,9 @@ private fun OverviewPreviewContent(
             "levelup_badge" to "Level UP",
             "overview_level_short" to "lvl",
             "overview_hp" to "HP",
+            "conditions_add_chip" to "Condition",
+            "overview_xp_coin" to "XP",
+            "overview_add_experience" to "Add experience",
             "overview_death_saves" to "Death saves",
             "overview_death_saves_successes" to "Successes",
             "overview_death_saves_failures" to "Failures",
