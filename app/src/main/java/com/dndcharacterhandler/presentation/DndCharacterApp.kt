@@ -248,9 +248,9 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                             .fillMaxSize()
                             .padding(
                                 start = padding.calculateStartPadding(layoutDirection),
-                                // The overview draws under the status bar itself: its portrait from the phone's very top,
-                                // its header on it (owner's choice, 2026-10-09).
-                                top = if (currentRoute == AppScreen.Overview.route) 0.dp else padding.calculateTopPadding(),
+                                // Every screen draws under the status bar itself, its header lying on it (owner's choice,
+                                // 2026-10-09).
+                                top = 0.dp,
                                 end = padding.calculateEndPadding(layoutDirection),
                                 bottom = 0.dp
                             )

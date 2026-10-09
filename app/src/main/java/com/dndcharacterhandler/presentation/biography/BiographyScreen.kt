@@ -1,5 +1,8 @@
 package com.dndcharacterhandler.presentation.biography
 
+import androidx.compose.foundation.layout.statusBarsPadding
+import com.dndcharacterhandler.presentation.components.rememberHeaderBackdrop
+import com.dndcharacterhandler.presentation.components.headerBackdrop
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -77,7 +80,6 @@ import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
 import com.dndcharacterhandler.presentation.components.CharacterHeaderInset
 import com.dndcharacterhandler.presentation.components.PinnedCharacterHeader
-import com.dndcharacterhandler.presentation.components.fadeUnderHeader
 import com.dndcharacterhandler.presentation.components.EditDialog
 import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
 import com.dndcharacterhandler.presentation.components.OutlinedPanel
@@ -228,6 +230,7 @@ internal fun BiographyContent(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .statusBarsPadding()
                     .padding(start = 24.dp, end = 24.dp, top = 4.dp)
             ) {
             ScreenTopActions(
@@ -249,6 +252,7 @@ internal fun BiographyContent(
     val resolvedBundle = characterBundle
     val focusManager = LocalFocusManager.current
     val listState = rememberLazyListState()
+    val backdrop = rememberHeaderBackdrop(listState)
     val scope = rememberCoroutineScope()
     ScreenBackground {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -256,7 +260,7 @@ internal fun BiographyContent(
             state = listState,
             modifier = Modifier
                 .fillMaxSize()
-                .fadeUnderHeader()
+                .headerBackdrop(backdrop)
                 // A tap that nothing else takes — off the texts, the buttons and the cells — ends the typing, and
                 // what was typed is saved as the field is left (owner's wish, 2026-10-07).
                 .pointerInput(Unit) { detectTapGestures(onTap = { focusManager.clearFocus() }) },
@@ -301,7 +305,7 @@ internal fun BiographyContent(
 
             moreItems()
         }
-        PinnedCharacterHeader(character = resolvedCharacter, onOpenDrawer = onOpenDrawer, onOpenDice = onOpenDice)
+        PinnedCharacterHeader(character = resolvedCharacter, onOpenDrawer = onOpenDrawer, onOpenDice = onOpenDice, backdrop = backdrop)
         // Hidden while the keyboard is up: nothing is started while typing, and it would lie on the note's foot.
         onAddNote?.takeUnless { WindowInsets.isImeVisible }?.let { add ->
             FloatingAddButton(

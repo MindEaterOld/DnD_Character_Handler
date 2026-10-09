@@ -1,4 +1,8 @@
 package com.dndcharacterhandler.presentation.overview
+import com.dndcharacterhandler.presentation.components.CharacterHeaderInset
+import com.dndcharacterhandler.presentation.components.PinnedCharacterHeader
+import com.dndcharacterhandler.presentation.components.rememberHeaderBackdrop
+import com.dndcharacterhandler.presentation.components.headerBackdrop
 import com.dndcharacterhandler.presentation.components.FadingLazyColumn
 import com.dndcharacterhandler.domain.model.AppTheme
 import com.dndcharacterhandler.presentation.theme.FrameStyle
@@ -55,14 +59,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.graphics.layer.drawLayer
-import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -913,27 +912,16 @@ private fun OverviewContent(
 
     ScreenBackground {
         // The portrait from the phone's very top, under the status bar; the header lies on it, its back coming in as the
-        // list goes under it, the list behind it blurred (owner's choices from the device, 2026-10-09). The list draws
-        // into its own layer for the header to blur.
+        // list goes under it, the list behind it blurred (owner's choices from the device, 2026-10-09).
         val listState = rememberLazyListState()
-        val listLayer = rememberGraphicsLayer()
-        val density = LocalDensity.current
-        val headerBack by remember {
-            derivedStateOf {
-                if (listState.firstVisibleItemIndex > 0) 1f
-                else (listState.firstVisibleItemScrollOffset / with(density) { HeaderBackScroll.toPx() }).coerceIn(0f, 1f)
-            }
-        }
+        val backdrop = rememberHeaderBackdrop(listState)
         val statusBarTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
         Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
                 state = listState,
                 modifier = Modifier
                     .fillMaxSize()
-                    .drawWithContent {
-                        listLayer.record { this@drawWithContent.drawContent() }
-                        drawLayer(listLayer)
-                    },
+                    .headerBackdrop(backdrop),
                 contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 0.dp, bottom = LocalFloatingButtonsInset.current),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
@@ -980,7 +968,7 @@ private fun OverviewContent(
                             },
                             fallback = { PortraitFallback(displayName) },
                             topInset = statusBarTop,
-                            levelTop = statusBarTop + OverviewHeaderRow + 4.dp
+                            levelTop = CharacterHeaderInset + 4.dp
                         ) {
                             // The conditions down the left, inspiration over them, the rests down the right, on the
                             // column's edges, each column centred on the art's middle.
@@ -1163,7 +1151,7 @@ private fun OverviewContent(
 
                 moreItems()
             }
-            OverviewHeader(
+            PinnedCharacterHeader(
                 name = character?.name.orEmpty(),
                 onOpenDrawer = onOpenDrawer,
                 onOpenDice = onOpenDice,
@@ -1172,9 +1160,7 @@ private fun OverviewContent(
                     draftText = character?.name.orEmpty()
                     activeField = OverviewEditableField.NAME
                 },
-                content = listLayer,
-                progress = headerBack,
-                modifier = Modifier.align(Alignment.TopCenter)
+                backdrop = backdrop
             )
         }
     }

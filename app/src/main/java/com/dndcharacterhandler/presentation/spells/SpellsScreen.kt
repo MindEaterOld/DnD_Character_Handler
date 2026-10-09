@@ -1,5 +1,9 @@
 package com.dndcharacterhandler.presentation.spells
 
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.layout.statusBarsPadding
+import com.dndcharacterhandler.presentation.components.rememberHeaderBackdrop
+import com.dndcharacterhandler.presentation.components.headerBackdrop
 import com.dndcharacterhandler.presentation.components.fadingVerticalScroll
 import com.dndcharacterhandler.presentation.components.FadingLazyColumn
 import androidx.compose.material.icons.outlined.AutoFixHigh
@@ -107,7 +111,6 @@ import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
 import com.dndcharacterhandler.presentation.components.CharacterHeaderInset
 import com.dndcharacterhandler.presentation.components.PinnedCharacterHeader
-import com.dndcharacterhandler.presentation.components.fadeUnderHeader
 import com.dndcharacterhandler.presentation.components.CardEditButton
 import com.dndcharacterhandler.presentation.components.EditDialog
 import com.dndcharacterhandler.presentation.components.ExpandableCard
@@ -369,6 +372,7 @@ internal fun SpellsContent(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .statusBarsPadding()
                     .padding(start = 24.dp, end = 24.dp, top = 4.dp)
             ) {
                 ScreenTopActions(
@@ -412,12 +416,15 @@ internal fun SpellsContent(
         }
     }
 
+    val listState = rememberLazyListState()
+    val backdrop = rememberHeaderBackdrop(listState)
     ScreenBackground {
         Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
+                state = listState,
                 modifier = Modifier
                     .fillMaxSize()
-                    .fadeUnderHeader(),
+                    .headerBackdrop(backdrop),
                 contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = CharacterHeaderInset + 10.dp, bottom = LocalFloatingButtonsInset.current),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
@@ -517,7 +524,7 @@ internal fun SpellsContent(
                     }
                 }
             }
-            PinnedCharacterHeader(character = character, onOpenDrawer = onOpenDrawer, onOpenDice = onOpenDice)
+            PinnedCharacterHeader(character = character, onOpenDrawer = onOpenDrawer, onOpenDice = onOpenDice, backdrop = backdrop)
 
             FloatingAddButton(
                 onClick = { isAddEntryDialogOpen = true },

@@ -1,5 +1,8 @@
 package com.dndcharacterhandler.presentation.inventory
 
+import androidx.compose.foundation.layout.statusBarsPadding
+import com.dndcharacterhandler.presentation.components.rememberHeaderBackdrop
+import com.dndcharacterhandler.presentation.components.headerBackdrop
 import com.dndcharacterhandler.presentation.components.FadingLazyColumn
 import com.dndcharacterhandler.domain.rules.carryingCapacity
 import com.dndcharacterhandler.presentation.components.NumberStepperField
@@ -102,7 +105,6 @@ import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
 import com.dndcharacterhandler.presentation.components.CharacterHeaderInset
 import com.dndcharacterhandler.presentation.components.PinnedCharacterHeader
-import com.dndcharacterhandler.presentation.components.fadeUnderHeader
 import com.dndcharacterhandler.presentation.components.CardActionButton
 import com.dndcharacterhandler.presentation.components.CardEditButton
 import com.dndcharacterhandler.presentation.components.EditDialog
@@ -424,6 +426,7 @@ internal fun InventoryContent(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .statusBarsPadding()
                     .padding(start = 24.dp, end = 24.dp, top = 4.dp)
             ) {
                 ScreenTopActions(
@@ -471,6 +474,7 @@ internal fun InventoryContent(
     }
     val carryLimit = carryingCapacity(character.strength, character.size)
     val listState = rememberLazyListState()
+    val backdrop = rememberHeaderBackdrop(listState)
 
     ScreenBackground {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -478,7 +482,7 @@ internal fun InventoryContent(
                 state = listState,
                 modifier = Modifier
                     .fillMaxSize()
-                    .fadeUnderHeader(),
+                    .headerBackdrop(backdrop),
                 contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = CharacterHeaderInset + 12.dp, bottom = LocalFloatingButtonsInset.current),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
@@ -536,7 +540,7 @@ internal fun InventoryContent(
                     }
                 }
             }
-            PinnedCharacterHeader(character = character, onOpenDrawer = onOpenDrawer, onOpenDice = onOpenDice)
+            PinnedCharacterHeader(character = character, onOpenDrawer = onOpenDrawer, onOpenDice = onOpenDice, backdrop = backdrop)
 
             FloatingAddButton(
                 onClick = onAddItem,
