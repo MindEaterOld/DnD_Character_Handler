@@ -1,7 +1,8 @@
 package com.dndcharacterhandler.presentation.components
 
+import androidx.compose.ui.semantics.Role
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -68,7 +69,7 @@ private fun SizeOptions(
                     .weight(1f)
                     .clip(RoundedCornerShape(8.dp))
                     .background(toggleFill(isSelected))
-                    .clickable { onSelect(size) }
+                    .selectable(selected = isSelected, role = Role.RadioButton) { onSelect(size) }
                     .padding(horizontal = 4.dp, vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(6.dp)

@@ -16,19 +16,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.isSpecified
 import androidx.compose.ui.unit.sp
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 
 /** A field's label on the sheet's panels: gold capitals, spaced out, as a printed character sheet's (S2, 2026-10-06). */
 @Composable
-fun SheetLabel(label: String, modifier: Modifier = Modifier, fontSize: TextUnit = TextUnit.Unspecified) {
+fun SheetLabel(label: String, modifier: Modifier = Modifier) {
     Text(
         text = label.uppercase(),
         modifier = modifier,
-        style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 1.sp).let { if (fontSize.isSpecified) it.copy(fontSize = fontSize) else it },
+        style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 1.sp),
         color = MaterialTheme.colorScheme.primary,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis

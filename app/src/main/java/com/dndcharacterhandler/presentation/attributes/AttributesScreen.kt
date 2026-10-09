@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation.attributes
 
+import androidx.compose.foundation.layout.heightIn
 import com.dndcharacterhandler.domain.rules.RollMode
 import com.dndcharacterhandler.presentation.components.SheetLabel
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -1500,7 +1501,7 @@ private fun SkillLine(skill: SkillRow, effects: RollEffects?, modifier: Modifier
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(36.dp)
+            .heightIn(min = 36.dp)
             .padding(horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -1601,7 +1602,7 @@ private fun SaveLine(score: AbilityScore, proficiencyBonus: Int, effects: RollEf
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(36.dp)
+            .heightIn(min = 36.dp)
             .padding(horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -1729,7 +1730,7 @@ private fun OptionChip(label: String, selected: Boolean, onToggle: () -> Unit) {
 private fun CustomEntryChip(label: String, onRemove: () -> Unit) {
     Row(
         modifier = Modifier
-            .height(32.dp)
+            .heightIn(min = 32.dp)
             .clip(RoundedCornerShape(8.dp))
             .background(toggleFill(true))
             .clickable(onClickLabel = text("common_delete"), onClick = onRemove)

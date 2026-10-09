@@ -1,8 +1,8 @@
 package com.dndcharacterhandler.presentation.biography
 
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
@@ -117,7 +117,7 @@ private fun RowScope.GenderCard(icon: ImageVector, label: String, selected: Bool
             .height(96.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(toggleFill(selected))
-            .clickable(role = Role.RadioButton, onClick = onClick),
+            .selectable(selected = selected, role = Role.RadioButton, onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -574,7 +574,7 @@ internal fun SwatchDialog(title: String, group: SwatchGroup, currentValue: Strin
                         .height(36.dp)
                         .clip(RoundedCornerShape(10.dp))
                         .background(toggleFill(selected))
-                        .clickable(role = Role.RadioButton) { onSave(swatch.name) }
+                        .selectable(selected = selected, role = Role.RadioButton) { onSave(swatch.name) }
                         .padding(start = 8.dp, end = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -592,7 +592,7 @@ internal fun SwatchDialog(title: String, group: SwatchGroup, currentValue: Strin
                     .height(36.dp)
                     .clip(RoundedCornerShape(10.dp))
                     .background(toggleFill(own))
-                    .clickable(role = Role.RadioButton) { own = true }
+                    .selectable(selected = own, role = Role.RadioButton) { own = true }
                     .padding(start = 8.dp, end = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
