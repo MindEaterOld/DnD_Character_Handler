@@ -3,7 +3,6 @@ package com.dndcharacterhandler.presentation.attributes
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Psychology
-import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.foundation.layout.heightIn
 import com.dndcharacterhandler.domain.rules.RollMode
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -1270,7 +1269,10 @@ private fun SenseLine(
     }
 }
 
-/** Both darkvision states share a bottom-aligned value over their artwork. */
+/**
+ * The darkvision over its art (one with darkvision, one without), its value at the foot on a deep soft shadow: the feet
+ * white as every value of the sheet, «Нет» muted as every «Нет» (owner, 2026-10-10).
+ */
 @Composable
 private fun DarkvisionValue(feet: Int) {
     val colors = LocalDesignTokens.current.colors
@@ -1290,7 +1292,7 @@ private fun DarkvisionValue(feet: Int) {
             modifier = Modifier.align(Alignment.BottomCenter).padding(8.dp)
                 .drawWithContent { repeat(3) { drawContent() } },
             style = MaterialTheme.typography.titleLarge.copy(shadow = textShadow),
-            color = colors.text.primary
+            color = if (feet > 0) colors.text.primary else colors.text.muted
         )
     }
 }
