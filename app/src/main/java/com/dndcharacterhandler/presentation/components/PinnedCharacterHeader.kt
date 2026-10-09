@@ -82,9 +82,6 @@ private val HeaderBackScroll = 56.dp
 /** How much the list behind the header is blurred: as behind the tab bar. */
 private val HeaderBlur = 24.dp
 
-/** The tint over the blurred list: the card's colour at the stat cards' fill, as the tab bar's. */
-private const val HeaderTint = .7f
-
 /** What the header shows blurred behind it: the list's own layer, and how far the list has gone under the header. */
 @Stable
 class HeaderBackdrop internal constructor(internal val layer: GraphicsLayer, private val scrolled: State<Float>) {
@@ -137,6 +134,8 @@ fun BoxScope.PinnedCharacterHeader(
     onNameClick: (() -> Unit)? = null
 ) {
     val colors = LocalDesignTokens.current.colors
+    // The tint over the blurred list: the stat cards' fill (a veil), as the tab bar's.
+    val veil = LocalDesignTokens.current.alpha.veil
     val canBlur = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     val density = LocalDensity.current
     val shadow = Shadow(colors.ornament.dropShadow, Offset(0f, with(density) { 1.dp.toPx() }), with(density) { 12.dp.toPx() })
@@ -159,7 +158,7 @@ fun BoxScope.PinnedCharacterHeader(
                 .drawBehind {
                     drawRect(colors.surface.card)
                     if (canBlur) drawLayer(backdrop.layer)
-                    drawRect(colors.surface.card.copy(alpha = HeaderTint))
+                    drawRect(colors.surface.card.copy(alpha = veil))
                 }
         )
         Box(

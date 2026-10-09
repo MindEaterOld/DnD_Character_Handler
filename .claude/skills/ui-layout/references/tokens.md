@@ -79,11 +79,11 @@
 | `surface.selected` | #3A3244 | выбранный вариант |
 | `surface.inspiration` | #2A2419 | включённое вдохновение |
 | `surface.portrait*` | #141118, #3B3840 / #18151C / #0F0C12 | портрет и его заглушка |
-| `border.default` | #50FFFFFF | обводка кнопок и полей |
-| `border.panel` | #44FFFFFF | обводка панелей и карточек |
-| `border.miniCard` | #42FFFFFF | обводка карточки стата |
-| `border.selected` | #66FFF6EA | обводка выбранного |
-| `border.muted` | #30FFFFFF | тихая обводка |
+| `border.default` | #4DFFFFFF | обводка кнопок и полей |
+| `border.panel` | #4DFFFFFF | обводка панелей и карточек |
+| `border.miniCard` | #4DFFFFFF | обводка карточки стата |
+| `border.selected` | #80FFF6EA | обводка выбранного |
+| `border.muted` | #26FFFFFF | тихая обводка |
 | `accent.inspiration` | #FFD86B | золото: вдохновение, Level UP |
 | `accent.xpCapped` | #E0B84E | полный опыт |
 | `accent.hpTemporary` | #69B7FF | временные хиты |
@@ -92,8 +92,8 @@
 | `accent.coinCopper/Silver/Gold` | #C9824B / #C4C8D2 / #E0B548 | монеты |
 | `accent.magical` | #69B7FF | магические предметы |
 | `accent.damageFire/Cold/Lightning/Poison/Other` | #FF8A3D / #7BB7FF / #CFB6FF / #A8D76F / #D5C6B2 | типы урона |
-| `progress.xpFill` / `xpTrack` | #D7D1CC / #30FFFFFF | полоса опыта |
-| `ornament.*` | outer #20FFFFFF, middle #80C7C1BB, innerGlow #42FFFFFF, inner #E9E2D9, shadow #14000000, stroke #55A19892, dot #2D2730 | орнамент портрета |
+| `progress.xpFill` / `xpTrack` | #D7D1CC / #26FFFFFF | полоса опыта |
+| `ornament.*` | outer #26FFFFFF, middle #80C7C1BB, innerGlow #4DFFFFFF, inner #E9E2D9, shadow #26000000, stroke #4DA19892, dot #2D2730 | орнамент портрета |
 
 ## Цвета Material (`themes.classic.colors.materialTheme`)
 
@@ -107,7 +107,7 @@
 | `surfaceVariant` / `onSurfaceVariant` | #2A2231 / #CABFB3 | заливка плавающей кнопки «+» |
 | `outline` / `outlineVariant` | #706359 / #423830 | рамки полей ввода |
 
-Альфа-варианты в коде, уже одобренные: `accent.dangerHpZero` 16 % за иконкой мусорки; `accent.dangerHpZero` / `accent.heal` / `accent.hpTemporary` 12 % — заливки кнопок урона, лечения и временных хитов; свечение включённого вдохновения — `accent.inspiration`, уходящий в прозрачность радиальным градиентом. Новый альфа-вариант — как новый цвет, через владельца.
+Прозрачности — одна шкала (владелец, 2026-10-09: вариант А): `alpha` в JSON, в коде `LocalDesignTokens.current.alpha.<ступень>`. **faint 15 %** — подсветка выбора своим цветом (кнопки урона/лечения в «Гравюре», вид лечения, состояния, мировоззрение, вкладка, вдохновение), красное под корзиной, самые бледные линии и отблески; **line 30 %** — линии и обводки, потраченная кость хитов; **half 50 %** — обводка выбранного, подсказка пустого поля, узоры, тень под надписями; **veil 70 %** — заливка карточек поверх фона, тон шапки и панели вкладок, картинка фона. У цветов #AARRGGBB альфа — тоже ступень: 26 / 4D / 80 / B3. Заливка, которая должна закрывать фон, — непрозрачная. Новая прозрачность — через владельца, с рендерами.
 
 ## Размерные токены
 

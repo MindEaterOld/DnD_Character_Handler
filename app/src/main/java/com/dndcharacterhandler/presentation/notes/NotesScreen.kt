@@ -300,7 +300,7 @@ private fun NotesSearchField(
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
-        color = colors.surface.card.copy(alpha = 0.7f),
+        color = colors.surface.card.copy(alpha = LocalDesignTokens.current.alpha.veil),
         border = BorderStroke(1.dp, colors.border.muted)
     ) {
         OutlinedTextField(
@@ -319,7 +319,7 @@ private fun NotesSearchField(
                 Text(
                     text = text("notes_search_placeholder"),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = colors.text.muted.copy(alpha = 0.7f)
+                    color = colors.text.muted.copy(alpha = LocalDesignTokens.current.alpha.veil)
                 )
             },
             singleLine = true,
@@ -582,7 +582,7 @@ private fun NoteEditor(
             NoteRoundButton(
                 icon = Icons.Outlined.Delete,
                 contentDescription = text("notes_delete"),
-                fill = colors.accent.dangerHpZero.copy(alpha = 0.16f),
+                fill = colors.accent.dangerHpZero.copy(alpha = LocalDesignTokens.current.alpha.faint),
                 tint = colors.accent.dangerHpZero,
                 onClick = {
                     deleted = true

@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation.inventory
 
+import com.dndcharacterhandler.presentation.theme.AlphaTokens
 import com.dndcharacterhandler.presentation.components.CharacterLoadingScreen
 import com.dndcharacterhandler.presentation.components.rememberHeaderBackdrop
 import com.dndcharacterhandler.presentation.components.headerBackdrop
@@ -563,6 +564,7 @@ internal fun CurrencyCoinCluster(
     color: Color,
     type: CurrencyType
 ) {
+    val alphas = LocalDesignTokens.current.alpha
     Canvas(modifier = modifier) {
         val stroke = 1.2.dp.toPx()
         when (type) {
@@ -574,22 +576,22 @@ internal fun CurrencyCoinCluster(
                     Offset(size.width * 0.22f, size.height * 0.72f)
                 )
                 positions.forEach { center ->
-                    drawCoin(center, radius, color, stroke)
+                    drawCoin(center, radius, color, stroke, alphas)
                 }
             }
 
             CurrencyType.SILVER -> {
                 val backRadius = size.minDimension * 0.16f
                 val frontRadius = size.minDimension * 0.2f
-                drawCoin(Offset(size.width * 0.28f, size.height * 0.68f), backRadius, color, stroke)
-                drawCoin(Offset(size.width * 0.6f, size.height * 0.4f), frontRadius, color, stroke)
-                drawCoin(Offset(size.width * 0.66f, size.height * 0.68f), frontRadius, color, stroke)
+                drawCoin(Offset(size.width * 0.28f, size.height * 0.68f), backRadius, color, stroke, alphas)
+                drawCoin(Offset(size.width * 0.6f, size.height * 0.4f), frontRadius, color, stroke, alphas)
+                drawCoin(Offset(size.width * 0.66f, size.height * 0.68f), frontRadius, color, stroke, alphas)
             }
 
             CurrencyType.GOLD -> {
                 val radius = size.minDimension * 0.2f
-                drawCoin(Offset(size.width * 0.38f, size.height * 0.7f), radius, color, stroke)
-                drawCoin(Offset(size.width * 0.64f, size.height * 0.42f), radius, color, stroke)
+                drawCoin(Offset(size.width * 0.38f, size.height * 0.7f), radius, color, stroke, alphas)
+                drawCoin(Offset(size.width * 0.64f, size.height * 0.42f), radius, color, stroke, alphas)
             }
         }
     }
@@ -599,10 +601,11 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawCoin(
     center: Offset,
     radius: Float,
     color: Color,
-    strokeWidth: Float
+    strokeWidth: Float,
+    alphas: AlphaTokens
 ) {
     drawCircle(
-        color = color.copy(alpha = 0.18f),
+        color = color.copy(alpha = alphas.faint),
         radius = radius,
         center = center
     )
@@ -613,7 +616,7 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawCoin(
         style = androidx.compose.ui.graphics.drawscope.Stroke(width = strokeWidth)
     )
     drawCircle(
-        color = color.copy(alpha = 0.7f),
+        color = color.copy(alpha = alphas.veil),
         radius = radius * 0.42f,
         center = center,
         style = androidx.compose.ui.graphics.drawscope.Stroke(width = strokeWidth * 0.85f)
@@ -689,7 +692,7 @@ private fun InventorySearchField(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
-        color = colors.surface.card.copy(alpha = 0.7f),
+        color = colors.surface.card.copy(alpha = LocalDesignTokens.current.alpha.veil),
         border = BorderStroke(1.dp, colors.border.muted)
     ) {
         OutlinedTextField(
@@ -708,7 +711,7 @@ private fun InventorySearchField(
                 Text(
                     text = text("inventory_search_placeholder"),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = colors.text.muted.copy(alpha = 0.7f)
+                    color = colors.text.muted.copy(alpha = LocalDesignTokens.current.alpha.veil)
                 )
             },
             singleLine = true,
@@ -767,7 +770,7 @@ private fun InventoryCatalogRow(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
-        color = colors.surface.card.copy(alpha = 0.7f),
+        color = colors.surface.card.copy(alpha = LocalDesignTokens.current.alpha.veil),
         border = BorderStroke(1.dp, colors.border.muted)
     ) {
         Row(
@@ -997,7 +1000,7 @@ private fun InventoryBaseItemDialog(
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(10.dp),
-                    color = colors.surface.card.copy(alpha = 0.7f),
+                    color = colors.surface.card.copy(alpha = LocalDesignTokens.current.alpha.veil),
                     border = BorderStroke(1.dp, colors.border.muted),
                     onClick = { onSelect(base, variant) }
                 ) {
@@ -1116,7 +1119,7 @@ internal fun InventorySectionCard(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
-        color = colors.surface.card.copy(alpha = 0.7f),
+        color = colors.surface.card.copy(alpha = LocalDesignTokens.current.alpha.veil),
         border = BorderStroke(1.dp, colors.border.muted)
     ) {
         Column {

@@ -425,7 +425,7 @@ internal fun DiceWorkshopOverlay(
                     FilledTonalIconButton(
                         onClick = { confirmDelete = true },
                         colors = IconButtonDefaults.filledTonalIconButtonColors(
-                            containerColor = LocalDesignTokens.current.colors.accent.dangerHpZero.copy(alpha = 0.16f),
+                            containerColor = LocalDesignTokens.current.colors.accent.dangerHpZero.copy(alpha = LocalDesignTokens.current.alpha.faint),
                             contentColor = LocalDesignTokens.current.colors.accent.dangerHpZero
                         )
                     ) {
@@ -541,7 +541,7 @@ private fun WorkshopSection(title: String, content: @Composable () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .background(colors.surface.card.copy(alpha = 0.7f))
+            .background(colors.surface.card.copy(alpha = LocalDesignTokens.current.alpha.veil))
             .border(1.dp, colors.border.muted, RoundedCornerShape(12.dp))
             .padding(14.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)

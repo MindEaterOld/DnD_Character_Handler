@@ -158,7 +158,7 @@ internal fun PortraitSideButton(
                 .size(PortraitSideButtonSize)
                 .clip(CircleShape)
                 .background(colors.surface.card)
-                .background(if (on == true) accent.copy(alpha = .12f) else Color.Transparent)
+                .background(if (on == true) accent.copy(alpha = LocalDesignTokens.current.alpha.faint) else Color.Transparent)
                 .border(1.dp, Brush.verticalGradient(listOf(colors.text.label, colors.border.muted)), CircleShape)
                 .then(
                     if (on != null) {

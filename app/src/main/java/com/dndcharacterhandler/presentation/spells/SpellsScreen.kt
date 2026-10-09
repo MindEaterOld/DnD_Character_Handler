@@ -630,7 +630,7 @@ private fun SpellsSearchField(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
-        color = colors.surface.card.copy(alpha = 0.7f),
+        color = colors.surface.card.copy(alpha = LocalDesignTokens.current.alpha.veil),
         border = BorderStroke(1.dp, colors.border.muted)
     ) {
         OutlinedTextField(
@@ -649,7 +649,7 @@ private fun SpellsSearchField(
                 Text(
                     text = text("spells_search_placeholder"),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = colors.text.muted.copy(alpha = 0.7f)
+                    color = colors.text.muted.copy(alpha = LocalDesignTokens.current.alpha.veil)
                 )
             },
             singleLine = true,
@@ -745,7 +745,7 @@ private fun SpellSlotDiamond(
             modifier = Modifier.fillMaxSize(),
             shape = RoundedCornerShape(2.dp),
             color = if (filled) onBackground else Color.Transparent,
-            border = BorderStroke(1.dp, onBackground.copy(alpha = 0.5f))
+            border = BorderStroke(1.dp, onBackground.copy(alpha = LocalDesignTokens.current.alpha.half))
         ) {}
     }
 }

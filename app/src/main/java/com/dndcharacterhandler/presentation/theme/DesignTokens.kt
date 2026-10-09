@@ -133,12 +133,29 @@ data class DesignColorTokens(
     val ornament: OrnamentColorTokens
 )
 
+/**
+ * The app's transparencies (design_tokens.json `alpha`; owner's choice from boards, 2026-10-09: A): four steps, the
+ * same in every theme. A colour's own alpha (#AARRGGBB) is one of them too; a transparency off the scale is asked for.
+ */
+data class AlphaTokens(
+    /** 15 %: a pick lit in its own colour, the red behind a delete, the faintest lines and glows. */
+    val faint: Float = 0.15f,
+    /** 30 %: lines and outlines, a spent hit die, the human on the height's scale. */
+    val line: Float = 0.3f,
+    /** 50 %: a picked outline, a field's hint, the ornaments, the shadow under writing on an art. */
+    val half: Float = 0.5f,
+    /** 70 %: a veil — the cards' fill over the backdrop, the header's and the tab bar's tint, the backdrop itself. */
+    val veil: Float = 0.7f
+)
+
 /** The type scale and the colours of the theme in use. */
 data class DesignTokens(
     val typography: DesignTypographyTokens,
     val colors: DesignColorTokens,
     /** The colours a character's eyes, hair and skin are picked from: the same in every theme. */
-    val swatches: SwatchTokens = SwatchTokens.Empty
+    val swatches: SwatchTokens = SwatchTokens.Empty,
+    /** The scale of transparency: the same in every theme. */
+    val alpha: AlphaTokens = AlphaTokens()
 )
 
 /** A colour to pick for a character: its [name] (the text key's last part) and the colour itself. */
@@ -161,11 +178,12 @@ data class ThemePalette(
 data class DesignTokenSet(
     val typography: DesignTypographyTokens,
     val palettes: Map<AppTheme, ThemePalette>,
-    val swatches: SwatchTokens = SwatchTokens.Empty
+    val swatches: SwatchTokens = SwatchTokens.Empty,
+    val alpha: AlphaTokens = AlphaTokens()
 ) {
     fun palette(theme: AppTheme): ThemePalette = palettes[theme] ?: palettes[AppTheme.CLASSIC] ?: DefaultThemePalette
 
-    fun tokens(theme: AppTheme): DesignTokens = DesignTokens(typography, palette(theme).colors, swatches)
+    fun tokens(theme: AppTheme): DesignTokens = DesignTokens(typography, palette(theme).colors, swatches, alpha)
 }
 
 val DefaultDesignColors = DesignColorTokens(
@@ -325,7 +343,8 @@ fun parseDesignTokenSet(json: String): DesignTokenSet {
                     material = colors.optObject("materialTheme").materialColors()
                 )
             }.toMap(),
-            swatches = root.optObject("swatches").swatchTokens()
+            swatches = root.optObject("swatches").swatchTokens(),
+            alpha = root.optObject("alpha").alphaTokens()
         )
     }.getOrDefault(DefaultDesignTokenSet)
 }
@@ -451,6 +470,18 @@ private fun loadColorTokens(app: JsonObject?): DesignColorTokens {
             stroke = ornament.colorToken("stroke", defaults.ornament.stroke),
             dot = ornament.colorToken("dot", defaults.ornament.dot)
         )
+    )
+}
+
+/** The `alpha` section: the scale's four steps; a step the file lacks keeps its default. */
+private fun JsonObject?.alphaTokens(): AlphaTokens {
+    val defaults = AlphaTokens()
+    if (this == null) return defaults
+    return AlphaTokens(
+        faint = optDouble("faint", defaults.faint.toDouble()).toFloat(),
+        line = optDouble("line", defaults.line.toDouble()).toFloat(),
+        half = optDouble("half", defaults.half.toDouble()).toFloat(),
+        veil = optDouble("veil", defaults.veil.toDouble()).toFloat()
     )
 }
 

@@ -27,7 +27,7 @@ import com.dndcharacterhandler.presentation.theme.LocalThemeLook
 fun OutlinedPanel(
     modifier: Modifier = Modifier,
     cornerRadius: Dp = 10.dp,
-    fill: Color = LocalDesignTokens.current.colors.surface.card.copy(alpha = 0.7f),
+    fill: Color = LocalDesignTokens.current.colors.surface.card.copy(alpha = LocalDesignTokens.current.alpha.veil),
     border: Color = LocalDesignTokens.current.colors.border.miniCard,
     /** Keep what is inside within the corners; off when something is let out over the frame (the stats' shield). */
     clip: Boolean = true,
@@ -40,7 +40,7 @@ fun OutlinedPanel(
                 val stroke = 1.dp.toPx()
                 val radius = cornerRadius.toPx()
                 // Keep the dragon quiet behind values, as BorderLabelCard does.
-                drawRoundRect(color = if (etched) fill.copy(alpha = 0.92f) else fill, cornerRadius = CornerRadius(radius))
+                drawRoundRect(color = if (etched) fill.copy(alpha = 1f) else fill, cornerRadius = CornerRadius(radius))
                 if (etched) {
                     drawEngravedFrame(border)
                 } else {

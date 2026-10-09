@@ -113,7 +113,7 @@ fun EditDialog(
                         FilledIconButton(
                             onClick = { confirmingDelete = true },
                             colors = IconButtonDefaults.filledIconButtonColors(
-                                containerColor = colors.accent.dangerHpZero.copy(alpha = 0.16f),
+                                containerColor = colors.accent.dangerHpZero.copy(alpha = LocalDesignTokens.current.alpha.faint),
                                 contentColor = colors.accent.dangerHpZero
                             )
                         ) {

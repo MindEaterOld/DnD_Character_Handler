@@ -475,6 +475,7 @@ private fun WeightRuler(value: Float?, range: ClosedFloatingPointRange<Float>, o
 @Composable
 private fun BmiScale(bmi: Float) {
     val colors = LocalDesignTokens.current.colors
+    val veil = LocalDesignTokens.current.alpha.veil
     val builds = Build.entries
     val bandColors = builds.map { it.color() }
     val spans = builds.sumOf { it.span.toDouble() }.toFloat()
@@ -490,7 +491,7 @@ private fun BmiScale(bmi: Float) {
             builds.forEachIndexed { i, build ->
                 val width = unit * build.span
                 drawRoundRect(
-                    color = bandColors[i].copy(alpha = .7f),
+                    color = bandColors[i].copy(alpha = veil),
                     topLeft = Offset(left, y - band / 2),
                     size = Size(width, band),
                     cornerRadius = CornerRadius(band / 2)

@@ -1754,9 +1754,6 @@ private fun PortraitViewerContent(
     }
 }
 
-/** How much of an HP action's colour fills its button: at 12 % even the red label reads (4.6:1). */
-internal const val HpActionTint = 0.12f
-
 /** Damage and heal beside the hit points: round, outlined in their colour (the engraving lights them faintly too). */
 private val HpButtonSize = 52.dp
 
@@ -1856,8 +1853,8 @@ private fun HpRoundButton(icon: ImageVector, color: Color, description: String, 
         modifier = Modifier
             .size(HpButtonSize)
             .clip(CircleShape)
-            .background(if (etched) color.copy(alpha = HpActionTint) else Color.Transparent)
-            .border(1.dp, color.copy(alpha = .7f), CircleShape)
+            .background(if (etched) color.copy(alpha = LocalDesignTokens.current.alpha.faint) else Color.Transparent)
+            .border(1.dp, color.copy(alpha = LocalDesignTokens.current.alpha.veil), CircleShape)
             .clickable(role = Role.Button, onClick = onClick)
             .semantics { contentDescription = description },
         contentAlignment = Alignment.Center
@@ -1967,7 +1964,7 @@ private fun HpKindOption(label: String, icon: ImageVector, accent: Color, select
         modifier = modifier
             .height(40.dp)
             .clip(RoundedCornerShape(12.dp))
-            .background(if (selected) accent.copy(alpha = HpActionTint) else colors.surface.button)
+            .background(if (selected) accent.copy(alpha = LocalDesignTokens.current.alpha.faint) else colors.surface.button)
             .selectable(selected = selected, role = Role.RadioButton, onClick = onClick)
             .padding(horizontal = 8.dp),
         horizontalArrangement = Arrangement.Center,
@@ -2179,7 +2176,7 @@ private fun HpNumbers(
                     .clickable(onClick = onMaxHpClick)
                     .deepShadow(),
                 style = max,
-                color = colors.text.primary.copy(alpha = tokens.hpMaximum.alpha ?: 0.7f),
+                color = colors.text.primary.copy(alpha = tokens.hpMaximum.alpha ?: LocalDesignTokens.current.alpha.veil),
                 maxLines = 1
             )
         }

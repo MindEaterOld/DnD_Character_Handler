@@ -107,9 +107,9 @@ private fun ConditionChip(icon: ImageVector?, name: String, accent: Color, onCli
         modifier = Modifier
             .height(32.dp)
             .clip(shape)
-            .background(colors.surface.card.copy(alpha = .7f))
-            .background(accent.copy(alpha = .12f))
-            .border(1.dp, accent.copy(alpha = .7f), shape)
+            .background(colors.surface.card.copy(alpha = LocalDesignTokens.current.alpha.veil))
+            .background(accent.copy(alpha = LocalDesignTokens.current.alpha.faint))
+            .border(1.dp, accent.copy(alpha = LocalDesignTokens.current.alpha.veil), shape)
             .clickable(onClick = onClick)
             .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -238,7 +238,7 @@ private fun ExhaustionPicker(level: Int, immune: Boolean, onPick: (Int) -> Unit)
                         .weight(1f)
                         .height(36.dp)
                         .clip(shape)
-                        .background(if (lit) fire.copy(alpha = HpActionTint) else colors.surface.button)
+                        .background(if (lit) fire.copy(alpha = LocalDesignTokens.current.alpha.faint) else colors.surface.button)
                         .then(if (on) Modifier.border(1.dp, if (lit) fire else colors.text.label, shape) else Modifier)
                         .selectable(selected = on, enabled = enabled, role = Role.RadioButton, onClick = { onPick(n) }),
                     contentAlignment = Alignment.Center
@@ -281,7 +281,7 @@ private fun ConditionRow(condition: Condition, on: Boolean, immune: Boolean, onT
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(10.dp))
-            .background(if (on) accent.copy(alpha = HpActionTint) else Color.Transparent)
+            .background(if (on) accent.copy(alpha = LocalDesignTokens.current.alpha.faint) else Color.Transparent)
             .toggleable(value = on, enabled = !immune, role = Role.Checkbox, onValueChange = { onToggle() })
             .padding(horizontal = 8.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically

@@ -86,7 +86,7 @@ fun BorderLabelCard(
     /** On the label's text: what its style can't say (the ability cards draw it thrice, for a deep shadow). */
     labelModifier: Modifier = Modifier,
     cornerRadius: Dp = 10.dp,
-    fill: Color = LocalDesignTokens.current.colors.surface.card.copy(alpha = 0.7f),
+    fill: Color = LocalDesignTokens.current.colors.surface.card.copy(alpha = LocalDesignTokens.current.alpha.veil),
     border: Color = LocalDesignTokens.current.colors.border.miniCard,
     /**
      * The frame drawn over [content] instead of under it: for a picture filling the card to its edges (the
@@ -108,7 +108,7 @@ fun BorderLabelCard(
             val radius = cornerRadius.toPx()
             drawRoundRect(
                 // Keep the dragon quiet behind values when panels scroll over the hero artwork.
-                color = if (etched) fill.copy(alpha = 0.92f) else fill,
+                color = if (etched) fill.copy(alpha = 1f) else fill,
                 topLeft = Offset(0f, top),
                 size = Size(size.width, size.height - top),
                 cornerRadius = CornerRadius(radius)

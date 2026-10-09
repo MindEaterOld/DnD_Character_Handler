@@ -420,7 +420,7 @@ private fun FeaturesSearchField(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
-        color = LocalDesignTokens.current.colors.surface.card.copy(alpha = 0.7f),
+        color = LocalDesignTokens.current.colors.surface.card.copy(alpha = LocalDesignTokens.current.alpha.veil),
         border = BorderStroke(1.dp, LocalDesignTokens.current.colors.border.muted)
     ) {
         OutlinedTextField(
@@ -439,7 +439,7 @@ private fun FeaturesSearchField(
                 Text(
                     text = text("features_search_placeholder"),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = LocalDesignTokens.current.colors.text.muted.copy(alpha = 0.7f)
+                    color = LocalDesignTokens.current.colors.text.muted.copy(alpha = LocalDesignTokens.current.alpha.veil)
                 )
             },
             singleLine = true,

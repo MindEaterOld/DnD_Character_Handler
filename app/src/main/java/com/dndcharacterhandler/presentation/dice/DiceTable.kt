@@ -155,7 +155,7 @@ internal fun DiceTableOverlay(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(colors.background.radialEnd.copy(alpha = 0.7f))
+            .background(colors.background.radialEnd.copy(alpha = LocalDesignTokens.current.alpha.veil))
     ) {
         DiceCanvas(
             state = state,
@@ -207,7 +207,7 @@ internal fun DiceResultPanel(modifier: Modifier = Modifier, onClose: (() -> Unit
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(colors.surface.card.copy(alpha = 0.88f))
+            .background(colors.surface.card)
             .border(1.dp, colors.border.muted, RoundedCornerShape(16.dp))
     ) {
         Column(

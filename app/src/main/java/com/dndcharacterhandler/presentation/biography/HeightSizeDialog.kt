@@ -197,7 +197,7 @@ private fun HeightRod(cm: Float, unit: HeightUnit, onChange: (Float) -> Unit) {
             Icon(
                 imageVector = HumanFit.icon,
                 contentDescription = null,
-                tint = colors.text.primary.copy(alpha = ScaleHumanAlpha),
+                tint = colors.text.primary.copy(alpha = LocalDesignTokens.current.alpha.line),
                 modifier = Modifier
                     .absoluteOffset(x = humanX - humanBox / 2, y = rodY(ScaleHumanCm) - humanBox * HumanFit.top)
                     .size(humanBox)
@@ -273,8 +273,6 @@ private fun HeightRod(cm: Float, unit: HeightUnit, onChange: (Float) -> Unit) {
 
 private val ZoneNamesWidth = 92.dp
 
-// The human of 175 cm is a see-through shadow of the text's ivory (owner's choice, 2026-10-06).
-private const val ScaleHumanAlpha = 0.3f
 
 /** The rod's ticks, (height in cm, a long one): every 10 cm and 50 long, or every half foot and each foot long. */
 private fun ticks(unit: HeightUnit): List<Pair<Float, Boolean>> =

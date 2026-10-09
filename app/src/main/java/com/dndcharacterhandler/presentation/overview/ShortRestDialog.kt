@@ -260,7 +260,7 @@ private fun HitDieToken(die: DieType, state: HitDieState, onToggle: (() -> Unit)
                     HitDieState.PICKED -> MaterialTheme.colorScheme.primary
                     HitDieState.AVAILABLE -> colors.surface.button
                     HitDieState.SPENT -> Color.Transparent
-                    HitDieState.RETURNING -> colors.accent.heal.copy(alpha = 0.12f)
+                    HitDieState.RETURNING -> colors.accent.heal.copy(alpha = LocalDesignTokens.current.alpha.faint)
                 }
             )
             .then(
@@ -290,13 +290,11 @@ private fun HitDieToken(die: DieType, state: HitDieState, onToggle: (() -> Unit)
             look = LocalDiceSkin.current,
             modifier = Modifier
                 .size(40.dp)
-                .then(if (state == HitDieState.SPENT) Modifier.alpha(SpentHitDieAlpha) else Modifier)
+                .then(if (state == HitDieState.SPENT) Modifier.alpha(LocalDesignTokens.current.alpha.line) else Modifier)
         )
     }
 }
 
-/** How faint a spent die is (owner's choice from boards, 2026-10-07: D1). */
-private const val SpentHitDieAlpha = 0.3f
 
 /** The die's size beside the title, for a character whose class is only text: a tap lists the sizes. */
 @Composable

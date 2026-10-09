@@ -108,6 +108,13 @@
       }
     }
   },
+  "alpha": {
+    "comment": "The app's transparencies (owner's choice from boards, 2026-10-09: A): four steps, the same in every theme. Code reads them as LocalDesignTokens.alpha.<step>; a colour's own alpha (#AARRGGBB) is one of them too: 26 = 15 %, 4D = 30 %, 80 = 50 %, B3 = 70 %. A transparency not on the scale is asked for, as a colour is.",
+    "faint": 0.15,
+    "line": 0.3,
+    "half": 0.5,
+    "veil": 0.7
+  },
   "themes": {
     "comment": "Every theme has its own whole palette with the same roles: the Material scheme and the app palette grouped by role. Code reads the chosen theme's colours through LocalDesignTokens.colors.<group>.<name> and MaterialTheme.colorScheme; a new colour goes into every theme, and only with the owner's approval. Hex is #RRGGBB (opaque) or #AARRGGBB (with alpha). Material roles a theme leaves out keep Material's dark defaults.",
     "classic": {
@@ -164,11 +171,11 @@
             "portraitFallbackEnd": "#0F0C12"
           },
           "border": {
-            "default": "#50FFFFFF",
-            "panel": "#44FFFFFF",
-            "miniCard": "#42FFFFFF",
-            "selected": "#66FFF6EA",
-            "muted": "#30FFFFFF"
+            "default": "#4DFFFFFF",
+            "panel": "#4DFFFFFF",
+            "miniCard": "#4DFFFFFF",
+            "selected": "#80FFF6EA",
+            "muted": "#26FFFFFF"
           },
           "accent": {
             "inspiration": "#FFD86B",
@@ -188,16 +195,16 @@
           },
           "progress": {
             "xpFill": "#D7D1CC",
-            "xpTrack": "#30FFFFFF"
+            "xpTrack": "#26FFFFFF"
           },
           "ornament": {
-            "outer": "#20FFFFFF",
+            "outer": "#26FFFFFF",
             "middle": "#80C7C1BB",
-            "innerGlow": "#42FFFFFF",
+            "innerGlow": "#4DFFFFFF",
             "inner": "#E9E2D9",
-            "shadow": "#14000000",
-            "dropShadow": "#8C000000",
-            "stroke": "#55A19892",
+            "shadow": "#26000000",
+            "dropShadow": "#80000000",
+            "stroke": "#4DA19892",
             "dot": "#2D2730"
           }
         }
@@ -220,7 +227,7 @@
           "surfaceVariant": "#363025",
           "onSurfaceVariant": "#D8C7A6",
           "outline": "#B3D8C7A6",
-          "outlineVariant": "#50D8C7A6",
+          "outlineVariant": "#4DD8C7A6",
           "surfaceDim": "#201F1D",
           "surfaceBright": "#34312B",
           "surfaceContainer": "#201F1D",
@@ -263,7 +270,7 @@
             "panel": "#B3D8C7A6",
             "miniCard": "#80D8C7A6",
             "selected": "#B39E8850",
-            "muted": "#50D8C7A6"
+            "muted": "#4DD8C7A6"
           },
           "accent": {
             "inspiration": "#9E8850",
@@ -283,16 +290,16 @@
           },
           "progress": {
             "xpFill": "#E8D6B2",
-            "xpTrack": "#30D8C7A6"
+            "xpTrack": "#26D8C7A6"
           },
           "ornament": {
-            "outer": "#30D8C7A6",
+            "outer": "#26D8C7A6",
             "middle": "#B3D8C7A6",
-            "innerGlow": "#40D8C7A6",
+            "innerGlow": "#4DD8C7A6",
             "inner": "#D8C7A6",
-            "shadow": "#20201F1D",
-            "dropShadow": "#8C000000",
-            "stroke": "#709E8850",
+            "shadow": "#26201F1D",
+            "dropShadow": "#80000000",
+            "stroke": "#809E8850",
             "dot": "#72352F"
           }
         }

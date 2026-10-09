@@ -31,6 +31,7 @@ fun ScreenBackground(
     content: @Composable () -> Unit
 ) {
     val colors = LocalDesignTokens.current.colors.background
+    val veil = LocalDesignTokens.current.alpha.veil
     // The theme's illustration over its last stop, or the radial gradient.
     val illustration = LocalThemeBackdrop.current
     val root = LocalView.current
@@ -48,7 +49,7 @@ fun ScreenBackground(
                             with(illustration) {
                                 draw(
                                     Size(root.width.toFloat().coerceAtLeast(size.width), root.height.toFloat().coerceAtLeast(size.height)),
-                                    alpha = 0.82f
+                                    alpha = veil
                                 )
                             }
                         }

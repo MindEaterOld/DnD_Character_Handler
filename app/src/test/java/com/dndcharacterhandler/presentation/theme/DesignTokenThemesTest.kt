@@ -11,6 +11,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
+import kotlin.math.roundToInt
 
 /**
  * Every theme in design_tokens.json is a whole palette (see CLAUDE.md, "Themes"): the same roles as the
@@ -74,6 +75,24 @@ class DesignTokenThemesTest {
             val material = colors(theme).optObject("materialTheme")!!
             assertEquals(theme.key, material.colour("primary"), palette.material.primary)
         }
+    }
+
+    @Test
+    fun everyTransparencyIsAStepOfTheScale() {
+        val alpha = parseDesignTokenSet(text).alpha
+        assertEquals(AlphaTokens(faint = 0.15f, line = 0.3f, half = 0.5f, veil = 0.7f), alpha)
+        val steps = listOf(alpha.faint, alpha.line, alpha.half, alpha.veil).map { (it * 255).roundToInt() }
+        val problems = mutableListOf<String>()
+        AppTheme.entries.forEach { theme ->
+            val colors = colors(theme)
+            val roles = colors.optObject("materialTheme")!!.map { (role, value) -> "materialTheme.$role" to value } +
+                colors.optObject("app")!!.flatMap { (group, roles) -> roles.jsonObject.map { (role, value) -> "$group.$role" to value } }
+            roles.forEach { (role, value) ->
+                val raw = value.string().removePrefix("#")
+                if (raw.length == 8 && raw.substring(0, 2).toInt(16) !in steps) problems += "${theme.key}.$role = $value"
+            }
+        }
+        assertTrue("Off the scale (15 · 30 · 50 · 70 %):\n" + problems.joinToString("\n"), problems.isEmpty())
     }
 
     private fun JsonObject.colour(group: String, role: String): Color = optObject(group)!!.colour(role)

@@ -52,9 +52,6 @@ val TabBarGap = 8.dp
 /** How much the screens behind the tab bar's plate are blurred: as behind the overview's header. */
 private val TabBarBlur = 24.dp
 
-/** The tint over the blurred screens: the card's colour at the stat cards' fill, as the overview's header's. */
-private const val TabBarTint = .7f
-
 /** The plate's height: in Classic a pill, its ends half circles of half this. */
 private val TabBarHeight = 62.dp
 
@@ -67,8 +64,6 @@ private val TabInset = 8.dp
  */
 private val TabSize = TabBarHeight - TabInset * 2
 
-/** The picked tab's lamp: gold at 12 %, as what is on lights up (inspiration, the conditions). */
-private const val TabLampAlpha = .12f
 
 /**
  * The tab bar: a plate with an outline, the screens running down under it and showing through it blurred over the
@@ -88,6 +83,9 @@ fun BottomNavigationBar(
     backdropOrigin: Offset = Offset.Zero
 ) {
     val colors = LocalDesignTokens.current.colors
+    // The tint over the blurred screens is the stat cards' fill (a veil); the picked tab's lamp is faint gold, as
+    // what is on lights up (inspiration, the conditions).
+    val alphas = LocalDesignTokens.current.alpha
     val etched = LocalThemeLook.current.frames == FrameStyle.ETCHED
     val canBlur = backdrop != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     var plateOrigin by remember { mutableStateOf(Offset.Zero) }
@@ -114,7 +112,7 @@ fun BottomNavigationBar(
                     if (canBlur && backdrop != null) {
                         translate(backdropOrigin.x - plateOrigin.x, backdropOrigin.y - plateOrigin.y) { drawLayer(backdrop) }
                     }
-                    drawRect(colors.surface.card.copy(alpha = TabBarTint))
+                    drawRect(colors.surface.card.copy(alpha = alphas.veil))
                 }
         )
         // The end tabs' centres on the centres of the plate's ends, the others shared out evenly between them.
@@ -132,7 +130,7 @@ fun BottomNavigationBar(
                     modifier = Modifier
                         .size(TabSize)
                         .clip(if (etched) EngravedPortraitShape else CircleShape)
-                        .background(if (selected) gold.copy(alpha = TabLampAlpha) else Color.Transparent)
+                        .background(if (selected) gold.copy(alpha = alphas.faint) else Color.Transparent)
                         .then(if (etched && selected) Modifier.engravedBorder(colors.accent.inspiration) else Modifier)
                         .selectable(selected = selected, role = Role.Tab, onClick = { onNavigate(screen) }),
                     contentAlignment = Alignment.Center

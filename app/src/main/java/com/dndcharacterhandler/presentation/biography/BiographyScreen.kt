@@ -689,7 +689,7 @@ private fun BiographyHistorySection(
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(10.dp),
-            color = colors.surface.card.copy(alpha = 0.7f),
+            color = colors.surface.card.copy(alpha = LocalDesignTokens.current.alpha.veil),
             border = BorderStroke(1.dp, colors.border.muted)
         ) {
             OutlinedTextField(
@@ -707,7 +707,7 @@ private fun BiographyHistorySection(
                     Text(
                         text = text("biography_history_placeholder"),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = colors.text.muted.copy(alpha = 0.48f)
+                        color = colors.text.muted.copy(alpha = LocalDesignTokens.current.alpha.half)
                     )
                 },
                 textStyle = MaterialTheme.typography.bodyLarge.copy(color = colors.text.muted),
