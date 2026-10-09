@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation.combat
 
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -211,13 +212,19 @@ internal fun RollDialog(
             RollModeButton(text("combat_roll_disadvantage"), Icons.Outlined.KeyboardDoubleArrowDown, preferred == RollMode.DISADVANTAGE, enabled) { roll(RollMode.DISADVANTAGE) }
         } else if (input.attackBonus == null && damage != null && valid) {
             val formula = damage + (damageExtra ?: DiceFormula.Zero)
+            // A flat amount with no dice (a homebrew "5 damage"): a spell is still cast, its amount read off the pop-up.
+            val castsFlat = !formula.hasDice && castLabel != null
             RollModeButton(
-                label = damageOnlyLabel ?: text(if (input.healing) "combat_roll_healing_only" else "combat_roll_damage_only"),
-                icon = Icons.Outlined.Casino,
+                label = if (castsFlat) castLabel!! else damageOnlyLabel ?: text(if (input.healing) "combat_roll_healing_only" else "combat_roll_damage_only"),
+                icon = if (castsFlat) Icons.Outlined.AutoFixHigh else Icons.Outlined.Casino,
                 primary = true,
-                enabled = enabled && formula.hasDice
+                enabled = enabled && (formula.hasDice || castsFlat)
             ) {
                 onRoll()
+                if (castsFlat) {
+                    onDismiss()
+                    return@RollModeButton
+                }
                 rollDice(
                     DiceRollRequest(
                         selection = formula.dice.toDieSelection(),
@@ -278,7 +285,7 @@ private fun RollModeButton(label: String, icon: ImageVector, primary: Boolean, e
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(48.dp)
+            .heightIn(min = 48.dp)
             .clip(RoundedCornerShape(24.dp))
             .background(if (primary && enabled) MaterialTheme.colorScheme.primary else colors.surface.button)
             .clickable(enabled = enabled, onClick = onClick)

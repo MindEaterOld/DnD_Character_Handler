@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation.combat
 
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -7,7 +8,6 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -186,7 +186,7 @@ private fun SlotChip(selected: Boolean, enabled: Boolean, onClick: () -> Unit, c
     val contentColor = if (enabled) toggleContent(selected) else colors.text.subtle
     Column(
         modifier = Modifier
-            .height(52.dp)
+            .heightIn(min = 52.dp)
             .widthIn(min = 52.dp)
             .clip(RoundedCornerShape(10.dp))
             .background(toggleFill(selected))

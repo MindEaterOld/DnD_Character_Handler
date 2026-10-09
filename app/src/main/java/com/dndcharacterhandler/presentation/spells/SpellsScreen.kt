@@ -1,5 +1,7 @@
 package com.dndcharacterhandler.presentation.spells
 
+import com.dndcharacterhandler.domain.rules.encodeSpellSlots
+import com.dndcharacterhandler.domain.rules.spellSlots
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.layout.statusBarsPadding
 import com.dndcharacterhandler.presentation.components.rememberHeaderBackdrop
@@ -38,7 +40,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -46,23 +47,15 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.MenuBook
-import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.ArrowDropDown
-import androidx.compose.material.icons.outlined.AutoStories
-import androidx.compose.material.icons.outlined.Bolt
-import androidx.compose.material.icons.outlined.FlashOn
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -82,7 +75,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -2342,17 +2334,9 @@ private fun spellSchoolLabel(value: String, strings: LocalizedStrings): String =
         else -> value.ifBlank { strings["spells_school_abjuration"] }
     }
 
-private fun String.toSpellSlotList(): MutableList<Int> {
-    val values = split(',')
-        .mapNotNull { it.trim().toIntOrNull() }
-        .take(9)
-        .toMutableList()
-    while (values.size < 9) values += 0
-    return values
-}
+private fun String.toSpellSlotList(): MutableList<Int> = spellSlots(this).toMutableList()
 
-private fun List<Int>.encodeSpellSlotList(): String =
-    take(9).joinToString(",") { it.coerceAtLeast(0).toString() }
+private fun List<Int>.encodeSpellSlotList(): String = encodeSpellSlots(this)
 
 private fun signedNumber(value: Int): String = if (value >= 0) "+$value" else value.toString()
 
