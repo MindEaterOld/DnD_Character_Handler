@@ -1,8 +1,10 @@
 package com.dndcharacterhandler.presentation.attributes
 
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.Psychology
+import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.foundation.layout.heightIn
 import com.dndcharacterhandler.domain.rules.RollMode
-import com.dndcharacterhandler.presentation.components.SheetLabel
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -450,6 +452,16 @@ internal fun attributesSectionItems(
         RollMode.NORMAL -> 0
     }
     val passivePerception = passiveBase + passiveShift
+    // The other passive checks of the senses, the same way: 10 + the skill's bonus, ±5 with advantage or disadvantage.
+    val investigationShift = when (checkEffects.getValue(AbilityType.INTELLIGENCE).mode) {
+        RollMode.ADVANTAGE -> 5
+        RollMode.DISADVANTAGE -> -5
+        RollMode.NORMAL -> 0
+    }
+    val passiveInsight = 10 + abilityModifier(character.wisdom) +
+        skillTrainingBonus(characterBundle?.skills?.firstOrNull { it.name == "skill_insight" }, proficiencyBonus) + passiveShift
+    val passiveInvestigation = 10 + abilityModifier(character.intelligence) +
+        skillTrainingBonus(characterBundle?.skills?.firstOrNull { it.name == "skill_investigation" }, proficiencyBonus) + investigationShift
     val darkvisionCatalogLookup = remember(darkvisionCatalogItems) { FeatureCatalogLookup(darkvisionCatalogItems) }
     val darkvisionFeatures = remember(characterBundle?.features, darkvisionCatalogLookup, strings.language) {
         characterBundle?.features.orEmpty()
@@ -498,10 +510,11 @@ internal fun attributesSectionItems(
         mutableStateOf(character.darkvisionManualFeet.takeIf { it > 0 }?.toString().orEmpty())
     }
 
-    // The proficiency bonus and the passive perception are the skills' (owner's choice from boards, 2026-10-09: И): over
-    // them, under their title. The darkvision is off the overview (owner's wish, 2026-10-09; its pop-up waits for its new
-    // place, see the backlog).
-    val passiveLabel = text("stat_card_passive_perception")
+    // The darkvision: its feature's feet, or the feet the player wrote.
+    val darkvisionFeet = when (character.darkvisionMode) {
+        DarkvisionMode.AUTO -> darkvisionFeatures.mapNotNull { it.darkvisionFeet() }.maxOrNull() ?: 0
+        DarkvisionMode.MANUAL -> character.darkvisionManualFeet
+    }
 
     val items: LazyListScope.() -> Unit = {
 
@@ -540,17 +553,23 @@ internal fun attributesSectionItems(
 
         item {
             AttributesSectionTitle(title = text("attributes_skills"))
-            // The proficiency bonus is on the portrait's art, by the armor class (owner's wish, 2026-10-09).
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(40.dp, Alignment.CenterHorizontally)
-            ) {
-                SectionStat(
-                    label = passiveLabel,
-                    value = passivePerception.toString(),
+            SkillGroups(
+                skills = skillRows,
+                checkEffects = checkEffects,
+                onSkillClick = { skill -> if (characterBundle != null) rollingSkill = skill }
+            )
+        }
+
+        item {
+            // The senses (owner's wish, 2026-10-09): what the character notices with no roll, and how far it sees in the
+            // dark, a line each as the skills'. A tap on the passive perception edits its bonus, on the darkvision its
+            // source; the passive insight and investigation only show.
+            AttributesSectionTitle(title = text("attributes_senses"))
+            SheetPanel {
+                SenseLine(
                     icon = Icons.Outlined.Visibility,
+                    label = text("senses_passive_perception"),
+                    value = passivePerception.toString(),
                     valueColor = changedValueColor(passiveShift),
                     onClick = {
                         // A fresh draft each time: what was typed and dismissed last time isn't kept.
@@ -558,12 +577,26 @@ internal fun attributesSectionItems(
                         isPassiveDialogOpen = true
                     }
                 )
+                SenseLine(
+                    icon = Icons.Outlined.DarkMode,
+                    label = text("attributes_darkvision_title"),
+                    value = if (darkvisionFeet > 0) "$darkvisionFeet ${text("inventory_unit_feet")}" else text("common_none"),
+                    quiet = darkvisionFeet <= 0,
+                    onClick = { isDarkvisionDialogOpen = true }
+                )
+                SenseLine(
+                    icon = Icons.Outlined.Psychology,
+                    label = text("senses_passive_insight"),
+                    value = passiveInsight.toString(),
+                    valueColor = changedValueColor(passiveShift)
+                )
+                SenseLine(
+                    icon = Icons.Outlined.Search,
+                    label = text("senses_passive_investigation"),
+                    value = passiveInvestigation.toString(),
+                    valueColor = changedValueColor(investigationShift)
+                )
             }
-            SkillGroups(
-                skills = skillRows,
-                checkEffects = checkEffects,
-                onSkillClick = { skill -> if (characterBundle != null) rollingSkill = skill }
-            )
         }
 
         item {
@@ -1165,22 +1198,46 @@ private fun Feature.darkvisionFeet(): Int? =
         .find("$name $description".lowercase())
         ?.groupValues?.get(1)?.toIntOrNull()
 
-/** A stat of the section's, under its title: its gold label over its value, an icon in gold before it; a tap may edit it. */
+/**
+ * A sense's line (owner's wish, 2026-10-09), as a skill's: its icon in gold, its name, its value at the end — in its
+ * conditions' colour when they moved it, quiet when there is none; a tap may edit it.
+ */
 @Composable
-private fun SectionStat(label: String, value: String, icon: ImageVector, valueColor: Color? = null, onClick: (() -> Unit)? = null) {
+private fun SenseLine(
+    icon: ImageVector,
+    label: String,
+    value: String,
+    valueColor: Color? = null,
+    quiet: Boolean = false,
+    onClick: (() -> Unit)? = null
+) {
     val colors = LocalDesignTokens.current.colors
-    Column(
+    Row(
         modifier = Modifier
-            .clip(RoundedCornerShape(10.dp))
+            .fillMaxWidth()
+            .heightIn(min = 40.dp)
+            .clip(RoundedCornerShape(8.dp))
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(horizontal = 6.dp, vertical = 2.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(horizontal = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        SheetLabel(label)
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
-            Text(text = value, style = MaterialTheme.typography.titleLarge, color = valueColor ?: colors.text.primary)
-        }
+        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+        Text(
+            text = label,
+            modifier = Modifier
+                .padding(start = 12.dp)
+                .weight(1f),
+            style = MaterialTheme.typography.bodyMedium,
+            color = colors.text.primary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Text(
+            text = value,
+            modifier = Modifier.padding(start = 8.dp),
+            style = MaterialTheme.typography.bodyLarge,
+            color = valueColor ?: if (quiet) colors.text.subtle else colors.text.primary
+        )
     }
 }
 
