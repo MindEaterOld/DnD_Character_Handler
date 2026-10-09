@@ -12,7 +12,6 @@ import com.dndcharacterhandler.domain.model.AppLanguage
 import com.dndcharacterhandler.domain.model.CharacterBundle
 import com.dndcharacterhandler.domain.model.Skill
 import com.dndcharacterhandler.presentation.components.ScreenBackground
-import com.dndcharacterhandler.presentation.components.StatsPanel
 import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.theme.DnDTheme
 
@@ -140,7 +139,6 @@ fun AttributesScreenPreview() {
                     contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 4.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    item { StatsPanel(top = parts.senses) }
                     parts.items(this)
                 }
             }

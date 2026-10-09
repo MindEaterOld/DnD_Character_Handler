@@ -1,5 +1,9 @@
 package com.dndcharacterhandler.presentation.overview
 
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.layout.layout
 import androidx.compose.animation.core.animateDpAsState
@@ -48,100 +52,102 @@ import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 
-/** How many marks the column holds before the rest fold into "+N": under the button, down the frame's straight side. */
-private const val ColumnMarks = 3
-
-private val MarkSize = PortraitSideButtonSize
+/** How many chips the row shows before the rest fold into "+N". */
+private const val ShownChips = 3
 
 /**
- * The character's conditions down the left of the portrait, as the rests go down the right (owner's
- * choices, 2026-10-03 and 2026-10-07): first the conditions' button, a figure in an aura with a small "+"
- * ([PortraitSideButton]), level with the short rest; under it an outlined mark each, as stats are; exhaustion
- * as its level in orange; concentration in gold. The button and a condition's mark open the picker;
- * concentration's offers to end it.
+ * The character's conditions as chips over the hit points (owner's choice from boards, 2026-10-09: И): exhaustion's
+ * level in `accent.damageFire`, concentration in gold, each condition in its colour — lit at 12 % over the card's fill,
+ * outlined in it at 70 %, its icon and its name; three at most, the rest folded into "+N". After them a quiet «+» to
+ * add one, «Состояние» beside it while there is none. A chip opens the conditions' sheet; concentration's offers to
+ * end it.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun ConditionsColumn(
+internal fun ConditionChips(
     conditions: Set<Condition>,
     exhaustion: Int,
     concentrating: Boolean,
     onOpenPicker: () -> Unit,
     onOpenConcentration: () -> Unit,
-    modifier: Modifier = Modifier,
-    /** A button over the conditions' one, part of the column (inspiration, owner's choice 2026-10-07). */
-    leading: (@Composable () -> Unit)? = null
+    modifier: Modifier = Modifier
 ) {
     val strings = LocalStrings.current
     val colors = LocalDesignTokens.current.colors
+    val gold = MaterialTheme.colorScheme.primary
     // Exhaustion's level and concentration first: they matter most and stay in sight.
-    val marks = buildList<@Composable () -> Unit> {
+    val chips = buildList<@Composable () -> Unit> {
         if (exhaustion > 0) {
-            add {
-                ConditionMark(strings.format("conditions_exhaustion_level", exhaustion), onOpenPicker) {
-                    Text(text = exhaustion.toString(), style = MaterialTheme.typography.titleLarge, color = colors.accent.damageFire)
-                }
-            }
+            add { ConditionChip(ExhaustionIcon, strings.format("conditions_exhaustion_level", exhaustion), colors.accent.damageFire, onOpenPicker) }
         }
-        if (concentrating) {
-            add {
-                ConditionMark(strings["spells_concentration"], onOpenConcentration) {
-                    Icon(ConcentrationIcon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
-                }
-            }
-        }
+        if (concentrating) add { ConditionChip(ConcentrationIcon, strings["spells_concentration"], gold, onOpenConcentration) }
         Condition.entries.filter { it in conditions }.forEach { condition ->
-            add {
-                ConditionMark(strings[condition.nameKey], onOpenPicker) {
-                    Icon(condition.icon, contentDescription = null, tint = condition.accent(), modifier = Modifier.size(24.dp))
-                }
-            }
+            add { ConditionChip(condition.icon, strings[condition.nameKey], condition.accent(), onOpenPicker) }
         }
     }
-    val shown = if (marks.size > ColumnMarks) {
-        val hidden = marks.size - (ColumnMarks - 1)
-        marks.take(ColumnMarks - 1) + listOf<@Composable () -> Unit>({
-            ConditionMark(strings["conditions_title"], onOpenPicker) {
-                Text(text = "+$hidden", style = MaterialTheme.typography.titleMedium, color = colors.text.primary)
-            }
-        })
+    val shown = if (chips.size > ShownChips) {
+        val hidden = chips.size - (ShownChips - 1)
+        chips.take(ShownChips - 1) + listOf<@Composable () -> Unit>({ ConditionChip(null, "+$hidden", colors.text.label, onOpenPicker) })
     } else {
-        marks
+        chips
     }
-    // Centred on where it is put (the middle of the frame's side), gliding up half a row as a mark comes; over the
-    // portrait's box, never stretching it: the column takes no height of its own.
-    val rows = (if (leading != null) 1 else 0) + 1 + shown.size
-    val lift by animateDpAsState(portraitSideColumnHeight(rows) / 2, label = "conditionsColumnLift")
-    Column(
-        modifier = modifier.layout { measurable, constraints ->
-            val placeable = measurable.measure(constraints.copy(maxHeight = Constraints.Infinity))
-            layout(placeable.width, 0) { placeable.place(0, -lift.roundToPx()) }
-        },
-        verticalArrangement = Arrangement.spacedBy(PortraitSideGap)
+    FlowRow(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        leading?.invoke()
-        PortraitSideButton(
-            icon = SideIconConditions,
-            contentDescription = text("conditions_add"),
-            onClick = onOpenPicker,
-            add = true,
-            iconSize = 26.dp
-        )
         shown.forEach { it() }
+        AddConditionChip(label = if (chips.isEmpty()) text("conditions_add_chip") else null, description = text("conditions_add"), onClick = onOpenPicker)
     }
 }
 
+/** A condition on: lit in its [accent] at 12 % over the card's fill, outlined in it, its icon and its name. */
 @Composable
-private fun ConditionMark(description: String, onClick: () -> Unit, content: @Composable () -> Unit) {
+private fun ConditionChip(icon: ImageVector?, name: String, accent: Color, onClick: () -> Unit) {
     val colors = LocalDesignTokens.current.colors
-    Box(
+    val shape = RoundedCornerShape(16.dp)
+    Row(
         modifier = Modifier
-            .size(MarkSize)
-            .clip(CircleShape)
-            .border(1.dp, colors.border.panel, CircleShape)
+            .height(32.dp)
+            .clip(shape)
+            .background(colors.surface.card.copy(alpha = .62f))
+            .background(accent.copy(alpha = .12f))
+            .border(1.dp, accent.copy(alpha = .7f), shape)
             .clickable(onClick = onClick)
-            .semantics { contentDescription = description },
-        contentAlignment = Alignment.Center
-    ) { content() }
+            .padding(horizontal = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        if (icon != null) Icon(icon, contentDescription = null, tint = accent, modifier = Modifier.size(18.dp))
+        Text(text = name, style = MaterialTheme.typography.bodyMedium, color = colors.text.primary, maxLines = 1)
+    }
+}
+
+/** A quiet «+» to put a condition on — a minor action, so no fill: the icon and, while there is none, a word. */
+@Composable
+private fun AddConditionChip(label: String?, description: String, onClick: () -> Unit) {
+    val colors = LocalDesignTokens.current.colors
+    Row(
+        modifier = Modifier
+            .height(32.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick)
+            .semantics { contentDescription = description }
+            .padding(horizontal = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Icon(Icons.Outlined.Add, contentDescription = null, tint = colors.text.label, modifier = Modifier.size(18.dp))
+        if (label != null) {
+            Text(
+                text = label,
+                modifier = Modifier.deepShadow(),
+                style = MaterialTheme.typography.bodyMedium.copy(shadow = artShadow()),
+                color = colors.text.label,
+                maxLines = 1
+            )
+        }
+    }
 }
 
 /**

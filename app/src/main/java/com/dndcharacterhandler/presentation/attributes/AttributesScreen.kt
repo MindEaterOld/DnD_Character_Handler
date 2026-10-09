@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation.attributes
 
+import com.dndcharacterhandler.presentation.components.SheetLabel
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -11,7 +12,6 @@ import androidx.compose.ui.text.input.ImeAction
 import com.dndcharacterhandler.presentation.biography.BiographyLabel
 import com.dndcharacterhandler.presentation.components.OutlinedPanel
 import androidx.compose.foundation.layout.RowScope
-import com.dndcharacterhandler.presentation.components.PanelStat
 import com.dndcharacterhandler.presentation.components.StepButton
 import com.dndcharacterhandler.presentation.components.ToggleChip
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -373,8 +373,7 @@ private fun AbilityType.toSpellcastingAbility(): SpellcastingAbility =
 @Composable
 fun AttributesSection(
     viewModel: AttributesViewModel,
-    /** [senses]: the proficiency bonus and the senses, for the overview's stats frame; null until the character loads. */
-    content: @Composable (items: LazyListScope.() -> Unit, senses: (@Composable RowScope.() -> Unit)?) -> Unit
+    content: @Composable (items: LazyListScope.() -> Unit) -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val darkvisionCatalog by viewModel.darkvisionCatalog.collectAsStateWithLifecycle()
@@ -402,13 +401,12 @@ fun AttributesSection(
             onDeleteFeature = viewModel::deleteFeature
         )
     }
-    content(parts?.items ?: NoItems, parts?.senses)
+    content(parts?.items ?: NoItems)
 }
 
-/** The attributes' part of the overview: the list's items, and the senses for the stats frame above them. */
+/** The attributes' part of the overview: the list's items. */
 internal class AttributesSectionParts(
-    val items: LazyListScope.() -> Unit,
-    val senses: @Composable RowScope.() -> Unit
+    val items: LazyListScope.() -> Unit
 )
 
 private val NoItems: LazyListScope.() -> Unit = {}
@@ -499,21 +497,11 @@ internal fun attributesSectionItems(
         mutableStateOf(character.darkvisionManualFeet.takeIf { it > 0 }?.toString().orEmpty())
     }
 
-    // The proficiency bonus and the passive perception: looked up now and then, under the fight's stats in the overview's
-    // frame (owner's choices from boards, 2026-10-06: S4; 2026-10-08: U2). Their pop-ups are this section's. The darkvision
-    // is off the overview (owner's wish, 2026-10-09; its pop-up waits for its new place, see the backlog).
+    // The proficiency bonus and the passive perception are the skills' (owner's choice from boards, 2026-10-09: И): over
+    // them, under their title. The darkvision is off the overview (owner's wish, 2026-10-09; its pop-up waits for its new
+    // place, see the backlog).
     val proficiencyLabel = text("stat_card_proficiency")
     val passiveLabel = text("stat_card_passive_perception")
-    val senses: @Composable RowScope.() -> Unit = {
-        PanelStat(label = proficiencyLabel, value = signed(proficiencyBonus), icon = Icons.Outlined.AutoAwesome, compact = true)
-        PanelStat(
-            label = passiveLabel,
-            value = passivePerception.toString(),
-            icon = Icons.Outlined.Visibility,
-            compact = true,
-            onClick = { isPassiveDialogOpen = true }
-        )
-    }
 
     val items: LazyListScope.() -> Unit = {
 
@@ -552,6 +540,20 @@ internal fun attributesSectionItems(
 
         item {
             AttributesSectionTitle(title = text("attributes_skills"))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(40.dp, Alignment.CenterHorizontally)
+            ) {
+                SectionStat(label = proficiencyLabel, value = signed(proficiencyBonus), icon = Icons.Outlined.AutoAwesome)
+                SectionStat(
+                    label = passiveLabel,
+                    value = passivePerception.toString(),
+                    icon = Icons.Outlined.Visibility,
+                    onClick = { isPassiveDialogOpen = true }
+                )
+            }
             SkillGroups(
                 skills = skillRows,
                 checkEffects = checkEffects,
@@ -1126,7 +1128,7 @@ internal fun attributesSectionItems(
             )
         }
     }
-    return AttributesSectionParts(items = items, senses = senses)
+    return AttributesSectionParts(items = items)
 }
 
 @Composable
@@ -1159,6 +1161,25 @@ private fun Feature.darkvisionFeet(): Int? =
     Regex("""(\d+)\s*(?:ft|feet|фт|фут)""")
         .find("$name $description".lowercase())
         ?.groupValues?.get(1)?.toIntOrNull()
+
+/** A stat of the section's, under its title: its gold label over its value, an icon in gold before it; a tap may edit it. */
+@Composable
+private fun SectionStat(label: String, value: String, icon: ImageVector, onClick: (() -> Unit)? = null) {
+    val colors = LocalDesignTokens.current.colors
+    Column(
+        modifier = Modifier
+            .clip(RoundedCornerShape(10.dp))
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+            .padding(horizontal = 6.dp, vertical = 2.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        SheetLabel(label)
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+            Text(text = value, style = MaterialTheme.typography.titleLarge, color = colors.text.primary)
+        }
+    }
+}
 
 @Composable
 private fun AttributesSectionTitle(title: String) {

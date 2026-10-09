@@ -1,4 +1,6 @@
 package com.dndcharacterhandler.presentation.overview
+import androidx.compose.material.icons.outlined.Shield
+import com.dndcharacterhandler.presentation.components.HeaderLevel
 import com.dndcharacterhandler.presentation.components.CharacterHeaderInset
 import com.dndcharacterhandler.presentation.components.PinnedCharacterHeader
 import com.dndcharacterhandler.presentation.components.rememberHeaderBackdrop
@@ -209,11 +211,7 @@ import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
 import com.dndcharacterhandler.presentation.components.OverlayCloseButton
 import com.dndcharacterhandler.presentation.levelup.LevelUpWizard
 import com.dndcharacterhandler.presentation.components.ScreenBackground
-import com.dndcharacterhandler.presentation.components.PanelStat
-import com.dndcharacterhandler.presentation.components.StatValueCenter
-import com.dndcharacterhandler.presentation.components.BackedStat
 import com.dndcharacterhandler.presentation.components.SheetLabel
-import com.dndcharacterhandler.presentation.components.StatsPanel
 import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.DnDTheme
@@ -629,18 +627,6 @@ private data class OverviewStat(
 )
 
 
-/**
- * Draws the item [by] higher than its place and gives that room back, so what follows moves up with it:
- * an offset alone would leave the gap below, under the next item.
- */
-private fun Modifier.pullUp(by: Dp): Modifier = layout { measurable, constraints ->
-    val placeable = measurable.measure(constraints)
-    val shift = by.roundToPx()
-    layout(placeable.width, (placeable.height - shift).coerceAtLeast(0)) {
-        placeable.place(0, -shift)
-    }
-}
-
 private enum class OverviewEditableField {
     NAME,
     RACE,
@@ -690,12 +676,11 @@ fun OverviewScreen(
         state.character?.let(viewModel::syncAutomaticArmorClass)
     }
     val catalog by viewModel.catalog.collectAsStateWithLifecycle()
-    AttributesSection(viewModel = attributesViewModel) { attributesItems, senses ->
+    AttributesSection(viewModel = attributesViewModel) { attributesItems ->
         OverviewContent(
             characterBundle = state.character,
             catalog = catalog,
             moreItems = attributesItems,
-            senses = senses,
             onOpenLevelUp = onOpenLevelUp,
             onOpenDrawer = onOpenDrawer,
             onOpenDice = onOpenDice,
@@ -782,12 +767,8 @@ private fun OverviewContent(
     onLongRest: (CharacterBundle) -> Unit,
     onSetDeathSaves: (CharacterBundle, Int, Int) -> Unit = { _, _, _ -> },
     onDeathSave: (CharacterBundle, DeathSaves, Int) -> Unit = { _, _, _ -> },
-    /** The death saving throws' tray starts open (the screen preview). */
-    deathSavesOpen: Boolean = false,
     /** The list's items after the overview's own: the stats section. */
-    moreItems: LazyListScope.() -> Unit = {},
-    /** The proficiency bonus and the senses, under the fight's three in their frame: the stats section's. */
-    senses: (@Composable RowScope.() -> Unit)? = null
+    moreItems: LazyListScope.() -> Unit = {}
 ) {
     val character = characterBundle?.character
     val context = LocalContext.current
@@ -873,6 +854,33 @@ private fun OverviewContent(
         isHpDialogOpen = true
     }
 
+    // The experience's pop-up, adding: the «XP» coin, a long press on the level under the name.
+    val openAddExperience: () -> Unit = {
+        experienceEditMode = OverviewExperienceEditMode.ADD
+        experienceDraft = ""
+        isExperienceDialogOpen = true
+    }
+
+    // A tap on the armor class or the speed edits it.
+    val openStat: (OverviewStat) -> Unit = { stat ->
+        if (stat.field == OverviewMiniStatField.INITIATIVE && character != null) {
+            // Initiative rolls; its pop-up's "Edit" opens the bonus.
+            isInitiativeRollOpen = true
+        } else {
+            activeMiniStatField = stat.field
+            miniStatDraft = when (stat.field) {
+                OverviewMiniStatField.ARMOR_CLASS -> (character?.armorClass ?: 10).toString()
+                OverviewMiniStatField.INITIATIVE -> (character?.initiativeBonus ?: 0).toString()
+                OverviewMiniStatField.SPEED -> (character?.speed ?: 30).toString()
+            }
+            if (stat.field == OverviewMiniStatField.ARMOR_CLASS) {
+                armorClassBaseDraft = (character?.baseArmorClass ?: 10).toString()
+                armorClassManualDraft = (character?.armorClass ?: 10).toString()
+                armorClassModeDraft = character?.armorClassMode ?: ArmorClassMode.AUTOMATIC
+            }
+        }
+    }
+
     val miniStats = remember(character, strings) {
         val active = character?.let { activeConditions(it.conditions, it.currentHp) }.orEmpty()
         val exhaustion = character?.exhaustion ?: 0
@@ -917,12 +925,11 @@ private fun OverviewContent(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 item {
-                    // The portrait as wide as the screen, right under the header's rule, its foot melting into the
-                    // background; on it the level, the coins down its sides and the hit points on its foot (owner's
-                    // choice from boards, 2026-10-09: 1).
+                    // The portrait as wide as the screen from the phone's very top, its foot melting into the background
+                    // (owner's choices from boards, 2026-10-09: И): the rests' coins down its left, inspiration and the
+                    // experience's down its right, and the survival block on its foot — the conditions, damage, the hit
+                    // points and heal, then the armor class and the speed, or the death saves at 0.
                     Column(modifier = Modifier.bleed(24.dp)) {
-                        val canLevelUp = character != null &&
-                            character.level < MAX_CHARACTER_LEVEL && levelForExperience(character.experience) > character.level
                         PortraitHero(
                             portraitUri = character?.portraitUri,
                             characterName = displayName,
@@ -933,63 +940,13 @@ private fun OverviewContent(
                                     isPortraitMenuOpen = true
                                 }
                             },
-                            progress = xpInfo.progress,
-                            progressColor = when {
-                                canLevelUp -> colors.accent.inspiration
-                                xpInfo.hasReachedLevelCap -> colors.accent.xpCapped
-                                else -> MaterialTheme.colorScheme.primary
-                            },
-                            // «I lvl» over the art (owner's choices, 2026-10-07, 2026-10-09). A tap adds experience, or
-                            // opens the level up when one is due; a long press adds experience always.
-                            badge = levelBadge(character?.level ?: 1, canLevelUp),
-                            badgeDescription = levelLabel,
-                            onBadgeClick = {
-                                if (canLevelUp) {
-                                    character?.let { onOpenLevelUp(levelForExperience(it.experience)) }
-                                } else {
-                                    experienceEditMode = OverviewExperienceEditMode.ADD
-                                    experienceDraft = ""
-                                    isExperienceDialogOpen = true
-                                }
-                            },
-                            onBadgeLongClick = {
-                                experienceEditMode = OverviewExperienceEditMode.ADD
-                                experienceDraft = ""
-                                isExperienceDialogOpen = true
-                            },
                             fallback = { PortraitFallback(displayName) },
-                            topInset = statusBarTop,
-                            levelTop = CharacterHeaderInset + 4.dp
+                            topInset = statusBarTop
                         ) {
-                            // The conditions down the left, inspiration over them, the rests down the right, on the
-                            // column's edges, each column centred on the art's middle.
-                            if (character != null) {
-                                ConditionsColumn(
-                                    // Unconscious at 0 hit points too: it explains the arrows.
-                                    conditions = activeConditions(character.conditions, character.currentHp),
-                                    exhaustion = character.exhaustion,
-                                    concentrating = concentrationSpell != null,
-                                    onOpenPicker = { isConditionsDialogOpen = true },
-                                    onOpenConcentration = { isEndConcentrationOpen = true },
-                                    modifier = Modifier
-                                        .align(Alignment.CenterStart)
-                                        .padding(start = 24.dp),
-                                    // Inspiration over the conditions: a coin like the rests', lit in gold while it
-                                    // is on (owner's choice, 2026-10-07).
-                                    leading = {
-                                        PortraitSideButton(
-                                            icon = SideIconInspiration,
-                                            contentDescription = text("overview_inspiration"),
-                                            onClick = { characterBundle?.let(onToggleInspiration) },
-                                            on = character.hasInspiration
-                                        )
-                                    }
-                                )
-                            }
                             Column(
                                 modifier = Modifier
-                                    .align(Alignment.CenterEnd)
-                                    .padding(end = 24.dp),
+                                    .align(Alignment.TopStart)
+                                    .padding(start = 24.dp, top = CharacterHeaderInset + PortraitCoinsTop),
                                 verticalArrangement = Arrangement.spacedBy(PortraitSideGap)
                             ) {
                                 PortraitSideButton(
@@ -1003,141 +960,59 @@ private fun OverviewContent(
                                     onClick = { isLongRestDialogOpen = true }
                                 )
                             }
-                            // The hit points on its melting foot, over heal, the death saves' tab and damage.
-                            HpNumbers(
-                                currentHp = character?.currentHp ?: 0,
-                                maxHp = character?.maxHp ?: 0,
-                                temporaryHp = character?.temporaryHp ?: 0,
-                                onClick = { openHpDialog(OverviewHpEditMode.DAMAGE) },
-                                onMaxHpClick = {
-                                    maxHpDraft = (character?.maxHp ?: 0).toString()
-                                    isMaxHpDialogOpen = true
-                                },
-                                modifier = Modifier
-                                    .align(Alignment.BottomCenter)
-                                    .padding(bottom = hpRowRise() + HpNumbersAir)
-                            )
-                        }
-                        if (characterBundle != null) {
-                            val dying = characterBundle.character.currentHp == 0
-                            DeathSavesTray(
-                                characterId = characterBundle.character.id,
-                                dying = dying,
-                                initiallyOpen = deathSavesOpen,
-                                successes = characterBundle.character.deathSaveSuccesses,
-                                failures = characterBundle.character.deathSaveFailures,
-                                onSetSaves = { successes, failures -> onSetDeathSaves(characterBundle, successes, failures) },
-                                onRoll = {
-                                    // Counted from the saves as they are now, so a second throw on the table replaces the first.
-                                    val before = DeathSaves(characterBundle.character.deathSaveSuccesses, characterBundle.character.deathSaveFailures)
-                                    val snapshot = characterBundle
-                                    rollDice(DiceRollRequest(mapOf(DieType.D20 to 1)) { dice ->
-                                        dice.firstOrNull()?.let { onDeathSave(snapshot, before, it.value()) }
-                                    })
-                                },
-                                // Up onto the art's foot; the tray, when out, goes on under it.
-                                modifier = Modifier
-                                    .padding(horizontal = 24.dp)
-                                    .pullUp(hpRowRise()),
-                                // Healing on the left, damage on the right, each into its own pop-up.
-                                start = {
-                                    HpActionButton(
-                                        label = text("overview_hp_heal"),
-                                        icon = Icons.Outlined.Favorite,
-                                        color = colors.accent.heal,
-                                        modifier = Modifier.width(HpActionWidth),
-                                        onClick = { openHpDialog(OverviewHpEditMode.HEAL) }
+                            if (character != null) {
+                                // What the master gives: inspiration (a toggle) and experience.
+                                Column(
+                                    modifier = Modifier
+                                        .align(Alignment.TopEnd)
+                                        .padding(end = 24.dp, top = CharacterHeaderInset + PortraitCoinsTop),
+                                    verticalArrangement = Arrangement.spacedBy(PortraitSideGap)
+                                ) {
+                                    PortraitSideButton(
+                                        icon = SideIconInspiration,
+                                        contentDescription = text("overview_inspiration"),
+                                        onClick = { characterBundle?.let(onToggleInspiration) },
+                                        on = character.hasInspiration
                                     )
-                                },
-                                end = {
-                                    HpActionButton(
-                                        label = text("overview_hp_damage"),
-                                        icon = Icons.Outlined.HeartBroken,
-                                        color = colors.accent.dangerHpZero,
-                                        modifier = Modifier.width(HpActionWidth),
-                                        onClick = { openHpDialog(OverviewHpEditMode.DAMAGE) }
+                                    PortraitSideButton(
+                                        icon = null,
+                                        label = text("overview_xp_coin"),
+                                        contentDescription = text("overview_add_experience"),
+                                        onClick = openAddExperience,
+                                        add = true
                                     )
                                 }
-                            )
-                        }
-                    }
-                }
-
-                item {
-                    // The fight's three: the initiative, the armor class in its shield, the speed (owner's
-                    // choice from boards, 2026-10-05), in one frame with the senses under them (U2, 2026-10-08).
-                    val openStat: (OverviewStat) -> Unit = { stat ->
-                        if (stat.field == OverviewMiniStatField.INITIATIVE && character != null) {
-                            // Initiative rolls; its pop-up's "Edit" opens the bonus.
-                            isInitiativeRollOpen = true
-                        } else {
-                            activeMiniStatField = stat.field
-                            miniStatDraft = when (stat.field) {
-                                OverviewMiniStatField.ARMOR_CLASS -> (character?.armorClass ?: 10).toString()
-                                OverviewMiniStatField.INITIATIVE -> (character?.initiativeBonus ?: 0).toString()
-                                OverviewMiniStatField.SPEED -> (character?.speed ?: 30).toString()
-                            }
-                            if (stat.field == OverviewMiniStatField.ARMOR_CLASS) {
-                                armorClassBaseDraft = (character?.baseArmorClass ?: 10).toString()
-                                armorClassManualDraft = (character?.armorClass ?: 10).toString()
-                                armorClassModeDraft = character?.armorClassMode ?: ArmorClassMode.AUTOMATIC
+                                SurvivalBlock(
+                                    character = character,
+                                    concentrating = concentrationSpell != null,
+                                    armorClass = miniStats.first { it.field == OverviewMiniStatField.ARMOR_CLASS },
+                                    speed = miniStats.first { it.field == OverviewMiniStatField.SPEED },
+                                    onOpenConditions = { isConditionsDialogOpen = true },
+                                    onOpenConcentration = { isEndConcentrationOpen = true },
+                                    onDamage = { openHpDialog(OverviewHpEditMode.DAMAGE) },
+                                    onHeal = { openHpDialog(OverviewHpEditMode.HEAL) },
+                                    onMaxHp = {
+                                        maxHpDraft = character.maxHp.toString()
+                                        isMaxHpDialogOpen = true
+                                    },
+                                    onStat = openStat,
+                                    onSetSaves = { successes, failures -> characterBundle?.let { onSetDeathSaves(it, successes, failures) } },
+                                    onRollSave = {
+                                        characterBundle?.let { snapshot ->
+                                            // Counted from the saves as they are now, so a second throw on the table replaces the first.
+                                            val before = DeathSaves(snapshot.character.deathSaveSuccesses, snapshot.character.deathSaveFailures)
+                                            rollDice(DiceRollRequest(mapOf(DieType.D20 to 1)) { dice ->
+                                                dice.firstOrNull()?.let { onDeathSave(snapshot, before, it.value()) }
+                                            })
+                                        }
+                                    },
+                                    modifier = Modifier
+                                        .align(Alignment.BottomCenter)
+                                        .padding(start = 24.dp, end = 24.dp, bottom = 10.dp)
+                                )
                             }
                         }
                     }
-                    StatsPanel(
-                        modifier = Modifier.padding(top = 6.dp),
-                        top = {
-                            miniStats.forEach { stat ->
-                                if (stat.field == OverviewMiniStatField.ARMOR_CLASS) {
-                                    // A smaller shield, its number (40, as an ability's modifier) on the values' line: it
-                                    // reaches over the frame's top and onto the ornament, so the row stays as low as the
-                                    // initiative and the speed. «КБ» is written on the labels' line, over the shield (Б).
-                                    // A third of the row, as every cell, so the columns stand over the ones below
-                                    // (owner's wishes, 2026-10-08).
-                                    val shortLabel = text("stat_card_armor_class_short")
-                                    BackedStat(
-                                        back = {
-                                            ArmorClassShield(
-                                                label = shortLabel,
-                                                value = stat.value,
-                                                worse = stat.worse,
-                                                better = stat.better,
-                                                onClick = { openStat(stat) },
-                                                width = StatsShieldWidth,
-                                                height = StatsShieldHeight,
-                                                fill = colors.surface.card,
-                                                labelVisible = false
-                                            )
-                                        },
-                                        front = {
-                                            // The row's lines only: the label is written larger below, the number is the shield's.
-                                            PanelStat(
-                                                label = shortLabel,
-                                                value = stat.value,
-                                                compact = true,
-                                                valueColor = Color.Transparent,
-                                                labelVisible = false
-                                            )
-                                        },
-                                        // Its foot on the labels' line, larger, into the shield's empty top (owner's wish, 2026-10-08).
-                                        label = { SheetLabel(shortLabel, fontSize = LocalDesignTokens.current.typography.titleMedium.fontSizeSp.sp) }
-                                    )
-                                } else {
-                                    // The size of the stats under them (22, as an ability's score).
-                                    PanelStat(
-                                        label = text(stat.labelKey),
-                                        value = stat.value,
-                                        compact = true,
-                                        icon = stat.icon,
-                                        valueMarker = if (stat.worse || stat.better) ({ RollMarker(worse = stat.worse, better = stat.better, size = 18.dp) }) else null,
-                                        valueColor = changedValueColor(stat.delta),
-                                        onClick = { openStat(stat) }
-                                    )
-                                }
-                            }
-                        },
-                        bottom = senses
-                    )
                 }
 
                 moreItems()
@@ -1150,6 +1025,20 @@ private fun OverviewContent(
                 onNameClick = {
                     draftText = character?.name.orEmpty()
                     activeField = OverviewEditableField.NAME
+                },
+                level = character?.let { current ->
+                    HeaderLevel(
+                        level = current.level,
+                        experience = current.experience,
+                        onClick = {
+                            if (current.level < MAX_CHARACTER_LEVEL && levelForExperience(current.experience) > current.level) {
+                                onOpenLevelUp(levelForExperience(current.experience))
+                            } else {
+                                openAddExperience()
+                            }
+                        },
+                        onLongClick = openAddExperience
+                    )
                 },
                 backdrop = backdrop
             )
@@ -1740,26 +1629,8 @@ private fun ExperienceModeButton(
     }
 }
 
-/** The armor class's shield in the stats frame: smaller than on its own, the frame's row as low as its neighbours. */
-private val StatsShieldWidth = 80.dp
-private val StatsShieldHeight = 92.dp
-
-/**
- * The level as the portrait writes it (owner's choices, 2026-10-07): the Roman numeral and «lvl», one serif — the
- * numeral the larger (`headlineMedium`), «lvl» `titleMedium` in the label's grey, on one baseline; both gold when a
- * level up is due, as the experience's rule is.
- */
-@Composable
-private fun levelBadge(level: Int, canLevelUp: Boolean): AnnotatedString {
-    val colors = LocalDesignTokens.current.colors
-    val numeral = if (canLevelUp) colors.accent.inspiration else colors.text.primary
-    val label = if (canLevelUp) colors.accent.inspiration else colors.text.label
-    val lvl = text("overview_level_short")
-    return buildAnnotatedString {
-        withStyle(SpanStyle(color = numeral)) { append(romanNumeral(level)) }
-        withStyle(MaterialTheme.typography.titleMedium.toSpanStyle().copy(color = label)) { append(" $lvl") }
-    }
-}
+/** From the header's foot to the portrait's coins. */
+private val PortraitCoinsTop = 16.dp
 
 @Composable
 private fun PortraitFallback(characterName: String) {
@@ -1900,80 +1771,171 @@ private fun PortraitViewerContent(
 /** How much of an HP action's colour fills its button: at 12 % even the red label reads (4.6:1). */
 internal const val HpActionTint = 0.12f
 
+/** Damage and heal beside the hit points: round, outlined in their colour (the engraving lights them faintly too). */
+private val HpButtonSize = 52.dp
+
+/** From the hit points to the buttons either side of them. */
+private val HpButtonGap = 22.dp
+
+/** The bar of what is left under the hit points. */
+private val HpBarWidth = 150.dp
+
 /**
- * Healing or damage on the portrait's foot, either side of the death saves' tab: a button of its own, its whole
- * outline in the colour of what it does, the icon and label too, as tall as the tab (owner's choices from boards,
- * 2026-10-06: R3; on the art since 2026-10-09). The engraving draws it etched, the colour faint behind.
+ * The survival block on the portrait's foot (owner's choice from boards, 2026-10-09: И): the conditions as chips; damage
+ * (a broken heart), the hit points with a bar of what is left under them, heal (a heart); under them the armor class
+ * and the speed — or, at 0 hit points, the death saves in their place, so nothing moves.
  */
 @Composable
-private fun HpActionButton(label: String, icon: ImageVector, color: Color, modifier: Modifier = Modifier, onClick: () -> Unit) {
-    val token = LocalDesignTokens.current.typography.actionButtonLabel
-    val etched = LocalThemeLook.current.frames == FrameStyle.ETCHED
+private fun SurvivalBlock(
+    character: Character,
+    concentrating: Boolean,
+    armorClass: OverviewStat,
+    speed: OverviewStat,
+    onOpenConditions: () -> Unit,
+    onOpenConcentration: () -> Unit,
+    onDamage: () -> Unit,
+    onHeal: () -> Unit,
+    onMaxHp: () -> Unit,
+    onStat: (OverviewStat) -> Unit,
+    onSetSaves: (Int, Int) -> Unit,
+    onRollSave: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     val colors = LocalDesignTokens.current.colors
-    val shape = if (etched) RoundedCornerShape(4.dp) else RoundedCornerShape(HpActionCornerRadius)
-    Row(
-        modifier = modifier
-            .height(hpActionHeight())
-            .clip(shape)
-            .then(
-                if (etched) {
-                    Modifier
-                        .background(color.copy(alpha = HpActionTint))
-                        .engravedBorder(color.copy(alpha = .7f))
-                } else {
-                    Modifier.border(1.dp, color.copy(alpha = .7f), shape)
-                }
-            )
-            .clickable(onClick = onClick)
-            .padding(horizontal = 10.dp),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(imageVector = icon, contentDescription = null, tint = color, modifier = Modifier.size(19.dp))
-        Text(
-            text = label,
-            modifier = Modifier.padding(start = 6.dp),
-            style = MaterialTheme.typography.bodyLarge.copy(
-                fontSize = token.fontSizeSp.sp,
-                lineHeight = (token.lineHeightSp ?: token.fontSizeSp).sp
-            ),
-            color = if (etched) colors.text.primary else color,
-            fontWeight = FontWeight.Medium,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        ConditionChips(
+            // Unconscious at 0 hit points too: it explains the arrows.
+            conditions = activeConditions(character.conditions, character.currentHp),
+            exhaustion = character.exhaustion,
+            concentrating = concentrating,
+            onOpenPicker = onOpenConditions,
+            onOpenConcentration = onOpenConcentration,
+            modifier = Modifier.fillMaxWidth()
         )
+        Spacer(modifier = Modifier.height(6.dp))
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(HpButtonGap)) {
+            HpRoundButton(Icons.Outlined.HeartBroken, colors.accent.dangerHpZero, text("overview_hp_damage"), onDamage)
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                HpNumbers(
+                    currentHp = character.currentHp,
+                    maxHp = character.maxHp,
+                    temporaryHp = character.temporaryHp,
+                    onClick = onDamage,
+                    onMaxHpClick = onMaxHp
+                )
+                HpBar(character.currentHp, character.temporaryHp, character.maxHp)
+            }
+            HpRoundButton(Icons.Outlined.Favorite, colors.accent.heal, text("overview_hp_heal"), onHeal)
+        }
+        Spacer(modifier = Modifier.height(14.dp))
+        if (character.currentHp == 0) {
+            DeathSavesRow(
+                successes = character.deathSaveSuccesses,
+                failures = character.deathSaveFailures,
+                onSetSaves = onSetSaves,
+                onRoll = onRollSave
+            )
+        } else {
+            Row(horizontalArrangement = Arrangement.spacedBy(40.dp)) {
+                ArtStat(
+                    label = text(armorClass.labelKey),
+                    value = armorClass.value,
+                    icon = Icons.Outlined.Shield,
+                    worse = armorClass.worse,
+                    better = armorClass.better,
+                    onClick = { onStat(armorClass) }
+                )
+                ArtStat(
+                    label = text(speed.labelKey),
+                    value = speed.value,
+                    icon = speed.icon ?: Icons.AutoMirrored.Outlined.DirectionsRun,
+                    valueColor = changedValueColor(speed.delta),
+                    onClick = { onStat(speed) }
+                )
+            }
+        }
     }
 }
 
 /**
- * The HP actions' and the death saves' tab's height: lower than a stat card, so the row doesn't vie with the hit
- * points (owner's choice from boards, 2026-10-06: V2).
+ * Damage or heal: round, its whole outline in the colour of what it does at 70 % and its icon in it, no fill — the one
+ * outlined button, its colour says "press me" (owner's choices, 2026-10-06 and from boards, 2026-10-09). The engraving
+ * lights it faintly in its colour.
  */
-private val HpActionHeight = 40.dp
-
-/** The engraving's etched HP actions and tab: as tall as before. */
-private val HpActionEtchedHeight = 48.dp
-
 @Composable
-@ReadOnlyComposable
-private fun hpActionHeight(): Dp = if (LocalThemeLook.current.frames == FrameStyle.ETCHED) HpActionEtchedHeight else HpActionHeight
+private fun HpRoundButton(icon: ImageVector, color: Color, description: String, onClick: () -> Unit) {
+    val etched = LocalThemeLook.current.frames == FrameStyle.ETCHED
+    Box(
+        modifier = Modifier
+            .size(HpButtonSize)
+            .clip(CircleShape)
+            .background(if (etched) color.copy(alpha = HpActionTint) else Color.Transparent)
+            .border(1.dp, color.copy(alpha = .7f), CircleShape)
+            .clickable(role = Role.Button, onClick = onClick)
+            .semantics { contentDescription = description },
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(imageVector = icon, contentDescription = null, tint = color, modifier = Modifier.size(24.dp))
+    }
+}
 
-/** The HP actions' width: their longest label («Schaden», `maxChars` 9 at 12sp) beside the icon. */
-private val HpActionWidth = 104.dp
-
-/** The HP actions' and the tab's corners: the stat cards' 10. */
-private val HpActionCornerRadius = 10.dp
-
-/** Under the heal–damage row, the rest of the portrait's foot. */
-private val HpRowFoot = 8.dp
-
-/** Between the hit points and the row under them. */
-private val HpNumbersAir = 6.dp
-
-/** How far the heal–damage row rises onto the portrait's foot: its own height and [HpRowFoot] under it. */
+/** What is left of the hit points: a bar on the experience's track, green as far as they go, the temporary ones blue after. */
 @Composable
-@ReadOnlyComposable
-private fun hpRowRise(): Dp = hpActionHeight() + HpRowFoot
+private fun HpBar(current: Int, temporary: Int, max: Int) {
+    val colors = LocalDesignTokens.current.colors
+    Canvas(modifier = Modifier.padding(top = 4.dp).width(HpBarWidth).height(6.dp)) {
+        val h = 4.dp.toPx()
+        val y = size.height / 2 - h / 2
+        val corner = CornerRadius(h / 2)
+        drawRoundRect(colors.progress.xpTrack, Offset(0f, y), Size(size.width, h), corner)
+        if (max <= 0) return@Canvas
+        val hp = size.width * (current.toFloat() / max).coerceIn(0f, 1f)
+        if (hp > 0f) drawRoundRect(colors.accent.heal, Offset(0f, y), Size(hp, h), corner)
+        if (temporary > 0) {
+            val extra = (size.width * temporary / max).coerceAtMost(size.width - hp)
+            if (extra > 0f) drawRoundRect(colors.accent.hpTemporary, Offset(hp, y), Size(extra, h), corner)
+        }
+    }
+}
+
+/**
+ * A stat on the art: its gold label over its value, an icon in gold before the value — or the conditions' arrows in its
+ * place — with a deep shadow to read on the art. A tap edits it.
+ */
+@Composable
+private fun ArtStat(
+    label: String,
+    value: String,
+    icon: ImageVector,
+    onClick: () -> Unit,
+    worse: Boolean = false,
+    better: Boolean = false,
+    valueColor: Color? = null
+) {
+    val colors = LocalDesignTokens.current.colors
+    Column(
+        modifier = Modifier
+            .clip(RoundedCornerShape(10.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 6.dp, vertical = 2.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(modifier = Modifier.deepShadow()) { SheetLabel(label) }
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            if (worse || better) {
+                RollMarker(worse = worse, better = better, size = 18.dp)
+            } else {
+                Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+            }
+            Text(
+                text = value,
+                modifier = Modifier.deepShadow(),
+                style = MaterialTheme.typography.titleLarge.copy(shadow = artShadow()),
+                color = valueColor ?: colors.text.primary
+            )
+        }
+    }
+}
 
 /** The most hit points one change can take or give: four digits. */
 private const val MaxHpChange = 9999
@@ -2077,113 +2039,56 @@ private fun HpChange(before: HpPreview, after: HpPreview) {
 }
 
 /**
- * Heal and damage either side of the death saves' tab on the portrait's foot, and the death saving throws under them,
- * as Foundry has them: the tab with a skull pulls the tray out below the row, a second tap rolls it back — successes
- * on the left, failures on the right, and a d20 with a skull on its front in the middle. A tap on the die throws it on
- * the dice table and counts the result; a tap on a circle sets the count (on the last filled one, takes it back). The
- * tray opens by itself at 0 hit points.
+ * The death saving throws at 0 hit points, where the armor class and the speed stand otherwise (owner's choice from
+ * boards, 2026-10-09: И): successes on the left, failures on the right, and a d20 with a skull on its front in the
+ * middle, as Foundry has them. A tap on the die throws it on the dice table and counts the result; a tap on a circle
+ * sets the count (on the last filled one, takes it back).
  */
 @Composable
-private fun DeathSavesTray(
-    characterId: Long,
-    dying: Boolean,
-    initiallyOpen: Boolean,
-    successes: Int,
-    failures: Int,
-    onSetSaves: (Int, Int) -> Unit,
-    onRoll: () -> Unit,
-    modifier: Modifier = Modifier,
-    start: @Composable RowScope.() -> Unit = {},
-    end: @Composable RowScope.() -> Unit = {}
-) {
+private fun DeathSavesRow(successes: Int, failures: Int, onSetSaves: (Int, Int) -> Unit, onRoll: () -> Unit) {
     val colors = LocalDesignTokens.current.colors
     val look = LocalDiceSkin.current
-    val etched = LocalThemeLook.current.frames == FrameStyle.ETCHED
     val rollDescription = text("overview_death_saves_roll")
-    var open by remember(characterId) { mutableStateOf(initiallyOpen || dying) }
-    LaunchedEffect(dying) { if (dying) open = true }
     val saves = DeathSaves(successes, failures)
-    val shape = if (etched) RoundedCornerShape(4.dp) else RoundedCornerShape(HpActionCornerRadius)
-    val outline = if (etched) Modifier.engravedBorder(colors.border.panel) else Modifier.border(1.dp, colors.border.panel, shape)
-    Column(modifier = modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            start()
-            // The tab: a skull, red while dying.
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            DeathSaveMarks(
+                label = text("overview_death_saves_successes"),
+                count = successes,
+                color = colors.accent.heal,
+                onSet = { onSetSaves(it, failures) }
+            )
             Box(
                 modifier = Modifier
-                    .height(hpActionHeight())
-                    .clip(shape)
-                    .background(colors.surface.card)
-                    .then(outline)
-                    .clickable { open = !open }
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = 16.dp)
+                    .size(64.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable(onClick = onRoll),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = SkullIcon,
-                    contentDescription = text("overview_death_saves"),
-                    tint = if (dying) colors.accent.dangerHpZero else colors.text.label,
-                    modifier = Modifier.size(if (etched) 20.dp else 22.dp)
+                // Turned half round, the front triangle stands on its point: room for the skull's crown.
+                DieIcon(
+                    type = DieType.D20,
+                    look = look,
+                    showNumbers = false,
+                    mark = rememberVectorPainter(SkullIcon),
+                    markRotation = 180f,
+                    turn = HalfTurn,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .semantics { contentDescription = rollDescription }
                 )
             }
-            end()
+            DeathSaveMarks(
+                label = text("overview_death_saves_failures"),
+                count = failures,
+                color = colors.accent.dangerHpZero,
+                onSet = { onSetSaves(successes, it) }
+            )
         }
-        AnimatedVisibility(
-            visible = open,
-            enter = expandVertically(expandFrom = Alignment.Top),
-            exit = shrinkVertically(shrinkTowards = Alignment.Top)
-        ) {
-            Column(
-                modifier = Modifier
-                    .padding(top = 10.dp)
-                    .fillMaxWidth()
-                    .clip(shape)
-                    .background(colors.surface.card)
-                    .then(outline)
-                    .padding(horizontal = 18.dp, vertical = 10.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    DeathSaveMarks(
-                        label = text("overview_death_saves_successes"),
-                        count = successes,
-                        color = colors.accent.heal,
-                        modifier = Modifier.weight(1f),
-                        onSet = { onSetSaves(it, failures) }
-                    )
-                    Box(
-                        modifier = Modifier
-                            .size(72.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .clickable(onClick = onRoll),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        // Turned half round, the front triangle stands on its point: room for the skull's crown.
-                        DieIcon(
-                            type = DieType.D20,
-                            look = look,
-                            showNumbers = false,
-                            mark = rememberVectorPainter(SkullIcon),
-                            markRotation = 180f,
-                            turn = HalfTurn,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .semantics { contentDescription = rollDescription }
-                        )
-                    }
-                    DeathSaveMarks(
-                        label = text("overview_death_saves_failures"),
-                        count = failures,
-                        color = colors.accent.dangerHpZero,
-                        modifier = Modifier.weight(1f),
-                        onSet = { onSetSaves(successes, it) }
-                    )
-                }
-                when {
-                    saves.isDead -> Text(text("overview_death_saves_dead"), style = MaterialTheme.typography.titleMedium, color = colors.accent.dangerHpZero)
-                    saves.isStable -> Text(text("overview_death_saves_stable"), style = MaterialTheme.typography.titleMedium, color = colors.accent.heal)
-                }
-            }
+        when {
+            saves.isDead -> Text(text("overview_death_saves_dead"), style = MaterialTheme.typography.titleMedium, color = colors.accent.dangerHpZero)
+            saves.isStable -> Text(text("overview_death_saves_stable"), style = MaterialTheme.typography.titleMedium, color = colors.accent.heal)
         }
     }
 }
@@ -2530,14 +2435,14 @@ private fun EngravedOverviewRussianPreview() {
 @Preview(showBackground = true, showSystemUi = true, device = "spec:width=412dp,height=915dp")
 @Composable
 private fun OverviewDyingPreview() {
-    OverviewPreviewContent(currentHp = 0, temporaryHp = 0, deathSaveSuccesses = 1, deathSaveFailures = 2, deathSavesOpen = true)
+    OverviewPreviewContent(currentHp = 0, temporaryHp = 0, deathSaveSuccesses = 1, deathSaveFailures = 2)
 }
 
 /** Three failed death saves: dead, the portrait in black and white. */
 @Preview(showBackground = true, showSystemUi = true, device = "spec:width=412dp,height=915dp")
 @Composable
 private fun OverviewDeadPreview() {
-    OverviewPreviewContent(currentHp = 0, temporaryHp = 0, deathSaveSuccesses = 1, deathSaveFailures = 3, deathSavesOpen = true)
+    OverviewPreviewContent(currentHp = 0, temporaryHp = 0, deathSaveSuccesses = 1, deathSaveFailures = 3)
 }
 
 @Composable
@@ -2546,7 +2451,6 @@ private fun OverviewPreviewContent(
     temporaryHp: Int,
     deathSaveSuccesses: Int = 0,
     deathSaveFailures: Int = 0,
-    deathSavesOpen: Boolean = false,
     russian: Boolean = false,
     theme: AppTheme = AppTheme.CLASSIC
 ) {
@@ -2716,8 +2620,7 @@ private fun OverviewPreviewContent(
                 onSpendHitDice = { _, _, _ -> },
                 onToggleInspiration = {},
                 onShortRest = {},
-                onLongRest = {},
-                deathSavesOpen = deathSavesOpen
+                onLongRest = {}
             )
         }
     }

@@ -2,6 +2,7 @@ package com.dndcharacterhandler.presentation.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -14,6 +15,7 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dndcharacterhandler.presentation.localization.text
@@ -29,7 +31,11 @@ fun CharacterScreenHeader(
     /** A tap on the name: the overview renames the character there. */
     onNameClick: (() -> Unit)? = null,
     /** A shadow under the name where the header lies on a picture (the overview's art); drawn deep, thrice. */
-    nameShadow: Shadow? = null
+    nameShadow: Shadow? = null,
+    /** The row's height: the shared header makes room for its second line. */
+    height: Dp = 56.dp,
+    /** A second line under the name (the level and its experience). */
+    subtitle: (@Composable () -> Unit)? = null
 ) {
     val tokens = LocalDesignTokens.current.typography
     val colors = LocalDesignTokens.current.colors
@@ -37,7 +43,7 @@ fun CharacterScreenHeader(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(56.dp),
+            .height(height),
         contentAlignment = Alignment.Center
     ) {
         ScreenTopActions(
@@ -45,6 +51,7 @@ fun CharacterScreenHeader(
             onOpenDice = onOpenDice,
             modifier = Modifier.align(Alignment.Center)
         )
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = name.ifBlank { text("overview_name_placeholder") },
             modifier = Modifier
@@ -57,5 +64,7 @@ fun CharacterScreenHeader(
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center
         )
+        subtitle?.invoke()
+        }
     }
 }

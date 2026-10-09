@@ -14,6 +14,17 @@ val ExperienceThresholds: List<Int> = listOf(
 
 const val MAX_CHARACTER_LEVEL = 20
 
+/**
+ * How far a character of [level] with [experience] points has come toward the next level, 0 to 1: from its own level's
+ * threshold to the next one's; 1 at the last level.
+ */
+fun experienceProgress(level: Int, experience: Int): Float {
+    if (level >= MAX_CHARACTER_LEVEL) return 1f
+    val from = ExperienceThresholds[(level - 1).coerceIn(0, MAX_CHARACTER_LEVEL - 1)]
+    val to = ExperienceThresholds[level.coerceIn(1, MAX_CHARACTER_LEVEL - 1)]
+    return ((experience - from).toFloat() / (to - from).coerceAtLeast(1)).coerceIn(0f, 1f)
+}
+
 /** The level [experience] points are enough for. */
 fun levelForExperience(experience: Int): Int =
     ExperienceThresholds.indexOfLast { experience >= it }.coerceAtLeast(0) + 1

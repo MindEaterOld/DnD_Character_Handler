@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -134,8 +135,6 @@ internal val PortraitSideButtonSize = 44.dp
 /** Between the buttons, and the marks, of a side's column. */
 internal val PortraitSideGap = 8.dp
 
-/** A side's column of [rows] buttons or marks, from its top button's top to its bottom one's bottom. */
-internal fun portraitSideColumnHeight(rows: Int): Dp = PortraitSideButtonSize * rows + PortraitSideGap * (rows - 1)
 
 /**
  * A button at the portrait's sides (owner's choices from boards, 2026-10-07: K1, T4): the conditions' on the left,
@@ -146,7 +145,7 @@ internal fun portraitSideColumnHeight(rows: Int): Dp = PortraitSideButtonSize * 
  */
 @Composable
 internal fun PortraitSideButton(
-    icon: ImageVector,
+    icon: ImageVector?,
     contentDescription: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -154,7 +153,9 @@ internal fun PortraitSideButton(
     iconSize: Dp = 24.dp,
     /** A toggle's state (inspiration): on, it is lit in [accent] at 12 % and its icon is in it. Null: a plain button. */
     on: Boolean? = null,
-    accent: Color = LocalDesignTokens.current.colors.accent.inspiration
+    accent: Color = LocalDesignTokens.current.colors.accent.inspiration,
+    /** A word in place of the icon, in the serif: the experience's coin writes «XP». */
+    label: String? = null
 ) {
     val colors = LocalDesignTokens.current.colors
     Box(
@@ -196,12 +197,16 @@ internal fun PortraitSideButton(
                 ),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = if (on == true) accent else colors.text.primary,
-                modifier = Modifier.size(iconSize)
-            )
+            if (label != null) {
+                Text(text = label, style = MaterialTheme.typography.titleMedium, color = if (on == true) accent else colors.text.primary)
+            } else if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = if (on == true) accent else colors.text.primary,
+                    modifier = Modifier.size(iconSize)
+                )
+            }
         }
         if (add) {
             Box(

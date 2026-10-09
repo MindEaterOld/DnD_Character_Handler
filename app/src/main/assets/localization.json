@@ -5263,6 +5263,29 @@
     "fr": "Les pv temporaires ne rendent pas conscience",
     "es": "Los PG temporales no devuelven la consciencia"
   },
+  "overview_xp_coin": {
+    "maxChars": 2,
+    "en": "XP",
+    "ru": "XP",
+    "de": "EP",
+    "fr": "PX",
+    "es": "PX"
+  },
+  "overview_add_experience": {
+    "en": "Add experience",
+    "ru": "Добавить опыт",
+    "de": "Erfahrung hinzufügen",
+    "fr": "Ajouter de l'expérience",
+    "es": "Añadir experiencia"
+  },
+  "conditions_add_chip": {
+    "maxChars": 14,
+    "en": "Condition",
+    "ru": "Состояние",
+    "de": "Zustand",
+    "fr": "État",
+    "es": "Estado"
+  },
   "overview_hp_heal": {
     "maxChars": 9,
     "en": "Heal",

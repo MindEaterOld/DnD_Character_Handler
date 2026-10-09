@@ -1,6 +1,25 @@
 package com.dndcharacterhandler.presentation.components
 
 import android.os.Build
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import com.dndcharacterhandler.domain.rules.MAX_CHARACTER_LEVEL
+import com.dndcharacterhandler.domain.rules.experienceProgress
+import com.dndcharacterhandler.domain.rules.levelForExperience
+import com.dndcharacterhandler.domain.rules.romanNumeral
+import com.dndcharacterhandler.presentation.localization.LocalStrings
+import com.dndcharacterhandler.presentation.localization.text
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -35,8 +54,17 @@ import androidx.compose.ui.unit.dp
 import com.dndcharacterhandler.domain.model.Character
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 
-/** The header's own row, under the status bar. */
-val CharacterHeaderRow = 56.dp
+/** The header's own row, under the status bar: the name and the level under it. */
+val CharacterHeaderRow = 64.dp
+
+/** The experience's rule beside the level, under the name. */
+private val LevelRuleWidth = 120.dp
+
+/**
+ * The level the header writes under the name (owner's choice from boards, 2026-10-09: И): the character's [level] and
+ * [experience]; a tap is [onClick] and a long press [onLongClick] — the overview's, elsewhere none.
+ */
+class HeaderLevel(val level: Int, val experience: Int, val onClick: (() -> Unit)? = null, val onLongClick: (() -> Unit)? = null)
 
 /**
  * How much a list keeps free at its top for the header: the status bar and the header's row. Every character screen
@@ -95,12 +123,15 @@ fun BoxScope.PinnedCharacterHeader(
     onOpenDrawer: () -> Unit,
     onOpenDice: () -> Unit,
     backdrop: HeaderBackdrop,
+    /** The level and the experience under the name. */
+    level: HeaderLevel? = null,
     /** A tap on the name: the overview renames the character there. */
     onNameClick: (() -> Unit)? = null
 ) {
     val colors = LocalDesignTokens.current.colors
     val canBlur = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     val density = LocalDensity.current
+    val shadow = Shadow(colors.ornament.dropShadow, Offset(0f, with(density) { 1.dp.toPx() }), with(density) { 12.dp.toPx() })
     Box(modifier = Modifier.align(Alignment.TopCenter).fillMaxWidth()) {
         Box(
             modifier = Modifier
@@ -132,8 +163,64 @@ fun BoxScope.PinnedCharacterHeader(
                 .statusBarsPadding()
                 .padding(horizontal = 24.dp),
             onNameClick = onNameClick,
-            nameShadow = Shadow(colors.ornament.dropShadow, Offset(0f, with(density) { 1.dp.toPx() }), with(density) { 12.dp.toPx() })
+            nameShadow = shadow,
+            height = CharacterHeaderRow,
+            subtitle = level?.let { { HeaderLevelLine(it, shadow) } }
         )
+    }
+}
+
+/**
+ * «I lvl» and the experience's rule under the name: the rule on the track `progress.xpTrack`, filled from the left in
+ * gold — in `accent.inspiration`, the words too, when a level up is due; in `accent.xpCapped` at the last level.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun HeaderLevelLine(level: HeaderLevel, shadow: Shadow) {
+    val colors = LocalDesignTokens.current.colors
+    val gold = MaterialTheme.colorScheme.primary
+    val due = level.level < MAX_CHARACTER_LEVEL && levelForExperience(level.experience) > level.level
+    val fill = when {
+        due -> colors.accent.inspiration
+        level.level >= MAX_CHARACTER_LEVEL -> colors.accent.xpCapped
+        else -> gold
+    }
+    val progress = experienceProgress(level.level, level.experience)
+    val description = LocalStrings.current.format("overview_level_format", level.level)
+    val deep = Modifier.drawWithContent { repeat(3) { drawContent() } }
+    Row(
+        modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
+            .then(
+                if (level.onClick != null || level.onLongClick != null) {
+                    Modifier.combinedClickable(onClick = level.onClick ?: {}, onLongClick = level.onLongClick)
+                } else {
+                    Modifier
+                }
+            )
+            .semantics(mergeDescendants = true) { contentDescription = description }
+            .padding(horizontal = 6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = romanNumeral(level.level),
+            modifier = deep,
+            style = MaterialTheme.typography.titleMedium.copy(shadow = shadow),
+            color = if (due) colors.accent.inspiration else colors.text.primary
+        )
+        Text(
+            text = " " + text("overview_level_short"),
+            modifier = deep,
+            style = MaterialTheme.typography.labelMedium.copy(shadow = shadow),
+            color = if (due) colors.accent.inspiration else colors.text.label
+        )
+        Canvas(modifier = Modifier.padding(start = 10.dp).width(LevelRuleWidth).height(8.dp)) {
+            val h = 3.dp.toPx()
+            val y = size.height / 2 - h / 2
+            val corner = CornerRadius(h / 2)
+            drawRoundRect(colors.progress.xpTrack, Offset(0f, y), Size(size.width, h), corner)
+            if (progress > 0f) drawRoundRect(fill, Offset(0f, y), Size(size.width * progress, h), corner)
+        }
     }
 }
 
@@ -145,5 +232,11 @@ fun BoxScope.PinnedCharacterHeader(
     onOpenDice: () -> Unit,
     backdrop: HeaderBackdrop
 ) {
-    PinnedCharacterHeader(name = character.name, onOpenDrawer = onOpenDrawer, onOpenDice = onOpenDice, backdrop = backdrop)
+    PinnedCharacterHeader(
+        name = character.name,
+        onOpenDrawer = onOpenDrawer,
+        onOpenDice = onOpenDice,
+        backdrop = backdrop,
+        level = HeaderLevel(character.level, character.experience)
+    )
 }

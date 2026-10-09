@@ -112,7 +112,7 @@ internal fun LongRestDialog(
 }
 
 /** A tired eye (Game Icons, Delapouite, CC BY 3.0): exhaustion. */
-private val ExhaustionIcon: ImageVector by lazy {
+internal val ExhaustionIcon: ImageVector by lazy {
     ImageVector.Builder(
         name = "tired-eye", defaultWidth = 24.dp, defaultHeight = 24.dp, viewportWidth = 24f, viewportHeight = 24f
     )
