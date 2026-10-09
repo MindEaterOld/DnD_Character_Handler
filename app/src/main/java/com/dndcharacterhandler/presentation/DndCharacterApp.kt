@@ -107,6 +107,22 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
         appState.localizationRepository.getStrings(managerState.language)
     }
     val snackbarHostState = remember { SnackbarHostState() }
+    // The app's one way to show a notice (LocalAppSnackbar): the newest replaces the one up; with an action (an undo)
+    // it stays 10 s, without 4 s.
+    val appSnackbar = remember(scope, snackbarHostState) {
+        com.dndcharacterhandler.presentation.components.AppSnackbar { message, actionLabel, onAction ->
+            scope.launch {
+                snackbarHostState.currentSnackbarData?.dismiss()
+                val result = snackbarHostState.showSnackbar(
+                    message,
+                    actionLabel,
+                    withDismissAction = false,
+                    duration = if (actionLabel != null) androidx.compose.material3.SnackbarDuration.Long else androidx.compose.material3.SnackbarDuration.Short
+                )
+                if (result == androidx.compose.material3.SnackbarResult.ActionPerformed) onAction()
+            }
+        }
+    }
     var isSettingsOpen by remember { mutableStateOf(false) }
     var isDeleteConfirmOpen by remember { mutableStateOf(false) }
     var isDicePickerOpen by remember { mutableStateOf(false) }
@@ -125,7 +141,7 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
         if (uri != null) {
             scope.launch {
                 val imported = appState.diceSkinsViewModel.importSkin(uri)
-                snackbarHostState.showSnackbar(strings[if (imported) "dice_skin_imported" else "dice_skin_import_failed"])
+                appSnackbar.show(strings[if (imported) "dice_skin_imported" else "dice_skin_import_failed"], null) {}
             }
         }
     }
@@ -155,7 +171,7 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
     val currentStrings by rememberUpdatedState(strings)
     LaunchedEffect(appState.characterManagerViewModel) {
         appState.characterManagerViewModel.events.collect { messageKey ->
-            snackbarHostState.showSnackbar(currentStrings[messageKey])
+            appSnackbar.show(currentStrings[messageKey], null) {}
         }
     }
 
@@ -172,15 +188,7 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
         LocalDiceSkin provides diceSkin,
         com.dndcharacterhandler.presentation.dice.LocalDiceRoller provides { request -> diceRollRequest = request },
         // One for the app's life: the local is static, so a new one would recompose every screen under it.
-        com.dndcharacterhandler.presentation.components.LocalAppSnackbar provides remember(scope, snackbarHostState) {
-            com.dndcharacterhandler.presentation.components.AppSnackbar { message, actionLabel, onAction ->
-                scope.launch {
-                    snackbarHostState.currentSnackbarData?.dismiss()
-                    val result = snackbarHostState.showSnackbar(message, actionLabel, withDismissAction = false, duration = androidx.compose.material3.SnackbarDuration.Long)
-                    if (result == androidx.compose.material3.SnackbarResult.ActionPerformed) onAction()
-                }
-            }
-        }
+        com.dndcharacterhandler.presentation.components.LocalAppSnackbar provides appSnackbar
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             ModalNavigationDrawer(
