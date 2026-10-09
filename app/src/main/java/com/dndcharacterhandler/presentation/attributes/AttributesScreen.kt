@@ -574,9 +574,10 @@ internal fun attributesSectionItems(
             ) {
                 BorderLabelCard(
                     label = text("senses_group_passive"),
-                    // Near half and half: the darkvision's whole name fits its gap (owner's choice from boards, 2026-10-10: C).
+                    // Half and half, as the skills' two columns above: the frames' edges and the values stand under theirs
+                    // (owner's wish, 2026-10-10), and the darkvision's whole name still fits its gap (C).
                     modifier = Modifier
-                        .weight(0.95f)
+                        .weight(1f)
                         .fillMaxHeight(),
                     labelStyle = abilityLabelStyle,
                     cornerRadius = 7.dp
@@ -1240,8 +1241,9 @@ private fun SenseLine(
             .heightIn(min = 36.dp)
             .clip(RoundedCornerShape(8.dp))
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            // The icon's middle on the skills' dots' line (14dp in), the name where theirs starts (26dp).
-            .padding(start = 6.dp, end = 4.dp),
+            // The icon's middle on the skills' dots' line (14dp in), the name where theirs starts (26dp), the value
+            // ending where theirs does (8dp in): the frame is as wide as their column.
+            .padding(start = 6.dp, end = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
