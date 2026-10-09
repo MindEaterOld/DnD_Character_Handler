@@ -616,6 +616,7 @@ internal fun attributesSectionItems(
                         .fillMaxHeight(),
                     labelStyle = abilityLabelStyle,
                     cornerRadius = 7.dp,
+                    frameOverContent = true,
                     onClick = { isDarkvisionDialogOpen = true }
                 ) {
                     DarkvisionValue(darkvisionFeet)
@@ -1269,23 +1270,28 @@ private fun SenseLine(
     }
 }
 
-/** The darkvision in the senses' frame of its name: the moon and the feet large; «Нет», quiet. */
+/** Both darkvision states share a bottom-aligned value over their artwork. */
 @Composable
 private fun DarkvisionValue(feet: Int) {
     val colors = LocalDesignTokens.current.colors
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Icon(Icons.Outlined.DarkMode, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
-        if (feet > 0) {
-            Text("$feet ${text("inventory_unit_feet")}", style = MaterialTheme.typography.titleLarge, color = colors.text.primary)
-        } else {
-            Text(text("common_none"), style = MaterialTheme.typography.titleLarge, color = colors.text.subtle)
-        }
+    val textShadow = with(LocalDensity.current) {
+        Shadow(colors.ornament.dropShadow, Offset(0f, 1.dp.toPx()), 12.dp.toPx())
+    }
+    Box(modifier = Modifier.fillMaxSize()) {
+        Image(
+            painter = painterResource(if (feet > 0) R.drawable.darkvision_active_art else R.drawable.darkvision_none_art),
+            contentDescription = null,
+            modifier = Modifier.matchParentSize(),
+            contentScale = ContentScale.Crop,
+            alignment = Alignment.TopCenter
+        )
+        Text(
+            text = if (feet > 0) "$feet ${text("inventory_unit_feet")}" else text("common_none"),
+            modifier = Modifier.align(Alignment.BottomCenter).padding(8.dp)
+                .drawWithContent { repeat(3) { drawContent() } },
+            style = MaterialTheme.typography.titleLarge.copy(shadow = textShadow),
+            color = colors.text.primary
+        )
     }
 }
 
