@@ -1,10 +1,12 @@
 package com.dndcharacterhandler.presentation.biography
 
+import androidx.compose.ui.semantics.Role
+import androidx.compose.foundation.selection.selectable
+import com.dndcharacterhandler.presentation.components.CharacterLoadingScreen
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.compose.foundation.layout.statusBarsPadding
 import com.dndcharacterhandler.presentation.components.rememberHeaderBackdrop
 import com.dndcharacterhandler.presentation.components.headerBackdrop
 import androidx.compose.foundation.BorderStroke
@@ -61,7 +63,6 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -84,13 +85,11 @@ import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
 import com.dndcharacterhandler.presentation.components.CharacterHeaderInset
 import com.dndcharacterhandler.presentation.components.PinnedCharacterHeader
-import com.dndcharacterhandler.presentation.components.EditDialog
 import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
 import com.dndcharacterhandler.presentation.components.OutlinedPanel
 import com.dndcharacterhandler.presentation.components.SheetLabel
 import com.dndcharacterhandler.presentation.components.SheetOrnament
 import com.dndcharacterhandler.presentation.components.ScreenBackground
-import com.dndcharacterhandler.presentation.components.ScreenTopActions
 import com.dndcharacterhandler.presentation.components.figure
 import com.dndcharacterhandler.presentation.components.labelKey
 import com.dndcharacterhandler.presentation.components.toggleContent
@@ -230,26 +229,7 @@ internal fun BiographyContent(
         return row(field, icon, field.label(), swatch?.let { swatchName(group, it) } ?: value, swatch?.color)
     }
     if (character == null) {
-        ScreenBackground {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .statusBarsPadding()
-                    .padding(start = 24.dp, end = 24.dp, top = 4.dp)
-            ) {
-            ScreenTopActions(
-                onOpenDrawer = onOpenDrawer,
-                onOpenDice = onOpenDice,
-                modifier = Modifier.align(Alignment.TopCenter)
-            )
-            Text(
-                text = text("placeholder_loading_character"),
-                modifier = Modifier.align(Alignment.Center),
-                style = MaterialTheme.typography.titleLarge,
-                color = colors.text.primary
-            )
-            }
-        }
+        CharacterLoadingScreen(onOpenDrawer = onOpenDrawer, onOpenDice = onOpenDice)
         return
     }
     val resolvedCharacter = character
@@ -796,36 +776,8 @@ private fun BiographyEditDialog(
             onSave = onSave
         )
 
-        BiographyEditor.TEXT -> BiographyTextInputDialog(
-            title = field.label(),
-            currentValue = currentValue,
-            keyboardType = KeyboardType.Text,
-            onDismiss = onDismiss,
-            onSave = onSave
-        )
-    }
-}
-
-@Composable
-private fun BiographyTextInputDialog(
-    title: String,
-    currentValue: String,
-    keyboardType: KeyboardType,
-    onDismiss: () -> Unit,
-    onSave: (String) -> Unit
-) {
-    var draft by remember(title, currentValue) { mutableStateOf(currentValue) }
-    EditDialog(
-        title = title,
-        onDismiss = onDismiss,
-        onConfirm = { onSave(draft) }
-    ) {
-        OutlinedTextField(
-            value = draft,
-            onValueChange = { draft = it },
-            singleLine = keyboardType != KeyboardType.Text,
-            keyboardOptions = KeyboardOptions(keyboardType = keyboardType)
-        )
+        // The story's fields are written in place (BiographyInlineText): no pop-up.
+        BiographyEditor.TEXT -> Unit
     }
 }
 
@@ -843,7 +795,7 @@ internal fun UnitSwitcher(
                 modifier = Modifier
                     .clip(RoundedCornerShape(10.dp))
                     .background(toggleFill(selected == option))
-                    .clickable { onSelected(option) }
+                    .selectable(selected = selected == option, role = Role.RadioButton) { onSelected(option) }
                     .padding(horizontal = 16.dp, vertical = 10.dp),
                 style = MaterialTheme.typography.bodyLarge,
                 color = toggleContent(selected == option)

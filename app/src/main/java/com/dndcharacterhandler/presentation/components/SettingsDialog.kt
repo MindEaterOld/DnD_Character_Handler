@@ -1,5 +1,8 @@
 package com.dndcharacterhandler.presentation.components
 
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -71,9 +74,11 @@ private fun SettingsOption(
     onClick: () -> Unit
 ) {
     Surface(
+        selected = selected,
+        onClick = onClick,
+        modifier = Modifier.semantics { role = Role.RadioButton },
         shape = RoundedCornerShape(12.dp),
-        color = toggleFill(selected),
-        onClick = onClick
+        color = toggleFill(selected)
     ) {
         Row(
             modifier = Modifier

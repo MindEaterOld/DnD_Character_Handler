@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation
 
+import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -170,11 +171,14 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
         LocalStrings provides strings,
         LocalDiceSkin provides diceSkin,
         com.dndcharacterhandler.presentation.dice.LocalDiceRoller provides { request -> diceRollRequest = request },
-        com.dndcharacterhandler.presentation.components.LocalAppSnackbar provides com.dndcharacterhandler.presentation.components.AppSnackbar { message, actionLabel, onAction ->
-            scope.launch {
-                snackbarHostState.currentSnackbarData?.dismiss()
-                val result = snackbarHostState.showSnackbar(message, actionLabel, withDismissAction = false, duration = androidx.compose.material3.SnackbarDuration.Long)
-                if (result == androidx.compose.material3.SnackbarResult.ActionPerformed) onAction()
+        // One for the app's life: the local is static, so a new one would recompose every screen under it.
+        com.dndcharacterhandler.presentation.components.LocalAppSnackbar provides remember(scope, snackbarHostState) {
+            com.dndcharacterhandler.presentation.components.AppSnackbar { message, actionLabel, onAction ->
+                scope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    val result = snackbarHostState.showSnackbar(message, actionLabel, withDismissAction = false, duration = androidx.compose.material3.SnackbarDuration.Long)
+                    if (result == androidx.compose.material3.SnackbarResult.ActionPerformed) onAction()
+                }
             }
         }
     ) {
@@ -256,8 +260,13 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                             )
                             .onGloballyPositioned { screensOrigin = it.positionInRoot() }
                             .drawWithContent {
-                                screensLayer.record { this@drawWithContent.drawContent() }
-                                drawLayer(screensLayer)
+                                // Android before 12 can't blur: the bar has its tint alone, and the layer is not drawn.
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                    screensLayer.record { this@drawWithContent.drawContent() }
+                                    drawLayer(screensLayer)
+                                } else {
+                                    drawContent()
+                                }
                             },
                         color = Color.Transparent
                     ) {

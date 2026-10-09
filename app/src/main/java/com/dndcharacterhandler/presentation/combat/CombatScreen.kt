@@ -1,7 +1,7 @@
 package com.dndcharacterhandler.presentation.combat
 
+import com.dndcharacterhandler.presentation.components.CharacterLoadingScreen
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.layout.statusBarsPadding
 import com.dndcharacterhandler.presentation.components.rememberHeaderBackdrop
 import com.dndcharacterhandler.presentation.components.headerBackdrop
 import com.dndcharacterhandler.presentation.components.fadingVerticalScroll
@@ -118,7 +118,6 @@ import com.dndcharacterhandler.presentation.components.FloatingAddButtonBottom
 import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
 import com.dndcharacterhandler.presentation.components.MiniStatCard
 import com.dndcharacterhandler.presentation.components.ScreenBackground
-import com.dndcharacterhandler.presentation.components.ScreenTopActions
 import com.dndcharacterhandler.presentation.components.toggleContent
 import com.dndcharacterhandler.presentation.components.toggleFill
 import com.dndcharacterhandler.presentation.localization.LocalStrings
@@ -372,26 +371,7 @@ internal fun CombatContent(
     }
 
     if (character == null) {
-        ScreenBackground {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .statusBarsPadding()
-                    .padding(start = 24.dp, end = 24.dp, top = 4.dp)
-            ) {
-                ScreenTopActions(
-                    onOpenDrawer = onOpenDrawer,
-                    onOpenDice = onOpenDice,
-                    modifier = Modifier.align(Alignment.TopCenter)
-                )
-                Text(
-                    text = text("placeholder_loading_character"),
-                    modifier = Modifier.align(Alignment.Center),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = colors.progress.xpFill
-                )
-            }
-        }
+        CharacterLoadingScreen(onOpenDrawer = onOpenDrawer, onOpenDice = onOpenDice)
         return
     }
 

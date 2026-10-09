@@ -1,6 +1,6 @@
 package com.dndcharacterhandler.presentation.inventory
 
-import androidx.compose.foundation.layout.statusBarsPadding
+import com.dndcharacterhandler.presentation.components.CharacterLoadingScreen
 import com.dndcharacterhandler.presentation.components.rememberHeaderBackdrop
 import com.dndcharacterhandler.presentation.components.headerBackdrop
 import com.dndcharacterhandler.presentation.components.FadingLazyColumn
@@ -60,7 +60,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -95,7 +94,6 @@ import com.dndcharacterhandler.domain.model.InventoryWeaponProperty
 import com.dndcharacterhandler.domain.model.InventoryWeaponRangeType
 import com.dndcharacterhandler.domain.model.InventoryWeaponClass
 import com.dndcharacterhandler.domain.rules.abilityModifier
-import com.dndcharacterhandler.domain.rules.appliedDexterityModifier
 import com.dndcharacterhandler.domain.rules.armorMagicBonus
 import com.dndcharacterhandler.domain.repository.CharacterCatalogRepository
 import com.dndcharacterhandler.domain.repository.CharacterRepository
@@ -114,7 +112,6 @@ import com.dndcharacterhandler.presentation.components.LimitProgressBar
 import com.dndcharacterhandler.presentation.components.LocalFloatingButtonsInset
 import com.dndcharacterhandler.presentation.components.ScreenBackground
 import com.dndcharacterhandler.presentation.components.SelectableDot
-import com.dndcharacterhandler.presentation.components.ScreenTopActions
 import com.dndcharacterhandler.presentation.components.toggleContent
 import com.dndcharacterhandler.presentation.components.toggleFill
 import com.dndcharacterhandler.presentation.localization.LocalStrings
@@ -422,26 +419,7 @@ internal fun InventoryContent(
     var expandedItems by remember(characterBundle?.character?.id) { mutableStateOf(initiallyExpanded) }
 
     if (character == null) {
-        ScreenBackground {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .statusBarsPadding()
-                    .padding(start = 24.dp, end = 24.dp, top = 4.dp)
-            ) {
-                ScreenTopActions(
-                    onOpenDrawer = onOpenDrawer,
-                    onOpenDice = onOpenDice,
-                    modifier = Modifier.align(Alignment.TopCenter)
-                )
-                Text(
-                    text = text("placeholder_loading_character"),
-                    modifier = Modifier.align(Alignment.Center),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = LocalDesignTokens.current.colors.progress.xpFill
-                )
-            }
-        }
+        CharacterLoadingScreen(onOpenDrawer = onOpenDrawer, onOpenDice = onOpenDice)
         return
     }
 

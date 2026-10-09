@@ -50,9 +50,6 @@ import com.dndcharacterhandler.presentation.theme.LocalThemeLook
 /** Every stat card is this tall, its label on the border included. */
 val MiniStatCardHeight = 80.dp
 
-/** A compact stat card's height: values looked up now and then, under the cards that matter more. */
-val MiniStatCardCompactHeight = 60.dp
-
 /** A plain number ("11", "+3", "-1", "387"), maybe with a unit ("60 фт"): the number at the full value size. */
 internal val StatNumberPattern = Regex("""^([+\-−]?\d+)(?:\s+(\S{1,4}))?$""")
 
@@ -205,19 +202,13 @@ fun MiniStatCard(
     /** Beside the value: the conditions' arrows (RollMarker). */
     valueMarker: (@Composable () -> Unit)? = null,
     /** The value's colour when the conditions moved it (changedValueColor). */
-    valueColor: Color? = null,
-    /**
-     * Quieter: [MiniStatCardCompactHeight] tall, the value a step down (titleLarge, 22) — the overview's
-     * proficiency bonus and senses under the fight's three (owner's choice from boards, 2026-10-06: S4).
-     * Its icon is [MiniStatCardIcon] with [MiniStatCardCompactIconSize].
-     */
-    compact: Boolean = false
+    valueColor: Color? = null
 ) {
     val typography = LocalDesignTokens.current.typography
     val colors = LocalDesignTokens.current.colors
     BorderLabelCard(
         label = label,
-        modifier = modifier.height(if (compact) MiniStatCardCompactHeight else MiniStatCardHeight),
+        modifier = modifier.height(MiniStatCardHeight),
         onClick = onClick
     ) {
         Row(
@@ -229,14 +220,10 @@ fun MiniStatCard(
         ) {
             // The arrows take the icon's place: there's no room for both beside a long value.
             if (valueMarker == null) icon?.invoke()
-            val valueStyle = if (compact) {
-                MaterialTheme.typography.titleLarge
-            } else {
-                MaterialTheme.typography.headlineMedium.copy(
-                    fontSize = typography.miniStatValue.fontSizeSp.sp,
-                    lineHeight = (typography.miniStatValue.lineHeightSp ?: typography.miniStatValue.fontSizeSp).sp
-                )
-            }
+            val valueStyle = MaterialTheme.typography.headlineMedium.copy(
+                fontSize = typography.miniStatValue.fontSizeSp.sp,
+                lineHeight = (typography.miniStatValue.lineHeightSp ?: typography.miniStatValue.fontSizeSp).sp
+            )
             val shown = value.ifBlank { "—" }
             val number = StatNumberPattern.matchEntire(shown)
             if (number != null) {
@@ -273,7 +260,7 @@ fun MiniStatCard(
     }
 }
 
-/** The usual icon of a stat card: an outlined symbol before the value; a compact card's is smaller. */
+/** The usual icon of a stat card: an outlined symbol before the value. */
 @Composable
 fun MiniStatCardIcon(imageVector: ImageVector, size: Dp = 24.dp) {
     Icon(
@@ -283,6 +270,3 @@ fun MiniStatCardIcon(imageVector: ImageVector, size: Dp = 24.dp) {
         modifier = Modifier.size(size)
     )
 }
-
-/** A compact stat card's icon size. */
-val MiniStatCardCompactIconSize = 20.dp

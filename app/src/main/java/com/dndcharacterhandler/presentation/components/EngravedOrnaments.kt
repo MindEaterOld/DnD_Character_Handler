@@ -67,21 +67,6 @@ fun DrawScope.drawEngravedFrame(ink: Color, top: Float = 0f, openBottom: Boolean
     }
 }
 
-fun DrawScope.drawEtchedStar(center: Offset, radius: Float, ink: Color) {
-    val star = Path().apply {
-        moveTo(center.x, center.y - radius)
-        lineTo(center.x + radius * .2f, center.y - radius * .2f)
-        lineTo(center.x + radius, center.y)
-        lineTo(center.x + radius * .2f, center.y + radius * .2f)
-        lineTo(center.x, center.y + radius)
-        lineTo(center.x - radius * .2f, center.y + radius * .2f)
-        lineTo(center.x - radius, center.y)
-        lineTo(center.x - radius * .2f, center.y - radius * .2f)
-        close()
-    }
-    drawPath(star, ink, style = Stroke(.65.dp.toPx()))
-}
-
 val EngravedPortraitShape: Shape = object : Shape {
     override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density): Outline =
         Outline.Generic(engravedPortraitPath(size))

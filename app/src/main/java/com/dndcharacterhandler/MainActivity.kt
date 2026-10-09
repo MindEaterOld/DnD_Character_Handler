@@ -1,5 +1,8 @@
 package com.dndcharacterhandler
 
+import android.graphics.Color
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -31,6 +34,12 @@ import com.dndcharacterhandler.presentation.theme.DnDTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // The screens draw under both bars on every Android (from 15 on it is the system's rule); the themes are dark,
+        // so the bars' icons are light.
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT)
+        )
 
         val container = (application as DndApplication).container
         val viewModelProvider = ViewModelProvider(this, AppViewModelFactory(container))

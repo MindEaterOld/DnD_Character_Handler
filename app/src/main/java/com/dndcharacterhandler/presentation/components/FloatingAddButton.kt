@@ -1,5 +1,7 @@
 package com.dndcharacterhandler.presentation.components
 
+import com.dndcharacterhandler.presentation.localization.text
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -51,13 +53,13 @@ fun FloatingAddButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     icon: ImageVector = Icons.Outlined.Add,
-    contentDescription: String? = null
+    contentDescription: String? = text("common_add")
 ) {
     val colors = LocalDesignTokens.current.colors
     Surface(
         modifier = modifier
             .size(FloatingActionButtonSize)
-            .clickable(onClick = onClick),
+            .clickable(role = Role.Button, onClick = onClick),
         shape = RoundedCornerShape(50),
         color = MaterialTheme.colorScheme.surfaceVariant,
         border = BorderStroke(1.dp, colors.border.default)

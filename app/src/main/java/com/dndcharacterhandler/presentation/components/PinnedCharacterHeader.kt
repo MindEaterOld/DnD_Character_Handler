@@ -1,5 +1,8 @@
 package com.dndcharacterhandler.presentation.components
 
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectTapGestures
 import android.os.Build
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -105,8 +108,13 @@ fun rememberHeaderBackdrop(listState: LazyListState): HeaderBackdrop {
 
 /** Draws the list into its [backdrop]'s layer as well as on the screen, for the header to blur. */
 fun Modifier.headerBackdrop(backdrop: HeaderBackdrop): Modifier = drawWithContent {
-    backdrop.layer.record { this@drawWithContent.drawContent() }
-    drawLayer(backdrop.layer)
+    // Android before 12 can't blur: the header has its tint alone, and the layer is not drawn.
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        backdrop.layer.record { this@drawWithContent.drawContent() }
+        drawLayer(backdrop.layer)
+    } else {
+        drawContent()
+    }
 }
 
 /**
@@ -132,7 +140,14 @@ fun BoxScope.PinnedCharacterHeader(
     val canBlur = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     val density = LocalDensity.current
     val shadow = Shadow(colors.ornament.dropShadow, Offset(0f, with(density) { 1.dp.toPx() }), with(density) { 12.dp.toPx() })
-    Box(modifier = Modifier.align(Alignment.TopCenter).fillMaxWidth()) {
+    // Once the list goes under it, the header is a bar: a tap on it doesn't reach the card it covers.
+    val covers by remember(backdrop) { derivedStateOf { backdrop.progress > 0f } }
+    Box(
+        modifier = Modifier
+            .align(Alignment.TopCenter)
+            .fillMaxWidth()
+            .then(if (covers) Modifier.pointerInput(Unit) { detectTapGestures() } else Modifier)
+    ) {
         Box(
             modifier = Modifier
                 .matchParentSize()
