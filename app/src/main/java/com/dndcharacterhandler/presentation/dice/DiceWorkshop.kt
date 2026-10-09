@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation.dice
 
+import androidx.compose.material3.SliderDefaults
 import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -424,8 +425,8 @@ internal fun DiceWorkshopOverlay(
                     FilledTonalIconButton(
                         onClick = { confirmDelete = true },
                         colors = IconButtonDefaults.filledTonalIconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer,
-                            contentColor = MaterialTheme.colorScheme.onErrorContainer
+                            containerColor = LocalDesignTokens.current.colors.accent.dangerHpZero.copy(alpha = 0.16f),
+                            contentColor = LocalDesignTokens.current.colors.accent.dangerHpZero
                         )
                     ) {
                         Icon(Icons.Outlined.Delete, contentDescription = text("common_delete"))
@@ -580,7 +581,16 @@ private fun SliderRow(label: String, value: Float, range: ClosedFloatingPointRan
             Text(label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge, color = colors.text.muted)
             Text(shown, style = MaterialTheme.typography.bodyMedium, color = colors.text.primary)
         }
-        Slider(value = value.coerceIn(range), onValueChange = onChange, valueRange = range)
+        Slider(
+            value = value.coerceIn(range),
+            onValueChange = onChange,
+            valueRange = range,
+            colors = SliderDefaults.colors(
+                thumbColor = MaterialTheme.colorScheme.primary,
+                activeTrackColor = MaterialTheme.colorScheme.primary,
+                inactiveTrackColor = colors.border.muted
+            )
+        )
     }
 }
 

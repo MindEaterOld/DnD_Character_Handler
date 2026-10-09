@@ -490,7 +490,7 @@ private fun BmiScale(bmi: Float) {
             builds.forEachIndexed { i, build ->
                 val width = unit * build.span
                 drawRoundRect(
-                    color = bandColors[i].copy(alpha = .7f),
+                    color = bandColors[i].copy(alpha = .62f),
                     topLeft = Offset(left, y - band / 2),
                     size = Size(width, band),
                     cornerRadius = CornerRadius(band / 2)

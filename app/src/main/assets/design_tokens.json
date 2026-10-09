@@ -127,7 +127,14 @@
           "surfaceVariant": "#2A2231",
           "onSurfaceVariant": "#CABFB3",
           "outline": "#706359",
-          "outlineVariant": "#423830"
+          "outlineVariant": "#423830",
+          "surfaceDim": "#120E18",
+          "surfaceBright": "#3B3840",
+          "surfaceContainerLowest": "#120E18",
+          "surfaceContainerLow": "#1A1521",
+          "surfaceContainer": "#1A1521",
+          "surfaceContainerHigh": "#2A2231",
+          "surfaceContainerHighest": "#3B3840"
         },
         "app": {
           "text": {
