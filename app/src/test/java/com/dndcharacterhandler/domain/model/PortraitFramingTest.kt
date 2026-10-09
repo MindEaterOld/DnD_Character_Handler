@@ -47,6 +47,13 @@ class PortraitFramingTest {
     }
 
     @Test
+    fun aPictureAHairSmallerThanTheFrameInFloatsDoesNotBreak() {
+        // Scaled to cover, this picture comes out 0.00006 shorter than the frame in floats: it used to crash.
+        val placed = PortraitFraming().placement(300f, 300f, 605.48f, 605.48f * 1.27f)
+        assertEquals(0f, placed.top, eps)
+    }
+
+    @Test
     fun theSameFramingShowsTheSamePartAtAnySize() {
         val framing = PortraitFraming(focusX = 0.3f, focusY = 0.6f, zoom = 1.5f)
         val big = framing.placement(300f, 400f, 200f, 200f)

@@ -23,8 +23,9 @@ data class PortraitFraming(
         val cover = maxOf(frameWidth / imageWidth, frameHeight / imageHeight)
         val width = imageWidth * cover * zoom.coerceIn(1f, MAX_ZOOM)
         val height = imageHeight * cover * zoom.coerceIn(1f, MAX_ZOOM)
-        val left = (frameWidth / 2f - focusX * width).coerceIn(frameWidth - width, 0f)
-        val top = (frameHeight / 2f - focusY * height).coerceIn(frameHeight - height, 0f)
+        // In floats a picture scaled to cover can come out a hair smaller than the frame: then it has no room to move.
+        val left = (frameWidth / 2f - focusX * width).coerceIn(minOf(frameWidth - width, 0f), 0f)
+        val top = (frameHeight / 2f - focusY * height).coerceIn(minOf(frameHeight - height, 0f), 0f)
         return Placement(left, top, width, height)
     }
 
