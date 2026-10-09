@@ -1631,8 +1631,9 @@ private fun SkillLine(skill: SkillRow, effects: RollEffects?, modifier: Modifier
 /**
  * A training's mark (owner's choices from boards, 2026-10-10: D for expertise, C for the half): untrained, the plain
  * ring; trained, a gold dot; expertise, the same gold dot with a wide ring of gold at half round it, outside — the mark
- * grows, the dot doesn't shrink; a jack of all trades' half training, the plain ring with a small gold half (the left)
- * inside it. The 12dp box is the line's: expertise's ring is drawn past it, so nothing in the line moves.
+ * grows, the dot doesn't shrink; a jack of all trades' half training, half of each: the left half a trained dot's (gold
+ * to the edge), the right half an untrained ring's (its grey arc). The 12dp box is the line's: expertise's ring is
+ * drawn past it, so nothing in the line moves.
  */
 @Composable
 private fun TrainingDot(proficient: Boolean, expertise: Boolean = false, jackOfAllTrades: Boolean = false) {
@@ -1649,16 +1650,25 @@ private fun TrainingDot(proficient: Boolean, expertise: Boolean = false, jackOfA
             }
             proficient -> drawCircle(gold, radius = dot)
             jackOfAllTrades -> {
-                val half = 3.5.dp.toPx()
                 drawArc(
                     gold,
                     startAngle = 90f,
                     sweepAngle = 180f,
                     useCenter = true,
-                    topLeft = Offset(center.x - half, center.y - half),
-                    size = Size(half * 2, half * 2)
+                    topLeft = Offset(center.x - dot, center.y - dot),
+                    size = Size(dot * 2, dot * 2)
                 )
-                drawCircle(colors.text.label, radius = dot, style = ring)
+                // The grey arc on the ring's line, as an untrained ring's (its stroke centred inside the dot's edge).
+                val arc = dot - 0.5.dp.toPx()
+                drawArc(
+                    colors.text.label,
+                    startAngle = -90f,
+                    sweepAngle = 180f,
+                    useCenter = false,
+                    topLeft = Offset(center.x - arc, center.y - arc),
+                    size = Size(arc * 2, arc * 2),
+                    style = ring
+                )
             }
             else -> drawCircle(colors.text.label, radius = dot, style = ring)
         }
