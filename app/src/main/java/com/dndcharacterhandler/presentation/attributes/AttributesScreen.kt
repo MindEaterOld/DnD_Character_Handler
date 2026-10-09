@@ -54,7 +54,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -502,7 +501,6 @@ internal fun attributesSectionItems(
     // The proficiency bonus and the passive perception are the skills' (owner's choice from boards, 2026-10-09: И): over
     // them, under their title. The darkvision is off the overview (owner's wish, 2026-10-09; its pop-up waits for its new
     // place, see the backlog).
-    val proficiencyLabel = text("stat_card_proficiency")
     val passiveLabel = text("stat_card_passive_perception")
 
     val items: LazyListScope.() -> Unit = {
@@ -542,13 +540,13 @@ internal fun attributesSectionItems(
 
         item {
             AttributesSectionTitle(title = text("attributes_skills"))
+            // The proficiency bonus is on the portrait's art, by the armor class (owner's wish, 2026-10-09).
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(40.dp, Alignment.CenterHorizontally)
             ) {
-                SectionStat(label = proficiencyLabel, value = signed(proficiencyBonus), icon = Icons.Outlined.AutoAwesome)
                 SectionStat(
                     label = passiveLabel,
                     value = passivePerception.toString(),
