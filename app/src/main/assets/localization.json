@@ -692,6 +692,7 @@
     "es": "Bonificador adicional"
   },
   "attributes_has_proficiency": {
+    "maxChars": 30,
     "en": "Has proficiency",
     "ru": "Есть владение",
     "de": "Geübt",
@@ -699,6 +700,7 @@
     "es": "Tiene competencia"
   },
   "attributes_has_expertise": {
+    "maxChars": 30,
     "en": "Has expertise",
     "ru": "Есть экспертиза",
     "de": "Expertise",
@@ -706,6 +708,7 @@
     "es": "Tiene pericia"
   },
   "attributes_jack_of_all_trades": {
+    "maxChars": 30,
     "en": "Jack of All Trades",
     "ru": "Мастер на все руки",
     "de": "Alleskönner",
@@ -733,12 +736,13 @@
     "fr": "Valeur (%s)",
     "es": "Puntuación de %s"
   },
-  "attributes_save_proficiency_label": {
-    "en": "Proficient in %s saving throw",
-    "ru": "Владение спасброском %s",
-    "de": "Geübt in %s-Rettungswürfen",
-    "fr": "Maîtrise du jet de sauvegarde (%s)",
-    "es": "Competencia en tiradas de salvación de %s"
+  "attributes_save_proficiency_chip": {
+    "maxChars": 30,
+    "en": "Saving throw proficiency",
+    "ru": "\u0412\u043b\u0430\u0434\u0435\u043d\u0438\u0435 \u0441\u043f\u0430\u0441\u0431\u0440\u043e\u0441\u043a\u043e\u043c",
+    "de": "Ge\u00fcbt im Rettungswurf",
+    "fr": "Ma\u00eetrise du jet de sauvegarde",
+    "es": "Competencia en salvaci\u00f3n"
   },
   "attributes_saving_throws": {
     "en": "Saving Throws",

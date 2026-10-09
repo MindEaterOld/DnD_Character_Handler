@@ -2,7 +2,6 @@ package com.dndcharacterhandler.presentation.components
 
 import com.dndcharacterhandler.presentation.localization.text
 import androidx.compose.ui.semantics.Role
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,7 +10,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.Dp
@@ -61,8 +59,8 @@ fun FloatingAddButton(
             .size(FloatingActionButtonSize)
             .clickable(role = Role.Button, onClick = onClick),
         shape = RoundedCornerShape(50),
-        color = MaterialTheme.colorScheme.surfaceVariant,
-        border = BorderStroke(1.dp, colors.border.default)
+        // A button: the standard button fill says "press me", no outline (CLAUDE.md, the button palette).
+        color = colors.surface.button
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -71,7 +69,7 @@ fun FloatingAddButton(
             Icon(
                 imageVector = icon,
                 contentDescription = contentDescription,
-                tint = colors.text.muted,
+                tint = colors.text.primary,
                 modifier = Modifier.size(30.dp)
             )
         }

@@ -56,7 +56,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.Visibility
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -872,18 +871,12 @@ internal fun attributesSectionItems(
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(
-                        checked = saveProficientDraft,
-                        onCheckedChange = { saveProficientDraft = it }
-                    )
-                    Text(
-                        text = LocalStrings.current.format(
-                            "attributes_save_proficiency_label",
-                            LocalStrings.current[currentEditingAbility.displayNameKey]
-                        ),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                // The save's training: a chip, gold while trained (no checkboxes; owner, 2026-10-09). The title names the
+                // ability.
+                OptionGroup {
+                    OptionChip(text("attributes_save_proficiency_chip"), saveProficientDraft) {
+                        saveProficientDraft = !saveProficientDraft
+                    }
                 }
             }
         }
@@ -905,33 +898,27 @@ internal fun attributesSectionItems(
                 editingSkill = null
             }
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(
-                        checked = skillProficientDraft,
-                        onCheckedChange = {
-                            skillProficientDraft = it
-                            if (!it) skillExpertiseDraft = false
-                            if (it) skillJackDraft = false
-                        }
-                    )
-                    Text(text("attributes_has_proficiency"), style = MaterialTheme.typography.bodyMedium)
+            // The skill's training: chips, gold while on (no checkboxes; owner, 2026-10-09). Expertise is on top of the
+            // training and brings it; a jack of all trades' half is for a skill not trained, so each takes the other off.
+            OptionGroup {
+                OptionChip(text("attributes_has_proficiency"), skillProficientDraft) {
+                    skillProficientDraft = !skillProficientDraft
+                    if (!skillProficientDraft) skillExpertiseDraft = false
+                    if (skillProficientDraft) skillJackDraft = false
                 }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(
-                        checked = skillExpertiseDraft,
-                        enabled = skillProficientDraft,
-                        onCheckedChange = { skillExpertiseDraft = it }
-                    )
-                    Text(text("attributes_has_expertise"), style = MaterialTheme.typography.bodyMedium)
+                OptionChip(text("attributes_has_expertise"), skillExpertiseDraft) {
+                    skillExpertiseDraft = !skillExpertiseDraft
+                    if (skillExpertiseDraft) {
+                        skillProficientDraft = true
+                        skillJackDraft = false
+                    }
                 }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(
-                        checked = skillJackDraft,
-                        enabled = !skillProficientDraft,
-                        onCheckedChange = { skillJackDraft = it }
-                    )
-                    Text(text("attributes_jack_of_all_trades"), style = MaterialTheme.typography.bodyMedium)
+                OptionChip(text("attributes_jack_of_all_trades"), skillJackDraft) {
+                    skillJackDraft = !skillJackDraft
+                    if (skillJackDraft) {
+                        skillProficientDraft = false
+                        skillExpertiseDraft = false
+                    }
                 }
             }
         }
