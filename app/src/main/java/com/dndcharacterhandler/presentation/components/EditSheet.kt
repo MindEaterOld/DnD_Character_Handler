@@ -1,5 +1,9 @@
 package com.dndcharacterhandler.presentation.components
 
+import androidx.core.view.WindowCompat
+import androidx.compose.ui.window.DialogWindowProvider
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.runtime.SideEffect
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -63,6 +67,19 @@ fun EditSheet(
         containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
         dragHandle = { BottomSheetDefaults.DragHandle(color = colors.border.default) }
     ) {
+        // The sheet is a window of its own, and Material lights its bars' icons by the phone's own theme: on a phone in
+        // light mode they turned black over the app's dark screens. Every theme of the app is dark: they stay light, as
+        // the app's own bars (MainActivity).
+        val sheetView = LocalView.current
+        SideEffect {
+            // The content's view is the sheet layout's child: the window is its parent's.
+            ((sheetView.parent as? DialogWindowProvider) ?: (sheetView as? DialogWindowProvider))?.window?.let { window ->
+                WindowCompat.getInsetsController(window, sheetView).apply {
+                    isAppearanceLightStatusBars = false
+                    isAppearanceLightNavigationBars = false
+                }
+            }
+        }
         // Never the whole screen: the sheet in its corner stays visible above it, to tap and close.
         val maxHeight = (LocalConfiguration.current.screenHeightDp * SheetMaxHeightShare).dp
         Column(
