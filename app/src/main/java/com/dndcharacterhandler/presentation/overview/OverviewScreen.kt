@@ -1836,13 +1836,12 @@ private fun KeyStatsRule() {
     val gold = MaterialTheme.colorScheme.primary.copy(alpha = LocalDesignTokens.current.alpha.half)
     Canvas(modifier = Modifier.fillMaxWidth().height(KeyStatsRuleHeight)) {
         val y = size.height / 2
-        drawLine(
-            brush = Brush.horizontalGradient(listOf(Color.Transparent, gold, gold, Color.Transparent)),
-            start = Offset(0f, y),
-            end = Offset(size.width, y),
-            strokeWidth = 1.dp.toPx()
-        )
         val d = 3.5.dp.toPx()
+        // The line stops at the diamond's points: both are see-through gold, and the line drawn under the diamond
+        // showed through it (owner, 2026-10-10).
+        val brush = Brush.horizontalGradient(listOf(Color.Transparent, gold, gold, Color.Transparent))
+        drawLine(brush = brush, start = Offset(0f, y), end = Offset(size.width / 2 - d, y), strokeWidth = 1.dp.toPx())
+        drawLine(brush = brush, start = Offset(size.width / 2 + d, y), end = Offset(size.width, y), strokeWidth = 1.dp.toPx())
         val diamond = Path().apply {
             moveTo(size.width / 2, y - d)
             lineTo(size.width / 2 + d, y)
@@ -2049,32 +2048,32 @@ private fun Modifier.beginAtCapTop(capHeight: Dp): Modifier = layout { measurabl
 
 /**
  * The armor class's shield (owner's choices from boards, 2026-10-10: 1, then the label in two letters inside it, then
- * smaller and lower, 1): the shield icon the stat had before, at its own proportions — the middle of Material's
- * outlined «Shield» stroke, 14 × 17.89 (not «Security»'s 18 × 22, which read as another shield) — in gold at half, the
- * rules', 1.5dp; its point [KeyStatShieldFoot] over the rule below, its top about 8dp under the rule above
- * (`drawKeyStatShield`): the label's two letters under its shoulders, the number («99» with a little air) in its widest
- * part.
+ * the same air over and under it, 4): the shield icon the stat had before — the middle of Material's outlined «Shield»
+ * stroke, 14 × 17.89 (not «Security»'s 18 × 22, which read as another shield) — squeezed to [KeyStatShieldSqueeze] of
+ * its height so it clears both rules alike, about 9dp, centred between them (`drawKeyStatShield`); in gold at half, the
+ * rules', 1.5dp: the label's two letters under its shoulders, the number («99» with a little air) in its widest part.
  */
 private val KeyStatShieldWidth = 48.dp
-private val KeyStatShieldFoot = 5.dp
+private const val KeyStatShieldSqueeze = 0.94f
 
 /** The middle of Material's outlined «Shield» stroke (Apache 2.0), on its 24 grid: x 5…19, y 3.07…20.96. */
 private val KeyStatShieldPath: Path by lazy {
     PathParser().parsePathString("M12 3.07 5 5.695V11.09C5 15.615 7.98 19.82 12 20.96 16.02 19.82 19 15.615 19 11.09V5.695Z").toPath()
 }
 
-/** The armor class's shield, centred across, its point over the rule below, whose line is half a rule under the stat. */
+/** The armor class's shield, centred across and between the rules, whose lines are half a rule outside the stat. */
 private fun DrawScope.drawKeyStatShield(color: Color) {
     val width = KeyStatShieldWidth.toPx()
-    val scale = width / 14f
-    val bottom = size.height + KeyStatsRuleHeight.toPx() / 2 - KeyStatShieldFoot.toPx()
+    val scaleX = width / 14f
+    val scaleY = scaleX * KeyStatShieldSqueeze
+    val height = 17.89f * scaleY
     val left = (size.width - width) / 2
-    val top = bottom - 17.89f * scale
+    val top = size.height / 2 - height / 2
     withTransform({
-        translate(left - 5f * scale, top - 3.07f * scale)
-        scale(scale, scale, pivot = Offset.Zero)
+        translate(left - 5f * scaleX, top - 3.07f * scaleY)
+        scale(scaleX, scaleY, pivot = Offset.Zero)
     }) {
-        drawPath(KeyStatShieldPath, color, style = Stroke(width = 1.5.dp.toPx() / scale))
+        drawPath(KeyStatShieldPath, color, style = Stroke(width = 1.5.dp.toPx() / scaleX))
     }
 }
 
