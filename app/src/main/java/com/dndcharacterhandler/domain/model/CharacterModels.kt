@@ -16,6 +16,8 @@ enum class CreatureSize(val foundryKey: String) {
 
 data class Character(
     val id: Long = 0,
+    /** The game system the character is made in; it exists in no other (docs/GAME_SYSTEMS.md). */
+    val gameSystem: GameSystem = GameSystem.DEFAULT,
     val name: String,
     val race: String,
     val characterClass: String,

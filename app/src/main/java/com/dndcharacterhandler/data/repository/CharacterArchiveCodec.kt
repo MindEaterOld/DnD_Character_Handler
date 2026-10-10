@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.data.repository
 
+import com.dndcharacterhandler.domain.model.GameSystem
 import com.dndcharacterhandler.domain.rules.MAX_EXHAUSTION
 import com.dndcharacterhandler.domain.model.Condition
 import androidx.core.net.toUri
@@ -53,7 +54,8 @@ import java.io.File
 // 25: conditions (keys, comma-separated), exhaustion. Concentration isn't carried: it lasts minutes,
 //     and the spells get new ids on import.
 // 26: defenses (resistances, immunities, vulnerabilities as trait keys).
-private const val SCHEMA_VERSION = 26
+// 27: gameSystem, the system the character is made in (GameSystem.key); an archive without it is D&D 5e (2024).
+private const val SCHEMA_VERSION = 27
 
 data class ImportedArchive(
     val characterBundle: CharacterBundle,
@@ -147,6 +149,7 @@ fun CharacterBundle.toArchiveManifest(
 
     return buildJsonObject {
         put("schemaVersion", SCHEMA_VERSION)
+        put("gameSystem", character.gameSystem.key)
         put("exportedAt", exportedAt)
         put("character", characterObject)
         put("skills", JsonArray(skills.map { skill ->
@@ -324,6 +327,10 @@ fun archiveManifestToCharacterBundle(
         "Unsupported character archive schema version."
     }
 
+    // This reader knows the D&D 5e (2024) sheet only: another system's archive is another app's to read.
+    val gameSystem = GameSystem.fromKey(manifest.optNullableString("gameSystem") ?: GameSystem.DEFAULT.key)
+    require(gameSystem == GameSystem.DND_5E_2024) { "Unsupported game system in the character archive." }
+
     val characterJson = manifest.optObject("character")
         ?: throw IllegalArgumentException("Character archive has no character.")
     // Guard against corrupt/hand-edited archives: optInt coerces non-numeric values to 0, which
@@ -331,6 +338,7 @@ fun archiveManifestToCharacterBundle(
     val importedLevel = characterJson.optInt("level").coerceIn(1, 20)
     val character = Character(
         id = 0,
+        gameSystem = gameSystem,
         name = characterJson.optString("name"),
         race = characterJson.optString("race"),
         characterClass = characterJson.optString("characterClass"),

@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.data.preferences
 
+import com.dndcharacterhandler.domain.model.GameSystem
 import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
@@ -17,6 +18,7 @@ class LanguagePreferencesRepository(private val context: Context) {
     private val selectedCharacterKey = longPreferencesKey("selected_character_id")
     private val diceSkinKey = stringPreferencesKey("dice_skin")
     private val themeKey = stringPreferencesKey("app_theme")
+    private val gameSystemKey = stringPreferencesKey("game_system")
 
     val language: Flow<AppLanguage> = context.dataStore.data.map { preferences ->
         preferences[key]?.let { runCatching { AppLanguage.valueOf(it) }.getOrNull() } ?: AppLanguage.ENGLISH
@@ -33,6 +35,15 @@ class LanguagePreferencesRepository(private val context: Context) {
 
     suspend fun setTheme(theme: AppTheme) {
         context.dataStore.edit { preferences -> preferences[themeKey] = theme.key }
+    }
+
+    /** The game system the drawer shows the characters of; D&D 5e (2024) until the player picks another. */
+    val gameSystem: Flow<GameSystem> = context.dataStore.data.map { preferences ->
+        GameSystem.fromKey(preferences[gameSystemKey]) ?: GameSystem.DEFAULT
+    }
+
+    suspend fun setGameSystem(system: GameSystem) {
+        context.dataStore.edit { preferences -> preferences[gameSystemKey] = system.key }
     }
 
     /** The dice look the player picked ("builtin:GOLD", "custom:<id>"); null before any pick. */

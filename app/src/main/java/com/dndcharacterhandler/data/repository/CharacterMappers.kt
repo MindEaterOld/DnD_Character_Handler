@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.data.repository
 
+import com.dndcharacterhandler.domain.model.GameSystem
 import com.dndcharacterhandler.domain.model.Condition
 import com.dndcharacterhandler.data.local.entity.AttackEntity
 import com.dndcharacterhandler.data.local.entity.CharacterEntity
@@ -115,6 +116,7 @@ fun CharacterWithDetails.toDomain(): CharacterBundle =
 fun CharacterEntity.toDomain(): Character =
     Character(
         id = id,
+        gameSystem = GameSystem.fromKey(gameSystem) ?: GameSystem.DEFAULT,
         name = name,
         race = race,
         characterClass = characterClass,
@@ -268,6 +270,7 @@ fun InventoryItemEntity.toDomain(): InventoryItem =
 fun Character.toEntity(): CharacterEntity =
     CharacterEntity(
         id = id,
+        gameSystem = gameSystem.key,
         name = name,
         race = race,
         characterClass = characterClass,

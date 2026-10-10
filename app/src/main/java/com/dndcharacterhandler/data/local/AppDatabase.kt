@@ -33,7 +33,7 @@ import com.dndcharacterhandler.data.local.entity.SpellEntity
         FeatureEntity::class,
         NoteEntity::class
     ],
-    version = 55,
+    version = 56,
     exportSchema = false
 )
 @TypeConverters(RoomConverters::class)
@@ -104,7 +104,8 @@ abstract class AppDatabase : RoomDatabase() {
                     MIGRATION_51_52,
                     MIGRATION_52_53,
                     MIGRATION_53_54,
-                    MIGRATION_54_55
+                    MIGRATION_54_55,
+                    MIGRATION_55_56
                 ).build().also { INSTANCE = it }
             }
         }
@@ -630,6 +631,13 @@ abstract class AppDatabase : RoomDatabase() {
                 found.forEach { (id, value) ->
                     db.execSQL("UPDATE characters SET defenses = ? WHERE id = ?", arrayOf<Any>(value, id))
                 }
+            }
+        }
+
+        private val MIGRATION_55_56 = object : Migration(55, 56) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // The game system a character is made in: every character so far is D&D 5e (2024).
+                db.execSQL("ALTER TABLE characters ADD COLUMN gameSystem TEXT NOT NULL DEFAULT 'dnd5e_2024'")
             }
         }
 

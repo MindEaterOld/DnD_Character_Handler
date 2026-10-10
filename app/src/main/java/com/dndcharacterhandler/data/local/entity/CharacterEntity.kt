@@ -20,6 +20,8 @@ import com.dndcharacterhandler.domain.model.SpellcastingAbility
 @Entity(tableName = "characters")
 data class CharacterEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    /** The game system the character is made in (`GameSystem.key`). */
+    val gameSystem: String = "dnd5e_2024",
     val name: String,
     val race: String,
     val characterClass: String,

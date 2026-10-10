@@ -10,6 +10,7 @@ import com.dndcharacterhandler.domain.model.CharacterClassEntry
 import com.dndcharacterhandler.domain.model.CombatResource
 import com.dndcharacterhandler.domain.model.Feature
 import com.dndcharacterhandler.domain.model.FeatureSource
+import com.dndcharacterhandler.domain.model.GameSystem
 import com.dndcharacterhandler.domain.model.InventoryArmorDetails
 import com.dndcharacterhandler.domain.model.InventoryArmorType
 import com.dndcharacterhandler.domain.model.InventoryCategory
@@ -64,6 +65,28 @@ class CharacterArchiveCodecTest {
         assertTrue(imported.characterBundle.notes.isEmpty())
         assertTrue(imported.characterBundle.combatResources.isEmpty())
         assertEquals("Aluen", imported.characterBundle.character.name)
+    }
+
+    @Test
+    fun theGameSystemIsWrittenAndAnArchiveWithoutItIsDnd2024() {
+        val manifest = richBundle().toArchiveManifest(exportedAt = 0L, mapAssetReference = identityMap)
+        assertEquals(JsonPrimitive("dnd5e_2024"), manifest["gameSystem"])
+
+        val older = JsonObject(manifest - "gameSystem")
+        val imported = archiveManifestToCharacterBundle(older, resolveAssetReference = identityResolve)
+
+        assertEquals(GameSystem.DND_5E_2024, imported.characterBundle.character.gameSystem)
+    }
+
+    @Test
+    fun anotherSystemsArchiveIsNotReadAsDnd() {
+        val manifest = richBundle().toArchiveManifest(exportedAt = 0L, mapAssetReference = identityMap)
+
+        listOf("pf2e", "some_future_system").forEach { key ->
+            val other = manifest.withValue("gameSystem", JsonPrimitive(key))
+            val failure = runCatching { archiveManifestToCharacterBundle(other, resolveAssetReference = identityResolve) }
+            assertTrue(key, failure.isFailure)
+        }
     }
 
     @Test

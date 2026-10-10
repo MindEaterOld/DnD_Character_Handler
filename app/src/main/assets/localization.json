@@ -7756,5 +7756,119 @@
     "de": "Hinzufuegen",
     "fr": "Ajouter",
     "es": "Agregar"
+  },
+  "game_family_dnd": {
+    "en": "Dungeons & Dragons",
+    "ru": "Dungeons & Dragons",
+    "de": "Dungeons & Dragons",
+    "fr": "Dungeons & Dragons",
+    "es": "Dungeons & Dragons"
+  },
+  "game_family_pathfinder": {
+    "en": "Pathfinder",
+    "ru": "Pathfinder",
+    "de": "Pathfinder",
+    "fr": "Pathfinder",
+    "es": "Pathfinder"
+  },
+  "game_family_starfinder": {
+    "en": "Starfinder",
+    "ru": "Starfinder",
+    "de": "Starfinder",
+    "fr": "Starfinder",
+    "es": "Starfinder"
+  },
+  "game_family_vampire": {
+    "en": "Vampire: The Masquerade",
+    "ru": "Вампиры: Маскарад",
+    "de": "Vampire: Die Maskerade",
+    "fr": "Vampire : La Mascarade",
+    "es": "Vampiro: La Mascarada"
+  },
+  "game_edition_dnd5e_2024": {
+    "en": "5th Edition (2024)",
+    "ru": "5-я редакция (2024)",
+    "de": "5. Edition (2024)",
+    "fr": "5e édition (2024)",
+    "es": "5.ª edición (2024)"
+  },
+  "game_edition_dnd5e_2014": {
+    "en": "5th Edition (2014)",
+    "ru": "5-я редакция (2014)",
+    "de": "5. Edition (2014)",
+    "fr": "5e édition (2014)",
+    "es": "5.ª edición (2014)"
+  },
+  "game_edition_pf2e": {
+    "en": "2nd Edition",
+    "ru": "2-я редакция",
+    "de": "2. Edition",
+    "fr": "2e édition",
+    "es": "2.ª edición"
+  },
+  "game_edition_pf1e": {
+    "en": "1st Edition",
+    "ru": "1-я редакция",
+    "de": "1. Edition",
+    "fr": "1re édition",
+    "es": "1.ª edición"
+  },
+  "game_edition_sf2e": {
+    "en": "2nd Edition",
+    "ru": "2-я редакция",
+    "de": "2. Edition",
+    "fr": "2e édition",
+    "es": "2.ª edición"
+  },
+  "game_edition_sf1e": {
+    "en": "1st Edition",
+    "ru": "1-я редакция",
+    "de": "1. Edition",
+    "fr": "1re édition",
+    "es": "1.ª edición"
+  },
+  "game_edition_vtm5": {
+    "en": "5th Edition (V5)",
+    "ru": "5-я редакция (V5)",
+    "de": "5. Edition (V5)",
+    "fr": "5e édition (V5)",
+    "es": "5.ª edición (V5)"
+  },
+  "game_system_name_format": {
+    "en": "%1$s (%2$s)",
+    "ru": "%1$s (%2$s)",
+    "de": "%1$s (%2$s)",
+    "fr": "%1$s (%2$s)",
+    "es": "%1$s (%2$s)"
+  },
+  "drawer_game_system": {
+    "maxChars": 24,
+    "en": "Game system",
+    "ru": "Игровая система",
+    "de": "Spielsystem",
+    "fr": "Système de jeu",
+    "es": "Sistema de juego"
+  },
+  "game_system_soon": {
+    "maxChars": 8,
+    "en": "Soon",
+    "ru": "Скоро",
+    "de": "Bald",
+    "fr": "Bientôt",
+    "es": "Pronto"
+  },
+  "drawer_no_characters": {
+    "en": "No characters in this system yet.",
+    "ru": "В этой системе пока нет персонажей.",
+    "de": "In diesem System gibt es noch keine Charaktere.",
+    "fr": "Aucun personnage dans ce système pour l'instant.",
+    "es": "Aún no hay personajes en este sistema."
+  },
+  "drawer_system_in_development": {
+    "en": "Character sheets for %1$s are still in development: characters can't be made in it yet.",
+    "ru": "Листы персонажей для %1$s пока в разработке: создать персонажа в этой системе ещё нельзя.",
+    "de": "Charakterbögen für %1$s sind noch in Entwicklung: Charaktere lassen sich darin noch nicht erstellen.",
+    "fr": "Les fiches de personnage pour %1$s sont encore en développement : on ne peut pas encore y créer de personnage.",
+    "es": "Las hojas de personaje para %1$s aún están en desarrollo: todavía no se pueden crear personajes en él."
   }
 }
