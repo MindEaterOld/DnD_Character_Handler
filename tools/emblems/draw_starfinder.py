@@ -84,11 +84,12 @@ for deg in (30, 62, -30, -62):
 band(186, 202, 0, 360, ON)
 if DISC:
     disc(178, ON)
-# Short points under the long ones (each cut free on the disc), then the long ones cut free and drawn.
+# Short points under the long ones, their tips just touching the inner ring (owner, 2026-10-10), each cut free on
+# the disc with --disc; then the long ones cut free and drawn.
 for deg in (45, 135, 225, 315):
     if DISC:
-        point(deg, 40, 56, 206, 0, 0, grow=8)
-    point(deg, 40, 56, 206, 80, 194)
+        point(deg, 40, 56, 186, 0, 0, grow=8)
+    point(deg, 40, 56, 186, 80, 174)
 for deg in (0, 90, 180, 270):
     point(deg, 40, 51, 490, 0, 0, grow=8)
 for deg in (0, 90, 180, 270):
