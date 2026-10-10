@@ -1,5 +1,14 @@
 package com.dndcharacterhandler.presentation.attributes
 
+import com.dndcharacterhandler.presentation.components.isBetter
+import com.dndcharacterhandler.presentation.components.isWorse
+import com.dndcharacterhandler.presentation.components.fails
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.runtime.key
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.ColumnScope
@@ -1366,6 +1375,55 @@ private fun glowFromScreenPosition(coordinates: LayoutCoordinates): Float {
     return t * t * (3f - 2f * t)
 }
 
+/** The conditions' sign on an ability card: two arrows down or up, or a cross for an outright fail. */
+private enum class RuleMark { WORSE, BETTER, FAILS }
+
+private fun RollEffects?.ruleMark(): RuleMark? = when {
+    this == null -> null
+    fails -> RuleMark.FAILS
+    isWorse -> RuleMark.WORSE
+    isBetter -> RuleMark.BETTER
+    else -> null
+}
+
+/**
+ * The conditions' sign on an ability card (owner's choice from boards, 2026-10-10: 3 — the small arrows beside the
+ * modifier didn't read on the art): in a gap of the gold rule under the modifier, larger and bolder than the sheet's
+ * arrows elsewhere, with a soft shade of `ornament.dropShadow` round it (the HP ± signs' shade) to read on a light art.
+ */
+private val AbilityRuleMarkSize = 22.dp
+private val AbilityRuleMarkGap = 2.dp
+
+/** [mark] centred on [center], [size] square, its strokes 13 % of it, over a soft [shade]. */
+private fun DrawScope.drawRuleMark(mark: RuleMark, center: Offset, size: Float, color: Color, shade: Color) {
+    val reach = size * 0.8f
+    drawCircle(Brush.radialGradient(0f to shade, 1f to Color.Transparent, center = center, radius = reach), radius = reach, center = center)
+    val left = center.x - size / 2
+    val top = center.y - size / 2
+    val stroke = Stroke(width = size * 0.13f, cap = StrokeCap.Round, join = StrokeJoin.Round)
+    fun at(x: Float, y: Float) = Offset(left + x * size, top + y * size)
+    when (mark) {
+        RuleMark.FAILS -> {
+            drawLine(color, at(.27f, .27f), at(.73f, .73f), stroke.width, StrokeCap.Round)
+            drawLine(color, at(.73f, .27f), at(.27f, .73f), stroke.width, StrokeCap.Round)
+        }
+        else -> listOf(.23f, .55f).forEach { y ->
+            val chevron = Path().apply {
+                if (mark == RuleMark.WORSE) {
+                    moveTo(at(.2f, y).x, at(.2f, y).y)
+                    lineTo(at(.5f, y + .22f).x, at(.5f, y + .22f).y)
+                    lineTo(at(.8f, y).x, at(.8f, y).y)
+                } else {
+                    moveTo(at(.2f, y + .22f).x, at(.2f, y + .22f).y)
+                    lineTo(at(.5f, y).x, at(.5f, y).y)
+                    lineTo(at(.8f, y + .22f).x, at(.8f, y + .22f).y)
+                }
+            }
+            drawPath(chevron, color, style = stroke)
+        }
+    }
+}
+
 /** Each ability's art on its card. */
 private fun abilityArt(type: AbilityType): Int = when (type) {
     AbilityType.STRENGTH -> R.drawable.ability_art_strength
@@ -1405,6 +1463,15 @@ private fun AbilityScoreCard(
     // How near the screen's middle the card is: written on every scroll, read only while drawing.
     var glow by remember { mutableFloatStateOf(0f) }
     val goldNow = { lerp(grey, gold, glow) }
+    // The conditions' sign in the rule's gap, and what TalkBack says for it.
+    val mark = checkEffects.ruleMark()
+    val markColor = if (mark == RuleMark.BETTER) colors.accent.heal else colors.accent.dangerHpZero
+    val markDescription = when (mark) {
+        RuleMark.WORSE -> text("roll_marker_worse")
+        RuleMark.BETTER -> text("roll_marker_better")
+        RuleMark.FAILS -> text("roll_marker_fail")
+        null -> null
+    }
     BorderLabelCard(
         label = text(score.shortNameKey),
         modifier = modifier.onGloballyPositioned { glow = glowFromScreenPosition(it) },
@@ -1465,28 +1532,38 @@ private fun AbilityScoreCard(
                     .padding(bottom = 10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    RollMarker(checkEffects, size = 20.dp)
-                    Text(
-                        text = signed(score.modifier + (checkEffects?.modifier ?: 0)),
-                        // Drawn thrice: one shadow is too faint on a light art.
-                        modifier = Modifier.drawWithContent { repeat(3) { drawContent() } },
-                        style = MaterialTheme.typography.headlineMedium.copy(
-                            fontSize = tokens.hpTemporary.fontSizeSp.sp,
-                            lineHeight = (tokens.hpTemporary.lineHeightSp ?: tokens.hpTemporary.fontSizeSp).sp,
-                            shadow = shadow
-                        ),
-                        color = changedValueColor(checkEffects?.modifier ?: 0) ?: colors.text.primary
-                    )
-                }
+                Text(
+                    text = signed(score.modifier + (checkEffects?.modifier ?: 0)),
+                    // Drawn thrice: one shadow is too faint on a light art.
+                    modifier = Modifier.drawWithContent { repeat(3) { drawContent() } },
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontSize = tokens.hpTemporary.fontSizeSp.sp,
+                        lineHeight = (tokens.hpTemporary.lineHeightSp ?: tokens.hpTemporary.fontSizeSp).sp,
+                        shadow = shadow
+                    ),
+                    color = changedValueColor(checkEffects?.modifier ?: 0) ?: colors.text.primary
+                )
+                // The rule under the modifier, midway between its digits and the score's (the modifier's line keeps
+                // more room under its digits than the score's over them); the conditions' sign in a gap in its middle,
+                // drawn over the line's height, so nothing moves when a condition comes or goes.
                 Box(
                     modifier = Modifier
-                        .padding(vertical = 3.dp)
+                        .padding(top = 3.dp, bottom = 7.dp)
                         .fillMaxWidth(AbilityCardRuleShare)
                         .height(1.dp)
+                        .then(if (markDescription != null) Modifier.semantics { contentDescription = markDescription } else Modifier)
                         .drawBehind {
                             val rule = goldNow()
-                            drawRect(Brush.horizontalGradient(listOf(Color.Transparent, rule, rule, Color.Transparent)))
+                            val brush = Brush.horizontalGradient(listOf(Color.Transparent, rule, rule, Color.Transparent))
+                            if (mark == null) {
+                                drawRect(brush)
+                            } else {
+                                val middle = size.width / 2
+                                val half = (AbilityRuleMarkSize / 2 + AbilityRuleMarkGap).toPx()
+                                clipRect(right = middle - half) { drawRect(brush) }
+                                clipRect(left = middle + half) { drawRect(brush) }
+                                drawRuleMark(mark, Offset(middle, size.height / 2), AbilityRuleMarkSize.toPx(), markColor, shade)
+                            }
                         }
                 )
                 Text(
