@@ -23,6 +23,7 @@ import androidx.compose.ui.semantics.semantics
 import com.dndcharacterhandler.domain.rules.MAX_CHARACTER_LEVEL
 import com.dndcharacterhandler.domain.rules.experienceProgress
 import com.dndcharacterhandler.domain.rules.levelForExperience
+import com.dndcharacterhandler.domain.rules.romanNumeral
 import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.localization.text
 import androidx.compose.foundation.background
@@ -200,9 +201,9 @@ private fun Modifier.levelTaps(level: HeaderLevel): Modifier =
     }
 
 /**
- * «1 LVL» before the name, on its baseline (owner's choices from boards, 2026-10-10: D1, U4): the level in Arabic digits
- * as large as the name (`titleLarge`) — the Roman «XVIII» was too wide (owner, 2026-10-10) — «LVL» small (`labelMedium`),
- * semibold and spaced, in `text.label`; both in `accent.inspiration` when a level up is due.
+ * «I LVL» before the name, on its baseline (owner's choices from boards, 2026-10-10: D1, U4): the Roman numeral as large
+ * as the name (`titleLarge`), «LVL» small (`labelMedium`), semibold and spaced, in `text.label`; both in
+ * `accent.inspiration` when a level up is due.
  */
 @Composable
 private fun RowScope.HeaderLevelWords(level: HeaderLevel, shadow: Shadow) {
@@ -220,7 +221,7 @@ private fun RowScope.HeaderLevelWords(level: HeaderLevel, shadow: Shadow) {
         verticalAlignment = Alignment.Bottom
     ) {
         Text(
-            text = level.level.toString(),
+            text = romanNumeral(level.level),
             modifier = Modifier.alignByBaseline().then(deep),
             style = MaterialTheme.typography.titleLarge.copy(shadow = shadow),
             color = if (due) colors.accent.inspiration else colors.text.primary,
