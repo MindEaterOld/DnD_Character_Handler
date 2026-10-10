@@ -2013,26 +2013,27 @@ private val KeyStatMarkerGap = 6.dp
 
 /**
  * The armor class's shield (owner's choices from boards, 2026-10-10: 1, then the label in two letters inside it): the
- * shield icon's own outline at its own proportions (Material's, 18 × 22), in gold at half — the rules' — 1.5dp, between
- * the two rules, about 3dp from each (`drawKeyStatShield`): the label's two letters under its shoulders, the number
- * («99» with a little air) in its widest part.
+ * shield icon the stat had before, at its own proportions — the middle of Material's outlined «Shield» stroke, 14 × 17.89
+ * (not «Security»'s 18 × 22, which read as another shield) — in gold at half, the rules', 1.5dp, between the two rules,
+ * about 3dp from each (`drawKeyStatShield`): the label's two letters under its shoulders, the number («99» with a little
+ * air) in its widest part.
  */
-private val KeyStatShieldWidth = 58.dp
+private val KeyStatShieldWidth = 55.dp
 
-/** Material's shield (Apache 2.0), its outline only, on its 24 grid: x 3…21, y 1…23. */
+/** The middle of Material's outlined «Shield» stroke (Apache 2.0), on its 24 grid: x 5…19, y 3.07…20.96. */
 private val KeyStatShieldPath: Path by lazy {
-    PathParser().parsePathString("M12 1 3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5L12 1z").toPath()
+    PathParser().parsePathString("M12 3.07 5 5.695V11.09C5 15.615 7.98 19.82 12 20.96 16.02 19.82 19 15.615 19 11.09V5.695Z").toPath()
 }
 
 /** The armor class's shield, centred across and between the rules, whose lines are half a rule outside the stat. */
 private fun DrawScope.drawKeyStatShield(color: Color) {
     val width = KeyStatShieldWidth.toPx()
-    val scale = width / 18f
+    val scale = width / 14f
     val middle = size.height / 2
     val left = (size.width - width) / 2
-    val top = middle - 11f * scale
+    val top = middle - 17.89f / 2 * scale
     withTransform({
-        translate(left - 3f * scale, top - 1f * scale)
+        translate(left - 5f * scale, top - 3.07f * scale)
         scale(scale, scale, pivot = Offset.Zero)
     }) {
         drawPath(KeyStatShieldPath, color, style = Stroke(width = 1.5.dp.toPx() / scale))
