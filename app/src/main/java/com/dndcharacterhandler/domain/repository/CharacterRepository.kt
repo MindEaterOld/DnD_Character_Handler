@@ -1,22 +1,22 @@
 package com.dndcharacterhandler.domain.repository
 
-import com.dndcharacterhandler.domain.model.Condition
+import com.dndcharacterhandler.domain.dnd5e.model.Condition
 import com.dndcharacterhandler.domain.model.PortraitFraming
-import com.dndcharacterhandler.domain.model.CharacterBundle
-import com.dndcharacterhandler.domain.model.CharacterClassEntry
-import com.dndcharacterhandler.domain.model.CombatResource
-import com.dndcharacterhandler.domain.model.CreatureSize
-import com.dndcharacterhandler.domain.model.InventoryItem
-import com.dndcharacterhandler.domain.model.ArmorClassMode
-import com.dndcharacterhandler.domain.model.Attack
-import com.dndcharacterhandler.domain.model.DarkvisionMode
-import com.dndcharacterhandler.domain.model.CharacterProficiencyField
-import com.dndcharacterhandler.domain.model.CharacterTextField
-import com.dndcharacterhandler.domain.model.Spell
-import com.dndcharacterhandler.domain.model.SpellcastingAbility
-import com.dndcharacterhandler.domain.model.Feature
-import com.dndcharacterhandler.domain.model.Note
-import com.dndcharacterhandler.domain.model.Skill
+import com.dndcharacterhandler.domain.dnd5e.model.CharacterBundle
+import com.dndcharacterhandler.domain.dnd5e.model.CharacterClassEntry
+import com.dndcharacterhandler.domain.dnd5e.model.CombatResource
+import com.dndcharacterhandler.domain.dnd5e.model.CreatureSize
+import com.dndcharacterhandler.domain.dnd5e.model.InventoryItem
+import com.dndcharacterhandler.domain.dnd5e.model.ArmorClassMode
+import com.dndcharacterhandler.domain.dnd5e.model.Attack
+import com.dndcharacterhandler.domain.dnd5e.model.DarkvisionMode
+import com.dndcharacterhandler.domain.dnd5e.model.CharacterProficiencyField
+import com.dndcharacterhandler.domain.dnd5e.model.CharacterTextField
+import com.dndcharacterhandler.domain.dnd5e.model.Spell
+import com.dndcharacterhandler.domain.dnd5e.model.SpellcastingAbility
+import com.dndcharacterhandler.domain.dnd5e.model.Feature
+import com.dndcharacterhandler.domain.dnd5e.model.Note
+import com.dndcharacterhandler.domain.dnd5e.model.Skill
 import kotlinx.coroutines.flow.Flow
 
 interface CharacterRepository {

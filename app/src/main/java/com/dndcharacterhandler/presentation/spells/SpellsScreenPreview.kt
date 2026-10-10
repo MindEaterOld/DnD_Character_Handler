@@ -5,8 +5,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.tooling.preview.Preview
 import com.dndcharacterhandler.data.localization.LocalizedStrings
 import com.dndcharacterhandler.domain.model.AppLanguage
-import com.dndcharacterhandler.domain.model.CharacterBundle
-import com.dndcharacterhandler.domain.model.Spell
+import com.dndcharacterhandler.domain.dnd5e.model.CharacterBundle
+import com.dndcharacterhandler.domain.dnd5e.model.Spell
 import com.dndcharacterhandler.presentation.attributes.previewFallbackCharacter
 import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.theme.DnDTheme

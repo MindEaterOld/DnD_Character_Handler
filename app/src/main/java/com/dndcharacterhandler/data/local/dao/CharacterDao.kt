@@ -15,10 +15,10 @@ import com.dndcharacterhandler.data.local.entity.NoteEntity
 import com.dndcharacterhandler.data.local.entity.SkillEntity
 import com.dndcharacterhandler.data.local.entity.SpellAttackEntity
 import com.dndcharacterhandler.data.local.entity.SpellEntity
-import com.dndcharacterhandler.domain.model.ArmorClassMode
-import com.dndcharacterhandler.domain.model.CreatureSize
-import com.dndcharacterhandler.domain.model.DarkvisionMode
-import com.dndcharacterhandler.domain.model.SpellcastingAbility
+import com.dndcharacterhandler.domain.dnd5e.model.ArmorClassMode
+import com.dndcharacterhandler.domain.dnd5e.model.CreatureSize
+import com.dndcharacterhandler.domain.dnd5e.model.DarkvisionMode
+import com.dndcharacterhandler.domain.dnd5e.model.SpellcastingAbility
 import kotlinx.coroutines.flow.Flow
 
 @Dao

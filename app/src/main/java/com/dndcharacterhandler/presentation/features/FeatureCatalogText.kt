@@ -1,7 +1,7 @@
 package com.dndcharacterhandler.presentation.features
 
-import com.dndcharacterhandler.domain.model.Feature
-import com.dndcharacterhandler.domain.model.FeatureCatalogItem
+import com.dndcharacterhandler.domain.dnd5e.model.Feature
+import com.dndcharacterhandler.domain.dnd5e.model.FeatureCatalogItem
 import com.dndcharacterhandler.presentation.localization.CatalogIndex
 import com.dndcharacterhandler.presentation.localization.catalogFieldText
 

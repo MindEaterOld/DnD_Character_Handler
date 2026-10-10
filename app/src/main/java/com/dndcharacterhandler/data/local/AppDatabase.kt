@@ -1,7 +1,7 @@
 package com.dndcharacterhandler.data.local
 
-import com.dndcharacterhandler.domain.model.encodeProficiencyIds
-import com.dndcharacterhandler.domain.rules.Defenses
+import com.dndcharacterhandler.domain.dnd5e.model.encodeProficiencyIds
+import com.dndcharacterhandler.domain.dnd5e.rules.Defenses
 import com.dndcharacterhandler.data.repository.ProgressionJson
 import android.content.Context
 import androidx.room.Database

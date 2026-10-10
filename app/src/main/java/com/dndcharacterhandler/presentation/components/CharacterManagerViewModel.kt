@@ -7,8 +7,8 @@ import androidx.lifecycle.viewModelScope
 import com.dndcharacterhandler.data.preferences.LanguagePreferencesRepository
 import com.dndcharacterhandler.domain.model.AppLanguage
 import com.dndcharacterhandler.domain.model.AppTheme
-import com.dndcharacterhandler.domain.model.CharacterBundle
-import com.dndcharacterhandler.domain.model.defaultCharacterBundle
+import com.dndcharacterhandler.domain.dnd5e.model.CharacterBundle
+import com.dndcharacterhandler.domain.dnd5e.model.defaultCharacterBundle
 import com.dndcharacterhandler.domain.repository.CharacterFileRepository
 import com.dndcharacterhandler.domain.repository.CharacterRepository
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder

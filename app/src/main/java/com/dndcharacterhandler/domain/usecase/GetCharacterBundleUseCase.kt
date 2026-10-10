@@ -1,6 +1,6 @@
 package com.dndcharacterhandler.domain.usecase
 
-import com.dndcharacterhandler.domain.model.CharacterBundle
+import com.dndcharacterhandler.domain.dnd5e.model.CharacterBundle
 import com.dndcharacterhandler.domain.repository.CharacterRepository
 import kotlinx.coroutines.flow.Flow
 

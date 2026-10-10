@@ -4,7 +4,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import com.dndcharacterhandler.domain.model.AppLanguage
-import com.dndcharacterhandler.domain.model.CatalogWeaponMastery
+import com.dndcharacterhandler.domain.dnd5e.model.CatalogWeaponMastery
 import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 

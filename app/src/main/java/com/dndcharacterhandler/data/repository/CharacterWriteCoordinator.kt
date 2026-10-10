@@ -12,9 +12,9 @@ import com.dndcharacterhandler.data.local.entity.NoteEntity
 import com.dndcharacterhandler.data.local.entity.SkillEntity
 import com.dndcharacterhandler.data.local.entity.SpellAttackEntity
 import com.dndcharacterhandler.data.local.entity.SpellEntity
-import com.dndcharacterhandler.domain.model.ArmorClassMode
-import com.dndcharacterhandler.domain.model.InventoryArmorType
-import com.dndcharacterhandler.domain.rules.calculateArmorClass
+import com.dndcharacterhandler.domain.dnd5e.model.ArmorClassMode
+import com.dndcharacterhandler.domain.dnd5e.model.InventoryArmorType
+import com.dndcharacterhandler.domain.dnd5e.rules.calculateArmorClass
 
 class CharacterWriteCoordinator(
     private val database: AppDatabase,

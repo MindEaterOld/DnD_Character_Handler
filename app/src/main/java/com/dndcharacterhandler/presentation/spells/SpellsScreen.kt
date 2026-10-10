@@ -1,8 +1,8 @@
 package com.dndcharacterhandler.presentation.spells
 
 import com.dndcharacterhandler.presentation.components.CharacterLoadingScreen
-import com.dndcharacterhandler.domain.rules.encodeSpellSlots
-import com.dndcharacterhandler.domain.rules.spellSlots
+import com.dndcharacterhandler.domain.dnd5e.rules.encodeSpellSlots
+import com.dndcharacterhandler.domain.dnd5e.rules.spellSlots
 import androidx.compose.foundation.lazy.rememberLazyListState
 import com.dndcharacterhandler.presentation.components.rememberHeaderBackdrop
 import com.dndcharacterhandler.presentation.components.headerBackdrop
@@ -15,7 +15,7 @@ import com.dndcharacterhandler.presentation.combat.SpellCastDialog
 import com.dndcharacterhandler.presentation.combat.castConcentration
 import com.dndcharacterhandler.presentation.components.CardMainButton
 import com.dndcharacterhandler.presentation.components.changedValueColor
-import com.dndcharacterhandler.domain.rules.breaksConcentration
+import com.dndcharacterhandler.domain.dnd5e.rules.breaksConcentration
 import com.dndcharacterhandler.presentation.components.MiniStatCardHeight
 import com.dndcharacterhandler.presentation.components.BorderLabelCard
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -26,9 +26,9 @@ import com.dndcharacterhandler.presentation.components.isWorse
 import com.dndcharacterhandler.presentation.components.RollMarker
 import com.dndcharacterhandler.presentation.components.EndConcentrationDialog
 import com.dndcharacterhandler.presentation.components.ConcentrationToggle
-import com.dndcharacterhandler.domain.rules.rollEffects
-import com.dndcharacterhandler.domain.rules.activeConditions
-import com.dndcharacterhandler.domain.rules.D20Test
+import com.dndcharacterhandler.domain.dnd5e.rules.rollEffects
+import com.dndcharacterhandler.domain.dnd5e.rules.activeConditions
+import com.dndcharacterhandler.domain.dnd5e.rules.D20Test
 import com.dndcharacterhandler.presentation.components.StatCardRow
 import com.dndcharacterhandler.presentation.components.MiniStatCard
 import androidx.compose.foundation.BorderStroke
@@ -83,21 +83,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
-import com.dndcharacterhandler.domain.model.CharacterCatalog
-import com.dndcharacterhandler.domain.repository.CharacterCatalogRepository
+import com.dndcharacterhandler.domain.dnd5e.model.CharacterCatalog
+import com.dndcharacterhandler.domain.dnd5e.repository.CharacterCatalogRepository
 import com.dndcharacterhandler.data.localization.LocalizedStrings
 import com.dndcharacterhandler.domain.model.AppLanguage
-import com.dndcharacterhandler.domain.model.Character
-import com.dndcharacterhandler.domain.model.CharacterBundle
-import com.dndcharacterhandler.domain.model.Spell
-import com.dndcharacterhandler.domain.model.SpellCatalogItem
-import com.dndcharacterhandler.domain.model.SpellcastingAbility
-import com.dndcharacterhandler.domain.rules.abilityModifier
-import com.dndcharacterhandler.domain.rules.preparedSpellLimit
-import com.dndcharacterhandler.domain.rules.proficiencyBonusForLevel
-import com.dndcharacterhandler.domain.rules.scoreForSpellcastingAbility
+import com.dndcharacterhandler.domain.dnd5e.model.Character
+import com.dndcharacterhandler.domain.dnd5e.model.CharacterBundle
+import com.dndcharacterhandler.domain.dnd5e.model.Spell
+import com.dndcharacterhandler.domain.dnd5e.model.SpellCatalogItem
+import com.dndcharacterhandler.domain.dnd5e.model.SpellcastingAbility
+import com.dndcharacterhandler.domain.dnd5e.rules.abilityModifier
+import com.dndcharacterhandler.domain.dnd5e.rules.preparedSpellLimit
+import com.dndcharacterhandler.domain.dnd5e.rules.proficiencyBonusForLevel
+import com.dndcharacterhandler.domain.dnd5e.rules.scoreForSpellcastingAbility
 import com.dndcharacterhandler.domain.repository.CharacterRepository
-import com.dndcharacterhandler.domain.repository.SpellCatalogRepository
+import com.dndcharacterhandler.domain.dnd5e.repository.SpellCatalogRepository
 import com.dndcharacterhandler.domain.usecase.GetCharacterBundleUseCase
 import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
@@ -202,7 +202,7 @@ class SpellsViewModel(
     }
 
     /** Takes a cast back: slots and concentration as [before] had them. */
-    fun undoCast(before: com.dndcharacterhandler.domain.model.Character) {
+    fun undoCast(before: com.dndcharacterhandler.domain.dnd5e.model.Character) {
         viewModelScope.launch { characterRepository.undoCast(before) }
     }
 
@@ -341,7 +341,7 @@ internal fun SpellsContent(
     onEndConcentration: (CharacterBundle) -> Unit = {},
     /** A spell cast: the slot level spent (null for none) and the spell to concentrate on. */
     onCastSpell: (CharacterBundle, Int?, Long?) -> Unit = { _, _, _ -> },
-    onUndoCast: (com.dndcharacterhandler.domain.model.Character) -> Unit = {},
+    onUndoCast: (com.dndcharacterhandler.domain.dnd5e.model.Character) -> Unit = {},
     onUpdateAllSpellSlots: (CharacterBundle, List<Int>, List<Int>, Boolean, Boolean) -> Unit = { _, _, _, _, _ -> },
     onUpdateSpellSlotRemaining: (CharacterBundle, Int, Int) -> Unit = { _, _, _ -> },
     onUpdateSpellcastingAbility: (CharacterBundle, SpellcastingAbility) -> Unit = { _, _ -> }

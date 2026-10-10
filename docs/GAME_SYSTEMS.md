@@ -48,11 +48,13 @@ Vampire: The Masquerade. Персонаж привязан к одной сис�
 
 ## Этап 4. Код D&D 5e — отдельно
 
-- [ ] Правила и Character Wizard: `domain/rules` → `domain/dnd5e/rules`, `domain/levelup` → `domain/dnd5e/levelup`.
-- [ ] Модели листа и каталогов D&D 5e: `domain/model/*` → `domain/dnd5e/model` (общими остаются язык, тема,
+- [x] Правила и Character Wizard: `domain/rules` → `domain/dnd5e/rules`, `domain/levelup` → `domain/dnd5e/levelup`.
+      Римские цифры уровня — общие для всех систем: `presentation/components/RomanNumerals.kt`.
+- [x] Модели листа и каталогов D&D 5e: `domain/model/*` → `domain/dnd5e/model` (общими остаются язык, тема,
       система, портрет и его кадр, кубики, ссылки на ассеты).
-- [ ] Каталоги: `data/catalog` и репозитории каталогов → `data/dnd5e/catalog`.
-- [ ] Тесты — следом за кодом.
+- [x] Каталоги: `data/catalog` и репозитории каталогов → `data/dnd5e/catalog`.
+- [x] Интерфейсы каталогов → `domain/dnd5e/repository`.
+- [x] Тесты — следом за кодом.
 
 ## Этап 5. Лист как модуль системы — когда появится вторая система
 

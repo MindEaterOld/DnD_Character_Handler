@@ -2,8 +2,8 @@ package com.dndcharacterhandler.presentation.spells
 
 import com.dndcharacterhandler.data.localization.LocalizedStrings
 import com.dndcharacterhandler.domain.model.AppLanguage
-import com.dndcharacterhandler.domain.model.Spell
-import com.dndcharacterhandler.domain.model.SpellCatalogItem
+import com.dndcharacterhandler.domain.dnd5e.model.Spell
+import com.dndcharacterhandler.domain.dnd5e.model.SpellCatalogItem
 import com.dndcharacterhandler.presentation.localization.catalogFieldText
 
 /** Catalog spell name in the current language: the catalog's Russian, or its English for the others. */

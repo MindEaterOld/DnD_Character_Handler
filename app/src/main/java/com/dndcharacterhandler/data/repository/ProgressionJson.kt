@@ -4,8 +4,8 @@ import com.dndcharacterhandler.data.json.optBoolean
 import com.dndcharacterhandler.data.json.optInt
 import com.dndcharacterhandler.data.json.optString
 import com.dndcharacterhandler.data.json.parseJsonArray
-import com.dndcharacterhandler.domain.model.AdvancementRecord
-import com.dndcharacterhandler.domain.model.CharacterClassEntry
+import com.dndcharacterhandler.domain.dnd5e.model.AdvancementRecord
+import com.dndcharacterhandler.domain.dnd5e.model.CharacterClassEntry
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject

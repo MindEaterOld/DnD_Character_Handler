@@ -1,8 +1,8 @@
 package com.dndcharacterhandler.data.repository
 
 import com.dndcharacterhandler.domain.model.GameSystem
-import com.dndcharacterhandler.domain.rules.MAX_EXHAUSTION
-import com.dndcharacterhandler.domain.model.Condition
+import com.dndcharacterhandler.domain.dnd5e.rules.MAX_EXHAUSTION
+import com.dndcharacterhandler.domain.dnd5e.model.Condition
 import androidx.core.net.toUri
 import com.dndcharacterhandler.data.json.has
 import com.dndcharacterhandler.data.json.isNull
@@ -15,30 +15,30 @@ import com.dndcharacterhandler.data.json.optLong
 import com.dndcharacterhandler.data.json.optObject
 import com.dndcharacterhandler.data.json.optString
 import com.dndcharacterhandler.domain.model.PortraitFraming
-import com.dndcharacterhandler.domain.model.Attack
-import com.dndcharacterhandler.domain.model.AttackCalculationMode
-import com.dndcharacterhandler.domain.model.DarkvisionMode
-import com.dndcharacterhandler.domain.model.ArmorClassMode
-import com.dndcharacterhandler.domain.model.Character
-import com.dndcharacterhandler.domain.model.CharacterBundle
-import com.dndcharacterhandler.domain.model.CombatResource
-import com.dndcharacterhandler.domain.model.Feature
-import com.dndcharacterhandler.domain.model.FeatureSource
-import com.dndcharacterhandler.domain.model.InventoryArmorDetails
-import com.dndcharacterhandler.domain.model.InventoryArmorType
-import com.dndcharacterhandler.domain.model.InventoryCategory
-import com.dndcharacterhandler.domain.model.InventoryContainerDetails
-import com.dndcharacterhandler.domain.model.InventoryItem
-import com.dndcharacterhandler.domain.model.InventoryWeaponClass
-import com.dndcharacterhandler.domain.model.InventoryWeaponDamage
-import com.dndcharacterhandler.domain.model.InventoryWeaponDetails
-import com.dndcharacterhandler.domain.model.InventoryWeaponProperty
-import com.dndcharacterhandler.domain.model.InventoryWeaponRangeType
-import com.dndcharacterhandler.domain.model.Note
-import com.dndcharacterhandler.domain.model.CreatureSize
-import com.dndcharacterhandler.domain.model.Skill
-import com.dndcharacterhandler.domain.model.Spell
-import com.dndcharacterhandler.domain.model.SpellcastingAbility
+import com.dndcharacterhandler.domain.dnd5e.model.Attack
+import com.dndcharacterhandler.domain.dnd5e.model.AttackCalculationMode
+import com.dndcharacterhandler.domain.dnd5e.model.DarkvisionMode
+import com.dndcharacterhandler.domain.dnd5e.model.ArmorClassMode
+import com.dndcharacterhandler.domain.dnd5e.model.Character
+import com.dndcharacterhandler.domain.dnd5e.model.CharacterBundle
+import com.dndcharacterhandler.domain.dnd5e.model.CombatResource
+import com.dndcharacterhandler.domain.dnd5e.model.Feature
+import com.dndcharacterhandler.domain.dnd5e.model.FeatureSource
+import com.dndcharacterhandler.domain.dnd5e.model.InventoryArmorDetails
+import com.dndcharacterhandler.domain.dnd5e.model.InventoryArmorType
+import com.dndcharacterhandler.domain.dnd5e.model.InventoryCategory
+import com.dndcharacterhandler.domain.dnd5e.model.InventoryContainerDetails
+import com.dndcharacterhandler.domain.dnd5e.model.InventoryItem
+import com.dndcharacterhandler.domain.dnd5e.model.InventoryWeaponClass
+import com.dndcharacterhandler.domain.dnd5e.model.InventoryWeaponDamage
+import com.dndcharacterhandler.domain.dnd5e.model.InventoryWeaponDetails
+import com.dndcharacterhandler.domain.dnd5e.model.InventoryWeaponProperty
+import com.dndcharacterhandler.domain.dnd5e.model.InventoryWeaponRangeType
+import com.dndcharacterhandler.domain.dnd5e.model.Note
+import com.dndcharacterhandler.domain.dnd5e.model.CreatureSize
+import com.dndcharacterhandler.domain.dnd5e.model.Skill
+import com.dndcharacterhandler.domain.dnd5e.model.Spell
+import com.dndcharacterhandler.domain.dnd5e.model.SpellcastingAbility
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
@@ -372,8 +372,8 @@ fun archiveManifestToCharacterBundle(
         initiativeBonus = characterJson.optInt("initiativeBonus"),
         spellcastingAbility = characterJson.optString("spellcastingAbility")
             .takeIf { it.isNotBlank() }
-            ?.let { runCatching { com.dndcharacterhandler.domain.model.SpellcastingAbility.valueOf(it) }.getOrDefault(com.dndcharacterhandler.domain.model.SpellcastingAbility.WISDOM) }
-            ?: com.dndcharacterhandler.domain.model.SpellcastingAbility.WISDOM,
+            ?.let { runCatching { com.dndcharacterhandler.domain.dnd5e.model.SpellcastingAbility.valueOf(it) }.getOrDefault(com.dndcharacterhandler.domain.dnd5e.model.SpellcastingAbility.WISDOM) }
+            ?: com.dndcharacterhandler.domain.dnd5e.model.SpellcastingAbility.WISDOM,
         spellSlotMaximums = characterJson.optString("spellSlotMaximums"),
         spellSlotRemaining = characterJson.optString("spellSlotRemaining"),
         spellSlotsRestoreOnShortRest = characterJson.optBoolean("spellSlotsRestoreOnShortRest", false),

@@ -1,16 +1,16 @@
 package com.dndcharacterhandler.data.local
 
 import androidx.room.TypeConverter
-import com.dndcharacterhandler.domain.model.ArmorClassMode
-import com.dndcharacterhandler.domain.model.AttackCalculationMode
-import com.dndcharacterhandler.domain.model.CreatureSize
-import com.dndcharacterhandler.domain.model.DarkvisionMode
-import com.dndcharacterhandler.domain.model.FeatureSource
-import com.dndcharacterhandler.domain.model.InventoryArmorType
-import com.dndcharacterhandler.domain.model.InventoryCategory
-import com.dndcharacterhandler.domain.model.InventoryWeaponClass
-import com.dndcharacterhandler.domain.model.InventoryWeaponRangeType
-import com.dndcharacterhandler.domain.model.SpellcastingAbility
+import com.dndcharacterhandler.domain.dnd5e.model.ArmorClassMode
+import com.dndcharacterhandler.domain.dnd5e.model.AttackCalculationMode
+import com.dndcharacterhandler.domain.dnd5e.model.CreatureSize
+import com.dndcharacterhandler.domain.dnd5e.model.DarkvisionMode
+import com.dndcharacterhandler.domain.dnd5e.model.FeatureSource
+import com.dndcharacterhandler.domain.dnd5e.model.InventoryArmorType
+import com.dndcharacterhandler.domain.dnd5e.model.InventoryCategory
+import com.dndcharacterhandler.domain.dnd5e.model.InventoryWeaponClass
+import com.dndcharacterhandler.domain.dnd5e.model.InventoryWeaponRangeType
+import com.dndcharacterhandler.domain.dnd5e.model.SpellcastingAbility
 
 class RoomConverters {
     @TypeConverter

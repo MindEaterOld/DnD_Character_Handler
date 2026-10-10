@@ -4,18 +4,18 @@ import android.content.Context
 import com.dndcharacterhandler.data.local.AppDatabase
 import com.dndcharacterhandler.data.localization.LocalizationRepository
 import com.dndcharacterhandler.data.preferences.LanguagePreferencesRepository
-import com.dndcharacterhandler.data.repository.AssetCharacterCatalogRepository
-import com.dndcharacterhandler.data.repository.AssetInventoryCatalogRepository
-import com.dndcharacterhandler.data.repository.CatalogSpellCatalogRepository
-import com.dndcharacterhandler.data.repository.CatalogFeatureCatalogRepository
+import com.dndcharacterhandler.data.dnd5e.catalog.AssetCharacterCatalogRepository
+import com.dndcharacterhandler.data.dnd5e.catalog.AssetInventoryCatalogRepository
+import com.dndcharacterhandler.data.dnd5e.catalog.CatalogSpellCatalogRepository
+import com.dndcharacterhandler.data.dnd5e.catalog.CatalogFeatureCatalogRepository
 import com.dndcharacterhandler.data.repository.CharacterFileRepositoryImpl
 import com.dndcharacterhandler.data.repository.CharacterRepositoryImpl
-import com.dndcharacterhandler.domain.repository.CharacterCatalogRepository
+import com.dndcharacterhandler.domain.dnd5e.repository.CharacterCatalogRepository
 import com.dndcharacterhandler.domain.repository.CharacterFileRepository
 import com.dndcharacterhandler.domain.repository.CharacterRepository
-import com.dndcharacterhandler.domain.repository.FeatureCatalogRepository
-import com.dndcharacterhandler.domain.repository.InventoryCatalogRepository
-import com.dndcharacterhandler.domain.repository.SpellCatalogRepository
+import com.dndcharacterhandler.domain.dnd5e.repository.FeatureCatalogRepository
+import com.dndcharacterhandler.domain.dnd5e.repository.InventoryCatalogRepository
+import com.dndcharacterhandler.domain.dnd5e.repository.SpellCatalogRepository
 import com.dndcharacterhandler.domain.usecase.GetCharacterBundleUseCase
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
 

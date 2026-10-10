@@ -12,8 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.dndcharacterhandler.domain.rules.RollEffects
-import com.dndcharacterhandler.domain.rules.RollMode
+import com.dndcharacterhandler.domain.dnd5e.rules.RollEffects
+import com.dndcharacterhandler.domain.dnd5e.rules.RollMode
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 

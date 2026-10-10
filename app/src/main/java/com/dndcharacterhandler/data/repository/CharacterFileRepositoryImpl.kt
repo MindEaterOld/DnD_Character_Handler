@@ -8,9 +8,9 @@ import androidx.core.net.toUri
 import com.dndcharacterhandler.data.json.PrettyJson
 import com.dndcharacterhandler.data.json.parseJsonObject
 import com.dndcharacterhandler.data.local.dao.CharacterDao
-import com.dndcharacterhandler.domain.model.Attack
-import com.dndcharacterhandler.domain.model.CharacterBundle
-import com.dndcharacterhandler.domain.model.InventoryItem
+import com.dndcharacterhandler.domain.dnd5e.model.Attack
+import com.dndcharacterhandler.domain.dnd5e.model.CharacterBundle
+import com.dndcharacterhandler.domain.dnd5e.model.InventoryItem
 import com.dndcharacterhandler.domain.repository.CharacterFileRepository
 import com.dndcharacterhandler.domain.repository.CharacterRepository
 import kotlinx.coroutines.NonCancellable

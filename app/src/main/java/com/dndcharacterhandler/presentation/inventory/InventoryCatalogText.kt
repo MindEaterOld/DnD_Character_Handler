@@ -1,8 +1,8 @@
 package com.dndcharacterhandler.presentation.inventory
 
-import com.dndcharacterhandler.domain.model.InventoryCatalogBonusVariant
-import com.dndcharacterhandler.domain.model.InventoryCatalogItem
-import com.dndcharacterhandler.domain.model.InventoryItem
+import com.dndcharacterhandler.domain.dnd5e.model.InventoryCatalogBonusVariant
+import com.dndcharacterhandler.domain.dnd5e.model.InventoryCatalogItem
+import com.dndcharacterhandler.domain.dnd5e.model.InventoryItem
 import com.dndcharacterhandler.presentation.localization.CatalogIndex
 import com.dndcharacterhandler.presentation.localization.catalogFieldText
 

@@ -55,8 +55,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.dndcharacterhandler.data.localization.LocalizedStrings
 import com.dndcharacterhandler.domain.model.PortraitFraming
 import com.dndcharacterhandler.domain.model.AssetReferences
-import com.dndcharacterhandler.domain.model.Character
-import com.dndcharacterhandler.domain.model.CharacterBundle
+import com.dndcharacterhandler.domain.dnd5e.model.Character
+import com.dndcharacterhandler.domain.dnd5e.model.CharacterBundle
 import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.DnDTheme

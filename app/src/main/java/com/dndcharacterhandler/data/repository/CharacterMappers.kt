@@ -1,7 +1,7 @@
 package com.dndcharacterhandler.data.repository
 
 import com.dndcharacterhandler.domain.model.GameSystem
-import com.dndcharacterhandler.domain.model.Condition
+import com.dndcharacterhandler.domain.dnd5e.model.Condition
 import com.dndcharacterhandler.data.local.entity.AttackEntity
 import com.dndcharacterhandler.data.local.entity.CharacterEntity
 import com.dndcharacterhandler.data.local.entity.CharacterWithDetails
@@ -13,22 +13,22 @@ import com.dndcharacterhandler.data.local.entity.SkillEntity
 import com.dndcharacterhandler.data.local.entity.SpellAttackEntity
 import com.dndcharacterhandler.data.local.entity.SpellEntity
 import com.dndcharacterhandler.domain.model.PortraitFraming
-import com.dndcharacterhandler.domain.model.Attack
-import com.dndcharacterhandler.domain.model.ArmorClassMode
-import com.dndcharacterhandler.domain.model.Character
-import com.dndcharacterhandler.domain.model.CharacterBundle
-import com.dndcharacterhandler.domain.model.CombatResource
-import com.dndcharacterhandler.domain.model.Feature
-import com.dndcharacterhandler.domain.model.InventoryArmorDetails
-import com.dndcharacterhandler.domain.model.InventoryCategory
-import com.dndcharacterhandler.domain.model.InventoryContainerDetails
-import com.dndcharacterhandler.domain.model.InventoryItem
-import com.dndcharacterhandler.domain.model.InventoryWeaponDamage
-import com.dndcharacterhandler.domain.model.InventoryWeaponDetails
-import com.dndcharacterhandler.domain.model.InventoryWeaponProperty
-import com.dndcharacterhandler.domain.model.Note
-import com.dndcharacterhandler.domain.model.Skill
-import com.dndcharacterhandler.domain.model.Spell
+import com.dndcharacterhandler.domain.dnd5e.model.Attack
+import com.dndcharacterhandler.domain.dnd5e.model.ArmorClassMode
+import com.dndcharacterhandler.domain.dnd5e.model.Character
+import com.dndcharacterhandler.domain.dnd5e.model.CharacterBundle
+import com.dndcharacterhandler.domain.dnd5e.model.CombatResource
+import com.dndcharacterhandler.domain.dnd5e.model.Feature
+import com.dndcharacterhandler.domain.dnd5e.model.InventoryArmorDetails
+import com.dndcharacterhandler.domain.dnd5e.model.InventoryCategory
+import com.dndcharacterhandler.domain.dnd5e.model.InventoryContainerDetails
+import com.dndcharacterhandler.domain.dnd5e.model.InventoryItem
+import com.dndcharacterhandler.domain.dnd5e.model.InventoryWeaponDamage
+import com.dndcharacterhandler.domain.dnd5e.model.InventoryWeaponDetails
+import com.dndcharacterhandler.domain.dnd5e.model.InventoryWeaponProperty
+import com.dndcharacterhandler.domain.dnd5e.model.Note
+import com.dndcharacterhandler.domain.dnd5e.model.Skill
+import com.dndcharacterhandler.domain.dnd5e.model.Spell
 
 fun CharacterWithDetails.toDomain(): CharacterBundle =
     CharacterBundle(

@@ -18,7 +18,7 @@ import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.dndcharacterhandler.domain.model.Condition
+import com.dndcharacterhandler.domain.dnd5e.model.Condition
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 
 /** A condition's icon: on the overview's column and in its picker. */

@@ -1,11 +1,11 @@
 package com.dndcharacterhandler.domain.repository
 
-import com.dndcharacterhandler.domain.model.Character
-import com.dndcharacterhandler.domain.rules.activeConditions
-import com.dndcharacterhandler.domain.rules.breaksConcentration
-import com.dndcharacterhandler.domain.rules.encodeSpellSlots
-import com.dndcharacterhandler.domain.rules.spellSlots
-import com.dndcharacterhandler.domain.rules.spendSlot
+import com.dndcharacterhandler.domain.dnd5e.model.Character
+import com.dndcharacterhandler.domain.dnd5e.rules.activeConditions
+import com.dndcharacterhandler.domain.dnd5e.rules.breaksConcentration
+import com.dndcharacterhandler.domain.dnd5e.rules.encodeSpellSlots
+import com.dndcharacterhandler.domain.dnd5e.rules.spellSlots
+import com.dndcharacterhandler.domain.dnd5e.rules.spendSlot
 
 /**
  * A spell cast by [character]: one slot of [slotLevel] spent (none for null: a cantrip, a ritual, a

@@ -26,7 +26,7 @@ import androidx.compose.ui.graphics.vector.addPathNodes
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.dndcharacterhandler.domain.model.CreatureSize
+import com.dndcharacterhandler.domain.dnd5e.model.CreatureSize
 import com.dndcharacterhandler.presentation.localization.text
 
 /**

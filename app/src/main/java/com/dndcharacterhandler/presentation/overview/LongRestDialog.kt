@@ -12,10 +12,10 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.addPathNodes
 import androidx.compose.ui.unit.dp
-import com.dndcharacterhandler.domain.model.CharacterBundle
-import com.dndcharacterhandler.domain.model.CharacterCatalog
-import com.dndcharacterhandler.domain.rules.hitDicePools
-import com.dndcharacterhandler.domain.rules.spellSlots
+import com.dndcharacterhandler.domain.dnd5e.model.CharacterBundle
+import com.dndcharacterhandler.domain.dnd5e.model.CharacterCatalog
+import com.dndcharacterhandler.domain.dnd5e.rules.hitDicePools
+import com.dndcharacterhandler.domain.dnd5e.rules.spellSlots
 import com.dndcharacterhandler.presentation.components.ConcentrationIcon
 import com.dndcharacterhandler.presentation.components.EditDialog
 import com.dndcharacterhandler.presentation.localization.LocalStrings

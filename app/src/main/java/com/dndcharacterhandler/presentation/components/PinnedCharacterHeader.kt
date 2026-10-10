@@ -20,10 +20,9 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import com.dndcharacterhandler.domain.rules.MAX_CHARACTER_LEVEL
-import com.dndcharacterhandler.domain.rules.experienceProgress
-import com.dndcharacterhandler.domain.rules.levelForExperience
-import com.dndcharacterhandler.domain.rules.romanNumeral
+import com.dndcharacterhandler.domain.dnd5e.rules.MAX_CHARACTER_LEVEL
+import com.dndcharacterhandler.domain.dnd5e.rules.experienceProgress
+import com.dndcharacterhandler.domain.dnd5e.rules.levelForExperience
 import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.localization.text
 import androidx.compose.foundation.background
@@ -57,7 +56,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.dndcharacterhandler.domain.model.Character
+import com.dndcharacterhandler.domain.dnd5e.model.Character
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 
 /** The header's own row, under the status bar: the level and the name on the icons' line, the experience under them. */

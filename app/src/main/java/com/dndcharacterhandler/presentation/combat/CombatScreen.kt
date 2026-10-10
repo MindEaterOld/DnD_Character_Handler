@@ -8,29 +8,29 @@ import com.dndcharacterhandler.presentation.components.fadingVerticalScroll
 import com.dndcharacterhandler.presentation.components.FadingLazyColumn
 import com.dndcharacterhandler.domain.repository.castSpell
 import com.dndcharacterhandler.domain.repository.undoCast
-import com.dndcharacterhandler.domain.rules.asIn
-import com.dndcharacterhandler.domain.rules.bookSpellOf
-import com.dndcharacterhandler.domain.rules.castAt
-import com.dndcharacterhandler.domain.rules.castLevel
-import com.dndcharacterhandler.domain.rules.madeWith
-import com.dndcharacterhandler.domain.rules.spellSlots
-import com.dndcharacterhandler.domain.rules.weaponAttack
-import com.dndcharacterhandler.domain.rules.weaponOf
+import com.dndcharacterhandler.domain.dnd5e.rules.asIn
+import com.dndcharacterhandler.domain.dnd5e.rules.bookSpellOf
+import com.dndcharacterhandler.domain.dnd5e.rules.castAt
+import com.dndcharacterhandler.domain.dnd5e.rules.castLevel
+import com.dndcharacterhandler.domain.dnd5e.rules.madeWith
+import com.dndcharacterhandler.domain.dnd5e.rules.spellSlots
+import com.dndcharacterhandler.domain.dnd5e.rules.weaponAttack
+import com.dndcharacterhandler.domain.dnd5e.rules.weaponOf
 import com.dndcharacterhandler.presentation.components.NumberStepperField
 import com.dndcharacterhandler.presentation.components.StepButton
-import com.dndcharacterhandler.domain.rules.DiceFormula
+import com.dndcharacterhandler.domain.dnd5e.rules.DiceFormula
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.ExperimentalFoundationApi
 import com.dndcharacterhandler.presentation.components.changedValueColor
-import com.dndcharacterhandler.domain.rules.RollMode
-import com.dndcharacterhandler.domain.rules.attacksAgainst
+import com.dndcharacterhandler.domain.dnd5e.rules.RollMode
+import com.dndcharacterhandler.domain.dnd5e.rules.attacksAgainst
 import com.dndcharacterhandler.presentation.components.isBetter
 import com.dndcharacterhandler.presentation.components.isWorse
 import com.dndcharacterhandler.presentation.components.RollMarker
-import com.dndcharacterhandler.domain.rules.rollEffects
-import com.dndcharacterhandler.domain.rules.activeConditions
-import com.dndcharacterhandler.domain.rules.RollEffects
-import com.dndcharacterhandler.domain.rules.D20Test
+import com.dndcharacterhandler.domain.dnd5e.rules.rollEffects
+import com.dndcharacterhandler.domain.dnd5e.rules.activeConditions
+import com.dndcharacterhandler.domain.dnd5e.rules.RollEffects
+import com.dndcharacterhandler.domain.dnd5e.rules.D20Test
 import com.dndcharacterhandler.presentation.components.StatCardRow
 import com.dndcharacterhandler.presentation.components.MiniStatCardIcon
 import androidx.compose.foundation.BorderStroke
@@ -82,30 +82,30 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
-import com.dndcharacterhandler.domain.model.Attack
-import com.dndcharacterhandler.domain.model.AttackCalculationMode
-import com.dndcharacterhandler.domain.model.ArmorClassMode
-import com.dndcharacterhandler.domain.model.CharacterBundle
-import com.dndcharacterhandler.domain.model.CombatResource
+import com.dndcharacterhandler.domain.dnd5e.model.Attack
+import com.dndcharacterhandler.domain.dnd5e.model.AttackCalculationMode
+import com.dndcharacterhandler.domain.dnd5e.model.ArmorClassMode
+import com.dndcharacterhandler.domain.dnd5e.model.CharacterBundle
+import com.dndcharacterhandler.domain.dnd5e.model.CombatResource
 import com.dndcharacterhandler.domain.model.AppLanguage
-import com.dndcharacterhandler.domain.model.InventoryCatalogItem
-import com.dndcharacterhandler.domain.model.InventoryCategory
-import com.dndcharacterhandler.domain.model.InventoryItem
-import com.dndcharacterhandler.domain.model.CatalogWeaponMastery
-import com.dndcharacterhandler.domain.model.CharacterCatalog
-import com.dndcharacterhandler.domain.model.decodeProficiencyIds
-import com.dndcharacterhandler.domain.model.InventoryWeaponRangeType
-import com.dndcharacterhandler.domain.model.Spell
-import com.dndcharacterhandler.domain.model.SpellCatalogItem
-import com.dndcharacterhandler.domain.model.SpellcastingAbility
-import com.dndcharacterhandler.domain.rules.abilityModifier
-import com.dndcharacterhandler.domain.rules.calculateArmorClass
-import com.dndcharacterhandler.domain.rules.proficiencyBonusForLevel
-import com.dndcharacterhandler.domain.rules.scoreForSpellcastingAbility
-import com.dndcharacterhandler.domain.repository.CharacterCatalogRepository
+import com.dndcharacterhandler.domain.dnd5e.model.InventoryCatalogItem
+import com.dndcharacterhandler.domain.dnd5e.model.InventoryCategory
+import com.dndcharacterhandler.domain.dnd5e.model.InventoryItem
+import com.dndcharacterhandler.domain.dnd5e.model.CatalogWeaponMastery
+import com.dndcharacterhandler.domain.dnd5e.model.CharacterCatalog
+import com.dndcharacterhandler.domain.dnd5e.model.decodeProficiencyIds
+import com.dndcharacterhandler.domain.dnd5e.model.InventoryWeaponRangeType
+import com.dndcharacterhandler.domain.dnd5e.model.Spell
+import com.dndcharacterhandler.domain.dnd5e.model.SpellCatalogItem
+import com.dndcharacterhandler.domain.dnd5e.model.SpellcastingAbility
+import com.dndcharacterhandler.domain.dnd5e.rules.abilityModifier
+import com.dndcharacterhandler.domain.dnd5e.rules.calculateArmorClass
+import com.dndcharacterhandler.domain.dnd5e.rules.proficiencyBonusForLevel
+import com.dndcharacterhandler.domain.dnd5e.rules.scoreForSpellcastingAbility
+import com.dndcharacterhandler.domain.dnd5e.repository.CharacterCatalogRepository
 import com.dndcharacterhandler.domain.repository.CharacterRepository
-import com.dndcharacterhandler.domain.repository.InventoryCatalogRepository
-import com.dndcharacterhandler.domain.repository.SpellCatalogRepository
+import com.dndcharacterhandler.domain.dnd5e.repository.InventoryCatalogRepository
+import com.dndcharacterhandler.domain.dnd5e.repository.SpellCatalogRepository
 import com.dndcharacterhandler.domain.usecase.GetCharacterBundleUseCase
 import com.dndcharacterhandler.presentation.BaseCharacterViewModel
 import com.dndcharacterhandler.presentation.SelectedCharacterHolder
@@ -233,7 +233,7 @@ class CombatViewModel(
     }
 
     /** Takes a cast back: slots and concentration as [before] had them. */
-    fun undoCast(before: com.dndcharacterhandler.domain.model.Character) {
+    fun undoCast(before: com.dndcharacterhandler.domain.dnd5e.model.Character) {
         viewModelScope.launch { characterRepository.undoCast(before) }
     }
 
@@ -344,7 +344,7 @@ internal fun CombatContent(
     onUpdateSpell: (CharacterBundle, Spell) -> Unit = { _, _ -> },
     /** A spell cast: the slot level spent (null for none) and the spellbook's spell to concentrate on. */
     onCastSpell: (CharacterBundle, Int?, Long?) -> Unit = { _, _, _ -> },
-    onUndoCast: (com.dndcharacterhandler.domain.model.Character) -> Unit = {},
+    onUndoCast: (com.dndcharacterhandler.domain.dnd5e.model.Character) -> Unit = {},
     onUpdateCombatResourceUses: (CharacterBundle, Long, Int) -> Unit = { _, _, _ -> },
     onUpdateCombatResource: (CharacterBundle, CombatResource) -> Unit = { _, _ -> },
     onDeleteCombatResource: (CharacterBundle, CombatResource) -> Unit = { _, _ -> }
@@ -1086,7 +1086,7 @@ private fun CombatSectionTitle(title: String) {
 @Composable
 private fun AttackCard(
     attack: Attack,
-    character: com.dndcharacterhandler.domain.model.Character,
+    character: com.dndcharacterhandler.domain.dnd5e.model.Character,
     proficiencyBonus: Int,
     /** The conditions on attack rolls. */
     attackEffects: RollEffects? = null,
@@ -2310,7 +2310,7 @@ private fun <T> SelectionDialog(
 private fun InventoryItem.primaryDamageLabel(): String? =
     weaponDetails?.damages?.firstOrNull()?.toCombatDamageLabel(if (isMagical) magicalBonus else 0)
 
-private fun com.dndcharacterhandler.domain.model.InventoryWeaponDetails.rangeLabel(
+private fun com.dndcharacterhandler.domain.dnd5e.model.InventoryWeaponDetails.rangeLabel(
     meleeLabel: String,
     feetLabel: String
 ): String {
@@ -2324,7 +2324,7 @@ private fun com.dndcharacterhandler.domain.model.InventoryWeaponDetails.rangeLab
     }
 }
 
-private fun com.dndcharacterhandler.domain.model.InventoryWeaponDamage.toCombatDamageLabel(modifier: Int): String {
+private fun com.dndcharacterhandler.domain.dnd5e.model.InventoryWeaponDamage.toCombatDamageLabel(modifier: Int): String {
     val normalizedDice = dice.replace(" ", "")
     val match = Regex("""^(\d+d\d+)([+-]\d+)?$""").matchEntire(normalizedDice)
     if (match == null) return dice
@@ -2511,7 +2511,7 @@ private fun Attack.displayRange(
 )
 
 private fun Attack.displayAttackBonusOrSaveDc(
-    character: com.dndcharacterhandler.domain.model.Character,
+    character: com.dndcharacterhandler.domain.dnd5e.model.Character,
     proficiencyBonus: Int,
     attackLabel: String,
     /** The conditions' penalty (exhaustion); a hand-written bonus stays as written. */
@@ -2527,7 +2527,7 @@ private fun Attack.displayAttackBonusOrSaveDc(
 }
 
 private fun Attack.displayDamage(
-    character: com.dndcharacterhandler.domain.model.Character
+    character: com.dndcharacterhandler.domain.dnd5e.model.Character
 ): String {
     return if (calculationMode == AttackCalculationMode.MANUAL) {
         manualDamage.ifBlank { formatAttackDamage(damageDiceCount, damageDieType, 0) }
@@ -2556,7 +2556,7 @@ private fun Attack.displayDamageTypeLabel(strings: com.dndcharacterhandler.data.
 
 /** The roll pop-up's view of a weapon attack: its bonus with the conditions' penalty, its damage. */
 private fun Attack.rollInput(
-    character: com.dndcharacterhandler.domain.model.Character,
+    character: com.dndcharacterhandler.domain.dnd5e.model.Character,
     proficiencyBonus: Int,
     effects: RollEffects,
     strings: com.dndcharacterhandler.data.localization.LocalizedStrings

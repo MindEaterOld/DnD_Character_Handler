@@ -6,16 +6,16 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 import androidx.room.Relation
 import androidx.room.Embedded
-import com.dndcharacterhandler.domain.model.ArmorClassMode
-import com.dndcharacterhandler.domain.model.AttackCalculationMode
-import com.dndcharacterhandler.domain.model.CreatureSize
-import com.dndcharacterhandler.domain.model.DarkvisionMode
-import com.dndcharacterhandler.domain.model.FeatureSource
-import com.dndcharacterhandler.domain.model.InventoryArmorType
-import com.dndcharacterhandler.domain.model.InventoryCategory
-import com.dndcharacterhandler.domain.model.InventoryWeaponClass
-import com.dndcharacterhandler.domain.model.InventoryWeaponRangeType
-import com.dndcharacterhandler.domain.model.SpellcastingAbility
+import com.dndcharacterhandler.domain.dnd5e.model.ArmorClassMode
+import com.dndcharacterhandler.domain.dnd5e.model.AttackCalculationMode
+import com.dndcharacterhandler.domain.dnd5e.model.CreatureSize
+import com.dndcharacterhandler.domain.dnd5e.model.DarkvisionMode
+import com.dndcharacterhandler.domain.dnd5e.model.FeatureSource
+import com.dndcharacterhandler.domain.dnd5e.model.InventoryArmorType
+import com.dndcharacterhandler.domain.dnd5e.model.InventoryCategory
+import com.dndcharacterhandler.domain.dnd5e.model.InventoryWeaponClass
+import com.dndcharacterhandler.domain.dnd5e.model.InventoryWeaponRangeType
+import com.dndcharacterhandler.domain.dnd5e.model.SpellcastingAbility
 
 @Entity(tableName = "characters")
 data class CharacterEntity(
@@ -98,9 +98,9 @@ data class CharacterEntity(
     val biography: String,
     val createdAt: Long,
     val updatedAt: Long,
-    /** [com.dndcharacterhandler.domain.model.CharacterClassEntry] list as JSON. */
+    /** [com.dndcharacterhandler.domain.dnd5e.model.CharacterClassEntry] list as JSON. */
     val classesJson: String = "[]",
-    /** [com.dndcharacterhandler.domain.model.AdvancementRecord] list as JSON. */
+    /** [com.dndcharacterhandler.domain.dnd5e.model.AdvancementRecord] list as JSON. */
     val advancementsJson: String = "[]"
 )
 

@@ -38,8 +38,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.dndcharacterhandler.domain.model.Condition
-import com.dndcharacterhandler.domain.rules.MAX_EXHAUSTION
+import com.dndcharacterhandler.domain.dnd5e.model.Condition
+import com.dndcharacterhandler.domain.dnd5e.rules.MAX_EXHAUSTION
 import com.dndcharacterhandler.presentation.components.ConcentrationIcon
 import com.dndcharacterhandler.presentation.components.EditSheet
 import com.dndcharacterhandler.presentation.components.accent
