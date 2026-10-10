@@ -113,6 +113,12 @@ def simplify_loop(loop, eps):
 
 def trace(field, w, h, blur=2, min_area=40.0, eps=0.4, margin=1.02):
     """The path (for a square viewport of the returned side) and the simplified loops in viewport coordinates."""
+    side, path, loops, _, _ = trace_box(field, w, h, blur, min_area, eps, margin)
+    return side, path, loops
+
+
+def trace_box(field, w, h, blur=2, min_area=40.0, eps=0.4, margin=1.02):
+    """As trace, and where the picture's origin lands: the viewport's (ox, oy) in the picture's coordinates."""
     smooth = box_blur(field, w, h, blur)
     loops = [l for l in contours(smooth, w, h) if abs(area(l)) > min_area]
     xs = [p[0] for l in loops for p in l]
@@ -124,7 +130,7 @@ def trace(field, w, h, blur=2, min_area=40.0, eps=0.4, margin=1.02):
     simple = [[(p[0] - ox, p[1] - oy) for p in simplify_loop(l, eps)] for l in loops]
     simple = [l for l in simple if len(l) >= 3]
     path = ''.join('M' + ' L'.join('%.1f %.1f' % p for p in l) + 'Z' for l in simple)
-    return side, path, simple
+    return side, path, simple, ox, oy
 
 
 def preview(loops, side, out_path, size=420, fill=(198, 163, 108), bg=(18, 16, 22)):

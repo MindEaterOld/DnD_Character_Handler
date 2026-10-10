@@ -9,7 +9,11 @@ scripts made the ones that weren't vectors already. Pure Python with Pillow, no 
 - `trace_mark.py` — a one-coloured mark on a dark ground traced as it is. Vampire: The Masquerade's ankh came from the
   owner's picture (red on black): `python tools/emblems/trace_mark.py ankh.jpg 105 0.35`.
 - `draw_starfinder.py` — the Starfinder Society's compass has no flat version, so it is drawn by the original's
-  measures and then traced.
+  measures and then traced: every point a straight-sided triangle split into its two faces, the Pathfinder Society's
+  glyph cut in the hub as on the original. It takes PathfinderWiki's `Pathfinder_Society_symbol.svg`:
+  `python tools/emblems/draw_starfinder.py Pathfinder_Society_symbol.svg out/` (`--disc` tries the star on a filled
+  disc — turned down, 2026-10-10: the star is lost on it).
+- `svg_path.py` — an SVG path's subpaths as polygons (for drawing the glyph into the hub).
 
 The others: D&D's ampersand is Simple Icons' path (CC0); Pathfinder's Glyph of the Open Road is Andrew Eakett's vector
 from PathfinderWiki, with a ring round it drawn in code. The marks are their owners' (Wizards of the Coast, Paizo,
