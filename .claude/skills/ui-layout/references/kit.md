@@ -52,6 +52,7 @@
 | `EndConcentrationDialog(spellName, onEnd, onDismiss)` | 2 | «Прервать концентрацию?» — с экрана заклинаний и из столбика состояний |
 | `Condition.icon` / `.nameKey` / `.accent()` (`ConditionVisuals.kt`) | 2 | Значок, ключ названия и цвет состояния |
 | `StepButton(icon, contentDescription, onClick, enabled, size)` / `NumberStepperField(label, value, onValueChange, minValue)` | 5 | Степпер: круг заливки `surface.button`, иконка `Remove`/`Add` (половина круга) в `text.primary`, у края — `text.subtle`; 48dp в окнах хитов и состояний, 30dp в поле «− число +», 28dp в ресурсах боя |
+| `GameSystemCard(system, onClick)` / `GameSystemSheet(selected, onPick, onDismiss)` / `GameSystemEmblem(family, size)` (`components/GameSystemPicker.kt`) | 1 | Игровая система в шторке персонажей (владелец, 2026-10-10): карточка-ячейка в золотой рамке с ромбами у подписи «Игровая система» — эмблема игры в двух кольцах на мягком золотом свечении, название игры `titleLarge`, редакция `bodyLarge` `text.muted`, значок «развернуть»; тап — шторка выбора: игры группами с эмблемой, редакции переключателями (выбранная — золото), у систем без листа «Скоро». Эмблема — никогда не логотип игры. `gameSystemName(system)` — «Pathfinder (2-я редакция)» |
 
 ## Текст, картинки, эффекты
 

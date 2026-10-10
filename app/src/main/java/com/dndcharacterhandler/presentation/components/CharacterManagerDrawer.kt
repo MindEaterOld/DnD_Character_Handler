@@ -1,5 +1,10 @@
 package com.dndcharacterhandler.presentation.components
 
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import com.dndcharacterhandler.domain.model.GameSystem
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -66,11 +71,14 @@ fun CharacterManagerDrawer(
     onDeleteCharacter: () -> Unit,
     onImportCharacter: () -> Unit,
     onOpenSettings: () -> Unit,
+    /** Turns the drawer to another game system: its characters, and new ones made in it. */
+    onPickGameSystem: (GameSystem) -> Unit,
     /** Null while there are no characters: the drawer can't be closed then. */
     onClose: (() -> Unit)?
 ) {
     val tokens = LocalDesignTokens.current.typography
     val colors = LocalDesignTokens.current.colors
+    var isPickingSystem by remember { mutableStateOf(false) }
 
     // The whole screen wide: with no scrim to tap beside it, it closes with the cross, Back or a swipe.
     Box(
@@ -104,7 +112,31 @@ fun CharacterManagerDrawer(
                     ),
                     color = colors.text.primary
                 )
-                DrawerOrnamentDivider(modifier = Modifier.padding(top = 4.dp, bottom = 10.dp))
+            }
+
+            // The game system heads the list: the characters under it are its own (owner's wish, 2026-10-10).
+            item {
+                GameSystemCard(
+                    system = state.gameSystem,
+                    onClick = { isPickingSystem = true },
+                    modifier = Modifier.padding(top = 12.dp)
+                )
+                DrawerOrnamentDivider(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp))
+            }
+
+            if (state.isLoaded && state.characters.isEmpty()) {
+                item {
+                    Text(
+                        text = if (state.gameSystem.available) {
+                            text("drawer_no_characters")
+                        } else {
+                            LocalStrings.current.format("drawer_system_in_development", gameSystemName(state.gameSystem))
+                        },
+                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 6.dp),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = colors.text.muted
+                    )
+                }
             }
 
             items(state.characters, key = { it.character.id }) { characterBundle ->
@@ -115,13 +147,16 @@ fun CharacterManagerDrawer(
                 )
             }
 
-            item {
-                DrawerActionCard(
-                    label = text("drawer_new_character"),
-                    icon = Icons.Outlined.AddCircleOutline,
-                    onClick = onCreateCharacter,
-                    modifier = Modifier.padding(top = 16.dp)
-                )
+            // Characters are made in a system with its rules and sheet only.
+            if (state.gameSystem.available) {
+                item {
+                    DrawerActionCard(
+                        label = text("drawer_new_character"),
+                        icon = Icons.Outlined.AddCircleOutline,
+                        onClick = onCreateCharacter,
+                        modifier = Modifier.padding(top = 16.dp)
+                    )
+                }
             }
 
             // Export and delete act on the selected character: none without characters.
@@ -170,6 +205,13 @@ fun CharacterManagerDrawer(
         if (onClose != null) {
             OverlayCloseButton(onClick = onClose, modifier = Modifier.align(Alignment.TopEnd))
         }
+    }
+    if (isPickingSystem) {
+        GameSystemSheet(
+            selected = state.gameSystem,
+            onPick = onPickGameSystem,
+            onDismiss = { isPickingSystem = false }
+        )
     }
 }
 

@@ -2,123 +2,72 @@ package com.dndcharacterhandler.presentation.components
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import com.dndcharacterhandler.data.localization.LocalizedStrings
+import com.dndcharacterhandler.data.localization.LocalizationRepository
 import com.dndcharacterhandler.domain.model.AppLanguage
+import com.dndcharacterhandler.domain.model.AppTheme
 import com.dndcharacterhandler.domain.model.ArmorClassMode
 import com.dndcharacterhandler.domain.model.Character
 import com.dndcharacterhandler.domain.model.CharacterBundle
+import com.dndcharacterhandler.domain.model.GameSystem
 import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.theme.DnDTheme
 
-@Preview(
-    name = "Character Manager Drawer",
-    showBackground = true,
-    showSystemUi = true,
-    device = "spec:width=412dp,height=915dp"
-)
+/** The drawer in [theme] with the app's own Russian texts, listing [state]'s characters. */
 @Composable
-fun CharacterManagerDrawerPreview() {
-    val previewStrings = LocalizedStrings(
-        language = AppLanguage.ENGLISH,
-        values = mapOf(
-            "drawer_characters" to "Characters",
-            "drawer_new_character" to "New Character",
-            "drawer_export_character" to "Export Character",
-            "drawer_delete_character" to "Delete Character",
-            "drawer_import_character" to "Import Character",
-            "overview_settings" to "Settings",
-            "drawer_level" to "Level %1\$s",
-            "overview_name_placeholder" to "Character Name",
-            "placeholder_race" to "Human",
-            "placeholder_class" to "Wizard",
-            "placeholder_subclass" to "Subclass",
-            "language_en" to "English",
-            "language_ru" to "Russian",
-            "language_de" to "German",
-            "language_fr" to "French",
-            "language_es" to "Spanish"
-        )
-    )
-
-    CompositionLocalProvider(LocalStrings provides previewStrings) {
-        DnDTheme {
+private fun DrawerPreview(state: CharacterManagerUiState, theme: AppTheme = AppTheme.CLASSIC, closable: Boolean = true) {
+    val context = LocalContext.current
+    val strings = remember { LocalizationRepository(context).getStrings(AppLanguage.RUSSIAN) }
+    CompositionLocalProvider(LocalStrings provides strings) {
+        DnDTheme(theme) {
             CharacterManagerDrawer(
-                state = CharacterManagerUiState(
-                    characters = listOf(
-                        previewCharacterBundle(
-                            id = 1,
-                            name = "Alaric Stormwind",
-                            race = "Human",
-                            characterClass = "Wizard",
-                            subclass = "Divination",
-                            level = 7
-                        ),
-                        previewCharacterBundle(
-                            id = 2,
-                            name = "Thorin Ironbeard",
-                            race = "Dwarf",
-                            characterClass = "Fighter",
-                            subclass = "",
-                            level = 5
-                        ),
-                        previewCharacterBundle(
-                            id = 3,
-                            name = "Elara Moonshadow",
-                            race = "Elf",
-                            characterClass = "Ranger",
-                            subclass = "",
-                            level = 8
-                        )
-                    ),
-                    selectedCharacterId = 1,
-                    language = AppLanguage.ENGLISH
-                ),
+                state = state,
                 onSelectCharacter = {},
                 onCreateCharacter = {},
                 onExportCharacter = {},
                 onDeleteCharacter = {},
                 onImportCharacter = {},
                 onOpenSettings = {},
-                onClose = {}
+                onPickGameSystem = {},
+                onClose = if (closable) ({}) else null
             )
         }
     }
 }
+
+private val previewCharacters = listOf(
+    previewCharacterBundle(id = 1, name = "Аларик Штормвинд", race = "Человек", characterClass = "Волшебник", subclass = "Прорицатель", level = 7),
+    previewCharacterBundle(id = 2, name = "Торин Железнобородый", race = "Дварф", characterClass = "Воин", subclass = "", level = 5),
+    previewCharacterBundle(id = 3, name = "Элара Лунная Тень", race = "Эльф", characterClass = "Следопыт", subclass = "", level = 8)
+)
+
+@Preview(name = "Character Manager Drawer", showBackground = true, showSystemUi = true, device = "spec:width=412dp,height=915dp")
+@Composable
+fun CharacterManagerDrawerPreview() = DrawerPreview(
+    CharacterManagerUiState(characters = previewCharacters, selectedCharacterId = 1, isLoaded = true)
+)
+
+@Preview(name = "Character Manager Drawer — engraving", showBackground = true, showSystemUi = true, device = "spec:width=412dp,height=915dp")
+@Composable
+fun CharacterManagerDrawerEngravedPreview() = DrawerPreview(
+    CharacterManagerUiState(characters = previewCharacters, selectedCharacterId = 1, isLoaded = true),
+    theme = AppTheme.ENGRAVED
+)
 
 /** The first launch: no characters, so only "New Character" and "Import", and no close button. */
-@Preview(
-    name = "Character Manager Drawer — no characters",
-    showBackground = true,
-    showSystemUi = true,
-    device = "spec:width=412dp,height=915dp"
-)
+@Preview(name = "Character Manager Drawer — no characters", showBackground = true, showSystemUi = true, device = "spec:width=412dp,height=915dp")
 @Composable
-fun CharacterManagerDrawerEmptyPreview() {
-    val previewStrings = LocalizedStrings(
-        language = AppLanguage.ENGLISH,
-        values = mapOf(
-            "drawer_characters" to "Characters",
-            "drawer_new_character" to "New Character",
-            "drawer_import_character" to "Import Character",
-            "overview_settings" to "Settings"
-        )
-    )
-    CompositionLocalProvider(LocalStrings provides previewStrings) {
-        DnDTheme {
-            CharacterManagerDrawer(
-                state = CharacterManagerUiState(isLoaded = true, language = AppLanguage.ENGLISH),
-                onSelectCharacter = {},
-                onCreateCharacter = {},
-                onExportCharacter = {},
-                onDeleteCharacter = {},
-                onImportCharacter = {},
-                onOpenSettings = {},
-                onClose = null
-            )
-        }
-    }
-}
+fun CharacterManagerDrawerEmptyPreview() = DrawerPreview(CharacterManagerUiState(isLoaded = true), closable = false)
+
+/** A system without its sheet yet: its list says so, and no character can be made in it. */
+@Preview(name = "Character Manager Drawer — a system in development", showBackground = true, showSystemUi = true, device = "spec:width=412dp,height=915dp")
+@Composable
+fun CharacterManagerDrawerSystemInDevelopmentPreview() = DrawerPreview(
+    CharacterManagerUiState(gameSystem = GameSystem.PATHFINDER_2E, isLoaded = true),
+    closable = false
+)
 
 private fun previewCharacterBundle(
     id: Long,

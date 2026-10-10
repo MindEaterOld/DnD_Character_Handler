@@ -108,6 +108,13 @@ What can be pressed as an action and what shows a value must look different at a
 - In Russian exhaustion is «Истощение» (the owner's word); the other names and languages are as the catalog and the 2024 books have them.
 - Damage types in Russian are the catalog's words everywhere (combat, inventory, the spell editor, defenses): radiant is **«Лучистый»**, never «Сияние» or «Излучение» (owner's choice, 2026-10-04); force «Сила», lightning «Молния», thunder «Гром», necrotic «Некротический», psychic «Психический».
 
+## Game systems — a character belongs to one (owner's wish, 2026-10-10)
+
+- The app is not for D&D 5e (2024) alone: D&D 5e (2014), Pathfinder, Starfinder and Vampire: The Masquerade come after it. `GameSystem` (`domain/model/GameSystem.kt`) is a game's edition — its rules, catalogs and sheet — grouped by `GameSystemFamily`; its `key` (`dnd5e_2024`, `pf2e`…) is stored with the character (`characters.gameSystem`), in its archive (`gameSystem`, schema 27) and in the settings (`game_system`): **never change a key**. Only an `available` system has its rules and sheet — D&D 5e (2024) for now; the others can be picked, their list is empty and says they are coming, and no character is made in them.
+- A character exists in its own system only: the drawer lists the picked system's characters (`CharacterManagerViewModel`), a new one is made in it, an import turns the drawer to the archive's system. With none in the system, the drawer stays open, as on the first launch.
+- **The drawer's top card** (`GameSystemCard`, under «Персонажи»): the game's emblem in gold inside two rings over a soft gold glow (`GameSystemEmblem` — an emblem, never the game's logo: a d20, a compass, a rocket, a drop of blood), the game's name in the serif `titleLarge`, the edition under it in `bodyLarge` `text.muted`, an unfold mark at its end. It shows a value and a tap changes it, so it is a cell: a gold outline with the ability cards' diamonds at its label's gap («Игровая система»), no fill. A tap opens **the picker** (`GameSystemSheet`, a sheet): the games as groups, each with its emblem, their editions as toggles — the picked one gold, a system without its sheet with «Скоро» at its end; a tap picks and closes.
+- The plan — what is a system's own and what is shared, stage by stage — is `docs/GAME_SYSTEMS.md`.
+
 ## Naming — Character Wizard
 
 The step-by-step character building and level-up system is called **Character Wizard**. It's a name: write it in English in every language and never translate it (not «мастер», «Assistent», «assistant», «asistente»). Use it in texts and when talking to the project owner.

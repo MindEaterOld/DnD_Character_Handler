@@ -218,6 +218,7 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                             importLauncher.launch(arrayOf("application/octet-stream", "application/zip", "*/*"))
                         },
                         onOpenSettings = { isSettingsOpen = true },
+                        onPickGameSystem = appState.characterManagerViewModel::setGameSystem,
                         onClose = if (hasNoCharacters) null else ({ scope.launch { drawerState.close() } })
                     )
                 }

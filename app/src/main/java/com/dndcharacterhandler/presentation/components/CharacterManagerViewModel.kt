@@ -1,5 +1,7 @@
 package com.dndcharacterhandler.presentation.components
 
+import kotlinx.coroutines.flow.combine
+import com.dndcharacterhandler.domain.model.GameSystem
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dndcharacterhandler.data.preferences.LanguagePreferencesRepository
@@ -21,6 +23,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 data class CharacterManagerUiState(
+    /** The picked game system: the drawer lists its characters only, and new ones are made in it. */
+    val gameSystem: GameSystem = GameSystem.DEFAULT,
+    /** The [gameSystem]'s characters, the last changed first. */
     val characters: List<CharacterBundle> = emptyList(),
     val selectedCharacterId: Long? = null,
     val language: AppLanguage = AppLanguage.ENGLISH,
@@ -53,11 +58,14 @@ class CharacterManagerViewModel(
             }
         }
         viewModelScope.launch {
-            characterRepository.observeCharacters().collectLatest { characters ->
+            // A character exists in its own system only: the list and the selection are the picked system's.
+            combine(characterRepository.observeCharacters(), languagePreferencesRepository.gameSystem) { all, system ->
+                system to all.filter { it.character.gameSystem == system }
+            }.collectLatest { (system, characters) ->
                 if (characters.isEmpty()) {
-                    // No characters (first launch, or the last one deleted): nothing is made up; the
-                    // app opens the drawer, where the player creates or imports one.
-                    applySelection(null, characters = emptyList())
+                    // No characters (first launch, the last one deleted, a system with none yet): nothing is
+                    // made up; the app opens the drawer, where the player creates, imports or picks another system.
+                    applySelection(null, characters = emptyList(), system = system)
                 } else {
                     val currentSelectedId = _uiState.value.selectedCharacterId
                         ?: languagePreferencesRepository.selectedCharacterId.first()
@@ -66,17 +74,18 @@ class CharacterManagerViewModel(
                         ?.character
                         ?.id
                         ?: characters.first().character.id
-                    applySelection(selected, characters = characters)
+                    applySelection(selected, characters = characters, system = system)
                 }
             }
         }
     }
 
     /** Updates the in-memory selection and persists it (only when it actually changed). */
-    private suspend fun applySelection(characterId: Long?, characters: List<CharacterBundle>) {
+    private suspend fun applySelection(characterId: Long?, characters: List<CharacterBundle>, system: GameSystem) {
         val changed = _uiState.value.selectedCharacterId != characterId
         selectedCharacterHolder.setSelectedCharacterId(characterId)
         _uiState.value = _uiState.value.copy(
+            gameSystem = system,
             characters = characters,
             selectedCharacterId = characterId,
             isLoaded = true
@@ -93,8 +102,12 @@ class CharacterManagerViewModel(
     }
 
     fun createCharacter() {
+        val system = _uiState.value.gameSystem
+        // A system without its rules and sheet yet has no characters to make.
+        if (!system.available) return
         viewModelScope.launch {
-            val id = characterRepository.createCharacter(defaultCharacterBundle())
+            val blank = defaultCharacterBundle()
+            val id = characterRepository.createCharacter(blank.copy(character = blank.character.copy(gameSystem = system)))
             selectedCharacterHolder.setSelectedCharacterId(id)
             _uiState.value = _uiState.value.copy(selectedCharacterId = id)
             languagePreferencesRepository.setSelectedCharacterId(id)
@@ -114,6 +127,10 @@ class CharacterManagerViewModel(
             val result = fileRepository.importCharacter(sourceUri)
             if (result.isSuccess) {
                 val characterId = result.getOrThrow()
+                // The drawer turns to the imported character's system, then picks it there.
+                characterRepository.observeCharacter(characterId).first()?.character?.gameSystem?.let { system ->
+                    languagePreferencesRepository.setGameSystem(system)
+                }
                 selectedCharacterHolder.setSelectedCharacterId(characterId)
                 _uiState.value = _uiState.value.copy(selectedCharacterId = characterId)
                 languagePreferencesRepository.setSelectedCharacterId(characterId)
@@ -132,6 +149,11 @@ class CharacterManagerViewModel(
             _uiState.value = _uiState.value.copy(selectedCharacterId = null)
             languagePreferencesRepository.setSelectedCharacterId(null)
         }
+    }
+
+    /** Turns the drawer to [system]: its characters, the last changed of them picked. */
+    fun setGameSystem(system: GameSystem) {
+        viewModelScope.launch { languagePreferencesRepository.setGameSystem(system) }
     }
 
     fun setTheme(theme: AppTheme) {
