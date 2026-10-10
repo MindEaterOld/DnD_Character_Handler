@@ -1,4 +1,5 @@
 package com.dndcharacterhandler.presentation.overview
+import androidx.compose.foundation.layout.paddingFromBaseline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.ui.unit.Dp
@@ -1764,15 +1765,17 @@ private fun KeyStats(
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         KeyStatsRule()
-        Spacer(modifier = Modifier.height(10.dp))
         if (character.currentHp == 0) {
+            Spacer(modifier = Modifier.height(10.dp))
             DeathSavesRow(
                 successes = character.deathSaveSuccesses,
                 failures = character.deathSaveFailures,
                 onSetSaves = onSetSaves,
                 onRoll = onRollSave
             )
+            Spacer(modifier = Modifier.height(10.dp))
         } else {
+            // The air over and under the stats is their own: measured from the writing, not its boxes (KeyStat).
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(ColumnGap)) {
                 KeyStat(
                     label = text("stat_card_proficiency"),
@@ -1799,16 +1802,28 @@ private fun KeyStats(
                 )
             }
         }
-        Spacer(modifier = Modifier.height(10.dp))
         KeyStatsRule()
     }
 }
+
+/**
+ * Between the rules and the stats' writing, the same over and under (owner, 2026-10-10 — the boxes' air read larger
+ * under the values: their line keeps room for descenders the digits don't have): from a rule to the labels' capitals'
+ * top and from the values' baseline to the rule.
+ */
+private val KeyStatAir = 20.dp
+
+/** The rules' height, their line in its middle. */
+private val KeyStatsRuleHeight = 9.dp
+
+/** The capitals' height in the body font (Roboto), of its size: where a label's capitals end above its baseline. */
+private const val BodyCapHeight = 0.711f
 
 /** A gold rule melting away toward its ends, a small diamond in its middle (`primary` at half, as the ornaments). */
 @Composable
 private fun KeyStatsRule() {
     val gold = MaterialTheme.colorScheme.primary.copy(alpha = LocalDesignTokens.current.alpha.half)
-    Canvas(modifier = Modifier.fillMaxWidth().height(9.dp)) {
+    Canvas(modifier = Modifier.fillMaxWidth().height(KeyStatsRuleHeight)) {
         val y = size.height / 2
         drawLine(
             brush = Brush.horizontalGradient(listOf(Color.Transparent, gold, gold, Color.Transparent)),
@@ -1904,23 +1919,35 @@ private fun KeyStat(
     val token = LocalDesignTokens.current.typography.miniStatValue
     val number = KeyStatNumber.matchEntire(value)
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        val labelStyle = MaterialTheme.typography.labelMedium
+        // From the rule above to the label's baseline: the air, then the capitals; from the value's baseline to the
+        // rule below: the air. Each less the rule's half, whose line is in its middle.
+        val airOverBaseline = KeyStatAir - KeyStatsRuleHeight / 2 +
+            with(LocalDensity.current) { (labelStyle.fontSize.value * BodyCapHeight).sp.toDp() }
+        val airUnderBaseline = KeyStatAir - KeyStatsRuleHeight / 2
         Column(
             modifier = Modifier
                 .clip(RoundedCornerShape(10.dp))
                 .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-                .padding(horizontal = 6.dp, vertical = 2.dp),
+                .padding(horizontal = 6.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            SheetLabel(label)
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            SheetLabel(label, modifier = Modifier.paddingFromBaseline(top = airOverBaseline))
+            Row(
+                modifier = Modifier.paddingFromBaseline(bottom = airUnderBaseline),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
                 if (worse || better) {
                     RollMarker(worse = worse, better = better, size = 20.dp)
                 } else {
                     Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
                 }
-                Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                // The unit on the number's baseline.
+                Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
                     Text(
                         text = number?.groupValues?.get(1) ?: value,
+                        modifier = Modifier.alignByBaseline(),
                         style = MaterialTheme.typography.headlineMedium.copy(
                             fontSize = token.fontSizeSp.sp,
                             lineHeight = (token.lineHeightSp ?: token.fontSizeSp).sp
@@ -1931,7 +1958,7 @@ private fun KeyStat(
                     number?.groupValues?.get(2)?.takeIf { it.isNotEmpty() }?.let { unit ->
                         Text(
                             text = unit,
-                            modifier = Modifier.padding(bottom = 4.dp),
+                            modifier = Modifier.alignByBaseline(),
                             style = MaterialTheme.typography.bodyLarge,
                             color = colors.text.muted,
                             maxLines = 1
