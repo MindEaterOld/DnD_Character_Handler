@@ -1827,7 +1827,7 @@ private val SheetGroupColumnGap = 10.dp
 /**
  * A group's frame (owner's choices from boards, 2026-10-10: A, Б1 — before, a line per field in one frame), named in
  * its top edge's gap as a skills' group, a value a line ([SheetGroupLine]) — in [columns] columns, down the first and
- * then the next; «Нет» muted, as every «Нет». A group longer than [SheetGroupMaxLines] lines shows one line fewer and
+ * then the next; an empty one says «+ Добавить» in its middle ([SheetGroupAdd]). A group longer than [SheetGroupMaxLines] lines shows one line fewer and
  * «Ещё K» under them — never «Ещё 1», as that line would hold the value itself — and unfolds in place, «Свернуть» at
  * its foot ([SheetGroupFold]). A tap on the frame edits the group.
  */
@@ -1849,8 +1849,12 @@ private fun SheetGroupCard(
         onClick = group.onClick
     ) {
         // The skills' groups' insets: the label clears the first line, the gaps between frames come out even.
-        Column(modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)) {
-            if (values.isEmpty()) SheetGroupLine(LocalStrings.current["common_none"], none = true)
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .padding(top = 8.dp, bottom = 4.dp)
+        ) {
+            if (values.isEmpty()) SheetGroupAdd()
             if (columns == 1) {
                 shown.forEach { SheetGroupLine(it) }
             } else if (shown.isNotEmpty()) {
@@ -1880,12 +1884,35 @@ private fun SheetGroupCard(
 private const val SheetGroupMaxLines = 5
 
 /**
+ * An empty group's frame (owner's choice from boards, 2026-10-10: 3 — before, «Нет» where a value starts, which read as
+ * a value begun): a quiet «+ Добавить» in its middle, across and down — even in a frame stretched beside a fuller one —
+ * as the conditions' «+ Состояние»: the icon and the word in `text.label`, no fill; the tap is the frame's, opening its
+ * editor.
+ */
+@Composable
+private fun SheetGroupAdd() {
+    val colors = LocalDesignTokens.current.colors
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight()
+            .heightIn(min = 30.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            Icon(Icons.Outlined.Add, contentDescription = null, tint = colors.text.label, modifier = Modifier.size(18.dp))
+            Text(text = LocalStrings.current["common_add"], style = MaterialTheme.typography.bodyMedium, color = colors.text.label)
+        }
+    }
+}
+
+/**
  * A value of a group: a dot (5dp) in the plain ring's colour, the value in `bodyMedium` `text.primary`, a line 30dp;
  * a long one wraps under itself, the dot staying by its first line. The dot and the word stand on the skills' lines
  * above: the dot in their training dot's 12dp, 8dp in, the word 6dp after it.
  */
 @Composable
-private fun SheetGroupLine(value: String, none: Boolean = false) {
+private fun SheetGroupLine(value: String) {
     val colors = LocalDesignTokens.current.colors
     Row(
         modifier = Modifier
@@ -1893,27 +1920,25 @@ private fun SheetGroupLine(value: String, none: Boolean = false) {
             .padding(horizontal = 8.dp),
         verticalAlignment = Alignment.Top
     ) {
-        // The dot centred on the first line's 30dp; «Нет» has none, but starts where the values do.
+        // The dot centred on the first line's 30dp.
         Box(
             modifier = Modifier
                 .padding(top = 9.dp)
                 .size(12.dp),
             contentAlignment = Alignment.Center
         ) {
-            if (!none) {
-                Box(
-                    modifier = Modifier
-                        .size(5.dp)
-                        .clip(CircleShape)
-                        .background(colors.text.label)
-                )
-            }
+            Box(
+                modifier = Modifier
+                    .size(5.dp)
+                    .clip(CircleShape)
+                    .background(colors.text.label)
+            )
         }
         Text(
             text = value,
             modifier = Modifier.padding(start = 6.dp, top = 5.dp, bottom = 5.dp),
             style = MaterialTheme.typography.bodyMedium,
-            color = if (none) colors.text.muted else colors.text.primary
+            color = colors.text.primary
         )
     }
 }
