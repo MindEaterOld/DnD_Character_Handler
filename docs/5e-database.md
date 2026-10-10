@@ -4,7 +4,8 @@ The project uses `5e-bits/5e-database` as a git submodule in `external/5e-databa
 
 Why this setup:
 - We keep the upstream history and can pull new releases without copying files by hand.
-- The app reads the 2024 SRD JSON files directly from the submodule through Android `assets`.
+- The app reads two 2024 SRD JSON files from the submodule: `app/build.gradle.kts` (task `dnd5eSrdAssets`) copies
+  them into the assets at build time, under D&D 5e (2024)'s own folder `systems/dnd5e_2024/srd/` (docs/GAME_SYSTEMS.md).
 - Character inventory remains local to each character; catalog items are only templates.
 
 Useful commands:

@@ -30,6 +30,9 @@ enum class GameSystem(
     STARFINDER_1E("sf1e", GameSystemFamily.STARFINDER, "game_edition_sf1e", available = false),
     VAMPIRE_V5("vtm5", GameSystemFamily.VAMPIRE, "game_edition_vtm5", available = false);
 
+    /** The system's own files in the app's assets (its catalogs); what every system shares lies outside. */
+    val assetsRoot: String get() = "systems/$key"
+
     companion object {
         /** Every character made before the systems, and the pick until the player makes another. */
         val DEFAULT = DND_5E_2024

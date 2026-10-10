@@ -24,7 +24,7 @@ class LevelUpEngineTest {
         @BeforeClass
         @JvmStatic
         fun load() {
-            val file = listOf("src/main/assets/character_catalog.json", "app/src/main/assets/character_catalog.json")
+            val file = listOf("src/main/assets/systems/dnd5e_2024/character_catalog.json", "app/src/main/assets/systems/dnd5e_2024/character_catalog.json")
                 .map(::File).first { it.exists() }
             catalog = CharacterCatalogParser.parse(file.readText())
             engine = LevelUpEngine(catalog)

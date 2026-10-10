@@ -53,14 +53,38 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+}
 
-    sourceSets {
-        getByName("main") {
-            assets.srcDirs(
-                "src/main/assets",
-                "../external/5e-database/src/2024/en"
-            )
-        }
+/**
+ * The D&D 5e (2024) SRD files the app reads, from the 5e-database submodule, under the system's own folder in the
+ * assets (`systems/dnd5e_2024/srd/`, docs/GAME_SYSTEMS.md) — these two only, not the whole SRD.
+ */
+abstract class Dnd5eSrdAssets : DefaultTask() {
+    @get:InputFiles
+    abstract val sources: ConfigurableFileCollection
+
+    @get:OutputDirectory
+    abstract val outputDir: DirectoryProperty
+
+    @TaskAction
+    fun copy() {
+        val target = outputDir.get().asFile.resolve("systems/dnd5e_2024/srd")
+        target.deleteRecursively()
+        target.mkdirs()
+        sources.files.forEach { it.copyTo(target.resolve(it.name), overwrite = true) }
+    }
+}
+
+val dnd5eSrdAssets = tasks.register<Dnd5eSrdAssets>("dnd5eSrdAssets") {
+    sources.from(
+        listOf("5e-SRD-Equipment.json", "5e-SRD-Magic-Items.json")
+            .map { rootProject.file("external/5e-database/src/2024/en/$it") }
+    )
+}
+
+androidComponents {
+    onVariants { variant ->
+        variant.sources.assets?.addGeneratedSourceDirectory(dnd5eSrdAssets, Dnd5eSrdAssets::outputDir)
     }
 }
 

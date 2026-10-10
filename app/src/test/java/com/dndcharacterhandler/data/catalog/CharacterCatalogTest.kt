@@ -23,7 +23,7 @@ class CharacterCatalogTest {
         @JvmStatic
         fun load() {
             // Unit tests run from the module directory; allow the repository root too.
-            val file = listOf("src/main/assets/character_catalog.json", "app/src/main/assets/character_catalog.json")
+            val file = listOf("src/main/assets/systems/dnd5e_2024/character_catalog.json", "app/src/main/assets/systems/dnd5e_2024/character_catalog.json")
                 .map(::File).first { it.exists() }
             catalog = CharacterCatalogParser.parse(file.readText())
         }

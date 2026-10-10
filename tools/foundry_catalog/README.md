@@ -1,6 +1,6 @@
 # Character catalog from Foundry
 
-`app/src/main/assets/character_catalog.json` — classes, subclasses, species, backgrounds and every
+`app/src/main/assets/systems/dnd5e_2024/character_catalog.json` — classes, subclasses, species, backgrounds and every
 feature, option and feat with their level progression, and the spells with the spell lists they are
 on — is built from the Foundry VTT compendiums of the D&D world:
 

@@ -40,7 +40,7 @@ import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.longOrNull
 
-/** Reads character_catalog.json, the catalog tools/foundry_catalog/convert.py builds. */
+/** Reads D&D 5e (2024)'s character_catalog.json (`Dnd5eAssets.characterCatalog`), built by tools/foundry_catalog/convert.py. */
 object CharacterCatalogParser {
     fun parse(json: String): CharacterCatalog {
         val root = parseJsonObject(json)

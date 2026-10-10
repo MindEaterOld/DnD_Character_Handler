@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.data.repository
 
+import com.dndcharacterhandler.data.dnd5e.Dnd5eAssets
 import android.content.Context
 import com.dndcharacterhandler.data.json.has
 import com.dndcharacterhandler.data.json.isNull
@@ -46,7 +47,7 @@ class AssetInventoryCatalogRepository(
     }
 
     private suspend fun loadItems(): List<InventoryCatalogItem> = withContext(Dispatchers.IO) {
-        val equipmentJson = readArray("5e-SRD-Equipment.json")
+        val equipmentJson = readArray(Dnd5eAssets.srdEquipment)
         val equipmentItems = equipmentJson.mapNotNull(::parseEquipmentItem)
         val ammunitionIds = equipmentJson.objects()
             .filter { json -> json.optArray("equipment_categories").categoryNames().contains("Ammunition") }
@@ -54,7 +55,7 @@ class AssetInventoryCatalogRepository(
             .toSet()
         val russian = readRussianText()
         val magicItems = parseMagicItems(
-            entries = readArray("5e-SRD-Magic-Items.json").objects(),
+            entries = readArray(Dnd5eAssets.srdMagicItems).objects(),
             equipment = equipmentItems,
             ammunitionIds = ammunitionIds,
             russian = russian
@@ -181,7 +182,7 @@ class AssetInventoryCatalogRepository(
     /** Russian names/descriptions keyed by catalog id ("equipment:<index>", "magic:<index>"), from TTG Club. */
     private fun readRussianText(): JsonObject =
         runCatching {
-            parseJsonObject(context.assets.open("inventory_text_ru.json").bufferedReader().use { it.readText() })
+            parseJsonObject(context.assets.open(Dnd5eAssets.inventoryTextRu).bufferedReader().use { it.readText() })
         }.getOrDefault(JsonObject(emptyMap()))
 
     private fun InventoryCatalogItem.withRussianText(text: JsonObject?): InventoryCatalogItem =

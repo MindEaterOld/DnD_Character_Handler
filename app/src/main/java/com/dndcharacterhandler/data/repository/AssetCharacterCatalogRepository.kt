@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.data.repository
 
+import com.dndcharacterhandler.data.dnd5e.Dnd5eAssets
 import android.content.Context
 import android.util.Log
 import com.dndcharacterhandler.data.catalog.CharacterCatalogParser
@@ -10,7 +11,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
-/** Loads character_catalog.json (built by tools/foundry_catalog/convert.py) once. */
+/** Loads D&D 5e (2024)'s character catalog (built by tools/foundry_catalog/convert.py) once. */
 class AssetCharacterCatalogRepository(
     private val context: Context
 ) : CharacterCatalogRepository {
@@ -35,7 +36,7 @@ class AssetCharacterCatalogRepository(
     }
 
     private companion object {
-        const val ASSET = "character_catalog.json"
+        val ASSET = Dnd5eAssets.characterCatalog
         const val TAG = "CharacterCatalog"
     }
 }

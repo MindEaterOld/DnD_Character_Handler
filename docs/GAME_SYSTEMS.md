@@ -40,11 +40,11 @@ Vampire: The Masquerade. Персонаж привязан к одной сис�
 
 ## Этап 3. Файлы D&D 5e — отдельно
 
-- [ ] Каталоги D&D 5e (2024) — в `assets/systems/dnd5e_2024/`: `character_catalog.json`,
+- [x] Каталоги D&D 5e (2024) — в `assets/systems/dnd5e_2024/`: `character_catalog.json`,
       `inventory_text_ru.json`, из 5e-database — только два файла SRD, которые читаются
       (`srd/5e-SRD-Equipment.json`, `srd/5e-SRD-Magic-Items.json`), а не вся папка.
-- [ ] Пути к ним — в одном месте (`Dnd5eAssets`), `GameSystem` знает корень своих файлов.
-- [ ] Скрипты `tools/foundry_catalog` пишут каталог по новому пути.
+- [x] Пути к ним — в одном месте (`Dnd5eAssets`), `GameSystem` знает корень своих файлов.
+- [x] Скрипты `tools/foundry_catalog` пишут каталог по новому пути.
 
 ## Этап 4. Код D&D 5e — отдельно
 

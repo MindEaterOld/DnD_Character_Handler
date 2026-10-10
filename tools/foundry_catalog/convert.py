@@ -1,4 +1,4 @@
-"""Builds the app's character catalog (app/src/main/assets/character_catalog.json) from the Foundry
+"""Builds the app's character catalog (app/src/main/assets/systems/dnd5e_2024/character_catalog.json) from the Foundry
 compendium dumps in ./export (see export_foundry.js).
 
 Russian comes from AG Fifthpendium (full PHB 2024 plus supplements, names like 'Ярость [Rage]').
@@ -22,7 +22,7 @@ LEGACY = os.path.join(HERE, 'legacy')
 TRANSLATIONS = os.path.join(HERE, 'translations')
 REPO = os.path.dirname(os.path.dirname(HERE))
 SRD_2024 = os.path.join(REPO, 'external', '5e-database', 'src', '2024', 'en')
-DEFAULT_OUT = os.path.join(REPO, 'app', 'src', 'main', 'assets', 'character_catalog.json')
+DEFAULT_OUT = os.path.join(REPO, 'app', 'src', 'main', 'assets', 'systems', 'dnd5e_2024', 'character_catalog.json')
 
 PRIMARY_PACKS = [
     'ag-fifthpendium.classes', 'ag-fifthpendium.feats', 'ag-fifthpendium.origins',

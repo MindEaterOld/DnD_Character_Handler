@@ -53,7 +53,20 @@ Examples:
 - `portraits/placeholders/default_mage.png`
 - `portraits/placeholders/default_rogue.png`
 
-## 4. User-provided media
+## 4. `assets/systems/<key>/` — a game system's own files
+
+What belongs to one game system (its catalogs, its texts of rules) lies in its folder, named by its `GameSystem.key`
+(docs/GAME_SYSTEMS.md); what every system shares (design tokens, the interface's texts, icons, portraits, fonts,
+sounds) stays at the root.
+
+- `systems/dnd5e_2024/character_catalog.json` — classes, species, backgrounds, feats, spells (tools/foundry_catalog).
+- `systems/dnd5e_2024/inventory_text_ru.json` — the inventory's items in Russian.
+- `systems/dnd5e_2024/srd/` — two SRD 5.2 files from the 5e-database submodule, copied in at build time
+  (`dnd5eSrdAssets` in app/build.gradle.kts).
+
+Code reads the paths from one place per system (`Dnd5eAssets`), never as string literals.
+
+## 5. User-provided media
 
 User portraits and imported custom icons should remain in app-local file storage and continue to be exported through `.dndchar` archives.
 
