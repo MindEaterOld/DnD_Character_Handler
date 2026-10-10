@@ -21,7 +21,6 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
-import com.dndcharacterhandler.presentation.biography.BiographyLabel
 import com.dndcharacterhandler.presentation.components.OutlinedPanel
 import com.dndcharacterhandler.presentation.components.StepButton
 import com.dndcharacterhandler.presentation.components.ToggleChip
@@ -633,8 +632,8 @@ internal fun attributesSectionItems(
 
         item {
             AttributesSectionTitle(title = text("attributes_proficiencies"))
-            // One frame, a field under another, drawn as the biography's (owner's wishes, 2026-10-05, 2026-10-08); a tap
-            // on a field edits it.
+            // One frame, a line per field as the skills' (owner's choice from boards, 2026-10-10: C); a tap on a field
+            // edits it.
             SheetPanel {
                 SheetRow(
                     icon = ProficiencyIconArmor,
@@ -1778,9 +1777,12 @@ private fun SaveLine(score: AbilityScore, proficiencyBonus: Int, effects: RollEf
 }
 
 /**
- * A field of the sheet's panels, drawn as the biography's (owner's wish, 2026-10-08): its icon in gold at the middle
- * of the name and the first line, the name in gold spaced capitals over its values, «None» quiet; the space parts
- * the fields, no rules. A tap edits it.
+ * A field of the sheet's panels (owner's choice from boards, 2026-10-10: C — before, the biography's gold capitals over
+ * the values, which stood apart from the overview's frames), drawn as a skill's line and a sense's: the icon (16dp) in the
+ * plain ring's colour on the skills' dots' line (14dp in), the name muted (`bodyMedium`) where theirs starts (26dp), the
+ * values (`bodyLarge`, `text.primary`) after it, ending where the skills' bonuses do (8dp in) and wrapping under
+ * themselves when long; a line is 36dp, as theirs, and a longer one keeps the icon and the name on its first line.
+ * «Нет» muted, as every «Нет». A tap edits it.
  */
 @Composable
 private fun SheetRow(
@@ -1793,34 +1795,51 @@ private fun SheetRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
+            .heightIn(min = 36.dp)
+            .clip(RoundedCornerShape(8.dp))
             .clickable(onClick = onClick)
-            .padding(vertical = 8.dp)
+            .padding(start = 6.dp, end = 8.dp),
+        verticalAlignment = Alignment.Top
     ) {
+        // Each centred on the first line's 36dp: the icon 16dp, the name's line 20sp, the values' 22sp.
         Icon(
             imageVector = icon,
             contentDescription = null,
             modifier = Modifier
-                .padding(top = 8.dp)
-                .size(24.dp),
-            tint = MaterialTheme.colorScheme.primary
+                .padding(top = 10.dp)
+                .size(16.dp),
+            tint = colors.text.label
         )
-        Column(modifier = Modifier.padding(start = 12.dp)) {
-            BiographyLabel(label)
-            Text(
-                text = values.joinToString(", ").ifEmpty { LocalStrings.current["common_none"] },
-                style = MaterialTheme.typography.bodyLarge,
-                color = if (values.isEmpty()) colors.text.subtle else colors.text.primary
-            )
-        }
+        Text(
+            text = label,
+            modifier = Modifier
+                .padding(start = 4.dp, top = 8.dp)
+                .width(SheetRowNameWidth),
+            style = MaterialTheme.typography.bodyMedium,
+            color = colors.text.muted,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Text(
+            text = values.joinToString(", ").ifEmpty { LocalStrings.current["common_none"] },
+            modifier = Modifier
+                .padding(start = 8.dp, top = 7.dp, bottom = 7.dp)
+                .weight(1f),
+            style = MaterialTheme.typography.bodyLarge,
+            color = if (values.isEmpty()) colors.text.muted else colors.text.primary,
+            textAlign = TextAlign.End
+        )
     }
 }
 
-/** The fields of a sheet's panel, in its frame: the biography's air round them. */
+/** A field's name: room for «Сопротивления» (13 characters at 14sp). */
+private val SheetRowNameWidth = 108.dp
+
+/** The fields of a sheet's panel in one frame, as the skills' (the corners 7dp), a line's air above and under. */
 @Composable
 private fun SheetPanel(content: @Composable () -> Unit) {
-    OutlinedPanel(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)) { content() }
+    OutlinedPanel(modifier = Modifier.fillMaxWidth(), cornerRadius = 7.dp) {
+        Column(modifier = Modifier.padding(vertical = 4.dp)) { content() }
     }
 }
 
