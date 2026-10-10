@@ -39,6 +39,8 @@ fun AttributesScreenPreview() {
             "attributes_defense_resistances_short" to "Resistant",
             "attributes_defense_immunities_short" to "Immune",
             "attributes_defense_vulnerabilities_short" to "Vulnerable",
+            "list_show_more" to "%1${'$'}d more",
+            "list_show_less" to "Show less",
             "condition_poisoned" to "Poisoned",
             "attributes_weapon_simple_short" to "Simple",
             "attributes_weapon_martial_short" to "Martial",

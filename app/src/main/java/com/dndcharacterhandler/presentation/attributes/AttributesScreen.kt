@@ -1,5 +1,11 @@
 package com.dndcharacterhandler.presentation.attributes
 
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.material.icons.outlined.ExpandMore
+import androidx.compose.material.icons.outlined.ExpandLess
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.layout.findRootCoordinates
 import com.dndcharacterhandler.presentation.components.saturation
 import androidx.compose.ui.draw.drawBehind
@@ -632,93 +638,95 @@ internal fun attributesSectionItems(
 
         item {
             AttributesSectionTitle(title = text("attributes_proficiencies"))
-            // One frame, a line per field as the skills' (owner's choice from boards, 2026-10-10: C); a tap on a field
-            // edits it.
-            SheetPanel {
-                SheetRow(
-                    icon = ProficiencyIconArmor,
-                    label = text("attributes_proficiency_armor"),
-                    values = selectedProficiencyLabels(decodeProficiencyIds(character.armorProficiencies), armorProficiencyOptions, strings),
-                    onClick = {
-                        armorDraft = decodeProficiencyIds(character.armorProficiencies)
-                        isArmorDialogOpen = true
-                    }
-                )
-                SheetRow(
-                    icon = ProficiencyIconWeapons,
-                    label = text("attributes_proficiency_weapons"),
-                    values = weaponProficiencyLabels(decodeProficiencyIds(character.weaponProficiencies), strings),
-                    onClick = {
-                        weaponDraft = decodeProficiencyIds(character.weaponProficiencies)
-                        isWeaponDialogOpen = true
-                    }
-                )
-                SheetRow(
-                    icon = ProficiencyIconTools,
-                    label = text("attributes_proficiency_tools"),
-                    values = selectedProficiencyLabels(
-                        decodeProficiencyIds(character.toolProficiencies),
-                        toolProficiencyCategories.flatMap { it.options },
-                        strings
-                    ),
-                    onClick = {
-                        val selectedTools = decodeProficiencyIds(character.toolProficiencies)
-                        toolDraft = selectedTools.filterNot { it.startsWith(CustomProficiencyPrefix) }.toSet()
-                        customToolDrafts = customLabels(selectedTools)
-                        customToolInput = ""
-                        isToolsDialogOpen = true
-                    }
-                )
-                SheetRow(
-                    icon = ProficiencyIconLanguages,
-                    label = text("attributes_proficiency_languages"),
-                    values = selectedProficiencyLabels(
-                        decodeProficiencyIds(character.languageProficiencies),
-                        languageProficiencyCategories.flatMap { it.options },
-                        strings
-                    ),
-                    onClick = {
-                        val selectedLanguages = decodeProficiencyIds(character.languageProficiencies)
-                        languageDraft = selectedLanguages.filterNot { it.startsWith(CustomProficiencyPrefix) }.toSet()
-                        customLanguageDrafts = customLabels(selectedLanguages)
-                        customLanguageInput = ""
-                        isLanguagesDialogOpen = true
-                    }
-                )
-                // The weapons only: what their masteries do is the weapon's business (owner, 2026-10-05).
-                SheetRow(
-                    icon = ProficiencyIconMasteries,
-                    label = text("attributes_proficiency_masteries_short"),
-                    values = decodeProficiencyIds(character.weaponMasteries).map { weaponName(it, characterCatalog, strings) }.sorted(),
-                    onClick = {
-                        masteryDraft = decodeProficiencyIds(character.weaponMasteries)
-                        isMasteryDialogOpen = true
-                    }
-                )
-            }
+            // A frame per group, a value a line, in two columns of their own (owner's choices from boards, 2026-10-10: A,
+            // Б1, 2): the armor, the tools and the languages on the left, the weapons and their masteries on the right. A
+            // tap on a frame edits it.
+            SheetGroupColumns(
+                left = {
+                    SheetGroupCard(
+                        label = text("attributes_proficiency_armor"),
+                        values = selectedProficiencyLabels(decodeProficiencyIds(character.armorProficiencies), armorProficiencyOptions, strings),
+                        onClick = {
+                            armorDraft = decodeProficiencyIds(character.armorProficiencies)
+                            isArmorDialogOpen = true
+                        }
+                    )
+                    SheetGroupCard(
+                        label = text("attributes_proficiency_tools"),
+                        values = selectedProficiencyLabels(
+                            decodeProficiencyIds(character.toolProficiencies),
+                            toolProficiencyCategories.flatMap { it.options },
+                            strings
+                        ),
+                        onClick = {
+                            val selectedTools = decodeProficiencyIds(character.toolProficiencies)
+                            toolDraft = selectedTools.filterNot { it.startsWith(CustomProficiencyPrefix) }.toSet()
+                            customToolDrafts = customLabels(selectedTools)
+                            customToolInput = ""
+                            isToolsDialogOpen = true
+                        }
+                    )
+                    SheetGroupCard(
+                        label = text("attributes_proficiency_languages"),
+                        values = selectedProficiencyLabels(
+                            decodeProficiencyIds(character.languageProficiencies),
+                            languageProficiencyCategories.flatMap { it.options },
+                            strings
+                        ),
+                        onClick = {
+                            val selectedLanguages = decodeProficiencyIds(character.languageProficiencies)
+                            languageDraft = selectedLanguages.filterNot { it.startsWith(CustomProficiencyPrefix) }.toSet()
+                            customLanguageDrafts = customLabels(selectedLanguages)
+                            customLanguageInput = ""
+                            isLanguagesDialogOpen = true
+                        }
+                    )
+                },
+                right = {
+                    SheetGroupCard(
+                        label = text("attributes_proficiency_weapons"),
+                        values = weaponProficiencyLabels(decodeProficiencyIds(character.weaponProficiencies), strings),
+                        onClick = {
+                            weaponDraft = decodeProficiencyIds(character.weaponProficiencies)
+                            isWeaponDialogOpen = true
+                        }
+                    )
+                    // The weapons only: what their masteries do is the weapon's business (owner, 2026-10-05).
+                    SheetGroupCard(
+                        label = text("attributes_proficiency_masteries_short"),
+                        values = decodeProficiencyIds(character.weaponMasteries).map { weaponName(it, characterCatalog, strings) }.sorted(),
+                        onClick = {
+                            masteryDraft = decodeProficiencyIds(character.weaponMasteries)
+                            isMasteryDialogOpen = true
+                        }
+                    )
+                }
+            )
         }
 
         item {
             // Resistances, immunities, vulnerabilities: what Character Wizard grants, and edits by hand.
             AttributesSectionTitle(title = text("attributes_defenses"))
             val defenses = decodeProficiencyIds(character.defenses)
-            SheetPanel {
-                listOf(
-                    Triple(Defenses.RESISTANCE, DefenseIconResistance, "attributes_defense_resistances_short"),
-                    Triple(Defenses.IMMUNITY, DefenseIconImmunity, "attributes_defense_immunities_short"),
-                    Triple(Defenses.VULNERABILITY, DefenseIconVulnerability, "attributes_defense_vulnerabilities_short")
-                ).forEach { (kind, icon, labelKey) ->
-                    SheetRow(
-                        icon = icon,
-                        label = text(labelKey),
-                        values = defenseLabels(defenses, kind, characterCatalog, strings),
-                        onClick = {
-                            defenseDraft = defenses
-                            editingDefenseKind = kind
-                        }
-                    )
+            @Composable
+            fun defense(kind: String, labelKey: String) = SheetGroupCard(
+                label = text(labelKey),
+                values = defenseLabels(defenses, kind, characterCatalog, strings),
+                onClick = {
+                    defenseDraft = defenses
+                    editingDefenseKind = kind
                 }
-            }
+            )
+            // As the proficiencies: the resistances and the vulnerabilities on the left, the immunities on the right.
+            SheetGroupColumns(
+                left = {
+                    defense(Defenses.RESISTANCE, "attributes_defense_resistances_short")
+                    defense(Defenses.VULNERABILITY, "attributes_defense_vulnerabilities_short")
+                },
+                right = {
+                    defense(Defenses.IMMUNITY, "attributes_defense_immunities_short")
+                }
+            )
         }
     }
 
@@ -1777,69 +1785,135 @@ private fun SaveLine(score: AbilityScore, proficiencyBonus: Int, effects: RollEf
 }
 
 /**
- * A field of the sheet's panels (owner's choice from boards, 2026-10-10: C — before, the biography's gold capitals over
- * the values, which stood apart from the overview's frames), drawn as a skill's line and a sense's: the icon (16dp) in the
- * plain ring's colour on the skills' dots' line (14dp in), the name muted (`bodyMedium`) where theirs starts (26dp), the
- * values (`bodyLarge`, `text.primary`) after it, ending where the skills' bonuses do (8dp in) and wrapping under
- * themselves when long; a line is 36dp, as theirs, and a longer one keeps the icon and the name on its first line.
- * «Нет» muted, as every «Нет». A tap edits it.
+ * A group of the proficiencies or the defenses (owner's choices from boards, 2026-10-10: A, Б1, 2 — before, a line per
+ * field in one frame), named in its top edge's gap as a skills' group, a value a line ([SheetGroupLine]); «Нет» muted, as
+ * every «Нет». A group longer than [SheetGroupMaxLines] shows one line fewer and «Ещё K» under them — never «Ещё 1», as
+ * that line would hold the value itself — and unfolds in place, «Свернуть» at its foot ([SheetGroupFold]). A tap on
+ * the frame edits the group.
  */
 @Composable
-private fun SheetRow(
-    icon: ImageVector,
+private fun SheetGroupCard(
     label: String,
     values: List<String>,
     onClick: () -> Unit
 ) {
+    var expanded by rememberSaveable { mutableStateOf(false) }
+    BorderLabelCard(
+        label = label,
+        modifier = Modifier.fillMaxWidth(),
+        labelStyle = abilityLabelStyle,
+        cornerRadius = 7.dp,
+        onClick = onClick
+    ) {
+        // The skills' groups' insets: the label clears the first line, the gaps between frames come out even.
+        Column(modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)) {
+            if (values.isEmpty()) SheetGroupLine(LocalStrings.current["common_none"], none = true)
+            val folds = values.size > SheetGroupMaxLines
+            val shown = if (folds && !expanded) values.take(SheetGroupMaxLines - 1) else values
+            shown.forEach { SheetGroupLine(it) }
+            if (folds) {
+                SheetGroupFold(
+                    expanded = expanded,
+                    hidden = values.size - (SheetGroupMaxLines - 1),
+                    onToggle = { expanded = !expanded }
+                )
+            }
+        }
+    }
+}
+
+/** The most lines a folded group shows (owner, 2026-10-10): the armor's four, a rogue's five languages fit whole. */
+private const val SheetGroupMaxLines = 5
+
+/**
+ * A value of a group: a dot (5dp) in the plain ring's colour, the value in `bodyMedium` `text.primary`, a line 30dp;
+ * a long one wraps under itself, the dot staying by its first line. The dot and the word stand on the skills' lines
+ * above: the dot in their training dot's 12dp, 8dp in, the word 6dp after it.
+ */
+@Composable
+private fun SheetGroupLine(value: String, none: Boolean = false) {
     val colors = LocalDesignTokens.current.colors
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 36.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .clickable(onClick = onClick)
-            .padding(start = 6.dp, end = 8.dp),
+            .padding(horizontal = 8.dp),
         verticalAlignment = Alignment.Top
     ) {
-        // Each centred on the first line's 36dp: the icon 16dp, the name's line 20sp, the values' 22sp.
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
+        // The dot centred on the first line's 30dp; «Нет» has none, but starts where the values do.
+        Box(
             modifier = Modifier
-                .padding(top = 10.dp)
-                .size(16.dp),
-            tint = colors.text.label
-        )
+                .padding(top = 9.dp)
+                .size(12.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            if (!none) {
+                Box(
+                    modifier = Modifier
+                        .size(5.dp)
+                        .clip(CircleShape)
+                        .background(colors.text.label)
+                )
+            }
+        }
         Text(
-            text = label,
-            modifier = Modifier
-                .padding(start = 4.dp, top = 8.dp)
-                .width(SheetRowNameWidth),
+            text = value,
+            modifier = Modifier.padding(start = 6.dp, top = 5.dp, bottom = 5.dp),
             style = MaterialTheme.typography.bodyMedium,
-            color = colors.text.muted,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-        Text(
-            text = values.joinToString(", ").ifEmpty { LocalStrings.current["common_none"] },
-            modifier = Modifier
-                .padding(start = 8.dp, top = 7.dp, bottom = 7.dp)
-                .weight(1f),
-            style = MaterialTheme.typography.bodyLarge,
-            color = if (values.isEmpty()) colors.text.muted else colors.text.primary,
-            textAlign = TextAlign.End
+            color = if (none) colors.text.muted else colors.text.primary
         )
     }
 }
 
-/** A field's name: room for «Сопротивления» (13 characters at 14sp). */
-private val SheetRowNameWidth = 108.dp
-
-/** The fields of a sheet's panel in one frame, as the skills' (the corners 7dp), a line's air above and under. */
+/**
+ * The fold's line, as the app's unfolding cards' (the notes, the inventory): the chevron in `text.muted` centred on the
+ * dots' column, «Ещё K» or «Свернуть» where the values start; a tap unfolds or folds the group.
+ */
 @Composable
-private fun SheetPanel(content: @Composable () -> Unit) {
-    OutlinedPanel(modifier = Modifier.fillMaxWidth(), cornerRadius = 7.dp) {
-        Column(modifier = Modifier.padding(vertical = 4.dp)) { content() }
+private fun SheetGroupFold(expanded: Boolean, hidden: Int, onToggle: () -> Unit) {
+    val colors = LocalDesignTokens.current.colors
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 30.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .clickable(role = Role.Button, onClick = onToggle)
+            .padding(horizontal = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(modifier = Modifier.width(12.dp), contentAlignment = Alignment.Center) {
+            Icon(
+                imageVector = if (expanded) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
+                contentDescription = null,
+                modifier = Modifier.requiredSize(18.dp),
+                tint = colors.text.muted
+            )
+        }
+        Text(
+            text = if (expanded) LocalStrings.current["list_show_less"] else LocalStrings.current.format("list_show_more", hidden),
+            modifier = Modifier.padding(start = 6.dp),
+            style = MaterialTheme.typography.bodyMedium,
+            color = colors.text.muted
+        )
+    }
+}
+
+/**
+ * The groups in two columns of their own, as the skills' (10dp apart, [SkillGroupGap] between frames): a group that
+ * unfolds moves only its column (owner's choice from boards, 2026-10-10: 2 — pairs in rows left a hole under the
+ * shorter one, and a neighbour stretched to match stood empty).
+ */
+@Composable
+private fun SheetGroupColumns(
+    left: @Composable ColumnScope.() -> Unit,
+    right: @Composable ColumnScope.() -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalAlignment = Alignment.Top
+    ) {
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(SkillGroupGap), content = left)
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(SkillGroupGap), content = right)
     }
 }
 

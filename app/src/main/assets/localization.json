@@ -920,6 +920,22 @@
     "fr": "Aucun",
     "es": "Ninguno"
   },
+  "list_show_more": {
+    "maxChars": 17,
+    "en": "%1$d more",
+    "ru": "Ещё %1$d",
+    "de": "%1$d weitere",
+    "fr": "%1$d de plus",
+    "es": "%1$d más"
+  },
+  "list_show_less": {
+    "maxChars": 17,
+    "en": "Show less",
+    "ru": "Свернуть",
+    "de": "Weniger",
+    "fr": "Réduire",
+    "es": "Ver menos"
+  },
   "common_automatic": {
     "en": "Automatic",
     "ru": "\u0410\u0432\u0442\u043e\u043c\u0430\u0442\u0438\u0447\u0435\u0441\u043a\u0438\u0439",
@@ -985,7 +1001,7 @@
   "attributes_defense_resistances_short": {
     "maxChars": 13,
     "en": "Resistant",
-    "ru": "Сопротивления",
+    "ru": "Сопротивл.",
     "de": "Resistent",
     "fr": "Résistant",
     "es": "Resistente"
