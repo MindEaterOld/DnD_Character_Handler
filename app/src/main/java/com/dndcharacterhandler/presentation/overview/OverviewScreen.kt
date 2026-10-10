@@ -1,4 +1,9 @@
 package com.dndcharacterhandler.presentation.overview
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.foundation.layout.paddingFromBaseline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -1786,7 +1791,8 @@ private fun KeyStats(
                 KeyStat(
                     label = text(armorClass.labelKey),
                     value = armorClass.value,
-                    icon = Icons.Outlined.Shield,
+                    icon = null,
+                    inShield = true,
                     worse = armorClass.worse,
                     better = armorClass.better,
                     modifier = Modifier.weight(1f),
@@ -1902,13 +1908,15 @@ private fun HpBar(current: Int, temporary: Int, max: Int, width: Dp = HpBarWidth
 /**
  * A stat under the portrait: its gold label over its value (`miniStatValue`, the stat cards' size), an icon in gold
  * before the value — or the conditions' arrows in its place — a unit («фт») after it in body text. A tap edits it.
+ * [inShield]: the value inscribed in a shield instead, the conditions' arrows left of it ([KeyStatShieldWidth]).
  */
 @Composable
 private fun KeyStat(
     label: String,
     value: String,
-    icon: ImageVector,
+    icon: ImageVector?,
     modifier: Modifier = Modifier,
+    inShield: Boolean = false,
     /** A tap edits it; none for what only shows (the proficiency bonus). */
     onClick: (() -> Unit)? = null,
     worse: Boolean = false,
@@ -1925,24 +1933,27 @@ private fun KeyStat(
         val airOverBaseline = KeyStatAir - KeyStatsRuleHeight / 2 +
             with(LocalDensity.current) { (labelStyle.fontSize.value * BodyCapHeight).sp.toDp() }
         val airUnderBaseline = KeyStatAir - KeyStatsRuleHeight / 2
+        val shieldLine = MaterialTheme.colorScheme.primary.copy(alpha = LocalDesignTokens.current.alpha.half)
         Column(
             modifier = Modifier
+                .then(
+                    if (inShield) {
+                        // Room for the arrows left of the shield; the shield drawn before the clip that bounds the
+                        // ripple, as it runs up under the label and down toward the rule.
+                        Modifier
+                            .widthIn(min = KeyStatShieldWidth + (KeyStatMarkerGap + KeyStatMarkerSize) * 2)
+                            .drawBehind { drawKeyStatShield(shieldLine, baseline = size.height - airUnderBaseline.toPx()) }
+                    } else {
+                        Modifier
+                    }
+                )
                 .clip(RoundedCornerShape(10.dp))
                 .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
                 .padding(horizontal = 6.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             SheetLabel(label, modifier = Modifier.paddingFromBaseline(top = airOverBaseline))
-            Row(
-                modifier = Modifier.paddingFromBaseline(bottom = airUnderBaseline),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                if (worse || better) {
-                    RollMarker(worse = worse, better = better, size = 20.dp)
-                } else {
-                    Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
-                }
+            val numberAndUnit: @Composable () -> Unit = {
                 // The unit on the number's baseline.
                 Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
                     Text(
@@ -1966,7 +1977,64 @@ private fun KeyStat(
                     }
                 }
             }
+            if (inShield) {
+                // The number in the middle of its column, the arrows left of the shield.
+                Box(modifier = Modifier.paddingFromBaseline(bottom = airUnderBaseline), contentAlignment = Alignment.Center) {
+                    numberAndUnit()
+                    RollMarker(
+                        worse = worse,
+                        better = better,
+                        size = KeyStatMarkerSize,
+                        modifier = Modifier.offset(x = -(KeyStatShieldWidth / 2 + KeyStatMarkerGap + KeyStatMarkerSize / 2))
+                    )
+                }
+            } else {
+                Row(
+                    modifier = Modifier.paddingFromBaseline(bottom = airUnderBaseline),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(KeyStatMarkerGap)
+                ) {
+                    if (worse || better) {
+                        RollMarker(worse = worse, better = better, size = KeyStatMarkerSize)
+                    } else if (icon != null) {
+                        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(KeyStatMarkerSize))
+                    }
+                    numberAndUnit()
+                }
+            }
         }
+    }
+}
+
+/** A stat's icon, or the conditions' arrows in its place, and the gap after it. */
+private val KeyStatMarkerSize = 20.dp
+private val KeyStatMarkerGap = 6.dp
+
+/**
+ * The armor class's shield (owner's choice from boards, 2026-10-10: 1): the shield icon's own outline at its own
+ * proportions (Material's, 18 × 22), as wide as two digits need (`miniStatValue` 28: «99» with a little air), in gold at
+ * half — the rules' — 1.5dp; its point [KeyStatShieldGap] over the rule below, running up under the label as it needs.
+ */
+private val KeyStatShieldWidth = 46.dp
+private val KeyStatShieldGap = 3.dp
+
+/** Material's shield (Apache 2.0), its outline only, on its 24 grid: x 3…21, y 1…23. */
+private val KeyStatShieldPath: Path by lazy {
+    PathParser().parsePathString("M12 1 3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5L12 1z").toPath()
+}
+
+/** The armor class's shield, centred across, its point [KeyStatShieldGap] over the rule under the value's [baseline]. */
+private fun DrawScope.drawKeyStatShield(color: Color, baseline: Float) {
+    val width = KeyStatShieldWidth.toPx()
+    val scale = width / 18f
+    val bottom = baseline + KeyStatAir.toPx() - KeyStatShieldGap.toPx()
+    val left = (size.width - width) / 2
+    val top = bottom - 22f * scale
+    withTransform({
+        translate(left - 3f * scale, top - 1f * scale)
+        scale(scale, scale, pivot = Offset.Zero)
+    }) {
+        drawPath(KeyStatShieldPath, color, style = Stroke(width = 1.5.dp.toPx() / scale))
     }
 }
 
