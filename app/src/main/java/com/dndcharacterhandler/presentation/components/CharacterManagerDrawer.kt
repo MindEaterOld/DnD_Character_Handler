@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation.components
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -78,7 +79,9 @@ fun CharacterManagerDrawer(
 ) {
     val tokens = LocalDesignTokens.current.typography
     val colors = LocalDesignTokens.current.colors
+    // The system card unfolds in place (A); Back folds it before it closes the drawer.
     var isPickingSystem by remember { mutableStateOf(false) }
+    BackHandler(enabled = isPickingSystem) { isPickingSystem = false }
 
     // The whole screen wide: with no scrim to tap beside it, it closes with the cross, Back or a swipe.
     Box(
@@ -118,7 +121,12 @@ fun CharacterManagerDrawer(
             item {
                 GameSystemCard(
                     system = state.gameSystem,
-                    onClick = { isPickingSystem = true },
+                    expanded = isPickingSystem,
+                    onToggle = { isPickingSystem = !isPickingSystem },
+                    onPick = { system ->
+                        onPickGameSystem(system)
+                        isPickingSystem = false
+                    },
                     modifier = Modifier.padding(top = 12.dp)
                 )
                 DrawerOrnamentDivider(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp))
@@ -201,13 +209,6 @@ fun CharacterManagerDrawer(
         if (onClose != null) {
             OverlayCloseButton(onClick = onClose, modifier = Modifier.align(Alignment.TopEnd))
         }
-    }
-    if (isPickingSystem) {
-        GameSystemSheet(
-            selected = state.gameSystem,
-            onPick = onPickGameSystem,
-            onDismiss = { isPickingSystem = false }
-        )
     }
 }
 

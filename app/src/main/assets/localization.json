@@ -7792,13 +7792,6 @@
     "fr": "5e édition (2024)",
     "es": "5.ª edición (2024)"
   },
-  "game_edition_dnd5e_2014": {
-    "en": "5th Edition (2014)",
-    "ru": "5-я редакция (2014)",
-    "de": "5. Edition (2014)",
-    "fr": "5e édition (2014)",
-    "es": "5.ª edición (2014)"
-  },
   "game_edition_pf2e": {
     "en": "2nd Edition",
     "ru": "2-я редакция",
@@ -7806,26 +7799,12 @@
     "fr": "2e édition",
     "es": "2.ª edición"
   },
-  "game_edition_pf1e": {
-    "en": "1st Edition",
-    "ru": "1-я редакция",
-    "de": "1. Edition",
-    "fr": "1re édition",
-    "es": "1.ª edición"
-  },
   "game_edition_sf2e": {
     "en": "2nd Edition",
     "ru": "2-я редакция",
     "de": "2. Edition",
     "fr": "2e édition",
     "es": "2.ª edición"
-  },
-  "game_edition_sf1e": {
-    "en": "1st Edition",
-    "ru": "1-я редакция",
-    "de": "1. Edition",
-    "fr": "1re édition",
-    "es": "1.ª edición"
   },
   "game_edition_vtm5": {
     "en": "5th Edition (V5)",

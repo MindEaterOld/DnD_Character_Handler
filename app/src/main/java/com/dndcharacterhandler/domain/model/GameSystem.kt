@@ -12,9 +12,10 @@ enum class GameSystemFamily(val localizationKey: String) {
  * The game and edition a character is made in, with its rules, catalogs and sheet (owner's wish, 2026-10-10): a
  * character belongs to one and exists in no other, and the drawer lists the picked one's characters.
  *
- * [key] is stored with the character, in its archive and in the settings: never change it. [editionKey] names the
- * edition («5-я редакция (2024)»). Only an [available] system has rules and a sheet yet; the others can be picked,
- * their list stays empty and says they are coming (docs/GAME_SYSTEMS.md).
+ * [key] is stored with the character, in its archive and in the settings: never change it. The fresh editions
+ * only (owner, 2026-10-10): no D&D 5e (2014), no first editions of Pathfinder and Starfinder. [editionKey] names the
+ * edition («5-я редакция (2024)»). Only an [available] system has rules and a sheet yet; the others are shown, muted,
+ * and can't be picked (docs/GAME_SYSTEMS.md).
  */
 enum class GameSystem(
     val key: String,
@@ -23,11 +24,8 @@ enum class GameSystem(
     val available: Boolean
 ) {
     DND_5E_2024("dnd5e_2024", GameSystemFamily.DND, "game_edition_dnd5e_2024", available = true),
-    DND_5E_2014("dnd5e_2014", GameSystemFamily.DND, "game_edition_dnd5e_2014", available = false),
     PATHFINDER_2E("pf2e", GameSystemFamily.PATHFINDER, "game_edition_pf2e", available = false),
-    PATHFINDER_1E("pf1e", GameSystemFamily.PATHFINDER, "game_edition_pf1e", available = false),
     STARFINDER_2E("sf2e", GameSystemFamily.STARFINDER, "game_edition_sf2e", available = false),
-    STARFINDER_1E("sf1e", GameSystemFamily.STARFINDER, "game_edition_sf1e", available = false),
     VAMPIRE_V5("vtm5", GameSystemFamily.VAMPIRE, "game_edition_vtm5", available = false);
 
     /** The system's own files in the app's assets (its catalogs); what every system shares lies outside. */
