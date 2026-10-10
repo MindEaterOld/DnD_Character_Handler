@@ -1789,7 +1789,8 @@ private fun KeyStats(
                     modifier = Modifier.weight(1f)
                 )
                 KeyStat(
-                    label = text(armorClass.labelKey),
+                    // Two letters, as every sheet has them («КБ», «AC»), to sit inside the shield with the number.
+                    label = text("stat_card_armor_class_short"),
                     value = armorClass.value,
                     icon = null,
                     inShield = true,
@@ -1942,7 +1943,7 @@ private fun KeyStat(
                         // ripple, as it runs up under the label and down toward the rule.
                         Modifier
                             .widthIn(min = KeyStatShieldWidth + (KeyStatMarkerGap + KeyStatMarkerSize) * 2)
-                            .drawBehind { drawKeyStatShield(shieldLine, baseline = size.height - airUnderBaseline.toPx()) }
+                            .drawBehind { drawKeyStatShield(shieldLine) }
                     } else {
                         Modifier
                     }
@@ -2011,25 +2012,25 @@ private val KeyStatMarkerSize = 20.dp
 private val KeyStatMarkerGap = 6.dp
 
 /**
- * The armor class's shield (owner's choice from boards, 2026-10-10: 1): the shield icon's own outline at its own
- * proportions (Material's, 18 × 22), as wide as two digits need (`miniStatValue` 28: «99» with a little air), in gold at
- * half — the rules' — 1.5dp; its point [KeyStatShieldGap] over the rule below, running up under the label as it needs.
+ * The armor class's shield (owner's choices from boards, 2026-10-10: 1, then the label in two letters inside it): the
+ * shield icon's own outline at its own proportions (Material's, 18 × 22), in gold at half — the rules' — 1.5dp, between
+ * the two rules, about 3dp from each (`drawKeyStatShield`): the label's two letters under its shoulders, the number
+ * («99» with a little air) in its widest part.
  */
-private val KeyStatShieldWidth = 46.dp
-private val KeyStatShieldGap = 3.dp
+private val KeyStatShieldWidth = 58.dp
 
 /** Material's shield (Apache 2.0), its outline only, on its 24 grid: x 3…21, y 1…23. */
 private val KeyStatShieldPath: Path by lazy {
     PathParser().parsePathString("M12 1 3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5L12 1z").toPath()
 }
 
-/** The armor class's shield, centred across, its point [KeyStatShieldGap] over the rule under the value's [baseline]. */
-private fun DrawScope.drawKeyStatShield(color: Color, baseline: Float) {
+/** The armor class's shield, centred across and between the rules, whose lines are half a rule outside the stat. */
+private fun DrawScope.drawKeyStatShield(color: Color) {
     val width = KeyStatShieldWidth.toPx()
     val scale = width / 18f
-    val bottom = baseline + KeyStatAir.toPx() - KeyStatShieldGap.toPx()
+    val middle = size.height / 2
     val left = (size.width - width) / 2
-    val top = bottom - 22f * scale
+    val top = middle - 11f * scale
     withTransform({
         translate(left - 3f * scale, top - 1f * scale)
         scale(scale, scale, pivot = Offset.Zero)
