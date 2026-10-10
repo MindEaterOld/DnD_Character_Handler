@@ -5213,6 +5213,7 @@
     "es": "Petrificado, resiste todo el daño: %1$d de %2$d"
   },
   "overview_hp_heal_title": {
+    "maxChars": 11,
     "en": "Healing",
     "ru": "Лечение",
     "de": "Heilung",
@@ -7835,5 +7836,26 @@
     "de": "In diesem System gibt es noch keine Charaktere.",
     "fr": "Aucun personnage dans ce système pour l'instant.",
     "es": "Aún no hay personajes en este sistema."
+  },
+  "overview_hp_step_down": {
+    "en": "One hit point less",
+    "ru": "Минус хит",
+    "de": "Ein Trefferpunkt weniger",
+    "fr": "Un point de vie de moins",
+    "es": "Un punto de golpe menos"
+  },
+  "overview_hp_step_up": {
+    "en": "One hit point more",
+    "ru": "Плюс хит",
+    "de": "Ein Trefferpunkt mehr",
+    "fr": "Un point de vie de plus",
+    "es": "Un punto de golpe más"
+  },
+  "overview_hp_temporary_title": {
+    "en": "Temporary hit points",
+    "ru": "Временные хиты",
+    "de": "Temporäre Trefferpunkte",
+    "fr": "Points de vie temporaires",
+    "es": "Puntos de golpe temporales"
   }
 }

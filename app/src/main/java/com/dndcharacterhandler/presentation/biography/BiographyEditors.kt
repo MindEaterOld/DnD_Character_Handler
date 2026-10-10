@@ -1,12 +1,10 @@
 package com.dndcharacterhandler.presentation.biography
 
+import com.dndcharacterhandler.presentation.components.repeatWhileHeld
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
-import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,7 +34,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,7 +45,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
@@ -66,9 +62,6 @@ import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 import com.dndcharacterhandler.presentation.theme.Swatch
 import kotlin.math.roundToInt
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 // ---------- The gender ----------
 
@@ -194,38 +187,6 @@ private fun oneSeparator(value: String): String {
 }
 private val AgeStepGap = 16.dp
 private val AgeNumberWidth = 80.dp
-
-/** Held, a stepper keeps stepping: after a moment, quicker and quicker — an elf's 120 years without 120 taps. */
-@Composable
-private fun Modifier.repeatWhileHeld(step: () -> Unit): Modifier {
-    val latest by rememberUpdatedState(step)
-    return pointerInput(Unit) {
-        coroutineScope {
-            awaitEachGesture {
-                awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
-                var repeated = false
-                val repeating = launch {
-                    delay(HoldDelayMs)
-                    var pause = HoldFirstStepMs
-                    while (true) {
-                        repeated = true
-                        latest()
-                        delay(pause)
-                        pause = (pause * 4 / 5).coerceAtLeast(HoldFastestStepMs)
-                    }
-                }
-                val up = waitForUpOrCancellation(PointerEventPass.Initial)
-                repeating.cancel()
-                // The steps were the hold's: the button's own tap on lifting would be one too many.
-                if (repeated) up?.consume()
-            }
-        }
-    }
-}
-
-private const val HoldDelayMs = 400L
-private const val HoldFirstStepMs = 120L
-private const val HoldFastestStepMs = 30L
 
 /**
  * A number typed in the pop-up's large size, centred, [hint] in grey while it is empty. [fitted]: as wide as what it

@@ -1,4 +1,11 @@
 package com.dndcharacterhandler.presentation.overview
+import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.draw.drawBehind
+import com.dndcharacterhandler.presentation.components.repeatWhileHeld
+import com.dndcharacterhandler.domain.dnd5e.rules.stepHitPoints
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.sync.Mutex
 import com.dndcharacterhandler.presentation.components.CharacterHeaderRow
 import androidx.compose.ui.platform.LocalConfiguration
 import com.dndcharacterhandler.domain.dnd5e.rules.proficiencyBonusForLevel
@@ -12,8 +19,6 @@ import com.dndcharacterhandler.presentation.components.rememberHeaderBackdrop
 import com.dndcharacterhandler.presentation.components.headerBackdrop
 import com.dndcharacterhandler.presentation.components.FadingLazyColumn
 import com.dndcharacterhandler.domain.model.AppTheme
-import com.dndcharacterhandler.presentation.theme.FrameStyle
-import com.dndcharacterhandler.presentation.theme.LocalThemeLook
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.foundation.lazy.LazyListScope
 import com.dndcharacterhandler.domain.dnd5e.model.decodeProficiencyIds
@@ -333,6 +338,21 @@ class OverviewViewModel(
         viewModelScope.launch {
             if (hitPointsChanged) characterRepository.updateHitPoints(current.id, result.currentHp, result.temporaryHp)
             if (result.saves != before) characterRepository.updateDeathSaves(current.id, result.saves.successes, result.saves.failures)
+        }
+    }
+
+    /** The − and + by the hit points: one at a time, each read after the last is written, so a hold loses none. */
+    private val hitPointSteps = Mutex()
+
+    fun nudgeHitPoints(characterId: Long, delta: Int) {
+        viewModelScope.launch {
+            hitPointSteps.withLock {
+                val current = characterRepository.observeCharacter(characterId).first()?.character ?: return@withLock
+                val (hp, temporary) = stepHitPoints(delta, current.currentHp, current.temporaryHp, current.maxHp)
+                if (hp != current.currentHp || temporary != current.temporaryHp) {
+                    characterRepository.updateHitPoints(characterId, hp, temporary)
+                }
+            }
         }
     }
 
@@ -673,6 +693,7 @@ fun OverviewScreen(
             onUpdateExhaustion = viewModel::updateExhaustion,
             onEndConcentration = viewModel::endConcentration,
             onDamageHitPoints = viewModel::damageHitPoints,
+            onNudgeHitPoints = viewModel::nudgeHitPoints,
             onHealHitPoints = viewModel::healHitPoints,
             onAddTemporaryHitPoints = viewModel::addTemporaryHitPoints,
             onUpdateMaxHitPoints = viewModel::updateMaxHitPoints,
@@ -734,6 +755,8 @@ private fun OverviewContent(
     onUpdateExhaustion: (CharacterBundle, Int) -> Unit = { _, _ -> },
     onEndConcentration: (CharacterBundle) -> Unit = {},
     onDamageHitPoints: (CharacterBundle, Int) -> Unit,
+    /** The − and + by the hit points: a character's id and −1 or +1. */
+    onNudgeHitPoints: (Long, Int) -> Unit,
     onHealHitPoints: (CharacterBundle, Int) -> Unit,
     onAddTemporaryHitPoints: (CharacterBundle, Int) -> Unit,
     onUpdateMaxHitPoints: (CharacterBundle, Int) -> Unit,
@@ -980,8 +1003,9 @@ private fun OverviewContent(
                                     proficiencyBonus = proficiencyBonusForLevel(character.level),
                                     onOpenConditions = { isConditionsDialogOpen = true },
                                     onOpenConcentration = { isEndConcentrationOpen = true },
-                                    onDamage = { openHpDialog(OverviewHpEditMode.DAMAGE) },
-                                    onHeal = { openHpDialog(OverviewHpEditMode.HEAL) },
+                                    onEditHitPoints = { openHpDialog(OverviewHpEditMode.DAMAGE) },
+                                    onStepDown = { onNudgeHitPoints(character.id, -1) },
+                                    onStepUp = { onNudgeHitPoints(character.id, 1) },
                                     onMaxHp = {
                                         maxHpDraft = character.maxHp.toString()
                                         isMaxHpDialogOpen = true
@@ -1260,12 +1284,20 @@ private fun OverviewContent(
         }
 
         EditDialog(
-            title = if (damage) text("overview_hp_damage") else text("overview_hp_heal_title"),
+            title = when (hpEditMode) {
+                OverviewHpEditMode.DAMAGE -> text("overview_hp_damage")
+                OverviewHpEditMode.HEAL -> text("overview_hp_heal_title")
+                OverviewHpEditMode.TEMPORARY -> text("overview_hp_temporary_title")
+            },
             titleLeading = {
                 Icon(
-                    imageVector = if (damage) Icons.Outlined.HeartBroken else Icons.Outlined.Favorite,
+                    imageVector = when (hpEditMode) {
+                        OverviewHpEditMode.DAMAGE -> Icons.Outlined.HeartBroken
+                        OverviewHpEditMode.HEAL -> Icons.Outlined.Favorite
+                        OverviewHpEditMode.TEMPORARY -> Icons.Outlined.HealthAndSafety
+                    },
                     contentDescription = null,
-                    tint = if (damage) colors.accent.dangerHpZero else colors.accent.heal,
+                    tint = accent,
                     modifier = Modifier
                         .padding(end = 10.dp)
                         .size(26.dp)
@@ -1284,12 +1316,8 @@ private fun OverviewContent(
             confirmEnabled = canConfirm,
             confirmIsDanger = damage
         ) {
-            if (!damage) {
-                HpKindToggle(
-                    temporary = hpEditMode == OverviewHpEditMode.TEMPORARY,
-                    onPick = { hpEditMode = it }
-                )
-            }
+            // The tap on the number opens it at damage; the other two kinds a tap away (owner's wish, 2026-10-10: no heal button).
+            HpKindToggle(mode = hpEditMode, onPick = { hpEditMode = it })
             // The number from the keyboard, which opens at once, or a step at a time.
             val focus = remember { FocusRequester() }
             val amountStyle = MaterialTheme.typography.headlineMedium.copy(
@@ -1767,19 +1795,23 @@ private fun PortraitViewerContent(
     }
 }
 
-/** Damage and heal beside the hit points: round, outlined in their colour (the engraving lights them faintly too). */
-private val HpButtonSize = 52.dp
+/** The − and + beside the hit points: their tap area, and their icon, as large as the header's. */
+private val HpStepSize = 52.dp
+private val HpStepIconSize = 28.dp
 
-/** From the hit points to the buttons either side of them. */
+/** From the hit points to the − and + either side of them. */
 private val HpButtonGap = 22.dp
+
+/** The hit points between − and +: a fixed width, so the steppers never move under the thumb. */
+private val HpCounterWidth = 200.dp
 
 /** The bar of what is left under the hit points. */
 private val HpBarWidth = 150.dp
 
 /**
- * The survival block on the portrait's foot (owner's choice from boards, 2026-10-09: И): the conditions as chips; damage
- * (a broken heart), the hit points with a bar of what is left under them, heal (a heart); under them the armor class
- * and the speed — or, at 0 hit points, the death saves in their place, so nothing moves.
+ * The survival block on the portrait's foot (owner's choice from boards, 2026-10-09: И): the conditions as chips; −,
+ * the hit points with a bar of what is left under them, + (owner's wish, 2026-10-10); under them the proficiency bonus,
+ * the armor class and the speed — or, at 0 hit points, the death saves in their place, so nothing moves.
  */
 @Composable
 private fun SurvivalBlock(
@@ -1791,8 +1823,10 @@ private fun SurvivalBlock(
     proficiencyBonus: Int,
     onOpenConditions: () -> Unit,
     onOpenConcentration: () -> Unit,
-    onDamage: () -> Unit,
-    onHeal: () -> Unit,
+    /** A tap on the hit points: the pop-up with the keyboard, damage, healing or temporary ones. */
+    onEditHitPoints: () -> Unit,
+    onStepDown: () -> Unit,
+    onStepUp: () -> Unit,
     onMaxHp: () -> Unit,
     onStat: (OverviewStat) -> Unit,
     onSetSaves: (Int, Int) -> Unit,
@@ -1812,20 +1846,31 @@ private fun SurvivalBlock(
         )
         Spacer(modifier = Modifier.height(6.dp))
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(HpButtonGap)) {
-            // Heal on the left, damage on the right (owner's wish, 2026-10-09).
-            HpRoundButton(Icons.Outlined.Favorite, colors.accent.heal, text("overview_hp_heal"), onHeal)
-            // What the buttons leave: the numbers fit into it, never pushing the right button off the row.
-            Column(modifier = Modifier.weight(1f, fill = false), horizontalAlignment = Alignment.CenterHorizontally) {
+            // − and + (owner's wish, 2026-10-10): a hit point a tap, held they keep stepping; − takes the temporary ones first.
+            HpStepButton(
+                icon = Icons.Outlined.Remove,
+                description = text("overview_hp_step_down"),
+                enabled = character.currentHp > 0 || character.temporaryHp > 0,
+                onStep = onStepDown
+            )
+            // As wide whatever they show, so − and + stay where the thumb is while the number grows and shrinks; the
+            // numbers step down the type scale to fit it.
+            Column(modifier = Modifier.width(HpCounterWidth), horizontalAlignment = Alignment.CenterHorizontally) {
                 HpNumbers(
                     currentHp = character.currentHp,
                     maxHp = character.maxHp,
                     temporaryHp = character.temporaryHp,
-                    onClick = onDamage,
+                    onClick = onEditHitPoints,
                     onMaxHpClick = onMaxHp
                 )
                 HpBar(character.currentHp, character.temporaryHp, character.maxHp)
             }
-            HpRoundButton(Icons.Outlined.HeartBroken, colors.accent.dangerHpZero, text("overview_hp_damage"), onDamage)
+            HpStepButton(
+                icon = Icons.Outlined.Add,
+                description = text("overview_hp_step_up"),
+                enabled = character.currentHp < character.maxHp,
+                onStep = onStepUp
+            )
         }
         Spacer(modifier = Modifier.height(14.dp))
         if (character.currentHp == 0) {
@@ -1867,24 +1912,38 @@ private fun SurvivalBlock(
 }
 
 /**
- * Damage or heal: round, its whole outline in the colour of what it does at 70 % and its icon in it, no fill — the one
- * outlined button, its colour says "press me" (owner's choices, 2026-10-06 and from boards, 2026-10-09). The engraving
- * lights it faintly in its colour.
+ * − or + beside the hit points (owner's wishes, 2026-10-10): a bare white icon as the header's — no ring, no colour,
+ * the sign says what it does — with only a soft shade of `ornament.dropShadow` round it to read on a bright art. A tap
+ * moves the hit points by one; held, it keeps stepping. Dim (`text.subtle`) while it can't go further. The same in
+ * both themes.
  */
 @Composable
-private fun HpRoundButton(icon: ImageVector, color: Color, description: String, onClick: () -> Unit) {
-    val etched = LocalThemeLook.current.frames == FrameStyle.ETCHED
+private fun HpStepButton(icon: ImageVector, description: String, enabled: Boolean, onStep: () -> Unit) {
+    val colors = LocalDesignTokens.current.colors
     Box(
         modifier = Modifier
-            .size(HpButtonSize)
+            .size(HpStepSize)
+            .drawBehind {
+                val radius = size.minDimension * 0.62f
+                drawCircle(
+                    brush = Brush.radialGradient(0f to colors.ornament.dropShadow, 1f to Color.Transparent, center = center, radius = radius),
+                    radius = radius
+                )
+            }
             .clip(CircleShape)
-            .background(if (etched) color.copy(alpha = LocalDesignTokens.current.alpha.faint) else Color.Transparent)
-            .border(1.dp, color.copy(alpha = LocalDesignTokens.current.alpha.veil), CircleShape)
-            .clickable(role = Role.Button, onClick = onClick)
-            .semantics { contentDescription = description },
+            .then(if (enabled) Modifier.repeatWhileHeld(onStep).clickable(role = Role.Button, onClick = onStep) else Modifier)
+            .semantics {
+                contentDescription = description
+                if (!enabled) disabled()
+            },
         contentAlignment = Alignment.Center
     ) {
-        Icon(imageVector = icon, contentDescription = null, tint = color, modifier = Modifier.size(24.dp))
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = if (enabled) colors.text.primary else colors.text.subtle,
+            modifier = Modifier.size(HpStepIconSize)
+        )
     }
 }
 
@@ -1964,14 +2023,22 @@ private const val MaxExperienceDigits = 7
 
 /** Healing's two kinds, a toggle: the picked one in its colour at 12 %, the other on the option fill. */
 @Composable
-private fun HpKindToggle(temporary: Boolean, onPick: (OverviewHpEditMode) -> Unit) {
+private fun HpKindToggle(mode: OverviewHpEditMode, onPick: (OverviewHpEditMode) -> Unit) {
     val colors = LocalDesignTokens.current.colors
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         HpKindOption(
-            label = text("overview_hp_kind_hit_points"),
+            label = text("overview_hp_damage"),
+            icon = Icons.Outlined.HeartBroken,
+            accent = colors.accent.dangerHpZero,
+            selected = mode == OverviewHpEditMode.DAMAGE,
+            modifier = Modifier.weight(1f),
+            onClick = { onPick(OverviewHpEditMode.DAMAGE) }
+        )
+        HpKindOption(
+            label = text("overview_hp_heal_title"),
             icon = Icons.Outlined.Favorite,
             accent = colors.accent.heal,
-            selected = !temporary,
+            selected = mode == OverviewHpEditMode.HEAL,
             modifier = Modifier.weight(1f),
             onClick = { onPick(OverviewHpEditMode.HEAL) }
         )
@@ -1979,7 +2046,7 @@ private fun HpKindToggle(temporary: Boolean, onPick: (OverviewHpEditMode) -> Uni
             label = text("overview_hp_kind_temporary"),
             icon = Icons.Outlined.HealthAndSafety,
             accent = colors.accent.hpTemporary,
-            selected = temporary,
+            selected = mode == OverviewHpEditMode.TEMPORARY,
             modifier = Modifier.weight(1f),
             onClick = { onPick(OverviewHpEditMode.TEMPORARY) }
         )
@@ -1989,21 +2056,21 @@ private fun HpKindToggle(temporary: Boolean, onPick: (OverviewHpEditMode) -> Uni
 @Composable
 private fun HpKindOption(label: String, icon: ImageVector, accent: Color, selected: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit) {
     val colors = LocalDesignTokens.current.colors
-    Row(
+    Column(
         modifier = modifier
-            .height(40.dp)
+            .height(56.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(if (selected) accent.copy(alpha = LocalDesignTokens.current.alpha.faint) else colors.surface.button)
             .selectable(selected = selected, role = Role.RadioButton, onClick = onClick)
-            .padding(horizontal = 8.dp),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = 6.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(imageVector = icon, contentDescription = null, tint = if (selected) accent else colors.text.primary, modifier = Modifier.size(16.dp))
+        Icon(imageVector = icon, contentDescription = null, tint = if (selected) accent else colors.text.primary, modifier = Modifier.size(18.dp))
         Text(
             text = label,
-            modifier = Modifier.padding(start = 6.dp),
-            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(top = 4.dp),
+            style = MaterialTheme.typography.labelMedium,
             color = if (selected) accent else colors.text.primary,
             fontWeight = FontWeight.Medium,
             maxLines = 1,
@@ -2580,6 +2647,7 @@ private fun OverviewPreviewContent(
                 onUpdateExperience = { _, _ -> },
                 onUpdatePortrait = { _, _ -> },
                 onDamageHitPoints = { _, _ -> },
+                onNudgeHitPoints = { _, _ -> },
                 onHealHitPoints = { _, _ -> },
                 onAddTemporaryHitPoints = { _, _ -> },
                 onUpdateMaxHitPoints = { _, _ -> },

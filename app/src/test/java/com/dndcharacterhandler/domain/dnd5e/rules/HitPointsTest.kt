@@ -19,6 +19,21 @@ class HitPointsTest {
     }
 
     @Test
+    fun minusTakesTheTemporaryOnesFirstAndStopsAtZero() {
+        assertEquals(8 to 4, stepHitPoints(-1, 8, 5, 13))
+        assertEquals(7 to 0, stepHitPoints(-1, 8, 0, 13))
+        assertEquals(0 to 0, stepHitPoints(-1, 0, 0, 13))
+        assertEquals(0 to 2, stepHitPoints(-1, 0, 3, 13))
+    }
+
+    @Test
+    fun plusHealsOneUpToTheMaximumAndLeavesTheTemporaryOnes() {
+        assertEquals(9 to 5, stepHitPoints(1, 8, 5, 13))
+        assertEquals(13 to 0, stepHitPoints(1, 13, 0, 13))
+        assertEquals(1 to 0, stepHitPoints(1, 0, 0, 13))
+    }
+
+    @Test
     fun temporaryHitPointsDoNotAddUp() {
         assertEquals(5, gainTemporaryHitPoints(5, 3))
         assertEquals(8, gainTemporaryHitPoints(5, 8))
