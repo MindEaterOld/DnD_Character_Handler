@@ -50,15 +50,12 @@ import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 
-/** How many chips the row shows before the rest fold into "+N". */
-private const val ShownChips = 3
-
 /**
  * The character's conditions as chips over the hit points (owner's choice from boards, 2026-10-09: И): exhaustion's
  * level in `accent.damageFire`, concentration in gold, each condition in its colour — lit at 15 % over the card's fill,
- * outlined in it at 70 %, its icon and its name; three at most, the rest folded into "+N"; each row centred, filling
- * from the bottom (by the hit points) up: a chip that doesn't fit opens a row above the others (owner's wish,
- * 2026-10-10). A chip opens the conditions' sheet; concentration's offers to end it. While no chip opens the sheet — no
+ * outlined in it at 70 %, its icon and its name; every one shown — none folded into "+N" (owner's wish, 2026-10-10)
+ * — each row centred, filling from the bottom (by the hit points) up: a chip that doesn't fit opens a row above the
+ * others (owner's wish, 2026-10-10). A chip opens the conditions' sheet; concentration's offers to end it. While no chip opens the sheet — no
  * condition, no exhaustion — a quiet «+ Состояние» stands over them, alone and centred, to put one on; with one on it
  * goes, and the chips open the sheet (owner's wish, 2026-10-10: the «+» and a chip opened the same sheet).
  */
@@ -85,18 +82,12 @@ internal fun ConditionChips(
             add { ConditionChip(condition.icon, strings[condition.nameKey], condition.accent(), onOpenPicker) }
         }
     }
-    val shown = if (chips.size > ShownChips) {
-        val hidden = chips.size - (ShownChips - 1)
-        chips.take(ShownChips - 1) + listOf<@Composable () -> Unit>({ ConditionChip(null, "+$hidden", colors.text.label, onOpenPicker) })
-    } else {
-        chips
-    }
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(ChipGap)) {
         // Concentration's chip offers to end it: alone, it doesn't open the sheet, so the «+» stays beside it.
         if (exhaustion <= 0 && conditions.isEmpty()) {
             AddConditionChip(label = text("conditions_add_chip"), description = text("conditions_add"), onClick = onOpenPicker)
         }
-        if (shown.isNotEmpty()) BottomUpRows(gap = ChipGap) { shown.forEach { it() } }
+        if (chips.isNotEmpty()) BottomUpRows(gap = ChipGap) { chips.forEach { it() } }
     }
 }
 
@@ -146,7 +137,7 @@ private fun BottomUpRows(gap: Dp, content: @Composable () -> Unit) {
 
 /** A condition on: lit in its [accent] at 12 % over the card's fill, outlined in it, its icon and its name. */
 @Composable
-private fun ConditionChip(icon: ImageVector?, name: String, accent: Color, onClick: () -> Unit) {
+private fun ConditionChip(icon: ImageVector, name: String, accent: Color, onClick: () -> Unit) {
     val colors = LocalDesignTokens.current.colors
     val shape = RoundedCornerShape(16.dp)
     Row(
@@ -161,7 +152,7 @@ private fun ConditionChip(icon: ImageVector?, name: String, accent: Color, onCli
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        if (icon != null) Icon(icon, contentDescription = null, tint = accent, modifier = Modifier.size(18.dp))
+        Icon(icon, contentDescription = null, tint = accent, modifier = Modifier.size(18.dp))
         Text(text = name, style = MaterialTheme.typography.bodyMedium, color = colors.text.primary, maxLines = 1)
     }
 }
