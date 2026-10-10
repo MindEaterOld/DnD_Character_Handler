@@ -151,8 +151,9 @@ class CharacterManagerViewModel(
         }
     }
 
-    /** Turns the drawer to [system]: its characters, the last changed of them picked. */
+    /** Turns the drawer to [system]: its characters, the last changed of them picked. Only a system with its sheet. */
     fun setGameSystem(system: GameSystem) {
+        if (!system.available) return
         viewModelScope.launch { languagePreferencesRepository.setGameSystem(system) }
     }
 

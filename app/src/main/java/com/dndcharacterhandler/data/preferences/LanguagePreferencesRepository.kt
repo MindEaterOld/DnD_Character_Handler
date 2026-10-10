@@ -37,9 +37,12 @@ class LanguagePreferencesRepository(private val context: Context) {
         context.dataStore.edit { preferences -> preferences[themeKey] = theme.key }
     }
 
-    /** The game system the drawer shows the characters of; D&D 5e (2024) until the player picks another. */
+    /**
+     * The game system the drawer shows the characters of; D&D 5e (2024) until the player picks another. Only a
+     * system with its sheet can be picked: any other stored (by an older build) reads as the default.
+     */
     val gameSystem: Flow<GameSystem> = context.dataStore.data.map { preferences ->
-        GameSystem.fromKey(preferences[gameSystemKey]) ?: GameSystem.DEFAULT
+        GameSystem.fromKey(preferences[gameSystemKey])?.takeIf { it.available } ?: GameSystem.DEFAULT
     }
 
     suspend fun setGameSystem(system: GameSystem) {

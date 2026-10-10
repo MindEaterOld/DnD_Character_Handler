@@ -71,23 +71,39 @@ class CharacterArchiveCodecTest {
     fun theGameSystemIsWrittenAndAnArchiveWithoutItIsDnd2024() {
         val manifest = richBundle().toArchiveManifest(exportedAt = 0L, mapAssetReference = identityMap)
         assertEquals(JsonPrimitive("dnd5e_2024"), manifest["gameSystem"])
+        assertEquals(JsonPrimitive("dnd5e_2024"), manifest.getValue("character").jsonObject["gameSystem"])
 
-        val older = JsonObject(manifest - "gameSystem")
+        val older = manifest.withoutSystemMarks()
         val imported = archiveManifestToCharacterBundle(older, resolveAssetReference = identityResolve)
 
         assertEquals(GameSystem.DND_5E_2024, imported.characterBundle.character.gameSystem)
     }
 
+    /** A character of another system — known or not, marked at the top or in the character — is never read as D&D. */
     @Test
-    fun anotherSystemsArchiveIsNotReadAsDnd() {
-        val manifest = richBundle().toArchiveManifest(exportedAt = 0L, mapAssetReference = identityMap)
+    fun anotherSystemsCharacterIsNotReadAsDnd() {
+        val older = richBundle().toArchiveManifest(exportedAt = 0L, mapAssetReference = identityMap).withoutSystemMarks()
 
-        listOf("pf2e", "some_future_system").forEach { key ->
-            val other = manifest.withValue("gameSystem", JsonPrimitive(key))
-            val failure = runCatching { archiveManifestToCharacterBundle(other, resolveAssetReference = identityResolve) }
-            assertTrue(key, failure.isFailure)
+        GameSystem.entries.filter { it != GameSystem.DND_5E_2024 }.map { it.key }.plus("some_future_system").forEach { key ->
+            val atTop = older.withValue("gameSystem", JsonPrimitive(key))
+            val inCharacter = older.withValue("character", older.getValue("character").jsonObject.withValue("gameSystem", JsonPrimitive(key)))
+            listOf(atTop, inCharacter).forEach { manifest ->
+                val read = runCatching { archiveManifestToCharacterBundle(manifest, resolveAssetReference = identityResolve) }
+                assertTrue(key, read.isFailure)
+            }
         }
     }
+
+    @Test
+    fun marksAtOddsAreRefused() {
+        val manifest = richBundle().toArchiveManifest(exportedAt = 0L, mapAssetReference = identityMap)
+        val atOdds = manifest.withValue("character", manifest.getValue("character").jsonObject.withValue("gameSystem", JsonPrimitive("pf2e")))
+
+        assertTrue(runCatching { archiveManifestToCharacterBundle(atOdds, resolveAssetReference = identityResolve) }.isFailure)
+    }
+
+    private fun JsonObject.withoutSystemMarks(): JsonObject =
+        JsonObject(this - "gameSystem").withValue("character", JsonObject(getValue("character").jsonObject - "gameSystem"))
 
     @Test
     fun unknownEnumValues_fallBackToDefaults() {

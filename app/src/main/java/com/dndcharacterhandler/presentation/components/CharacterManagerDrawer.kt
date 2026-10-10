@@ -127,11 +127,7 @@ fun CharacterManagerDrawer(
             if (state.isLoaded && state.characters.isEmpty()) {
                 item {
                     Text(
-                        text = if (state.gameSystem.available) {
-                            text("drawer_no_characters")
-                        } else {
-                            LocalStrings.current.format("drawer_system_in_development", gameSystemName(state.gameSystem))
-                        },
+                        text = text("drawer_no_characters"),
                         modifier = Modifier.padding(horizontal = 4.dp, vertical = 6.dp),
                         style = MaterialTheme.typography.bodyLarge,
                         color = colors.text.muted

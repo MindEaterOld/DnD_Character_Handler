@@ -11,7 +11,6 @@ import com.dndcharacterhandler.domain.model.AppTheme
 import com.dndcharacterhandler.domain.dnd5e.model.ArmorClassMode
 import com.dndcharacterhandler.domain.dnd5e.model.Character
 import com.dndcharacterhandler.domain.dnd5e.model.CharacterBundle
-import com.dndcharacterhandler.domain.model.GameSystem
 import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.theme.DnDTheme
 
@@ -60,14 +59,6 @@ fun CharacterManagerDrawerEngravedPreview() = DrawerPreview(
 @Preview(name = "Character Manager Drawer — no characters", showBackground = true, showSystemUi = true, device = "spec:width=412dp,height=915dp")
 @Composable
 fun CharacterManagerDrawerEmptyPreview() = DrawerPreview(CharacterManagerUiState(isLoaded = true), closable = false)
-
-/** A system without its sheet yet: its list says so, and no character can be made in it. */
-@Preview(name = "Character Manager Drawer — a system in development", showBackground = true, showSystemUi = true, device = "spec:width=412dp,height=915dp")
-@Composable
-fun CharacterManagerDrawerSystemInDevelopmentPreview() = DrawerPreview(
-    CharacterManagerUiState(gameSystem = GameSystem.PATHFINDER_2E, isLoaded = true),
-    closable = false
-)
 
 private fun previewCharacterBundle(
     id: Long,

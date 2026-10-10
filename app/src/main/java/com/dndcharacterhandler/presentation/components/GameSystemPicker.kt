@@ -1,5 +1,8 @@
 package com.dndcharacterhandler.presentation.components
 
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.disabled
+import androidx.compose.foundation.border
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -14,10 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Explore
-import androidx.compose.material.icons.outlined.RocketLaunch
 import androidx.compose.material.icons.outlined.UnfoldMore
-import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -35,34 +35,32 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.dndcharacterhandler.domain.model.GameSystem
 import com.dndcharacterhandler.domain.model.GameSystemFamily
-import com.dndcharacterhandler.presentation.dice.D20Outline
-import com.dndcharacterhandler.presentation.localization.LocalStrings
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 
 /**
- * A game's emblem, never its logo: a d20 for D&D, a compass for Pathfinder, a rocket for Starfinder, a drop of blood
- * for Vampire (Material Symbols, Apache 2.0; the d20 is the dice table's).
+ * A game's own emblem (owner's wish, 2026-10-10; GameSystemEmblems.kt): D&D's ampersand, Pathfinder's Glyph of the
+ * Open Road, Starfinder's compass star, Vampire's ankh.
  */
 val GameSystemFamily.emblem: ImageVector
     get() = when (this) {
-        GameSystemFamily.DND -> D20Outline
-        GameSystemFamily.PATHFINDER -> Icons.Outlined.Explore
-        GameSystemFamily.STARFINDER -> Icons.Outlined.RocketLaunch
-        GameSystemFamily.VAMPIRE -> Icons.Outlined.WaterDrop
+        GameSystemFamily.DND -> DndEmblem
+        GameSystemFamily.PATHFINDER -> PathfinderEmblem
+        GameSystemFamily.STARFINDER -> StarfinderEmblem
+        GameSystemFamily.VAMPIRE -> VampireEmblem
     }
-
-/** «Pathfinder (2-я редакция)»: the game and its edition in one line. */
-@Composable
-fun gameSystemName(system: GameSystem): String =
-    LocalStrings.current.format("game_system_name_format", text(system.family.localizationKey), text(system.editionKey))
 
 /**
  * The game's emblem in gold inside two rings, as the drawer's portraits sit in theirs, over a soft gold glow: the
  * system card's picture until the games have arts of their own.
  */
 @Composable
-fun GameSystemEmblem(family: GameSystemFamily, modifier: Modifier = Modifier, size: Dp = 70.dp) {
+fun GameSystemEmblem(family: GameSystemFamily, modifier: Modifier = Modifier, size: Dp = 70.dp) =
+    EmblemInRings(family.emblem, modifier, size)
+
+/** [icon] in gold inside the emblem's two rings, over its glow. */
+@Composable
+internal fun EmblemInRings(icon: ImageVector, modifier: Modifier = Modifier, size: Dp = 70.dp) {
     val colors = LocalDesignTokens.current.colors
     val gold = MaterialTheme.colorScheme.primary
     val faint = LocalDesignTokens.current.alpha.faint
@@ -74,7 +72,7 @@ fun GameSystemEmblem(family: GameSystemFamily, modifier: Modifier = Modifier, si
             drawCircle(color = colors.ornament.stroke, radius = radius - 4.dp.toPx(), style = Stroke(width = 1.dp.toPx()))
             drawCircle(color = gold.copy(alpha = half), radius = radius - 9.dp.toPx(), style = Stroke(width = 1.dp.toPx()))
         }
-        Icon(imageVector = family.emblem, contentDescription = null, tint = gold, modifier = Modifier.size(size * 0.46f))
+        Icon(imageVector = icon, contentDescription = null, tint = gold, modifier = Modifier.size(size * 0.56f))
     }
 }
 
@@ -136,8 +134,8 @@ fun GameSystemCard(system: GameSystem, onClick: () -> Unit, modifier: Modifier =
 
 /**
  * The game systems to pick from, a sheet (S3): the games as groups, each with its emblem, and their editions as
- * toggles — the picked one gold. A system without its sheet yet says «Скоро» and can still be picked: its list is
- * empty and says why. A tap picks and closes.
+ * toggles — the picked one gold. A system without its sheet yet is there to be seen, not picked (owner's choice,
+ * 2026-10-10): muted, «В разработке» at its end. A tap picks and closes.
  */
 @Composable
 fun GameSystemSheet(selected: GameSystem, onPick: (GameSystem) -> Unit, onDismiss: () -> Unit) {
@@ -145,14 +143,21 @@ fun GameSystemSheet(selected: GameSystem, onPick: (GameSystem) -> Unit, onDismis
     val gold = MaterialTheme.colorScheme.primary
     EditSheet(title = text("drawer_game_system"), onDismiss = onDismiss) {
         GameSystemFamily.entries.forEach { family ->
+            // A game none of whose editions has its sheet yet is muted whole, its emblem too.
+            val ready = GameSystem.entries.any { it.family == family && it.available }
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(imageVector = family.emblem, contentDescription = null, tint = gold, modifier = Modifier.size(22.dp))
+                    Icon(
+                        imageVector = family.emblem,
+                        contentDescription = null,
+                        tint = if (ready) gold else colors.text.subtle,
+                        modifier = Modifier.size(22.dp)
+                    )
                     Text(
                         text = text(family.localizationKey),
                         modifier = Modifier.padding(start = 10.dp),
                         style = MaterialTheme.typography.titleMedium,
-                        color = colors.text.primary
+                        color = if (ready) colors.text.primary else colors.text.subtle
                     )
                 }
                 GameSystem.entries.filter { it.family == family }.forEach { system ->
@@ -170,18 +175,31 @@ fun GameSystemSheet(selected: GameSystem, onPick: (GameSystem) -> Unit, onDismis
     }
 }
 
-/** An edition to pick: a toggle, gold when picked, «Скоро» at its end while it has no sheet. */
+/**
+ * An edition to pick: a toggle, gold when picked. One without its sheet can't be pressed, so it has no button's fill:
+ * a `border.muted` outline, as a spent hit die's, its name and «В разработке» in `text.subtle`.
+ */
 @Composable
 private fun GameSystemOption(system: GameSystem, selected: Boolean, onClick: () -> Unit) {
     val colors = LocalDesignTokens.current.colors
-    val content = toggleContent(selected)
+    val shape = RoundedCornerShape(10.dp)
+    val ready = system.available
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 48.dp)
-            .clip(RoundedCornerShape(10.dp))
-            .background(toggleFill(selected))
-            .selectable(selected = selected, role = Role.RadioButton, onClick = onClick)
+            .clip(shape)
+            .then(
+                if (ready) {
+                    Modifier
+                        .background(toggleFill(selected))
+                        .selectable(selected = selected, role = Role.RadioButton, onClick = onClick)
+                } else {
+                    Modifier
+                        .border(1.dp, colors.border.muted, shape)
+                        .semantics { disabled() }
+                }
+            )
             .padding(horizontal = 14.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -189,14 +207,14 @@ private fun GameSystemOption(system: GameSystem, selected: Boolean, onClick: () 
             text = text(system.editionKey),
             modifier = Modifier.weight(1f),
             style = MaterialTheme.typography.bodyLarge,
-            color = content
+            color = if (ready) toggleContent(selected) else colors.text.subtle
         )
-        if (!system.available) {
+        if (!ready) {
             Text(
-                text = text("game_system_soon"),
+                text = text("game_system_in_development"),
                 modifier = Modifier.padding(start = 8.dp),
                 style = MaterialTheme.typography.labelMedium,
-                color = toggleContent(selected, unselected = colors.text.subtle)
+                color = colors.text.subtle
             )
         }
     }

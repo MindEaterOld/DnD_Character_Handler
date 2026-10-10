@@ -7834,13 +7834,6 @@
     "fr": "5e édition (V5)",
     "es": "5.ª edición (V5)"
   },
-  "game_system_name_format": {
-    "en": "%1$s (%2$s)",
-    "ru": "%1$s (%2$s)",
-    "de": "%1$s (%2$s)",
-    "fr": "%1$s (%2$s)",
-    "es": "%1$s (%2$s)"
-  },
   "drawer_game_system": {
     "maxChars": 24,
     "en": "Game system",
@@ -7849,13 +7842,13 @@
     "fr": "Système de jeu",
     "es": "Sistema de juego"
   },
-  "game_system_soon": {
-    "maxChars": 8,
-    "en": "Soon",
-    "ru": "Скоро",
-    "de": "Bald",
-    "fr": "Bientôt",
-    "es": "Pronto"
+  "game_system_in_development": {
+    "maxChars": 16,
+    "en": "In development",
+    "ru": "В разработке",
+    "de": "In Arbeit",
+    "fr": "En cours",
+    "es": "En desarrollo"
   },
   "drawer_no_characters": {
     "en": "No characters in this system yet.",
@@ -7863,12 +7856,5 @@
     "de": "In diesem System gibt es noch keine Charaktere.",
     "fr": "Aucun personnage dans ce système pour l'instant.",
     "es": "Aún no hay personajes en este sistema."
-  },
-  "drawer_system_in_development": {
-    "en": "Character sheets for %1$s are still in development: characters can't be made in it yet.",
-    "ru": "Листы персонажей для %1$s пока в разработке: создать персонажа в этой системе ещё нельзя.",
-    "de": "Charakterbögen für %1$s sind noch in Entwicklung: Charaktere lassen sich darin noch nicht erstellen.",
-    "fr": "Les fiches de personnage pour %1$s sont encore en développement : on ne peut pas encore y créer de personnage.",
-    "es": "Las hojas de personaje para %1$s aún están en desarrollo: todavía no se pueden crear personajes en él."
   }
 }

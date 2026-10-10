@@ -54,7 +54,8 @@ import java.io.File
 // 25: conditions (keys, comma-separated), exhaustion. Concentration isn't carried: it lasts minutes,
 //     and the spells get new ids on import.
 // 26: defenses (resistances, immunities, vulnerabilities as trait keys).
-// 27: gameSystem, the system the character is made in (GameSystem.key); an archive without it is D&D 5e (2024).
+// 27: gameSystem, the system the character is made in (GameSystem.key), at the manifest's top and in the character;
+//     an archive without it is D&D 5e (2024).
 private const val SCHEMA_VERSION = 27
 
 data class ImportedArchive(
@@ -69,6 +70,8 @@ fun CharacterBundle.toArchiveManifest(
     // A null value leaves its key out (no JSON nulls): reading takes a missing key for null.
     val characterObject = buildJsonObject {
         put("id", character.id)
+        // The character carries its system's mark itself, as at the manifest's top (owner, 2026-10-10).
+        put("gameSystem", character.gameSystem.key)
         put("name", character.name)
         put("race", character.race)
         put("characterClass", character.characterClass)
@@ -327,12 +330,16 @@ fun archiveManifestToCharacterBundle(
         "Unsupported character archive schema version."
     }
 
-    // This reader knows the D&D 5e (2024) sheet only: another system's archive is another app's to read.
-    val gameSystem = GameSystem.fromKey(manifest.optNullableString("gameSystem") ?: GameSystem.DEFAULT.key)
-    require(gameSystem == GameSystem.DND_5E_2024) { "Unsupported game system in the character archive." }
-
     val characterJson = manifest.optObject("character")
         ?: throw IllegalArgumentException("Character archive has no character.")
+
+    // This reader knows the D&D 5e (2024) sheet only: a character of another system (or of one unknown) is never read
+    // as D&D. The mark is at the manifest's top and in the character; at odds, the archive is refused. Neither: an
+    // archive from before the systems, D&D 5e (2024).
+    val marks = listOfNotNull(manifest.optNullableString("gameSystem"), characterJson.optNullableString("gameSystem")).distinct()
+    require(marks.size <= 1) { "The character archive's game system marks disagree." }
+    val gameSystem = GameSystem.fromKey(marks.firstOrNull() ?: GameSystem.DEFAULT.key)
+    require(gameSystem == GameSystem.DND_5E_2024) { "Unsupported game system in the character archive." }
     // Guard against corrupt/hand-edited archives: optInt coerces non-numeric values to 0, which
     // would import as level 0 / 0 max HP and let spentHitDice exceed the level.
     val importedLevel = characterJson.optInt("level").coerceIn(1, 20)
