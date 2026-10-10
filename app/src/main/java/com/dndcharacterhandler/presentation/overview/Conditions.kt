@@ -56,10 +56,11 @@ private const val ShownChips = 3
 /**
  * The character's conditions as chips over the hit points (owner's choice from boards, 2026-10-09: И): exhaustion's
  * level in `accent.damageFire`, concentration in gold, each condition in its colour — lit at 15 % over the card's fill,
- * outlined in it at 70 %, its icon and its name; three at most, the rest folded into "+N". A quiet «+» to add one is the
- * topmost, alone and centred — «Состояние» beside it while there is none — and the chips stand under it, each row
- * centred, filling from the bottom (by the hit points) up: a chip that doesn't fit opens a row above the others (owner's
- * wish, 2026-10-10). A chip opens the conditions' sheet; concentration's offers to end it.
+ * outlined in it at 70 %, its icon and its name; three at most, the rest folded into "+N"; each row centred, filling
+ * from the bottom (by the hit points) up: a chip that doesn't fit opens a row above the others (owner's wish,
+ * 2026-10-10). A chip opens the conditions' sheet; concentration's offers to end it. While no chip opens the sheet — no
+ * condition, no exhaustion — a quiet «+ Состояние» stands over them, alone and centred, to put one on; with one on it
+ * goes, and the chips open the sheet (owner's wish, 2026-10-10: the «+» and a chip opened the same sheet).
  */
 @Composable
 internal fun ConditionChips(
@@ -91,7 +92,10 @@ internal fun ConditionChips(
         chips
     }
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(ChipGap)) {
-        AddConditionChip(label = if (chips.isEmpty()) text("conditions_add_chip") else null, description = text("conditions_add"), onClick = onOpenPicker)
+        // Concentration's chip offers to end it: alone, it doesn't open the sheet, so the «+» stays beside it.
+        if (exhaustion <= 0 && conditions.isEmpty()) {
+            AddConditionChip(label = text("conditions_add_chip"), description = text("conditions_add"), onClick = onOpenPicker)
+        }
         if (shown.isNotEmpty()) BottomUpRows(gap = ChipGap) { shown.forEach { it() } }
     }
 }
@@ -162,9 +166,9 @@ private fun ConditionChip(icon: ImageVector?, name: String, accent: Color, onCli
     }
 }
 
-/** A quiet «+» to put a condition on — a minor action, so no fill: the icon and, while there is none, a word. */
+/** A quiet «+» to put a condition on — a minor action, so no fill: the icon and a word. */
 @Composable
-private fun AddConditionChip(label: String?, description: String, onClick: () -> Unit) {
+private fun AddConditionChip(label: String, description: String, onClick: () -> Unit) {
     val colors = LocalDesignTokens.current.colors
     Row(
         modifier = Modifier
@@ -177,15 +181,13 @@ private fun AddConditionChip(label: String?, description: String, onClick: () ->
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Icon(Icons.Outlined.Add, contentDescription = null, tint = colors.text.label, modifier = Modifier.size(18.dp))
-        if (label != null) {
-            Text(
-                text = label,
-                modifier = Modifier.deepShadow(),
-                style = MaterialTheme.typography.bodyMedium.copy(shadow = artShadow()),
-                color = colors.text.label,
-                maxLines = 1
-            )
-        }
+        Text(
+            text = label,
+            modifier = Modifier.deepShadow(),
+            style = MaterialTheme.typography.bodyMedium.copy(shadow = artShadow()),
+            color = colors.text.label,
+            maxLines = 1
+        )
     }
 }
 
