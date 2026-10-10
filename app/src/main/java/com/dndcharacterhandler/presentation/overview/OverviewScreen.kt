@@ -1,4 +1,5 @@
 package com.dndcharacterhandler.presentation.overview
+import androidx.compose.ui.graphics.Path
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.text.TextStyle
@@ -973,9 +974,6 @@ private fun OverviewContent(
                                 SurvivalBlock(
                                     character = character,
                                     concentrating = concentrationSpell != null,
-                                    armorClass = miniStats.first { it.field == OverviewMiniStatField.ARMOR_CLASS },
-                                    speed = miniStats.first { it.field == OverviewMiniStatField.SPEED },
-                                    proficiencyBonus = proficiencyBonusForLevel(character.level),
                                     onOpenConditions = { isConditionsDialogOpen = true },
                                     onOpenConcentration = { isEndConcentrationOpen = true },
                                     onSetHitPoints = { now, temporary -> onSetHitPoints(character.id, now, temporary) },
@@ -985,23 +983,35 @@ private fun OverviewContent(
                                         maxHpDraft = character.maxHp.toString()
                                         isMaxHpDialogOpen = true
                                     },
-                                    onStat = openStat,
-                                    onSetSaves = { successes, failures -> characterBundle?.let { onSetDeathSaves(it, successes, failures) } },
-                                    onRollSave = {
-                                        characterBundle?.let { snapshot ->
-                                            // Counted from the saves as they are now, so a second throw on the table replaces the first.
-                                            val before = DeathSaves(snapshot.character.deathSaveSuccesses, snapshot.character.deathSaveFailures)
-                                            rollDice(DiceRollRequest(mapOf(DieType.D20 to 1)) { dice ->
-                                                dice.firstOrNull()?.let { onDeathSave(snapshot, before, it.value()) }
-                                            })
-                                        }
-                                    },
                                     modifier = Modifier
                                         .align(Alignment.BottomCenter)
                                         .padding(start = 24.dp, end = 24.dp, bottom = 10.dp)
                                 )
                             }
                         }
+                    }
+                }
+
+                if (character != null) {
+                    item {
+                        // Under the portrait, before the abilities (owner's choice from boards, 2026-10-10: E).
+                        KeyStats(
+                            character = character,
+                            armorClass = miniStats.first { it.field == OverviewMiniStatField.ARMOR_CLASS },
+                            speed = miniStats.first { it.field == OverviewMiniStatField.SPEED },
+                            proficiencyBonus = proficiencyBonusForLevel(character.level),
+                            onStat = openStat,
+                            onSetSaves = { successes, failures -> characterBundle?.let { onSetDeathSaves(it, successes, failures) } },
+                            onRollSave = {
+                                characterBundle?.let { snapshot ->
+                                    // Counted from the saves as they are now, so a second throw on the table replaces the first.
+                                    val before = DeathSaves(snapshot.character.deathSaveSuccesses, snapshot.character.deathSaveFailures)
+                                    rollDice(DiceRollRequest(mapOf(DieType.D20 to 1)) { dice ->
+                                        dice.firstOrNull()?.let { onDeathSave(snapshot, before, it.value()) }
+                                    })
+                                }
+                            }
+                        )
                     }
                 }
 
@@ -1640,19 +1650,18 @@ private val HpStepEmptyEdge = 10.dp
 /** The bar of what is left under the hit points: this wide at least, as wide as the numbers above it at most. */
 private val HpBarWidth = 150.dp
 
+/** The ability cards' gap: the overview's columns under the portrait stand on theirs. */
+private val ColumnGap = 10.dp
+
 /**
  * The survival block on the portrait's foot (owner's choice from boards, 2026-10-09: И): the conditions as chips; −,
- * the hit points with a bar of what is left under them, + (owner's wish, 2026-10-10); under them the proficiency bonus,
- * the armor class and the speed — or, at 0 hit points, the death saves in their place, so nothing moves.
+ * the hit points with a bar of what is left under them, + (owner's wish, 2026-10-10). The stats went under the portrait
+ * (E, 2026-10-10: [KeyStats]).
  */
 @Composable
 private fun SurvivalBlock(
     character: Character,
     concentrating: Boolean,
-    armorClass: OverviewStat,
-    speed: OverviewStat,
-    /** The proficiency bonus, by the level: shown only (it changes with the level). */
-    proficiencyBonus: Int,
     onOpenConditions: () -> Unit,
     onOpenConcentration: () -> Unit,
     /** The hit points typed in the number: now, temporary. */
@@ -1660,12 +1669,8 @@ private fun SurvivalBlock(
     onStepDown: () -> Unit,
     onStepUp: () -> Unit,
     onMaxHp: () -> Unit,
-    onStat: (OverviewStat) -> Unit,
-    onSetSaves: (Int, Int) -> Unit,
-    onRollSave: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = LocalDesignTokens.current.colors
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         ConditionChips(
             // Unconscious at 0 hit points too: it explains the arrows.
@@ -1678,11 +1683,15 @@ private fun SurvivalBlock(
         )
         Spacer(modifier = Modifier.height(6.dp))
         // − and + (owner's wish, 2026-10-10): a hit point a tap, held they keep stepping; − takes the temporary ones first.
-        // They stand over the centres of the stats' outer thirds — the proficiency bonus's and the speed's — on their
-        // vertical lines (owner, 2026-10-10), and never move under the thumb; the numbers fill what lies between them,
-        // stepping down the type scale to fit it.
+        // They stand on the ability cards' outer columns — over the proficiency bonus and the speed, over СИЛ and ТЕЛ — on
+        // their vertical lines (owner, 2026-10-10), and never move under the thumb; the numbers fill what lies between.
         BoxWithConstraints(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            val column = (maxWidth - ColumnGap * 2) / 3
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(ColumnGap),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
                     HpStepButton(
                         icon = Icons.Outlined.Remove,
@@ -1708,10 +1717,31 @@ private fun SurvivalBlock(
                 temporaryHp = character.temporaryHp,
                 onSet = onSetHitPoints,
                 onMaxHpClick = onMaxHp,
-                modifier = Modifier.width(maxWidth * 2 / 3 - HpStepSize + HpStepEmptyEdge * 2)
+                modifier = Modifier.width(maxWidth - column - HpStepSize + HpStepEmptyEdge * 2)
             )
         }
-        Spacer(modifier = Modifier.height(14.dp))
+    }
+}
+
+/**
+ * The proficiency bonus, the armor class and the speed under the portrait, before the abilities (owner's choice from
+ * boards, 2026-10-10: E): large, no frames, the gold labels over the values, between two gold rules; a column each on
+ * the ability cards' columns. At 0 hit points the death saves take their place, so nothing moves.
+ */
+@Composable
+private fun KeyStats(
+    character: Character,
+    armorClass: OverviewStat,
+    speed: OverviewStat,
+    /** The proficiency bonus, by the level: shown only (it changes with the level). */
+    proficiencyBonus: Int,
+    onStat: (OverviewStat) -> Unit,
+    onSetSaves: (Int, Int) -> Unit,
+    onRollSave: () -> Unit
+) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        KeyStatsRule()
+        Spacer(modifier = Modifier.height(10.dp))
         if (character.currentHp == 0) {
             DeathSavesRow(
                 successes = character.deathSaveSuccesses,
@@ -1720,15 +1750,14 @@ private fun SurvivalBlock(
                 onRoll = onRollSave
             )
         } else {
-            // The proficiency bonus, the armor class, the speed: a third of the row each (owner's wish, 2026-10-09).
-            Row(modifier = Modifier.fillMaxWidth()) {
-                ArtStat(
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(ColumnGap)) {
+                KeyStat(
                     label = text("stat_card_proficiency"),
                     value = signed(proficiencyBonus),
                     icon = Icons.Outlined.AutoAwesome,
                     modifier = Modifier.weight(1f)
                 )
-                ArtStat(
+                KeyStat(
                     label = text(armorClass.labelKey),
                     value = armorClass.value,
                     icon = Icons.Outlined.Shield,
@@ -1737,7 +1766,7 @@ private fun SurvivalBlock(
                     modifier = Modifier.weight(1f),
                     onClick = { onStat(armorClass) }
                 )
-                ArtStat(
+                KeyStat(
                     label = text(speed.labelKey),
                     value = speed.value,
                     icon = speed.icon ?: Icons.AutoMirrored.Outlined.DirectionsRun,
@@ -1747,6 +1776,32 @@ private fun SurvivalBlock(
                 )
             }
         }
+        Spacer(modifier = Modifier.height(10.dp))
+        KeyStatsRule()
+    }
+}
+
+/** A gold rule melting away toward its ends, a small diamond in its middle (`primary` at half, as the ornaments). */
+@Composable
+private fun KeyStatsRule() {
+    val gold = MaterialTheme.colorScheme.primary.copy(alpha = LocalDesignTokens.current.alpha.half)
+    Canvas(modifier = Modifier.fillMaxWidth().height(9.dp)) {
+        val y = size.height / 2
+        drawLine(
+            brush = Brush.horizontalGradient(listOf(Color.Transparent, gold, gold, Color.Transparent)),
+            start = Offset(0f, y),
+            end = Offset(size.width, y),
+            strokeWidth = 1.dp.toPx()
+        )
+        val d = 3.5.dp.toPx()
+        val diamond = Path().apply {
+            moveTo(size.width / 2, y - d)
+            lineTo(size.width / 2 + d, y)
+            lineTo(size.width / 2, y + d)
+            lineTo(size.width / 2 - d, y)
+            close()
+        }
+        drawPath(diamond, gold)
     }
 }
 
@@ -1807,11 +1862,11 @@ private fun HpBar(current: Int, temporary: Int, max: Int, width: Dp = HpBarWidth
 }
 
 /**
- * A stat on the art: its gold label over its value, an icon in gold before the value — or the conditions' arrows in its
- * place — with a deep shadow to read on the art. A tap edits it.
+ * A stat under the portrait: its gold label over its value (`miniStatValue`, the stat cards' size), an icon in gold
+ * before the value — or the conditions' arrows in its place — a unit («фт») after it in body text. A tap edits it.
  */
 @Composable
-private fun ArtStat(
+private fun KeyStat(
     label: String,
     value: String,
     icon: ImageVector,
@@ -1823,31 +1878,50 @@ private fun ArtStat(
     valueColor: Color? = null
 ) {
     val colors = LocalDesignTokens.current.colors
+    val token = LocalDesignTokens.current.typography.miniStatValue
+    val number = KeyStatNumber.matchEntire(value)
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
-    Column(
-        modifier = Modifier
-            .clip(RoundedCornerShape(10.dp))
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(horizontal = 6.dp, vertical = 2.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Box(modifier = Modifier.deepShadow()) { SheetLabel(label) }
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            if (worse || better) {
-                RollMarker(worse = worse, better = better, size = 18.dp)
-            } else {
-                Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+        Column(
+            modifier = Modifier
+                .clip(RoundedCornerShape(10.dp))
+                .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+                .padding(horizontal = 6.dp, vertical = 2.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            SheetLabel(label)
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                if (worse || better) {
+                    RollMarker(worse = worse, better = better, size = 20.dp)
+                } else {
+                    Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                }
+                Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                    Text(
+                        text = number?.groupValues?.get(1) ?: value,
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontSize = token.fontSizeSp.sp,
+                            lineHeight = (token.lineHeightSp ?: token.fontSizeSp).sp
+                        ),
+                        color = valueColor ?: colors.text.primary,
+                        maxLines = 1
+                    )
+                    number?.groupValues?.get(2)?.takeIf { it.isNotEmpty() }?.let { unit ->
+                        Text(
+                            text = unit,
+                            modifier = Modifier.padding(bottom = 4.dp),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = colors.text.muted,
+                            maxLines = 1
+                        )
+                    }
+                }
             }
-            Text(
-                text = value,
-                modifier = Modifier.deepShadow(),
-                style = MaterialTheme.typography.titleLarge.copy(shadow = artShadow()),
-                color = valueColor ?: colors.text.primary
-            )
         }
     }
-    }
 }
+
+/** A stat's value: its number, and a unit after it if any («30 фт»). */
+private val KeyStatNumber = Regex("""^([+\-−]?\d+)\s*(.*)$""")
 
 /** Dead: three failed death saves, or the last level of exhaustion. */
 private fun Character.isDeadNow(): Boolean = isDead(DeathSaves(deathSaveSuccesses, deathSaveFailures), exhaustion)
@@ -1871,16 +1945,22 @@ private fun DeathSavesRow(successes: Int, failures: Int, onSetSaves: (Int, Int) 
     val rollDescription = text("overview_death_saves_roll")
     val saves = DeathSaves(successes, failures)
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        // On the ability cards' columns, as the stats they stand in for: successes, the die, failures.
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(ColumnGap),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             DeathSaveMarks(
                 label = text("overview_death_saves_successes"),
                 count = successes,
                 color = colors.accent.heal,
+                modifier = Modifier.weight(1f),
                 onSet = { onSetSaves(it, failures) }
             )
+            Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
             Box(
                 modifier = Modifier
-                    .padding(horizontal = 16.dp)
                     .size(64.dp)
                     .clip(RoundedCornerShape(12.dp))
                     // Dead or stable, there is nothing more to roll for.
@@ -1900,10 +1980,12 @@ private fun DeathSavesRow(successes: Int, failures: Int, onSetSaves: (Int, Int) 
                         .semantics { contentDescription = rollDescription }
                 )
             }
+            }
             DeathSaveMarks(
                 label = text("overview_death_saves_failures"),
                 count = failures,
                 color = colors.accent.dangerHpZero,
+                modifier = Modifier.weight(1f),
                 onSet = { onSetSaves(successes, it) }
             )
         }
