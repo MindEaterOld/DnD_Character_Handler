@@ -1,13 +1,4 @@
 package com.dndcharacterhandler.presentation.overview
-import androidx.compose.ui.layout.LastBaseline
-import androidx.compose.ui.layout.FirstBaseline
-import androidx.compose.ui.layout.AlignmentLine
-import androidx.compose.ui.layout.layout
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.ui.graphics.drawscope.withTransform
-import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.foundation.layout.paddingFromBaseline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -1793,11 +1784,9 @@ private fun KeyStats(
                     modifier = Modifier.weight(1f)
                 )
                 KeyStat(
-                    // Two letters, as every sheet has them («КБ», «AC»), to sit inside the shield with the number.
-                    label = text("stat_card_armor_class_short"),
+                    label = text(armorClass.labelKey),
                     value = armorClass.value,
-                    icon = null,
-                    inShield = true,
+                    icon = Icons.Outlined.Shield,
                     worse = armorClass.worse,
                     better = armorClass.better,
                     modifier = Modifier.weight(1f),
@@ -1912,15 +1901,13 @@ private fun HpBar(current: Int, temporary: Int, max: Int, width: Dp = HpBarWidth
 /**
  * A stat under the portrait: its gold label over its value (`miniStatValue`, the stat cards' size), an icon in gold
  * before the value — or the conditions' arrows in its place — a unit («фт») after it in body text. A tap edits it.
- * [inShield]: the value inscribed in a shield instead, the conditions' arrows left of it ([KeyStatShieldWidth]).
  */
 @Composable
 private fun KeyStat(
     label: String,
     value: String,
-    icon: ImageVector?,
+    icon: ImageVector,
     modifier: Modifier = Modifier,
-    inShield: Boolean = false,
     /** A tap edits it; none for what only shows (the proficiency bonus). */
     onClick: (() -> Unit)? = null,
     worse: Boolean = false,
@@ -1937,35 +1924,24 @@ private fun KeyStat(
         val airOverBaseline = KeyStatAir - KeyStatsRuleHeight / 2 +
             with(LocalDensity.current) { (labelStyle.fontSize.value * BodyCapHeight).sp.toDp() }
         val airUnderBaseline = KeyStatAir - KeyStatsRuleHeight / 2
-        // The value's digits' top: the serif's capitals' height over their baseline.
-        val digitsHeight = with(LocalDensity.current) { (token.fontSizeSp * SerifCapHeight).sp.toDp() }
-        val shieldLine = MaterialTheme.colorScheme.primary.copy(alpha = LocalDesignTokens.current.alpha.half)
         Column(
             modifier = Modifier
-                .then(
-                    if (inShield) {
-                        // Room for the arrows left of the shield; the shield drawn before the clip that bounds the
-                        // ripple, as it runs up under the label and down toward the rule.
-                        Modifier
-                            .widthIn(min = KeyStatShieldWidth + (KeyStatMarkerGap + KeyStatMarkerSize) * 2)
-                            .drawBehind { drawKeyStatShield(shieldLine) }
-                    } else {
-                        Modifier
-                    }
-                )
                 .clip(RoundedCornerShape(10.dp))
                 .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
                 .padding(horizontal = 6.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // The label's box ends on its baseline and the value's begins at its digits' top, so the gap between them
-            // is [KeyStatLabelGap], not what the two fonts' lines happen to keep.
-            SheetLabel(label, modifier = Modifier.paddingFromBaseline(top = airOverBaseline).endOnBaseline())
-            val valueModifier = Modifier
-                .padding(top = KeyStatLabelGap)
-                .beginAtCapTop(digitsHeight)
-                .paddingFromBaseline(bottom = airUnderBaseline)
-            val numberAndUnit: @Composable () -> Unit = {
+            SheetLabel(label, modifier = Modifier.paddingFromBaseline(top = airOverBaseline))
+            Row(
+                modifier = Modifier.paddingFromBaseline(bottom = airUnderBaseline),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                if (worse || better) {
+                    RollMarker(worse = worse, better = better, size = 20.dp)
+                } else {
+                    Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                }
                 // The unit on the number's baseline.
                 Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
                     Text(
@@ -1989,91 +1965,7 @@ private fun KeyStat(
                     }
                 }
             }
-            if (inShield) {
-                // The number in the middle of its column, the arrows left of the shield.
-                Box(modifier = valueModifier, contentAlignment = Alignment.Center) {
-                    numberAndUnit()
-                    RollMarker(
-                        worse = worse,
-                        better = better,
-                        size = KeyStatMarkerSize,
-                        modifier = Modifier.offset(x = -(KeyStatShieldWidth / 2 + KeyStatMarkerGap + KeyStatMarkerSize / 2))
-                    )
-                }
-            } else {
-                Row(
-                    modifier = valueModifier,
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(KeyStatMarkerGap)
-                ) {
-                    if (worse || better) {
-                        RollMarker(worse = worse, better = better, size = KeyStatMarkerSize)
-                    } else if (icon != null) {
-                        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(KeyStatMarkerSize))
-                    }
-                    numberAndUnit()
-                }
-            }
         }
-    }
-}
-
-/** A stat's icon, or the conditions' arrows in its place, and the gap after it. */
-private val KeyStatMarkerSize = 20.dp
-private val KeyStatMarkerGap = 6.dp
-
-/**
- * From a stat's label's baseline to its value's digits' top (owner's choice from boards, 2026-10-10: 1 — before, the
- * 8.4dp the two fonts' lines kept, which held the armor class's number away from its «КБ» in the shield).
- */
-private val KeyStatLabelGap = 6.dp
-
-/** The capitals' and the lining digits' height in the serif (Noto Serif), of its size. */
-private const val SerifCapHeight = 0.714f
-
-/** The layout ends on its last baseline: what hangs under it (the line's descent) is drawn, not laid out. */
-private fun Modifier.endOnBaseline(): Modifier = layout { measurable, constraints ->
-    val placeable = measurable.measure(constraints)
-    val baseline = placeable[LastBaseline]
-    layout(placeable.width, if (baseline == AlignmentLine.Unspecified) placeable.height else baseline) { placeable.place(0, 0) }
-}
-
-/** The layout begins at its first line's capitals' top, [capHeight] over its baseline: the line's air above is cut. */
-private fun Modifier.beginAtCapTop(capHeight: Dp): Modifier = layout { measurable, constraints ->
-    val placeable = measurable.measure(constraints)
-    val baseline = placeable[FirstBaseline]
-    val cut = if (baseline == AlignmentLine.Unspecified) 0 else (baseline - capHeight.roundToPx()).coerceAtLeast(0)
-    layout(placeable.width, placeable.height - cut) { placeable.place(0, -cut) }
-}
-
-/**
- * The armor class's shield (owner's choices from boards, 2026-10-10: 1, then the label in two letters inside it, then
- * the same air over and under it, 4): the shield icon the stat had before — the middle of Material's outlined «Shield»
- * stroke, 14 × 17.89 (not «Security»'s 18 × 22, which read as another shield) — squeezed to [KeyStatShieldSqueeze] of
- * its height so it clears both rules alike, about 9dp, centred between them (`drawKeyStatShield`); in gold at half, the
- * rules', 1.5dp: the label's two letters under its shoulders, the number («99» with a little air) in its widest part.
- */
-private val KeyStatShieldWidth = 48.dp
-private const val KeyStatShieldSqueeze = 0.94f
-
-/** The middle of Material's outlined «Shield» stroke (Apache 2.0), on its 24 grid: x 5…19, y 3.07…20.96. */
-private val KeyStatShieldPath: Path by lazy {
-    PathParser().parsePathString("M12 3.07 5 5.695V11.09C5 15.615 7.98 19.82 12 20.96 16.02 19.82 19 15.615 19 11.09V5.695Z").toPath()
-}
-
-/** The armor class's shield, centred across and between the rules, whose lines are half a rule outside the stat. */
-private fun DrawScope.drawKeyStatShield(color: Color) {
-    val width = KeyStatShieldWidth.toPx()
-    val scaleX = width / 14f
-    val scaleY = scaleX * KeyStatShieldSqueeze
-    val height = 17.89f * scaleY
-    val left = (size.width - width) / 2
-    val top = size.height / 2 - height / 2
-    withTransform({
-        translate(left - 5f * scaleX, top - 3.07f * scaleY)
-        scale(scaleX, scaleY, pivot = Offset.Zero)
-    }) {
-        drawPath(KeyStatShieldPath, color, style = Stroke(width = 1.5.dp.toPx() / scaleX))
     }
 }
 
