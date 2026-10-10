@@ -1799,6 +1799,9 @@ private fun PortraitViewerContent(
 private val HpStepSize = 52.dp
 private val HpStepIconSize = 28.dp
 
+/** The shade under − and +: just under the sign (owner's choice, 2026-10-10: 10dp of 5, 8, 10, 12 and 32). */
+private val HpStepShade = 10.dp
+
 
 /** The bar of what is left under the hit points. */
 private val HpBarWidth = 150.dp
@@ -1919,7 +1922,8 @@ private fun SurvivalBlock(
 
 /**
  * − or + beside the hit points (owner's wishes, 2026-10-10): a bare white icon as the header's — no ring, no colour,
- * the sign says what it does — with only a soft shade of `ornament.dropShadow` round it to read on a bright art. A tap
+ * the sign says what it does — with only a small soft shade of `ornament.dropShadow` under the sign (10dp; owner's
+ * choice from the device, 2026-10-10 — 32dp read as a stain), to read on a bright art. A tap
  * moves the hit points by one; held, it keeps stepping. Dim (`text.subtle`) while it can't go further. The same in
  * both themes.
  */
@@ -1930,7 +1934,7 @@ private fun HpStepButton(icon: ImageVector, description: String, enabled: Boolea
         modifier = Modifier
             .size(HpStepSize)
             .drawBehind {
-                val radius = size.minDimension * 0.62f
+                val radius = HpStepShade.toPx()
                 drawCircle(
                     brush = Brush.radialGradient(0f to colors.ornament.dropShadow, 1f to Color.Transparent, center = center, radius = radius),
                     radius = radius
