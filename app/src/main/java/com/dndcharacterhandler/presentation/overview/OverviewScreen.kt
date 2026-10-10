@@ -1,4 +1,7 @@
 package com.dndcharacterhandler.presentation.overview
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.platform.LocalFocusManager
@@ -1628,8 +1631,13 @@ private val HpStepIconSize = 28.dp
 /** The shade under − and +: just under the sign (owner's choice, 2026-10-10: 10dp of 5, 8, 10, 12 and 32). */
 private val HpStepShade = 10.dp
 
+/**
+ * What of the − and +'s tap area the hit points may run into: its empty edge, up to about 8dp from the sign (the sign
+ * is about 16dp of the 28dp icon, in the 52dp area) — nearer, «−13» and «13+» read as signed numbers.
+ */
+private val HpStepEmptyEdge = 10.dp
 
-/** The bar of what is left under the hit points. */
+/** The bar of what is left under the hit points: this wide at least, as wide as the numbers above it at most. */
 private val HpBarWidth = 150.dp
 
 /**
@@ -1693,19 +1701,15 @@ private fun SurvivalBlock(
                     )
                 }
             }
-            Column(
-                modifier = Modifier.width(maxWidth * 2 / 3 - HpStepSize),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                HpNumbers(
-                    currentHp = character.currentHp,
-                    maxHp = character.maxHp,
-                    temporaryHp = character.temporaryHp,
-                    onSet = onSetHitPoints,
-                    onMaxHpClick = onMaxHp
-                )
-                HpBar(character.currentHp, character.temporaryHp, character.maxHp)
-            }
+            // Between − and +, up to the signs themselves: the numbers and their bar widen into it.
+            HpNumbers(
+                currentHp = character.currentHp,
+                maxHp = character.maxHp,
+                temporaryHp = character.temporaryHp,
+                onSet = onSetHitPoints,
+                onMaxHpClick = onMaxHp,
+                modifier = Modifier.width(maxWidth * 2 / 3 - HpStepSize + HpStepEmptyEdge * 2)
+            )
         }
         Spacer(modifier = Modifier.height(14.dp))
         if (character.currentHp == 0) {
@@ -1785,9 +1789,9 @@ private fun HpStepButton(icon: ImageVector, description: String, enabled: Boolea
 
 /** What is left of the hit points: a bar on the experience's track, green as far as they go, the temporary ones blue after. */
 @Composable
-private fun HpBar(current: Int, temporary: Int, max: Int) {
+private fun HpBar(current: Int, temporary: Int, max: Int, width: Dp = HpBarWidth) {
     val colors = LocalDesignTokens.current.colors
-    Canvas(modifier = Modifier.padding(top = 4.dp).width(HpBarWidth).height(6.dp)) {
+    Canvas(modifier = Modifier.padding(top = 4.dp).width(width).height(6.dp)) {
         val h = 4.dp.toPx()
         val y = size.height / 2 - h / 2
         val corner = CornerRadius(h / 2)
@@ -1986,9 +1990,15 @@ private fun HpNumbers(
         if (kept == value.text) value else TextFieldValue(kept, TextRange(kept.length))
     }
     fun selectedAll(value: Int) = value.toString().let { TextFieldValue(it, TextRange(0, it.length)) }
+    fun endOf(value: Int) = value.toString().let { TextFieldValue(it, TextRange(it.length)) }
     fun begin(onTemporary: Boolean) {
-        nowDraft = selectedAll(currentHp)
-        temporaryDraft = if (temporaryHp > 0) selectedAll(temporaryHp) else TextFieldValue("")
+        // Only the field typed in first is selected: the other shows no selection it doesn't have the focus for.
+        nowDraft = if (onTemporary) endOf(currentHp) else selectedAll(currentHp)
+        temporaryDraft = when {
+            temporaryHp == 0 -> TextFieldValue("")
+            onTemporary -> selectedAll(temporaryHp)
+            else -> endOf(temporaryHp)
+        }
         temporaryFocused = onTemporary
         editing = true
     }
@@ -2016,24 +2026,31 @@ private fun HpNumbers(
     }
     BackHandler(enabled = editing) { commit() }
 
-    val temporary = when {
-        editing -> "+" + temporaryDraft.text
-        temporaryHp > 0 -> "+$temporaryHp"
-        else -> ""
-    }
-    val maximum = " / $maxHp"
-    val shownNow = if (editing) nowDraft.text.ifEmpty { "0" } else currentHp.toString()
+    val temporary = if (temporaryHp > 0) "+$temporaryHp" else ""
+    // Hair spaces round the slash: the room goes to the digits.
+    val maximum = " / $maxHp"
     val measurer = rememberTextMeasurer()
-    BoxWithConstraints(modifier = modifier) {
-        // While typing, the temporary ones' slot takes its gap and its dashed outline's padding too.
-        val room = constraints.maxWidth - with(LocalDensity.current) { (if (editing) 32.dp else 16.dp).roundToPx() }
-        val (current, extra, max) = scales.firstOrNull { (c, t, m) ->
-            measurer.measure(shownNow, c).size.width +
-                (if (temporary.isEmpty()) 0 else measurer.measure(temporary, t).size.width) +
-                measurer.measure(maximum, m).size.width <= room
-        } ?: scales.last()
+    val density = LocalDensity.current
+    BoxWithConstraints(modifier = modifier, contentAlignment = Alignment.Center) {
+        // One size while they fit (owner, 2026-10-10): sized by the saved values, never by what is being typed, so the
+        // number doesn't jump under the thumb; a step down only when the saved ones don't fit between − and +.
+        fun widthAt(c: TextStyle, t: TextStyle, m: TextStyle) = measurer.measure(currentHp.toString(), c).size.width +
+            (if (temporary.isEmpty()) 0 else measurer.measure(temporary, t).size.width) +
+            measurer.measure(maximum, m).size.width
+        // The row's padding is its texts' tap area, not what shows: it may run into the − and +'s empty edge.
+        val room = constraints.maxWidth
+        val (current, extra, max) = scales.firstOrNull { (c, t, m) -> widthAt(c, t, m) <= room } ?: scales.last()
+        // The bar as wide as the numbers, 150dp at least, the room at most.
+        val barWidth = with(density) {
+            widthAt(current, extra, max).toDp().coerceIn(HpBarWidth, maxOf(HpBarWidth, maxWidth))
+        }
         val nowColor = if (currentHp == 0 && !editing) colors.accent.dangerHpZero else colors.text.primary
-        Row(modifier = Modifier.padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        // Typing can run wider than the room for a moment: nothing is cut, it settles once set.
+        Row(
+            modifier = Modifier.wrapContentWidth(unbounded = true).padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             if (editing) {
                 BasicTextField(
                     value = nowDraft,
@@ -2125,6 +2142,8 @@ private fun HpNumbers(
                 color = colors.text.primary.copy(alpha = tokens.hpMaximum.alpha ?: LocalDesignTokens.current.alpha.veil),
                 maxLines = 1
             )
+        }
+        HpBar(currentHp, temporaryHp, maxHp, barWidth)
         }
     }
 }
