@@ -144,6 +144,9 @@ class ConditionRulesTest {
         assertEquals(Condition.entries.toSet(), Condition.parse(Condition.join(Condition.entries.toSet())))
         assertEquals(emptySet<Condition>(), Condition.parse(Condition.join(emptySet())))
         assertEquals(emptySet<Condition>(), Condition.parse(""))
+        // The order they were put on comes back.
+        val putOn = linkedSetOf(Condition.POISONED, Condition.BLINDED, Condition.FRIGHTENED)
+        assertEquals(putOn.toList(), Condition.parse(Condition.join(putOn)).toList())
     }
 
     @Test

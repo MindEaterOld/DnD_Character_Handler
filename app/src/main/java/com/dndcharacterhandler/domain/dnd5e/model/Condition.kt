@@ -26,7 +26,10 @@ enum class Condition(val key: String) {
         /** Conditions from their keys, comma-separated; unknown ones are skipped. */
         fun parse(keys: String): Set<Condition> = keys.split(',').mapNotNull { ofKey(it.trim()) }.toSet()
 
-        /** [conditions] as their keys, comma-separated, in a steady order. */
-        fun join(conditions: Set<Condition>): String = entries.filter { it in conditions }.joinToString(",") { it.key }
+        /**
+         * [conditions] as their keys, comma-separated, in the order they were put on: the overview shows them so, the
+         * first by the hit points (owner's wish, 2026-10-10). [parse] keeps it.
+         */
+        fun join(conditions: Set<Condition>): String = conditions.joinToString(",") { it.key }
     }
 }

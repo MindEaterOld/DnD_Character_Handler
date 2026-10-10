@@ -1,9 +1,10 @@
 package com.dndcharacterhandler.presentation.overview
 
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.layout.Placeable
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -54,12 +55,12 @@ private const val ShownChips = 3
 
 /**
  * The character's conditions as chips over the hit points (owner's choice from boards, 2026-10-09: И): exhaustion's
- * level in `accent.damageFire`, concentration in gold, each condition in its colour — lit at 12 % over the card's fill,
- * outlined in it at 70 %, its icon and its name; three at most, the rest folded into "+N". After them a quiet «+» to
- * add one, «Состояние» beside it while there is none. A chip opens the conditions' sheet; concentration's offers to
- * end it.
+ * level in `accent.damageFire`, concentration in gold, each condition in its colour — lit at 15 % over the card's fill,
+ * outlined in it at 70 %, its icon and its name; three at most, the rest folded into "+N". A quiet «+» to add one is the
+ * topmost, alone and centred — «Состояние» beside it while there is none — and the chips stand under it, each row
+ * centred, filling from the bottom (by the hit points) up: a chip that doesn't fit opens a row above the others (owner's
+ * wish, 2026-10-10). A chip opens the conditions' sheet; concentration's offers to end it.
  */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun ConditionChips(
     conditions: Set<Condition>,
@@ -78,7 +79,8 @@ internal fun ConditionChips(
             add { ConditionChip(ExhaustionIcon, strings.format("conditions_exhaustion_level", exhaustion), colors.accent.damageFire, onOpenPicker) }
         }
         if (concentrating) add { ConditionChip(ConcentrationIcon, strings["spells_concentration"], gold, onOpenConcentration) }
-        Condition.entries.filter { it in conditions }.forEach { condition ->
+        // In the order they were put on: the first by the hit points, a new one after it, or on a row above.
+        conditions.forEach { condition ->
             add { ConditionChip(condition.icon, strings[condition.nameKey], condition.accent(), onOpenPicker) }
         }
     }
@@ -88,13 +90,53 @@ internal fun ConditionChips(
     } else {
         chips
     }
-    FlowRow(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        shown.forEach { it() }
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(ChipGap)) {
         AddConditionChip(label = if (chips.isEmpty()) text("conditions_add_chip") else null, description = text("conditions_add"), onClick = onOpenPicker)
+        if (shown.isNotEmpty()) BottomUpRows(gap = ChipGap) { shown.forEach { it() } }
+    }
+}
+
+/** Between the chips, across and down. */
+private val ChipGap = 8.dp
+
+/**
+ * Its children in rows, each row centred, filled from the bottom up: the first ones on the bottom row, and one that
+ * doesn't fit beside them starts the row above.
+ */
+@Composable
+private fun BottomUpRows(gap: Dp, content: @Composable () -> Unit) {
+    Layout(content = content, modifier = Modifier.fillMaxWidth()) { measurables, constraints ->
+        val gapPx = gap.roundToPx()
+        val placeables = measurables.map { it.measure(constraints.copy(minWidth = 0, minHeight = 0)) }
+        // Rows from the bottom one up.
+        val rows = mutableListOf(mutableListOf<Placeable>())
+        var used = 0
+        placeables.forEach { placeable ->
+            val row = rows.last()
+            val needed = if (row.isEmpty()) placeable.width else used + gapPx + placeable.width
+            if (row.isNotEmpty() && needed > constraints.maxWidth) {
+                rows += mutableListOf(placeable)
+                used = placeable.width
+            } else {
+                row += placeable
+                used = needed
+            }
+        }
+        val heights = rows.map { row -> row.maxOf { it.height } }
+        val height = heights.sum() + gapPx * (rows.size - 1)
+        layout(constraints.maxWidth, height) {
+            var y = height
+            rows.forEachIndexed { index, row ->
+                y -= heights[index]
+                val width = row.sumOf { it.width } + gapPx * (row.size - 1)
+                var x = (constraints.maxWidth - width) / 2
+                row.forEach { placeable ->
+                    placeable.placeRelative(x, y + (heights[index] - placeable.height) / 2)
+                    x += placeable.width + gapPx
+                }
+                y -= gapPx
+            }
+        }
     }
 }
 
