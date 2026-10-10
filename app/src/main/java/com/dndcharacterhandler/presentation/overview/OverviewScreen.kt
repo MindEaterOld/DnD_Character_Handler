@@ -1799,11 +1799,6 @@ private fun PortraitViewerContent(
 private val HpStepSize = 52.dp
 private val HpStepIconSize = 28.dp
 
-/** From the hit points to the − and + either side of them. */
-private val HpButtonGap = 22.dp
-
-/** The hit points between − and +: a fixed width, so the steppers never move under the thumb. */
-private val HpCounterWidth = 200.dp
 
 /** The bar of what is left under the hit points. */
 private val HpBarWidth = 150.dp
@@ -1845,17 +1840,34 @@ private fun SurvivalBlock(
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(6.dp))
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(HpButtonGap)) {
-            // − and + (owner's wish, 2026-10-10): a hit point a tap, held they keep stepping; − takes the temporary ones first.
-            HpStepButton(
-                icon = Icons.Outlined.Remove,
-                description = text("overview_hp_step_down"),
-                enabled = character.currentHp > 0 || character.temporaryHp > 0,
-                onStep = onStepDown
-            )
-            // As wide whatever they show, so − and + stay where the thumb is while the number grows and shrinks; the
-            // numbers step down the type scale to fit it.
-            Column(modifier = Modifier.width(HpCounterWidth), horizontalAlignment = Alignment.CenterHorizontally) {
+        // − and + (owner's wish, 2026-10-10): a hit point a tap, held they keep stepping; − takes the temporary ones first.
+        // They stand over the centres of the stats' outer thirds — the proficiency bonus's and the speed's — on their
+        // vertical lines (owner, 2026-10-10), and never move under the thumb; the numbers fill what lies between them,
+        // stepping down the type scale to fit it.
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                    HpStepButton(
+                        icon = Icons.Outlined.Remove,
+                        description = text("overview_hp_step_down"),
+                        enabled = character.currentHp > 0 || character.temporaryHp > 0,
+                        onStep = onStepDown
+                    )
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                    HpStepButton(
+                        icon = Icons.Outlined.Add,
+                        description = text("overview_hp_step_up"),
+                        enabled = character.currentHp < character.maxHp,
+                        onStep = onStepUp
+                    )
+                }
+            }
+            Column(
+                modifier = Modifier.width(maxWidth * 2 / 3 - HpStepSize),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 HpNumbers(
                     currentHp = character.currentHp,
                     maxHp = character.maxHp,
@@ -1865,12 +1877,6 @@ private fun SurvivalBlock(
                 )
                 HpBar(character.currentHp, character.temporaryHp, character.maxHp)
             }
-            HpStepButton(
-                icon = Icons.Outlined.Add,
-                description = text("overview_hp_step_up"),
-                enabled = character.currentHp < character.maxHp,
-                onStep = onStepUp
-            )
         }
         Spacer(modifier = Modifier.height(14.dp))
         if (character.currentHp == 0) {
