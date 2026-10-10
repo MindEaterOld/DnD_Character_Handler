@@ -89,6 +89,11 @@ fun BorderLabelCard(
     fill: Color = LocalDesignTokens.current.colors.surface.card.copy(alpha = LocalDesignTokens.current.alpha.veil),
     border: Color = LocalDesignTokens.current.colors.border.miniCard,
     /**
+     * The frame's colour read while drawing, in place of [border]: for a colour that follows the scroll (the ability
+     * cards warming to gold as they near the screen's middle) without recomposing the card each frame.
+     */
+    borderColor: (() -> Color)? = null,
+    /**
      * The frame drawn over [content] instead of under it: for a picture filling the card to its edges (the
      * ability cards' art), which would cover the line.
      */
@@ -103,6 +108,7 @@ fun BorderLabelCard(
     var notch by remember { mutableStateOf(Rect.Zero) }
     Layout(
         modifier = modifier.drawWithContent {
+            val line = borderColor?.invoke() ?: border
             val stroke = 1.dp.toPx()
             val top = notch.center.y
             val radius = cornerRadius.toPx()
@@ -116,10 +122,10 @@ fun BorderLabelCard(
             val frame: () -> Unit = {
                 clipRect(left = notch.left, top = 0f, right = notch.right, bottom = top + stroke, clipOp = ClipOp.Difference) {
                     if (etched) {
-                        drawEngravedFrame(border, top)
+                        drawEngravedFrame(line, top)
                     } else {
                         drawRoundRect(
-                            color = border,
+                            color = line,
                             topLeft = Offset(stroke / 2, top + stroke / 2),
                             size = Size(size.width - stroke, size.height - top - stroke),
                             cornerRadius = CornerRadius(radius - stroke / 2),
@@ -138,7 +144,7 @@ fun BorderLabelCard(
                             lineTo(x - half, y)
                             close()
                         }
-                        drawPath(diamond, border)
+                        drawPath(diamond, line)
                     }
                 }
             }

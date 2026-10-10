@@ -1,5 +1,13 @@
 package com.dndcharacterhandler.presentation.attributes
 
+import androidx.compose.ui.layout.findRootCoordinates
+import com.dndcharacterhandler.presentation.components.saturation
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Psychology
@@ -1342,6 +1350,18 @@ private val AbilityCardArtFade = 42.dp
 /** The rule between an ability's modifier and score: this share of the card, melting away toward its ends (Р3). */
 private const val AbilityCardRuleShare = .76f
 
+/**
+ * How lit an ability card is by where it stands on the screen: 0 while its centre is at the screen's foot or below,
+ * 1 from the screen's middle up, eased in between.
+ */
+private fun glowFromScreenPosition(coordinates: LayoutCoordinates): Float {
+    val screen = coordinates.findRootCoordinates().size.height.toFloat()
+    if (screen <= 0f) return 1f
+    val centre = coordinates.positionInRoot().y + coordinates.size.height / 2f
+    val t = ((screen - centre) / (screen / 2f)).coerceIn(0f, 1f)
+    return t * t * (3f - 2f * t)
+}
+
 /** Each ability's art on its card. */
 private fun abilityArt(type: AbilityType): Int = when (type) {
     AbilityType.STRENGTH -> R.drawable.ability_art_strength
@@ -1358,6 +1378,11 @@ private fun abilityArt(type: AbilityType): Int = when (type) {
  * down to the rule and darkens from it to the card's foot, and toward the edges as the portrait does. The frame is the stat cards' ([BorderLabelCard]) in gold, drawn
  * over the art, with a diamond at each end of the gap for the short name; the name and the numbers have a deep
  * soft shadow under them — no plate — to read on a light art.
+ *
+ * Grey until it nears the screen's middle (owner's wish, 2026-10-10: the gold cards drew the eye down from the
+ * overview's first screen): the frame, its diamonds and the rule in the stat frames' grey (`border.miniCard`), the art
+ * without its colours; as the card's centre rises from the screen's foot to its middle they warm to gold and the art to
+ * its colours, and stay so above it ([glowFromScreenPosition]).
  */
 @Composable
 private fun AbilityScoreCard(
@@ -1371,14 +1396,19 @@ private fun AbilityScoreCard(
     val colors = LocalDesignTokens.current.colors
     val shade = colors.ornament.dropShadow
     val shadow = with(LocalDensity.current) { Shadow(shade, Offset(0f, 1.dp.toPx()), 12.dp.toPx()) }
+    val gold = MaterialTheme.colorScheme.primary
+    val grey = colors.border.miniCard
+    // How near the screen's middle the card is: written on every scroll, read only while drawing.
+    var glow by remember { mutableFloatStateOf(0f) }
+    val goldNow = { lerp(grey, gold, glow) }
     BorderLabelCard(
         label = text(score.shortNameKey),
-        modifier = modifier,
+        modifier = modifier.onGloballyPositioned { glow = glowFromScreenPosition(it) },
         labelStyle = MaterialTheme.typography.titleLarge.copy(shadow = shadow),
         labelColor = colors.text.primary,
         // Drawn thrice, as the modifier: one shadow is too faint on a light art.
         labelModifier = Modifier.drawWithContent { repeat(3) { drawContent() } },
-        border = MaterialTheme.colorScheme.primary,
+        borderColor = goldNow,
         frameOverContent = true,
         notchMarks = true,
         onClick = onClick
@@ -1395,6 +1425,7 @@ private fun AbilityScoreCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight()
+                    .saturation { glow }
                     .drawWithContent {
                         drawContent()
                         val fade = AbilityCardArtFade.toPx()
@@ -1444,13 +1475,15 @@ private fun AbilityScoreCard(
                         color = changedValueColor(checkEffects?.modifier ?: 0) ?: colors.text.primary
                     )
                 }
-                val gold = MaterialTheme.colorScheme.primary
                 Box(
                     modifier = Modifier
                         .padding(vertical = 3.dp)
                         .fillMaxWidth(AbilityCardRuleShare)
                         .height(1.dp)
-                        .background(Brush.horizontalGradient(listOf(Color.Transparent, gold, gold, Color.Transparent)))
+                        .drawBehind {
+                            val rule = goldNow()
+                            drawRect(Brush.horizontalGradient(listOf(Color.Transparent, rule, rule, Color.Transparent)))
+                        }
                 )
                 Text(
                     text = score.value.toString(),
