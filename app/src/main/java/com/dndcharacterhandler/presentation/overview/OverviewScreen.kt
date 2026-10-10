@@ -923,14 +923,32 @@ private fun OverviewContent(
                             characterName = displayName,
                             dead = dead,
                             framing = character?.portraitFraming ?: PortraitFraming(),
-                            onClick = {
-                                if (characterBundle != null) {
-                                    isPortraitMenuOpen = true
-                                }
-                            },
                             fallback = { PortraitFallback(displayName) },
                             topInset = statusBarTop
                         ) {
+                            // The art's middle opens the portrait's menu, and the survival block stands under it.
+                            Column(modifier = Modifier.matchParentSize()) {
+                                PortraitTapZone(
+                                    onClick = { if (characterBundle != null) isPortraitMenuOpen = true },
+                                    modifier = Modifier.weight(1f)
+                                )
+                                if (character != null) {
+                                    SurvivalBlock(
+                                        character = character,
+                                        concentrating = concentrationSpell != null,
+                                        onOpenConditions = { isConditionsDialogOpen = true },
+                                        onOpenConcentration = { isEndConcentrationOpen = true },
+                                        onSetHitPoints = { now, temporary -> onSetHitPoints(character.id, now, temporary) },
+                                        onStepDown = { onNudgeHitPoints(character.id, -1) },
+                                        onStepUp = { onNudgeHitPoints(character.id, 1) },
+                                        onMaxHp = {
+                                            maxHpDraft = character.maxHp.toString()
+                                            isMaxHpDialogOpen = true
+                                        },
+                                        modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 10.dp)
+                                    )
+                                }
+                            }
                             Column(
                                 modifier = Modifier
                                     .align(Alignment.TopStart)
@@ -971,22 +989,6 @@ private fun OverviewContent(
                                         add = true
                                     )
                                 }
-                                SurvivalBlock(
-                                    character = character,
-                                    concentrating = concentrationSpell != null,
-                                    onOpenConditions = { isConditionsDialogOpen = true },
-                                    onOpenConcentration = { isEndConcentrationOpen = true },
-                                    onSetHitPoints = { now, temporary -> onSetHitPoints(character.id, now, temporary) },
-                                    onStepDown = { onNudgeHitPoints(character.id, -1) },
-                                    onStepUp = { onNudgeHitPoints(character.id, 1) },
-                                    onMaxHp = {
-                                        maxHpDraft = character.maxHp.toString()
-                                        isMaxHpDialogOpen = true
-                                    },
-                                    modifier = Modifier
-                                        .align(Alignment.BottomCenter)
-                                        .padding(start = 24.dp, end = 24.dp, bottom = 10.dp)
-                                )
                             }
                         }
                     }
@@ -1497,6 +1499,27 @@ private fun ExperienceModeButton(
  * the header's icons' middle (owner's choice from boards, 2026-10-10: B).
  */
 private val PortraitCoinsTop = PortraitSideStep - CharacterHeaderRow / 2 - PortraitSideButtonSize / 2
+
+/**
+ * Where a tap on the portrait opens its menu (show, change, crop): the art's middle only, clear of everything on it
+ * (owner, 2026-10-10 — the whole art took the tap, and one on «+» at full hit points, disabled, fell through to it) —
+ * under the header, between the side buttons' columns (24dp in and their 44dp), down to the survival block, which
+ * stands under it in the same column.
+ */
+@Composable
+private fun PortraitTapZone(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val label = text("overview_portrait_menu_title")
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(top = CharacterHeaderInset, start = PortraitSideColumn, end = PortraitSideColumn)
+            .clickable(onClickLabel = label, role = Role.Button, onClick = onClick)
+            .semantics { contentDescription = label }
+    )
+}
+
+/** A side buttons' column with its inset from the screen's edge. */
+private val PortraitSideColumn = 24.dp + PortraitSideButtonSize
 
 @Composable
 private fun PortraitFallback(characterName: String) {

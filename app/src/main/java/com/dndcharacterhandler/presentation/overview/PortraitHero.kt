@@ -116,8 +116,8 @@ internal fun Modifier.bleed(margin: Dp): Modifier = layout { measurable, constra
  * The overview's portrait (owner's choices from boards, 2026-10-09: the art bleeding to the edges, 1; И): no frame — the
  * picture as wide as the screen from the phone's very top, every edge melting into the background — its sides and its
  * top as a vignette (2026-10-10: C), its foot under the hit points; on it whatever
- * [content] lays (the coins, the survival block). A tap on the picture is [onClick]. Three failed death saves drain
- * the picture to black and white.
+ * [content] lays (the coins, the survival block, and the tap that opens the portrait's menu — only in the art's middle,
+ * clear of the rest: the overview's `PortraitTapZone`). Three failed death saves drain the picture to black and white.
  */
 @Composable
 internal fun PortraitHero(
@@ -125,7 +125,6 @@ internal fun PortraitHero(
     characterName: String,
     dead: Boolean,
     framing: PortraitFraming,
-    onClick: () -> Unit,
     fallback: @Composable () -> Unit,
     /** What lies over the art's top, the status bar: the art is that much taller. */
     topInset: Dp = 0.dp,
@@ -153,7 +152,6 @@ internal fun PortraitHero(
                     portraitVignette(Rect(Offset.Zero, size), PortraitHeroFade.toPx(), colors.surface.portrait)
                 }
                 .background(colors.surface.portrait)
-                .clickable(onClick = onClick)
                 .saturation(saturation)
         ) {
             AppImage(
