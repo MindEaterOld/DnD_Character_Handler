@@ -254,7 +254,7 @@ val DefaultMaterialColors: ColorScheme = darkColorScheme(
     onSurface = Color(0xFFF1EFEC),
     surfaceVariant = Color(0xFF242427),
     onSurfaceVariant = Color(0xFFCACACD),
-    outline = Color(0xFF6C6C71),
+    outline = Color(0xFF9F9FA4),
     outlineVariant = Color(0xFF39393D)
 )
 
