@@ -254,6 +254,351 @@
           }
         }
       }
+    },
+    "graphite_a": {
+      "name": "Graphite A · former",
+      "colors": {
+        "materialTheme": {
+          "primary": "#C6A36C",
+          "onPrimary": "#22170C",
+          "primaryContainer": "#49321A",
+          "onPrimaryContainer": "#F3DDB8",
+          "secondary": "#9E7B5A",
+          "onSecondary": "#21150C",
+          "background": "#0E0E10",
+          "onBackground": "#F1EFEC",
+          "surface": "#19191B",
+          "onSurface": "#F1EFEC",
+          "surfaceVariant": "#242427",
+          "onSurfaceVariant": "#CACACD",
+          "outline": "#6C6C71",
+          "outlineVariant": "#39393D",
+          "surfaceDim": "#0E0E10",
+          "surfaceBright": "#39393D",
+          "surfaceContainerLowest": "#0E0E10",
+          "surfaceContainerLow": "#19191B",
+          "surfaceContainer": "#19191B",
+          "surfaceContainerHigh": "#242427",
+          "surfaceContainerHighest": "#39393D"
+        },
+        "app": {
+          "text": {
+            "primary": "#F1EFEC",
+            "muted": "#CACACD",
+            "subtle": "#9F9FA4"
+          },
+          "background": {
+            "page": "#0E0E10"
+          },
+          "surface": {
+            "sunken": "#151517",
+            "card": "#19191B",
+            "raised": "#242427",
+            "button": "#39393D"
+          },
+          "border": {
+            "default": "#4DF1EFEC",
+            "strong": "#80F1EFEC",
+            "faint": "#26F1EFEC",
+            "rule": "#4D9F9FA4"
+          },
+          "accent": {
+            "inspiration": "#FFD86B",
+            "xpCapped": "#FFD86B",
+            "hpTemporary": "#69B7FF",
+            "heal": "#8AD178",
+            "dangerHpZero": "#E85C5C",
+            "coinCopper": "#FF8A3D",
+            "coinSilver": "#CACACD",
+            "coinGold": "#FFD86B",
+            "magical": "#69B7FF",
+            "damageFire": "#FF8A3D",
+            "damageCold": "#69B7FF",
+            "damageLightning": "#B9A2F0",
+            "damagePoison": "#8AD178",
+            "damageOther": "#CACACD"
+          },
+          "shadow": {
+            "drop": "#80000000"
+          }
+        }
+      }
+    },
+    "graphite_b": {
+      "name": "Graphite B · muted",
+      "colors": {
+        "materialTheme": {
+          "primary": "#C6A36C",
+          "onPrimary": "#22170C",
+          "primaryContainer": "#49321A",
+          "onPrimaryContainer": "#F3DDB8",
+          "secondary": "#9E7B5A",
+          "onSecondary": "#21150C",
+          "background": "#0E0E10",
+          "onBackground": "#F1EFEC",
+          "surface": "#19191B",
+          "onSurface": "#F1EFEC",
+          "surfaceVariant": "#242427",
+          "onSurfaceVariant": "#CACACD",
+          "outline": "#6C6C71",
+          "outlineVariant": "#39393D",
+          "surfaceDim": "#0E0E10",
+          "surfaceBright": "#39393D",
+          "surfaceContainerLowest": "#0E0E10",
+          "surfaceContainerLow": "#19191B",
+          "surfaceContainer": "#19191B",
+          "surfaceContainerHigh": "#242427",
+          "surfaceContainerHighest": "#39393D"
+        },
+        "app": {
+          "text": {
+            "primary": "#F1EFEC",
+            "muted": "#CACACD",
+            "subtle": "#9F9FA4"
+          },
+          "background": {
+            "page": "#0E0E10"
+          },
+          "surface": {
+            "sunken": "#151517",
+            "card": "#19191B",
+            "raised": "#242427",
+            "button": "#39393D"
+          },
+          "border": {
+            "default": "#4DF1EFEC",
+            "strong": "#80F1EFEC",
+            "faint": "#26F1EFEC",
+            "rule": "#4D9F9FA4"
+          },
+          "accent": {
+            "inspiration": "#E9C873",
+            "xpCapped": "#E9C873",
+            "hpTemporary": "#6F9CC8",
+            "heal": "#86AE6E",
+            "dangerHpZero": "#C9625A",
+            "coinCopper": "#D48A4A",
+            "coinSilver": "#CACACD",
+            "coinGold": "#E9C873",
+            "magical": "#6F9CC8",
+            "damageFire": "#D48A4A",
+            "damageCold": "#6F9CC8",
+            "damageLightning": "#A592C8",
+            "damagePoison": "#86AE6E",
+            "damageOther": "#CACACD"
+          },
+          "shadow": {
+            "drop": "#80000000"
+          }
+        }
+      }
+    },
+    "graphite_c": {
+      "name": "Graphite C · vivid",
+      "colors": {
+        "materialTheme": {
+          "primary": "#C6A36C",
+          "onPrimary": "#22170C",
+          "primaryContainer": "#49321A",
+          "onPrimaryContainer": "#F3DDB8",
+          "secondary": "#9E7B5A",
+          "onSecondary": "#21150C",
+          "background": "#0E0E10",
+          "onBackground": "#F1EFEC",
+          "surface": "#19191B",
+          "onSurface": "#F1EFEC",
+          "surfaceVariant": "#242427",
+          "onSurfaceVariant": "#CACACD",
+          "outline": "#6C6C71",
+          "outlineVariant": "#39393D",
+          "surfaceDim": "#0E0E10",
+          "surfaceBright": "#39393D",
+          "surfaceContainerLowest": "#0E0E10",
+          "surfaceContainerLow": "#19191B",
+          "surfaceContainer": "#19191B",
+          "surfaceContainerHigh": "#242427",
+          "surfaceContainerHighest": "#39393D"
+        },
+        "app": {
+          "text": {
+            "primary": "#F1EFEC",
+            "muted": "#CACACD",
+            "subtle": "#9F9FA4"
+          },
+          "background": {
+            "page": "#0E0E10"
+          },
+          "surface": {
+            "sunken": "#151517",
+            "card": "#19191B",
+            "raised": "#242427",
+            "button": "#39393D"
+          },
+          "border": {
+            "default": "#4DF1EFEC",
+            "strong": "#80F1EFEC",
+            "faint": "#26F1EFEC",
+            "rule": "#4D9F9FA4"
+          },
+          "accent": {
+            "inspiration": "#FFD447",
+            "xpCapped": "#FFD447",
+            "hpTemporary": "#4DA6FF",
+            "heal": "#5FD97A",
+            "dangerHpZero": "#FF5A5F",
+            "coinCopper": "#FF8A2A",
+            "coinSilver": "#CACACD",
+            "coinGold": "#FFD447",
+            "magical": "#4DA6FF",
+            "damageFire": "#FF8A2A",
+            "damageCold": "#4DA6FF",
+            "damageLightning": "#B07CFF",
+            "damagePoison": "#5FD97A",
+            "damageOther": "#CACACD"
+          },
+          "shadow": {
+            "drop": "#80000000"
+          }
+        }
+      }
+    },
+    "graphite_d": {
+      "name": "Graphite D · warm",
+      "colors": {
+        "materialTheme": {
+          "primary": "#C6A36C",
+          "onPrimary": "#22170C",
+          "primaryContainer": "#49321A",
+          "onPrimaryContainer": "#F3DDB8",
+          "secondary": "#9E7B5A",
+          "onSecondary": "#21150C",
+          "background": "#0E0E10",
+          "onBackground": "#F1EFEC",
+          "surface": "#19191B",
+          "onSurface": "#F1EFEC",
+          "surfaceVariant": "#242427",
+          "onSurfaceVariant": "#CACACD",
+          "outline": "#6C6C71",
+          "outlineVariant": "#39393D",
+          "surfaceDim": "#0E0E10",
+          "surfaceBright": "#39393D",
+          "surfaceContainerLowest": "#0E0E10",
+          "surfaceContainerLow": "#19191B",
+          "surfaceContainer": "#19191B",
+          "surfaceContainerHigh": "#242427",
+          "surfaceContainerHighest": "#39393D"
+        },
+        "app": {
+          "text": {
+            "primary": "#F1EFEC",
+            "muted": "#CACACD",
+            "subtle": "#9F9FA4"
+          },
+          "background": {
+            "page": "#0E0E10"
+          },
+          "surface": {
+            "sunken": "#151517",
+            "card": "#19191B",
+            "raised": "#242427",
+            "button": "#39393D"
+          },
+          "border": {
+            "default": "#4DF1EFEC",
+            "strong": "#80F1EFEC",
+            "faint": "#26F1EFEC",
+            "rule": "#4D9F9FA4"
+          },
+          "accent": {
+            "inspiration": "#F0CF7A",
+            "xpCapped": "#F0CF7A",
+            "hpTemporary": "#7FA4C4",
+            "heal": "#9DBA6C",
+            "dangerHpZero": "#D9644E",
+            "coinCopper": "#E39A4C",
+            "coinSilver": "#CACACD",
+            "coinGold": "#F0CF7A",
+            "magical": "#7FA4C4",
+            "damageFire": "#E39A4C",
+            "damageCold": "#7FA4C4",
+            "damageLightning": "#B49AC4",
+            "damagePoison": "#9DBA6C",
+            "damageOther": "#CACACD"
+          },
+          "shadow": {
+            "drop": "#80000000"
+          }
+        }
+      }
+    },
+    "graphite_e": {
+      "name": "Graphite E · gems",
+      "colors": {
+        "materialTheme": {
+          "primary": "#C6A36C",
+          "onPrimary": "#22170C",
+          "primaryContainer": "#49321A",
+          "onPrimaryContainer": "#F3DDB8",
+          "secondary": "#9E7B5A",
+          "onSecondary": "#21150C",
+          "background": "#0E0E10",
+          "onBackground": "#F1EFEC",
+          "surface": "#19191B",
+          "onSurface": "#F1EFEC",
+          "surfaceVariant": "#242427",
+          "onSurfaceVariant": "#CACACD",
+          "outline": "#6C6C71",
+          "outlineVariant": "#39393D",
+          "surfaceDim": "#0E0E10",
+          "surfaceBright": "#39393D",
+          "surfaceContainerLowest": "#0E0E10",
+          "surfaceContainerLow": "#19191B",
+          "surfaceContainer": "#19191B",
+          "surfaceContainerHigh": "#242427",
+          "surfaceContainerHighest": "#39393D"
+        },
+        "app": {
+          "text": {
+            "primary": "#F1EFEC",
+            "muted": "#CACACD",
+            "subtle": "#9F9FA4"
+          },
+          "background": {
+            "page": "#0E0E10"
+          },
+          "surface": {
+            "sunken": "#151517",
+            "card": "#19191B",
+            "raised": "#242427",
+            "button": "#39393D"
+          },
+          "border": {
+            "default": "#4DF1EFEC",
+            "strong": "#80F1EFEC",
+            "faint": "#26F1EFEC",
+            "rule": "#4D9F9FA4"
+          },
+          "accent": {
+            "inspiration": "#F4C84A",
+            "xpCapped": "#F4C84A",
+            "hpTemporary": "#5B8DEF",
+            "heal": "#4CC38A",
+            "dangerHpZero": "#E04B63",
+            "coinCopper": "#F08C3A",
+            "coinSilver": "#CACACD",
+            "coinGold": "#F4C84A",
+            "magical": "#5B8DEF",
+            "damageFire": "#F08C3A",
+            "damageCold": "#5B8DEF",
+            "damageLightning": "#9B7BE8",
+            "damagePoison": "#4CC38A",
+            "damageOther": "#CACACD"
+          },
+          "shadow": {
+            "drop": "#80000000"
+          }
+        }
+      }
     }
   },
   "swatches": {
