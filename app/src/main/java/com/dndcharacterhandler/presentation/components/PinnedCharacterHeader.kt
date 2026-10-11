@@ -140,7 +140,7 @@ fun BoxScope.PinnedCharacterHeader(
     val veil = LocalDesignTokens.current.alpha.veil
     val canBlur = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     val density = LocalDensity.current
-    val shadow = Shadow(colors.ornament.dropShadow, Offset(0f, with(density) { 1.dp.toPx() }), with(density) { 12.dp.toPx() })
+    val shadow = Shadow(colors.shadow.drop, Offset(0f, with(density) { 1.dp.toPx() }), with(density) { 12.dp.toPx() })
     // Once the list goes under it, the header is a bar: a tap on it doesn't reach the card it covers.
     val covers by remember(backdrop) { derivedStateOf { backdrop.progress > 0f } }
     Box(
@@ -169,7 +169,7 @@ fun BoxScope.PinnedCharacterHeader(
                 .fillMaxWidth()
                 .height(1.dp)
                 .graphicsLayer { alpha = backdrop.progress }
-                .background(colors.ornament.stroke)
+                .background(colors.border.rule)
         )
         CharacterScreenHeader(
             name = name,
@@ -201,7 +201,7 @@ private fun Modifier.levelTaps(level: HeaderLevel): Modifier =
 
 /**
  * «I LVL» before the name, on its baseline (owner's choices from boards, 2026-10-10: D1, U4): the Roman numeral as large
- * as the name (`titleLarge`), «LVL» small (`labelMedium`), semibold and spaced, in `text.label`; both in
+ * as the name (`titleLarge`), «LVL» small (`labelMedium`), semibold and spaced, in `text.muted`; both in
  * `accent.inspiration` when a level up is due.
  */
 @Composable
@@ -230,14 +230,14 @@ private fun RowScope.HeaderLevelWords(level: HeaderLevel, shadow: Shadow) {
             text = " " + text("overview_level_short").uppercase(),
             modifier = Modifier.alignByBaseline().then(deep),
             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold, letterSpacing = 1.sp, shadow = shadow),
-            color = if (due) colors.accent.inspiration else colors.text.label,
+            color = if (due) colors.accent.inspiration else colors.text.muted,
             maxLines = 1
         )
     }
 }
 
 /**
- * The experience's rule under the name: on the track `progress.xpTrack`, filled from the left in gold — in
+ * The experience's rule under the name: on the track `border.faint`, filled from the left in gold — in
  * `accent.inspiration` when a level up is due, in `accent.xpCapped` at the last level. Its taps are the level's.
  */
 @Composable
@@ -253,7 +253,7 @@ private fun HeaderLevelRule(level: HeaderLevel) {
         val h = 3.dp.toPx()
         val y = size.height / 2 - h / 2
         val corner = CornerRadius(h / 2)
-        drawRoundRect(colors.progress.xpTrack, Offset(0f, y), Size(size.width, h), corner)
+        drawRoundRect(colors.border.faint, Offset(0f, y), Size(size.width, h), corner)
         if (progress > 0f) drawRoundRect(fill, Offset(0f, y), Size(size.width * progress, h), corner)
     }
 }

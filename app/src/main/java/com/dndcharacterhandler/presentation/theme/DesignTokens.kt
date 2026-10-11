@@ -41,45 +41,48 @@ data class DesignTypographyTokens(
 
 // ---- Color tokens, grouped by role (mirrors colors.app in design_tokens.json) ----
 
-/** Text & icon foreground colors. */
+/**
+ * The palette's slots (owner, 2026-10-11 — before, 54 neutral slots, many of one colour): each a step of the theme's
+ * ladder of ten neutrals (N0 the deepest … N9 the ivory text) or that step at a scale's alpha. A place in the UI takes
+ * the slot that says what it is; two places that mean the same thing can't drift apart.
+ */
+/** Text and icons: N9, N8, N7. */
 data class TextColorTokens(
+    /** Values, names, icons: N9. */
     val primary: Color,
-    val warmPrimary: Color,
-    val action: Color,
+    /** Labels and secondary text: N8. */
     val muted: Color,
-    val subtle: Color,
-    val label: Color,
-    val miniLabel: Color,
-    val icon: Color
+    /** What is off, empty or quiet: N7. */
+    val subtle: Color
 )
 
-/** The screens' background: one colour (owner, 2026-10-11 — before, a radial gradient of three). */
+/** The screens' background: one colour, N1 (owner, 2026-10-11 — before, a radial gradient of three). */
 data class BackgroundColorTokens(
     val page: Color
 )
 
-/** Card / button / portrait surfaces. */
+/** Surfaces by depth: N2, N3, N4, N5. */
 data class SurfaceColorTokens(
+    /** Under the page: the portrait's own back. N2. */
+    val sunken: Color,
+    /** The cards and stat frames. N3. */
     val card: Color,
-    /** The standard fill of a button: it stands out from the cards (1.58:1), see CLAUDE.md. */
-    val button: Color,
-    /** The old near-card fill of picker rows and toggle options, until they move to the button palette. */
-    val option: Color,
-    val selected: Color,
-    val inspiration: Color,
-    val portrait: Color,
-    val portraitFallbackStart: Color,
-    val portraitFallbackMiddle: Color,
-    val portraitFallbackEnd: Color
+    /** Over the cards: a picked row's back, the pop-ups' and the sheets' (Material's surfaceContainerHigh). N4. */
+    val raised: Color,
+    /** The standard fill of a button: it stands out from the cards (1.58:1), see CLAUDE.md. N5. */
+    val button: Color
 )
 
-/** Outline / stroke colors for cards, panels and selections. */
+/** Lines: the ivory text at the scale's alphas, and the rules' grey. */
 data class BorderColorTokens(
+    /** Frames and outlines: N9 at 30 %. */
     val default: Color,
-    val panel: Color,
-    val miniCard: Color,
-    val selected: Color,
-    val muted: Color
+    /** A picked outline: N9 at 50 %. */
+    val strong: Color,
+    /** The faintest lines, tracks and dividers: N9 at 15 %. */
+    val faint: Color,
+    /** The section titles' and the header's rules: N7 at 30 %. */
+    val rule: Color
 )
 
 /** Semantic accents (inspiration, HP, healing, danger), the coins of the currency icons, magical items and damage types. */
@@ -102,23 +105,9 @@ data class AccentColorTokens(
     val damageOther: Color
 )
 
-/** XP / progress bar fill and track. */
-data class ProgressColorTokens(
-    val xpFill: Color,
-    val xpTrack: Color
-)
-
-/** Portrait ornament frame layers. */
-data class OrnamentColorTokens(
-    val outer: Color,
-    val middle: Color,
-    val innerGlow: Color,
-    val inner: Color,
-    val shadow: Color,
-    /** A shadow that reads on the dark backgrounds: under the portrait's side buttons. */
-    val dropShadow: Color,
-    val stroke: Color,
-    val dot: Color
+/** The soft shadow under writing and signs on an art: black at 50 %. */
+data class ShadowColorTokens(
+    val drop: Color
 )
 
 data class DesignColorTokens(
@@ -127,8 +116,7 @@ data class DesignColorTokens(
     val surface: SurfaceColorTokens,
     val border: BorderColorTokens,
     val accent: AccentColorTokens,
-    val progress: ProgressColorTokens,
-    val ornament: OrnamentColorTokens
+    val shadow: ShadowColorTokens
 )
 
 /**
@@ -187,34 +175,23 @@ data class DesignTokenSet(
 val DefaultDesignColors = DesignColorTokens(
     text = TextColorTokens(
         primary = Color(0xFFF1EFEC),
-        warmPrimary = Color(0xFFF1EFEC),
-        action = Color(0xFFF1EFEC),
         muted = Color(0xFFCACACD),
-        subtle = Color(0xFF9F9FA4),
-        label = Color(0xFFCACACD),
-        miniLabel = Color(0xFFCACACD),
-        icon = Color(0xFFF1EFEC)
+        subtle = Color(0xFF9F9FA4)
     ),
     background = BackgroundColorTokens(
         page = Color(0xFF0E0E10)
     ),
     surface = SurfaceColorTokens(
+        sunken = Color(0xFF151517),
         card = Color(0xFF19191B),
-        button = Color(0xFF39393D),
-        option = Color(0xFF19191B),
-        selected = Color(0xFF242427),
-        inspiration = Color(0xFF242427),
-        portrait = Color(0xFF151517),
-        portraitFallbackStart = Color(0xFF39393D),
-        portraitFallbackMiddle = Color(0xFF19191B),
-        portraitFallbackEnd = Color(0xFF0E0E10)
+        raised = Color(0xFF242427),
+        button = Color(0xFF39393D)
     ),
     border = BorderColorTokens(
         default = Color(0x4DF1EFEC),
-        panel = Color(0x4DF1EFEC),
-        miniCard = Color(0x4DF1EFEC),
-        selected = Color(0x80F1EFEC),
-        muted = Color(0x26F1EFEC)
+        strong = Color(0x80F1EFEC),
+        faint = Color(0x26F1EFEC),
+        rule = Color(0x4D9F9FA4)
     ),
     accent = AccentColorTokens(
         inspiration = Color(0xFFFFD86B),
@@ -232,19 +209,8 @@ val DefaultDesignColors = DesignColorTokens(
         damagePoison = Color(0xFFA8D76F),
         damageOther = Color(0xFFD5C6B2)
     ),
-    progress = ProgressColorTokens(
-        xpFill = Color(0xFFCACACD),
-        xpTrack = Color(0x26F1EFEC)
-    ),
-    ornament = OrnamentColorTokens(
-        outer = Color(0x26F1EFEC),
-        middle = Color(0x80CACACD),
-        innerGlow = Color(0x4DF1EFEC),
-        inner = Color(0xFFCACACD),
-        shadow = Color(0x26000000),
-        dropShadow = Color(0x80000000),
-        stroke = Color(0x4D9F9FA4),
-        dot = Color(0xFF242427)
+    shadow = ShadowColorTokens(
+        drop = Color(0x80000000)
     )
 )
 
@@ -400,39 +366,27 @@ private fun loadColorTokens(app: JsonObject?): DesignColorTokens {
     val surface = group("surface")
     val border = group("border")
     val accent = group("accent")
-    val progress = group("progress")
-    val ornament = group("ornament")
+    val shadow = group("shadow")
     return DesignColorTokens(
         text = TextColorTokens(
             primary = text.colorToken("primary", defaults.text.primary),
-            warmPrimary = text.colorToken("warmPrimary", defaults.text.warmPrimary),
-            action = text.colorToken("action", defaults.text.action),
             muted = text.colorToken("muted", defaults.text.muted),
-            subtle = text.colorToken("subtle", defaults.text.subtle),
-            label = text.colorToken("label", defaults.text.label),
-            miniLabel = text.colorToken("miniLabel", defaults.text.miniLabel),
-            icon = text.colorToken("icon", defaults.text.icon)
+            subtle = text.colorToken("subtle", defaults.text.subtle)
         ),
         background = BackgroundColorTokens(
             page = background.colorToken("page", defaults.background.page)
         ),
         surface = SurfaceColorTokens(
+            sunken = surface.colorToken("sunken", defaults.surface.sunken),
             card = surface.colorToken("card", defaults.surface.card),
-            button = surface.colorToken("button", defaults.surface.button),
-            option = surface.colorToken("option", defaults.surface.option),
-            selected = surface.colorToken("selected", defaults.surface.selected),
-            inspiration = surface.colorToken("inspiration", defaults.surface.inspiration),
-            portrait = surface.colorToken("portrait", defaults.surface.portrait),
-            portraitFallbackStart = surface.colorToken("portraitFallbackStart", defaults.surface.portraitFallbackStart),
-            portraitFallbackMiddle = surface.colorToken("portraitFallbackMiddle", defaults.surface.portraitFallbackMiddle),
-            portraitFallbackEnd = surface.colorToken("portraitFallbackEnd", defaults.surface.portraitFallbackEnd)
+            raised = surface.colorToken("raised", defaults.surface.raised),
+            button = surface.colorToken("button", defaults.surface.button)
         ),
         border = BorderColorTokens(
             default = border.colorToken("default", defaults.border.default),
-            panel = border.colorToken("panel", defaults.border.panel),
-            miniCard = border.colorToken("miniCard", defaults.border.miniCard),
-            selected = border.colorToken("selected", defaults.border.selected),
-            muted = border.colorToken("muted", defaults.border.muted)
+            strong = border.colorToken("strong", defaults.border.strong),
+            faint = border.colorToken("faint", defaults.border.faint),
+            rule = border.colorToken("rule", defaults.border.rule)
         ),
         accent = AccentColorTokens(
             inspiration = accent.colorToken("inspiration", defaults.accent.inspiration),
@@ -450,19 +404,8 @@ private fun loadColorTokens(app: JsonObject?): DesignColorTokens {
             damagePoison = accent.colorToken("damagePoison", defaults.accent.damagePoison),
             damageOther = accent.colorToken("damageOther", defaults.accent.damageOther)
         ),
-        progress = ProgressColorTokens(
-            xpFill = progress.colorToken("xpFill", defaults.progress.xpFill),
-            xpTrack = progress.colorToken("xpTrack", defaults.progress.xpTrack)
-        ),
-        ornament = OrnamentColorTokens(
-            outer = ornament.colorToken("outer", defaults.ornament.outer),
-            middle = ornament.colorToken("middle", defaults.ornament.middle),
-            innerGlow = ornament.colorToken("innerGlow", defaults.ornament.innerGlow),
-            inner = ornament.colorToken("inner", defaults.ornament.inner),
-            shadow = ornament.colorToken("shadow", defaults.ornament.shadow),
-            dropShadow = ornament.colorToken("dropShadow", defaults.ornament.dropShadow),
-            stroke = ornament.colorToken("stroke", defaults.ornament.stroke),
-            dot = ornament.colorToken("dot", defaults.ornament.dot)
+        shadow = ShadowColorTokens(
+            drop = shadow.colorToken("drop", defaults.shadow.drop)
         )
     )
 }

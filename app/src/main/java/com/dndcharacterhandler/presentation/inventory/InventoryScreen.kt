@@ -693,7 +693,7 @@ private fun InventorySearchField(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
         color = colors.surface.card.copy(alpha = LocalDesignTokens.current.alpha.veil),
-        border = BorderStroke(1.dp, colors.border.muted)
+        border = BorderStroke(1.dp, colors.border.faint)
     ) {
         OutlinedTextField(
             value = value,
@@ -720,7 +720,7 @@ private fun InventorySearchField(
                 unfocusedBorderColor = Color.Transparent,
                 focusedContainerColor = Color.Transparent,
                 unfocusedContainerColor = Color.Transparent,
-                cursorColor = colors.text.warmPrimary
+                cursorColor = colors.text.primary
             )
         )
     }
@@ -749,7 +749,7 @@ private fun InventorySectionTitle(title: String) {
         ) {
             Canvas(modifier = Modifier.fillMaxSize()) {
                 drawLine(
-                    color = colors.border.muted,
+                    color = colors.border.faint,
                     start = Offset(0f, size.height / 2f),
                     end = Offset(size.width, size.height / 2f),
                     strokeWidth = 1.dp.toPx()
@@ -771,7 +771,7 @@ private fun InventoryCatalogRow(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
         color = colors.surface.card.copy(alpha = LocalDesignTokens.current.alpha.veil),
-        border = BorderStroke(1.dp, colors.border.muted)
+        border = BorderStroke(1.dp, colors.border.faint)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
@@ -792,7 +792,7 @@ private fun InventoryCatalogRow(
                     Text(
                         text = detail,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = colors.text.label,
+                        color = colors.text.muted,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -815,7 +815,7 @@ private fun InventoryCatalogRow(
                     Text(
                         text = "${formatWeight(item.weight)} ${text("inventory_unit_pounds")}",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = colors.text.label
+                        color = colors.text.muted
                     )
                 }
                 IconButton(onClick = onAdd) {
@@ -1001,7 +1001,7 @@ private fun InventoryBaseItemDialog(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(10.dp),
                     color = colors.surface.card.copy(alpha = LocalDesignTokens.current.alpha.veil),
-                    border = BorderStroke(1.dp, colors.border.muted),
+                    border = BorderStroke(1.dp, colors.border.faint),
                     onClick = { onSelect(base, variant) }
                 ) {
                     Column(
@@ -1019,7 +1019,7 @@ private fun InventoryBaseItemDialog(
                             Text(
                                 text = detail,
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = colors.text.label,
+                                color = colors.text.muted,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
@@ -1075,8 +1075,8 @@ private fun InventoryCategoryPickerDialog(
                         .fillMaxWidth()
                         .clickable { onSelectCategory(category) },
                     shape = RoundedCornerShape(10.dp),
-                    color = colors.ornament.outer,
-                    border = BorderStroke(1.dp, colors.border.muted)
+                    color = colors.border.faint,
+                    border = BorderStroke(1.dp, colors.border.faint)
                 ) {
                     Text(
                         text = category.title(),
@@ -1120,7 +1120,7 @@ internal fun InventorySectionCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
         color = colors.surface.card.copy(alpha = LocalDesignTokens.current.alpha.veil),
-        border = BorderStroke(1.dp, colors.border.muted)
+        border = BorderStroke(1.dp, colors.border.faint)
     ) {
         Column {
             InventoryRows(rows, tree, dexterityScore, actions, showLocation)
@@ -1155,7 +1155,7 @@ private fun InventoryRows(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(1.dp)
-                        .background(colors.ornament.outer)
+                        .background(colors.border.faint)
                 )
             }
         }
@@ -1235,7 +1235,7 @@ private fun InventoryItemRow(
                 text = "${formatWeight(item.weight)} ${text("inventory_unit_pounds")}",
                 modifier = Modifier.padding(start = 10.dp, end = 8.dp),
                 style = MaterialTheme.typography.bodyMedium,
-                color = colors.text.label,
+                color = colors.text.muted,
                 maxLines = 1
             )
             Text(
@@ -1313,7 +1313,7 @@ private fun InventoryItemRow(
                             .padding(start = 24.dp, top = 4.dp),
                         shape = RoundedCornerShape(8.dp),
                         color = colors.surface.card,
-                        border = BorderStroke(1.dp, colors.border.muted)
+                        border = BorderStroke(1.dp, colors.border.faint)
                     ) {
                         Column {
                             InventoryRows(contents, tree, dexterityScore, actions, showLocation = false)
@@ -1884,8 +1884,8 @@ private fun InventoryDialogReadOnlyField(
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(10.dp),
-            color = colors.ornament.outer,
-            border = BorderStroke(1.dp, colors.border.muted)
+            color = colors.border.faint,
+            border = BorderStroke(1.dp, colors.border.faint)
         ) {
             Box(
                 modifier = Modifier
@@ -2010,8 +2010,8 @@ private fun SelectionTagField(
                 tags.forEach { tag ->
                     Surface(
                         shape = RoundedCornerShape(999.dp),
-                        color = colors.ornament.outer,
-                        border = BorderStroke(1.dp, colors.border.muted)
+                        color = colors.border.faint,
+                        border = BorderStroke(1.dp, colors.border.faint)
                     ) {
                         Text(
                             text = tag,
@@ -2048,8 +2048,8 @@ private fun SelectionField(
                 .fillMaxWidth()
                 .clickable(onClick = onClick),
             shape = RoundedCornerShape(10.dp),
-            color = colors.ornament.outer,
-            border = BorderStroke(1.dp, colors.border.muted)
+            color = colors.border.faint,
+            border = BorderStroke(1.dp, colors.border.faint)
         ) {
             Box(
                 modifier = Modifier
@@ -2092,8 +2092,8 @@ private fun CompactSelectionField(
                 .fillMaxWidth()
                 .clickable(onClick = onClick),
             shape = RoundedCornerShape(10.dp),
-            color = colors.ornament.outer,
-            border = BorderStroke(1.dp, colors.border.muted)
+            color = colors.border.faint,
+            border = BorderStroke(1.dp, colors.border.faint)
         ) {
             Box(
                 modifier = Modifier
@@ -2140,8 +2140,8 @@ private fun CompactTextField(
                 .fillMaxWidth()
                 .height(CompactEditorFieldHeight),
             shape = RoundedCornerShape(10.dp),
-            color = colors.ornament.outer,
-            border = BorderStroke(1.dp, colors.border.muted)
+            color = colors.border.faint,
+            border = BorderStroke(1.dp, colors.border.faint)
         ) {
             BasicTextField(
                 value = value,
@@ -2330,8 +2330,8 @@ private fun InventoryPropertyTags(
         tags.forEach { tag ->
             Surface(
                 shape = RoundedCornerShape(999.dp),
-                color = colors.ornament.outer,
-                border = BorderStroke(1.dp, colors.border.muted)
+                color = colors.border.faint,
+                border = BorderStroke(1.dp, colors.border.faint)
             ) {
                 Text(
                     text = tag,

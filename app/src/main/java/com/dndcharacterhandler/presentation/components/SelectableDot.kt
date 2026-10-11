@@ -31,7 +31,7 @@ fun SelectableDot(
             radius = size.minDimension * 0.32f
         )
         drawCircle(
-            color = colors.text.label,
+            color = colors.text.muted,
             radius = size.minDimension * 0.42f,
             style = Stroke(width = 1.5.dp.toPx())
         )

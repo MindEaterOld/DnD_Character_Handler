@@ -93,7 +93,7 @@ fun BottomNavigationBar(
             .height(TabBarHeight),
         shape = RoundedCornerShape(50),
         color = Color.Transparent,
-        border = BorderStroke(1.dp, colors.border.muted)
+        border = BorderStroke(1.dp, colors.border.faint)
     ) {
         Box(
             modifier = Modifier

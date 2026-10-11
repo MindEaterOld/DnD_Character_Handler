@@ -40,7 +40,7 @@ fun SettingsDialog(
             Text(
                 text = text("settings_language"),
                 style = MaterialTheme.typography.titleMedium,
-                color = colors.text.label
+                color = colors.text.muted
             )
             AppLanguage.entries.forEach { language ->
                 SettingsOption(
@@ -54,7 +54,7 @@ fun SettingsDialog(
                 text = text("settings_theme"),
                 modifier = Modifier.padding(top = 8.dp),
                 style = MaterialTheme.typography.titleMedium,
-                color = colors.text.label
+                color = colors.text.muted
             )
             AppTheme.entries.forEach { theme ->
                 SettingsOption(

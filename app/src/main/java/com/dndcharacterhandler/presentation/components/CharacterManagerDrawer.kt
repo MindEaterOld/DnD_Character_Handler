@@ -223,7 +223,7 @@ private fun DrawerCharacterCard(
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(8.dp),
         color = colors.surface.card.copy(alpha = LocalDesignTokens.current.alpha.veil),
-        border = BorderStroke(1.dp, if (selected) MaterialTheme.colorScheme.primary else colors.border.miniCard)
+        border = BorderStroke(1.dp, if (selected) MaterialTheme.colorScheme.primary else colors.border.default)
     ) {
         Row(
             modifier = Modifier
@@ -286,7 +286,7 @@ private fun DrawerSelectionDot(selected: Boolean) {
                 radius = 6.dp.toPx()
             )
             drawCircle(
-                color = if (selected) colors.accent.inspiration else colors.text.label,
+                color = if (selected) colors.accent.inspiration else colors.text.muted,
                 radius = 7.dp.toPx(),
                 style = Stroke(width = 1.5.dp.toPx())
             )
@@ -310,12 +310,12 @@ private fun DrawerPortrait(
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             drawCircle(
-                color = colors.ornament.stroke,
+                color = colors.border.rule,
                 radius = size.minDimension / 2f - 4.dp.toPx(),
                 style = Stroke(width = 1.dp.toPx())
             )
             drawCircle(
-                color = colors.border.miniCard,
+                color = colors.border.default,
                 radius = size.minDimension / 2f - 9.dp.toPx(),
                 style = Stroke(width = 1.dp.toPx())
             )
@@ -325,7 +325,7 @@ private fun DrawerPortrait(
                 .size(56.dp)
                 .clip(CircleShape),
             shape = CircleShape,
-            color = colors.surface.portrait
+            color = colors.surface.sunken
         ) {
             AppImage(
                 imageRef = portraitReference,
@@ -337,7 +337,7 @@ private fun DrawerPortrait(
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(colors.ornament.dot),
+                            .background(colors.surface.raised),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
@@ -408,7 +408,7 @@ private fun DrawerOrnamentDivider(modifier: Modifier = Modifier) {
     ) {
         val centerY = size.height / 2f
         drawLine(
-            color = colors.ornament.stroke,
+            color = colors.border.rule,
             start = Offset(0f, centerY),
             end = Offset(size.width, centerY),
             strokeWidth = 1.dp.toPx(),

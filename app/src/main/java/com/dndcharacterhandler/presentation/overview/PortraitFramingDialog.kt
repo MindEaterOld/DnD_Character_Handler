@@ -119,15 +119,15 @@ internal fun PortraitFramingDialog(
                     with(painter) { draw(pictureSize) }
                 }
             }
-            portraitVignette(frame, frame.height * footShare, colors.surface.portrait)
+            portraitVignette(frame, frame.height * footShare, colors.surface.sunken)
             drawIntoCanvas { it.restore() }
-            drawRect(colors.border.muted, topLeft = frame.topLeft, size = frame.size, style = Stroke(width = 1.dp.toPx()))
+            drawRect(colors.border.faint, topLeft = frame.topLeft, size = frame.size, style = Stroke(width = 1.dp.toPx()))
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = text("overview_portrait_zoom"),
                 style = MaterialTheme.typography.labelMedium,
-                color = colors.text.label,
+                color = colors.text.muted,
                 modifier = Modifier.weight(1f)
             )
             TextButton(onClick = { draft = PortraitFraming() }) {
@@ -148,7 +148,7 @@ internal fun PortraitFramingDialog(
             colors = SliderDefaults.colors(
                 thumbColor = MaterialTheme.colorScheme.primary,
                 activeTrackColor = MaterialTheme.colorScheme.primary,
-                inactiveTrackColor = colors.border.muted
+                inactiveTrackColor = colors.border.faint
             )
         )
     }

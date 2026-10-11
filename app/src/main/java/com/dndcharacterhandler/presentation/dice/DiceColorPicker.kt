@@ -126,7 +126,7 @@ internal fun DiceColorPickerDialog(title: String, initial: Color, onDismiss: () 
                     .size(48.dp)
                     .clip(RoundedCornerShape(10.dp))
                     .background(picked)
-                    .border(1.dp, colors.border.muted, RoundedCornerShape(10.dp))
+                    .border(1.dp, colors.border.faint, RoundedCornerShape(10.dp))
             )
             OutlinedTextField(
                 value = hex,
@@ -146,7 +146,7 @@ internal fun DiceColorPickerDialog(title: String, initial: Color, onDismiss: () 
                         .size(32.dp)
                         .clip(CircleShape)
                         .background(preset)
-                        .border(1.dp, colors.border.muted, CircleShape)
+                        .border(1.dp, colors.border.faint, CircleShape)
                         .clickable { set(preset) }
                 )
             }

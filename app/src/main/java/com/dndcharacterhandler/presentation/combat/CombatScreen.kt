@@ -1072,7 +1072,7 @@ private fun CombatSectionTitle(title: String) {
         ) {
             Canvas(modifier = Modifier.fillMaxSize()) {
                 drawLine(
-                    color = colors.border.muted,
+                    color = colors.border.faint,
                     start = Offset(0f, size.height / 2f),
                     end = Offset(size.width, size.height / 2f),
                     strokeWidth = 1.dp.toPx()
@@ -1118,7 +1118,7 @@ private fun AttackCard(
             .combinedClickable(onClick = onClick, onLongClick = onLongClick),
         shape = RoundedCornerShape(10.dp),
         color = colors.surface.card.copy(alpha = LocalDesignTokens.current.alpha.veil),
-        border = BorderStroke(1.dp, colors.border.muted)
+        border = BorderStroke(1.dp, colors.border.faint)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
@@ -1155,7 +1155,7 @@ private fun AttackCard(
                 modifier = Modifier
                     .width(1.dp)
                     .height(72.dp)
-                    .background(colors.ornament.outer)
+                    .background(colors.border.faint)
             )
 
             Column(
@@ -1181,7 +1181,7 @@ private fun AttackCard(
                 Text(
                     text = damageLabel,
                     style = MaterialTheme.typography.titleMedium,
-                    color = colors.ornament.inner,
+                    color = colors.text.muted,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -1232,7 +1232,7 @@ private fun SpellAttackCard(
             .combinedClickable(onClick = onClick, onLongClick = onLongClick),
         shape = RoundedCornerShape(10.dp),
         color = colors.surface.card.copy(alpha = LocalDesignTokens.current.alpha.veil),
-        border = BorderStroke(1.dp, colors.border.muted)
+        border = BorderStroke(1.dp, colors.border.faint)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
@@ -1273,7 +1273,7 @@ private fun SpellAttackCard(
                 modifier = Modifier
                     .width(1.dp)
                     .height(72.dp)
-                    .background(colors.ornament.outer)
+                    .background(colors.border.faint)
             )
 
             Column(
@@ -1301,7 +1301,7 @@ private fun SpellAttackCard(
                     Text(
                         text = amount,
                         style = MaterialTheme.typography.titleMedium,
-                        color = colors.ornament.inner,
+                        color = colors.text.muted,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -1346,7 +1346,7 @@ private fun MasteryTag(value: String, onClick: () -> Unit) {
         modifier = Modifier.clickable(onClick = onClick),
         shape = RoundedCornerShape(6.dp),
         color = MaterialTheme.colorScheme.surfaceVariant,
-        border = BorderStroke(1.dp, LocalDesignTokens.current.colors.border.selected)
+        border = BorderStroke(1.dp, LocalDesignTokens.current.colors.border.strong)
     ) {
         Text(
             text = value,
@@ -1380,7 +1380,7 @@ private fun CombatTag(value: String, textColor: Color) {
     Surface(
         shape = RoundedCornerShape(6.dp),
         color = MaterialTheme.colorScheme.surfaceVariant,
-        border = BorderStroke(1.dp, LocalDesignTokens.current.colors.border.muted)
+        border = BorderStroke(1.dp, LocalDesignTokens.current.colors.border.faint)
     ) {
         Text(
             text = value,
@@ -1443,7 +1443,7 @@ private fun CombatResourceTile(
             .clickable { onEdit(resource) },
         shape = RoundedCornerShape(10.dp),
         color = colors.surface.card.copy(alpha = LocalDesignTokens.current.alpha.veil),
-        border = BorderStroke(1.dp, colors.border.muted)
+        border = BorderStroke(1.dp, colors.border.faint)
     ) {
         Column(
             modifier = Modifier
@@ -2174,8 +2174,8 @@ private fun CombatCompactSelectionField(
                 .fillMaxWidth()
                 .clickable(onClick = onClick),
             shape = RoundedCornerShape(10.dp),
-            color = colors.ornament.outer,
-            border = BorderStroke(1.dp, colors.border.muted)
+            color = colors.border.faint,
+            border = BorderStroke(1.dp, colors.border.faint)
         ) {
             Box(
                 modifier = Modifier
@@ -2223,8 +2223,8 @@ private fun CombatCompactTextField(
                 .fillMaxWidth()
                 .height(46.dp),
             shape = RoundedCornerShape(10.dp),
-            color = colors.ornament.outer,
-            border = BorderStroke(1.dp, colors.border.muted)
+            color = colors.border.faint,
+            border = BorderStroke(1.dp, colors.border.faint)
         ) {
             BasicTextField(
                 value = value,

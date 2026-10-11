@@ -93,7 +93,7 @@ internal fun AlignmentIcon(value: String, fallback: ImageVector, modifier: Modif
     Icon(
         imageVector = card?.icon ?: fallback,
         contentDescription = null,
-        tint = if (card != null) moralTint(card.moral) else LocalDesignTokens.current.colors.text.label,
+        tint = if (card != null) moralTint(card.moral) else LocalDesignTokens.current.colors.text.muted,
         modifier = modifier
     )
 }

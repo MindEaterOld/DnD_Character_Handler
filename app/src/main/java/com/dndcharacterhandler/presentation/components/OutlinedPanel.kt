@@ -26,7 +26,7 @@ fun OutlinedPanel(
     modifier: Modifier = Modifier,
     cornerRadius: Dp = 10.dp,
     fill: Color = LocalDesignTokens.current.colors.surface.card.copy(alpha = LocalDesignTokens.current.alpha.veil),
-    border: Color = LocalDesignTokens.current.colors.border.miniCard,
+    border: Color = LocalDesignTokens.current.colors.border.default,
     /** Keep what is inside within the corners; off when something is let out over the frame (the stats' shield). */
     clip: Boolean = true,
     content: @Composable ColumnScope.() -> Unit

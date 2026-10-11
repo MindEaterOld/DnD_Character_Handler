@@ -95,7 +95,7 @@ internal fun DrawScope.portraitVignette(area: Rect, foot: Float, opaque: Color) 
 /** A deep soft shadow under what is written on the art, for it to read on a light one. */
 @Composable
 internal fun artShadow(): Shadow = with(LocalDensity.current) {
-    Shadow(LocalDesignTokens.current.colors.ornament.dropShadow, Offset(0f, 1.dp.toPx()), 12.dp.toPx())
+    Shadow(LocalDesignTokens.current.colors.shadow.drop, Offset(0f, 1.dp.toPx()), 12.dp.toPx())
 }
 
 /** Draws what it is put on thrice: one [artShadow] is too faint on a light art. */
@@ -149,9 +149,9 @@ internal fun PortraitHero(
                 .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
                 .drawWithContent {
                     drawContent()
-                    portraitVignette(Rect(Offset.Zero, size), PortraitHeroFade.toPx(), colors.surface.portrait)
+                    portraitVignette(Rect(Offset.Zero, size), PortraitHeroFade.toPx(), colors.surface.sunken)
                 }
-                .background(colors.surface.portrait)
+                .background(colors.surface.sunken)
                 .saturation(saturation)
         ) {
             AppImage(

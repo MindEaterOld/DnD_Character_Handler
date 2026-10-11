@@ -225,12 +225,12 @@ private fun HeightRod(cm: Float, unit: HeightUnit, onChange: (Float) -> Unit) {
             val dash = PathEffect.dashPathEffect(floatArrayOf(5.dp.toPx(), 4.dp.toPx()))
             listOf(small, medium).forEach { v ->
                 drawLine(halo, Offset(x, y(v)), Offset(this.size.width, y(v)), 3.dp.toPx())
-                drawLine(colors.border.miniCard, Offset(x, y(v)), Offset(this.size.width, y(v)), 1.dp.toPx(), pathEffect = dash)
+                drawLine(colors.border.default, Offset(x, y(v)), Offset(this.size.width, y(v)), 1.dp.toPx(), pathEffect = dash)
             }
-            drawLine(colors.ornament.stroke, Offset(0f, y(0f)), Offset(this.size.width, y(0f)), 1.dp.toPx())
-            drawLine(colors.border.miniCard, Offset(x, y(0f)), Offset(x, y(tallest)), 1.dp.toPx())
+            drawLine(colors.border.rule, Offset(0f, y(0f)), Offset(this.size.width, y(0f)), 1.dp.toPx())
+            drawLine(colors.border.default, Offset(x, y(0f)), Offset(x, y(tallest)), 1.dp.toPx())
             ticks(unit).forEach { (v, long) ->
-                drawLine(colors.text.label, Offset(x - (if (long) 10 else 5).dp.toPx(), y(v)), Offset(x, y(v)), 1.dp.toPx())
+                drawLine(colors.text.muted, Offset(x - (if (long) 10 else 5).dp.toPx(), y(v)), Offset(x, y(v)), 1.dp.toPx())
             }
         }
         ticks(unit).filter { it.second && it.first > 0f }.forEach { (v, _) ->
@@ -240,7 +240,7 @@ private fun HeightRod(cm: Float, unit: HeightUnit, onChange: (Float) -> Unit) {
                     .absoluteOffset(x = 0.dp, y = rodY(v) - 8.dp)
                     .width(RodX - 12.dp),
                 style = numberStyle,
-                color = colors.text.label,
+                color = colors.text.muted,
                 textAlign = TextAlign.End
             )
         }
@@ -256,7 +256,7 @@ private fun HeightRod(cm: Float, unit: HeightUnit, onChange: (Float) -> Unit) {
                     .align(Alignment.TopEnd)
                     .absoluteOffset(y = rodY(middle) - 8.dp),
                 style = nameStyle,
-                color = if (zone == size) gold else colors.text.label
+                color = if (zone == size) gold else colors.text.muted
             )
         }
         // The mark from the rod to the figure's head, and the knob, on top.
@@ -299,6 +299,6 @@ private fun HeightSizeResult(size: CreatureSize, unit: HeightUnit) {
             BiographyLabel(text("size_label"))
             Text(text(size.labelKey), style = MaterialTheme.typography.titleMedium, color = colors.text.primary)
         }
-        Text(range, style = MaterialTheme.typography.bodyMedium, color = colors.text.label)
+        Text(range, style = MaterialTheme.typography.bodyMedium, color = colors.text.muted)
     }
 }

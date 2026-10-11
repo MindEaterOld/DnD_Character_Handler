@@ -50,14 +50,14 @@ fun LimitProgressBar(
             val filled = progress.coerceIn(0f, 1f)
             val stroke = 11.dp.toPx()
             drawLine(
-                color = colors.progress.xpTrack,
+                color = colors.border.faint,
                 start = Offset(stroke / 2, center.y),
                 end = Offset(size.width - stroke / 2, center.y),
                 strokeWidth = stroke,
                 cap = StrokeCap.Round
             )
             drawLine(
-                color = if (overLimit) colors.accent.dangerHpZero else colors.progress.xpFill,
+                color = if (overLimit) colors.accent.dangerHpZero else colors.text.muted,
                 start = Offset(stroke / 2, center.y),
                 end = Offset((size.width - stroke) * filled + stroke / 2, center.y),
                 strokeWidth = stroke,

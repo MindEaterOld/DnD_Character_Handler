@@ -35,7 +35,7 @@ fun ScreenTopActions(
             Icon(
                 imageVector = Icons.Filled.Menu,
                 contentDescription = text("drawer_open_character_manager"),
-                tint = colors.text.icon,
+                tint = colors.text.primary,
                 modifier = Modifier.size(28.dp)
             )
         }
@@ -43,7 +43,7 @@ fun ScreenTopActions(
             Icon(
                 imageVector = D20Outline,
                 contentDescription = text("dice_open"),
-                tint = colors.text.icon,
+                tint = colors.text.primary,
                 modifier = Modifier.size(28.dp)
             )
         }

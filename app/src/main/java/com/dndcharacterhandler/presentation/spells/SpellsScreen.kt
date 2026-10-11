@@ -631,7 +631,7 @@ private fun SpellsSearchField(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
         color = colors.surface.card.copy(alpha = LocalDesignTokens.current.alpha.veil),
-        border = BorderStroke(1.dp, colors.border.muted)
+        border = BorderStroke(1.dp, colors.border.faint)
     ) {
         OutlinedTextField(
             value = value,
@@ -658,7 +658,7 @@ private fun SpellsSearchField(
                 unfocusedBorderColor = Color.Transparent,
                 focusedContainerColor = Color.Transparent,
                 unfocusedContainerColor = Color.Transparent,
-                cursorColor = colors.text.warmPrimary
+                cursorColor = colors.text.primary
             )
         )
     }
@@ -696,7 +696,7 @@ private fun SpellLevelSectionTitle(
         ) {
             Canvas(modifier = Modifier.fillMaxSize()) {
                 drawLine(
-                    color = colors.border.muted,
+                    color = colors.border.faint,
                     start = androidx.compose.ui.geometry.Offset(0f, size.height / 2f),
                     end = androidx.compose.ui.geometry.Offset(size.width, size.height / 2f),
                     strokeWidth = 1.dp.toPx()
@@ -908,8 +908,8 @@ private fun SpellCatalogRow(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
-        color = colors.ornament.outer,
-        border = BorderStroke(1.dp, colors.border.muted)
+        color = colors.border.faint,
+        border = BorderStroke(1.dp, colors.border.faint)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
@@ -1725,13 +1725,13 @@ private fun SpellSlotCell(
         colors = OutlinedTextFieldDefaults.colors(
             focusedTextColor = colors.text.primary,
             unfocusedTextColor = colors.text.primary,
-            focusedContainerColor = colors.ornament.outer,
-            unfocusedContainerColor = colors.ornament.outer,
+            focusedContainerColor = colors.border.faint,
+            unfocusedContainerColor = colors.border.faint,
             focusedBorderColor = colors.border.default,
-            unfocusedBorderColor = colors.border.muted,
+            unfocusedBorderColor = colors.border.faint,
             focusedLabelColor = colors.text.muted,
             unfocusedLabelColor = colors.text.muted,
-            cursorColor = colors.text.warmPrimary
+            cursorColor = colors.text.primary
         )
     )
 }
@@ -1768,7 +1768,7 @@ private fun SpellSlotsConfigDialogPreview() {
 
     CompositionLocalProvider(LocalStrings provides strings) {
         DnDTheme {
-            Surface(color = LocalDesignTokens.current.colors.surface.option) {
+            Surface(color = LocalDesignTokens.current.colors.surface.card) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
                         text = text("spells_edit_slots"),
@@ -1845,8 +1845,8 @@ private fun CompactSelectionField(
                 .fillMaxWidth()
                 .clickable(onClick = onClick),
             shape = RoundedCornerShape(10.dp),
-            color = colors.ornament.outer,
-            border = BorderStroke(1.dp, colors.border.muted)
+            color = colors.border.faint,
+            border = BorderStroke(1.dp, colors.border.faint)
         ) {
             Row(
                 modifier = Modifier
@@ -1900,11 +1900,11 @@ private fun CompactTextField(
             colors = OutlinedTextFieldDefaults.colors(
                 focusedTextColor = colors.text.primary,
                 unfocusedTextColor = colors.text.primary,
-                focusedContainerColor = colors.ornament.outer,
-                unfocusedContainerColor = colors.ornament.outer,
+                focusedContainerColor = colors.border.faint,
+                unfocusedContainerColor = colors.border.faint,
                 focusedBorderColor = colors.border.default,
-                unfocusedBorderColor = colors.border.muted,
-                cursorColor = colors.text.warmPrimary
+                unfocusedBorderColor = colors.border.faint,
+                cursorColor = colors.text.primary
             )
         )
     }
@@ -2361,8 +2361,8 @@ private fun ConcentrationCard(spellName: String?, modifier: Modifier = Modifier,
     BorderLabelCard(
         label = text("concentration_card"),
         modifier = modifier.height(MiniStatCardHeight),
-        labelColor = if (lit) gold else colors.text.miniLabel,
-        border = if (lit) gold else colors.border.miniCard,
+        labelColor = if (lit) gold else colors.text.muted,
+        border = if (lit) gold else colors.border.default,
         onClick = if (lit) onClick else null
     ) {
         BoxWithConstraints(

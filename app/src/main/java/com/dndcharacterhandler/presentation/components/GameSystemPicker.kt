@@ -85,7 +85,7 @@ internal fun EmblemInRings(icon: ImageVector, modifier: Modifier = Modifier, siz
         Canvas(modifier = Modifier.fillMaxSize()) {
             val radius = this.size.minDimension / 2f
             if (!muted) drawCircle(brush = Brush.radialGradient(listOf(tint.copy(alpha = faint), Color.Transparent), radius = radius))
-            drawCircle(color = colors.ornament.stroke, radius = radius * (1 - 4f / 35f), style = Stroke(width = 1.dp.toPx()))
+            drawCircle(color = colors.border.rule, radius = radius * (1 - 4f / 35f), style = Stroke(width = 1.dp.toPx()))
             drawCircle(color = tint.copy(alpha = half), radius = radius * (1 - 9f / 35f), style = Stroke(width = 1.dp.toPx()))
         }
         Icon(imageVector = icon, contentDescription = null, tint = tint, modifier = Modifier.size(size * 0.56f))
@@ -152,7 +152,7 @@ fun GameSystemCard(
                 Icon(
                     imageVector = if (expanded) Icons.Outlined.UnfoldLess else Icons.Outlined.UnfoldMore,
                     contentDescription = null,
-                    tint = colors.text.label,
+                    tint = colors.text.muted,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -162,7 +162,7 @@ fun GameSystemCard(
                         .padding(horizontal = 14.dp)
                         .fillMaxWidth()
                         .height(1.dp)
-                        .background(colors.ornament.stroke)
+                        .background(colors.border.rule)
                 )
                 Column(
                     modifier = Modifier.padding(start = 10.dp, end = 14.dp, top = 6.dp, bottom = 8.dp),

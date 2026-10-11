@@ -208,7 +208,7 @@ internal fun DiceResultPanel(modifier: Modifier = Modifier, onClose: (() -> Unit
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
             .background(colors.surface.card)
-            .border(1.dp, colors.border.muted, RoundedCornerShape(16.dp))
+            .border(1.dp, colors.border.faint, RoundedCornerShape(16.dp))
     ) {
         Column(
             modifier = Modifier
@@ -262,7 +262,7 @@ private fun DiceStatusPanel(
         Text(
             text = text(if (phase == DicePhase.READY) "dice_hint_grab" else "dice_hint_regrab"),
             style = MaterialTheme.typography.bodyMedium,
-            color = colors.text.label,
+            color = colors.text.muted,
             textAlign = TextAlign.Center
         )
     }

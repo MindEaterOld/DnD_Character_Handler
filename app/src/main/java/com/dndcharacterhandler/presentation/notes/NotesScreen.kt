@@ -301,7 +301,7 @@ private fun NotesSearchField(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
         color = colors.surface.card.copy(alpha = LocalDesignTokens.current.alpha.veil),
-        border = BorderStroke(1.dp, colors.border.muted)
+        border = BorderStroke(1.dp, colors.border.faint)
     ) {
         OutlinedTextField(
             value = value,
@@ -328,7 +328,7 @@ private fun NotesSearchField(
                 unfocusedBorderColor = Color.Transparent,
                 focusedContainerColor = Color.Transparent,
                 unfocusedContainerColor = Color.Transparent,
-                cursorColor = colors.text.warmPrimary
+                cursorColor = colors.text.primary
             )
         )
     }
@@ -360,7 +360,7 @@ private fun NotesSectionTitle(title: String, modifier: Modifier = Modifier) {
         ) {
             val centerY = size.height / 2f
             drawLine(
-                color = colors.ornament.stroke,
+                color = colors.border.rule,
                 start = Offset(0f, centerY),
                 end = Offset(size.width - 18.dp.toPx(), centerY),
                 strokeWidth = 1.dp.toPx(),
@@ -608,7 +608,7 @@ private fun NoteField(
         onValueChange = onValueChange,
         modifier = modifier,
         textStyle = style,
-        cursorBrush = SolidColor(colors.text.warmPrimary),
+        cursorBrush = SolidColor(colors.text.primary),
         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
         decorationBox = { field ->
             Box {

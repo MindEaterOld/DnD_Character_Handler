@@ -89,7 +89,7 @@ fun ConcentrationToggle(
             contentDescription = text("spells_concentration"),
             tint = when {
                 concentrating -> MaterialTheme.colorScheme.onPrimary
-                enabled -> colors.text.label
+                enabled -> colors.text.muted
                 else -> colors.text.subtle
             },
             modifier = Modifier.size(size * 0.56f)

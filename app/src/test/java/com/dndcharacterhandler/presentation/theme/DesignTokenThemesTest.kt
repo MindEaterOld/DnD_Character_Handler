@@ -71,7 +71,7 @@ class DesignTokenThemesTest {
             val palette = set.palette(theme)
             assertEquals(theme.key, app.colour("accent", "heal"), palette.colors.accent.heal)
             assertEquals(theme.key, app.colour("text", "primary"), palette.colors.text.primary)
-            assertEquals(theme.key, app.colour("border", "muted"), palette.colors.border.muted)
+            assertEquals(theme.key, app.colour("border", "faint"), palette.colors.border.faint)
             val material = colors(theme).optObject("materialTheme")!!
             assertEquals(theme.key, material.colour("primary"), palette.material.primary)
         }

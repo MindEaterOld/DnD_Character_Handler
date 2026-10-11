@@ -412,7 +412,7 @@ private fun AlignmentSeal(alignment: String, onClick: () -> Unit, modifier: Modi
     ) {
         Canvas(modifier = Modifier.size(SealSize)) {
             drawCircle(
-                color = colors.border.miniCard,
+                color = colors.border.default,
                 radius = size.minDimension / 2 - 0.5.dp.toPx(),
                 style = Stroke(width = 1.dp.toPx())
             )
@@ -447,7 +447,7 @@ private fun BiographySectionTitle(title: String) {
         ) {
             val centerY = size.height / 2f
             drawLine(
-                color = colors.ornament.stroke,
+                color = colors.border.rule,
                 start = Offset(0f, centerY),
                 end = Offset(size.width - 18.dp.toPx(), centerY),
                 strokeWidth = 1.dp.toPx(),
@@ -642,7 +642,7 @@ private fun BiographyInlineText(
             wasFocused = focusState.isFocused
         },
         textStyle = style.copy(color = colors.text.primary),
-        cursorBrush = SolidColor(colors.text.warmPrimary),
+        cursorBrush = SolidColor(colors.text.primary),
         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
         decorationBox = { field ->
             Box {
@@ -690,7 +690,7 @@ private fun BiographyHistorySection(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(10.dp),
             color = colors.surface.card.copy(alpha = LocalDesignTokens.current.alpha.veil),
-            border = BorderStroke(1.dp, colors.border.muted)
+            border = BorderStroke(1.dp, colors.border.faint)
         ) {
             OutlinedTextField(
                 value = draft,
@@ -719,7 +719,7 @@ private fun BiographyHistorySection(
                     unfocusedBorderColor = Color.Transparent,
                     focusedContainerColor = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent,
-                    cursorColor = colors.text.warmPrimary
+                    cursorColor = colors.text.primary
                 )
             )
         }

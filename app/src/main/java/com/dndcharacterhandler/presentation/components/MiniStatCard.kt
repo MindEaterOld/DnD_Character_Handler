@@ -80,12 +80,12 @@ fun BorderLabelCard(
     labelStyle: TextStyle = MaterialTheme.typography.bodyLarge.copy(
         fontSize = LocalDesignTokens.current.typography.miniStatLabel.fontSizeSp.sp
     ),
-    labelColor: Color = LocalDesignTokens.current.colors.text.miniLabel,
+    labelColor: Color = LocalDesignTokens.current.colors.text.muted,
     /** On the label's text: what its style can't say (the ability cards draw it thrice, for a deep shadow). */
     labelModifier: Modifier = Modifier,
     cornerRadius: Dp = 10.dp,
     fill: Color = LocalDesignTokens.current.colors.surface.card.copy(alpha = LocalDesignTokens.current.alpha.veil),
-    border: Color = LocalDesignTokens.current.colors.border.miniCard,
+    border: Color = LocalDesignTokens.current.colors.border.default,
     /**
      * The frame's colour read while drawing, in place of [border]: for a colour that follows the scroll (the ability
      * cards warming to gold as they near the screen's middle) without recomposing the card each frame.
@@ -264,7 +264,7 @@ fun MiniStatCardIcon(imageVector: ImageVector, size: Dp = 24.dp) {
     Icon(
         imageVector = imageVector,
         contentDescription = null,
-        tint = LocalDesignTokens.current.colors.text.label,
+        tint = LocalDesignTokens.current.colors.text.muted,
         modifier = Modifier.size(size)
     )
 }

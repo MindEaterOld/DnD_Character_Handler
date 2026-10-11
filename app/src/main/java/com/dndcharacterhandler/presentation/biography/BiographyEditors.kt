@@ -165,7 +165,7 @@ internal fun AgeDialog(currentValue: String, onDismiss: () -> Unit, onSave: (Str
             )
             Column(modifier = Modifier.width(AgeNumberWidth), horizontalAlignment = Alignment.CenterHorizontally) {
                 BigNumberField(value = draft, onValueChange = { draft = it.filter(Char::isDigit).take(5) }, hint = "0")
-                Text(text = yearsWord(age), style = MaterialTheme.typography.bodyMedium, color = colors.text.label)
+                Text(text = yearsWord(age), style = MaterialTheme.typography.bodyMedium, color = colors.text.muted)
             }
             StepButton(
                 icon = Icons.Outlined.Add,
@@ -212,7 +212,7 @@ private fun BigNumberField(
         modifier = modifier.then(if (fitted) Modifier.width(width) else Modifier.fillMaxWidth()),
         textStyle = style,
         singleLine = true,
-        cursorBrush = SolidColor(colors.text.warmPrimary),
+        cursorBrush = SolidColor(colors.text.primary),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         decorationBox = { field ->
             Box(contentAlignment = Alignment.Center) {
@@ -342,7 +342,7 @@ internal fun WeightDialog(currentValue: String, height: String, onDismiss: () ->
                     .alignByBaseline()
                     .padding(start = 8.dp),
                 style = MaterialTheme.typography.bodyLarge,
-                color = colors.text.label
+                color = colors.text.muted
             )
         }
         WeightRuler(
@@ -366,7 +366,7 @@ internal fun WeightDialog(currentValue: String, height: String, onDismiss: () ->
                 Text(
                     text = LocalStrings.current.format("biography_bmi", formatNumber((bmi * 10).roundToInt() / 10.0), localizedMeasuredValue(height)),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = colors.text.label
+                    color = colors.text.muted
                 )
             }
         } else if (heightInCm(height) == null) {
@@ -411,7 +411,7 @@ private fun WeightRuler(value: Float?, range: ClosedFloatingPointRange<Float>, o
     ) {
         width = size.width
         val y = size.height / 2 + 4.dp.toPx()
-        drawLine(colors.progress.xpTrack, Offset(0f, y), Offset(size.width, y), 4.dp.toPx(), StrokeCap.Round)
+        drawLine(colors.border.faint, Offset(0f, y), Offset(size.width, y), 4.dp.toPx(), StrokeCap.Round)
         var mark = (range.start / 5f).toInt() * 5f
         while (mark <= range.endInclusive) {
             if (mark >= range.start) {

@@ -1278,7 +1278,7 @@ private fun SenseLine(
     ) {
         // As an untrained skill's line (owner, 2026-10-10): the icon in the plain ring's colour, the name muted — no one
         // is trained in a passive check.
-        Icon(icon, contentDescription = null, tint = colors.text.label, modifier = Modifier.size(16.dp))
+        Icon(icon, contentDescription = null, tint = colors.text.muted, modifier = Modifier.size(16.dp))
         Text(
             text = label,
             modifier = Modifier
@@ -1306,7 +1306,7 @@ private fun SenseLine(
 private fun DarkvisionValue(feet: Int) {
     val colors = LocalDesignTokens.current.colors
     val textShadow = with(LocalDensity.current) {
-        Shadow(colors.ornament.dropShadow, Offset(0f, 1.dp.toPx()), 12.dp.toPx())
+        Shadow(colors.shadow.drop, Offset(0f, 1.dp.toPx()), 12.dp.toPx())
     }
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
@@ -1349,7 +1349,7 @@ private fun AttributesSectionTitle(title: String) {
         ) {
             val centerY = size.height / 2f
             drawLine(
-                color = colors.ornament.stroke,
+                color = colors.border.rule,
                 start = Offset(0f, centerY),
                 end = Offset(size.width - 18.dp.toPx(), centerY),
                 strokeWidth = 1.dp.toPx(),
@@ -1436,7 +1436,7 @@ private fun RollEffects?.ruleMark(): RuleMark? = when {
 /**
  * The conditions' sign on an ability card (owner's choice from boards, 2026-10-10: 3 — the small arrows beside the
  * modifier didn't read on the art): in a gap of the gold rule under the modifier, larger and bolder than the sheet's
- * arrows elsewhere, with a soft shade of `ornament.dropShadow` round it (the HP ± signs' shade) to read on a light art.
+ * arrows elsewhere, with a soft shade of `shadow.drop` round it (the HP ± signs' shade) to read on a light art.
  */
 private val AbilityRuleMarkSize = 22.dp
 private val AbilityRuleMarkGap = 2.dp
@@ -1489,7 +1489,7 @@ private fun abilityArt(type: AbilityType): Int = when (type) {
  * soft shadow under them — no plate — to read on a light art.
  *
  * Grey until it nears the screen's middle (owner's wish, 2026-10-10: the gold cards drew the eye down from the
- * overview's first screen): the frame, its diamonds and the rule in the stat frames' grey (`border.miniCard`), the art
+ * overview's first screen): the frame, its diamonds and the rule in the stat frames' grey (`border.default`), the art
  * in the background's tones and at half ([restingArt]); as the card's centre rises from the screen's foot to its middle
  * they warm to gold and the art to its colours, and stay so above it ([glowFromScreenPosition]). The card has no fill
  * of its own under the art: the stat cards' (`surface.card` at 70 % over the screen — its colour within a hair), so the
@@ -1505,10 +1505,10 @@ private fun AbilityScoreCard(
 ) {
     val tokens = LocalDesignTokens.current.typography
     val colors = LocalDesignTokens.current.colors
-    val shade = colors.ornament.dropShadow
+    val shade = colors.shadow.drop
     val shadow = with(LocalDensity.current) { Shadow(shade, Offset(0f, 1.dp.toPx()), 12.dp.toPx()) }
     val gold = MaterialTheme.colorScheme.primary
-    val grey = colors.border.miniCard
+    val grey = colors.border.default
     // How near the screen's middle the card is: written on every scroll, read only while drawing.
     var glow by remember { mutableFloatStateOf(0f) }
     val goldNow = { lerp(grey, gold, glow) }
@@ -1622,7 +1622,7 @@ private fun AbilityScoreCard(
                     // On the art's darkening foot: the modifier's shadow, drawn thrice too.
                     modifier = Modifier.drawWithContent { repeat(3) { drawContent() } },
                     style = MaterialTheme.typography.titleLarge.copy(shadow = shadow),
-                    color = colors.text.label
+                    color = colors.text.muted
                 )
             }
         }
@@ -1826,7 +1826,7 @@ private fun TrainingDot(proficient: Boolean, expertise: Boolean = false, jackOfA
                 // The grey arc on the ring's line, as an untrained ring's (its stroke centred inside the dot's edge).
                 val arc = dot - 0.5.dp.toPx()
                 drawArc(
-                    colors.text.label,
+                    colors.text.muted,
                     startAngle = -90f,
                     sweepAngle = 180f,
                     useCenter = false,
@@ -1835,7 +1835,7 @@ private fun TrainingDot(proficient: Boolean, expertise: Boolean = false, jackOfA
                     style = ring
                 )
             }
-            else -> drawCircle(colors.text.label, radius = dot, style = ring)
+            else -> drawCircle(colors.text.muted, radius = dot, style = ring)
         }
     }
 }
@@ -2014,7 +2014,7 @@ private const val SheetGroupMaxLines = 5
 /**
  * An empty group's frame (owner's choice from boards, 2026-10-10: 3 — before, «Нет» where a value starts, which read as
  * a value begun): a quiet «+ Добавить» in its middle, across and down — even in a frame stretched beside a fuller one —
- * as the conditions' «+ Состояние»: the icon and the word in `text.label`, no fill; the tap is the frame's, opening its
+ * as the conditions' «+ Состояние»: the icon and the word in `text.muted`, no fill; the tap is the frame's, opening its
  * editor.
  */
 @Composable
@@ -2028,8 +2028,8 @@ private fun SheetGroupAdd() {
         contentAlignment = Alignment.Center
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            Icon(Icons.Outlined.Add, contentDescription = null, tint = colors.text.label, modifier = Modifier.size(18.dp))
-            Text(text = LocalStrings.current["common_add"], style = MaterialTheme.typography.bodyMedium, color = colors.text.label)
+            Icon(Icons.Outlined.Add, contentDescription = null, tint = colors.text.muted, modifier = Modifier.size(18.dp))
+            Text(text = LocalStrings.current["common_add"], style = MaterialTheme.typography.bodyMedium, color = colors.text.muted)
         }
     }
 }
@@ -2059,7 +2059,7 @@ private fun SheetGroupLine(value: String) {
                 modifier = Modifier
                     .size(5.dp)
                     .clip(CircleShape)
-                    .background(colors.text.label)
+                    .background(colors.text.muted)
             )
         }
         Text(

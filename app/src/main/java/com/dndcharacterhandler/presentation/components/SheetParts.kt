@@ -43,7 +43,7 @@ fun SheetOrnament(modifier: Modifier = Modifier, airAbove: Dp = 10.dp, airBelow:
             .padding(top = airAbove, bottom = airBelow),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(modifier = Modifier.weight(1f).height(1.dp).background(colors.ornament.stroke))
+        Box(modifier = Modifier.weight(1f).height(1.dp).background(colors.border.rule))
         Canvas(modifier = Modifier.padding(horizontal = 8.dp).size(9.dp)) {
             val diamond = Path().apply {
                 moveTo(size.width / 2, 0f)
@@ -52,8 +52,8 @@ fun SheetOrnament(modifier: Modifier = Modifier, airAbove: Dp = 10.dp, airBelow:
                 lineTo(0f, size.height / 2)
                 close()
             }
-            drawPath(diamond, colors.ornament.middle)
+            drawPath(diamond, colors.border.strong)
         }
-        Box(modifier = Modifier.weight(1f).height(1.dp).background(colors.ornament.stroke))
+        Box(modifier = Modifier.weight(1f).height(1.dp).background(colors.border.rule))
     }
 }

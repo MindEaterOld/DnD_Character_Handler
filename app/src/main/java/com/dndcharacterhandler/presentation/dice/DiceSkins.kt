@@ -102,12 +102,12 @@ private fun DiceSkin.style(): DiceSkinStyle {
         )
         // Charcoal with light edges, so it still stands out on the dark table.
         DiceSkin.BLACK -> DiceSkinStyle(
-            body = tokens.surface.portraitFallbackStart,
+            body = tokens.surface.button,
             edge = tokens.text.subtle,
             number = tokens.text.primary
         )
         DiceSkin.WHITE -> DiceSkinStyle(
-            body = tokens.text.warmPrimary,
+            body = tokens.text.primary,
             edge = scheme.outline,
             number = scheme.background
         )
@@ -121,7 +121,7 @@ private fun DiceSkin.style(): DiceSkinStyle {
             body = scheme.surfaceVariant,
             edge = tokens.text.subtle,
             number = tokens.accent.dangerHpZero,
-            texture = DiceTexture.Web(thread = tokens.ornament.middle)
+            texture = DiceTexture.Web(thread = tokens.border.strong)
         )
     }
 }

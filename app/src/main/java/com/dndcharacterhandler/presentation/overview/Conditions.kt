@@ -171,12 +171,12 @@ private fun AddConditionChip(label: String, description: String, onClick: () -> 
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        Icon(Icons.Outlined.Add, contentDescription = null, tint = colors.text.label, modifier = Modifier.size(18.dp))
+        Icon(Icons.Outlined.Add, contentDescription = null, tint = colors.text.muted, modifier = Modifier.size(18.dp))
         Text(
             text = label,
             modifier = Modifier.deepShadow(),
             style = MaterialTheme.typography.bodyMedium.copy(shadow = artShadow()),
-            color = colors.text.label,
+            color = colors.text.muted,
             maxLines = 1
         )
     }
@@ -274,7 +274,7 @@ private fun ExhaustionPicker(level: Int, immune: Boolean, onPick: (Int) -> Unit)
                         .height(36.dp)
                         .clip(shape)
                         .background(if (lit) fire.copy(alpha = LocalDesignTokens.current.alpha.faint) else colors.surface.button)
-                        .then(if (on) Modifier.border(1.dp, if (lit) fire else colors.text.label, shape) else Modifier)
+                        .then(if (on) Modifier.border(1.dp, if (lit) fire else colors.text.muted, shape) else Modifier)
                         .selectable(selected = on, enabled = enabled, role = Role.RadioButton, onClick = { onPick(n) }),
                     contentAlignment = Alignment.Center
                 ) {
@@ -327,7 +327,7 @@ private fun ConditionRow(condition: Condition, on: Boolean, immune: Boolean, onT
             tint = when {
                 on -> accent
                 immune -> colors.text.subtle
-                else -> colors.text.label
+                else -> colors.text.muted
             },
             modifier = Modifier.size(22.dp)
         )
@@ -360,7 +360,7 @@ private fun ConditionRow(condition: Condition, on: Boolean, immune: Boolean, onT
                 .padding(start = 8.dp)
                 .size(22.dp)
                 .clip(CircleShape)
-                .then(if (on) Modifier.background(accent) else Modifier.border(1.5.dp, colors.border.panel, CircleShape)),
+                .then(if (on) Modifier.background(accent) else Modifier.border(1.5.dp, colors.border.default, CircleShape)),
             contentAlignment = Alignment.Center
         ) {
             if (on) {

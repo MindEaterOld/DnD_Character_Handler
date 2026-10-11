@@ -152,7 +152,7 @@ internal fun RestHitPoints(current: Int, max: Int, gain: Int, exact: Boolean = f
                 color = colors.text.primary
             )
             Text(text = "$now", style = MaterialTheme.typography.titleLarge, color = colors.text.primary)
-            Text(text = " / $max", style = MaterialTheme.typography.bodyLarge, color = colors.text.label)
+            Text(text = " / $max", style = MaterialTheme.typography.bodyLarge, color = colors.text.muted)
             if (added > 0) {
                 Text(
                     text = if (exact) "  +$added" else "  ≈ +$added",
@@ -215,7 +215,7 @@ internal fun HitDicePools(
                     Text(
                         text = (classes.distinct() + die.label).joinToString(" · "),
                         style = MaterialTheme.typography.labelMedium,
-                        color = colors.text.label
+                        color = colors.text.muted
                     )
                 }
                 FlowRow(
@@ -265,7 +265,7 @@ private fun HitDieToken(die: DieType, state: HitDieState, onToggle: (() -> Unit)
             )
             .then(
                 when (state) {
-                    HitDieState.SPENT -> Modifier.border(1.dp, colors.border.muted, shape)
+                    HitDieState.SPENT -> Modifier.border(1.dp, colors.border.faint, shape)
                     HitDieState.RETURNING -> Modifier.border(1.dp, colors.accent.heal, shape)
                     else -> Modifier
                 }
@@ -365,7 +365,7 @@ internal fun RestRows(title: String, rows: List<RestRow>) {
                     color = colors.text.primary
                 )
                 row.change?.let { change ->
-                    Text(text = change, style = MaterialTheme.typography.bodyMedium, color = colors.text.label)
+                    Text(text = change, style = MaterialTheme.typography.bodyMedium, color = colors.text.muted)
                 }
             }
         }
@@ -382,7 +382,7 @@ internal fun ShortRestRollResult(dice: List<ThrownDie>, constitutionModifier: In
     Text(
         text = text("overview_short_rest"),
         style = MaterialTheme.typography.titleMedium,
-        color = colors.text.label,
+        color = colors.text.muted,
         textAlign = TextAlign.Center
     )
     Text(

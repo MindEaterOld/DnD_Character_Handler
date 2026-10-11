@@ -146,34 +146,23 @@
         "app": {
           "text": {
             "primary": "#F1EFEC",
-            "warmPrimary": "#F1EFEC",
-            "action": "#F1EFEC",
             "muted": "#CACACD",
-            "subtle": "#9F9FA4",
-            "label": "#CACACD",
-            "miniLabel": "#CACACD",
-            "icon": "#F1EFEC"
+            "subtle": "#9F9FA4"
           },
           "background": {
             "page": "#0E0E10"
           },
           "surface": {
+            "sunken": "#151517",
             "card": "#19191B",
-            "button": "#39393D",
-            "option": "#19191B",
-            "selected": "#242427",
-            "inspiration": "#242427",
-            "portrait": "#151517",
-            "portraitFallbackStart": "#39393D",
-            "portraitFallbackMiddle": "#19191B",
-            "portraitFallbackEnd": "#0E0E10"
+            "raised": "#242427",
+            "button": "#39393D"
           },
           "border": {
             "default": "#4DF1EFEC",
-            "panel": "#4DF1EFEC",
-            "miniCard": "#4DF1EFEC",
-            "selected": "#80F1EFEC",
-            "muted": "#26F1EFEC"
+            "strong": "#80F1EFEC",
+            "faint": "#26F1EFEC",
+            "rule": "#4D9F9FA4"
           },
           "accent": {
             "inspiration": "#FFD86B",
@@ -191,19 +180,8 @@
             "damagePoison": "#A8D76F",
             "damageOther": "#D5C6B2"
           },
-          "progress": {
-            "xpFill": "#CACACD",
-            "xpTrack": "#26F1EFEC"
-          },
-          "ornament": {
-            "outer": "#26F1EFEC",
-            "middle": "#80CACACD",
-            "innerGlow": "#4DF1EFEC",
-            "inner": "#CACACD",
-            "shadow": "#26000000",
-            "dropShadow": "#80000000",
-            "stroke": "#4D9F9FA4",
-            "dot": "#242427"
+          "shadow": {
+            "drop": "#80000000"
           }
         }
       }
@@ -237,34 +215,23 @@
         "app": {
           "text": {
             "primary": "#F0EFF0",
-            "warmPrimary": "#F0EFF0",
-            "action": "#F0EFF0",
             "muted": "#CCC7CC",
-            "subtle": "#9F939F",
-            "label": "#CCC7CC",
-            "miniLabel": "#CCC7CC",
-            "icon": "#F0EFF0"
+            "subtle": "#9F939F"
           },
           "background": {
             "page": "#0E0B0E"
           },
           "surface": {
+            "sunken": "#141014",
             "card": "#181318",
-            "button": "#362B36",
-            "option": "#181318",
-            "selected": "#241C24",
-            "inspiration": "#241C24",
-            "portrait": "#141014",
-            "portraitFallbackStart": "#362B36",
-            "portraitFallbackMiddle": "#181318",
-            "portraitFallbackEnd": "#0E0B0E"
+            "raised": "#241C24",
+            "button": "#362B36"
           },
           "border": {
             "default": "#4DF0EFF0",
-            "panel": "#4DF0EFF0",
-            "miniCard": "#4DF0EFF0",
-            "selected": "#80F0EFF0",
-            "muted": "#26F0EFF0"
+            "strong": "#80F0EFF0",
+            "faint": "#26F0EFF0",
+            "rule": "#4D9F939F"
           },
           "accent": {
             "inspiration": "#FFD86B",
@@ -282,19 +249,8 @@
             "damagePoison": "#A8D76F",
             "damageOther": "#D5C6B2"
           },
-          "progress": {
-            "xpFill": "#CCC7CC",
-            "xpTrack": "#26F0EFF0"
-          },
-          "ornament": {
-            "outer": "#26F0EFF0",
-            "middle": "#80CCC7CC",
-            "innerGlow": "#4DF0EFF0",
-            "inner": "#CCC7CC",
-            "shadow": "#26000000",
-            "dropShadow": "#80000000",
-            "stroke": "#4D9F939F",
-            "dot": "#241C24"
+          "shadow": {
+            "drop": "#80000000"
           }
         }
       }

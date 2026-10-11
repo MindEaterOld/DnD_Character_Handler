@@ -1543,9 +1543,9 @@ private fun PortraitFallback(characterName: String) {
             .background(
                 Brush.radialGradient(
                     colors = listOf(
-                        colors.surface.portraitFallbackStart,
-                        colors.surface.portraitFallbackMiddle,
-                        colors.surface.portraitFallbackEnd
+                        colors.surface.button,
+                        colors.surface.card,
+                        colors.background.page
                     )
                 )
             ),
@@ -1615,7 +1615,7 @@ private fun PortraitMenuOption(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = if (enabled) colors.text.icon else colors.text.subtle,
+            tint = if (enabled) colors.text.primary else colors.text.subtle,
             modifier = Modifier.size(24.dp)
         )
         Text(
@@ -1983,7 +1983,7 @@ private fun KeyStatsRule() {
 
 /**
  * − or + beside the hit points (owner's wishes, 2026-10-10): a bare white icon as the header's — no ring, no colour,
- * the sign says what it does — with only a small soft shade of `ornament.dropShadow` under the sign (10dp; owner's
+ * the sign says what it does — with only a small soft shade of `shadow.drop` under the sign (10dp; owner's
  * choice from the device, 2026-10-10 — 32dp read as a stain), to read on a bright art. A tap
  * moves the hit points by one; held, it keeps stepping. Dim (`text.subtle`) while it can't go further. The same in
  * both themes.
@@ -1997,7 +1997,7 @@ private fun HpStepButton(icon: ImageVector, description: String, enabled: Boolea
             .drawBehind {
                 val radius = HpStepShade.toPx()
                 drawCircle(
-                    brush = Brush.radialGradient(0f to colors.ornament.dropShadow, 1f to Color.Transparent, center = center, radius = radius),
+                    brush = Brush.radialGradient(0f to colors.shadow.drop, 1f to Color.Transparent, center = center, radius = radius),
                     radius = radius
                 )
             }
@@ -2026,7 +2026,7 @@ private fun HpBar(current: Int, temporary: Int, max: Int, width: Dp = HpBarWidth
         val h = 4.dp.toPx()
         val y = size.height / 2 - h / 2
         val corner = CornerRadius(h / 2)
-        drawRoundRect(colors.progress.xpTrack, Offset(0f, y), Size(size.width, h), corner)
+        drawRoundRect(colors.border.faint, Offset(0f, y), Size(size.width, h), corner)
         if (max <= 0) return@Canvas
         val hp = size.width * (current.toFloat() / max).coerceIn(0f, 1f)
         if (hp > 0f) drawRoundRect(colors.accent.heal, Offset(0f, y), Size(hp, h), corner)
@@ -2262,7 +2262,7 @@ private fun DeathSaveMarks(label: String, count: Int, color: Color, modifier: Mo
                         .toggleable(value = filled, role = Role.Checkbox) { onSet(if (count == index + 1) index else index + 1) }
                         .semantics { contentDescription = "$label ${index + 1}" }
                         .padding(2.dp)
-                        .border(1.5.dp, if (filled) color else colors.text.label, CircleShape)
+                        .border(1.5.dp, if (filled) color else colors.text.muted, CircleShape)
                         .padding(3.dp)
                         .clip(CircleShape)
                         .background(if (filled) color else Color.Transparent)

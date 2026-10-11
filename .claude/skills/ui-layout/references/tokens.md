@@ -10,7 +10,7 @@
 
 | Что | Как |
 |---|---|
-| Цвет палитры приложения | `val colors = LocalDesignTokens.current.colors` → `colors.text.primary`, `colors.surface.card`, `colors.border.panel`, `colors.accent.heal` |
+| Цвет палитры приложения | `val colors = LocalDesignTokens.current.colors` → `colors.text.primary`, `colors.surface.card`, `colors.border.default`, `colors.accent.heal` |
 | Цвет Material | `MaterialTheme.colorScheme.primary` и т.д. (значения из `themes.<тема>.colors.materialTheme`; чего там нет — тёмные значения Material по умолчанию) |
 | Что тема рисует иначе, кроме цветов | `LocalThemeLook.current`: `frames` (`FrameStyle`), `portrait` (`PortraitStyle`), `xpBar` (`XpBarStyle`); фон темы — `LocalThemeBackdrop` (`presentation/theme/ThemeLook.kt`) |
 | Шкала шрифтов | `MaterialTheme.typography.bodyLarge` и т.д. |
@@ -60,52 +60,30 @@
 | `shortRestCounterButton` | headlineMedium | 28 | «−» и «+» короткого отдыха |
 | `shortRestCounterValue` | headlineMedium | 40 | число костей к трате |
 
-## Палитра приложения (`themes.classic.colors.app`)
+## Палитра приложения (`themes.<graphite|plum>.colors.app`)
 
-| Группа.имя | Значение | Роль |
-|---|---|---|
-| `text.primary` | #F7F2EA | основной текст и числа |
-| `text.warmPrimary` | #FFF6EA | тёплый светлый |
-| `text.action` | #F1ECE5 | подпись кнопки действия |
-| `text.muted` | #D2CAC2 | вторичный текст |
-| `text.label` | #C2BBB3 | подписи на рамках, неактивные иконки |
-| `text.miniLabel` | #BEB6AE | подпись карточки стата |
-| `text.subtle` | #AAA29A | третичный, неактивный |
-| `text.icon` | #F3EEE6 | иконки |
-| `background.page` | Графит #0E0E10, Слива #0E0B0E | фон всех экранов — один цвет, без градиента (2026-10-11) |
-| `surface.card` | #17141B | фон карточек и статов |
-| `surface.button` | #3B3840 | **стандартная заливка кнопки** (одобрена 2026-10-03), 1.58:1 к карточке; текст и иконка `text.primary` |
-| `surface.option` | #1A171D | прежний «фон кнопки», почти как `card`: строки выбора и варианты переключателей, пока их не переведут на палитру |
-| `surface.selected` | #3A3244 | выбранный вариант |
-| `surface.inspiration` | #2A2419 | включённое вдохновение |
-| `surface.portrait*` | #141118, #3B3840 / #18151C / #0F0C12 | портрет и его заглушка |
-| `border.default` | #4DFFFFFF | обводка кнопок и полей |
-| `border.panel` | #4DFFFFFF | обводка панелей и карточек |
-| `border.miniCard` | #4DFFFFFF | обводка карточки стата |
-| `border.selected` | #80FFF6EA | обводка выбранного |
-| `border.muted` | #26FFFFFF | тихая обводка |
-| `accent.inspiration` | #FFD86B | золото: вдохновение, Level UP |
-| `accent.xpCapped` | #E0B84E | полный опыт |
-| `accent.hpTemporary` | #69B7FF | временные хиты |
-| `accent.heal` | #8AD178 | лечение, успехи, «стабилен» |
-| `accent.dangerHpZero` | #E85C5C | 0 хитов, провалы, удаление |
-| `accent.coinCopper/Silver/Gold` | #C9824B / #C4C8D2 / #E0B548 | монеты |
-| `accent.magical` | #69B7FF | магические предметы |
-| `accent.damageFire/Cold/Lightning/Poison/Other` | #FF8A3D / #7BB7FF / #CFB6FF / #A8D76F / #D5C6B2 | типы урона |
-| `progress.xpFill` / `xpTrack` | #D7D1CC / #26FFFFFF | полоса опыта |
-| `ornament.*` | outer #26FFFFFF, middle #80C7C1BB, innerGlow #4DFFFFFF, inner #E9E2D9, shadow #26000000, stroke #4DA19892, dot #2D2730 | орнамент портрета |
+Слоты (2026-10-11): каждый — шаг лестницы из десяти нейтральных (N0 самый тёмный … N9 цвет текста) или этот шаг на ступени прозрачности. Место в интерфейсе берёт слот по смыслу; одинаковые по смыслу места не могут разойтись по цвету. Новый слот — только через владельца.
 
-## Цвета Material (`themes.classic.colors.materialTheme`)
+| Слот | Шаг | Графит / Слива | Роль |
+|---|---|---|---|
+| `text.primary` | N9 | #F1EFEC / #F0EFF0 | значения, имена, иконки |
+| `text.muted` | N8 | #CACACD / #CCC7CC | подписи, вторичный текст, полоса опыта |
+| `text.subtle` | N7 | #9F9FA4 / #9F939F | выключенное, пустое, тихое |
+| `background.page` | N1 | #0E0E10 / #0E0B0E | фон всех экранов, один цвет |
+| `surface.sunken` | N2 | #151517 / #141014 | своя подложка портрета |
+| `surface.card` | N3 | #19191B / #181318 | карточки и рамки статов |
+| `surface.raised` | N4 | #242427 / #241C24 | над карточками: выбранная строка, поп-апы и шторки (Material surfaceContainerHigh) |
+| `surface.button` | N5 | #39393D / #362B36 | **стандартная заливка кнопки**, 1.58:1 к карточке; текст и иконка `text.primary` |
+| `border.default` | N9 · 30 % | #4DF1EFEC / #4DF0EFF0 | рамки и обводки |
+| `border.strong` | N9 · 50 % | #80F1EFEC / #80F0EFF0 | обводка выбранного |
+| `border.faint` | N9 · 15 % | #26F1EFEC / #26F0EFF0 | самые тихие линии, дорожки полос, разделители |
+| `border.rule` | N7 · 30 % | #4D9F9FA4 / #4D9F939F | линии заголовков разделов и шапки |
+| `shadow.drop` | чёрный · 50 % | #80000000 / #80000000 | мягкая тень под надписями и знаками на арте |
+| `accent.*` | — | общие у обеих тем | красный, зелёный, синий, оранжевый, золото вдохновения, монеты, типы урона — сводятся следующим шагом |
 
-| Роль | Значение | Где видно |
-|---|---|---|
-| `primary` / `onPrimary` | #C6A36C / #22170C | заливка «Сохранить» — эталон главной кнопки |
-| `primaryContainer` / `onPrimaryContainer` | #49321A / #F3DDB8 | тёмная бронза |
-| `secondary` / `onSecondary` | #9E7B5A / #21150C | |
-| `background` / `onBackground` | #120E18 / #F0E7DA | |
-| `surface` / `onSurface` | #1A1521 / #F0E7DA | фон поп-апов |
-| `surfaceVariant` / `onSurfaceVariant` | #2A2231 / #CABFB3 | заливка плавающей кнопки «+» |
-| `outline` / `outlineVariant` | #706359 / #423830 | рамки полей ввода |
+## Цвета Material (`themes.<тема>.colors.materialTheme`)
+
+Роли Material разложены по той же лестнице (фон N1, поверхности N3–N5, обводка N6, текст N9/N8); золото — `primary` #C6A36C с `onPrimary` #22170C, остальные золотые роли Material почти не видны. Компоненты Material берут их сами; в своём коде — `MaterialTheme.colorScheme.primary` для золота.
 
 Прозрачности — одна шкала (владелец, 2026-10-09: вариант А): `alpha` в JSON, в коде `LocalDesignTokens.current.alpha.<ступень>`. **faint 15 %** — подсветка выбора своим цветом (кнопки урона/лечения в «Гравюре», вид лечения, состояния, мировоззрение, вкладка, вдохновение), красное под корзиной, самые бледные линии и отблески; **line 30 %** — линии и обводки, потраченная кость хитов; **half 50 %** — обводка выбранного, подсказка пустого поля, узоры, тень под надписями; **veil 70 %** — заливка карточек поверх фона, тон шапки и панели вкладок, картинка фона. У цветов #AARRGGBB альфа — тоже ступень: 26 / 4D / 80 / B3. Заливка, которая должна закрывать фон, — непрозрачная. Новая прозрачность — через владельца, с рендерами.
 

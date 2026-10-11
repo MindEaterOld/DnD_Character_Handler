@@ -421,7 +421,7 @@ private fun FeaturesSearchField(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
         color = LocalDesignTokens.current.colors.surface.card.copy(alpha = LocalDesignTokens.current.alpha.veil),
-        border = BorderStroke(1.dp, LocalDesignTokens.current.colors.border.muted)
+        border = BorderStroke(1.dp, LocalDesignTokens.current.colors.border.faint)
     ) {
         OutlinedTextField(
             value = value,
@@ -448,7 +448,7 @@ private fun FeaturesSearchField(
                 unfocusedBorderColor = Color.Transparent,
                 focusedContainerColor = Color.Transparent,
                 unfocusedContainerColor = Color.Transparent,
-                cursorColor = LocalDesignTokens.current.colors.text.warmPrimary
+                cursorColor = LocalDesignTokens.current.colors.text.primary
             )
         )
     }
@@ -457,7 +457,7 @@ private fun FeaturesSearchField(
 @Composable
 private fun FeaturesSectionTitle(title: String) {
     val tokens = LocalDesignTokens.current.typography
-    val dividerColor = LocalDesignTokens.current.colors.border.muted
+    val dividerColor = LocalDesignTokens.current.colors.border.faint
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -658,7 +658,7 @@ internal fun FeatureCatalogRow(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
         color = LocalDesignTokens.current.colors.surface.card,
-        border = BorderStroke(1.dp, LocalDesignTokens.current.colors.border.muted)
+        border = BorderStroke(1.dp, LocalDesignTokens.current.colors.border.faint)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),

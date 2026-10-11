@@ -122,7 +122,7 @@ internal val PortraitSideStep = 52.dp
 /**
  * A button at the portrait's sides (owner's choices from boards, 2026-10-09: И; 2026-10-10: B): the rests' on the left,
  * inspiration and the experience's on the right — a bare icon as the header's menu and dice (28dp in a 44dp tap area,
- * white), under the header's on one step ([PortraitSideStep]), a soft shade of [ornament.dropShadow] round it to read
+ * white), under the header's on one step ([PortraitSideStep]), a soft shade of [shadow.drop] round it to read
  * on a bright art. Inspiration, a toggle, is lit in its accent while on. [add] puts a small «+» before a word: the
  * experience's reads «+XP» (owner's wish, 2026-10-09).
  */
@@ -146,7 +146,7 @@ internal fun PortraitSideButton(
         Canvas(modifier = Modifier.matchParentSize()) {
             val radius = size.minDimension * IconShadeReach
             drawCircle(
-                brush = Brush.radialGradient(0f to colors.ornament.dropShadow, 1f to Color.Transparent, center = center, radius = radius),
+                brush = Brush.radialGradient(0f to colors.shadow.drop, 1f to Color.Transparent, center = center, radius = radius),
                 radius = radius
             )
         }

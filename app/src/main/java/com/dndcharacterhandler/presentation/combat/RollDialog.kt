@@ -337,7 +337,7 @@ private fun AttackResult(title: String, rollLabel: String?, roll: AttackRoll, ou
     val colors = LocalDesignTokens.current.colors
     val strings = LocalStrings.current
     val rollDice = LocalDiceRoller.current
-    Text(text = title, style = MaterialTheme.typography.titleMedium, color = colors.text.label, textAlign = TextAlign.Center)
+    Text(text = title, style = MaterialTheme.typography.titleMedium, color = colors.text.muted, textAlign = TextAlign.Center)
     Text(
         text = if (rollLabel != null) "$rollLabel ${outcome.attack.total}" else strings.format("combat_roll_attack_total", outcome.attack.total),
         style = MaterialTheme.typography.headlineMedium,
@@ -394,7 +394,7 @@ private fun CriticalResult(title: String, firstDamage: Int, extra: RollPart, dam
     val colors = LocalDesignTokens.current.colors
     val strings = LocalStrings.current
     val total = firstDamage + extra.total
-    Text(text = title, style = MaterialTheme.typography.titleMedium, color = colors.text.label, textAlign = TextAlign.Center)
+    Text(text = title, style = MaterialTheme.typography.titleMedium, color = colors.text.muted, textAlign = TextAlign.Center)
     Text(text = text("combat_roll_critical"), style = MaterialTheme.typography.titleMedium, color = colors.accent.inspiration, textAlign = TextAlign.Center)
     Text(
         text = strings.format("combat_roll_damage_total", total, damageType).trim(),
@@ -415,7 +415,7 @@ private fun CriticalResult(title: String, firstDamage: Int, extra: RollPart, dam
 private fun AmountResult(title: String, amount: RollPart, damageType: String, healing: Boolean, save: String?) {
     val colors = LocalDesignTokens.current.colors
     val strings = LocalStrings.current
-    Text(text = title, style = MaterialTheme.typography.titleMedium, color = colors.text.label, textAlign = TextAlign.Center)
+    Text(text = title, style = MaterialTheme.typography.titleMedium, color = colors.text.muted, textAlign = TextAlign.Center)
     Text(
         text = strings.format(if (healing) "combat_roll_healing_total" else "combat_roll_damage_total", amount.total.coerceAtLeast(0), damageType).trim(),
         style = MaterialTheme.typography.headlineMedium,

@@ -1116,7 +1116,7 @@ private fun LazyListScope.summaryPage(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 color = colors.surface.card,
-                border = BorderStroke(1.dp, colors.border.muted)
+                border = BorderStroke(1.dp, colors.border.faint)
             ) {
                 Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(strings["levelup_summary_equipment"], style = MaterialTheme.typography.titleMedium, color = colors.text.primary)
@@ -1180,7 +1180,7 @@ private fun RequirementWarning(strings: LocalizedStrings, requirements: List<Mul
     }
     Surface(
         shape = RoundedCornerShape(12.dp),
-        color = colors.surface.inspiration,
+        color = colors.surface.raised,
         border = BorderStroke(1.dp, colors.accent.xpCapped)
     ) {
         Row(modifier = Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -1197,7 +1197,7 @@ private fun InfoCard(title: String? = null, body: String? = null) {
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         color = colors.surface.card,
-        border = BorderStroke(1.dp, colors.border.muted)
+        border = BorderStroke(1.dp, colors.border.faint)
     ) {
         Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             if (title != null) Text(title, style = MaterialTheme.typography.titleMedium, color = colors.text.primary)
@@ -1225,8 +1225,8 @@ private fun ChoiceCard(
             .fillMaxWidth()
             .then(if (onClick != null && enabled) Modifier.clickable(onClick = onClick) else Modifier),
         shape = RoundedCornerShape(12.dp),
-        color = if (selected) colors.surface.selected else colors.surface.card,
-        border = BorderStroke(1.dp, if (selected) colors.border.selected else colors.border.muted)
+        color = if (selected) colors.surface.raised else colors.surface.card,
+        border = BorderStroke(1.dp, if (selected) colors.border.strong else colors.border.faint)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
@@ -1316,7 +1316,7 @@ private fun ScoreRow(
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
         shape = RoundedCornerShape(12.dp),
         color = colors.surface.card,
-        border = BorderStroke(1.dp, colors.border.muted)
+        border = BorderStroke(1.dp, colors.border.faint)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp).heightIn(min = 48.dp),
@@ -1398,8 +1398,8 @@ private fun EquipmentOptionCard(
             .fillMaxWidth()
             .clickable(onClick = onSelect),
         shape = RoundedCornerShape(12.dp),
-        color = if (selected) colors.surface.selected else colors.surface.card,
-        border = BorderStroke(1.dp, if (selected) colors.border.selected else colors.border.muted)
+        color = if (selected) colors.surface.raised else colors.surface.card,
+        border = BorderStroke(1.dp, if (selected) colors.border.strong else colors.border.faint)
     ) {
         Column(
             modifier = Modifier.padding(12.dp),
@@ -1497,7 +1497,7 @@ private fun AbilityRow(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         color = colors.surface.card,
-        border = BorderStroke(1.dp, colors.border.muted)
+        border = BorderStroke(1.dp, colors.border.faint)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),

@@ -377,13 +377,13 @@ internal fun DiceWorkshopOverlay(
                                 previewKind = kind
                                 templateLauncher.launch("dice_template_${label.replace(" ×", "x").replace(" ", "")}.png")
                             }) {
-                                Icon(Icons.Outlined.Download, contentDescription = text("dice_workshop_template_save"), tint = colors.text.label)
+                                Icon(Icons.Outlined.Download, contentDescription = text("dice_workshop_template_save"), tint = colors.text.muted)
                             }
                             IconButton(onClick = {
                                 faceArtKind = kind
                                 faceArtLauncher.launch(arrayOf("image/*"))
                             }) {
-                                Icon(Icons.Outlined.Upload, contentDescription = text("dice_workshop_face_art_load"), tint = colors.text.label)
+                                Icon(Icons.Outlined.Upload, contentDescription = text("dice_workshop_face_art_load"), tint = colors.text.muted)
                             }
                             if (loaded) {
                                 IconButton(onClick = {
@@ -542,7 +542,7 @@ private fun WorkshopSection(title: String, content: @Composable () -> Unit) {
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .background(colors.surface.card.copy(alpha = LocalDesignTokens.current.alpha.veil))
-            .border(1.dp, colors.border.muted, RoundedCornerShape(12.dp))
+            .border(1.dp, colors.border.faint, RoundedCornerShape(12.dp))
             .padding(14.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -568,7 +568,7 @@ private fun ColorRow(label: String, color: Color, onClick: () -> Unit) {
                 .size(width = 56.dp, height = 30.dp)
                 .clip(RoundedCornerShape(8.dp))
                 .background(color)
-                .border(1.dp, colors.border.selected, RoundedCornerShape(8.dp))
+                .border(1.dp, colors.border.strong, RoundedCornerShape(8.dp))
         )
     }
 }
@@ -588,7 +588,7 @@ private fun SliderRow(label: String, value: Float, range: ClosedFloatingPointRan
             colors = SliderDefaults.colors(
                 thumbColor = MaterialTheme.colorScheme.primary,
                 activeTrackColor = MaterialTheme.colorScheme.primary,
-                inactiveTrackColor = colors.border.muted
+                inactiveTrackColor = colors.border.faint
             )
         )
     }

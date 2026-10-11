@@ -61,8 +61,8 @@ fun ExpandableCard(
                 onLongClick = onLongClick
             ),
         shape = RoundedCornerShape(12.dp),
-        color = if (selected) colors.surface.selected else colors.surface.card,
-        border = BorderStroke(1.dp, if (selected) colors.border.selected else colors.border.muted)
+        color = if (selected) colors.surface.raised else colors.surface.card,
+        border = BorderStroke(1.dp, if (selected) colors.border.strong else colors.border.faint)
     ) {
         Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
