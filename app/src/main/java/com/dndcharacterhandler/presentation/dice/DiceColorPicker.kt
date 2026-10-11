@@ -140,7 +140,7 @@ internal fun DiceColorPickerDialog(title: String, initial: Color, onDismiss: () 
             )
         }
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            DiceColorPresets.forEach { preset ->
+            LocalDesignTokens.current.swatches.dice.map { it.color }.forEach { preset ->
                 Box(
                     modifier = Modifier
                         .size(32.dp)
@@ -161,11 +161,3 @@ private fun parseHex(value: String): Color? {
     if (digits.length != 6) return null
     return digits.toLongOrNull(16)?.let { Color(0xFF000000 or it) }
 }
-
-/** Colours dice are often made in, to start from: they're the dice's, chosen freely. */
-private val DiceColorPresets = listOf(
-    Color(0xFFB3202A), Color(0xFF7A1020), Color(0xFFE0B548), Color(0xFFC9824B),
-    Color(0xFF2E7D4F), Color(0xFF14524A), Color(0xFF2A5DB0), Color(0xFF1B2A5C),
-    Color(0xFF6A3FA0), Color(0xFF3B1F52), Color(0xFFE88FB4), Color(0xFF8AD1E8),
-    Color(0xFFF2EBDD), Color(0xFFC4C8D2), Color(0xFF5A5A62), Color(0xFF141217)
-)

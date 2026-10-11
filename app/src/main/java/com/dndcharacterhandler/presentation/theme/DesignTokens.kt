@@ -148,7 +148,13 @@ data class DesignTokens(
 data class Swatch(val name: String, val color: Color)
 
 /** The swatches of design_tokens.json (`swatches`), by what they colour, in the pop-up's order. */
-data class SwatchTokens(val eyes: List<Swatch>, val hair: List<Swatch>, val skin: List<Swatch>) {
+data class SwatchTokens(
+    val eyes: List<Swatch>,
+    val hair: List<Swatch>,
+    val skin: List<Swatch>,
+    /** The dice's preset colours, a start for the workshop's pick (2026-10-11 — before, written in the code). */
+    val dice: List<Swatch> = emptyList()
+) {
     companion object {
         val Empty = SwatchTokens(emptyList(), emptyList(), emptyList())
     }
@@ -241,10 +247,10 @@ val DefaultDesignTokens = DesignTokens(
 val DefaultMaterialColors: ColorScheme = darkColorScheme(
     primary = Color(0xFFC6A36C),
     onPrimary = Color(0xFF22170C),
-    primaryContainer = Color(0xFF49321A),
-    onPrimaryContainer = Color(0xFFF3DDB8),
-    secondary = Color(0xFF9E7B5A),
-    onSecondary = Color(0xFF21150C),
+    primaryContainer = Color(0xFF242427),
+    onPrimaryContainer = Color(0xFFF1EFEC),
+    secondary = Color(0xFFC6A36C),
+    onSecondary = Color(0xFF22170C),
     background = Color(0xFF0E0E10),
     onBackground = Color(0xFFF1EFEC),
     surface = Color(0xFF19191B),
@@ -432,7 +438,7 @@ private fun JsonObject?.swatchTokens(): SwatchTokens {
             if (color == Color.Unspecified) null else Swatch(key, color)
         }
     }
-    return SwatchTokens(eyes = group("eyes"), hair = group("hair"), skin = group("skin"))
+    return SwatchTokens(eyes = group("eyes"), hair = group("hair"), skin = group("skin"), dice = group("dice"))
 }
 
 /** Parses "#RRGGBB" (opaque) or "#AARRGGBB" hex into a [Color]; falls back on malformed values. */
