@@ -61,10 +61,8 @@ data class BackgroundColorTokens(
     val page: Color
 )
 
-/** Surfaces by depth: N2, N3, N4, N5. */
+/** Surfaces by depth: N3, N4, N5 (the portrait's own N2 went into the page, 2026-10-11). */
 data class SurfaceColorTokens(
-    /** Under the page: the portrait's own back. N2. */
-    val sunken: Color,
     /** The cards and stat frames. N3. */
     val card: Color,
     /** Over the cards: a picked row's back, the pop-ups' and the sheets' (Material's surfaceContainerHigh). N4. */
@@ -105,7 +103,7 @@ data class AccentColorTokens(
     val damageOther: Color
 )
 
-/** The soft shadow under writing and signs on an art: black at 50 %. */
+/** The soft shadow under writing and signs on an art: the page's N1 at 50 % (before, black; 2026-10-11). */
 data class ShadowColorTokens(
     val drop: Color
 )
@@ -188,7 +186,6 @@ val DefaultDesignColors = DesignColorTokens(
         page = Color(0xFF0E0E10)
     ),
     surface = SurfaceColorTokens(
-        sunken = Color(0xFF151517),
         card = Color(0xFF19191B),
         raised = Color(0xFF242427),
         button = Color(0xFF39393D)
@@ -216,7 +213,7 @@ val DefaultDesignColors = DesignColorTokens(
         damageOther = Color(0xFFD5C6B2)
     ),
     shadow = ShadowColorTokens(
-        drop = Color(0x80000000)
+        drop = Color(0x800E0E10)
     )
 )
 
@@ -246,11 +243,11 @@ val DefaultDesignTokens = DesignTokens(
 /** The default theme's (Graphite's) Material scheme, should design_tokens.json fail to load. */
 val DefaultMaterialColors: ColorScheme = darkColorScheme(
     primary = Color(0xFFC6A36C),
-    onPrimary = Color(0xFF22170C),
+    onPrimary = Color(0xFF0E0E10),
     primaryContainer = Color(0xFF242427),
     onPrimaryContainer = Color(0xFFF1EFEC),
     secondary = Color(0xFFC6A36C),
-    onSecondary = Color(0xFF22170C),
+    onSecondary = Color(0xFF0E0E10),
     background = Color(0xFF0E0E10),
     onBackground = Color(0xFFF1EFEC),
     surface = Color(0xFF19191B),
@@ -383,7 +380,6 @@ private fun loadColorTokens(app: JsonObject?): DesignColorTokens {
             page = background.colorToken("page", defaults.background.page)
         ),
         surface = SurfaceColorTokens(
-            sunken = surface.colorToken("sunken", defaults.surface.sunken),
             card = surface.colorToken("card", defaults.surface.card),
             raised = surface.colorToken("raised", defaults.surface.raised),
             button = surface.colorToken("button", defaults.surface.button)

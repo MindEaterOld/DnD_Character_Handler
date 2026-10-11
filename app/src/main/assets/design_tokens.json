@@ -122,11 +122,11 @@
       "colors": {
         "materialTheme": {
           "primary": "#C6A36C",
-          "onPrimary": "#22170C",
+          "onPrimary": "#0E0E10",
           "primaryContainer": "#242427",
           "onPrimaryContainer": "#F1EFEC",
           "secondary": "#C6A36C",
-          "onSecondary": "#22170C",
+          "onSecondary": "#0E0E10",
           "background": "#0E0E10",
           "onBackground": "#F1EFEC",
           "surface": "#19191B",
@@ -153,7 +153,6 @@
             "page": "#0E0E10"
           },
           "surface": {
-            "sunken": "#151517",
             "card": "#19191B",
             "raised": "#242427",
             "button": "#39393D"
@@ -181,7 +180,7 @@
             "damageOther": "#D5C6B2"
           },
           "shadow": {
-            "drop": "#80000000"
+            "drop": "#800E0E10"
           }
         }
       }
@@ -191,11 +190,11 @@
       "colors": {
         "materialTheme": {
           "primary": "#C6A36C",
-          "onPrimary": "#22170C",
+          "onPrimary": "#0E0B0E",
           "primaryContainer": "#241C24",
           "onPrimaryContainer": "#F0EFF0",
           "secondary": "#C6A36C",
-          "onSecondary": "#22170C",
+          "onSecondary": "#0E0B0E",
           "background": "#0E0B0E",
           "onBackground": "#F0EFF0",
           "surface": "#181318",
@@ -222,7 +221,6 @@
             "page": "#0E0B0E"
           },
           "surface": {
-            "sunken": "#141014",
             "card": "#181318",
             "raised": "#241C24",
             "button": "#362B36"
@@ -250,7 +248,7 @@
             "damageOther": "#D5C6B2"
           },
           "shadow": {
-            "drop": "#80000000"
+            "drop": "#800E0B0E"
           }
         }
       }
@@ -260,11 +258,11 @@
       "colors": {
         "materialTheme": {
           "primary": "#C6A36C",
-          "onPrimary": "#22170C",
+          "onPrimary": "#0E0E10",
           "primaryContainer": "#242427",
           "onPrimaryContainer": "#F1EFEC",
           "secondary": "#C6A36C",
-          "onSecondary": "#22170C",
+          "onSecondary": "#0E0E10",
           "background": "#0E0E10",
           "onBackground": "#F1EFEC",
           "surface": "#19191B",
@@ -291,7 +289,6 @@
             "page": "#0E0E10"
           },
           "surface": {
-            "sunken": "#151517",
             "card": "#19191B",
             "raised": "#242427",
             "button": "#39393D"
@@ -319,7 +316,7 @@
             "damageOther": "#CACACD"
           },
           "shadow": {
-            "drop": "#80000000"
+            "drop": "#800E0E10"
           }
         }
       }
@@ -329,11 +326,11 @@
       "colors": {
         "materialTheme": {
           "primary": "#C6A36C",
-          "onPrimary": "#22170C",
+          "onPrimary": "#0E0E10",
           "primaryContainer": "#242427",
           "onPrimaryContainer": "#F1EFEC",
           "secondary": "#C6A36C",
-          "onSecondary": "#22170C",
+          "onSecondary": "#0E0E10",
           "background": "#0E0E10",
           "onBackground": "#F1EFEC",
           "surface": "#19191B",
@@ -360,7 +357,6 @@
             "page": "#0E0E10"
           },
           "surface": {
-            "sunken": "#151517",
             "card": "#19191B",
             "raised": "#242427",
             "button": "#39393D"
@@ -388,7 +384,7 @@
             "damageOther": "#CACACD"
           },
           "shadow": {
-            "drop": "#80000000"
+            "drop": "#800E0E10"
           }
         }
       }
@@ -398,11 +394,11 @@
       "colors": {
         "materialTheme": {
           "primary": "#C6A36C",
-          "onPrimary": "#22170C",
+          "onPrimary": "#0E0E10",
           "primaryContainer": "#242427",
           "onPrimaryContainer": "#F1EFEC",
           "secondary": "#C6A36C",
-          "onSecondary": "#22170C",
+          "onSecondary": "#0E0E10",
           "background": "#0E0E10",
           "onBackground": "#F1EFEC",
           "surface": "#19191B",
@@ -429,7 +425,6 @@
             "page": "#0E0E10"
           },
           "surface": {
-            "sunken": "#151517",
             "card": "#19191B",
             "raised": "#242427",
             "button": "#39393D"
@@ -457,7 +452,7 @@
             "damageOther": "#CACACD"
           },
           "shadow": {
-            "drop": "#80000000"
+            "drop": "#800E0E10"
           }
         }
       }
@@ -467,11 +462,11 @@
       "colors": {
         "materialTheme": {
           "primary": "#C6A36C",
-          "onPrimary": "#22170C",
+          "onPrimary": "#0E0E10",
           "primaryContainer": "#242427",
           "onPrimaryContainer": "#F1EFEC",
           "secondary": "#C6A36C",
-          "onSecondary": "#22170C",
+          "onSecondary": "#0E0E10",
           "background": "#0E0E10",
           "onBackground": "#F1EFEC",
           "surface": "#19191B",
@@ -498,7 +493,6 @@
             "page": "#0E0E10"
           },
           "surface": {
-            "sunken": "#151517",
             "card": "#19191B",
             "raised": "#242427",
             "button": "#39393D"
@@ -526,7 +520,7 @@
             "damageOther": "#CACACD"
           },
           "shadow": {
-            "drop": "#80000000"
+            "drop": "#800E0E10"
           }
         }
       }
@@ -536,11 +530,11 @@
       "colors": {
         "materialTheme": {
           "primary": "#C6A36C",
-          "onPrimary": "#22170C",
+          "onPrimary": "#0E0E10",
           "primaryContainer": "#242427",
           "onPrimaryContainer": "#F1EFEC",
           "secondary": "#C6A36C",
-          "onSecondary": "#22170C",
+          "onSecondary": "#0E0E10",
           "background": "#0E0E10",
           "onBackground": "#F1EFEC",
           "surface": "#19191B",
@@ -567,7 +561,6 @@
             "page": "#0E0E10"
           },
           "surface": {
-            "sunken": "#151517",
             "card": "#19191B",
             "raised": "#242427",
             "button": "#39393D"
@@ -595,7 +588,7 @@
             "damageOther": "#CACACD"
           },
           "shadow": {
-            "drop": "#80000000"
+            "drop": "#800E0E10"
           }
         }
       }

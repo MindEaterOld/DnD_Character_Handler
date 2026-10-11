@@ -325,7 +325,7 @@ private fun DrawerPortrait(
                 .size(56.dp)
                 .clip(CircleShape),
             shape = CircleShape,
-            color = colors.surface.sunken
+            color = colors.background.page
         ) {
             AppImage(
                 imageRef = portraitReference,

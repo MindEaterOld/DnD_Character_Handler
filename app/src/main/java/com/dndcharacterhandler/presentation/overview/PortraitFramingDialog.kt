@@ -119,7 +119,7 @@ internal fun PortraitFramingDialog(
                     with(painter) { draw(pictureSize) }
                 }
             }
-            portraitVignette(frame, frame.height * footShare, colors.surface.sunken)
+            portraitVignette(frame, frame.height * footShare, colors.background.page)
             drawIntoCanvas { it.restore() }
             drawRect(colors.border.faint, topLeft = frame.topLeft, size = frame.size, style = Stroke(width = 1.dp.toPx()))
         }

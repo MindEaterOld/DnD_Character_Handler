@@ -149,9 +149,9 @@ internal fun PortraitHero(
                 .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
                 .drawWithContent {
                     drawContent()
-                    portraitVignette(Rect(Offset.Zero, size), PortraitHeroFade.toPx(), colors.surface.sunken)
+                    portraitVignette(Rect(Offset.Zero, size), PortraitHeroFade.toPx(), colors.background.page)
                 }
-                .background(colors.surface.sunken)
+                .background(colors.background.page)
                 .saturation(saturation)
         ) {
             AppImage(
