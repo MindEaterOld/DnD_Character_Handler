@@ -132,7 +132,7 @@ internal fun PortraitHero(
     content: @Composable BoxScope.() -> Unit = {}
 ) {
     val colors = LocalDesignTokens.current.colors
-    val portraitReference = portraitUri ?: AssetReferences.portraitPlaceholderPath("portrait_placeholder.png")
+    val portraitReference = portraitUri ?: AssetReferences.portraitPlaceholderPath("portrait_placeholder.webp")
     val saturation by animateFloatAsState(if (dead) 0f else 1f, animationSpec = tween(durationMillis = 1200), label = "portraitSaturation")
     Box(
         modifier = modifier.layout { measurable, constraints ->

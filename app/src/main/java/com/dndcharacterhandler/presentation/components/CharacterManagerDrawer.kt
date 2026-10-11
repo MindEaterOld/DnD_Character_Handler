@@ -306,7 +306,7 @@ private fun DrawerPortrait(
     characterName: String,
     modifier: Modifier = Modifier
 ) {
-    val portraitReference = portraitUri ?: AssetReferences.portraitPlaceholderPath("portrait_placeholder.png")
+    val portraitReference = portraitUri ?: AssetReferences.portraitPlaceholderPath("portrait_placeholder.webp")
     val colors = LocalDesignTokens.current.colors
 
     Box(

@@ -1461,7 +1461,7 @@ private fun OverviewContent(
         val heroHeight = portraitHeroHeight(heroWidth, WindowInsets.statusBars.asPaddingValues().calculateTopPadding())
         PortraitFramingDialog(
             portraitReference = characterBundle.character.portraitUri
-                ?: AssetReferences.portraitPlaceholderPath("portrait_placeholder.png"),
+                ?: AssetReferences.portraitPlaceholderPath("portrait_placeholder.webp"),
             initial = characterBundle.character.portraitFraming,
             heroAspect = heroWidth / heroHeight,
             footShare = portraitHeroFootShare(heroHeight),
