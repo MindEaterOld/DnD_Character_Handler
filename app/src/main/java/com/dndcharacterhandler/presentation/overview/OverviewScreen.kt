@@ -105,7 +105,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.RoundRect
-import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.text.input.ImeAction
 import com.dndcharacterhandler.domain.dnd5e.rules.heal
@@ -2022,8 +2021,8 @@ private fun HpStepButton(icon: ImageVector, description: String, enabled: Boolea
 
 /**
  * What is left of the hit points: a bar on the experience's track, green as far as they go, the temporary ones blue
- * after. One capsule: only the track's ends are round, the parts in it are cut square, so they meet each other and
- * the track with no notch (owner, 2026-10-11 — each part its own capsule left a gap between their round ends).
+ * after, each part a capsule. The blue one starts under the green, so under the green's round end there is blue, not
+ * the track (owner, 2026-10-11 — the two round ends left a gap of track between them).
  */
 @Composable
 private fun HpBar(current: Int, temporary: Int, max: Int, width: Dp = HpBarWidth) {
@@ -2031,19 +2030,15 @@ private fun HpBar(current: Int, temporary: Int, max: Int, width: Dp = HpBarWidth
     Canvas(modifier = Modifier.padding(top = 4.dp).width(width).height(6.dp)) {
         val h = 4.dp.toPx()
         val y = size.height / 2 - h / 2
-        val track = Path().apply {
-            addRoundRect(RoundRect(0f, y, size.width, y + h, CornerRadius(h / 2)))
+        val corner = CornerRadius(h / 2)
+        drawRoundRect(colors.border.faint, Offset(0f, y), Size(size.width, h), corner)
+        if (max <= 0) return@Canvas
+        val hp = size.width * (current.toFloat() / max).coerceIn(0f, 1f)
+        if (temporary > 0) {
+            val extra = (size.width * temporary / max).coerceAtMost(size.width - hp)
+            if (extra > 0f) drawRoundRect(colors.accent.magic, Offset(0f, y), Size(hp + extra, h), corner)
         }
-        clipPath(track) {
-            drawRect(colors.border.faint, Offset(0f, y), Size(size.width, h))
-            if (max <= 0) return@clipPath
-            val hp = size.width * (current.toFloat() / max).coerceIn(0f, 1f)
-            if (hp > 0f) drawRect(colors.accent.heal, Offset(0f, y), Size(hp, h))
-            if (temporary > 0) {
-                val extra = (size.width * temporary / max).coerceAtMost(size.width - hp)
-                if (extra > 0f) drawRect(colors.accent.magic, Offset(hp, y), Size(extra, h))
-            }
-        }
+        if (hp > 0f) drawRoundRect(colors.accent.heal, Offset(0f, y), Size(hp, h), corner)
     }
 }
 
