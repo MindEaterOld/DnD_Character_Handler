@@ -1,6 +1,7 @@
 package com.dndcharacterhandler.presentation.attributes
 
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.geometry.Rect
@@ -1544,7 +1545,7 @@ private fun AbilityScoreCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight()
-                    .restingArt(colors.surface.card, colors.text.subtle) { glow }
+                    .restingArt(colors.surface.card, colors.text.subtle.compositeOver(colors.surface.card)) { glow }
                     // The foot melts away (an alpha mask), into the card's fill under it.
                     .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
                     .drawWithContent {

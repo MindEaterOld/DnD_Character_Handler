@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -103,12 +104,12 @@ private fun DiceSkin.style(): DiceSkinStyle {
         // Charcoal with light edges, so it still stands out on the dark table.
         DiceSkin.BLACK -> DiceSkinStyle(
             body = tokens.surface.button,
-            edge = tokens.text.subtle,
+            edge = tokens.text.subtle.compositeOver(tokens.surface.card),
             number = tokens.text.primary
         )
         DiceSkin.WHITE -> DiceSkinStyle(
             body = tokens.text.primary,
-            edge = scheme.outline,
+            edge = scheme.outline.compositeOver(tokens.surface.card),
             number = scheme.background
         )
         // Dark numbers: white ones would be hard to read on the light blue.
@@ -119,7 +120,7 @@ private fun DiceSkin.style(): DiceSkinStyle {
         )
         DiceSkin.WEB -> DiceSkinStyle(
             body = scheme.surfaceVariant,
-            edge = tokens.text.subtle,
+            edge = tokens.text.subtle.compositeOver(tokens.surface.card),
             number = tokens.accent.dangerHpZero,
             texture = DiceTexture.Web(thread = tokens.border.strong)
         )

@@ -180,7 +180,7 @@ val DefaultDesignColors = DesignColorTokens(
     text = TextColorTokens(
         primary = Color(0xFFF1EFEC),
         muted = Color(0xFFCACACD),
-        subtle = Color(0xFF9F9FA4)
+        subtle = Color(0x80F1EFEC)
     ),
     background = BackgroundColorTokens(
         page = Color(0xFF0E0E10)
@@ -194,7 +194,7 @@ val DefaultDesignColors = DesignColorTokens(
         default = Color(0x4DF1EFEC),
         strong = Color(0x80F1EFEC),
         faint = Color(0x26F1EFEC),
-        rule = Color(0x4D9F9FA4)
+        rule = Color(0x4DF1EFEC)
     ),
     accent = AccentColorTokens(
         inspiration = Color(0xFFFFD86B),
@@ -254,7 +254,7 @@ val DefaultMaterialColors: ColorScheme = darkColorScheme(
     onSurface = Color(0xFFF1EFEC),
     surfaceVariant = Color(0xFF242427),
     onSurfaceVariant = Color(0xFFCACACD),
-    outline = Color(0xFF9F9FA4),
+    outline = Color(0x80F1EFEC),
     outlineVariant = Color(0xFF39393D)
 )
 
