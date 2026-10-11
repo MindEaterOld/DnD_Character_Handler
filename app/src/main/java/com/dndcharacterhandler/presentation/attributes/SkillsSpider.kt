@@ -46,7 +46,7 @@ internal fun SkillsSpider(modifier: Modifier = Modifier) {
     val heartPainter = rememberVectorPainter(Icons.Filled.Favorite)
     val colors = LocalDesignTokens.current.colors
     val tint = colors.border.default
-    val heartTint = ColorFilter.tint(colors.accent.dangerHpZero)
+    val heartTint = ColorFilter.tint(colors.accent.danger)
     val hearts = remember { mutableStateListOf<SpiderHeart>() }
     val scope = rememberCoroutineScope()
     Spacer(

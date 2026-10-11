@@ -1181,10 +1181,10 @@ private fun RequirementWarning(strings: LocalizedStrings, requirements: List<Mul
     Surface(
         shape = RoundedCornerShape(12.dp),
         color = colors.surface.raised,
-        border = BorderStroke(1.dp, colors.accent.xpCapped)
+        border = BorderStroke(1.dp, colors.accent.bright)
     ) {
         Row(modifier = Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Icon(Icons.Outlined.WarningAmber, contentDescription = null, tint = colors.accent.inspiration)
+            Icon(Icons.Outlined.WarningAmber, contentDescription = null, tint = colors.accent.bright)
             Text(catalogNames, style = MaterialTheme.typography.bodyMedium, color = colors.text.primary)
         }
     }
@@ -1434,7 +1434,7 @@ private fun CoinsAmount(coins: Map<String, Int>, strings: LocalizedStrings, modi
                 if (currency == "gp") {
                     CurrencyCoinCluster(
                         modifier = Modifier.size(24.dp),
-                        color = colors.accent.coinGold,
+                        color = colors.accent.bright,
                         type = CurrencyType.GOLD
                     )
                 } else {
@@ -1509,7 +1509,7 @@ private fun AbilityRow(
                 text = value.toString() + if (added > 0) " (+$added)" else "",
                 modifier = Modifier.width(80.dp),
                 style = MaterialTheme.typography.titleMedium,
-                color = if (added > 0) colors.accent.inspiration else colors.text.primary,
+                color = if (added > 0) colors.accent.bright else colors.text.primary,
                 textAlign = TextAlign.Center
             )
             StepButton(icon = Icons.Outlined.Add, contentDescription = text("common_increase"), onClick = onAdd, enabled = canAdd, size = 40.dp)

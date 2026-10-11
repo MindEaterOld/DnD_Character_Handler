@@ -582,8 +582,8 @@ private fun NoteEditor(
             NoteRoundButton(
                 icon = Icons.Outlined.Delete,
                 contentDescription = text("notes_delete"),
-                fill = colors.accent.dangerHpZero.copy(alpha = LocalDesignTokens.current.alpha.faint),
-                tint = colors.accent.dangerHpZero,
+                fill = colors.accent.danger.copy(alpha = LocalDesignTokens.current.alpha.faint),
+                tint = colors.accent.danger,
                 onClick = {
                     deleted = true
                     onDelete(edited())

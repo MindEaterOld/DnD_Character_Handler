@@ -103,8 +103,8 @@ fun EditDialog(
                         FilledIconButton(
                             onClick = { confirmingDelete = true },
                             colors = IconButtonDefaults.filledIconButtonColors(
-                                containerColor = colors.accent.dangerHpZero.copy(alpha = LocalDesignTokens.current.alpha.faint),
-                                contentColor = colors.accent.dangerHpZero
+                                containerColor = colors.accent.danger.copy(alpha = LocalDesignTokens.current.alpha.faint),
+                                contentColor = colors.accent.danger
                             )
                         ) {
                             Icon(imageVector = Icons.Outlined.Delete, contentDescription = text("inventory_delete_action"))
@@ -117,7 +117,7 @@ fun EditDialog(
                             enabled = confirmEnabled,
                             colors = if (confirmIsDanger) {
                                 ButtonDefaults.buttonColors(
-                                    containerColor = colors.accent.dangerHpZero,
+                                    containerColor = colors.accent.danger,
                                     contentColor = colors.text.primary
                                 )
                             } else {

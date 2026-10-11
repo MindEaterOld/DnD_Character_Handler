@@ -269,11 +269,11 @@ internal enum class Build(val key: String, val from: Float, val upTo: Float, val
     fun color(): Color {
         val accent = LocalDesignTokens.current.colors.accent
         return when (this) {
-            THIN -> accent.hpTemporary
+            THIN -> accent.magic
             SLIM -> accent.heal
-            STURDY -> accent.inspiration
-            HEAVY -> accent.damageFire
-            BULKY -> accent.dangerHpZero
+            STURDY -> accent.bright
+            HEAVY -> accent.fire
+            BULKY -> accent.danger
         }
     }
 

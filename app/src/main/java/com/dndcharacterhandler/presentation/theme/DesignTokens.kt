@@ -83,24 +83,23 @@ data class BorderColorTokens(
     val rule: Color
 )
 
-/** Semantic accents (inspiration, HP, healing, danger), the coins of the currency icons, magical items and damage types. */
+/**
+ * The accents, six (owner's pick from the phone, 2026-10-11: «самоцветы» — before, fourteen slots, many of one colour):
+ * each a meaning, the same colour in every theme. The silver coin and «other» damage are the muted text.
+ */
 data class AccentColorTokens(
-    val inspiration: Color,
-    val xpCapped: Color,
-    val hpTemporary: Color,
+    /** Danger: a hindering condition, disadvantage, a value lowered, 0 hit points, a delete. */
+    val danger: Color,
+    /** Healing and help: the hit points' bar, advantage, a value raised, healing, poison damage. */
     val heal: Color,
-    val dangerHpZero: Color,
-    val coinCopper: Color,
-    val coinSilver: Color,
-    val coinGold: Color,
-    /** A magical item's name. */
-    val magical: Color,
-    /** Damage types on the Combat screen's attacks. */
-    val damageFire: Color,
-    val damageCold: Color,
-    val damageLightning: Color,
-    val damagePoison: Color,
-    val damageOther: Color
+    /** Magic and the temporary: temporary hit points, the ability modifiers, invisible, magic items, cold damage. */
+    val magic: Color,
+    /** Fire: exhaustion, fire damage, the copper coin. */
+    val fire: Color,
+    /** The arcane: lightning damage. */
+    val arcane: Color,
+    /** The bright: inspiration, the experience at the last level or due, the gold coin, a material cost. */
+    val bright: Color
 )
 
 /** The soft shadow under writing and signs on an art: the page's N1 at 50 % (before, black; 2026-10-11). */
@@ -197,20 +196,12 @@ val DefaultDesignColors = DesignColorTokens(
         rule = Color(0x4DF1EFEC)
     ),
     accent = AccentColorTokens(
-        inspiration = Color(0xFFFFD86B),
-        xpCapped = Color(0xFFE0B84E),
-        hpTemporary = Color(0xFF69B7FF),
-        heal = Color(0xFF8AD178),
-        dangerHpZero = Color(0xFFE85C5C),
-        coinCopper = Color(0xFFC9824B),
-        coinSilver = Color(0xFFC4C8D2),
-        coinGold = Color(0xFFE0B548),
-        magical = Color(0xFF69B7FF),
-        damageFire = Color(0xFFFF8A3D),
-        damageCold = Color(0xFF7BB7FF),
-        damageLightning = Color(0xFFCFB6FF),
-        damagePoison = Color(0xFFA8D76F),
-        damageOther = Color(0xFFD5C6B2)
+        danger = Color(0xFFE04B63),
+        heal = Color(0xFF4CC38A),
+        magic = Color(0xFF5B8DEF),
+        fire = Color(0xFFF08C3A),
+        arcane = Color(0xFF9B7BE8),
+        bright = Color(0xFFF4C84A)
     ),
     shadow = ShadowColorTokens(
         drop = Color(0x800E0E10)
@@ -391,20 +382,12 @@ private fun loadColorTokens(app: JsonObject?): DesignColorTokens {
             rule = border.colorToken("rule", defaults.border.rule)
         ),
         accent = AccentColorTokens(
-            inspiration = accent.colorToken("inspiration", defaults.accent.inspiration),
-            xpCapped = accent.colorToken("xpCapped", defaults.accent.xpCapped),
-            hpTemporary = accent.colorToken("hpTemporary", defaults.accent.hpTemporary),
+            danger = accent.colorToken("danger", defaults.accent.danger),
             heal = accent.colorToken("heal", defaults.accent.heal),
-            dangerHpZero = accent.colorToken("dangerHpZero", defaults.accent.dangerHpZero),
-            coinCopper = accent.colorToken("coinCopper", defaults.accent.coinCopper),
-            coinSilver = accent.colorToken("coinSilver", defaults.accent.coinSilver),
-            coinGold = accent.colorToken("coinGold", defaults.accent.coinGold),
-            magical = accent.colorToken("magical", defaults.accent.magical),
-            damageFire = accent.colorToken("damageFire", defaults.accent.damageFire),
-            damageCold = accent.colorToken("damageCold", defaults.accent.damageCold),
-            damageLightning = accent.colorToken("damageLightning", defaults.accent.damageLightning),
-            damagePoison = accent.colorToken("damagePoison", defaults.accent.damagePoison),
-            damageOther = accent.colorToken("damageOther", defaults.accent.damageOther)
+            magic = accent.colorToken("magic", defaults.accent.magic),
+            fire = accent.colorToken("fire", defaults.accent.fire),
+            arcane = accent.colorToken("arcane", defaults.accent.arcane),
+            bright = accent.colorToken("bright", defaults.accent.bright)
         ),
         shadow = ShadowColorTokens(
             drop = shadow.colorToken("drop", defaults.shadow.drop)

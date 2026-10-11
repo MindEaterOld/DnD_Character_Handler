@@ -52,7 +52,7 @@ import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 
 /**
  * The character's conditions as chips over the hit points (owner's choice from boards, 2026-10-09: И): exhaustion's
- * level in `accent.damageFire`, concentration in gold, each condition in its colour — lit at 15 % over the card's fill,
+ * level in `accent.fire`, concentration in gold, each condition in its colour — lit at 15 % over the card's fill,
  * outlined in it at 70 %, its icon and its name; every one shown — none folded into "+N" (owner's wish, 2026-10-10)
  * — each row centred, filling from the bottom (by the hit points) up: a chip that doesn't fit opens a row above the
  * others (owner's wish, 2026-10-10). A chip opens the conditions' sheet; concentration's offers to end it. While no chip opens the sheet — no
@@ -74,7 +74,7 @@ internal fun ConditionChips(
     // Exhaustion's level and concentration first: they matter most and stay in sight.
     val chips = buildList<@Composable () -> Unit> {
         if (exhaustion > 0) {
-            add { ConditionChip(ExhaustionIcon, strings.format("conditions_exhaustion_level", exhaustion), colors.accent.damageFire, onOpenPicker) }
+            add { ConditionChip(ExhaustionIcon, strings.format("conditions_exhaustion_level", exhaustion), colors.accent.fire, onOpenPicker) }
         }
         if (concentrating) add { ConditionChip(ConcentrationIcon, strings["spells_concentration"], gold, onOpenConcentration) }
         // In the order they were put on: the first by the hit points, a new one after it, or on a row above.
@@ -258,7 +258,7 @@ private fun ConditionGroupTitle(name: String) {
 private fun ExhaustionPicker(level: Int, immune: Boolean, onPick: (Int) -> Unit) {
     val strings = LocalStrings.current
     val colors = LocalDesignTokens.current.colors
-    val fire = colors.accent.damageFire
+    val fire = colors.accent.fire
     val shape = RoundedCornerShape(10.dp)
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         ConditionGroupTitle(text("condition_exhaustion"))

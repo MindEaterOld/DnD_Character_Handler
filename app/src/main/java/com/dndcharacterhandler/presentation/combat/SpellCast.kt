@@ -203,7 +203,7 @@ private fun SlotChip(selected: Boolean, enabled: Boolean, onClick: () -> Unit, c
 private fun CastNote(note: String?, warning: Boolean = false) {
     note ?: return
     val colors = LocalDesignTokens.current.colors
-    Text(text = note, style = MaterialTheme.typography.bodyMedium, color = if (warning) colors.accent.dangerHpZero else colors.text.muted)
+    Text(text = note, style = MaterialTheme.typography.bodyMedium, color = if (warning) colors.accent.danger else colors.text.muted)
 }
 
 /** Concentration's mark and what the cast does to it: starts it, ends the held spell's, or can't. */
@@ -215,7 +215,7 @@ private fun ConcentrationNote(concentration: CastConcentration) {
         CastConcentration.None -> return
         CastConcentration.Starts -> text("spells_cast_concentration_starts") to colors.text.muted
         CastConcentration.Continues -> text("spells_cast_concentration_continues") to colors.text.muted
-        is CastConcentration.Replaces -> strings.format("spells_cast_concentration_replaces", concentration.heldName) to colors.accent.dangerHpZero
+        is CastConcentration.Replaces -> strings.format("spells_cast_concentration_replaces", concentration.heldName) to colors.accent.danger
         CastConcentration.Cannot -> text("spells_cast_concentration_cannot") to colors.text.muted
     }
     Row(verticalAlignment = Alignment.CenterVertically) {

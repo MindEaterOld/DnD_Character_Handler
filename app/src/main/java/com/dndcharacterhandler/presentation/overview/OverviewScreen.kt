@@ -2032,7 +2032,7 @@ private fun HpBar(current: Int, temporary: Int, max: Int, width: Dp = HpBarWidth
         if (hp > 0f) drawRoundRect(colors.accent.heal, Offset(0f, y), Size(hp, h), corner)
         if (temporary > 0) {
             val extra = (size.width * temporary / max).coerceAtMost(size.width - hp)
-            if (extra > 0f) drawRoundRect(colors.accent.hpTemporary, Offset(hp, y), Size(extra, h), corner)
+            if (extra > 0f) drawRoundRect(colors.accent.magic, Offset(hp, y), Size(extra, h), corner)
         }
     }
 }
@@ -2232,13 +2232,13 @@ private fun DeathSavesRow(successes: Int, failures: Int, onSetSaves: (Int, Int) 
             DeathSaveMarks(
                 label = text("overview_death_saves_failures"),
                 count = failures,
-                color = colors.accent.dangerHpZero,
+                color = colors.accent.danger,
                 modifier = Modifier.weight(1f),
                 onSet = { onSetSaves(successes, it) }
             )
         }
         when {
-            saves.isDead -> Text(text("overview_death_saves_dead"), style = MaterialTheme.typography.titleMedium, color = colors.accent.dangerHpZero)
+            saves.isDead -> Text(text("overview_death_saves_dead"), style = MaterialTheme.typography.titleMedium, color = colors.accent.danger)
             saves.isStable -> Text(text("overview_death_saves_stable"), style = MaterialTheme.typography.titleMedium, color = colors.accent.heal)
         }
     }
@@ -2274,7 +2274,7 @@ private fun DeathSaveMarks(label: String, count: Int, color: Color, modifier: Mo
 }
 
 /**
- * The hit points on the art: now in `hpCurrent` (red at 0), the temporary ones in `accent.hpTemporary` right after
+ * The hit points on the art: now in `hpCurrent` (red at 0), the temporary ones in `accent.magic` right after
  * («8+5»), the maximum dimmer. A tap on them types new ones in place (owner's choice, 2026-10-10: A): now is selected
  * under a gold rule and the keyboard comes up; a blue «+» stands after it — dashed while there are none — and a tap on it
  * types the temporary ones. ✓, Back or the keyboard put away sets them (now up to the maximum; the temporary ones
@@ -2293,7 +2293,7 @@ private fun HpNumbers(
     val tokens = LocalDesignTokens.current.typography
     val colors = LocalDesignTokens.current.colors
     val gold = MaterialTheme.colorScheme.primary
-    val blue = colors.accent.hpTemporary
+    val blue = colors.accent.magic
     val shadow = artShadow()
     val headline = MaterialTheme.typography.headlineMedium
     fun sized(token: com.dndcharacterhandler.presentation.theme.TextSizeToken) =
@@ -2374,7 +2374,7 @@ private fun HpNumbers(
         val barWidth = with(density) {
             widthAt(current, extra, max).toDp().coerceIn(HpBarWidth, maxOf(HpBarWidth, maxWidth))
         }
-        val nowColor = if (currentHp == 0 && !editing) colors.accent.dangerHpZero else colors.text.primary
+        val nowColor = if (currentHp == 0 && !editing) colors.accent.danger else colors.text.primary
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
         // Typing can run wider than the room for a moment: nothing is cut, it settles once set.
         Row(

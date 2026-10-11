@@ -97,7 +97,7 @@ private fun DiceSkin.style(): DiceSkinStyle {
     val scheme = MaterialTheme.colorScheme
     return when (this) {
         DiceSkin.GOLD -> DiceSkinStyle(
-            body = tokens.accent.inspiration,
+            body = tokens.accent.bright,
             edge = scheme.secondary,
             number = tokens.surface.card
         )
@@ -114,14 +114,14 @@ private fun DiceSkin.style(): DiceSkinStyle {
         )
         // Dark numbers: white ones would be hard to read on the light blue.
         DiceSkin.BLUE -> DiceSkinStyle(
-            body = tokens.accent.hpTemporary,
+            body = tokens.accent.magic,
             edge = tokens.text.primary,
             number = tokens.surface.card
         )
         DiceSkin.WEB -> DiceSkinStyle(
             body = scheme.surfaceVariant,
             edge = tokens.text.subtle.compositeOver(tokens.surface.card),
-            number = tokens.accent.dangerHpZero,
+            number = tokens.accent.danger,
             texture = DiceTexture.Web(thread = tokens.border.strong)
         )
     }

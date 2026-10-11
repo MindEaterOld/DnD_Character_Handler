@@ -30,7 +30,7 @@ fun RollMarker(effects: RollEffects?, modifier: Modifier = Modifier, size: Dp = 
         Icon(
             imageVector = Icons.Outlined.Close,
             contentDescription = text("roll_marker_fail"),
-            tint = LocalDesignTokens.current.colors.accent.dangerHpZero,
+            tint = LocalDesignTokens.current.colors.accent.danger,
             modifier = modifier.size(size)
         )
         return
@@ -52,7 +52,7 @@ val RollEffects.isBetter: Boolean get() = mode == RollMode.ADVANTAGE
 fun changedValueColor(delta: Int): Color? {
     val colors = LocalDesignTokens.current.colors
     return when {
-        delta < 0 -> colors.accent.dangerHpZero
+        delta < 0 -> colors.accent.danger
         delta > 0 -> colors.accent.heal
         else -> null
     }
@@ -76,7 +76,7 @@ fun RollMarker(worse: Boolean, better: Boolean, modifier: Modifier = Modifier, s
             Icon(
                 imageVector = Icons.Outlined.KeyboardDoubleArrowDown,
                 contentDescription = text("roll_marker_worse"),
-                tint = colors.accent.dangerHpZero,
+                tint = colors.accent.danger,
                 modifier = Modifier.size(size)
             )
         }

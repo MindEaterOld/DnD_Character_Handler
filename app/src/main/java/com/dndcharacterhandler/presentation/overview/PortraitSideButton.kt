@@ -136,7 +136,7 @@ internal fun PortraitSideButton(
     iconSize: Dp = PortraitSideIconSize,
     /** A toggle's state (inspiration): on, its icon is lit in [accent]. Null: a plain button. */
     on: Boolean? = null,
-    accent: Color = LocalDesignTokens.current.colors.accent.inspiration,
+    accent: Color = LocalDesignTokens.current.colors.accent.bright,
     /** A word in place of the icon, in the serif: the experience's coin writes «XP». */
     label: String? = null
 ) {

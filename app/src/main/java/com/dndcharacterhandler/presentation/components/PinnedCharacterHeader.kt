@@ -202,7 +202,7 @@ private fun Modifier.levelTaps(level: HeaderLevel): Modifier =
 /**
  * «I LVL» before the name, on its baseline (owner's choices from boards, 2026-10-10: D1, U4): the Roman numeral as large
  * as the name (`titleLarge`), «LVL» small (`labelMedium`), semibold and spaced, in `text.muted`; both in
- * `accent.inspiration` when a level up is due.
+ * `accent.bright` when a level up is due.
  */
 @Composable
 private fun RowScope.HeaderLevelWords(level: HeaderLevel, shadow: Shadow) {
@@ -223,14 +223,14 @@ private fun RowScope.HeaderLevelWords(level: HeaderLevel, shadow: Shadow) {
             text = romanNumeral(level.level),
             modifier = Modifier.alignByBaseline().then(deep),
             style = MaterialTheme.typography.titleLarge.copy(shadow = shadow),
-            color = if (due) colors.accent.inspiration else colors.text.primary,
+            color = if (due) colors.accent.bright else colors.text.primary,
             maxLines = 1
         )
         Text(
             text = " " + text("overview_level_short").uppercase(),
             modifier = Modifier.alignByBaseline().then(deep),
             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold, letterSpacing = 1.sp, shadow = shadow),
-            color = if (due) colors.accent.inspiration else colors.text.muted,
+            color = if (due) colors.accent.bright else colors.text.muted,
             maxLines = 1
         )
     }
@@ -238,14 +238,14 @@ private fun RowScope.HeaderLevelWords(level: HeaderLevel, shadow: Shadow) {
 
 /**
  * The experience's rule under the name: on the track `border.faint`, filled from the left in gold — in
- * `accent.inspiration` when a level up is due, in `accent.xpCapped` at the last level. Its taps are the level's.
+ * `accent.bright` when a level up is due, in `accent.bright` at the last level. Its taps are the level's.
  */
 @Composable
 private fun HeaderLevelRule(level: HeaderLevel) {
     val colors = LocalDesignTokens.current.colors
     val fill = when {
-        level.due() -> colors.accent.inspiration
-        level.level >= MAX_CHARACTER_LEVEL -> colors.accent.xpCapped
+        level.due() -> colors.accent.bright
+        level.level >= MAX_CHARACTER_LEVEL -> colors.accent.bright
         else -> MaterialTheme.colorScheme.primary
     }
     val progress = experienceProgress(level.level, level.experience)

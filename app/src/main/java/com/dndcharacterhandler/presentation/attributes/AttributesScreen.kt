@@ -1515,7 +1515,7 @@ private fun AbilityScoreCard(
     val goldNow = { lerp(grey, gold, glow) }
     // The conditions' sign in the rule's gap, and what TalkBack says for it.
     val mark = checkEffects.ruleMark()
-    val markColor = if (mark == RuleMark.BETTER) colors.accent.heal else colors.accent.dangerHpZero
+    val markColor = if (mark == RuleMark.BETTER) colors.accent.heal else colors.accent.danger
     val markDescription = when (mark) {
         RuleMark.WORSE -> text("roll_marker_worse")
         RuleMark.BETTER -> text("roll_marker_better")

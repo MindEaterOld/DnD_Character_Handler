@@ -877,7 +877,7 @@ private fun WeaponAttackPickerDialog(
                             Text(
                                 text = weapon.name,
                                 style = MaterialTheme.typography.bodyLarge,
-                                color = if (weapon.isMagical) colors.accent.magical else colors.text.primary
+                                color = if (weapon.isMagical) colors.accent.magic else colors.text.primary
                             )
                             weapon.weaponDetails?.let { details ->
                                 val previewRange = details.rangeLabel(
@@ -1264,7 +1264,7 @@ private fun SpellAttackCard(
                         CombatTag(value = components, textColor = colors.text.muted)
                     }
                     materialCostLabel?.let { cost ->
-                        CombatTag(value = cost, textColor = colors.accent.inspiration)
+                        CombatTag(value = cost, textColor = colors.accent.bright)
                     }
                 }
             }
@@ -1372,7 +1372,7 @@ private fun attackMastery(attack: Attack, bundle: CharacterBundle, catalog: Char
 
 @Composable
 private fun LevelTag(value: String) {
-    CombatTag(value = value, textColor = LocalDesignTokens.current.colors.accent.hpTemporary)
+    CombatTag(value = value, textColor = LocalDesignTokens.current.colors.accent.magic)
 }
 
 @Composable
@@ -2121,11 +2121,11 @@ private fun spellSchoolLocalizationKey(value: String): String? =
 private fun damageTypeColor(value: String, colors: DesignColorTokens): Color {
     val key = value.lowercase()
     return when {
-        "fire" in key -> colors.accent.damageFire
-        "cold" in key -> colors.accent.damageCold
-        "lightning" in key -> colors.accent.damageLightning
-        "poison" in key -> colors.accent.damagePoison
-        else -> colors.accent.damageOther
+        "fire" in key -> colors.accent.fire
+        "cold" in key -> colors.accent.magic
+        "lightning" in key -> colors.accent.arcane
+        "poison" in key -> colors.accent.heal
+        else -> colors.text.muted
     }
 }
 

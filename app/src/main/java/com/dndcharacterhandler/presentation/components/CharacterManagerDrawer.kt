@@ -282,11 +282,11 @@ private fun DrawerSelectionDot(selected: Boolean) {
     ) {
         Canvas(modifier = Modifier.size(18.dp)) {
             drawCircle(
-                color = if (selected) colors.accent.inspiration else Color.Transparent,
+                color = if (selected) colors.accent.bright else Color.Transparent,
                 radius = 6.dp.toPx()
             )
             drawCircle(
-                color = if (selected) colors.accent.inspiration else colors.text.muted,
+                color = if (selected) colors.accent.bright else colors.text.muted,
                 radius = 7.dp.toPx(),
                 style = Stroke(width = 1.5.dp.toPx())
             )

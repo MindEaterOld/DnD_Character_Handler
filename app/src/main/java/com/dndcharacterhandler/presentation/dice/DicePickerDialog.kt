@@ -147,7 +147,7 @@ private fun DiceCountList(
                     text = count.toString(),
                     modifier = Modifier.widthIn(min = 44.dp),
                     style = MaterialTheme.typography.titleMedium,
-                    color = if (count > 0) colors.accent.inspiration else colors.text.subtle,
+                    color = if (count > 0) colors.accent.bright else colors.text.subtle,
                     textAlign = TextAlign.Center
                 )
                 StepButton(

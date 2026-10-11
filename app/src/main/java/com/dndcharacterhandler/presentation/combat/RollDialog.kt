@@ -187,7 +187,7 @@ internal fun RollDialog(
             Text(
                 text = strings.format("combat_roll_auto_fail", fails.joinToString(", ") { strings[it.nameKey] }),
                 style = MaterialTheme.typography.titleMedium,
-                color = colors.accent.dangerHpZero
+                color = colors.accent.danger
             )
         } else if (input.attackBonus != null && valid) {
             val roll = { mode: RollMode ->
@@ -343,8 +343,8 @@ private fun AttackResult(title: String, rollLabel: String?, roll: AttackRoll, ou
         style = MaterialTheme.typography.headlineMedium,
         color = when {
             rollLabel != null -> colors.text.primary
-            outcome.critical -> colors.accent.inspiration
-            outcome.fumble -> colors.accent.dangerHpZero
+            outcome.critical -> colors.accent.bright
+            outcome.fumble -> colors.accent.danger
             else -> colors.text.primary
         },
         textAlign = TextAlign.Center
@@ -361,8 +361,8 @@ private fun AttackResult(title: String, rollLabel: String?, roll: AttackRoll, ou
     // Only an attack hits or misses on a natural 20 or 1; a check or a save is just its total.
     if (rollLabel == null) {
         when {
-            outcome.critical -> Text(text("combat_roll_critical"), style = MaterialTheme.typography.titleMedium, color = colors.accent.inspiration, textAlign = TextAlign.Center)
-            outcome.fumble -> Text(text("combat_roll_fumble"), style = MaterialTheme.typography.titleMedium, color = colors.accent.dangerHpZero, textAlign = TextAlign.Center)
+            outcome.critical -> Text(text("combat_roll_critical"), style = MaterialTheme.typography.titleMedium, color = colors.accent.bright, textAlign = TextAlign.Center)
+            outcome.fumble -> Text(text("combat_roll_fumble"), style = MaterialTheme.typography.titleMedium, color = colors.accent.danger, textAlign = TextAlign.Center)
         }
     }
     if (!roll.damage.isEmpty) {
@@ -395,7 +395,7 @@ private fun CriticalResult(title: String, firstDamage: Int, extra: RollPart, dam
     val strings = LocalStrings.current
     val total = firstDamage + extra.total
     Text(text = title, style = MaterialTheme.typography.titleMedium, color = colors.text.muted, textAlign = TextAlign.Center)
-    Text(text = text("combat_roll_critical"), style = MaterialTheme.typography.titleMedium, color = colors.accent.inspiration, textAlign = TextAlign.Center)
+    Text(text = text("combat_roll_critical"), style = MaterialTheme.typography.titleMedium, color = colors.accent.bright, textAlign = TextAlign.Center)
     Text(
         text = strings.format("combat_roll_damage_total", total, damageType).trim(),
         style = MaterialTheme.typography.headlineMedium,

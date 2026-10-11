@@ -412,7 +412,7 @@ internal fun DiceWorkshopOverlay(
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = colors.accent.inspiration
+                    color = colors.accent.bright
                 )
             }
             Row(
@@ -425,8 +425,8 @@ internal fun DiceWorkshopOverlay(
                     FilledTonalIconButton(
                         onClick = { confirmDelete = true },
                         colors = IconButtonDefaults.filledTonalIconButtonColors(
-                            containerColor = LocalDesignTokens.current.colors.accent.dangerHpZero.copy(alpha = LocalDesignTokens.current.alpha.faint),
-                            contentColor = LocalDesignTokens.current.colors.accent.dangerHpZero
+                            containerColor = LocalDesignTokens.current.colors.accent.danger.copy(alpha = LocalDesignTokens.current.alpha.faint),
+                            contentColor = LocalDesignTokens.current.colors.accent.danger
                         )
                     ) {
                         Icon(Icons.Outlined.Delete, contentDescription = text("common_delete"))

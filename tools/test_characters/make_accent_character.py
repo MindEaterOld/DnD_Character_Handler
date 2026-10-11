@@ -2,21 +2,21 @@
 """A test character that lights every accent colour (owner's wish, 2026-10-11), as an archive to import:
 python tools/test_characters/make_accent_character.py  ->  tools/test_characters/Accent_test.dndchar
 
-Where each accent shows:
-  inspiration      the portrait's star (inspiration on); a combat spell's material cost (Chromatic Orb)
-  xpCapped         the header's experience rule at the last level (20)
-  hpTemporary      the temporary hit points (+15) and their bar; the ability modifiers; invisible's chip;
+Where each accent shows (the six of 2026-10-11):
+  bright           the portrait's star (inspiration on); a combat spell's material cost (Chromatic Orb)
+  bright           the header's experience rule at the last level (20)
+  magic            the temporary hit points (+15) and their bar; the ability modifiers; invisible's chip;
                    the spells' level tags in combat; the long rest's temporary hit points
   heal             the hit points' bar; advantage arrows (invisible: attacks); Cure Wounds; the short rest's average
-  dangerHpZero     a hindering condition's chip (charmed); an empty resource; the trash in a pop-up
-  damageFire       fire damage (Fire Bolt, the flaming sword); exhaustion's chip, if you put it on (no exhaustion here:
+  danger           a hindering condition's chip (charmed); an empty resource; the trash in a pop-up
+  fire             fire damage (Fire Bolt, the flaming sword); exhaustion's chip, if you put it on (no exhaustion here:
                    its -2 would turn every ability modifier red and hide their blue)
-  damageCold       cold damage (Ray of Frost, the frost spear)
-  damageLightning  lightning damage (Lightning Bolt, the storm staff)
-  damagePoison     poison damage (Poison Spray, the poisoned dagger)
-  damageOther      any other damage (the longsword's slashing, Chromatic Orb's acid)
-  magical          magic items' names in the inventory and the combat's weapon pick
-  coinCopper/Silver/Gold  the inventory's coins
+  magic            cold damage (Ray of Frost, the frost spear)
+  arcane           lightning damage (Lightning Bolt, the storm staff)
+  heal             poison damage (Poison Spray, the poisoned dagger)
+  text.muted       any other damage (the longsword's slashing, Chromatic Orb's acid)
+  magic            magic items' names in the inventory and the combat's weapon pick
+  fire / text.muted / bright  the inventory's copper, silver and gold coins
 """
 import json
 import os

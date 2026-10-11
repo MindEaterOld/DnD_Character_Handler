@@ -146,41 +146,6 @@
     "fr": "Graphite",
     "es": "Grafito"
   },
-  "settings_theme_graphite_a": {
-    "en": "Graphite A · former",
-    "ru": "Графит А · прежние",
-    "de": "Graphit A · bisherig",
-    "fr": "Graphite A · anciens",
-    "es": "Grafito A · anteriores"
-  },
-  "settings_theme_graphite_b": {
-    "en": "Graphite B · muted",
-    "ru": "Графит Б · приглушённые",
-    "de": "Graphit B · gedämpft",
-    "fr": "Graphite B · sourds",
-    "es": "Grafito B · apagados"
-  },
-  "settings_theme_graphite_c": {
-    "en": "Graphite C · vivid",
-    "ru": "Графит В · яркие",
-    "de": "Graphit C · kräftig",
-    "fr": "Graphite C · vifs",
-    "es": "Grafito C · vivos"
-  },
-  "settings_theme_graphite_d": {
-    "en": "Graphite D · warm",
-    "ru": "Графит Г · тёплые",
-    "de": "Graphit D · warm",
-    "fr": "Graphite D · chauds",
-    "es": "Grafito D · cálidos"
-  },
-  "settings_theme_graphite_e": {
-    "en": "Graphite E · gems",
-    "ru": "Графит Д · самоцветы",
-    "de": "Graphit E · Edelsteine",
-    "fr": "Graphite E · gemmes",
-    "es": "Grafito E · gemas"
-  },
   "settings_theme_plum": {
     "en": "Plum",
     "ru": "Слива",

@@ -539,12 +539,13 @@ private fun CurrencyCardRow(
     goldPieces: Int,
     onClick: () -> Unit
 ) {
-    val accent = LocalDesignTokens.current.colors.accent
+    val colors = LocalDesignTokens.current.colors
+    val accent = colors.accent
     StatCardRow {
         listOf(
-            Triple("stat_card_gold", goldPieces, CurrencyType.GOLD to accent.coinGold),
-            Triple("stat_card_silver", silverPieces, CurrencyType.SILVER to accent.coinSilver),
-            Triple("stat_card_copper", copperPieces, CurrencyType.COPPER to accent.coinCopper)
+            Triple("stat_card_gold", goldPieces, CurrencyType.GOLD to accent.bright),
+            Triple("stat_card_silver", silverPieces, CurrencyType.SILVER to colors.text.muted),
+            Triple("stat_card_copper", copperPieces, CurrencyType.COPPER to accent.fire)
         ).forEach { (label, amount, coin) ->
             MiniStatCard(
                 modifier = Modifier.weight(1f),
@@ -1227,7 +1228,7 @@ private fun InventoryItemRow(
                     .padding(start = 12.dp)
                     .weight(1f),
                 style = MaterialTheme.typography.bodyLarge,
-                color = if (item.isMagical) colors.accent.magical else colors.text.primary,
+                color = if (item.isMagical) colors.accent.magic else colors.text.primary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )

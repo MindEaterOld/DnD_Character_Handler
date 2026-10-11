@@ -39,7 +39,7 @@ fun LimitProgressBar(
             Text(
                 text = value,
                 style = MaterialTheme.typography.bodyLarge,
-                color = if (overLimit) colors.accent.dangerHpZero else colors.text.muted
+                color = if (overLimit) colors.accent.danger else colors.text.muted
             )
         }
         Canvas(
@@ -57,7 +57,7 @@ fun LimitProgressBar(
                 cap = StrokeCap.Round
             )
             drawLine(
-                color = if (overLimit) colors.accent.dangerHpZero else colors.text.muted,
+                color = if (overLimit) colors.accent.danger else colors.text.muted,
                 start = Offset(stroke / 2, center.y),
                 end = Offset((size.width - stroke) * filled + stroke / 2, center.y),
                 strokeWidth = stroke,

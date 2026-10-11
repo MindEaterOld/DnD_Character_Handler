@@ -103,9 +103,9 @@ internal fun AlignmentIcon(value: String, fallback: ImageVector, modifier: Modif
 private fun moralTint(moral: Moral): Color {
     val colors = LocalDesignTokens.current.colors
     return when (moral) {
-        Moral.GOOD -> colors.accent.hpTemporary
+        Moral.GOOD -> colors.accent.magic
         Moral.NEUTRAL -> colors.text.primary
-        Moral.EVIL -> colors.accent.dangerHpZero
+        Moral.EVIL -> colors.accent.danger
     }
 }
 

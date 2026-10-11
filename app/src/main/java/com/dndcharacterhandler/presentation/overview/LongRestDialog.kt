@@ -59,7 +59,7 @@ internal fun LongRestDialog(
                     ExhaustionIcon,
                     text("condition_exhaustion"),
                     restChange(character.exhaustion, character.exhaustion - 1),
-                    colors.accent.damageFire
+                    colors.accent.fire
                 )
             )
         }
@@ -73,7 +73,7 @@ internal fun LongRestDialog(
                     Icons.Outlined.HealthAndSafety,
                     text("overview_long_rest_temporary"),
                     restChange(character.temporaryHp, 0),
-                    colors.accent.hpTemporary
+                    colors.accent.magic
                 )
             )
         }

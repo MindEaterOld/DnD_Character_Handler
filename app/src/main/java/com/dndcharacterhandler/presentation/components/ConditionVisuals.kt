@@ -38,5 +38,5 @@ val Condition.nameKey: String get() = "condition_$key"
 @Composable
 fun Condition.accent(): Color {
     val colors = LocalDesignTokens.current.colors
-    return if (this == Condition.INVISIBLE) colors.accent.hpTemporary else colors.accent.dangerHpZero
+    return if (this == Condition.INVISIBLE) colors.accent.magic else colors.accent.danger
 }
