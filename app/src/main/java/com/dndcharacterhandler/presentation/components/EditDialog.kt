@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.MaterialTheme
@@ -31,9 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.unit.dp
 import com.dndcharacterhandler.presentation.localization.text
-import com.dndcharacterhandler.presentation.theme.FrameStyle
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
-import com.dndcharacterhandler.presentation.theme.LocalThemeLook
 
 /**
  * The app's pop-up: the title with a cross in the corner (closing without saving, no Cancel
@@ -47,8 +44,8 @@ import com.dndcharacterhandler.presentation.theme.LocalThemeLook
  * [scrollable] false for content that scrolls by itself (a LazyColumn). [titleActions] sit before
  * the cross (the dice picker's skin button); [titleLeading] before the title (a back arrow).
  *
- * Its title is in the app's serif (`titleLarge`), as the sheet's ([EditSheet]); in Engraving it is an etched panel
- * with cut corners (owner's choice from boards, 2026-10-07: P1).
+ * Its title is in the app's serif (`titleLarge`), as the sheet's ([EditSheet]) (owner's choice from boards,
+ * 2026-10-07: P1).
  */
 @Composable
 fun EditDialog(
@@ -66,18 +63,11 @@ fun EditDialog(
     content: @Composable ColumnScope.() -> Unit
 ) {
     val colors = LocalDesignTokens.current.colors
-    val etched = LocalThemeLook.current.frames == FrameStyle.ETCHED
     var confirmingDelete by remember { mutableStateOf(false) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        // In Engraving the pop-up is an etched panel: its corners cut, its line drawn over its edge.
-        modifier = modifier.then(
-            if (etched) Modifier.drawWithContent {
-                drawContent()
-                drawEngravedFrame(colors.border.panel)
-            } else Modifier
-        ),
-        shape = if (etched) CutCornerShape(EtchedCornerCut) else AlertDialogDefaults.shape,
+        modifier = modifier,
+        shape = AlertDialogDefaults.shape,
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 titleLeading?.invoke()

@@ -44,8 +44,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
-import com.dndcharacterhandler.presentation.theme.FrameStyle
-import com.dndcharacterhandler.presentation.theme.LocalThemeLook
 
 /** Every stat card is this tall, its label on the border included. */
 val MiniStatCardHeight = 80.dp
@@ -104,7 +102,6 @@ fun BorderLabelCard(
     content: @Composable BoxScope.() -> Unit
 ) {
     // The label's box in the card's coordinates: the border is cut there.
-    val etched = LocalThemeLook.current.frames == FrameStyle.ETCHED
     var notch by remember { mutableStateOf(Rect.Zero) }
     Layout(
         modifier = modifier.drawWithContent {
@@ -113,29 +110,24 @@ fun BorderLabelCard(
             val top = notch.center.y
             val radius = cornerRadius.toPx()
             drawRoundRect(
-                // Keep the dragon quiet behind values when panels scroll over the hero artwork.
-                color = if (etched) fill.copy(alpha = 1f) else fill,
+                color = fill,
                 topLeft = Offset(0f, top),
                 size = Size(size.width, size.height - top),
                 cornerRadius = CornerRadius(radius)
             )
             val frame: () -> Unit = {
                 clipRect(left = notch.left, top = 0f, right = notch.right, bottom = top + stroke, clipOp = ClipOp.Difference) {
-                    if (etched) {
-                        drawEngravedFrame(line, top)
-                    } else {
-                        drawRoundRect(
-                            color = line,
-                            topLeft = Offset(stroke / 2, top + stroke / 2),
-                            size = Size(size.width - stroke, size.height - top - stroke),
-                            cornerRadius = CornerRadius(radius - stroke / 2),
-                            style = Stroke(width = stroke)
-                        )
-                    }
+                    drawRoundRect(
+                        color = line,
+                        topLeft = Offset(stroke / 2, top + stroke / 2),
+                        size = Size(size.width - stroke, size.height - top - stroke),
+                        cornerRadius = CornerRadius(radius - stroke / 2),
+                        style = Stroke(width = stroke)
+                    )
                 }
                 if (notchMarks) {
                     val half = 3.5.dp.toPx()
-                    val y = top + if (etched) 1.dp.toPx() else stroke / 2
+                    val y = top + stroke / 2
                     listOf(notch.left, notch.right).forEach { x ->
                         val diamond = Path().apply {
                             moveTo(x, y - half)

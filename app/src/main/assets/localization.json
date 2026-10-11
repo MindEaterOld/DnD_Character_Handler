@@ -146,12 +146,103 @@
     "fr": "Classique",
     "es": "Clásico"
   },
-  "settings_theme_engraved": {
-    "en": "Engraving",
-    "ru": "Гравюра",
-    "de": "Kupferstich",
-    "fr": "Gravure",
-    "es": "Grabado"
+  "settings_theme_sepia": {
+    "en": "Sepia",
+    "ru": "Сепия",
+    "de": "Sepia",
+    "fr": "Sépia",
+    "es": "Sepia"
+  },
+  "settings_theme_graphite": {
+    "en": "Graphite",
+    "ru": "Графит",
+    "de": "Graphit",
+    "fr": "Graphite",
+    "es": "Grafito"
+  },
+  "settings_theme_midnight": {
+    "en": "Midnight",
+    "ru": "Полночь",
+    "de": "Mitternacht",
+    "fr": "Minuit",
+    "es": "Medianoche"
+  },
+  "settings_theme_wine": {
+    "en": "Wine",
+    "ru": "Вино",
+    "de": "Wein",
+    "fr": "Vin",
+    "es": "Vino"
+  },
+  "settings_theme_ash": {
+    "en": "Ash",
+    "ru": "Пепел",
+    "de": "Asche",
+    "fr": "Cendre",
+    "es": "Ceniza"
+  },
+  "settings_theme_umber": {
+    "en": "Umber",
+    "ru": "Умбра",
+    "de": "Umbra",
+    "fr": "Terre d'ombre",
+    "es": "Sombra"
+  },
+  "settings_theme_bronze": {
+    "en": "Bronze",
+    "ru": "Бронза",
+    "de": "Bronze",
+    "fr": "Bronze",
+    "es": "Bronce"
+  },
+  "settings_theme_olive": {
+    "en": "Olive",
+    "ru": "Олива",
+    "de": "Oliv",
+    "fr": "Olive",
+    "es": "Oliva"
+  },
+  "settings_theme_moss": {
+    "en": "Moss",
+    "ru": "Мох",
+    "de": "Moos",
+    "fr": "Mousse",
+    "es": "Musgo"
+  },
+  "settings_theme_teal": {
+    "en": "Deep sea",
+    "ru": "Морская глубь",
+    "de": "Tiefsee",
+    "fr": "Abysses",
+    "es": "Abismo"
+  },
+  "settings_theme_steel": {
+    "en": "Steel",
+    "ru": "Сталь",
+    "de": "Stahl",
+    "fr": "Acier",
+    "es": "Acero"
+  },
+  "settings_theme_sapphire": {
+    "en": "Sapphire",
+    "ru": "Сапфир",
+    "de": "Saphir",
+    "fr": "Saphir",
+    "es": "Zafiro"
+  },
+  "settings_theme_indigo": {
+    "en": "Indigo",
+    "ru": "Индиго",
+    "de": "Indigo",
+    "fr": "Indigo",
+    "es": "Índigo"
+  },
+  "settings_theme_plum": {
+    "en": "Plum",
+    "ru": "Слива",
+    "de": "Pflaume",
+    "fr": "Prune",
+    "es": "Ciruela"
   },
   "drawer_level": {
     "en": "Level %1$s",

@@ -14,9 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.dndcharacterhandler.presentation.theme.FrameStyle
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
-import com.dndcharacterhandler.presentation.theme.LocalThemeLook
 
 /**
  * A frame without a label around a column of rows: the sheet's panels (the proficiencies, the defenses). A
@@ -33,25 +31,19 @@ fun OutlinedPanel(
     clip: Boolean = true,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    val etched = LocalThemeLook.current.frames == FrameStyle.ETCHED
     Column(
         modifier = modifier
             .drawBehind {
                 val stroke = 1.dp.toPx()
                 val radius = cornerRadius.toPx()
-                // Keep the dragon quiet behind values, as BorderLabelCard does.
-                drawRoundRect(color = if (etched) fill.copy(alpha = 1f) else fill, cornerRadius = CornerRadius(radius))
-                if (etched) {
-                    drawEngravedFrame(border)
-                } else {
-                    drawRoundRect(
-                        color = border,
-                        topLeft = Offset(stroke / 2, stroke / 2),
-                        size = Size(size.width - stroke, size.height - stroke),
-                        cornerRadius = CornerRadius(radius - stroke / 2),
-                        style = Stroke(width = stroke)
-                    )
-                }
+                drawRoundRect(color = fill, cornerRadius = CornerRadius(radius))
+                drawRoundRect(
+                    color = border,
+                    topLeft = Offset(stroke / 2, stroke / 2),
+                    size = Size(size.width - stroke, size.height - stroke),
+                    cornerRadius = CornerRadius(radius - stroke / 2),
+                    style = Stroke(width = stroke)
+                )
             }
             .then(if (clip) Modifier.clip(RoundedCornerShape(cornerRadius)) else Modifier),
         content = content

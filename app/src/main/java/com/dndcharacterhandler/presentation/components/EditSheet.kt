@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -23,12 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
-import com.dndcharacterhandler.presentation.theme.FrameStyle
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
-import com.dndcharacterhandler.presentation.theme.LocalThemeLook
-
-/** The cut of an etched panel's corners: the pop-up's and the sheet's in Engraving, as its frame draws them. */
-internal val EtchedCornerCut = 6.dp
 
 /**
  * The app's sheet from the bottom (owner's choice from boards, 2026-10-07: S3): for what is browsed and ticked — a
@@ -36,8 +30,7 @@ internal val EtchedCornerCut = 6.dp
  * ([EditDialog]) staying put, the content under it scrolling with soft edges ([fadingEdges]). No buttons: what is ticked applies at once, so there is
  * nothing to save, and no cross — a swipe down, a tap above it or Back closes it (the handle says so to TalkBack);
  * it never takes the whole screen, so there is always room above it to tap.
- * The pop-up's colour and corners; in Engraving an etched panel, its top corners cut, its sides running off the
- * screen.
+ * The pop-up's colour and corners.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,23 +40,10 @@ fun EditSheet(
     content: @Composable ColumnScope.() -> Unit
 ) {
     val colors = LocalDesignTokens.current.colors
-    val etched = LocalThemeLook.current.frames == FrameStyle.ETCHED
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        modifier = if (etched) {
-            Modifier.drawWithContent {
-                drawContent()
-                drawEngravedFrame(colors.border.panel, openBottom = true)
-            }
-        } else {
-            Modifier
-        },
-        shape = if (etched) {
-            CutCornerShape(topStart = EtchedCornerCut, topEnd = EtchedCornerCut)
-        } else {
-            RoundedCornerShape(topStart = SheetCornerRadius, topEnd = SheetCornerRadius)
-        },
+        shape = RoundedCornerShape(topStart = SheetCornerRadius, topEnd = SheetCornerRadius),
         containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
         dragHandle = { BottomSheetDefaults.DragHandle(color = colors.border.default) }
     ) {

@@ -43,8 +43,6 @@ import androidx.compose.ui.unit.dp
 import com.dndcharacterhandler.presentation.AppScreen
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
-import com.dndcharacterhandler.presentation.theme.FrameStyle
-import com.dndcharacterhandler.presentation.theme.LocalThemeLook
 
 /** The air round the tab bar's plate, over it and under it. */
 val TabBarGap = 8.dp
@@ -71,8 +69,7 @@ private val TabSize = TabBarHeight - TabInset * 2
  * screens' own layer, laid at [backdropOrigin] in the window. Android before 12 can't blur: the tint alone. In Classic the
  * plate is a pill and the picked tab a circle lit in gold at 12 %, the end tabs' circles concentric with its half-circle
  * ends (owner's choice from boards, 2026-10-09); the picked icon gold, the others dimmed to `text.subtle`, so the pick
- * stands out by shape, hue and brightness. With etched frames the plate keeps its cut corners and the picked tab is
- * framed like the portrait's crest, lit the same.
+ * stands out by shape, hue and brightness.
  */
 @Composable
 fun BottomNavigationBar(
@@ -86,7 +83,6 @@ fun BottomNavigationBar(
     // The tint over the blurred screens is the stat cards' fill (a veil); the picked tab's lamp is faint gold, as
     // what is on lights up (inspiration, the conditions).
     val alphas = LocalDesignTokens.current.alpha
-    val etched = LocalThemeLook.current.frames == FrameStyle.ETCHED
     val canBlur = backdrop != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     var plateOrigin by remember { mutableStateOf(Offset.Zero) }
     Surface(
@@ -95,7 +91,7 @@ fun BottomNavigationBar(
             .navigationBarsPadding()
             .padding(horizontal = 14.dp, vertical = TabBarGap)
             .height(TabBarHeight),
-        shape = if (etched) RoundedCornerShape(12.dp) else RoundedCornerShape(50),
+        shape = RoundedCornerShape(50),
         color = Color.Transparent,
         border = BorderStroke(1.dp, colors.border.muted)
     ) {
@@ -129,9 +125,8 @@ fun BottomNavigationBar(
                 Box(
                     modifier = Modifier
                         .size(TabSize)
-                        .clip(if (etched) EngravedPortraitShape else CircleShape)
+                        .clip(CircleShape)
                         .background(if (selected) gold.copy(alpha = alphas.faint) else Color.Transparent)
-                        .then(if (etched && selected) Modifier.engravedBorder(colors.accent.inspiration) else Modifier)
                         .selectable(selected = selected, role = Role.Tab, onClick = { onNavigate(screen) }),
                     contentAlignment = Alignment.Center
                 ) {

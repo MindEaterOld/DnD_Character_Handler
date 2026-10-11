@@ -2628,12 +2628,6 @@ private fun ClassicOverviewRussianPreview() {
     OverviewPreviewContent(currentHp = 8, temporaryHp = 0, russian = true)
 }
 
-@Preview(name = "Engraved overview · Russian", showBackground = true, showSystemUi = true, device = "spec:width=412dp,height=915dp")
-@Composable
-private fun EngravedOverviewRussianPreview() {
-    OverviewPreviewContent(currentHp = 8, temporaryHp = 0, russian = true, theme = AppTheme.ENGRAVED)
-}
-
 /** At 0 hit points, the death saving throws' tray open: one success, two failures. */
 @Preview(showBackground = true, showSystemUi = true, device = "spec:width=412dp,height=915dp")
 @Composable

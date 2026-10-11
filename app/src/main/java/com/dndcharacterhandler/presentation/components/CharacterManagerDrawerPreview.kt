@@ -48,13 +48,6 @@ fun CharacterManagerDrawerPreview() = DrawerPreview(
     CharacterManagerUiState(characters = previewCharacters, selectedCharacterId = 1, isLoaded = true)
 )
 
-@Preview(name = "Character Manager Drawer — engraving", showBackground = true, showSystemUi = true, device = "spec:width=412dp,height=915dp")
-@Composable
-fun CharacterManagerDrawerEngravedPreview() = DrawerPreview(
-    CharacterManagerUiState(characters = previewCharacters, selectedCharacterId = 1, isLoaded = true),
-    theme = AppTheme.ENGRAVED
-)
-
 /** The first launch: no characters, so only "New Character" and "Import", and no close button. */
 @Preview(name = "Character Manager Drawer — no characters", showBackground = true, showSystemUi = true, device = "spec:width=412dp,height=915dp")
 @Composable

@@ -141,7 +141,7 @@ EditDialog(title, onDismiss, onConfirm?, onDelete?)
 
 Строки в превью — рукописная карта `LocalizedStrings(language, mapOf(...))`: новый ключ экрана добавлять и туда.
 
-Темы (2026-10-05): `DnDTheme(theme)` в превью — палитра и вид темы; что тема рисует иначе — `ThemeLook` (`LocalThemeLook`: `frames`, `portrait`, `xpBar`), его читают компоненты, а не экраны. У обзора превью в обеих темах (`ClassicOverviewRussianPreview`, `EngravedOverviewRussianPreview`).
+Темы (2026-10-05; с 2026-10-11 «Гравюры» нет — только палитры: «Классика» и 14 строгих на пробу): `DnDTheme(theme)` в превью — палитра темы; в `ThemeLook` осталось лишь место под фон-иллюстрацию (`backdrop`, у всех `null`), его читают компоненты, а не экраны. У обзора превью в обеих темах (`ClassicOverviewRussianPreview`, `EngravedOverviewRussianPreview`).
 
 Общие части, добавленные 2026-10-04:
 - `components/TabIcons.kt` — `TabIconOverview`, `TabIconCombat`, `TabIconInventory`, `TabIconSpells`, `TabIconFeatures`, `TabIconBiography`: иконки вкладок нижней панели (щит с фигурой, скрещённые мечи, мешок с верёвкой, волшебная палочка, розетка с лентами, свиток), залитые, на сетке 24. Почти все из Material Design Icons; палочка — Material Symbols Rounded `wand_stars`; мешок — тело MDI `sack` с нашей горловиной и верёвкой, вырезанной зазором (собран булевыми операциями над контурами).

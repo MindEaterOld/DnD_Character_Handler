@@ -256,7 +256,3 @@ private fun GameSystemCardPreview(theme: AppTheme) {
 @Preview(name = "Game system card", widthDp = 412, heightDp = 560)
 @Composable
 private fun GameSystemCardClassicPreview() = GameSystemCardPreview(AppTheme.CLASSIC)
-
-@Preview(name = "Game system card, engraving", widthDp = 412, heightDp = 560)
-@Composable
-private fun GameSystemCardEngravedPreview() = GameSystemCardPreview(AppTheme.ENGRAVED)
