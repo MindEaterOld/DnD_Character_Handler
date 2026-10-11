@@ -1,5 +1,13 @@
 package com.dndcharacterhandler.presentation.attributes
 
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
 import com.dndcharacterhandler.presentation.components.isBetter
 import com.dndcharacterhandler.presentation.components.isWorse
 import com.dndcharacterhandler.presentation.components.fails
@@ -1364,6 +1372,45 @@ private val AbilityCardArtFade = 42.dp
 private const val AbilityCardRuleShare = .76f
 
 /**
+ * An ability card's art out of focus (owner's choice from boards, 2026-10-11: «Ярче 2» — greyscale alone kept its
+ * whites and blacks, which still caught the eye): its light mapped between [dark] — the card's own colour, so its
+ * shadows are the screen's — and [RestingArtLight] of the way to [light], and the whole at [RestingArtAlpha]; at [glow]
+ * 1 the art as it is, eased between. Read while drawing, so the scroll recomposes nothing.
+ */
+private fun Modifier.restingArt(dark: Color, light: Color, glow: () -> Float): Modifier = drawWithContent {
+    val t = glow().coerceIn(0f, 1f)
+    if (t >= 1f) {
+        drawContent()
+        return@drawWithContent
+    }
+    val top = lerp(dark, light, RestingArtLight)
+    val toned = toneMatrix(dark, top)
+    val identity = ColorMatrix().values
+    val mixed = FloatArray(20) { i -> toned[i] + (identity[i] - toned[i]) * t }
+    val paint = Paint().apply {
+        colorFilter = ColorFilter.colorMatrix(ColorMatrix(mixed))
+        alpha = RestingArtAlpha + (1f - RestingArtAlpha) * t
+    }
+    drawIntoCanvas { canvas ->
+        canvas.saveLayer(Rect(Offset.Zero, size), paint)
+        drawContent()
+        canvas.restore()
+    }
+}
+
+/** How far the art's light goes from the card's colour toward `text.subtle` out of focus, and the art's opacity. */
+private const val RestingArtLight = 0.8f
+private const val RestingArtAlpha = 0.5f
+
+/** A colour matrix taking a picture's luminance to the line from [dark] to [light]: a duotone. */
+private fun toneMatrix(dark: Color, light: Color): FloatArray {
+    val lum = floatArrayOf(0.2126f, 0.7152f, 0.0722f)
+    fun row(d: Float, l: Float) = floatArrayOf(lum[0] * (l - d), lum[1] * (l - d), lum[2] * (l - d), 0f, d * 255f)
+    return row(dark.red, light.red) + row(dark.green, light.green) + row(dark.blue, light.blue) +
+        floatArrayOf(0f, 0f, 0f, 1f, 0f)
+}
+
+/**
  * How lit an ability card is by where it stands on the screen: 0 while its centre is at the screen's foot or below,
  * 1 from the screen's middle up, eased in between.
  */
@@ -1443,8 +1490,10 @@ private fun abilityArt(type: AbilityType): Int = when (type) {
  *
  * Grey until it nears the screen's middle (owner's wish, 2026-10-10: the gold cards drew the eye down from the
  * overview's first screen): the frame, its diamonds and the rule in the stat frames' grey (`border.miniCard`), the art
- * without its colours; as the card's centre rises from the screen's foot to its middle they warm to gold and the art to
- * its colours, and stay so above it ([glowFromScreenPosition]).
+ * in the background's tones and at half ([restingArt]); as the card's centre rises from the screen's foot to its middle
+ * they warm to gold and the art to its colours, and stay so above it ([glowFromScreenPosition]). The card has no fill
+ * of its own under the art: the stat cards' (`surface.card` at 70 % over the screen — its colour within a hair), so the
+ * faded art melts into the screen, not into a darker plate (owner, 2026-10-11).
  */
 @Composable
 private fun AbilityScoreCard(
@@ -1488,7 +1537,6 @@ private fun AbilityScoreCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(AbilityCardAspect)
-                .background(colors.surface.card)
         ) {
             Image(
                 painter = painterResource(abilityArt(score.type)),
@@ -1496,19 +1544,22 @@ private fun AbilityScoreCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight()
-                    .saturation { glow }
+                    .restingArt(colors.surface.card, colors.text.subtle) { glow }
+                    // The foot melts away (an alpha mask), into the card's fill under it.
+                    .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
                     .drawWithContent {
                         drawContent()
                         val fade = AbilityCardArtFade.toPx()
                         drawRect(
                             Brush.verticalGradient(
-                                0f to Color.Transparent,
-                                1f to colors.surface.card,
+                                0f to Color.Black,
+                                1f to Color.Transparent,
                                 startY = size.height - fade,
                                 endY = size.height
                             ),
                             topLeft = Offset(0f, size.height - fade),
-                            size = Size(size.width, fade)
+                            size = Size(size.width, fade),
+                            blendMode = BlendMode.DstIn
                         )
                     },
                 contentScale = ContentScale.Crop,
