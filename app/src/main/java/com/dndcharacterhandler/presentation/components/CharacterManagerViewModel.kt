@@ -29,7 +29,7 @@ data class CharacterManagerUiState(
     val characters: List<CharacterBundle> = emptyList(),
     val selectedCharacterId: Long? = null,
     val language: AppLanguage = AppLanguage.ENGLISH,
-    val theme: AppTheme = AppTheme.CLASSIC,
+    val theme: AppTheme = AppTheme.DEFAULT,
     /** The character list has been read once: an empty [characters] then means there are none. */
     val isLoaded: Boolean = false
 )

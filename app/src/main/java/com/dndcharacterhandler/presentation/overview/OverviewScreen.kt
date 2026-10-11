@@ -2649,7 +2649,7 @@ private fun OverviewPreviewContent(
     deathSaveSuccesses: Int = 0,
     deathSaveFailures: Int = 0,
     russian: Boolean = false,
-    theme: AppTheme = AppTheme.CLASSIC
+    theme: AppTheme = AppTheme.DEFAULT
 ) {
     val previewStrings = LocalizedStrings(
         language = AppLanguage.ENGLISH,

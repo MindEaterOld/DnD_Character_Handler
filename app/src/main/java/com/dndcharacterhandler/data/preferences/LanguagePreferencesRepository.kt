@@ -28,9 +28,9 @@ class LanguagePreferencesRepository(private val context: Context) {
         preferences[selectedCharacterKey]
     }
 
-    /** The app's look; the classic one until the player picks another. */
+    /** The app's look; Graphite until the player picks another (a key the list lacks reads as it too). */
     val theme: Flow<AppTheme> = context.dataStore.data.map { preferences ->
-        preferences[themeKey]?.let { key -> AppTheme.entries.firstOrNull { it.key == key } } ?: AppTheme.CLASSIC
+        preferences[themeKey]?.let { key -> AppTheme.entries.firstOrNull { it.key == key } } ?: AppTheme.DEFAULT
     }
 
     suspend fun setTheme(theme: AppTheme) {

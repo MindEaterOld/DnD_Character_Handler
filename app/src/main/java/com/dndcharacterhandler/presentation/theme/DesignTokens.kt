@@ -174,51 +174,51 @@ data class ThemePalette(
     val material: ColorScheme
 )
 
-/** Every theme's palette and the type scale they share; a theme the file lacks gets the classic palette. */
+/** Every theme's palette and the type scale they share; a theme the file lacks gets the default one's (Graphite). */
 data class DesignTokenSet(
     val typography: DesignTypographyTokens,
     val palettes: Map<AppTheme, ThemePalette>,
     val swatches: SwatchTokens = SwatchTokens.Empty,
     val alpha: AlphaTokens = AlphaTokens()
 ) {
-    fun palette(theme: AppTheme): ThemePalette = palettes[theme] ?: palettes[AppTheme.CLASSIC] ?: DefaultThemePalette
+    fun palette(theme: AppTheme): ThemePalette = palettes[theme] ?: palettes[AppTheme.DEFAULT] ?: DefaultThemePalette
 
     fun tokens(theme: AppTheme): DesignTokens = DesignTokens(typography, palette(theme).colors, swatches, alpha)
 }
 
 val DefaultDesignColors = DesignColorTokens(
     text = TextColorTokens(
-        primary = Color(0xFFF7F2EA),
-        warmPrimary = Color(0xFFFFF6EA),
-        action = Color(0xFFF1ECE5),
-        muted = Color(0xFFD2CAC2),
-        subtle = Color(0xFFAAA29A),
-        label = Color(0xFFC2BBB3),
-        miniLabel = Color(0xFFBEB6AE),
-        icon = Color(0xFFF3EEE6)
+        primary = Color(0xFFF1EFEC),
+        warmPrimary = Color(0xFFF1EFEC),
+        action = Color(0xFFF1EFEC),
+        muted = Color(0xFFCACACD),
+        subtle = Color(0xFF9F9FA4),
+        label = Color(0xFFCACACD),
+        miniLabel = Color(0xFFCACACD),
+        icon = Color(0xFFF1EFEC)
     ),
     background = BackgroundColorTokens(
-        radialStart = Color(0xFF1A161D),
-        radialMiddle = Color(0xFF0E0B11),
-        radialEnd = Color(0xFF09070D)
+        radialStart = Color(0xFF151517),
+        radialMiddle = Color(0xFF0E0E10),
+        radialEnd = Color(0xFF09090A)
     ),
     surface = SurfaceColorTokens(
-        card = Color(0xFF17141B),
-        button = Color(0xFF3B3840),
-        option = Color(0xFF1A171D),
-        selected = Color(0xFF3A3244),
-        inspiration = Color(0xFF2A2419),
-        portrait = Color(0xFF141118),
-        portraitFallbackStart = Color(0xFF3B3840),
-        portraitFallbackMiddle = Color(0xFF18151C),
-        portraitFallbackEnd = Color(0xFF0F0C12)
+        card = Color(0xFF19191B),
+        button = Color(0xFF39393D),
+        option = Color(0xFF19191B),
+        selected = Color(0xFF242427),
+        inspiration = Color(0xFF242427),
+        portrait = Color(0xFF151517),
+        portraitFallbackStart = Color(0xFF39393D),
+        portraitFallbackMiddle = Color(0xFF19191B),
+        portraitFallbackEnd = Color(0xFF0E0E10)
     ),
     border = BorderColorTokens(
-        default = Color(0x50FFFFFF),
-        panel = Color(0x44FFFFFF),
-        miniCard = Color(0x42FFFFFF),
-        selected = Color(0x66FFF6EA),
-        muted = Color(0x30FFFFFF)
+        default = Color(0x4DF1EFEC),
+        panel = Color(0x4DF1EFEC),
+        miniCard = Color(0x4DF1EFEC),
+        selected = Color(0x80F1EFEC),
+        muted = Color(0x26F1EFEC)
     ),
     accent = AccentColorTokens(
         inspiration = Color(0xFFFFD86B),
@@ -237,18 +237,18 @@ val DefaultDesignColors = DesignColorTokens(
         damageOther = Color(0xFFD5C6B2)
     ),
     progress = ProgressColorTokens(
-        xpFill = Color(0xFFD7D1CC),
-        xpTrack = Color(0x30FFFFFF)
+        xpFill = Color(0xFFCACACD),
+        xpTrack = Color(0x26F1EFEC)
     ),
     ornament = OrnamentColorTokens(
-        outer = Color(0x20FFFFFF),
-        middle = Color(0x80C7C1BB),
-        innerGlow = Color(0x42FFFFFF),
-        inner = Color(0xFFE9E2D9),
-        shadow = Color(0x14000000),
-        dropShadow = Color(0x8C000000),
-        stroke = Color(0x55A19892),
-        dot = Color(0xFF2D2730)
+        outer = Color(0x26F1EFEC),
+        middle = Color(0x80CACACD),
+        innerGlow = Color(0x4DF1EFEC),
+        inner = Color(0xFFCACACD),
+        shadow = Color(0x26000000),
+        dropShadow = Color(0x80000000),
+        stroke = Color(0x4D9F9FA4),
+        dot = Color(0xFF242427)
     )
 )
 
@@ -275,7 +275,7 @@ val DefaultDesignTokens = DesignTokens(
     colors = DefaultDesignColors
 )
 
-/** The classic Material scheme, should design_tokens.json fail to load. */
+/** The default theme's (Graphite's) Material scheme, should design_tokens.json fail to load. */
 val DefaultMaterialColors: ColorScheme = darkColorScheme(
     primary = Color(0xFFC6A36C),
     onPrimary = Color(0xFF22170C),
@@ -283,21 +283,21 @@ val DefaultMaterialColors: ColorScheme = darkColorScheme(
     onPrimaryContainer = Color(0xFFF3DDB8),
     secondary = Color(0xFF9E7B5A),
     onSecondary = Color(0xFF21150C),
-    background = Color(0xFF120E18),
-    onBackground = Color(0xFFF0E7DA),
-    surface = Color(0xFF1A1521),
-    onSurface = Color(0xFFF0E7DA),
-    surfaceVariant = Color(0xFF2A2231),
-    onSurfaceVariant = Color(0xFFCABFB3),
-    outline = Color(0xFF706359),
-    outlineVariant = Color(0xFF423830)
+    background = Color(0xFF0E0E10),
+    onBackground = Color(0xFFF1EFEC),
+    surface = Color(0xFF19191B),
+    onSurface = Color(0xFFF1EFEC),
+    surfaceVariant = Color(0xFF242427),
+    onSurfaceVariant = Color(0xFFCACACD),
+    outline = Color(0xFF6C6C71),
+    outlineVariant = Color(0xFF39393D)
 )
 
 val DefaultThemePalette = ThemePalette(DefaultDesignColors, DefaultMaterialColors)
 
 val DefaultDesignTokenSet = DesignTokenSet(
     typography = DefaultDesignTokens.typography,
-    palettes = mapOf(AppTheme.CLASSIC to DefaultThemePalette)
+    palettes = mapOf(AppTheme.DEFAULT to DefaultThemePalette)
 )
 
 val LocalDesignTokens = staticCompositionLocalOf { DefaultDesignTokens }

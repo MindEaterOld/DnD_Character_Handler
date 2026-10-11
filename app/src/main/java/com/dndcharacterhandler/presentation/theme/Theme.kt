@@ -45,7 +45,7 @@ private val DnDShapes = Shapes()
  * [LocalThemeBackdrop]. The type scale is the same in every theme.
  */
 @Composable
-fun DnDTheme(theme: AppTheme = AppTheme.CLASSIC, content: @Composable () -> Unit) {
+fun DnDTheme(theme: AppTheme = AppTheme.DEFAULT, content: @Composable () -> Unit) {
     val context = LocalContext.current
     val tokenSet = remember(context) { loadDesignTokenSet(context) }
     val designTokens = remember(tokenSet, theme) { tokenSet.tokens(theme) }

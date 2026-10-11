@@ -255,4 +255,4 @@ private fun GameSystemCardPreview(theme: AppTheme) {
 
 @Preview(name = "Game system card", widthDp = 412, heightDp = 560)
 @Composable
-private fun GameSystemCardClassicPreview() = GameSystemCardPreview(AppTheme.CLASSIC)
+private fun GameSystemCardDefaultPreview() = GameSystemCardPreview(AppTheme.DEFAULT)

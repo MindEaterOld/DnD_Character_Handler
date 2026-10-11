@@ -16,7 +16,7 @@ import com.dndcharacterhandler.presentation.theme.DnDTheme
 
 /** The drawer in [theme] with the app's own Russian texts, listing [state]'s characters. */
 @Composable
-private fun DrawerPreview(state: CharacterManagerUiState, theme: AppTheme = AppTheme.CLASSIC, closable: Boolean = true) {
+private fun DrawerPreview(state: CharacterManagerUiState, theme: AppTheme = AppTheme.DEFAULT, closable: Boolean = true) {
     val context = LocalContext.current
     val strings = remember { LocalizationRepository(context).getStrings(AppLanguage.RUSSIAN) }
     CompositionLocalProvider(LocalStrings provides strings) {

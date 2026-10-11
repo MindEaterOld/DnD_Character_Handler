@@ -28,7 +28,7 @@ fun SettingsDialog(
     currentLanguage: AppLanguage,
     onLanguageSelected: (AppLanguage) -> Unit,
     onDismiss: () -> Unit,
-    currentTheme: AppTheme = AppTheme.CLASSIC,
+    currentTheme: AppTheme = AppTheme.DEFAULT,
     onThemeSelected: (AppTheme) -> Unit = {}
 ) {
     val colors = LocalDesignTokens.current.colors

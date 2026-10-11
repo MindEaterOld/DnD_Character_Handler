@@ -27,8 +27,8 @@ class DesignTokenThemesTest {
         themes.optObject(theme.key)?.optObject("colors") ?: error("design_tokens.json has no theme \"${theme.key}\"")
 
     @Test
-    fun everyThemeHasTheClassicRoles() {
-        val classic = colors(AppTheme.CLASSIC)
+    fun everyThemeHasTheDefaultRoles() {
+        val classic = colors(AppTheme.DEFAULT)
         val classicApp = classic.optObject("app")!!
         val problems = mutableListOf<String>()
         AppTheme.entries.forEach { theme ->
