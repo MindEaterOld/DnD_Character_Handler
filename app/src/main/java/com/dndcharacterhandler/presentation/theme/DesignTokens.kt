@@ -53,11 +53,9 @@ data class TextColorTokens(
     val icon: Color
 )
 
-/** Screen background (radial gradient stops). */
+/** The screens' background: one colour (owner, 2026-10-11 — before, a radial gradient of three). */
 data class BackgroundColorTokens(
-    val radialStart: Color,
-    val radialMiddle: Color,
-    val radialEnd: Color
+    val page: Color
 )
 
 /** Card / button / portrait surfaces. */
@@ -198,9 +196,7 @@ val DefaultDesignColors = DesignColorTokens(
         icon = Color(0xFFF1EFEC)
     ),
     background = BackgroundColorTokens(
-        radialStart = Color(0xFF151517),
-        radialMiddle = Color(0xFF0E0E10),
-        radialEnd = Color(0xFF09090A)
+        page = Color(0xFF0E0E10)
     ),
     surface = SurfaceColorTokens(
         card = Color(0xFF19191B),
@@ -418,9 +414,7 @@ private fun loadColorTokens(app: JsonObject?): DesignColorTokens {
             icon = text.colorToken("icon", defaults.text.icon)
         ),
         background = BackgroundColorTokens(
-            radialStart = background.colorToken("radialStart", defaults.background.radialStart),
-            radialMiddle = background.colorToken("radialMiddle", defaults.background.radialMiddle),
-            radialEnd = background.colorToken("radialEnd", defaults.background.radialEnd)
+            page = background.colorToken("page", defaults.background.page)
         ),
         surface = SurfaceColorTokens(
             card = surface.colorToken("card", defaults.surface.card),

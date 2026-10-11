@@ -154,7 +154,7 @@ internal fun LevelUpWizard(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(colors.background.radialEnd)
+            .background(colors.background.page)
             // Taps on empty space must not reach the screen underneath.
             .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {}
             .systemBarsPadding()

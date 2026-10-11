@@ -112,7 +112,7 @@ internal fun PortraitFramingDialog(
                 with(painter) { draw(pictureSize, colorFilter = Dimmed) }
             }
             // The window as the overview shows it: the background, the picture over it melting at its edges.
-            drawRect(colors.background.radialEnd, topLeft = frame.topLeft, size = frame.size)
+            drawRect(colors.background.page, topLeft = frame.topLeft, size = frame.size)
             drawIntoCanvas { it.saveLayer(frame, Paint()) }
             clipRect(frame.left, frame.top, frame.right, frame.bottom) {
                 translate(frame.left + placed.left, frame.top + placed.top) {

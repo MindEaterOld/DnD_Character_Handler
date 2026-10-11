@@ -1657,7 +1657,7 @@ private fun PortraitViewerContent(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(colors.background.radialEnd)
+            .background(colors.background.page)
     ) {
         AppImage(
             imageRef = portraitUri,

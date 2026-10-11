@@ -212,7 +212,7 @@ internal fun DiceWorkshopOverlay(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(colors.background.radialEnd)
+            .background(colors.background.page)
             .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {}
             .systemBarsPadding()
     ) {

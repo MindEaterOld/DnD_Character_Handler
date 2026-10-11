@@ -10,7 +10,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.drawscope.clipRect
@@ -21,9 +20,9 @@ import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 import com.dndcharacterhandler.presentation.theme.LocalThemeBackdrop
 
 /**
- * The app's background, the theme's backdrop over the whole window: the palette's radial gradient, or
- * the theme's illustration over its last stop. A screen draws only its own part of it, so it runs on
- * seamlessly into the app's own background under the bottom bar and the system bars.
+ * The app's background, the theme's backdrop over the whole window: the palette's one colour (`background.page`), or
+ * the theme's illustration over it. A screen draws only its own part of it, so it runs on seamlessly into the app's
+ * own background under the bottom bar and the system bars.
  */
 @Composable
 fun ScreenBackground(
@@ -32,7 +31,7 @@ fun ScreenBackground(
 ) {
     val colors = LocalDesignTokens.current.colors.background
     val veil = LocalDesignTokens.current.alpha.veil
-    // The theme's illustration over its last stop, or the radial gradient.
+    // The theme's illustration over the page's colour, or the colour alone.
     val illustration = LocalThemeBackdrop.current
     val root = LocalView.current
     // Where this box sits in the window.
@@ -42,8 +41,8 @@ fun ScreenBackground(
             .fillMaxSize()
             .onPlaced { origin = it.positionInRoot() }
             .drawBehind {
+                drawRect(colors.page)
                 if (illustration != null) {
-                    drawRect(colors.radialEnd)
                     clipRect {
                         translate(-origin.x, -origin.y) {
                             with(illustration) {
@@ -54,14 +53,6 @@ fun ScreenBackground(
                             }
                         }
                     }
-                } else {
-                    drawRect(
-                        Brush.radialGradient(
-                            colors = listOf(colors.radialStart, colors.radialMiddle, colors.radialEnd),
-                            center = Offset(root.width / 2f, root.height / 2f) - origin,
-                            radius = 1600f
-                        )
-                    )
                 }
             }
     ) {

@@ -155,9 +155,7 @@
             "icon": "#F1EFEC"
           },
           "background": {
-            "radialStart": "#151517",
-            "radialMiddle": "#0E0E10",
-            "radialEnd": "#09090A"
+            "page": "#0E0E10"
           },
           "surface": {
             "card": "#19191B",
@@ -248,9 +246,7 @@
             "icon": "#F0EFF0"
           },
           "background": {
-            "radialStart": "#141014",
-            "radialMiddle": "#0E0B0E",
-            "radialEnd": "#0A080A"
+            "page": "#0E0B0E"
           },
           "surface": {
             "card": "#181318",

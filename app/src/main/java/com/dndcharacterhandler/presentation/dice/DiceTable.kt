@@ -155,7 +155,7 @@ internal fun DiceTableOverlay(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(colors.background.radialEnd.copy(alpha = LocalDesignTokens.current.alpha.veil))
+            .background(colors.background.page.copy(alpha = LocalDesignTokens.current.alpha.veil))
     ) {
         DiceCanvas(
             state = state,
@@ -271,7 +271,7 @@ private fun DiceStatusPanel(
 @Composable
 private fun DiceCanvas(state: DiceTableState, skin: DiceLook, modifier: Modifier = Modifier) {
     val style = rememberDiceSkinStyle(skin)
-    val shadowColor = LocalDesignTokens.current.colors.background.radialEnd
+    val shadowColor = LocalDesignTokens.current.colors.background.page
     val numbers = rememberDieNumberText()
     val scratch = remember { DieDrawScratch() }
 

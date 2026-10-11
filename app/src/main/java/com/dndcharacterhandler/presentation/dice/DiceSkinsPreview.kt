@@ -47,7 +47,7 @@ fun DiceSkinsPreview() {
     DnDTheme {
         Column(
             modifier = Modifier
-                .background(LocalDesignTokens.current.colors.background.radialEnd)
+                .background(LocalDesignTokens.current.colors.background.page)
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {

@@ -84,12 +84,7 @@ fun CharacterManagerDrawer(
         modifier = Modifier
             .fillMaxHeight()
             .fillMaxWidth()
-            .background(
-                Brush.radialGradient(
-                    colors = listOf(colors.background.radialStart, colors.background.radialMiddle, colors.background.radialEnd),
-                    radius = 1300f
-                )
-            )
+            .background(colors.background.page)
             .statusBarsPadding()
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
