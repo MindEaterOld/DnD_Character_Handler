@@ -2020,9 +2020,11 @@ private fun HpStepButton(icon: ImageVector, description: String, enabled: Boolea
 }
 
 /**
- * What is left of the hit points: a bar on the experience's track, green as far as they go, the temporary ones blue
- * after, each part a capsule. The blue one starts under the green, so under the green's round end there is blue, not
- * the track (owner, 2026-10-11 — the two round ends left a gap of track between them).
+ * What is left of the hit points: a bar on the experience's track, the temporary ones blue after, each part a capsule.
+ * The blue one starts under the hit points' own, so under its round end there is blue, not the track (owner,
+ * 2026-10-11 — the two round ends left a gap of track between them). Their own part says how many are left (owner's
+ * choice from boards, 2026-10-12: Г): green over half, yellow (`accent.bright`) at half and under, red at a quarter and
+ * under; the number stays white (red at 0 only).
  */
 @Composable
 private fun HpBar(current: Int, temporary: Int, max: Int, width: Dp = HpBarWidth) {
@@ -2038,7 +2040,12 @@ private fun HpBar(current: Int, temporary: Int, max: Int, width: Dp = HpBarWidth
             val extra = (size.width * temporary / max).coerceAtMost(size.width - hp)
             if (extra > 0f) drawRoundRect(colors.accent.magic, Offset(0f, y), Size(hp + extra, h), corner)
         }
-        if (hp > 0f) drawRoundRect(colors.accent.heal, Offset(0f, y), Size(hp, h), corner)
+        val left = when {
+            current * 4 <= max -> colors.accent.danger
+            current * 2 <= max -> colors.accent.bright
+            else -> colors.accent.heal
+        }
+        if (hp > 0f) drawRoundRect(left, Offset(0f, y), Size(hp, h), corner)
     }
 }
 
