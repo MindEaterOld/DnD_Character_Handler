@@ -1107,6 +1107,7 @@
     "es": "Armas marciales"
   },
   "attributes_weapon_simple_short": {
+    "maxChars": 17,
     "en": "Simple",
     "ru": "Простое",
     "de": "Einfach",
@@ -1114,6 +1115,7 @@
     "es": "Sencillas"
   },
   "attributes_weapon_martial_short": {
+    "maxChars": 17,
     "en": "Martial",
     "ru": "Воинское",
     "de": "Kriegswaffe",
@@ -1254,6 +1256,7 @@
     "es": "Idioma propio"
   },
   "Light Armor": {
+    "maxChars": 17,
     "en": "Light Armor",
     "ru": "Легкая броня",
     "de": "Leichte Rüstung",
@@ -1261,13 +1264,15 @@
     "es": "Armadura ligera"
   },
   "Medium Armor": {
+    "maxChars": 17,
     "en": "Medium Armor",
     "ru": "Средняя броня",
-    "de": "Mittelschwere Rüstung",
-    "fr": "Armures intermédiaires",
-    "es": "Armadura intermedia"
+    "de": "Mittlere Rüstung",
+    "fr": "Armures interm.",
+    "es": "Armadura media"
   },
   "Heavy Armor": {
+    "maxChars": 17,
     "en": "Heavy Armor",
     "ru": "Тяжелая броня",
     "de": "Schwere Rüstung",
@@ -1275,6 +1280,7 @@
     "es": "Armadura pesada"
   },
   "Shields": {
+    "maxChars": 17,
     "en": "Shields",
     "ru": "Щиты",
     "de": "Schilde",
@@ -1282,6 +1288,7 @@
     "es": "Escudos"
   },
   "Club": {
+    "maxChars": 17,
     "en": "Club",
     "ru": "Дубинка",
     "de": "Knüppel",
@@ -1289,6 +1296,7 @@
     "es": "Clava"
   },
   "Dagger": {
+    "maxChars": 17,
     "en": "Dagger",
     "ru": "Кинжал",
     "de": "Dolch",
@@ -1296,6 +1304,7 @@
     "es": "Daga"
   },
   "Greatclub": {
+    "maxChars": 17,
     "en": "Greatclub",
     "ru": "Большая дубинка",
     "de": "Zweihandknüppel",
@@ -1303,6 +1312,7 @@
     "es": "Gran clava"
   },
   "Handaxe": {
+    "maxChars": 17,
     "en": "Handaxe",
     "ru": "Ручной топор",
     "de": "Handaxt",
@@ -1310,6 +1320,7 @@
     "es": "Hacha de mano"
   },
   "Javelin": {
+    "maxChars": 17,
     "en": "Javelin",
     "ru": "Метательное копье",
     "de": "Wurfspeer",
@@ -1317,6 +1328,7 @@
     "es": "Jabalina"
   },
   "Light Hammer": {
+    "maxChars": 17,
     "en": "Light Hammer",
     "ru": "Легкий молот",
     "de": "Leichter Hammer",
@@ -1324,6 +1336,7 @@
     "es": "Martillo ligero"
   },
   "Mace": {
+    "maxChars": 17,
     "en": "Mace",
     "ru": "Булава",
     "de": "Streitkolben",
@@ -1331,6 +1344,7 @@
     "es": "Maza"
   },
   "Quarterstaff": {
+    "maxChars": 17,
     "en": "Quarterstaff",
     "ru": "Боевой посох",
     "de": "Kampfstab",
@@ -1338,6 +1352,7 @@
     "es": "Bastón"
   },
   "Sickle": {
+    "maxChars": 17,
     "en": "Sickle",
     "ru": "Серп",
     "de": "Sichel",
@@ -1345,6 +1360,7 @@
     "es": "Hoz"
   },
   "Spear": {
+    "maxChars": 17,
     "en": "Spear",
     "ru": "Копье",
     "de": "Speer",
@@ -1352,6 +1368,7 @@
     "es": "Lanza"
   },
   "Light Crossbow": {
+    "maxChars": 17,
     "en": "Light Crossbow",
     "ru": "Легкий арбалет",
     "de": "Leichte Armbrust",
@@ -1359,6 +1376,7 @@
     "es": "Ballesta ligera"
   },
   "Dart": {
+    "maxChars": 17,
     "en": "Dart",
     "ru": "Дротик",
     "de": "Wurfpfeil",
@@ -1366,6 +1384,7 @@
     "es": "Dardo"
   },
   "Shortbow": {
+    "maxChars": 17,
     "en": "Shortbow",
     "ru": "Короткий лук",
     "de": "Kurzbogen",
@@ -1373,6 +1392,7 @@
     "es": "Arco corto"
   },
   "Sling": {
+    "maxChars": 17,
     "en": "Sling",
     "ru": "Праща",
     "de": "Schleuder",
@@ -1380,6 +1400,7 @@
     "es": "Honda"
   },
   "Battleaxe": {
+    "maxChars": 17,
     "en": "Battleaxe",
     "ru": "Боевой топор",
     "de": "Streitaxt",
@@ -1387,6 +1408,7 @@
     "es": "Hacha de batalla"
   },
   "Flail": {
+    "maxChars": 17,
     "en": "Flail",
     "ru": "Цеп",
     "de": "Flegel",
@@ -1394,6 +1416,7 @@
     "es": "Mangual"
   },
   "Glaive": {
+    "maxChars": 17,
     "en": "Glaive",
     "ru": "Глефа",
     "de": "Glefe",
@@ -1401,13 +1424,15 @@
     "es": "Guja"
   },
   "Greataxe": {
+    "maxChars": 17,
     "en": "Greataxe",
     "ru": "Секира",
     "de": "Zweihandaxt",
-    "fr": "Hache à deux mains",
+    "fr": "Hache à 2 mains",
     "es": "Gran hacha"
   },
   "Greatsword": {
+    "maxChars": 17,
     "en": "Greatsword",
     "ru": "Двуручный меч",
     "de": "Zweihandschwert",
@@ -1415,6 +1440,7 @@
     "es": "Espadón"
   },
   "Halberd": {
+    "maxChars": 17,
     "en": "Halberd",
     "ru": "Алебарда",
     "de": "Hellebarde",
@@ -1422,13 +1448,15 @@
     "es": "Alabarda"
   },
   "Lance": {
+    "maxChars": 17,
     "en": "Lance",
     "ru": "Пика",
     "de": "Lanze",
     "fr": "Lance d'arçon",
-    "es": "Lanza de caballería"
+    "es": "Lanza de jinete"
   },
   "Longsword": {
+    "maxChars": 17,
     "en": "Longsword",
     "ru": "Длинный меч",
     "de": "Langschwert",
@@ -1436,6 +1464,7 @@
     "es": "Espada larga"
   },
   "Maul": {
+    "maxChars": 17,
     "en": "Maul",
     "ru": "Кувалда",
     "de": "Zweihandhammer",
@@ -1443,6 +1472,7 @@
     "es": "Mazo"
   },
   "Morningstar": {
+    "maxChars": 17,
     "en": "Morningstar",
     "ru": "Моргенштерн",
     "de": "Morgenstern",
@@ -1450,13 +1480,15 @@
     "es": "Lucero del alba"
   },
   "Musket": {
+    "maxChars": 17,
     "en": "Musket",
-    "ru": "\u041c\u0443\u0448\u043a\u0435\u0442",
+    "ru": "Мушкет",
     "de": "Muskete",
     "fr": "Mousquet",
     "es": "Mosquete"
   },
   "Pike": {
+    "maxChars": 17,
     "en": "Pike",
     "ru": "Пика",
     "de": "Pike",
@@ -1464,6 +1496,7 @@
     "es": "Pica"
   },
   "Rapier": {
+    "maxChars": 17,
     "en": "Rapier",
     "ru": "Рапира",
     "de": "Rapier",
@@ -1471,6 +1504,7 @@
     "es": "Estoque"
   },
   "Scimitar": {
+    "maxChars": 17,
     "en": "Scimitar",
     "ru": "Скимитар",
     "de": "Krummsäbel",
@@ -1478,6 +1512,7 @@
     "es": "Cimitarra"
   },
   "Shortsword": {
+    "maxChars": 17,
     "en": "Shortsword",
     "ru": "Короткий меч",
     "de": "Kurzschwert",
@@ -1485,6 +1520,7 @@
     "es": "Espada corta"
   },
   "Trident": {
+    "maxChars": 17,
     "en": "Trident",
     "ru": "Трезубец",
     "de": "Dreizack",
@@ -1492,6 +1528,7 @@
     "es": "Tridente"
   },
   "War Pick": {
+    "maxChars": 17,
     "en": "War Pick",
     "ru": "Боевая кирка",
     "de": "Kriegspicke",
@@ -1499,13 +1536,15 @@
     "es": "Pico de guerra"
   },
   "Warhammer": {
+    "maxChars": 17,
     "en": "Warhammer",
     "ru": "Боевой молот",
     "de": "Kriegshammer",
     "fr": "Marteau de guerre",
-    "es": "Martillo de guerra"
+    "es": "Mart. de guerra"
   },
   "Whip": {
+    "maxChars": 17,
     "en": "Whip",
     "ru": "Кнут",
     "de": "Peitsche",
@@ -1513,6 +1552,7 @@
     "es": "Látigo"
   },
   "Blowgun": {
+    "maxChars": 17,
     "en": "Blowgun",
     "ru": "Духовая трубка",
     "de": "Blasrohr",
@@ -1520,6 +1560,7 @@
     "es": "Cerbatana"
   },
   "Hand Crossbow": {
+    "maxChars": 17,
     "en": "Hand Crossbow",
     "ru": "Ручной арбалет",
     "de": "Handarmbrust",
@@ -1527,6 +1568,7 @@
     "es": "Ballesta de mano"
   },
   "Heavy Crossbow": {
+    "maxChars": 17,
     "en": "Heavy Crossbow",
     "ru": "Тяжелый арбалет",
     "de": "Schwere Armbrust",
@@ -1534,6 +1576,7 @@
     "es": "Ballesta pesada"
   },
   "Longbow": {
+    "maxChars": 17,
     "en": "Longbow",
     "ru": "Длинный лук",
     "de": "Langbogen",
@@ -1541,6 +1584,7 @@
     "es": "Arco largo"
   },
   "Net": {
+    "maxChars": 17,
     "en": "Net",
     "ru": "Сеть",
     "de": "Netz",
@@ -1583,125 +1627,143 @@
     "es": "Vehículos"
   },
   "Alchemist's Supplies": {
-    "en": "Alchemist's Supplies",
-    "ru": "Инструменты алхимика",
-    "de": "Alchemistenausrüstung",
-    "fr": "Matériel d'alchimiste",
-    "es": "Útiles de alquimista"
+    "maxChars": 17,
+    "en": "Alchemist's Supp.",
+    "ru": "Инстр. алхимика",
+    "de": "Alchemiezubehör",
+    "fr": "Mat. d'alchimiste",
+    "es": "Út. de alquimista"
   },
   "Brewer's Supplies": {
+    "maxChars": 17,
     "en": "Brewer's Supplies",
-    "ru": "Инструменты пивовара",
+    "ru": "Инстр. пивовара",
     "de": "Brauerausrüstung",
-    "fr": "Matériel de brasseur",
-    "es": "Útiles de cervecero"
+    "fr": "Mat. de brasseur",
+    "es": "Út. de cervecero"
   },
   "Calligrapher's Supplies": {
-    "en": "Calligrapher's Supplies",
-    "ru": "Инструменты каллиграфа",
-    "de": "Kalligrafenausrüstung",
-    "fr": "Matériel de calligraphie",
-    "es": "Útiles de calígrafo"
+    "maxChars": 17,
+    "en": "Calligraphy Supp.",
+    "ru": "Инстр. каллиграфа",
+    "de": "Kalligrafenzeug",
+    "fr": "Mat. calligraphie",
+    "es": "Út. de calígrafo"
   },
   "Carpenter's Tools": {
+    "maxChars": 17,
     "en": "Carpenter's Tools",
-    "ru": "Инструменты плотника",
-    "de": "Zimmermannswerkzeug",
-    "fr": "Outils de charpentier",
-    "es": "Herramientas de carpintero"
+    "ru": "Инстр. плотника",
+    "de": "Zimmererwerkzeug",
+    "fr": "Out. charpentier",
+    "es": "Herr. carpintero"
   },
   "Cartographer's Tools": {
-    "en": "Cartographer's Tools",
-    "ru": "Инструменты картографа",
-    "de": "Kartografenwerkzeug",
-    "fr": "Outils de cartographe",
-    "es": "Herramientas de cartógrafo"
+    "maxChars": 17,
+    "en": "Cartography Tools",
+    "ru": "Инстр. картографа",
+    "de": "Kartografenzeug",
+    "fr": "Out. cartographe",
+    "es": "Herr. cartógrafo"
   },
   "Cobbler's Tools": {
+    "maxChars": 17,
     "en": "Cobbler's Tools",
-    "ru": "Инструменты сапожника",
+    "ru": "Инстр. сапожника",
     "de": "Schusterwerkzeug",
-    "fr": "Outils de cordonnier",
-    "es": "Herramientas de zapatero"
+    "fr": "Out. cordonnier",
+    "es": "Herr. zapatero"
   },
   "Cook's Utensils": {
+    "maxChars": 17,
     "en": "Cook's Utensils",
     "ru": "Кухонная утварь",
     "de": "Kochutensilien",
-    "fr": "Ustensiles de cuisinier",
-    "es": "Utensilios de cocinero"
+    "fr": "Ust. de cuisinier",
+    "es": "Utens. cocinero"
   },
   "Glassblower's Tools": {
-    "en": "Glassblower's Tools",
-    "ru": "Инструменты стеклодува",
-    "de": "Glasbläserwerkzeug",
-    "fr": "Outils de souffleur de verre",
-    "es": "Herramientas de soplador de vidrio"
+    "maxChars": 17,
+    "en": "Glassblower Tools",
+    "ru": "Инстр. стеклодува",
+    "de": "Glasbläserzeug",
+    "fr": "Out. verrier",
+    "es": "Herr. vidriero"
   },
   "Jeweler's Tools": {
+    "maxChars": 17,
     "en": "Jeweler's Tools",
-    "ru": "Инструменты ювелира",
+    "ru": "Инстр. ювелира",
     "de": "Juwelierwerkzeug",
-    "fr": "Outils de joaillier",
-    "es": "Herramientas de joyero"
+    "fr": "Out. de joaillier",
+    "es": "Herr. joyero"
   },
   "Leatherworker's Tools": {
-    "en": "Leatherworker's Tools",
-    "ru": "Инструменты кожевника",
-    "de": "Lederverarbeitungswerkzeug",
+    "maxChars": 17,
+    "en": "Leatherwork Tools",
+    "ru": "Инстр. кожевника",
+    "de": "Lederwerkzeug",
     "fr": "Outils de tanneur",
-    "es": "Herramientas de peletero"
+    "es": "Herr. peletero"
   },
   "Mason's Tools": {
+    "maxChars": 17,
     "en": "Mason's Tools",
-    "ru": "Инструменты каменщика",
+    "ru": "Инстр. каменщика",
     "de": "Maurerwerkzeug",
     "fr": "Outils de maçon",
-    "es": "Herramientas de albañil"
+    "es": "Herr. albañil"
   },
   "Painter's Supplies": {
-    "en": "Painter's Supplies",
-    "ru": "Инструменты художника",
+    "maxChars": 17,
+    "en": "Painting Supplies",
+    "ru": "Инстр. художника",
     "de": "Malerausrüstung",
-    "fr": "Matériel de peintre",
+    "fr": "Mat. de peintre",
     "es": "Útiles de pintor"
   },
   "Potter's Tools": {
+    "maxChars": 17,
     "en": "Potter's Tools",
-    "ru": "Инструменты гончара",
+    "ru": "Инстр. гончара",
     "de": "Töpferwerkzeug",
     "fr": "Outils de potier",
-    "es": "Herramientas de alfarero"
+    "es": "Herr. alfarero"
   },
   "Smith's Tools": {
+    "maxChars": 17,
     "en": "Smith's Tools",
-    "ru": "Инструменты кузнеца",
+    "ru": "Инстр. кузнеца",
     "de": "Schmiedewerkzeug",
-    "fr": "Outils de forgeron",
-    "es": "Herramientas de herrero"
+    "fr": "Out. de forgeron",
+    "es": "Herr. herrero"
   },
   "Tinker's Tools": {
+    "maxChars": 17,
     "en": "Tinker's Tools",
-    "ru": "Инструменты ремонтника",
+    "ru": "Инстр. ремонтника",
     "de": "Tüftlerwerkzeug",
-    "fr": "Outils de bricoleur",
-    "es": "Herramientas de hojalatero"
+    "fr": "Out. de bricoleur",
+    "es": "Herr. hojalatero"
   },
   "Weaver's Tools": {
+    "maxChars": 17,
     "en": "Weaver's Tools",
     "ru": "Инструменты ткача",
     "de": "Weberwerkzeug",
-    "fr": "Outils de tisserand",
-    "es": "Herramientas de tejedor"
+    "fr": "Out. de tisserand",
+    "es": "Herr. tejedor"
   },
   "Woodcarver's Tools": {
-    "en": "Woodcarver's Tools",
-    "ru": "Инструменты резчика по дереву",
-    "de": "Holzschnitzwerkzeug",
-    "fr": "Outils de menuisier",
-    "es": "Herramientas de tallista"
+    "maxChars": 17,
+    "en": "Woodcarving Tools",
+    "ru": "Инстр. резчика",
+    "de": "Schnitzwerkzeug",
+    "fr": "Out. de menuisier",
+    "es": "Herr. tallista"
   },
   "Dice Set": {
+    "maxChars": 17,
     "en": "Dice Set",
     "ru": "Набор костей",
     "de": "Würfelspiel",
@@ -1709,13 +1771,15 @@
     "es": "Juego de dados"
   },
   "Dragonchess Set": {
+    "maxChars": 17,
     "en": "Dragonchess Set",
     "ru": "Драконьи шахматы",
     "de": "Drachenschach",
-    "fr": "Échecs draconiques",
-    "es": "Ajedrez de dragones"
+    "fr": "Échecs draconiq.",
+    "es": "Ajedrez dragones"
   },
   "Playing Card Set": {
+    "maxChars": 17,
     "en": "Playing Card Set",
     "ru": "Игральные карты",
     "de": "Kartenspiel",
@@ -1723,13 +1787,15 @@
     "es": "Baraja de cartas"
   },
   "Three-Dragon Ante Set": {
-    "en": "Three-Dragon Ante Set",
-    "ru": "Ставка трех драконов",
+    "maxChars": 17,
+    "en": "Three-Dragon Ante",
+    "ru": "Ставка 3 драконов",
     "de": "Drei-Drachen-Ante",
-    "fr": "Jeu des trois dragons",
-    "es": "Apuesta de los Tres Dragones"
+    "fr": "Jeu trois dragons",
+    "es": "Tres Dragones"
   },
   "Bagpipes": {
+    "maxChars": 17,
     "en": "Bagpipes",
     "ru": "Волынка",
     "de": "Dudelsack",
@@ -1737,6 +1803,7 @@
     "es": "Gaita"
   },
   "Drum": {
+    "maxChars": 17,
     "en": "Drum",
     "ru": "Барабан",
     "de": "Trommel",
@@ -1744,6 +1811,7 @@
     "es": "Tambor"
   },
   "Dulcimer": {
+    "maxChars": 17,
     "en": "Dulcimer",
     "ru": "Цимбалы",
     "de": "Hackbrett",
@@ -1751,6 +1819,7 @@
     "es": "Dulcémele"
   },
   "Flute": {
+    "maxChars": 17,
     "en": "Flute",
     "ru": "Флейта",
     "de": "Flöte",
@@ -1758,6 +1827,7 @@
     "es": "Flauta"
   },
   "Lute": {
+    "maxChars": 17,
     "en": "Lute",
     "ru": "Лютня",
     "de": "Laute",
@@ -1765,6 +1835,7 @@
     "es": "Laúd"
   },
   "Lyre": {
+    "maxChars": 17,
     "en": "Lyre",
     "ru": "Лира",
     "de": "Leier",
@@ -1772,6 +1843,7 @@
     "es": "Lira"
   },
   "Horn": {
+    "maxChars": 17,
     "en": "Horn",
     "ru": "Рожок",
     "de": "Horn",
@@ -1779,6 +1851,7 @@
     "es": "Cuerno"
   },
   "Pan Flute": {
+    "maxChars": 17,
     "en": "Pan Flute",
     "ru": "Флейта Пана",
     "de": "Panflöte",
@@ -1786,6 +1859,7 @@
     "es": "Flauta de Pan"
   },
   "Shawm": {
+    "maxChars": 17,
     "en": "Shawm",
     "ru": "Шалмей",
     "de": "Schalmei",
@@ -1793,6 +1867,7 @@
     "es": "Chirimía"
   },
   "Viol": {
+    "maxChars": 17,
     "en": "Viol",
     "ru": "Виола",
     "de": "Gambe",
@@ -1800,60 +1875,68 @@
     "es": "Viola"
   },
   "Disguise Kit": {
+    "maxChars": 17,
     "en": "Disguise Kit",
     "ru": "Набор для грима",
-    "de": "Verkleidungsausrüstung",
-    "fr": "Kit de déguisement",
+    "de": "Verkleidungsset",
+    "fr": "Kit déguisement",
     "es": "Útiles de disfraz"
   },
   "Forgery Kit": {
+    "maxChars": 17,
     "en": "Forgery Kit",
-    "ru": "Набор фальсификатора",
-    "de": "Fälscherausrüstung",
-    "fr": "Kit de contrefaçon",
-    "es": "Útiles de falsificación"
+    "ru": "Набор фальшивщика",
+    "de": "Fälscherset",
+    "fr": "Kit contrefaçon",
+    "es": "Út. falsificación"
   },
   "Herbalism Kit": {
+    "maxChars": 17,
     "en": "Herbalism Kit",
     "ru": "Набор травника",
-    "de": "Kräuterkundeausrüstung",
+    "de": "Kräuterkundeset",
     "fr": "Kit d'herboriste",
-    "es": "Útiles de herborista"
+    "es": "Út. de herborista"
   },
   "Navigator's Tools": {
+    "maxChars": 17,
     "en": "Navigator's Tools",
-    "ru": "Инструменты навигатора",
-    "de": "Navigationswerkzeug",
-    "fr": "Instruments de navigateur",
-    "es": "Herramientas de navegante"
+    "ru": "Инстр. навигатора",
+    "de": "Navigatorwerkzeug",
+    "fr": "Instr. navigateur",
+    "es": "Herr. navegante"
   },
   "Poisoner's Kit": {
+    "maxChars": 17,
     "en": "Poisoner's Kit",
     "ru": "Набор отравителя",
-    "de": "Giftmischerausrüstung",
-    "fr": "Kit d'empoisonneur",
-    "es": "Útiles de envenenador"
+    "de": "Giftmischerset",
+    "fr": "Kit empoisonneur",
+    "es": "Út. envenenador"
   },
   "Thieves' Tools": {
+    "maxChars": 17,
     "en": "Thieves' Tools",
-    "ru": "Воровские инструменты",
+    "ru": "Воровские инстр.",
     "de": "Diebeswerkzeug",
     "fr": "Outils de voleur",
-    "es": "Herramientas de ladrón"
+    "es": "Herr. de ladrón"
   },
   "Land Vehicles": {
+    "maxChars": 17,
     "en": "Land Vehicles",
-    "ru": "Наземный транспорт",
+    "ru": "Наземн. транспорт",
     "de": "Landfahrzeuge",
-    "fr": "Véhicules terrestres",
-    "es": "Vehículos terrestres"
+    "fr": "Véhic. terrestres",
+    "es": "Vehíc. terrestres"
   },
   "Water Vehicles": {
+    "maxChars": 17,
     "en": "Water Vehicles",
     "ru": "Водный транспорт",
     "de": "Wasserfahrzeuge",
-    "fr": "Véhicules aquatiques",
-    "es": "Vehículos acuáticos"
+    "fr": "Véhic. aquatiques",
+    "es": "Vehíc. acuáticos"
   },
   "Standard Languages": {
     "en": "Standard Languages",
@@ -1877,6 +1960,7 @@
     "es": "Idiomas especiales"
   },
   "Common": {
+    "maxChars": 17,
     "en": "Common",
     "ru": "Общий",
     "de": "Gemeinsprache",
@@ -1884,6 +1968,7 @@
     "es": "Común"
   },
   "Dwarvish": {
+    "maxChars": 17,
     "en": "Dwarvish",
     "ru": "Дварфийский",
     "de": "Zwergisch",
@@ -1891,6 +1976,7 @@
     "es": "Enano"
   },
   "Elvish": {
+    "maxChars": 17,
     "en": "Elvish",
     "ru": "Эльфийский",
     "de": "Elfisch",
@@ -1898,6 +1984,7 @@
     "es": "Élfico"
   },
   "Giant": {
+    "maxChars": 17,
     "en": "Giant",
     "ru": "Великаний",
     "de": "Riesisch",
@@ -1905,6 +1992,7 @@
     "es": "Gigante"
   },
   "Gnomish": {
+    "maxChars": 17,
     "en": "Gnomish",
     "ru": "Гномий",
     "de": "Gnomisch",
@@ -1912,6 +2000,7 @@
     "es": "Gnomo"
   },
   "Goblin": {
+    "maxChars": 17,
     "en": "Goblin",
     "ru": "Гоблинский",
     "de": "Goblinisch",
@@ -1919,6 +2008,7 @@
     "es": "Goblin"
   },
   "Halfling": {
+    "maxChars": 17,
     "en": "Halfling",
     "ru": "Полуросликов",
     "de": "Halblingisch",
@@ -1926,6 +2016,7 @@
     "es": "Mediano"
   },
   "Orc": {
+    "maxChars": 17,
     "en": "Orc",
     "ru": "Орочий",
     "de": "Orkisch",
@@ -1933,6 +2024,7 @@
     "es": "Orco"
   },
   "Abyssal": {
+    "maxChars": 17,
     "en": "Abyssal",
     "ru": "Бездны",
     "de": "Abyssisch",
@@ -1940,6 +2032,7 @@
     "es": "Abisal"
   },
   "Celestial": {
+    "maxChars": 17,
     "en": "Celestial",
     "ru": "Небесный",
     "de": "Celestisch",
@@ -1947,6 +2040,7 @@
     "es": "Celestial"
   },
   "Draconic": {
+    "maxChars": 17,
     "en": "Draconic",
     "ru": "Драконий",
     "de": "Drakonisch",
@@ -1954,6 +2048,7 @@
     "es": "Dracónico"
   },
   "Deep Speech": {
+    "maxChars": 17,
     "en": "Deep Speech",
     "ru": "Глубинная речь",
     "de": "Tiefensprache",
@@ -1961,6 +2056,7 @@
     "es": "Habla profunda"
   },
   "Infernal": {
+    "maxChars": 17,
     "en": "Infernal",
     "ru": "Инфернальный",
     "de": "Infernalisch",
@@ -1968,6 +2064,7 @@
     "es": "Infernal"
   },
   "Primordial": {
+    "maxChars": 17,
     "en": "Primordial",
     "ru": "Первозданный",
     "de": "Urtümlich",
@@ -1975,6 +2072,7 @@
     "es": "Primordial"
   },
   "Sylvan": {
+    "maxChars": 17,
     "en": "Sylvan",
     "ru": "Сильван",
     "de": "Sylvanisch",
@@ -1982,13 +2080,15 @@
     "es": "Silvano"
   },
   "Undercommon": {
+    "maxChars": 17,
     "en": "Undercommon",
     "ru": "Подземный общий",
-    "de": "Gemeinsprache der Unterreiche",
-    "fr": "Commun des profondeurs",
+    "de": "Unterreichsprache",
+    "fr": "Commun des prof.",
     "es": "Infracomún"
   },
   "Druidic": {
+    "maxChars": 17,
     "en": "Druidic",
     "ru": "Друидический",
     "de": "Druidisch",
@@ -1996,13 +2096,15 @@
     "es": "Druídico"
   },
   "Thieves' Cant": {
+    "maxChars": 17,
     "en": "Thieves' Cant",
     "ru": "Воровской жаргон",
     "de": "Diebessprache",
-    "fr": "Jargon des voleurs",
+    "fr": "Argot des voleurs",
     "es": "Jerga de ladrones"
   },
   "Telepathy": {
+    "maxChars": 17,
     "en": "Telepathy",
     "ru": "Телепатия",
     "de": "Telepathie",
