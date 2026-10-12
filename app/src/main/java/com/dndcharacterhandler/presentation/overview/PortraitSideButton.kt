@@ -138,7 +138,12 @@ internal fun PortraitSideButton(
     on: Boolean? = null,
     accent: Color = LocalDesignTokens.current.colors.accent.bright,
     /** A word in place of the icon, in the serif: the experience's coin writes «XP». */
-    label: String? = null
+    label: String? = null,
+    /**
+     * Dim (`text.subtle`): what it does gives nothing now — the short rest with no hit dice left (owner's wish,
+     * 2026-10-12). It still opens: the rest may give back what else it restores.
+     */
+    dim: Boolean = false
 ) {
     val colors = LocalDesignTokens.current.colors
     Box(modifier = modifier.size(PortraitSideButtonSize)) {
@@ -165,7 +170,11 @@ internal fun PortraitSideButton(
                 .semantics { this.contentDescription = contentDescription },
             contentAlignment = Alignment.Center
         ) {
-            val tint = if (on == true) accent else colors.text.primary
+            val tint = when {
+                on == true -> accent
+                dim -> colors.text.subtle
+                else -> colors.text.primary
+            }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (label != null) {
                     Text(

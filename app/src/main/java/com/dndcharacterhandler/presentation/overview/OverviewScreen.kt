@@ -31,6 +31,7 @@ import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.draw.drawBehind
 import com.dndcharacterhandler.presentation.components.repeatWhileHeld
 import com.dndcharacterhandler.domain.dnd5e.rules.stepHitPoints
+import com.dndcharacterhandler.domain.dnd5e.rules.hitDicePools
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.Mutex
@@ -971,7 +972,9 @@ private fun OverviewContent(
                                 PortraitSideButton(
                                     icon = SideIconShortRest,
                                     contentDescription = text("overview_short_rest"),
-                                    onClick = { restOrNotice { isShortRestDialogOpen = true } }
+                                    onClick = { restOrNotice { isShortRestDialogOpen = true } },
+                                    // Dim with no hit dice left to spend (owner's wish, 2026-10-12); the long rest as ever.
+                                    dim = character != null && hitDicePools(character, catalog).sumOf { it.available } == 0
                                 )
                                 PortraitSideButton(
                                     icon = SideIconLongRest,
