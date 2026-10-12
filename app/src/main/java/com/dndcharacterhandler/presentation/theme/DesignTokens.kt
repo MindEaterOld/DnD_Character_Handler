@@ -84,7 +84,8 @@ data class BorderColorTokens(
 )
 
 /**
- * The accents, six (owner's pick from the phone, 2026-10-11: «самоцветы» — before, fourteen slots, many of one colour):
+ * The accents, six (owner's pick from the phone, 2026-10-11: «самоцветы» — before, fourteen slots, many of one colour),
+ * and five more for the damage types the six don't cover (owner's choice from boards, 2026-10-12: В1 + Г2):
  * each a meaning, the same colour in every theme. The silver coin and «other» damage are the muted text.
  */
 data class AccentColorTokens(
@@ -96,10 +97,20 @@ data class AccentColorTokens(
     val magic: Color,
     /** Fire: exhaustion, fire damage, the copper coin. */
     val fire: Color,
-    /** The arcane: lightning damage. */
+    /** The arcane: necrotic damage (before 2026-10-12, lightning). */
     val arcane: Color,
     /** The bright: inspiration, the experience at the last level or due, the gold coin, a material cost. */
-    val bright: Color
+    val bright: Color,
+    /** Lightning damage: ice. */
+    val lightning: Color,
+    /** Acid damage: lime. */
+    val acid: Color,
+    /** Thunder damage: indigo. */
+    val thunder: Color,
+    /** Force damage: mint. */
+    val force: Color,
+    /** Psychic damage: pink. */
+    val psychic: Color
 )
 
 /** The soft shadow under writing and signs on an art: the page's N1 at 50 % (before, black; 2026-10-11). */
@@ -201,7 +212,12 @@ val DefaultDesignColors = DesignColorTokens(
         magic = Color(0xFF5B8DEF),
         fire = Color(0xFFF08C3A),
         arcane = Color(0xFF9B7BE8),
-        bright = Color(0xFFF4C84A)
+        bright = Color(0xFFF4C84A),
+        lightning = Color(0xFF74CFE6),
+        acid = Color(0xFFB5D94C),
+        thunder = Color(0xFF8A8FF0),
+        force = Color(0xFF7FE0C0),
+        psychic = Color(0xFFE07FB8)
     ),
     shadow = ShadowColorTokens(
         drop = Color(0x800E0E10)
@@ -387,7 +403,12 @@ private fun loadColorTokens(app: JsonObject?): DesignColorTokens {
             magic = accent.colorToken("magic", defaults.accent.magic),
             fire = accent.colorToken("fire", defaults.accent.fire),
             arcane = accent.colorToken("arcane", defaults.accent.arcane),
-            bright = accent.colorToken("bright", defaults.accent.bright)
+            bright = accent.colorToken("bright", defaults.accent.bright),
+            lightning = accent.colorToken("lightning", defaults.accent.lightning),
+            acid = accent.colorToken("acid", defaults.accent.acid),
+            thunder = accent.colorToken("thunder", defaults.accent.thunder),
+            force = accent.colorToken("force", defaults.accent.force),
+            psychic = accent.colorToken("psychic", defaults.accent.psychic)
         ),
         shadow = ShadowColorTokens(
             drop = shadow.colorToken("drop", defaults.shadow.drop)

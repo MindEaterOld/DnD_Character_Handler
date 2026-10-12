@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation.combat
 
+import com.dndcharacterhandler.presentation.components.damageTypeColor
 import com.dndcharacterhandler.presentation.components.CharacterLoadingScreen
 import androidx.compose.foundation.lazy.rememberLazyListState
 import com.dndcharacterhandler.presentation.components.rememberHeaderBackdrop
@@ -2117,17 +2118,6 @@ private fun spellSchoolLocalizationKey(value: String): String? =
         "transmutation" -> "spells_school_transmutation"
         else -> null
     }
-
-private fun damageTypeColor(value: String, colors: DesignColorTokens): Color {
-    val key = value.lowercase()
-    return when {
-        "fire" in key -> colors.accent.fire
-        "cold" in key -> colors.accent.magic
-        "lightning" in key -> colors.accent.arcane
-        "poison" in key -> colors.accent.heal
-        else -> colors.text.muted
-    }
-}
 
 private data class SpellcastingAbilityOptionItem(
     val ability: SpellcastingAbility,

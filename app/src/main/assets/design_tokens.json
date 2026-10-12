@@ -116,7 +116,7 @@
     "veil": 0.7
   },
   "themes": {
-    "comment": "Graphite (the default) and Plum, the strict palettes the owner kept (2026-10-11): one ladder of ten neutrals each, every role mapped onto it, the gold and the accents shared — the accents six (owner, 2026-10-11: «самоцветы»): danger, heal, magic, fire, arcane, bright.",
+    "comment": "Graphite (the default) and Plum, the strict palettes the owner kept (2026-10-11): one ladder of ten neutrals each, every role mapped onto it, the gold and the accents shared — the accents six (owner, 2026-10-11: «самоцветы»): danger, heal, magic, fire, arcane, bright. Five more accents for the damage types the six don't cover (owner, 2026-10-12: В1 + Г2): lightning, acid, thunder, force, psychic; necrotic takes arcane, cold magic, radiant bright.",
     "graphite": {
       "name": "Graphite",
       "colors": {
@@ -169,7 +169,12 @@
             "magic": "#5B8DEF",
             "fire": "#F08C3A",
             "arcane": "#9B7BE8",
-            "bright": "#F4C84A"
+            "bright": "#F4C84A",
+            "lightning": "#74CFE6",
+            "acid": "#B5D94C",
+            "thunder": "#8A8FF0",
+            "force": "#7FE0C0",
+            "psychic": "#E07FB8"
           },
           "shadow": {
             "drop": "#800E0E10"
@@ -229,7 +234,12 @@
             "magic": "#5B8DEF",
             "fire": "#F08C3A",
             "arcane": "#9B7BE8",
-            "bright": "#F4C84A"
+            "bright": "#F4C84A",
+            "lightning": "#74CFE6",
+            "acid": "#B5D94C",
+            "thunder": "#8A8FF0",
+            "force": "#7FE0C0",
+            "psychic": "#E07FB8"
           },
           "shadow": {
             "drop": "#800E0B0E"

@@ -9,6 +9,8 @@ import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
+import com.dndcharacterhandler.presentation.components.accent
+import com.dndcharacterhandler.presentation.components.damageTypeColor
 import com.dndcharacterhandler.presentation.components.isBetter
 import com.dndcharacterhandler.presentation.components.isWorse
 import com.dndcharacterhandler.presentation.components.fails
@@ -732,13 +734,17 @@ internal fun attributesSectionItems(
                     Defenses.IMMUNITY to "attributes_defense_immunities_short",
                     Defenses.VULNERABILITY to "attributes_defense_vulnerabilities_short"
                 ).map { (kind, labelKey) ->
+                    val keys = defenseKeys(defenses, kind, characterCatalog, strings)
                     SheetGroup(
                         label = text(labelKey),
-                        values = defenseLabels(defenses, kind, characterCatalog, strings),
+                        values = keys.map { defenseName(it, characterCatalog, strings) },
                         onClick = {
                             defenseDraft = defenses
                             editingDefenseKind = kind
-                        }
+                        },
+                        // Each a dot of its damage type's colour, as the combat screen writes it; a condition's its own
+                        // (owner's choice from boards, 2026-10-12: Б).
+                        dots = keys.map { defenseDot(it) }
                     )
                 }
             )
@@ -1911,7 +1917,8 @@ private fun SaveLine(score: AbilityScore, proficiencyBonus: Int, effects: RollEf
 }
 
 /** A group of the proficiencies or the defenses: its name, its values and what a tap on its frame opens. */
-private class SheetGroup(val label: String, val values: List<String>, val onClick: () -> Unit)
+/** [dots]: each value's dot colour, when it says something (a defense's damage type); the muted dot else. */
+private class SheetGroup(val label: String, val values: List<String>, val onClick: () -> Unit, val dots: List<Color> = emptyList())
 
 /**
  * The groups two to a row, the frames of a row as tall as the taller (owner's choice from boards, 2026-10-10: 3 — the
@@ -1985,12 +1992,12 @@ private fun SheetGroupCard(
         ) {
             if (values.isEmpty()) SheetGroupAdd()
             if (columns == 1) {
-                shown.forEach { SheetGroupLine(it) }
+                shown.forEachIndexed { i, value -> SheetGroupLine(value, group.dots.getOrNull(i)) }
             } else if (shown.isNotEmpty()) {
-                val parts = shown.chunked((shown.size + columns - 1) / columns)
+                val parts = shown.indices.chunked((shown.size + columns - 1) / columns)
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SheetGroupColumnGap)) {
                     parts.forEach { part ->
-                        Column(modifier = Modifier.weight(1f)) { part.forEach { SheetGroupLine(it) } }
+                        Column(modifier = Modifier.weight(1f)) { part.forEach { i -> SheetGroupLine(shown[i], group.dots.getOrNull(i)) } }
                     }
                     repeat(columns - parts.size) { Spacer(modifier = Modifier.weight(1f)) }
                 }
@@ -2041,7 +2048,7 @@ private fun SheetGroupAdd() {
  * above: the dot in their training dot's 12dp, 8dp in, the word 6dp after it.
  */
 @Composable
-private fun SheetGroupLine(value: String) {
+private fun SheetGroupLine(value: String, dot: Color? = null) {
     val colors = LocalDesignTokens.current.colors
     Row(
         modifier = Modifier
@@ -2060,7 +2067,7 @@ private fun SheetGroupLine(value: String) {
                 modifier = Modifier
                     .size(5.dp)
                     .clip(CircleShape)
-                    .background(colors.text.muted)
+                    .background(dot ?: colors.text.muted)
             )
         }
         Text(
@@ -2368,7 +2375,7 @@ private fun weaponProficiencyLabels(
  * A kind's defenses for its row: the damage types group by group (physical, elemental, other), then any key
  * the groups lack; the immunities end with the conditions.
  */
-private fun defenseLabels(
+private fun defenseKeys(
     defenses: Set<String>,
     kind: String,
     catalog: CharacterCatalog?,
@@ -2379,7 +2386,18 @@ private fun defenseLabels(
     val keys = grouped.flatMap { keys -> keys.filter { it in defenses }.sortedBy { defenseName(it, catalog, strings) } } +
         Defenses.ofKind(defenses, kind).filter { it !in listed } +
         (if (kind == Defenses.IMMUNITY) Defenses.ofKind(defenses, Defenses.CONDITION_IMMUNITY) else emptyList())
-    return keys.map { defenseName(it, catalog, strings) }
+    return keys
+}
+
+/** A defense's dot: its damage type's colour, a condition's own (exhaustion orange), the muted dot for the rest. */
+@Composable
+private fun defenseDot(key: String): Color {
+    val colors = LocalDesignTokens.current.colors
+    val code = key.substringAfter(':')
+    if (key.startsWith("${Defenses.CONDITION_IMMUNITY}:")) {
+        return if (code == "exhaustion") colors.accent.fire else Condition.ofKey(code)?.accent() ?: colors.text.muted
+    }
+    return damageTypeColor(code, colors)
 }
 
 internal fun previewFallbackCharacter(): Character =
