@@ -42,9 +42,6 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
-import androidx.compose.foundation.layout.Column
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
@@ -258,29 +255,6 @@ private fun HeaderLevelRule(level: HeaderLevel) {
         val corner = CornerRadius(h / 2)
         drawRoundRect(colors.border.faint, Offset(0f, y), Size(size.width, h), corner)
         if (progress > 0f) drawRoundRect(fill, Offset(0f, y), Size(size.width * progress, h), corner)
-    }
-}
-
-/**
- * The header's level, name and experience's rule as one block, where a window shows them (the experience's pop-up;
- * owner, 2026-10-13 — «как в шапке»): the same words and rule, laid out as the header lays them, with no taps.
- */
-@Composable
-fun CharacterLevelTitle(name: String, level: HeaderLevel, modifier: Modifier = Modifier) {
-    val colors = LocalDesignTokens.current.colors
-    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        Row(verticalAlignment = Alignment.Bottom) {
-            HeaderLevelWords(level, Shadow(Color.Transparent))
-            Text(
-                text = name.ifBlank { text("overview_name_placeholder") },
-                modifier = Modifier.alignByBaseline().weight(1f, fill = false),
-                style = MaterialTheme.typography.titleLarge,
-                color = colors.text.primary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-        HeaderLevelRule(level)
     }
 }
 

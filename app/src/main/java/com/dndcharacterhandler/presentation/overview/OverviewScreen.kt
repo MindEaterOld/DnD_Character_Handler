@@ -1,11 +1,9 @@
 package com.dndcharacterhandler.presentation.overview
 import com.dndcharacterhandler.domain.dnd5e.rules.experienceProgress
-import com.dndcharacterhandler.presentation.components.dialogLeadText
-import com.dndcharacterhandler.presentation.components.CharacterLevelTitle
+import com.dndcharacterhandler.presentation.components.romanNumeral
 import com.dndcharacterhandler.presentation.components.buttonFill
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.foundation.layout.aspectRatio
 import com.dndcharacterhandler.domain.dnd5e.rules.ExperienceThresholds
 import kotlin.math.hypot
 import androidx.compose.foundation.layout.offset
@@ -22,6 +20,7 @@ import androidx.compose.foundation.layout.paddingFromBaseline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.TextRange
@@ -1405,11 +1404,11 @@ private fun OverviewContent(
 
 /**
  * The experience's pop-up (owner's choices from boards, 2026-10-13): its tabs in place of the title, the rule's diamond
- * under the picked one. «Опыт»: the experience a counter as the hit points' — − and + on either side, held they step
+ * under the picked one. «Опыт»: the experience a counter as the hit points' — − and + beside it, held they step
  * quicker and quicker, the number typed in place — over the next level's threshold, the level's bar under it as the hit
- * points', and «Начислить опыт», a field and «Добавить» to add a reward to it. «Уровень»: the header's level, name and
- * rule over the levels as a grid, the picked one gold. «Сохранить» on both saves both (a level up through Character
- * Wizard).
+ * points', and «Начислить опыт», a field and «Добавить» to add a reward to it. «Уровень»: the level as a counter, its
+ * Roman numeral and «LVL» between − and +. − and + close to the numbers on both. «Сохранить» on both saves both (a level
+ * up through Character Wizard).
  */
 @Composable
 private fun ExperienceDialog(
@@ -1439,74 +1438,72 @@ private fun ExperienceDialog(
         onConfirm = { onSave(experience, pickedLevel) },
         scrollable = false
     ) {
+        // − and + close to the numbers on both tabs (owner, 2026-10-13), the numbers a step down from the hit points'.
+        val headline = MaterialTheme.typography.headlineMedium
+        val counter = headline.copy(
+            fontSize = typography.hpTemporary.fontSizeSp.sp,
+            lineHeight = (typography.hpTemporary.lineHeightSp ?: typography.hpTemporary.fontSizeSp).sp
+        )
+        val measurer = rememberTextMeasurer()
         if (tab == 0) {
             val level = levelForExperience(experience)
             val next = ExperienceThresholds.getOrNull(level)?.takeIf { level < MAX_CHARACTER_LEVEL }
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                HpStepButton(
-                    icon = Icons.Outlined.Remove,
-                    description = text("overview_exp_step_down"),
-                    enabled = experience > 0,
-                    onStep = { setExperience(experience - 1) }
-                )
-                // As the hit points': one size while they fit between − and +, a step down the type scale when not.
-                val headline = MaterialTheme.typography.headlineMedium
-                fun sized(token: com.dndcharacterhandler.presentation.theme.TextSizeToken) =
-                    headline.copy(fontSize = token.fontSizeSp.sp, lineHeight = (token.lineHeightSp ?: token.fontSizeSp).sp)
-                val scales = listOf(
-                    sized(typography.hpCurrent) to headline,
-                    sized(typography.hpTemporary) to headline,
-                    headline to MaterialTheme.typography.titleLarge
-                )
-                val measurer = rememberTextMeasurer()
-                val threshold = next?.let { " / $it" }.orEmpty()
-                BoxWithConstraints(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                    fun widthAt(number: TextStyle, rest: TextStyle) = measurer.measure(experience.toString(), number).size.width +
-                        (if (threshold.isEmpty()) 0 else measurer.measure(threshold, rest).size.width)
-                    val (numberStyle, thresholdStyle) = scales.firstOrNull { (n, t) -> widthAt(n, t) <= constraints.maxWidth }
-                        ?: scales.last()
-                    // The level's bar under the numbers, as the hit points' under theirs (owner, 2026-10-13): as wide as
-                    // they are, 150dp at least.
-                    val barWidth = with(LocalDensity.current) {
-                        widthAt(numberStyle, thresholdStyle).toDp().coerceIn(HpBarWidth, maxOf(HpBarWidth, maxWidth))
-                    }
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.Bottom) {
-                        // The experience typed in place, as the hit points are.
-                        BasicTextField(
-                            value = typed,
-                            onValueChange = { value ->
-                                val digits = value.text.filter(Char::isDigit).take(MaxExperienceDigits)
-                                typed = if (digits == value.text) value else TextFieldValue(digits, TextRange(digits.length))
-                                experience = digits.toIntOrNull() ?: 0
-                            },
-                            modifier = Modifier
-                                .width(IntrinsicSize.Min)
-                                .alignByBaseline(),
-                            textStyle = numberStyle.copy(color = colors.text.primary),
-                            singleLine = true,
-                            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                        )
-                        if (threshold.isNotEmpty()) {
-                            Text(
-                                text = threshold,
-                                modifier = Modifier.alignByBaseline(),
-                                style = thresholdStyle,
-                                color = colors.text.primary.copy(alpha = LocalDesignTokens.current.alpha.veil),
-                                maxLines = 1
-                            )
-                        }
-                    }
-                    ExperienceBar(HeaderLevel(pickedLevel, experience), barWidth)
-                    }
+            val threshold = next?.let { " / $it" }.orEmpty()
+            // One size while they fit between − and +, a step down the type scale when not.
+            val scales = listOf(counter to MaterialTheme.typography.titleLarge, headline to MaterialTheme.typography.titleMedium)
+            BoxWithConstraints(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                val room = with(LocalDensity.current) { (maxWidth - HpStepSize * 2).roundToPx() }
+                fun widthAt(number: TextStyle, rest: TextStyle) = measurer.measure(experience.toString(), number).size.width +
+                    (if (threshold.isEmpty()) 0 else measurer.measure(threshold, rest).size.width)
+                val (numberStyle, thresholdStyle) = scales.firstOrNull { (n, t) -> widthAt(n, t) <= room } ?: scales.last()
+                // The level's bar under the numbers, as the hit points' under theirs: as wide as they are.
+                val barWidth = with(LocalDensity.current) {
+                    widthAt(numberStyle, thresholdStyle).toDp().coerceAtLeast(ExperienceBarMinWidth)
                 }
-                HpStepButton(
-                    icon = Icons.Outlined.Add,
-                    description = text("overview_exp_step_up"),
-                    enabled = experience < MaxExperience,
-                    onStep = { setExperience(experience + 1) }
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    HpStepButton(
+                        icon = Icons.Outlined.Remove,
+                        description = text("overview_exp_step_down"),
+                        enabled = experience > 0,
+                        onStep = { setExperience(experience - 1) }
+                    )
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Row(verticalAlignment = Alignment.Bottom) {
+                            // The experience typed in place, as the hit points are.
+                            BasicTextField(
+                                value = typed,
+                                onValueChange = { value ->
+                                    val digits = value.text.filter(Char::isDigit).take(MaxExperienceDigits)
+                                    typed = if (digits == value.text) value else TextFieldValue(digits, TextRange(digits.length))
+                                    experience = digits.toIntOrNull() ?: 0
+                                },
+                                modifier = Modifier
+                                    .width(IntrinsicSize.Min)
+                                    .alignByBaseline(),
+                                textStyle = numberStyle.copy(color = colors.text.primary),
+                                singleLine = true,
+                                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                            )
+                            if (threshold.isNotEmpty()) {
+                                Text(
+                                    text = threshold,
+                                    modifier = Modifier.alignByBaseline(),
+                                    style = thresholdStyle,
+                                    color = colors.text.primary.copy(alpha = LocalDesignTokens.current.alpha.veil),
+                                    maxLines = 1
+                                )
+                            }
+                        }
+                        ExperienceBar(HeaderLevel(pickedLevel, experience), barWidth)
+                    }
+                    HpStepButton(
+                        icon = Icons.Outlined.Add,
+                        description = text("overview_exp_step_up"),
+                        enabled = experience < MaxExperience,
+                        onStep = { setExperience(experience + 1) }
+                    )
+                }
             }
             Text(
                 text = text("overview_exp_grant"),
@@ -1536,37 +1533,43 @@ private fun ExperienceDialog(
                 }
             }
         } else {
-            // The header's level, name and rule under the tabs' rule, over the levels (owner, 2026-10-13).
-            CharacterLevelTitle(
-                name = character.name,
-                level = HeaderLevel(pickedLevel, experience),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .dialogLeadText(MaterialTheme.typography.titleLarge)
-            )
-            Column(modifier = Modifier.padding(top = 4.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                (1..MAX_CHARACTER_LEVEL).chunked(5).forEach { row ->
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        row.forEach { level ->
-                            val current = level == pickedLevel
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .aspectRatio(1.25f)
-                                    .clip(RoundedCornerShape(10.dp))
-                                    .background(toggleFill(current))
-                                    .clickable(role = Role.RadioButton) { pickedLevel = level },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = level.toString(),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = toggleContent(current)
-                                )
-                            }
-                        }
-                    }
+            // The level a counter as the experience (owner, 2026-10-13): its Roman numeral and «LVL», as the header
+            // writes them, between − and +. The numeral's room is the widest one's, so − and + never move under the thumb.
+            val levelWords = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold, letterSpacing = 1.sp)
+            val levelShort = " " + text("overview_level_short").uppercase()
+            val numeralRoom = with(LocalDensity.current) {
+                ((1..MAX_CHARACTER_LEVEL).maxOf { measurer.measure(romanNumeral(it), counter).size.width } +
+                    measurer.measure(levelShort, levelWords).size.width).toDp()
+            }
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+                HpStepButton(
+                    icon = Icons.Outlined.Remove,
+                    description = text("overview_level_step_down"),
+                    enabled = pickedLevel > 1,
+                    onStep = { pickedLevel = (pickedLevel - 1).coerceAtLeast(1) }
+                )
+                Row(modifier = Modifier.width(numeralRoom), horizontalArrangement = Arrangement.Center) {
+                    Text(
+                        text = romanNumeral(pickedLevel),
+                        modifier = Modifier.alignByBaseline(),
+                        style = counter,
+                        color = colors.text.primary,
+                        maxLines = 1
+                    )
+                    Text(
+                        text = levelShort,
+                        modifier = Modifier.alignByBaseline(),
+                        style = levelWords,
+                        color = colors.text.muted,
+                        maxLines = 1
+                    )
                 }
+                HpStepButton(
+                    icon = Icons.Outlined.Add,
+                    description = text("overview_level_step_up"),
+                    enabled = pickedLevel < MAX_CHARACTER_LEVEL,
+                    onStep = { pickedLevel = (pickedLevel + 1).coerceAtMost(MAX_CHARACTER_LEVEL) }
+                )
             }
         }
     }
@@ -1591,6 +1594,9 @@ private fun ExperienceBar(level: HeaderLevel, width: Dp) {
         if (progress > 0f) drawRoundRect(fill, Offset(0f, y), Size(size.width * progress, h), corner)
     }
 }
+
+/** The experience's bar at its shortest: a short number keeps a bar to read. */
+private val ExperienceBarMinWidth = 120.dp
 
 /** The most experience the counter takes. */
 private const val MaxExperience = 9_999_999

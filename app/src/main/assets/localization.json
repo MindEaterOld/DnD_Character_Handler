@@ -4773,6 +4773,20 @@
     "fr": "Un point d'expérience de plus",
     "es": "Un punto de experiencia más"
   },
+  "overview_level_step_down": {
+    "en": "One level lower",
+    "ru": "На уровень ниже",
+    "de": "Eine Stufe niedriger",
+    "fr": "Un niveau de moins",
+    "es": "Un nivel menos"
+  },
+  "overview_level_step_up": {
+    "en": "One level higher",
+    "ru": "На уровень выше",
+    "de": "Eine Stufe höher",
+    "fr": "Un niveau de plus",
+    "es": "Un nivel más"
+  },
   "overview_exp_add": {
     "en": "Add",
     "ru": "\u0414\u043e\u0431\u0430\u0432\u0438\u0442\u044c",
