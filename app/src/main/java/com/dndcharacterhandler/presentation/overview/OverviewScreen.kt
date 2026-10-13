@@ -1459,101 +1459,112 @@ private fun ExperienceDialog(
                 val barWidth = with(LocalDensity.current) {
                     widthAt(numberStyle, thresholdStyle).toDp().coerceAtLeast(ExperienceBarMinWidth)
                 }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    HpStepButton(
-                        icon = Icons.Outlined.Remove,
-                        description = text("overview_exp_step_down"),
-                        enabled = experience > 0,
-                        onStep = { setExperience(experience - 1) }
-                    )
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Row(verticalAlignment = Alignment.Bottom) {
-                            // The experience typed in place, as the hit points are.
-                            BasicTextField(
-                                value = typed,
-                                onValueChange = { value ->
-                                    val digits = value.text.filter(Char::isDigit).take(MaxExperienceDigits)
-                                    typed = if (digits == value.text) value else TextFieldValue(digits, TextRange(digits.length))
-                                    experience = digits.toIntOrNull() ?: 0
-                                },
-                                modifier = Modifier
-                                    .width(IntrinsicSize.Min)
-                                    .alignByBaseline(),
-                                textStyle = numberStyle.copy(color = colors.text.primary),
-                                singleLine = true,
-                                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                            )
-                            if (threshold.isNotEmpty()) {
-                                Text(
-                                    text = threshold,
-                                    modifier = Modifier.alignByBaseline(),
-                                    style = thresholdStyle,
-                                    color = colors.text.primary.copy(alpha = LocalDesignTokens.current.alpha.veil),
-                                    maxLines = 1
+                // The award on the counter's lines (owner's choice from boards, 2026-10-13: Г): its «+» right under the
+                // counter's, the field as far out under the «−» — the block mirrored about the counter's middle.
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        HpStepButton(
+                            icon = Icons.Outlined.Remove,
+                            description = text("overview_exp_step_down"),
+                            enabled = experience > 0,
+                            onStep = { setExperience(experience - 1) }
+                        )
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Row(verticalAlignment = Alignment.Bottom) {
+                                // The experience typed in place, as the hit points are.
+                                BasicTextField(
+                                    value = typed,
+                                    onValueChange = { value ->
+                                        val digits = value.text.filter(Char::isDigit).take(MaxExperienceDigits)
+                                        typed = if (digits == value.text) value else TextFieldValue(digits, TextRange(digits.length))
+                                        experience = digits.toIntOrNull() ?: 0
+                                    },
+                                    modifier = Modifier
+                                        .width(IntrinsicSize.Min)
+                                        .alignByBaseline(),
+                                    textStyle = numberStyle.copy(color = colors.text.primary),
+                                    singleLine = true,
+                                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                                 )
+                                if (threshold.isNotEmpty()) {
+                                    Text(
+                                        text = threshold,
+                                        modifier = Modifier.alignByBaseline(),
+                                        style = thresholdStyle,
+                                        color = colors.text.primary.copy(alpha = LocalDesignTokens.current.alpha.veil),
+                                        maxLines = 1
+                                    )
+                                }
                             }
+                            ExperienceBar(HeaderLevel(pickedLevel, experience), barWidth)
                         }
-                        ExperienceBar(HeaderLevel(pickedLevel, experience), barWidth)
+                        HpStepButton(
+                            icon = Icons.Outlined.Add,
+                            description = text("overview_exp_step_up"),
+                            enabled = experience < MaxExperience,
+                            onStep = { setExperience(experience + 1) }
+                        )
                     }
-                    HpStepButton(
-                        icon = Icons.Outlined.Add,
-                        description = text("overview_exp_step_up"),
-                        enabled = experience < MaxExperience,
-                        onStep = { setExperience(experience + 1) }
-                    )
-                }
-            }
-            Text(
-                text = text("overview_exp_grant"),
-                modifier = Modifier.padding(top = 12.dp),
-                style = MaterialTheme.typography.bodyMedium,
-                color = colors.text.muted
-            )
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                // As tall as the «+» beside it (owner, 2026-10-13 — Material's 56dp field read too large under the
-                // counter): an outline with no fill, gold while typed in, its corners every field's (a capsule is a button's).
-                var grantFocused by remember { mutableStateOf(false) }
-                BasicTextField(
-                    value = grant,
-                    onValueChange = { grant = it.filter(Char::isDigit).take(MaxExperienceDigits) },
-                    modifier = Modifier
-                        .weight(1f)
-                        .onFocusChanged { grantFocused = it.isFocused },
-                    textStyle = MaterialTheme.typography.bodyLarge.copy(color = colors.text.primary),
-                    singleLine = true,
-                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    decorationBox = { field ->
-                        Box(
+                    Row(
+                        modifier = Modifier
+                            .padding(top = 12.dp)
+                            .width(HpStepSize * 2 + barWidth)
+                            .padding(horizontal = (HpStepSize - GrantAddSize) / 2),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // As tall as the «+» beside it (owner, 2026-10-13 — Material's 56dp field read too large under the
+                        // counter): an outline with no fill, gold while typed in, its corners every field's (a capsule is a
+                        // button's); what it is for written in it while empty.
+                        var grantFocused by remember { mutableStateOf(false) }
+                        BasicTextField(
+                            value = grant,
+                            onValueChange = { grant = it.filter(Char::isDigit).take(MaxExperienceDigits) },
                             modifier = Modifier
-                                .height(GrantAddSize)
-                                .border(
-                                    1.dp,
-                                    if (grantFocused) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
-                                    MaterialTheme.shapes.extraSmall
-                                )
-                                .padding(horizontal = 16.dp),
-                            contentAlignment = Alignment.CenterStart
-                        ) {
-                            if (grant.isEmpty()) {
-                                Text("+ 0", style = MaterialTheme.typography.bodyLarge, color = colors.text.subtle)
+                                .weight(1f)
+                                .onFocusChanged { grantFocused = it.isFocused },
+                            textStyle = MaterialTheme.typography.bodyLarge.copy(color = colors.text.primary),
+                            singleLine = true,
+                            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            decorationBox = { field ->
+                                Box(
+                                    modifier = Modifier
+                                        .height(GrantAddSize)
+                                        .border(
+                                            1.dp,
+                                            if (grantFocused) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                                            MaterialTheme.shapes.extraSmall
+                                        )
+                                        .padding(horizontal = 14.dp),
+                                    contentAlignment = Alignment.CenterStart
+                                ) {
+                                    if (grant.isEmpty()) {
+                                        Text(
+                                            text = text("overview_exp_grant"),
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            color = colors.text.subtle,
+                                            maxLines = 1
+                                        )
+                                    }
+                                    field()
+                                }
                             }
-                            field()
-                        }
+                        )
+                        // A round «+», as a pick's own entry is added (owner, 2026-10-13 — in place of «Добавить»).
+                        StepButton(
+                            icon = Icons.Outlined.Add,
+                            contentDescription = text("overview_exp_add"),
+                            onClick = {
+                                setExperience(experience + (grant.toIntOrNull() ?: 0))
+                                grant = ""
+                            },
+                            enabled = grant.isNotEmpty(),
+                            size = GrantAddSize
+                        )
                     }
-                )
-                // A round «+», as a pick's own entry is added (owner, 2026-10-13 — in place of «Добавить»).
-                StepButton(
-                    icon = Icons.Outlined.Add,
-                    contentDescription = text("overview_exp_add"),
-                    onClick = {
-                        setExperience(experience + (grant.toIntOrNull() ?: 0))
-                        grant = ""
-                    },
-                    enabled = grant.isNotEmpty(),
-                    size = GrantAddSize
-                )
+                }
             }
         } else {
             // The level a counter as the experience (owner, 2026-10-13): its Roman numeral and «LVL», as the header

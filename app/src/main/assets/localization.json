@@ -4753,11 +4753,12 @@
     "es": "Nivel"
   },
   "overview_exp_grant": {
-    "en": "Award experience",
+    "maxChars": 14,
+    "en": "Add experience",
     "ru": "Начислить опыт",
-    "de": "Erfahrung vergeben",
-    "fr": "Attribuer de l'expérience",
-    "es": "Otorgar experiencia"
+    "de": "EP vergeben",
+    "fr": "Ajouter des PX",
+    "es": "Añadir PX"
   },
   "overview_exp_step_down": {
     "en": "One experience point less",
