@@ -1,6 +1,6 @@
 package com.dndcharacterhandler.presentation.components
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -14,13 +14,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 
 /**
- * Round "X" that closes a full-screen overlay (portrait viewer, dice table). Keeps clear of the
- * system bars; place it with [modifier], usually `Modifier.align(Alignment.TopEnd)`.
+ * The "X" that closes a full-screen overlay (portrait viewer, dice workshop, Character Wizard, the drawer). A bare
+ * white icon, as the pop-ups' cross and the portrait's side buttons (owner, 2026-10-13 — the round fill under it
+ * went), with only a soft shade of `shadow.drop` round it to read on a bright picture. Keeps clear of the system bars;
+ * place it with [modifier], usually `Modifier.align(Alignment.TopEnd)`.
  */
 @Composable
 fun OverlayCloseButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
@@ -31,10 +36,16 @@ fun OverlayCloseButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
             .padding(16.dp)
             .size(44.dp)
             .clip(CircleShape)
-            .background(colors.surface.button)
-            .clickable(onClick = onClick),
+            .clickable(role = Role.Button, onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
+        Canvas(modifier = Modifier.matchParentSize()) {
+            val radius = size.minDimension * OverlayCrossShadeReach
+            drawCircle(
+                brush = Brush.radialGradient(0f to colors.shadow.drop, 1f to Color.Transparent, center = center, radius = radius),
+                radius = radius
+            )
+        }
         Icon(
             imageVector = Icons.Outlined.Close,
             contentDescription = text("common_close"),
@@ -43,3 +54,6 @@ fun OverlayCloseButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
         )
     }
 }
+
+/** How far the shade reaches round the icon, of the button's size: as the portrait's side buttons'. */
+private const val OverlayCrossShadeReach = 0.62f
