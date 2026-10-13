@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation.overview
 
+import com.dndcharacterhandler.presentation.components.buttonFill
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -258,7 +259,7 @@ private fun HitDieToken(die: DieType, state: HitDieState, onToggle: (() -> Unit)
             .background(
                 when (state) {
                     HitDieState.PICKED -> MaterialTheme.colorScheme.primary
-                    HitDieState.AVAILABLE -> colors.surface.button
+                    HitDieState.AVAILABLE -> buttonFill()
                     HitDieState.SPENT -> Color.Transparent
                     HitDieState.RETURNING -> colors.accent.heal.copy(alpha = LocalDesignTokens.current.alpha.faint)
                 }

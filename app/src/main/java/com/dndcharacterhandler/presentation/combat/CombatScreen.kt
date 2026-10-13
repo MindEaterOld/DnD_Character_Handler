@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation.combat
 
+import com.dndcharacterhandler.presentation.components.buttonFill
 import com.dndcharacterhandler.presentation.components.damageTypeColor
 import com.dndcharacterhandler.presentation.components.CharacterLoadingScreen
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -830,7 +831,7 @@ private fun DialogActionSection(
                     .fillMaxWidth()
                     .clickable(onClick = action.onClick),
                 shape = RoundedCornerShape(12.dp),
-                color = colors.surface.button
+                color = buttonFill()
             ) {
                 Text(
                     text = action.label,

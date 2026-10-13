@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation.overview
 
+import com.dndcharacterhandler.presentation.components.buttonFill
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.Layout
@@ -273,7 +274,7 @@ private fun ExhaustionPicker(level: Int, immune: Boolean, onPick: (Int) -> Unit)
                         .weight(1f)
                         .height(36.dp)
                         .clip(shape)
-                        .background(if (lit) fire.copy(alpha = LocalDesignTokens.current.alpha.faint) else colors.surface.button)
+                        .background(if (lit) fire.copy(alpha = LocalDesignTokens.current.alpha.faint) else buttonFill())
                         .then(if (on) Modifier.border(1.dp, if (lit) fire else colors.text.muted, shape) else Modifier)
                         .selectable(selected = on, enabled = enabled, role = Role.RadioButton, onClick = { onPick(n) }),
                     contentAlignment = Alignment.Center

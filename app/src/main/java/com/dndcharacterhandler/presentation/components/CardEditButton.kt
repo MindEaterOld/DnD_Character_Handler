@@ -45,7 +45,7 @@ fun CardMainButton(label: String, icon: ImageVector, onClick: () -> Unit, modifi
     Button(
         onClick = onClick,
         modifier = modifier.height(40.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = colors.surface.button, contentColor = colors.text.primary),
+        colors = ButtonDefaults.buttonColors(containerColor = buttonFill(), contentColor = colors.text.primary),
         contentPadding = PaddingValues(horizontal = 16.dp)
     ) {
         Icon(icon, contentDescription = null, modifier = Modifier.size(18.dp))

@@ -46,7 +46,7 @@ fun StepButton(
         modifier = modifier
             .size(size)
             .clip(CircleShape)
-            .background(colors.surface.button)
+            .background(buttonFill())
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick),
         contentAlignment = Alignment.Center
     ) {

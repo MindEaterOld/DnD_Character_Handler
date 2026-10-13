@@ -27,11 +27,20 @@ import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
  * standard button fill. No outline: the fill says which one is picked.
  */
 
+/**
+ * The standard button's fill: `surface.button` at half (owner's choice from boards, 2026-10-13: 3 — whole, the
+ * buttons read as heavy bricks). What floats over busy content (the floating «+», an overlay's cross, the snackbar)
+ * keeps it whole, so nothing shows through.
+ */
+@Composable
+@ReadOnlyComposable
+fun buttonFill(): Color = LocalDesignTokens.current.colors.surface.button.copy(alpha = LocalDesignTokens.current.alpha.half)
+
 /** The fill of a toggle's option: gold when picked, the standard button fill otherwise. */
 @Composable
 @ReadOnlyComposable
 fun toggleFill(selected: Boolean): Color =
-    if (selected) MaterialTheme.colorScheme.primary else LocalDesignTokens.current.colors.surface.button
+    if (selected) MaterialTheme.colorScheme.primary else buttonFill()
 
 /** Text and icons on [toggleFill]: onPrimary on the picked option, [unselected] on the others. */
 @Composable

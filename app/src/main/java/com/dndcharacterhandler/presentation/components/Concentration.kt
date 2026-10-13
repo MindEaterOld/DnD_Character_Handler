@@ -80,7 +80,7 @@ fun ConcentrationToggle(
         modifier = modifier
             .size(size)
             .clip(CircleShape)
-            .background(if (concentrating) MaterialTheme.colorScheme.primary else colors.surface.button)
+            .background(if (concentrating) MaterialTheme.colorScheme.primary else buttonFill())
             .toggleable(value = concentrating, enabled = enabled, role = Role.Switch, onValueChange = { onToggle() }),
         contentAlignment = Alignment.Center
     ) {

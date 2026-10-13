@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation.dice
 
+import com.dndcharacterhandler.presentation.components.buttonFill
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -227,7 +228,7 @@ private fun SkinListAction(icon: androidx.compose.ui.graphics.vector.ImageVector
         modifier = Modifier
             .fillMaxWidth()
             .clip(shape)
-            .background(colors.surface.button)
+            .background(buttonFill())
             .clickable(onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,

@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation.combat
 
+import com.dndcharacterhandler.presentation.components.buttonFill
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -287,7 +288,7 @@ private fun RollModeButton(label: String, icon: ImageVector, primary: Boolean, e
             .fillMaxWidth()
             .heightIn(min = 48.dp)
             .clip(RoundedCornerShape(24.dp))
-            .background(if (primary && enabled) MaterialTheme.colorScheme.primary else colors.surface.button)
+            .background(if (primary && enabled) MaterialTheme.colorScheme.primary else buttonFill())
             .clickable(enabled = enabled, onClick = onClick)
             .padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.Center,

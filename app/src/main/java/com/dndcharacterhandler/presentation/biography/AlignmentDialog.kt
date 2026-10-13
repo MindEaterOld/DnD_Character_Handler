@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation.biography
 
+import com.dndcharacterhandler.presentation.components.buttonFill
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -66,7 +67,7 @@ private fun AlignmentCardView(card: AlignmentCard, picked: Boolean, onClick: () 
     Column(
         modifier = modifier
             .clip(shape)
-            .background(if (picked) pickedColor.copy(alpha = LocalDesignTokens.current.alpha.faint) else colors.surface.button)
+            .background(if (picked) pickedColor.copy(alpha = LocalDesignTokens.current.alpha.faint) else buttonFill())
             .then(if (picked) Modifier.border(1.5.dp, pickedColor, shape) else Modifier)
             .selectable(selected = picked, role = Role.RadioButton, onClick = onClick)
             .padding(horizontal = 4.dp, vertical = 8.dp),

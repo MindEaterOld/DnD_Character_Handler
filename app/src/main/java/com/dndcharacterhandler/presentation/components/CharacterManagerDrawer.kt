@@ -371,7 +371,7 @@ private fun DrawerActionCard(
             .height(60.dp)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(8.dp),
-        color = colors.surface.button
+        color = buttonFill()
     ) {
         Row(
             modifier = Modifier

@@ -1,4 +1,5 @@
 package com.dndcharacterhandler.presentation.overview
+import com.dndcharacterhandler.presentation.components.buttonFill
 import kotlin.math.hypot
 import androidx.compose.foundation.layout.offset
 import androidx.compose.ui.layout.AlignmentLine
@@ -1614,7 +1615,7 @@ private fun PortraitMenuOption(
             .fillMaxWidth()
             .height(52.dp)
             .clip(RoundedCornerShape(10.dp))
-            .background(colors.surface.button)
+            .background(buttonFill())
             .clickable(enabled = enabled, onClick = onClick)
             .padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
