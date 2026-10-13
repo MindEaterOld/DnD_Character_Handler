@@ -48,6 +48,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.dp
 import com.dndcharacterhandler.domain.model.PortraitFraming
 import com.dndcharacterhandler.presentation.components.EditDialog
+import com.dndcharacterhandler.presentation.components.dialogLeadText
 import com.dndcharacterhandler.presentation.components.rememberAppImagePainter
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
@@ -93,6 +94,7 @@ internal fun PortraitFramingDialog(
     ) {
         Text(
             text = text("overview_portrait_frame_hint"),
+            modifier = Modifier.dialogLeadText(),
             style = MaterialTheme.typography.bodyMedium,
             color = colors.text.muted
         )

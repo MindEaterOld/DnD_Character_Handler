@@ -43,6 +43,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextStyle
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 
@@ -218,3 +221,17 @@ private fun DialogTitleRule(modifier: Modifier = Modifier) {
         drawPath(Path().apply { moveTo(x, y - half); lineTo(x + half, y); lineTo(x, y + half); lineTo(x - half, y); close() }, gold)
     }
 }
+
+/**
+ * For a text that opens a pop-up's content: its first line's capitals at the content's top, where a button's edge
+ * would be, so the gap under the title's rule is the same whatever comes first (owner, 2026-10-13 — a text's line kept
+ * room over its capitals and read farther off). [style] is the text's own.
+ */
+@Composable
+fun Modifier.dialogLeadText(style: TextStyle = MaterialTheme.typography.bodyMedium): Modifier {
+    val capHeight = with(LocalDensity.current) { (style.fontSize.value * DialogCapHeight).sp.toDp() }
+    return paddingFromBaseline(top = capHeight)
+}
+
+/** A capital's height, of the font's size (Roboto's). */
+private const val DialogCapHeight = 0.711f
