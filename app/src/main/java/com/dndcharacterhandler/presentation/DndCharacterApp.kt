@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import com.dndcharacterhandler.presentation.overview.PortraitSideStep
 import com.dndcharacterhandler.presentation.overview.PortraitSideButtonSize
 import com.dndcharacterhandler.presentation.components.CharacterHeaderRow
-import com.dndcharacterhandler.presentation.components.AppNotice
+import com.dndcharacterhandler.presentation.components.AppNoticeHost
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material.icons.Icons
@@ -23,7 +23,6 @@ import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.rememberDrawerState
@@ -356,16 +355,16 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
             // A notice (owner's choices from the device, 2026-10-13): a pill on the tab bar's plate, between the
             // portrait's first side buttons (the short rest's and inspiration's), on their row — clear of the name and
             // the level, and of the tab bar.
-            SnackbarHost(
-                hostState = snackbarHostState,
+            AppNoticeHost(
+                state = snackbarHostState,
+                backdrop = screensLayer,
+                backdropOrigin = screensOrigin,
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .statusBarsPadding()
                     .padding(top = NoticeTop, start = NoticeSide, end = NoticeSide)
                     .height(PortraitSideButtonSize)
-            ) { data ->
-                AppNotice(data, screensLayer, screensOrigin)
-            }
+            )
 
             // Covers the whole app, bottom navigation included.
             levelUpTarget?.let { target ->
