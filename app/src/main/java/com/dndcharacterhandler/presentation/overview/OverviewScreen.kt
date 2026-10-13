@@ -472,20 +472,6 @@ class OverviewViewModel(
         }
     }
 
-    fun updateHitDieSides(characterBundle: CharacterBundle, hitDieSides: Int) {
-        val sanitized = hitDieSides.takeIf { it in HitDieSidesOptions } ?: 8
-        val current = characterBundle.character
-        if (sanitized == current.hitDieSides) return
-
-        viewModelScope.launch {
-            characterRepository.updateHitDice(
-                characterId = current.id,
-                hitDieSides = sanitized,
-                spentHitDice = current.spentHitDice
-            )
-        }
-    }
-
     /**
      * A short rest's hit dice read off the dice table: the [picked] ones (sides to count) are spent,
      * by class when the classes are known, and their [rolls] heal. Counted from [characterBundle] as
@@ -702,7 +688,6 @@ fun OverviewScreen(
             onUpdateArmorClass = viewModel::updateArmorClass,
             onUpdateInitiative = viewModel::updateInitiative,
             onUpdateSpeed = viewModel::updateSpeed,
-            onUpdateHitDieSides = viewModel::updateHitDieSides,
             onSpendHitDice = viewModel::spendHitDice,
             onToggleInspiration = viewModel::toggleInspiration,
             onShortRest = viewModel::shortRest,
@@ -764,7 +749,6 @@ private fun OverviewContent(
     onUpdateArmorClass: (CharacterBundle, Int, ArmorClassMode, Int?) -> Unit,
     onUpdateInitiative: (CharacterBundle, Int) -> Unit,
     onUpdateSpeed: (CharacterBundle, Int) -> Unit,
-    onUpdateHitDieSides: (CharacterBundle, Int) -> Unit,
     /** Hit dice of a short rest read off the table: the picked ones (sides to count) and their rolls. */
     onSpendHitDice: (CharacterBundle, Map<Int, Int>, List<Int>) -> Unit,
     onToggleInspiration: (CharacterBundle) -> Unit,
@@ -1295,7 +1279,6 @@ private fun OverviewContent(
             characterBundle = characterBundle,
             catalog = catalog,
             onDismiss = { isShortRestDialogOpen = false },
-            onUpdateHitDieSides = { sides -> onUpdateHitDieSides(characterBundle, sides) },
             onRest = { picked ->
                 isShortRestDialogOpen = false
                 onShortRest(characterBundle)
@@ -2997,7 +2980,6 @@ private fun OverviewPreviewContent(
                 onUpdateArmorClass = { _, _, _, _ -> },
                 onUpdateInitiative = { _, _ -> },
                 onUpdateSpeed = { _, _ -> },
-                onUpdateHitDieSides = { _, _ -> },
                 onSpendHitDice = { _, _, _ -> },
                 onToggleInspiration = {},
                 onShortRest = {},

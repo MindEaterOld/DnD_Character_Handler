@@ -39,7 +39,6 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.dndcharacterhandler.domain.model.AppLanguage
 import com.dndcharacterhandler.domain.dnd5e.model.CharacterBundle
 import com.dndcharacterhandler.domain.dnd5e.model.CharacterCatalog
 import com.dndcharacterhandler.domain.dnd5e.rules.HitDicePool
@@ -50,7 +49,6 @@ import com.dndcharacterhandler.domain.dnd5e.rules.hitDicePools
 import com.dndcharacterhandler.domain.dnd5e.rules.spellSlots
 import com.dndcharacterhandler.presentation.components.EditDialog
 import androidx.compose.ui.unit.sp
-import com.dndcharacterhandler.presentation.components.ToggleChip
 import com.dndcharacterhandler.presentation.components.SheetLabel
 import com.dndcharacterhandler.presentation.dice.DieIcon
 import com.dndcharacterhandler.presentation.dice.DieType
@@ -63,7 +61,6 @@ import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 import kotlin.math.roundToInt
 
 /** The hit dice sizes the player can give a character whose class is only text. */
-internal val HitDieSidesOptions = listOf(6, 8, 10, 12)
 
 /**
  * The short rest (owner's choice from boards, 2026-10-07: R1, D1): the hit points now and how far
@@ -76,7 +73,6 @@ internal fun ShortRestDialog(
     characterBundle: CharacterBundle,
     catalog: CharacterCatalog?,
     onDismiss: () -> Unit,
-    onUpdateHitDieSides: (Int) -> Unit,
     onRest: (picked: Map<Int, Int>) -> Unit
 ) {
     val character = characterBundle.character
@@ -103,15 +99,10 @@ internal fun ShortRestDialog(
         RestHitPoints(current = character.currentHp, max = character.maxHp, gain = gain)
         HitDicePools(
             pools = pools,
-            catalog = catalog,
             picked = picked,
             onToggle = { sides, index ->
                 val now = picked[sides].orEmpty()
                 picked[sides] = if (index in now) now - index else now + index
-            },
-            onUpdateHitDieSides = { sides ->
-                picked.clear()
-                onUpdateHitDieSides(sides)
             }
         )
         RestRestores(characterBundle)
@@ -171,59 +162,40 @@ internal fun RestHitPoints(current: Int, max: Int, gain: Int, exact: Boolean = f
 }
 
 /**
- * The hit dice by size. With more than one size each row is headed by its classes; a character whose
- * class is only text has the die's size beside the title, to change ([onUpdateHitDieSides]). [onToggle]
- * picks a die at hand (the short rest); without it the dice only show. [spentComeBack]: the spent dice
- * are lit as coming back (the long rest).
+ * The hit dice in one list under a gold label (owner, 2026-10-13 — 20 at most, each showing its own size; before, a row
+ * per size headed by its classes, and the size's toggles for a class that is only text): the dice at hand first, the
+ * largest first, then the spent. [onToggle] picks a die at hand (the short rest); without it the dice only show.
+ * [spentComeBack]: the spent dice are lit as coming back (the long rest).
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun HitDicePools(
     pools: List<HitDicePool>,
-    catalog: CharacterCatalog?,
     picked: Map<Int, Set<Int>> = emptyMap(),
     onToggle: ((sides: Int, index: Int) -> Unit)? = null,
-    onUpdateHitDieSides: ((Int) -> Unit)? = null,
     spentComeBack: Boolean = false
 ) {
-    val colors = LocalDesignTokens.current.colors
-    val russian = LocalStrings.current.language == AppLanguage.RUSSIAN
-    val single = pools.singleOrNull()
+    // Each die by its pool and its place in it: a pool's dice at hand come first, so the picked are among them.
+    val dice = pools.sortedByDescending { it.sides }.flatMap { pool -> List(pool.total) { index -> pool to index } }
+    val (atHand, spent) = dice.partition { (pool, index) -> index < pool.available }
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        // The die's size is the dice's own and the toggles' (a label in capitals would write it «D8»).
         SheetLabel(text("overview_hit_dice"))
-        pools.forEach { pool ->
-            val die = dieTypeOf(pool.sides) ?: DieType.D8
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                if (pools.size > 1) {
-                    val classes = pool.classIds.mapNotNull { id -> catalog?.classes?.firstOrNull { it.id == id }?.name?.get(russian) }
-                    Text(
-                        text = (classes.distinct() + die.label).joinToString(" · "),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = colors.text.muted
-                    )
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            (atHand + spent).forEach { (pool, index) ->
+                val state = when {
+                    index >= pool.available -> if (spentComeBack) HitDieState.RETURNING else HitDieState.SPENT
+                    index in picked[pool.sides].orEmpty() -> HitDieState.PICKED
+                    else -> HitDieState.AVAILABLE
                 }
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    repeat(pool.total) { index ->
-                        val state = when {
-                            index >= pool.available -> if (spentComeBack) HitDieState.RETURNING else HitDieState.SPENT
-                            index in picked[pool.sides].orEmpty() -> HitDieState.PICKED
-                            else -> HitDieState.AVAILABLE
-                        }
-                        HitDieToken(
-                            die = die,
-                            state = state,
-                            onToggle = onToggle?.let { toggle -> { toggle(pool.sides, index) } }
-                        )
-                    }
-                }
+                HitDieToken(
+                    die = dieTypeOf(pool.sides) ?: DieType.D8,
+                    state = state,
+                    onToggle = onToggle?.let { toggle -> { toggle(pool.sides, index) } }
+                )
             }
-        }
-        if (single != null && single.classIds.isEmpty() && onUpdateHitDieSides != null) {
-            HitDieSidesPicker(sides = single.sides, onPick = onUpdateHitDieSides)
         }
     }
 }
@@ -283,19 +255,6 @@ private fun HitDieToken(die: DieType, state: HitDieState, onToggle: (() -> Unit)
     }
 }
 
-
-/**
- * The die's size, for a character whose class is only text: toggles, as every pick of a row (owner's choice from boards,
- * 2026-10-13: Б — before, a gold link with a drop-down menu).
- */
-@Composable
-private fun HitDieSidesPicker(sides: Int, onPick: (Int) -> Unit) {
-    Row(horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally)) {
-        HitDieSidesOptions.forEach { option ->
-            ToggleChip(label = "d$option", selected = option == sides, onClick = { if (option != sides) onPick(option) })
-        }
-    }
-}
 
 /** What else the short rest gives back: the uses of what restores on it, the spell slots if they do. */
 @Composable

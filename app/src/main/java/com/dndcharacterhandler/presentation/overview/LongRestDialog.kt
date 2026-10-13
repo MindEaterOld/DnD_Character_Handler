@@ -92,7 +92,7 @@ internal fun LongRestDialog(
             exact = true
         )
         if (diceBack) {
-            HitDicePools(pools = pools, catalog = catalog, spentComeBack = true)
+            HitDicePools(pools = pools, spentComeBack = true)
             Text(
                 text = text("overview_long_rest_dice_hint"),
                 style = MaterialTheme.typography.labelMedium,
