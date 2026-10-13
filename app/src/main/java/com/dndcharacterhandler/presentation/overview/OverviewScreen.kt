@@ -994,7 +994,16 @@ private fun OverviewContent(
                                         icon = SideIconInspiration,
                                         contentDescription = text("overview_inspiration"),
                                         iconSize = InspirationIconSize,
-                                        onClick = { characterBundle?.let(onToggleInspiration) },
+                                        onClick = {
+                                            characterBundle?.let { bundle ->
+                                                onToggleInspiration(bundle)
+                                                // A notice says what the tap did (owner, 2026-10-13); the star again takes it back.
+                                                snackbar.show(
+                                                    strings[if (bundle.character.hasInspiration) "overview_inspiration_spent" else "overview_inspiration_gained"],
+                                                    null
+                                                ) {}
+                                            }
+                                        },
                                         on = character.hasInspiration
                                     )
                                     PortraitSideButton(
