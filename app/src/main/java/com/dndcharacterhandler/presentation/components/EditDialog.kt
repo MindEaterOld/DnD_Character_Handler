@@ -10,7 +10,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material3.AlertDialog
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.BasicAlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Button
@@ -46,7 +53,12 @@ import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
  *
  * Its title is in the app's serif (`titleLarge`), as the sheet's ([EditSheet]) (owner's choice from boards,
  * 2026-10-07: P1).
+ *
+ * Laid out by itself, not by Material's AlertDialog: that one kept the room of its buttons' row under the content
+ * even with no buttons, a hole at the foot of every pop-up without them (owner, 2026-10-13). Material's measures are
+ * kept: 24dp in from every edge, 16dp under the title, 24dp over the buttons.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditDialog(
     title: String,
@@ -64,73 +76,82 @@ fun EditDialog(
 ) {
     val colors = LocalDesignTokens.current.colors
     var confirmingDelete by remember { mutableStateOf(false) }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        modifier = modifier,
-        shape = AlertDialogDefaults.shape,
-        title = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                titleLeading?.invoke()
-                // The app's serif, as its sections' titles (owner's choice from boards, 2026-10-07: P1).
-                Text(
-                    text = title,
-                    modifier = Modifier.weight(1f),
-                    style = MaterialTheme.typography.titleLarge,
-                    color = colors.text.primary
-                )
-                titleActions?.invoke(this)
-                IconButton(onClick = onDismiss) {
-                    Icon(
-                        imageVector = Icons.Outlined.Close,
-                        contentDescription = text("common_close"),
-                        tint = colors.text.muted
+    BasicAlertDialog(onDismissRequest = onDismiss, modifier = modifier) {
+        Surface(
+            shape = AlertDialogDefaults.shape,
+            color = AlertDialogDefaults.containerColor,
+            tonalElevation = AlertDialogDefaults.TonalElevation
+        ) {
+            Column(modifier = Modifier.padding(24.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    titleLeading?.invoke()
+                    // The app's serif, as its sections' titles (owner's choice from boards, 2026-10-07: P1).
+                    Text(
+                        text = title,
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.titleLarge,
+                        color = colors.text.primary
+                    )
+                    titleActions?.invoke(this)
+                    IconButton(onClick = onDismiss) {
+                        Icon(
+                            imageVector = Icons.Outlined.Close,
+                            contentDescription = text("common_close"),
+                            tint = colors.text.muted
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                // As Material's dialog gives its text: the muted colour, body type.
+                CompositionLocalProvider(
+                    LocalContentColor provides AlertDialogDefaults.textContentColor,
+                    LocalTextStyle provides MaterialTheme.typography.bodyMedium
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f, fill = false)
+                            .then(if (scrollable) Modifier.fadingVerticalScroll() else Modifier),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        content = content
                     )
                 }
-            }
-        },
-        text = {
-            Column(
-                modifier = if (scrollable) Modifier.fadingVerticalScroll() else Modifier,
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                content = content
-            )
-        },
-        confirmButton = {
-            if (onConfirm != null || onDelete != null) {
-                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    if (onDelete != null) {
-                        // As tall as the main button: the danger red, faint behind the icon.
-                        FilledIconButton(
-                            onClick = { confirmingDelete = true },
-                            colors = IconButtonDefaults.filledIconButtonColors(
-                                containerColor = colors.accent.danger.copy(alpha = LocalDesignTokens.current.alpha.faint),
-                                contentColor = colors.accent.danger
-                            )
-                        ) {
-                            Icon(imageVector = Icons.Outlined.Delete, contentDescription = text("inventory_delete_action"))
-                        }
-                    }
-                    Spacer(modifier = Modifier.weight(1f))
-                    if (onConfirm != null) {
-                        Button(
-                            onClick = onConfirm,
-                            enabled = confirmEnabled,
-                            colors = if (confirmIsDanger) {
-                                ButtonDefaults.buttonColors(
-                                    containerColor = colors.accent.danger,
-                                    contentColor = colors.text.primary
+                if (onConfirm != null || onDelete != null) {
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        if (onDelete != null) {
+                            // As tall as the main button: the danger red, faint behind the icon.
+                            FilledIconButton(
+                                onClick = { confirmingDelete = true },
+                                colors = IconButtonDefaults.filledIconButtonColors(
+                                    containerColor = colors.accent.danger.copy(alpha = LocalDesignTokens.current.alpha.faint),
+                                    contentColor = colors.accent.danger
                                 )
-                            } else {
-                                ButtonDefaults.buttonColors()
+                            ) {
+                                Icon(imageVector = Icons.Outlined.Delete, contentDescription = text("inventory_delete_action"))
                             }
-                        ) {
-                            Text(confirmLabel)
+                        }
+                        Spacer(modifier = Modifier.weight(1f))
+                        if (onConfirm != null) {
+                            Button(
+                                onClick = onConfirm,
+                                enabled = confirmEnabled,
+                                colors = if (confirmIsDanger) {
+                                    ButtonDefaults.buttonColors(
+                                        containerColor = colors.accent.danger,
+                                        contentColor = colors.text.primary
+                                    )
+                                } else {
+                                    ButtonDefaults.buttonColors()
+                                }
+                            ) {
+                                Text(confirmLabel)
+                            }
                         }
                     }
                 }
             }
         }
-    )
+    }
     if (confirmingDelete && onDelete != null) {
         EditDialog(
             title = text("common_delete_confirm_title"),

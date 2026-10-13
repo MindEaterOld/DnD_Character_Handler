@@ -1575,7 +1575,7 @@ private fun PortraitMenuDialog(
         title = text("overview_portrait_menu_title"),
         onDismiss = onDismiss
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             PortraitMenuOption(
                 label = text("overview_portrait_show"),
                 icon = Icons.Outlined.Visibility,
@@ -1606,20 +1606,24 @@ private fun PortraitMenuOption(
     onClick: () -> Unit
 ) {
     val colors = LocalDesignTokens.current.colors
-    val contentColor = if (enabled) colors.text.muted else colors.text.subtle
+    val contentColor = if (enabled) colors.text.primary else colors.text.subtle
+    // An action, so a button: the standard button fill, no outline (CLAUDE.md, buttons vs. stats; owner, 2026-10-13 —
+    // the plain rows read as text). As the drawer's actions.
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
+            .height(52.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(colors.surface.button)
             .clickable(enabled = enabled, onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = if (enabled) colors.text.primary else colors.text.subtle,
+            tint = contentColor,
             modifier = Modifier.size(24.dp)
         )
         Text(
