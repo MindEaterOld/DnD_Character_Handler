@@ -5,11 +5,24 @@ import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ZoomIn
+import androidx.compose.material.icons.outlined.ZoomOut
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,9 +62,10 @@ private val Dimmed = ColorFilter.colorMatrix(ColorMatrix().apply { setToScale(0.
  * Choosing which part of the portrait shows on the overview, as photo apps let you: the window is the overview's
  * portrait itself — as wide to as tall ([heroAspect], width over height), its edges melting into the background as
  * there ([footShare] of its height at the foot) — and the picture outside it is dimmed; a drag moves the picture, two
- * fingers (or the slider) bring it closer. Saved as a [PortraitFraming], so the drawer's small portrait shows the same
- * part.
+ * fingers (or the slider between the zoom's icons) bring it closer. Saved as a [PortraitFraming], so the drawer's small
+ * portrait shows the same part.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun PortraitFramingDialog(
     portraitReference: String,
@@ -123,33 +137,57 @@ internal fun PortraitFramingDialog(
             drawIntoCanvas { it.restore() }
             drawRect(colors.border.faint, topLeft = frame.topLeft, size = frame.size, style = Stroke(width = 1.dp.toPx()))
         }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = text("overview_portrait_zoom"),
-                style = MaterialTheme.typography.labelMedium,
-                color = colors.text.muted,
-                modifier = Modifier.weight(1f)
-            )
-            TextButton(onClick = { draft = PortraitFraming() }) {
-                Text(text("overview_portrait_frame_reset"))
+        // The zoom (owner's choice from boards, 2026-10-13: В, with no reset): a thin slider in the style of the app's bars
+        // between the zoom's icons; a tap on an icon steps it. No label, no reset — two fingers do it too.
+        fun zoomTo(zoom: Float) {
+            val picture = image
+            val target = zoom.coerceIn(1f, PortraitFraming.MAX_ZOOM)
+            draft = if (picture != null && window.width > 0f) {
+                draft.zoomedTo(target, picture.width, picture.height, window.width, window.height)
+            } else {
+                draft.copy(zoom = target)
             }
         }
-        Slider(
-            value = draft.zoom,
-            onValueChange = { zoom ->
-                val picture = image
-                draft = if (picture != null && window.width > 0f) {
-                    draft.zoomedTo(zoom, picture.width, picture.height, window.width, window.height)
-                } else {
-                    draft.copy(zoom = zoom)
+        val gold = MaterialTheme.colorScheme.primary
+        val zoomLabel = text("overview_portrait_zoom")
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = { zoomTo(draft.zoom - ZoomStep) }) {
+                Icon(Icons.Outlined.ZoomOut, contentDescription = null, tint = colors.text.muted)
+            }
+            Slider(
+                value = draft.zoom,
+                onValueChange = ::zoomTo,
+                valueRange = 1f..PortraitFraming.MAX_ZOOM,
+                modifier = Modifier
+                    .weight(1f)
+                    .semantics { contentDescription = zoomLabel },
+                thumb = {
+                    Box(
+                        modifier = Modifier
+                            .size(ZoomThumb)
+                            .clip(CircleShape)
+                            .background(gold)
+                    )
+                },
+                track = { state ->
+                    val share = (state.value - state.valueRange.start) / (state.valueRange.endInclusive - state.valueRange.start)
+                    Canvas(modifier = Modifier.fillMaxWidth().height(ZoomTrack)) {
+                        val corner = CornerRadius(size.height / 2)
+                        drawRoundRect(colors.border.faint, size = size, cornerRadius = corner)
+                        drawRoundRect(gold, size = Size(size.width * share, size.height), cornerRadius = corner)
+                    }
                 }
-            },
-            valueRange = 1f..PortraitFraming.MAX_ZOOM,
-            colors = SliderDefaults.colors(
-                thumbColor = MaterialTheme.colorScheme.primary,
-                activeTrackColor = MaterialTheme.colorScheme.primary,
-                inactiveTrackColor = colors.border.faint
             )
-        )
+            IconButton(onClick = { zoomTo(draft.zoom + ZoomStep) }) {
+                Icon(Icons.Outlined.ZoomIn, contentDescription = null, tint = colors.text.muted)
+            }
+        }
     }
 }
+
+/** The zoom's track as the app's bars (the hit points', the experience's): 4dp, its thumb a gold dot. */
+private val ZoomTrack = 4.dp
+private val ZoomThumb = 18.dp
+
+/** What a tap on a zoom icon adds or takes. */
+private const val ZoomStep = 0.25f

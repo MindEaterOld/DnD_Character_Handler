@@ -109,7 +109,9 @@ fun EditDialog(
                     )
                     DialogTitleRule(
                         modifier = Modifier
-                            .padding(bottom = 16.dp)
+                            // Under it the content, a little farther than the title over it (owner, 2026-10-13):
+                            // a text's capitals about 17dp under the line, a button's top 12dp, the title's baseline 12dp over it.
+                            .padding(bottom = 8.dp)
                             .padding(horizontal = 24.dp)
                     )
                     // As Material's dialog gives its text: the muted colour, body type.
