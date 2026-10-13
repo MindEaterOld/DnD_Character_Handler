@@ -12,8 +12,12 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import com.dndcharacterhandler.presentation.overview.PortraitSideStep
+import com.dndcharacterhandler.presentation.overview.PortraitSideButtonSize
+import com.dndcharacterhandler.presentation.components.CharacterHeaderRow
+import com.dndcharacterhandler.presentation.components.AppNotice
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.MaterialTheme
@@ -191,6 +195,9 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
         com.dndcharacterhandler.presentation.components.LocalAppSnackbar provides appSnackbar
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
+            // The screens drawn into a layer the tab bar's plate and a notice show blurred (owner's choice, 2026-10-09).
+            val screensLayer = rememberGraphicsLayer()
+            var screensOrigin by remember { mutableStateOf(Offset.Zero) }
             ModalNavigationDrawer(
                 drawerState = drawerState,
                 gesturesEnabled = !hasNoCharacters,
@@ -227,8 +234,6 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                 ScreenBackground {
                 // The screens run down under the tab bar, drawn into a layer its plate shows blurred (owner's choice,
                 // 2026-10-09).
-                val screensLayer = rememberGraphicsLayer()
-                var screensOrigin by remember { mutableStateOf(Offset.Zero) }
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     containerColor = Color.Transparent,
@@ -348,23 +353,18 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                 }
             }
 
-            // On the standard button fill (it stands out from the cards), its action in gold.
+            // A notice (owner's choices from the device, 2026-10-13): a pill on the tab bar's plate, between the
+            // portrait's first side buttons (the short rest's and inspiration's), on their row — clear of the name and
+            // the level, and of the tab bar.
             SnackbarHost(
                 hostState = snackbarHostState,
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .statusBarsPadding()
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .padding(top = NoticeTop, start = NoticeSide, end = NoticeSide)
+                    .height(PortraitSideButtonSize)
             ) { data ->
-                val tokens = LocalDesignTokens.current.colors
-                androidx.compose.material3.Snackbar(
-                    snackbarData = data,
-                    containerColor = tokens.surface.button,
-                    contentColor = tokens.text.primary,
-                    actionColor = MaterialTheme.colorScheme.primary,
-                    shape = RoundedCornerShape(12.dp)
-                )
+                AppNotice(data, screensLayer, screensOrigin)
             }
 
             // Covers the whole app, bottom navigation included.
@@ -469,3 +469,9 @@ private fun suggestCharacterArchiveName(characterName: String?): String {
         ?: "character"
     return "$baseName.dndchar"
 }
+
+/** A notice's row: the portrait's first side buttons', their middle a step under the header's icons'. */
+private val NoticeTop = CharacterHeaderRow / 2 + PortraitSideStep - PortraitSideButtonSize / 2
+
+/** A notice keeps clear of the side buttons' columns (24dp in and their 44dp), 8dp more. */
+private val NoticeSide = 24.dp + PortraitSideButtonSize + 8.dp

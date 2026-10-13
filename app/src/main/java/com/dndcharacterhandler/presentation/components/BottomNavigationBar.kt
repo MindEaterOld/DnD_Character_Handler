@@ -1,6 +1,5 @@
 package com.dndcharacterhandler.presentation.components
 
-import android.os.Build
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -20,23 +19,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.BlurEffect
-import androidx.compose.ui.graphics.TileMode
-import androidx.compose.ui.graphics.drawscope.translate
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.layer.GraphicsLayer
-import androidx.compose.ui.graphics.layer.drawLayer
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
@@ -46,9 +33,6 @@ import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 
 /** The air round the tab bar's plate, over it and under it. */
 val TabBarGap = 8.dp
-
-/** How much the screens behind the tab bar's plate are blurred: as behind the overview's header. */
-private val TabBarBlur = 24.dp
 
 /** The plate's height: in Classic a pill, its ends half circles of half this. */
 private val TabBarHeight = 62.dp
@@ -83,8 +67,6 @@ fun BottomNavigationBar(
     // The tint over the blurred screens is the stat cards' fill (a veil); the picked tab's lamp is faint gold, as
     // what is on lights up (inspiration, the conditions).
     val alphas = LocalDesignTokens.current.alpha
-    val canBlur = backdrop != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-    var plateOrigin by remember { mutableStateOf(Offset.Zero) }
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -95,22 +77,7 @@ fun BottomNavigationBar(
         color = Color.Transparent,
         border = BorderStroke(1.dp, colors.border.faint)
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .onGloballyPositioned { plateOrigin = it.positionInRoot() }
-                .graphicsLayer {
-                    clip = true
-                    if (canBlur) renderEffect = BlurEffect(TabBarBlur.toPx(), TabBarBlur.toPx(), TileMode.Clamp)
-                }
-                .drawBehind {
-                    drawRect(colors.surface.card)
-                    if (canBlur && backdrop != null) {
-                        translate(backdropOrigin.x - plateOrigin.x, backdropOrigin.y - plateOrigin.y) { drawLayer(backdrop) }
-                    }
-                    drawRect(colors.surface.card.copy(alpha = alphas.veil))
-                }
-        )
+        GlassPlateBack(backdrop, backdropOrigin, Modifier.fillMaxSize())
         // The end tabs' centres on the centres of the plate's ends, the others shared out evenly between them.
         Row(
             modifier = Modifier
