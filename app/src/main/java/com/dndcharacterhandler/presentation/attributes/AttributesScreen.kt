@@ -1019,7 +1019,7 @@ internal fun attributesSectionItems(
     // 2026-10-05; no count after a group's name, 2026-10-07).
     if (isArmorDialogOpen) {
         EditDialog(
-            title = text("attributes_armor_dialog_title"),
+            title = text("attributes_proficiency_armor"),
             onDismiss = { isArmorDialogOpen = false },
             onConfirm = {
                 onUpdateArmorProficiencies(characterBundle, armorDraft)
@@ -1043,7 +1043,7 @@ internal fun attributesSectionItems(
 
     if (isWeaponDialogOpen) {
         EditDialog(
-            title = text("attributes_weapon_dialog_title"),
+            title = text("attributes_proficiency_weapons"),
             onDismiss = { isWeaponDialogOpen = false },
             onConfirm = {
                 onUpdateWeaponProficiencies(characterBundle, weaponDraft)
@@ -1138,7 +1138,7 @@ internal fun attributesSectionItems(
         val known = (simpleWeaponOptions + martialWeaponOptions).map { it.id }.toSet()
         val extras = (saved + masteryDraft).filter { it !in known }.sortedBy { weaponName(it, characterCatalog, strings) }
         EditDialog(
-            title = text("attributes_proficiency_masteries"),
+            title = text("attributes_proficiency_masteries_short"),
             onDismiss = { isMasteryDialogOpen = false },
             onConfirm = {
                 onUpdateWeaponMasteries(characterBundle, masteryDraft)
@@ -1165,7 +1165,7 @@ internal fun attributesSectionItems(
 
     if (isToolsDialogOpen) {
         EditDialog(
-            title = text("attributes_tools_dialog_title"),
+            title = text("attributes_proficiency_tools"),
             onDismiss = { isToolsDialogOpen = false },
             onConfirm = {
                 onUpdateToolProficiencies(characterBundle, toolDraft + customEntryIds(customToolDrafts + customToolInput))
@@ -1197,7 +1197,7 @@ internal fun attributesSectionItems(
 
     if (isLanguagesDialogOpen) {
         EditDialog(
-            title = text("attributes_languages_dialog_title"),
+            title = text("attributes_proficiency_languages"),
             onDismiss = { isLanguagesDialogOpen = false },
             onConfirm = {
                 onUpdateLanguageProficiencies(characterBundle, languageDraft + customEntryIds(customLanguageDrafts + customLanguageInput))

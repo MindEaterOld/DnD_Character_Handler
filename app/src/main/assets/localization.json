@@ -91,11 +91,12 @@
     "es": "Eliminar personaje"
   },
   "drawer_delete_confirm_title": {
-    "en": "Delete character?",
-    "ru": "Удалить персонажа?",
-    "de": "Charakter löschen?",
-    "fr": "Supprimer le personnage ?",
-    "es": "¿Eliminar personaje?"
+    "maxChars": 15,
+    "en": "Delete?",
+    "ru": "Удалить?",
+    "de": "Löschen?",
+    "fr": "Supprimer ?",
+    "es": "¿Eliminar?"
   },
   "drawer_delete_confirm_message": {
     "en": "\"%1$s\" will be deleted permanently. This can't be undone.",
@@ -601,12 +602,12 @@
     "es": "Supervivencia"
   },
   "attributes_darkvision_title": {
-    "maxChars": 30,
+    "maxChars": 15,
     "en": "Darkvision",
     "ru": "Тёмное зрение",
     "de": "Dunkelsicht",
-    "fr": "Vision dans le noir",
-    "es": "Visión en la oscuridad"
+    "fr": "Vision nocturne",
+    "es": "Visión oscura"
   },
   "attributes_senses": {
     "en": "Senses",
@@ -653,11 +654,12 @@
     "es": "Ahora mismo no tienes visión en la oscuridad."
   },
   "attributes_darkvision_add": {
-    "en": "Add Darkvision",
-    "ru": "Добавить Тёмное зрение",
-    "de": "Dunkelsicht hinzufügen",
-    "fr": "Ajouter la vision dans le noir",
-    "es": "Añadir visión en la oscuridad"
+    "maxChars": 15,
+    "en": "Vision Source",
+    "ru": "Источник зрения",
+    "de": "Sichtquelle",
+    "fr": "Origine vision",
+    "es": "Origen visión"
   },
   "attributes_darkvision_manual_hint": {
     "en": "You're entering Darkvision manually.",
@@ -695,11 +697,12 @@
     "es": "Competencias"
   },
   "attributes_passive_perception_bonus_title": {
-    "en": "Passive Perception Bonus",
-    "ru": "Бонус пассивной внимательности",
-    "de": "Bonus auf passive Wahrnehmung",
-    "fr": "Bonus de Perception passive",
-    "es": "Bonificador a Percepción pasiva"
+    "maxChars": 15,
+    "en": "Perception",
+    "ru": "Внимательность",
+    "de": "Wahrnehmung",
+    "fr": "Perception",
+    "es": "Percepción"
   },
   "attributes_base_value": {
     "en": "Base value: %s",
@@ -2168,18 +2171,20 @@
     "es": "Recursos de combate"
   },
   "combat_add_attack": {
+    "maxChars": 15,
     "en": "Add Attack",
-    "ru": "\u0414\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u0430\u0442\u0430\u043a\u0443",
-    "de": "Angriff hinzuf\u00fcgen",
-    "fr": "Ajouter une attaque",
-    "es": "A\u00f1adir ataque"
+    "ru": "Добавить атаку",
+    "de": "Neuer Angriff",
+    "fr": "Ajout d'attaque",
+    "es": "Añadir ataque"
   },
   "combat_add_entry_title": {
+    "maxChars": 15,
     "en": "Add to Combat",
-    "ru": "\u0414\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u0438\u0435 \u0432 \u0431\u043e\u0439",
-    "de": "Zum Kampf hinzuf\u00fcgen",
-    "fr": "Ajouter au combat",
-    "es": "A\u00f1adir al combate"
+    "ru": "Добавить в бой",
+    "de": "In den Kampf",
+    "fr": "Ajout au combat",
+    "es": "Al combate"
   },
   "combat_add_attacks_section": {
     "en": "Attacks",
@@ -2231,11 +2236,12 @@
     "es": "A\u00f1adir recurso"
   },
   "combat_select_weapon": {
+    "maxChars": 15,
     "en": "Select Weapon",
-    "ru": "\u0412\u044b\u0431\u043e\u0440 \u043e\u0440\u0443\u0436\u0438\u044f",
-    "de": "Waffe ausw\u00e4hlen",
-    "fr": "S\u00e9lectionner une arme",
-    "es": "Seleccionar arma"
+    "ru": "Выбор оружия",
+    "de": "Waffe auswählen",
+    "fr": "Choisir l'arme",
+    "es": "Elegir arma"
   },
   "combat_no_weapons_available": {
     "en": "No weapons in inventory.",
@@ -2245,11 +2251,12 @@
     "es": "No hay armas en el inventario."
   },
   "combat_select_spell": {
+    "maxChars": 15,
     "en": "Select Spell",
-    "ru": "\u0412\u044b\u0431\u043e\u0440 \u0437\u0430\u043a\u043b\u0438\u043d\u0430\u043d\u0438\u044f",
-    "de": "Zauber ausw\u00e4hlen",
-    "fr": "S\u00e9lectionner un sort",
-    "es": "Seleccionar conjuro"
+    "ru": "Заклинание",
+    "de": "Zauber wählen",
+    "fr": "Choisir un sort",
+    "es": "Elegir conjuro"
   },
   "combat_no_spells_available": {
     "en": "No suitable spells available.",
@@ -2287,10 +2294,11 @@
     "es": "M"
   },
   "combat_edit_attack": {
+    "maxChars": 15,
     "en": "Edit Attack",
-    "ru": "\u0418\u0437\u043c\u0435\u043d\u0438\u0442\u044c \u0430\u0442\u0430\u043a\u0443",
-    "de": "Angriff bearbeiten",
-    "fr": "Modifier l'attaque",
+    "ru": "Изменить атаку",
+    "de": "Angriff ändern",
+    "fr": "Éditer attaque",
     "es": "Editar ataque"
   },
   "combat_attack_range": {
@@ -2420,10 +2428,11 @@
     "es": "Todav\u00eda no hay recursos de combate."
   },
   "combat_edit_resource": {
+    "maxChars": 15,
     "en": "Edit Resource",
-    "ru": "\u0418\u0437\u043c\u0435\u043d\u0438\u0442\u044c \u0440\u0435\u0441\u0443\u0440\u0441",
-    "de": "Ressource bearbeiten",
-    "fr": "Modifier la ressource",
+    "ru": "Изменить ресурс",
+    "de": "Ressource",
+    "fr": "Ressource",
     "es": "Editar recurso"
   },
   "combat_resource_current": {
@@ -2455,11 +2464,12 @@
     "es": "Se recupera en descanso largo"
   },
   "combat_edit_spellcasting_ability": {
-    "en": "Spellcasting Ability",
-    "ru": "\u0417\u0430\u043a\u043b\u0438\u043d\u0430\u0442\u0435\u043b\u044c\u043d\u0430\u044f \u0445\u0430\u0440\u0430\u043a\u0442\u0435\u0440\u0438\u0441\u0442\u0438\u043a\u0430",
+    "maxChars": 15,
+    "en": "Casting Ability",
+    "ru": "Характеристика",
     "de": "Zauberattribut",
-    "fr": "Caract\u00e9ristique d'incantation",
-    "es": "Caracter\u00edstica de conjuro"
+    "fr": "Caractéristique",
+    "es": "Característica"
   },
   "inventory_section_items_title": {
     "en": "Inventory List",
@@ -2715,18 +2725,20 @@
     "es": "Editar rasgo"
   },
   "features_editor_edit": {
+    "maxChars": 15,
     "en": "Edit",
-    "ru": "\u0418\u0437\u043c\u0435\u043d\u0438\u0442\u044c",
+    "ru": "Изменить",
     "de": "Bearbeiten",
     "fr": "Modifier",
     "es": "Editar"
   },
   "features_editor_add": {
+    "maxChars": 15,
     "en": "Add",
-    "ru": "\u0414\u043e\u0431\u0430\u0432\u0438\u0442\u044c",
-    "de": "Hinzuf\u00fcgen",
+    "ru": "Добавить",
+    "de": "Hinzufügen",
     "fr": "Ajouter",
-    "es": "A\u00f1adir"
+    "es": "Añadir"
   },
   "features_no_description": {
     "en": "No description",
@@ -2736,10 +2748,11 @@
     "es": "Sin descripci\u00f3n"
   },
   "features_add_feature": {
+    "maxChars": 15,
     "en": "Add Feature",
-    "ru": "\u0414\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u0438\u0435 \u043e\u0441\u043e\u0431\u0435\u043d\u043d\u043e\u0441\u0442\u0438",
-    "de": "Merkmal hinzufuegen",
-    "fr": "Ajouter un trait",
+    "ru": "Особенность",
+    "de": "Neues Merkmal",
+    "fr": "Nouveau trait",
     "es": "Agregar rasgo"
   },
   "features_add_create_section": {
@@ -3141,6 +3154,7 @@
     "es": "Sin alineamiento"
   },
   "biography_alignment": {
+    "maxChars": 15,
     "en": "Alignment",
     "ru": "Мировоззрение",
     "de": "Gesinnung",
@@ -3611,11 +3625,12 @@
     "es": "kg"
   },
   "biography_height_size_title": {
+    "maxChars": 15,
     "en": "Height and size",
     "ru": "Рост и размер",
-    "de": "Körpergröße und Größe",
-    "fr": "Taille et catégorie",
-    "es": "Estatura y tamaño"
+    "de": "Größe/Kategorie",
+    "fr": "Taille/gabarit",
+    "es": "Estatura/tamaño"
   },
   "biography_range_from": {
     "en": "from %s",
@@ -3831,15 +3846,17 @@
     "es": "Nivel %1$s"
   },
   "overview_short_rest": {
+    "maxChars": 15,
     "en": "Short Rest",
-    "ru": "\u041a\u043e\u0440\u043e\u0442\u043a\u0438\u0439 \u043e\u0442\u0434\u044b\u0445",
+    "ru": "Короткий отдых",
     "de": "Kurze Rast",
     "fr": "Repos court",
     "es": "Descanso corto"
   },
   "overview_long_rest": {
+    "maxChars": 15,
     "en": "Long Rest",
-    "ru": "\u0414\u043e\u043b\u0433\u0438\u0439 \u043e\u0442\u0434\u044b\u0445",
+    "ru": "Долгий отдых",
     "de": "Lange Rast",
     "fr": "Repos long",
     "es": "Descanso largo"
@@ -3887,9 +3904,10 @@
     "es": "Descansar"
   },
   "overview_portrait_menu_title": {
+    "maxChars": 15,
     "en": "Portrait",
-    "ru": "\u041f\u043e\u0440\u0442\u0440\u0435\u0442",
-    "de": "Portr\u00e4t",
+    "ru": "Портрет",
+    "de": "Porträt",
     "fr": "Portrait",
     "es": "Retrato"
   },
@@ -3908,11 +3926,12 @@
     "es": "Cambiar retrato"
   },
   "overview_portrait_frame": {
+    "maxChars": 15,
     "en": "Adjust framing",
-    "ru": "Кадрировать портрет",
-    "de": "Ausschnitt anpassen",
-    "fr": "Ajuster le cadrage",
-    "es": "Ajustar encuadre"
+    "ru": "Кадрировать",
+    "de": "Ausschnitt",
+    "fr": "Cadrage",
+    "es": "Encuadre"
   },
   "overview_portrait_frame_hint": {
     "en": "Drag the portrait, pinch to zoom: the frame shows what will be seen.",
@@ -4034,24 +4053,27 @@
     "es": "Velocidad"
   },
   "overview_settings": {
+    "maxChars": 15,
     "en": "Settings",
-    "ru": "\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438",
+    "ru": "Настройки",
     "de": "Einstellungen",
-    "fr": "Param\u00e8tres",
+    "fr": "Paramètres",
     "es": "Ajustes"
   },
   "overview_rename_title": {
-    "en": "Rename Character",
-    "ru": "\u0418\u043c\u044f \u043f\u0435\u0440\u0441\u043e\u043d\u0430\u0436\u0430",
-    "de": "Charakter umbenennen",
-    "fr": "Renommer le personnage",
-    "es": "Renombrar personaje"
+    "maxChars": 15,
+    "en": "Character Name",
+    "ru": "Имя персонажа",
+    "de": "Charaktername",
+    "fr": "Nom",
+    "es": "Nombre"
   },
   "overview_edit_race_title": {
+    "maxChars": 15,
     "en": "Edit Race",
-    "ru": "\u0420\u0430\u0441\u0430",
+    "ru": "Раса",
     "de": "Volk bearbeiten",
-    "fr": "Modifier la race",
+    "fr": "Race",
     "es": "Editar raza"
   },
   "overview_edit_class_title": {
@@ -4062,10 +4084,11 @@
     "es": "Editar clase"
   },
   "overview_level_picker_title": {
+    "maxChars": 15,
     "en": "Select Level",
-    "ru": "\u0412\u044b\u0431\u043e\u0440 \u0443\u0440\u043e\u0432\u043d\u044f",
+    "ru": "Выбор уровня",
     "de": "Stufe wählen",
-    "fr": "Choisir le niveau",
+    "fr": "Choix du niveau",
     "es": "Elegir nivel"
   },
   "levelup_badge": {
@@ -4706,11 +4729,12 @@
     "es": "Character Wizard a\u00fan no puede quitar niveles; llegar\u00e1 m\u00e1s adelante. Por ahora el nivel solo puede subir."
   },
   "overview_exp_dialog_title": {
-    "en": "Edit Experience",
-    "ru": "\u0418\u0437\u043c\u0435\u043d\u0438\u0442\u044c EXP",
-    "de": "Erfahrung bearbeiten",
-    "fr": "Modifier les PX",
-    "es": "Editar experiencia"
+    "maxChars": 15,
+    "en": "Experience",
+    "ru": "Опыт",
+    "de": "Erfahrung",
+    "fr": "Expérience",
+    "es": "Experiencia"
   },
   "overview_exp_add": {
     "en": "Add",
@@ -5273,6 +5297,7 @@
     "es": "Agotamiento %1$d"
   },
   "concentration_title": {
+    "maxChars": 15,
     "en": "Concentration",
     "ru": "Концентрация",
     "de": "Konzentration",
@@ -5333,11 +5358,12 @@
     "es": "Estado"
   },
   "overview_hp_max_dialog_title": {
-    "en": "Edit Max HP",
-    "ru": "\u0418\u0437\u043c\u0435\u043d\u0438\u0442\u044c \u043c\u0430\u043a\u0441. HP",
-    "de": "Max. TP bearbeiten",
-    "fr": "Modifier les pv max",
-    "es": "Editar PG máx."
+    "maxChars": 15,
+    "en": "Maximum HP",
+    "ru": "Максимум хитов",
+    "de": "Maximale TP",
+    "fr": "PV maximum",
+    "es": "PG máximos"
   },
   "overview_hp_max": {
     "en": "Max HP",
@@ -5382,18 +5408,20 @@
     "es": "Descansar"
   },
   "overview_edit_ac_title": {
-    "en": "Edit Armor Class",
-    "ru": "\u0418\u0437\u043c\u0435\u043d\u0438\u0442\u044c \u043a\u043b\u0430\u0441\u0441 \u0431\u0440\u043e\u043d\u0438",
-    "de": "Rüstungsklasse bearbeiten",
-    "fr": "Modifier la classe d'armure",
-    "es": "Editar Clase de Armadura"
+    "maxChars": 15,
+    "en": "Armor Class",
+    "ru": "Класс брони",
+    "de": "Rüstungsklasse",
+    "fr": "Classe d'armure",
+    "es": "Armadura (CA)"
   },
   "overview_edit_initiative_title": {
-    "en": "Edit Initiative",
-    "ru": "\u0418\u0437\u043c\u0435\u043d\u0438\u0442\u044c \u0438\u043d\u0438\u0446\u0438\u0430\u0442\u0438\u0432\u0443",
-    "de": "Initiative bearbeiten",
-    "fr": "Modifier l'initiative",
-    "es": "Editar iniciativa"
+    "maxChars": 15,
+    "en": "Initiative",
+    "ru": "Инициатива",
+    "de": "Initiative",
+    "fr": "Initiative",
+    "es": "Iniciativa"
   },
   "overview_initiative_bonus": {
     "en": "Initiative bonus",
@@ -5417,11 +5445,12 @@
     "es": "Resultado: %1$s"
   },
   "overview_edit_speed_title": {
-    "en": "Edit Speed",
-    "ru": "\u0418\u0437\u043c\u0435\u043d\u0438\u0442\u044c \u0441\u043a\u043e\u0440\u043e\u0441\u0442\u044c",
-    "de": "Bewegungsrate bearbeiten",
-    "fr": "Modifier la vitesse",
-    "es": "Editar velocidad"
+    "maxChars": 15,
+    "en": "Speed",
+    "ru": "Скорость",
+    "de": "Bewegungsrate",
+    "fr": "Vitesse",
+    "es": "Velocidad"
   },
   "common_save": {
     "en": "Save",
@@ -5567,11 +5596,12 @@
     "es": "Tirar dados"
   },
   "dice_picker_title": {
-    "en": "Which dice to roll?",
-    "ru": "\u041a\u0430\u043a\u0438\u0435 \u043a\u0443\u0431\u044b \u0431\u0440\u043e\u0441\u0438\u0442\u044c?",
-    "de": "Welche W\u00fcrfel werfen?",
-    "fr": "Quels d\u00e9s lancer ?",
-    "es": "\u00bfQu\u00e9 dados tirar?"
+    "maxChars": 12,
+    "en": "Roll dice",
+    "ru": "Бросок кубов",
+    "de": "Würfeln",
+    "fr": "Jet de dés",
+    "es": "Tirar dados"
   },
   "dice_picker_roll": {
     "en": "Roll",
@@ -5602,11 +5632,12 @@
     "es": "Total: %1$s"
   },
   "dice_skin_title": {
+    "maxChars": 12,
     "en": "Dice skin",
-    "ru": "\u0421\u043a\u0438\u043d \u043a\u0443\u0431\u043e\u0432",
-    "de": "W\u00fcrfel-Design",
-    "fr": "Apparence des d\u00e9s",
-    "es": "Aspecto de los dados"
+    "ru": "Скин кубов",
+    "de": "Würfeldesign",
+    "fr": "Apparence",
+    "es": "Aspecto"
   },
   "dice_skin_gold": {
     "en": "Gold",
@@ -6018,11 +6049,12 @@
     "es": "C\u00f3digo de color"
   },
   "dice_workshop_delete_title": {
-    "en": "Delete the skin?",
-    "ru": "\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u0441\u043a\u0438\u043d?",
-    "de": "Skin l\u00f6schen?",
-    "fr": "Supprimer le skin ?",
-    "es": "\u00bfEliminar el skin?"
+    "maxChars": 15,
+    "en": "Delete skin?",
+    "ru": "Удалить скин?",
+    "de": "Skin löschen?",
+    "fr": "Effacer skin ?",
+    "es": "¿Borrar skin?"
   },
   "dice_workshop_delete_text": {
     "en": "\u201c%1$s\u201d will be gone for good.",
@@ -6039,6 +6071,7 @@
     "es": "Eliminar"
   },
   "common_delete_confirm_title": {
+    "maxChars": 15,
     "en": "Delete?",
     "ru": "Удалить?",
     "de": "Löschen?",
@@ -6081,9 +6114,10 @@
     "es": "No se encontraron objetos coincidentes."
   },
   "inventory_add_item": {
+    "maxChars": 15,
     "en": "Add item",
-    "ru": "\u0414\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u0438\u0435 \u043f\u0440\u0435\u0434\u043c\u0435\u0442\u0430",
-    "de": "Gegenstand hinzufugen",
+    "ru": "Новый предмет",
+    "de": "Gegenstand",
     "fr": "Ajouter l'objet",
     "es": "Agregar objeto"
   },
@@ -6137,11 +6171,12 @@
     "es": "Crear"
   },
   "inventory_select_item_type": {
-    "en": "Select item type",
-    "ru": "\u0412\u044b\u0431\u043e\u0440 \u0442\u0438\u043f\u0430 \u043f\u0440\u0435\u0434\u043c\u0435\u0442\u0430",
-    "de": "Gegenstandstyp auswahlen",
-    "fr": "Choisir le type d'objet",
-    "es": "Seleccionar tipo de objeto"
+    "maxChars": 15,
+    "en": "Item type",
+    "ru": "Тип предмета",
+    "de": "Gegenstandstyp",
+    "fr": "Type d'objet",
+    "es": "Tipo de objeto"
   },
   "inventory_delete_action": {
     "en": "Delete",
@@ -6669,10 +6704,11 @@
     "es": "Tipo de dano a dos manos"
   },
   "inventory_currency_edit_title": {
+    "maxChars": 15,
     "en": "Edit currency",
-    "ru": "\u0418\u0437\u043c\u0435\u043d\u0438\u0442\u044c \u0432\u0430\u043b\u044e\u0442\u0443",
-    "de": "Waehrung bearbeiten",
-    "fr": "Modifier la monnaie",
+    "ru": "Изменить валюту",
+    "de": "Währung",
+    "fr": "Monnaie",
     "es": "Editar moneda"
   },
   "inventory_currency_cp": {
@@ -6788,9 +6824,10 @@
     "es": "Buscar conjuros"
   },
   "spells_add_spell": {
+    "maxChars": 15,
     "en": "Add Spell",
-    "ru": "Добавление заклинания",
-    "de": "Zauber hinzufuegen",
+    "ru": "Заклинание",
+    "de": "Neuer Zauber",
     "fr": "Ajouter un sort",
     "es": "Agregar conjuro"
   },
@@ -6851,17 +6888,19 @@
     "es": "Aun no hay conjuros de este nivel."
   },
   "spells_create_spell": {
+    "maxChars": 15,
     "en": "Create Spell",
-    "ru": "Создать заклинание",
-    "de": "Zauber erstellen",
-    "fr": "Creer un sort",
+    "ru": "Своё заклинание",
+    "de": "Neuer Zauber",
+    "fr": "Créer un sort",
     "es": "Crear conjuro"
   },
   "spells_edit_spell": {
+    "maxChars": 15,
     "en": "Edit Spell",
-    "ru": "Изменить заклинание",
-    "de": "Zauber bearbeiten",
-    "fr": "Modifier le sort",
+    "ru": "Заклинание",
+    "de": "Zauber ändern",
+    "fr": "Modifier sort",
     "es": "Editar conjuro"
   },
   "spells_section_description": {
@@ -7565,11 +7604,12 @@
     "es": "Clases"
   },
   "spells_edit_slots": {
-    "en": "Edit Spell Slots",
-    "ru": "Изменить ячейки заклинаний",
-    "de": "Zauberplaetze bearbeiten",
-    "fr": "Modifier les emplacements",
-    "es": "Editar espacios de conjuro"
+    "maxChars": 15,
+    "en": "Spell Slots",
+    "ru": "Ячейки",
+    "de": "Zauberplätze",
+    "fr": "Emplacements",
+    "es": "Espacios"
   },
   "spells_slot_count": {
     "en": "Slot Count",

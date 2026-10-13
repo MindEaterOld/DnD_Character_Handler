@@ -80,18 +80,14 @@ internal fun DicePickerDialog(
         onConfirm = { onRoll(counts.filterValues { it > 0 }) },
         confirmLabel = text("dice_picker_roll"),
         confirmEnabled = bodies > 0,
-        // The gear turns to the skins; on the skins the arrow before the title turns back.
+        // On the title's other side from the cross (2026-10-13): the gear turns to the skins, on the skins the arrow
+        // turns back.
         titleLeading = if (choosingSkin) {
             {
                 IconButton(onClick = { choosingSkin = false }) {
                     Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = text("common_back"))
                 }
             }
-        } else {
-            null
-        },
-        titleActions = if (choosingSkin) {
-            null
         } else {
             {
                 IconButton(onClick = { choosingSkin = true }) {

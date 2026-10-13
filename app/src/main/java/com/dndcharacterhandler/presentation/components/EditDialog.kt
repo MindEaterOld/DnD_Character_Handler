@@ -34,7 +34,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
@@ -49,10 +67,13 @@ import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
  * [confirmIsDanger] paints the main action in the danger colour (confirming a deletion). Delete
  * asks first ("Delete? This can't be undone."), in a pop-up of its own (owner's choice, 2026-10-04).
  * [scrollable] false for content that scrolls by itself (a LazyColumn). [titleActions] sit before
- * the cross (the dice picker's skin button); [titleLeading] before the title (a back arrow).
+ * the cross; [titleLeading] on the title's other side (a back arrow, the dice picker's skin button).
  *
  * Its title is in the app's serif (`titleLarge`), as the sheet's ([EditSheet]) (owner's choice from boards,
- * 2026-10-07: P1).
+ * 2026-10-07: P1), centred over a gold rule with a diamond (as the key stats' rules), the cross a round button
+ * ([DialogCrossSize], the standard button fill) on the title's first line, an empty place as wide on the other side
+ * so the title stays in the middle (owner's choice from boards, 2026-10-13: Б1). A title fits one line: its key
+ * carries `maxChars` 15 (12 where a button stands on its other side too).
  *
  * Laid out by itself, not by Material's AlertDialog: that one kept the room of its buttons' row under the content
  * even with no buttons, a hole at the foot of every pop-up without them (owner, 2026-10-13). Material's measures are
@@ -83,25 +104,45 @@ fun EditDialog(
             tonalElevation = AlertDialogDefaults.TonalElevation
         ) {
             Column(modifier = Modifier.padding(24.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    titleLeading?.invoke()
+                val titleStyle = MaterialTheme.typography.titleLarge
+                // The side places: as wide as the wider of the two, so the title stays in the middle.
+                val side: Dp = maxOf(
+                    if (titleLeading != null) DialogSideButtonSize else 0.dp,
+                    DialogCrossSize + if (titleActions != null) DialogSideButtonSize else 0.dp
+                )
+                // The buttons on the title's first line: its height, measured once.
+                val measurer = rememberTextMeasurer()
+                val firstLine = with(LocalDensity.current) { measurer.measure("Ж", titleStyle).size.height.toDp() }
+                Row(verticalAlignment = Alignment.Top) {
+                    Box(modifier = Modifier.width(side).height(firstLine), contentAlignment = Alignment.CenterStart) {
+                        Box(modifier = Modifier.wrapContentSize(unbounded = true)) { titleLeading?.invoke() }
+                    }
                     // The app's serif, as its sections' titles (owner's choice from boards, 2026-10-07: P1).
                     Text(
                         text = title,
-                        modifier = Modifier.weight(1f),
-                        style = MaterialTheme.typography.titleLarge,
-                        color = colors.text.primary
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 8.dp),
+                        style = titleStyle,
+                        color = colors.text.primary,
+                        textAlign = TextAlign.Center
                     )
-                    titleActions?.invoke(this)
-                    IconButton(onClick = onDismiss) {
-                        Icon(
-                            imageVector = Icons.Outlined.Close,
-                            contentDescription = text("common_close"),
-                            tint = colors.text.muted
-                        )
+                    Row(
+                        modifier = Modifier
+                            .width(side)
+                            .height(firstLine)
+                            .wrapContentSize(Alignment.CenterEnd, unbounded = true),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        titleActions?.invoke(this)
+                        DialogCross(onClick = onDismiss)
                     }
                 }
-                Spacer(modifier = Modifier.height(16.dp))
+                DialogTitleRule(
+                    modifier = Modifier
+                        .padding(top = 10.dp, bottom = 16.dp)
+                        .padding(horizontal = 24.dp)
+                )
                 // As Material's dialog gives its text: the muted colour, body type.
                 CompositionLocalProvider(
                     LocalContentColor provides AlertDialogDefaults.textContentColor,
@@ -165,5 +206,48 @@ fun EditDialog(
         ) {
             Text(text = text("common_delete_confirm_text"), color = colors.text.primary)
         }
+    }
+}
+
+/** The cross: a round button of the standard fill, the icon white; its tap area Material's 48dp. */
+internal val DialogCrossSize = 32.dp
+
+/** A side button's place (an IconButton's 48dp): the back arrow, the dice picker's skin button. */
+private val DialogSideButtonSize = 48.dp
+
+@Composable
+private fun DialogCross(onClick: () -> Unit) {
+    val colors = LocalDesignTokens.current.colors
+    Box(
+        modifier = Modifier
+            .minimumInteractiveComponentSize()
+            .size(DialogCrossSize)
+            .clip(CircleShape)
+            .background(colors.surface.button)
+            .clickable(role = Role.Button, onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.Close,
+            contentDescription = text("common_close"),
+            tint = colors.text.primary,
+            modifier = Modifier.size(18.dp)
+        )
+    }
+}
+
+/** Under a pop-up's title: a gold rule melting toward its ends, a small diamond in its middle (`primary` at half). */
+@Composable
+private fun DialogTitleRule(modifier: Modifier = Modifier) {
+    val gold = MaterialTheme.colorScheme.primary.copy(alpha = LocalDesignTokens.current.alpha.half)
+    Canvas(modifier = modifier.fillMaxWidth().height(9.dp)) {
+        val y = size.height / 2
+        val half = 3.5.dp.toPx()
+        val x = size.width / 2
+        val brush = Brush.horizontalGradient(listOf(Color.Transparent, gold, gold, Color.Transparent))
+        // The line stops at the diamond's points: both see-through, the line under it would show through.
+        drawLine(brush, Offset(0f, y), Offset(x - half, y), 1.dp.toPx())
+        drawLine(brush, Offset(x + half, y), Offset(size.width, y), 1.dp.toPx())
+        drawPath(Path().apply { moveTo(x, y - half); lineTo(x + half, y); lineTo(x, y + half); lineTo(x - half, y); close() }, gold)
     }
 }
