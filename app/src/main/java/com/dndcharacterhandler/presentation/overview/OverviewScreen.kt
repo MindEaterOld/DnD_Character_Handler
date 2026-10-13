@@ -1527,9 +1527,8 @@ private fun ExperienceDialog(
                         grant = ""
                     },
                     enabled = grant.isNotEmpty(),
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = buttonFill(), contentColor = colors.text.primary),
-                    modifier = Modifier.height(56.dp)
+                    // A small button is round-ended as «Сохранить», at its height (owner, 2026-10-13).
+                    colors = ButtonDefaults.buttonColors(containerColor = buttonFill(), contentColor = colors.text.primary)
                 ) {
                     Text(text("overview_exp_add"))
                 }
