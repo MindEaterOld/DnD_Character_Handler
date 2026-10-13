@@ -1113,17 +1113,16 @@ private fun OverviewContent(
         ExperienceDialog(
             character = characterBundle.character,
             startOnLevels = experienceDialogOnLevels,
-            onSave = { experience ->
+            onSave = { experience, level ->
+                // The experience and the level are kept apart, so one never writes over the other.
                 onUpdateExperience(characterBundle, experience)
-                isExperienceDialogOpen = false
-            },
-            onPickLevel = { level ->
                 val current = characterBundle.character.level
                 when {
+                    level == current -> Unit
                     // Going up walks the wizard through every level, as Foundry does.
                     level > current -> onOpenLevelUp(level)
                     // The wizard can't take levels back yet.
-                    level < current && characterBundle.character.classes.isNotEmpty() -> isLevelDownNoticeOpen = true
+                    characterBundle.character.classes.isNotEmpty() -> isLevelDownNoticeOpen = true
                     else -> onUpdateIdentity(characterBundle, null, null, null, level)
                 }
                 isExperienceDialogOpen = false
@@ -1407,16 +1406,17 @@ private fun OverviewContent(
 /**
  * The experience's pop-up (owner's choices from boards, 2026-10-13): its tabs in place of the title, the rule's diamond
  * under the picked one. «Опыт»: the experience a counter as the hit points' — − and + on either side, held they step
- * quicker and quicker, the number typed in place — over the next level's threshold, under the header's level, name and rule,
- * and «Начислить опыт», a field and «Добавить» to add a reward to it; saved by «Сохранить». «Уровень»: the progress and
- * the levels as a grid, the character's gold; a tap picks one at once (up through Character Wizard).
+ * quicker and quicker, the number typed in place — over the next level's threshold, the level's bar under it as the hit
+ * points', and «Начислить опыт», a field and «Добавить» to add a reward to it. «Уровень»: the header's level, name and
+ * rule over the levels as a grid, the picked one gold. «Сохранить» on both saves both (a level up through Character
+ * Wizard).
  */
 @Composable
 private fun ExperienceDialog(
     character: Character,
     startOnLevels: Boolean,
-    onSave: (Int) -> Unit,
-    onPickLevel: (Int) -> Unit,
+    /** The experience and the level picked, saved together whichever tab is open (owner, 2026-10-13). */
+    onSave: (experience: Int, level: Int) -> Unit,
     onDismiss: () -> Unit
 ) {
     val colors = LocalDesignTokens.current.colors
@@ -1425,6 +1425,7 @@ private fun ExperienceDialog(
     var experience by remember { mutableStateOf(character.experience) }
     var typed by remember { mutableStateOf(TextFieldValue(character.experience.toString())) }
     var grant by remember { mutableStateOf("") }
+    var pickedLevel by remember { mutableStateOf(character.level) }
     fun setExperience(value: Int) {
         experience = value.coerceIn(0, MaxExperience)
         typed = experience.toString().let { TextFieldValue(it, TextRange(it.length)) }
@@ -1435,7 +1436,7 @@ private fun ExperienceDialog(
         selectedTab = tab,
         onSelectTab = { tab = it },
         onDismiss = onDismiss,
-        onConfirm = if (tab == 0) ({ onSave(experience) }) else null,
+        onConfirm = { onSave(experience, pickedLevel) },
         scrollable = false
     ) {
         if (tab == 0) {
@@ -1497,7 +1498,7 @@ private fun ExperienceDialog(
                             )
                         }
                     }
-                    ExperienceBar(HeaderLevel(character.level, experience), barWidth)
+                    ExperienceBar(HeaderLevel(pickedLevel, experience), barWidth)
                     }
                 }
                 HpStepButton(
@@ -1538,7 +1539,7 @@ private fun ExperienceDialog(
             // The header's level, name and rule under the tabs' rule, over the levels (owner, 2026-10-13).
             CharacterLevelTitle(
                 name = character.name,
-                level = HeaderLevel(character.level, experience),
+                level = HeaderLevel(pickedLevel, experience),
                 modifier = Modifier
                     .fillMaxWidth()
                     .dialogLeadText(MaterialTheme.typography.titleLarge)
@@ -1547,14 +1548,14 @@ private fun ExperienceDialog(
                 (1..MAX_CHARACTER_LEVEL).chunked(5).forEach { row ->
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         row.forEach { level ->
-                            val current = level == character.level
+                            val current = level == pickedLevel
                             Box(
                                 modifier = Modifier
                                     .weight(1f)
                                     .aspectRatio(1.25f)
                                     .clip(RoundedCornerShape(10.dp))
                                     .background(toggleFill(current))
-                                    .clickable(role = Role.Button) { onPickLevel(level) },
+                                    .clickable(role = Role.RadioButton) { pickedLevel = level },
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
