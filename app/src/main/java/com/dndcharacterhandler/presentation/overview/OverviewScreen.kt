@@ -1,10 +1,10 @@
 package com.dndcharacterhandler.presentation.overview
+import com.dndcharacterhandler.presentation.components.CharacterLevelTitle
+import com.dndcharacterhandler.presentation.components.dialogLeadText
 import com.dndcharacterhandler.presentation.components.buttonFill
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.foundation.layout.aspectRatio
-import com.dndcharacterhandler.presentation.components.romanNumeral
-import com.dndcharacterhandler.domain.dnd5e.rules.experienceProgress
 import com.dndcharacterhandler.domain.dnd5e.rules.ExperienceThresholds
 import kotlin.math.hypot
 import androidx.compose.foundation.layout.offset
@@ -1406,7 +1406,7 @@ private fun OverviewContent(
 /**
  * The experience's pop-up (owner's choices from boards, 2026-10-13): its tabs in place of the title, the rule's diamond
  * under the picked one. «Опыт»: the experience a counter as the hit points' — − and + on either side, held they step
- * quicker and quicker, the number typed in place — over the next level's threshold, the progress «I — II» under it,
+ * quicker and quicker, the number typed in place — over the next level's threshold, under the header's level, name and rule,
  * and «Начислить опыт», a field and «Добавить» to add a reward to it; saved by «Сохранить». «Уровень»: the progress and
  * the levels as a grid, the character's gold; a tap picks one at once (up through Character Wizard).
  */
@@ -1437,10 +1437,18 @@ private fun ExperienceDialog(
         onConfirm = if (tab == 0) ({ onSave(experience) }) else null,
         scrollable = false
     ) {
+        // The header's level, name and rule over either tab, the draft's experience on it (owner, 2026-10-13).
+        CharacterLevelTitle(
+            name = character.name,
+            level = HeaderLevel(character.level, experience),
+            modifier = Modifier
+                .fillMaxWidth()
+                .dialogLeadText(MaterialTheme.typography.titleLarge)
+        )
         if (tab == 0) {
             val level = levelForExperience(experience)
             val next = ExperienceThresholds.getOrNull(level)?.takeIf { level < MAX_CHARACTER_LEVEL }
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Row(modifier = Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                 HpStepButton(
                     icon = Icons.Outlined.Remove,
                     description = text("overview_exp_step_down"),
@@ -1498,7 +1506,6 @@ private fun ExperienceDialog(
                     onStep = { setExperience(experience + 1) }
                 )
             }
-            ExperienceLevelBar(experience)
             Text(
                 text = text("overview_exp_grant"),
                 modifier = Modifier.padding(top = 12.dp),
@@ -1528,8 +1535,7 @@ private fun ExperienceDialog(
                 }
             }
         } else {
-            ExperienceLevelBar(experience)
-            Column(modifier = Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(modifier = Modifier.padding(top = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 (1..MAX_CHARACTER_LEVEL).chunked(5).forEach { row ->
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         row.forEach { level ->
@@ -1554,32 +1560,6 @@ private fun ExperienceDialog(
                 }
             }
         }
-    }
-}
-
-/** The experience's way to the next level: its Roman numeral, the header's rule across, the next one's. */
-@Composable
-private fun ExperienceLevelBar(experience: Int) {
-    val colors = LocalDesignTokens.current.colors
-    val gold = MaterialTheme.colorScheme.primary
-    val level = levelForExperience(experience)
-    val last = level >= MAX_CHARACTER_LEVEL
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Text(romanNumeral(level), style = MaterialTheme.typography.titleLarge, color = colors.text.primary)
-        Canvas(
-            modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 10.dp)
-                .height(8.dp)
-        ) {
-            val h = 3.dp.toPx()
-            val y = size.height / 2 - h / 2
-            val corner = CornerRadius(h / 2)
-            drawRoundRect(colors.border.faint, Offset(0f, y), Size(size.width, h), corner)
-            val share = experienceProgress(level, experience)
-            if (share > 0f) drawRoundRect(if (last) colors.accent.bright else gold, Offset(0f, y), Size(size.width * share, h), corner)
-        }
-        if (!last) Text(romanNumeral(level + 1), style = MaterialTheme.typography.titleLarge, color = colors.text.muted)
     }
 }
 
