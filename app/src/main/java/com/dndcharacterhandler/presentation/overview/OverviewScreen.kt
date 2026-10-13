@@ -1,9 +1,8 @@
 package com.dndcharacterhandler.presentation.overview
 import com.dndcharacterhandler.domain.dnd5e.rules.experienceProgress
+import com.dndcharacterhandler.presentation.components.StepButton
 import com.dndcharacterhandler.presentation.components.romanNumeral
 import com.dndcharacterhandler.presentation.components.buttonFill
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import com.dndcharacterhandler.domain.dnd5e.rules.ExperienceThresholds
 import kotlin.math.hypot
 import androidx.compose.foundation.layout.offset
@@ -1512,7 +1511,7 @@ private fun ExperienceDialog(
                 color = colors.text.muted
             )
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                // As tall as «Добавить» beside it (owner, 2026-10-13 — Material's 56dp field read too large under the
+                // As tall as the «+» beside it (owner, 2026-10-13 — Material's 56dp field read too large under the
                 // counter): an outline with no fill, gold while typed in, its corners every field's (a capsule is a button's).
                 var grantFocused by remember { mutableStateOf(false) }
                 BasicTextField(
@@ -1528,7 +1527,7 @@ private fun ExperienceDialog(
                     decorationBox = { field ->
                         Box(
                             modifier = Modifier
-                                .height(ButtonDefaults.MinHeight)
+                                .height(GrantAddSize)
                                 .border(
                                     1.dp,
                                     if (grantFocused) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
@@ -1544,17 +1543,17 @@ private fun ExperienceDialog(
                         }
                     }
                 )
-                Button(
+                // A round «+», as a pick's own entry is added (owner, 2026-10-13 — in place of «Добавить»).
+                StepButton(
+                    icon = Icons.Outlined.Add,
+                    contentDescription = text("overview_exp_add"),
                     onClick = {
                         setExperience(experience + (grant.toIntOrNull() ?: 0))
                         grant = ""
                     },
                     enabled = grant.isNotEmpty(),
-                    // A small button is round-ended as «Сохранить», at its height (owner, 2026-10-13).
-                    colors = ButtonDefaults.buttonColors(containerColor = buttonFill(), contentColor = colors.text.primary)
-                ) {
-                    Text(text("overview_exp_add"))
-                }
+                    size = GrantAddSize
+                )
             }
         } else {
             // The level a counter as the experience (owner, 2026-10-13): its Roman numeral and «LVL», as the header
@@ -1621,6 +1620,9 @@ private fun ExperienceBar(level: HeaderLevel, width: Dp) {
 
 /** The experience's bar at its shortest: a short number keeps a bar to read. */
 private val ExperienceBarMinWidth = 120.dp
+
+/** The award's «+» and its field beside it: a stepper's size. */
+private val GrantAddSize = 48.dp
 
 /** The most experience the counter takes. */
 private const val MaxExperience = 9_999_999
