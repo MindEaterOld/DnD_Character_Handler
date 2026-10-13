@@ -1,5 +1,11 @@
 package com.dndcharacterhandler.presentation.overview
 import com.dndcharacterhandler.presentation.components.buttonFill
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.foundation.layout.aspectRatio
+import com.dndcharacterhandler.presentation.components.romanNumeral
+import com.dndcharacterhandler.domain.dnd5e.rules.experienceProgress
+import com.dndcharacterhandler.domain.dnd5e.rules.ExperienceThresholds
 import kotlin.math.hypot
 import androidx.compose.foundation.layout.offset
 import androidx.compose.ui.layout.AlignmentLine
@@ -643,11 +649,6 @@ private enum class OverviewEditableField {
     LEVEL
 }
 
-private enum class OverviewExperienceEditMode {
-    ADD,
-    SET
-}
-
 private enum class OverviewMiniStatField {
     ARMOR_CLASS,
     INITIATIVE,
@@ -812,8 +813,7 @@ private fun OverviewContent(
     var isInitiativeRollOpen by remember { mutableStateOf(false) }
     var isEndConcentrationOpen by remember { mutableStateOf(false) }
     var isExperienceDialogOpen by remember { mutableStateOf(false) }
-    var experienceEditMode by remember { mutableStateOf(OverviewExperienceEditMode.ADD) }
-    var experienceDraft by remember(character?.id, character?.experience) { mutableStateOf("") }
+    var experienceDialogOnLevels by remember { mutableStateOf(false) }
     var isMaxHpDialogOpen by remember { mutableStateOf(false) }
     var maxHpDraft by remember(character?.id, character?.maxHp) { mutableStateOf("") }
     var activeMiniStatField by remember { mutableStateOf<OverviewMiniStatField?>(null) }
@@ -859,8 +859,7 @@ private fun OverviewContent(
 
     // The experience's pop-up, adding: the «XP» coin, a long press on the level under the name.
     val openAddExperience: () -> Unit = {
-        experienceEditMode = OverviewExperienceEditMode.ADD
-        experienceDraft = ""
+        experienceDialogOnLevels = false
         isExperienceDialogOpen = true
     }
 
@@ -1076,45 +1075,6 @@ private fun OverviewContent(
 
     if (activeField != null && characterBundle != null) {
         val field = activeField!!
-        if (field == OverviewEditableField.LEVEL) {
-            EditDialog(
-                title = text("overview_level_picker_title"),
-                onDismiss = { activeField = null },
-                scrollable = false
-            ) {
-                FadingLazyColumn(
-                    modifier = Modifier.heightIn(max = 320.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    items(20) { index ->
-                        val level = index + 1
-                        val isSelected = level == characterBundle.character.level
-                        Text(
-                            text = strings.format("overview_level_format", level),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(toggleFill(isSelected))
-                                .clickable {
-                                    val current = characterBundle.character.level
-                                    when {
-                                        // Going up walks the wizard through every level, as Foundry does.
-                                        level > current -> onOpenLevelUp(level)
-                                        // The wizard can't take levels back yet.
-                                        level < current && characterBundle.character.classes.isNotEmpty() ->
-                                            isLevelDownNoticeOpen = true
-                                        else -> onUpdateIdentity(characterBundle, null, null, null, level)
-                                    }
-                                    activeField = null
-                                }
-                                .padding(horizontal = 12.dp, vertical = 12.dp),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = toggleContent(isSelected)
-                        )
-                    }
-                }
-            }
-        } else {
         EditDialog(
             title = when (field) {
                 OverviewEditableField.NAME -> text("overview_rename_title")
@@ -1146,74 +1106,29 @@ private fun OverviewContent(
                 }
             )
         }
-        }
     }
 
     if (isExperienceDialogOpen && characterBundle != null) {
-        val formatter = remember { NumberFormat.getIntegerInstance() }
-        val currentExperience = characterBundle.character.experience
-        val draftValue = experienceDraft.toIntOrNull()?.coerceAtLeast(0) ?: 0
-        val resultExperience = when (experienceEditMode) {
-            OverviewExperienceEditMode.ADD -> currentExperience + draftValue
-            OverviewExperienceEditMode.SET -> draftValue
-        }
-
-        EditDialog(
-            title = text("overview_exp_dialog_title"),
-            onDismiss = { isExperienceDialogOpen = false },
-            onConfirm = {
-                onUpdateExperience(characterBundle, resultExperience)
+        ExperienceDialog(
+            character = characterBundle.character,
+            startOnLevels = experienceDialogOnLevels,
+            onSave = { experience ->
+                onUpdateExperience(characterBundle, experience)
                 isExperienceDialogOpen = false
-            }
-        ) {
-            Text(
-                text = strings.format("overview_exp_current", formatter.format(currentExperience)),
-                style = MaterialTheme.typography.bodyLarge,
-                color = colors.text.muted
-            )
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                ExperienceModeButton(
-                    modifier = Modifier.weight(1f),
-                    label = text("overview_exp_add"),
-                    selected = experienceEditMode == OverviewExperienceEditMode.ADD,
-                    onClick = { experienceEditMode = OverviewExperienceEditMode.ADD }
-                )
-                ExperienceModeButton(
-                    modifier = Modifier.weight(1f),
-                    label = text("overview_exp_set"),
-                    selected = experienceEditMode == OverviewExperienceEditMode.SET,
-                    onClick = { experienceEditMode = OverviewExperienceEditMode.SET }
-                )
-            }
-            OutlinedTextField(
-                value = experienceDraft,
-                onValueChange = { value ->
-                    experienceDraft = value.filter(Char::isDigit).take(MaxExperienceDigits)
-                },
-                singleLine = true,
-                label = {
-                    Text(
-                        if (experienceEditMode == OverviewExperienceEditMode.ADD) {
-                            text("overview_exp_add")
-                        } else {
-                            text("overview_exp_set")
-                        }
-                    )
-                },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-            )
-            Text(
-                text = strings.format("overview_exp_result", formatter.format(resultExperience)),
-                style = MaterialTheme.typography.bodyLarge,
-                color = colors.text.primary
-            )
-            TextButton(
-                onClick = {
-                    isExperienceDialogOpen = false
-                    activeField = OverviewEditableField.LEVEL
+            },
+            onPickLevel = { level ->
+                val current = characterBundle.character.level
+                when {
+                    // Going up walks the wizard through every level, as Foundry does.
+                    level > current -> onOpenLevelUp(level)
+                    // The wizard can't take levels back yet.
+                    level < current && characterBundle.character.classes.isNotEmpty() -> isLevelDownNoticeOpen = true
+                    else -> onUpdateIdentity(characterBundle, null, null, null, level)
                 }
-            ) { Text(text("overview_level_picker_title")) }
-        }
+                isExperienceDialogOpen = false
+            },
+            onDismiss = { isExperienceDialogOpen = false }
+        )
     }
 
     if (isMaxHpDialogOpen && characterBundle != null) {
@@ -1488,28 +1403,188 @@ private fun OverviewContent(
     }
 }
 
+/**
+ * The experience's pop-up (owner's choices from boards, 2026-10-13): its tabs in place of the title, the rule's diamond
+ * under the picked one. «Опыт»: the experience a counter as the hit points' — − and + on either side, held they step
+ * quicker and quicker, the number typed in place — over the next level's threshold, the progress «I — II» under it,
+ * and «Начислить опыт», a field and «Добавить» to add a reward to it; saved by «Сохранить». «Уровень»: the progress and
+ * the levels as a grid, the character's gold; a tap picks one at once (up through Character Wizard).
+ */
 @Composable
-private fun ExperienceModeButton(
-    modifier: Modifier = Modifier,
-    label: String,
-    selected: Boolean,
-    onClick: () -> Unit
+private fun ExperienceDialog(
+    character: Character,
+    startOnLevels: Boolean,
+    onSave: (Int) -> Unit,
+    onPickLevel: (Int) -> Unit,
+    onDismiss: () -> Unit
 ) {
-    Surface(
-        modifier = modifier,
-        shape = RoundedCornerShape(12.dp),
-        color = toggleFill(selected),
-        onClick = onClick
+    val colors = LocalDesignTokens.current.colors
+    val typography = LocalDesignTokens.current.typography
+    var tab by remember { mutableStateOf(if (startOnLevels) 1 else 0) }
+    var experience by remember { mutableStateOf(character.experience) }
+    var typed by remember { mutableStateOf(TextFieldValue(character.experience.toString())) }
+    var grant by remember { mutableStateOf("") }
+    fun setExperience(value: Int) {
+        experience = value.coerceIn(0, MaxExperience)
+        typed = experience.toString().let { TextFieldValue(it, TextRange(it.length)) }
+    }
+    EditDialog(
+        title = text("overview_exp_dialog_title"),
+        tabs = listOf(text("overview_exp_tab_experience"), text("overview_exp_tab_level")),
+        selectedTab = tab,
+        onSelectTab = { tab = it },
+        onDismiss = onDismiss,
+        onConfirm = if (tab == 0) ({ onSave(experience) }) else null,
+        scrollable = false
     ) {
-        Text(
-            text = label,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-            style = MaterialTheme.typography.bodyLarge,
-            color = toggleContent(selected),
-            textAlign = TextAlign.Center
-        )
+        if (tab == 0) {
+            val level = levelForExperience(experience)
+            val next = ExperienceThresholds.getOrNull(level)?.takeIf { level < MAX_CHARACTER_LEVEL }
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                HpStepButton(
+                    icon = Icons.Outlined.Remove,
+                    description = text("overview_exp_step_down"),
+                    enabled = experience > 0,
+                    onStep = { setExperience(experience - 1) }
+                )
+                // As the hit points': one size while they fit between − and +, a step down the type scale when not.
+                val headline = MaterialTheme.typography.headlineMedium
+                fun sized(token: com.dndcharacterhandler.presentation.theme.TextSizeToken) =
+                    headline.copy(fontSize = token.fontSizeSp.sp, lineHeight = (token.lineHeightSp ?: token.fontSizeSp).sp)
+                val scales = listOf(
+                    sized(typography.hpCurrent) to headline,
+                    sized(typography.hpTemporary) to headline,
+                    headline to MaterialTheme.typography.titleLarge
+                )
+                val measurer = rememberTextMeasurer()
+                val threshold = next?.let { " / $it" }.orEmpty()
+                BoxWithConstraints(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                    val (numberStyle, thresholdStyle) = scales.firstOrNull { (n, t) ->
+                        measurer.measure(experience.toString(), n).size.width +
+                            (if (threshold.isEmpty()) 0 else measurer.measure(threshold, t).size.width) <= constraints.maxWidth
+                    } ?: scales.last()
+                    Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.Bottom) {
+                        // The experience typed in place, as the hit points are.
+                        BasicTextField(
+                            value = typed,
+                            onValueChange = { value ->
+                                val digits = value.text.filter(Char::isDigit).take(MaxExperienceDigits)
+                                typed = if (digits == value.text) value else TextFieldValue(digits, TextRange(digits.length))
+                                experience = digits.toIntOrNull() ?: 0
+                            },
+                            modifier = Modifier
+                                .width(IntrinsicSize.Min)
+                                .alignByBaseline(),
+                            textStyle = numberStyle.copy(color = colors.text.primary),
+                            singleLine = true,
+                            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                        )
+                        if (threshold.isNotEmpty()) {
+                            Text(
+                                text = threshold,
+                                modifier = Modifier.alignByBaseline(),
+                                style = thresholdStyle,
+                                color = colors.text.primary.copy(alpha = LocalDesignTokens.current.alpha.veil),
+                                maxLines = 1
+                            )
+                        }
+                    }
+                }
+                HpStepButton(
+                    icon = Icons.Outlined.Add,
+                    description = text("overview_exp_step_up"),
+                    enabled = experience < MaxExperience,
+                    onStep = { setExperience(experience + 1) }
+                )
+            }
+            ExperienceLevelBar(experience)
+            Text(
+                text = text("overview_exp_grant"),
+                modifier = Modifier.padding(top = 12.dp),
+                style = MaterialTheme.typography.bodyMedium,
+                color = colors.text.muted
+            )
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                OutlinedTextField(
+                    value = grant,
+                    onValueChange = { grant = it.filter(Char::isDigit).take(MaxExperienceDigits) },
+                    modifier = Modifier.weight(1f),
+                    singleLine = true,
+                    placeholder = { Text("+ 0") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
+                Button(
+                    onClick = {
+                        setExperience(experience + (grant.toIntOrNull() ?: 0))
+                        grant = ""
+                    },
+                    enabled = grant.isNotEmpty(),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = buttonFill(), contentColor = colors.text.primary),
+                    modifier = Modifier.height(56.dp)
+                ) {
+                    Text(text("overview_exp_add"))
+                }
+            }
+        } else {
+            ExperienceLevelBar(experience)
+            Column(modifier = Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                (1..MAX_CHARACTER_LEVEL).chunked(5).forEach { row ->
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        row.forEach { level ->
+                            val current = level == character.level
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .aspectRatio(1.25f)
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(toggleFill(current))
+                                    .clickable(role = Role.Button) { onPickLevel(level) },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = level.toString(),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = toggleContent(current)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
+
+/** The experience's way to the next level: its Roman numeral, the header's rule across, the next one's. */
+@Composable
+private fun ExperienceLevelBar(experience: Int) {
+    val colors = LocalDesignTokens.current.colors
+    val gold = MaterialTheme.colorScheme.primary
+    val level = levelForExperience(experience)
+    val last = level >= MAX_CHARACTER_LEVEL
+    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Text(romanNumeral(level), style = MaterialTheme.typography.titleLarge, color = colors.text.primary)
+        Canvas(
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 10.dp)
+                .height(8.dp)
+        ) {
+            val h = 3.dp.toPx()
+            val y = size.height / 2 - h / 2
+            val corner = CornerRadius(h / 2)
+            drawRoundRect(colors.border.faint, Offset(0f, y), Size(size.width, h), corner)
+            val share = experienceProgress(level, experience)
+            if (share > 0f) drawRoundRect(if (last) colors.accent.bright else gold, Offset(0f, y), Size(size.width * share, h), corner)
+        }
+        if (!last) Text(romanNumeral(level + 1), style = MaterialTheme.typography.titleLarge, color = colors.text.muted)
+    }
+}
+
+/** The most experience the counter takes. */
+private const val MaxExperience = 9_999_999
 
 /**
  * From the header's foot to the top of the side buttons' column: the first button's middle one [PortraitSideStep] under

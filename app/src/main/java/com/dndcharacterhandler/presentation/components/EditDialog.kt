@@ -43,6 +43,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.layout.positionInParent
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.clickable
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
@@ -84,6 +91,13 @@ fun EditDialog(
     scrollable: Boolean = true,
     titleActions: (@Composable RowScope.() -> Unit)? = null,
     titleLeading: (@Composable () -> Unit)? = null,
+    /**
+     * Tabs in place of the title (owner's choice from boards, 2026-10-13: 3): in the title's serif, the picked one white,
+     * the others subtle, the rule's diamond moving under the picked one. [title] stays the pop-up's name for TalkBack.
+     */
+    tabs: List<String>? = null,
+    selectedTab: Int = 0,
+    onSelectTab: (Int) -> Unit = {},
     content: @Composable ColumnScope.() -> Unit
 ) {
     val colors = LocalDesignTokens.current.colors
@@ -96,26 +110,63 @@ fun EditDialog(
         ) {
             Box {
                 Column(modifier = Modifier.padding(24.dp)) {
-                    // The app's serif, as its sections' titles (owner's choice from boards, 2026-10-07: P1), in the middle;
-                    // kept off the corners' buttons by as much on each side, so it stays in the middle.
-                    Text(
-                        text = title,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = DialogTitleInset)
-                            // The rule close under the title, measured from its baseline (owner, 2026-10-13): its
-                            // middle 12dp under it, clear of the letters' tails.
-                            .paddingFromBaseline(bottom = 7.5.dp),
-                        style = MaterialTheme.typography.titleLarge,
-                        color = colors.text.primary,
-                        textAlign = TextAlign.Center
+                    // Where the rule's diamond stands: under the picked tab's middle, or the rule's own middle.
+                    var tabCentres by remember(tabs?.size) { mutableStateOf(List(tabs?.size ?: 0) { Float.NaN }) }
+                    if (tabs == null) {
+                        // The app's serif, as its sections' titles (owner's choice from boards, 2026-10-07: P1), in the middle;
+                        // kept off the corners' buttons by as much on each side, so it stays in the middle.
+                        Text(
+                            text = title,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = DialogTitleInset)
+                                // The rule close under the title, measured from its baseline (owner, 2026-10-13): its
+                                // middle 12dp under it, clear of the letters' tails.
+                                .paddingFromBaseline(bottom = 7.5.dp),
+                            style = MaterialTheme.typography.titleLarge,
+                            color = colors.text.primary,
+                            textAlign = TextAlign.Center
+                        )
+                    } else {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = DialogTitleInset),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            tabs.forEachIndexed { index, label ->
+                                Text(
+                                    text = label,
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .clickable(role = Role.Tab) { onSelectTab(index) }
+                                        .onGloballyPositioned { box ->
+                                            val middle = box.positionInParent().x + box.size.width / 2f
+                                            if (tabCentres.getOrNull(index) != middle) {
+                                                tabCentres = tabCentres.toMutableList().also { it[index] = middle }
+                                            }
+                                        }
+                                        .padding(horizontal = 6.dp)
+                                        .paddingFromBaseline(bottom = 7.5.dp),
+                                    style = MaterialTheme.typography.titleLarge,
+                                    color = if (index == selectedTab) colors.text.primary else colors.text.subtle,
+                                    maxLines = 1
+                                )
+                            }
+                        }
+                    }
+                    // The tabs' row and the rule share their width, so a tab's middle is the diamond's place on it.
+                    val diamond by animateFloatAsState(
+                        targetValue = tabCentres.getOrNull(selectedTab) ?: Float.NaN,
+                        label = "dialog tab diamond"
                     )
                     DialogTitleRule(
+                        diamondX = if (tabs != null) diamond else Float.NaN,
                         modifier = Modifier
                             // Under it the content, a little farther than the title over it (owner, 2026-10-13):
                             // a text's capitals about 17dp under the line, a button's top 12dp, the title's baseline 12dp over it.
                             .padding(bottom = 8.dp)
-                            .padding(horizontal = 24.dp)
+                            .padding(horizontal = if (tabs != null) DialogTitleInset else 24.dp)
                     )
                     // As Material's dialog gives its text: the muted colour, body type.
                     CompositionLocalProvider(
@@ -208,12 +259,12 @@ private val DialogTitleInset = 16.dp
 
 /** Under a pop-up's title: a gold rule melting toward its ends, a small diamond in its middle (`primary` at half). */
 @Composable
-private fun DialogTitleRule(modifier: Modifier = Modifier) {
+private fun DialogTitleRule(modifier: Modifier = Modifier, diamondX: Float = Float.NaN) {
     val gold = MaterialTheme.colorScheme.primary.copy(alpha = LocalDesignTokens.current.alpha.half)
     Canvas(modifier = modifier.fillMaxWidth().height(9.dp)) {
         val y = size.height / 2
         val half = 3.5.dp.toPx()
-        val x = size.width / 2
+        val x = if (diamondX.isNaN()) size.width / 2 else diamondX.coerceIn(half, size.width - half)
         val brush = Brush.horizontalGradient(listOf(Color.Transparent, gold, gold, Color.Transparent))
         // The line stops at the diamond's points: both see-through, the line under it would show through.
         drawLine(brush, Offset(0f, y), Offset(x - half, y), 1.dp.toPx())

@@ -4736,6 +4736,43 @@
     "fr": "Expérience",
     "es": "Experiencia"
   },
+  "overview_exp_tab_experience": {
+    "maxChars": 11,
+    "en": "Experience",
+    "ru": "Опыт",
+    "de": "Erfahrung",
+    "fr": "Expérience",
+    "es": "Experiencia"
+  },
+  "overview_exp_tab_level": {
+    "maxChars": 8,
+    "en": "Level",
+    "ru": "Уровень",
+    "de": "Stufe",
+    "fr": "Niveau",
+    "es": "Nivel"
+  },
+  "overview_exp_grant": {
+    "en": "Award experience",
+    "ru": "Начислить опыт",
+    "de": "Erfahrung vergeben",
+    "fr": "Attribuer de l'expérience",
+    "es": "Otorgar experiencia"
+  },
+  "overview_exp_step_down": {
+    "en": "One experience point less",
+    "ru": "На единицу опыта меньше",
+    "de": "Ein Erfahrungspunkt weniger",
+    "fr": "Un point d'expérience de moins",
+    "es": "Un punto de experiencia menos"
+  },
+  "overview_exp_step_up": {
+    "en": "One experience point more",
+    "ru": "На единицу опыта больше",
+    "de": "Ein Erfahrungspunkt mehr",
+    "fr": "Un point d'expérience de plus",
+    "es": "Un punto de experiencia más"
+  },
   "overview_exp_add": {
     "en": "Add",
     "ru": "\u0414\u043e\u0431\u0430\u0432\u0438\u0442\u044c",
