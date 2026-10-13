@@ -221,9 +221,8 @@ fun BoxScope.PinnedCharacterHeader(
 fun LevelUpWords(modifier: Modifier = Modifier, shadow: Shadow? = null) {
     Text(
         text = text("overview_level_up"),
-        modifier = modifier
-            .clip(RoundedCornerShape(6.dp))
-            .padding(horizontal = 6.dp),
+        // No clip: it would cut the shadow's blur at the words' box, a rectangle on the art.
+        modifier = modifier.padding(horizontal = 6.dp),
         style = MaterialTheme.typography.titleMedium.copy(shadow = shadow),
         color = LocalDesignTokens.current.colors.accent.bright,
         maxLines = 1
@@ -256,7 +255,7 @@ private fun RowScope.HeaderLevelWords(level: HeaderLevel, shadow: Shadow) {
     Row(
         modifier = Modifier
             .alignByBaseline()
-            .clip(RoundedCornerShape(8.dp))
+            // No clip: it would cut the deep shadow's blur at the words' box, a rectangle on the art.
             .levelTaps(level)
             .semantics(mergeDescendants = true) { contentDescription = description }
             .padding(end = 10.dp),
