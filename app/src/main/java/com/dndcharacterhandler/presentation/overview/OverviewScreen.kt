@@ -1112,18 +1112,25 @@ private fun OverviewContent(
         ExperienceDialog(
             character = characterBundle.character,
             startOnLevels = experienceDialogOnLevels,
-            onSave = { experience, level ->
-                // The experience and the level are kept apart, so one never writes over the other.
-                onUpdateExperience(characterBundle, experience)
+            onExperience = { experience -> onUpdateExperience(characterBundle, experience) },
+            onLevelStep = { up ->
                 val current = characterBundle.character.level
                 when {
-                    level == current -> Unit
                     // Going up walks the wizard through every level, as Foundry does.
-                    level > current -> onOpenLevelUp(level)
+                    up -> {
+                        onOpenLevelUp(current + 1)
+                        isExperienceDialogOpen = false
+                    }
                     // The wizard can't take levels back yet.
-                    characterBundle.character.classes.isNotEmpty() -> isLevelDownNoticeOpen = true
-                    else -> onUpdateIdentity(characterBundle, null, null, null, level)
+                    characterBundle.character.classes.isNotEmpty() -> {
+                        isLevelDownNoticeOpen = true
+                        isExperienceDialogOpen = false
+                    }
+                    else -> onUpdateIdentity(characterBundle, null, null, null, current - 1)
                 }
+            },
+            onLevelUp = { experience ->
+                onOpenLevelUp(levelForExperience(experience))
                 isExperienceDialogOpen = false
             },
             onDismiss = { isExperienceDialogOpen = false }
@@ -1407,15 +1414,21 @@ private fun OverviewContent(
  * under the picked one. «Опыт»: the experience a counter as the hit points' — − and + beside it, held they step
  * quicker and quicker, the number typed in place — over the next level's threshold, the level's bar under it as the hit
  * points', and «Начислить опыт», a field and «Добавить» to add a reward to it. «Уровень»: the level as a counter, its
- * Roman numeral and «LVL» between − and +. − and + close to the numbers on both. «Сохранить» on both saves both (a level
- * up through Character Wizard).
+ * Roman numeral and «LVL» between − and +. − and + close to the numbers on both. What changes is saved at once, no
+ * «Сохранить» (owner, 2026-10-13): the experience as it is stepped, typed or awarded; the level's + opens Character
+ * Wizard, its − the notice (or steps down a character whose class is only text); «Level up» under the bar opens the
+ * wizard as the header's does.
  */
 @Composable
 private fun ExperienceDialog(
     character: Character,
     startOnLevels: Boolean,
-    /** The experience and the level picked, saved together whichever tab is open (owner, 2026-10-13). */
-    onSave: (experience: Int, level: Int) -> Unit,
+    /** The experience changed: saved at once. */
+    onExperience: (Int) -> Unit,
+    /** The level's − or +: acted on at once. */
+    onLevelStep: (up: Boolean) -> Unit,
+    /** «Level up» under the bar, with the experience it is due by. */
+    onLevelUp: (experience: Int) -> Unit,
     onDismiss: () -> Unit
 ) {
     val colors = LocalDesignTokens.current.colors
@@ -1424,10 +1437,11 @@ private fun ExperienceDialog(
     var experience by remember { mutableStateOf(character.experience) }
     var typed by remember { mutableStateOf(TextFieldValue(character.experience.toString())) }
     var grant by remember { mutableStateOf("") }
-    var pickedLevel by remember { mutableStateOf(character.level) }
+    val level = character.level
     fun setExperience(value: Int) {
         experience = value.coerceIn(0, MaxExperience)
         typed = experience.toString().let { TextFieldValue(it, TextRange(it.length)) }
+        onExperience(experience)
     }
     EditDialog(
         title = text("overview_exp_dialog_title"),
@@ -1435,7 +1449,6 @@ private fun ExperienceDialog(
         selectedTab = tab,
         onSelectTab = { tab = it },
         onDismiss = onDismiss,
-        onConfirm = { onSave(experience, pickedLevel) },
         scrollable = false
     ) {
         // − and + close to the numbers on both tabs (owner, 2026-10-13), the numbers a step down from the hit points'.
@@ -1447,7 +1460,7 @@ private fun ExperienceDialog(
         val measurer = rememberTextMeasurer()
         if (tab == 0) {
             // The threshold of the level the character goes to next, not the experience's own (358 at I is «/ 300»).
-            val next = ExperienceThresholds.getOrNull(pickedLevel)?.takeIf { pickedLevel < MAX_CHARACTER_LEVEL }
+            val next = ExperienceThresholds.getOrNull(level)?.takeIf { level < MAX_CHARACTER_LEVEL }
             val due = next != null && experience >= next
             val threshold = next?.let { " / $it" }.orEmpty()
             // One size while they fit between − and +, a step down the type scale when not.
@@ -1480,6 +1493,7 @@ private fun ExperienceDialog(
                                         val digits = value.text.filter(Char::isDigit).take(MaxExperienceDigits)
                                         typed = if (digits == value.text) value else TextFieldValue(digits, TextRange(digits.length))
                                         experience = digits.toIntOrNull() ?: 0
+                                        onExperience(experience)
                                     },
                                     modifier = Modifier
                                         .width(IntrinsicSize.Min)
@@ -1499,8 +1513,14 @@ private fun ExperienceDialog(
                                     )
                                 }
                             }
-                            ExperienceBar(HeaderLevel(pickedLevel, experience), barWidth)
-                            if (due) LevelUpWords(Modifier.padding(top = 4.dp))
+                            ExperienceBar(HeaderLevel(level, experience), barWidth)
+                            if (due) {
+                                LevelUpWords(
+                                    Modifier
+                                        .padding(top = 4.dp)
+                                        .clickable(role = Role.Button) { onLevelUp(experience) }
+                                )
+                            }
                         }
                         HpStepButton(
                             icon = Icons.Outlined.Add,
@@ -1582,12 +1602,12 @@ private fun ExperienceDialog(
                 HpStepButton(
                     icon = Icons.Outlined.Remove,
                     description = text("overview_level_step_down"),
-                    enabled = pickedLevel > 1,
-                    onStep = { pickedLevel = (pickedLevel - 1).coerceAtLeast(1) }
+                    enabled = level > 1,
+                    onStep = { onLevelStep(false) }
                 )
                 Row(modifier = Modifier.width(numeralRoom), horizontalArrangement = Arrangement.Center) {
                     Text(
-                        text = romanNumeral(pickedLevel),
+                        text = romanNumeral(level),
                         modifier = Modifier.alignByBaseline(),
                         style = counter,
                         color = colors.text.primary,
@@ -1604,8 +1624,8 @@ private fun ExperienceDialog(
                 HpStepButton(
                     icon = Icons.Outlined.Add,
                     description = text("overview_level_step_up"),
-                    enabled = pickedLevel < MAX_CHARACTER_LEVEL,
-                    onStep = { pickedLevel = (pickedLevel + 1).coerceAtMost(MAX_CHARACTER_LEVEL) }
+                    enabled = level < MAX_CHARACTER_LEVEL,
+                    onStep = { onLevelStep(true) }
                 )
             }
         }
