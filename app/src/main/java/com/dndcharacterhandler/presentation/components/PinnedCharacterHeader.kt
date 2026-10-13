@@ -11,6 +11,8 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Column
+import androidx.compose.ui.layout.layout
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -64,6 +66,12 @@ val CharacterHeaderRow = 64.dp
 
 /** The experience's rule under the name. */
 private val LevelRuleWidth = 200.dp
+
+/**
+ * From the experience's rule down to «LEVEL UP»: under the header's foot by 4dp — the rule's foot is 54dp down the 64dp
+ * row (its middle 18dp under the row's, 4dp more), so 10dp to the foot and 4dp of air.
+ */
+private val LevelUpDrop = 14.dp
 
 /**
  * The level the header writes under the name (owner's choice from boards, 2026-10-09: И): the character's [level] and
@@ -182,9 +190,47 @@ fun BoxScope.PinnedCharacterHeader(
             nameShadow = shadow,
             height = CharacterHeaderRow,
             leading = level?.let { { HeaderLevelWords(it, shadow) } },
-            under = level?.let { { HeaderLevelRule(it) } }
+            under = level?.let {
+                {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        HeaderLevelRule(it)
+                        // Under the header's foot (owner, 2026-10-13): it takes no height, so the rule stays where it is.
+                        if (it.due()) {
+                            LevelUpWords(
+                                Modifier
+                                    .layout { measurable, constraints ->
+                                        val placeable = measurable.measure(constraints.copy(minHeight = 0))
+                                        layout(placeable.width, 0) { placeable.place(0, LevelUpDrop.roundToPx()) }
+                                    }
+                                    // It lies on the art only: as the band comes in it goes, the gold rule saying it still.
+                                    .graphicsLayer { alpha = 1f - backdrop.progress }
+                                    .levelTaps(it),
+                                shadow
+                            )
+                        }
+                    }
+                }
+            }
         )
     }
+}
+
+/**
+ * «LEVEL UP» under the experience's rule while a level up is due (trial, 2026-10-13): «lvl»'s style — small, semibold,
+ * spaced — in `accent.bright`, with [shadow] where it lies on a picture.
+ */
+@Composable
+fun LevelUpWords(modifier: Modifier = Modifier, shadow: Shadow? = null) {
+    Text(
+        text = text("overview_level_up").uppercase(),
+        modifier = modifier
+            .clip(RoundedCornerShape(6.dp))
+            .padding(horizontal = 6.dp, vertical = 2.dp)
+            .then(if (shadow != null) Modifier.drawWithContent { repeat(3) { drawContent() } } else Modifier),
+        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold, letterSpacing = 1.sp, shadow = shadow),
+        color = LocalDesignTokens.current.colors.accent.bright,
+        maxLines = 1
+    )
 }
 
 /** A level up is due: the experience reached the next level's. */

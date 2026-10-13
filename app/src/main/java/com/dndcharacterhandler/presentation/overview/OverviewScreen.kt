@@ -1,6 +1,7 @@
 package com.dndcharacterhandler.presentation.overview
 import com.dndcharacterhandler.domain.dnd5e.rules.experienceProgress
 import com.dndcharacterhandler.presentation.components.StepButton
+import com.dndcharacterhandler.presentation.components.LevelUpWords
 import com.dndcharacterhandler.presentation.components.romanNumeral
 import com.dndcharacterhandler.presentation.components.buttonFill
 import com.dndcharacterhandler.domain.dnd5e.rules.ExperienceThresholds
@@ -1445,8 +1446,9 @@ private fun ExperienceDialog(
         )
         val measurer = rememberTextMeasurer()
         if (tab == 0) {
-            val level = levelForExperience(experience)
-            val next = ExperienceThresholds.getOrNull(level)?.takeIf { level < MAX_CHARACTER_LEVEL }
+            // The threshold of the level the character goes to next, not the experience's own (358 at I is «/ 300»).
+            val next = ExperienceThresholds.getOrNull(pickedLevel)?.takeIf { pickedLevel < MAX_CHARACTER_LEVEL }
+            val due = next != null && experience >= next
             val threshold = next?.let { " / $it" }.orEmpty()
             // One size while they fit between − and +, a step down the type scale when not.
             val scales = listOf(counter to MaterialTheme.typography.titleLarge, headline to MaterialTheme.typography.titleMedium)
@@ -1498,6 +1500,7 @@ private fun ExperienceDialog(
                                 }
                             }
                             ExperienceBar(HeaderLevel(pickedLevel, experience), barWidth)
+                            if (due) LevelUpWords(Modifier.padding(top = 4.dp))
                         }
                         HpStepButton(
                             icon = Icons.Outlined.Add,

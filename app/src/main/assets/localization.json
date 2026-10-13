@@ -3830,6 +3830,13 @@
     "fr": "%1$s \u2022 %2$s \u2022 Niveau %3$s",
     "es": "%1$s \u2022 %2$s \u2022 Nivel %3$s"
   },
+  "overview_level_up": {
+    "en": "Level up",
+    "ru": "Level up",
+    "de": "Level up",
+    "fr": "Level up",
+    "es": "Level up"
+  },
   "overview_level_short": {
     "maxChars": 4,
     "en": "lvl",
