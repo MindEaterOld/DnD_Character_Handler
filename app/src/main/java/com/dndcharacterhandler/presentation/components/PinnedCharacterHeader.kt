@@ -67,11 +67,7 @@ val CharacterHeaderRow = 64.dp
 /** The experience's rule under the name. */
 private val LevelRuleWidth = 200.dp
 
-/**
- * From the experience's rule down to «LEVEL UP»: under the header's foot by 4dp — the rule's foot is 54dp down the 64dp
- * row (its middle 18dp under the row's, 4dp more), so 10dp to the foot and 4dp of air.
- */
-private val LevelUpDrop = 14.dp
+
 
 /**
  * The level the header writes under the name (owner's choice from boards, 2026-10-09: И): the character's [level] and
@@ -194,13 +190,14 @@ fun BoxScope.PinnedCharacterHeader(
                 {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         HeaderLevelRule(it)
-                        // Under the header's foot (owner, 2026-10-13): it takes no height, so the rule stays where it is.
+                        // Right under the rule (owner, 2026-10-13 — the header has no band at rest): it takes no height,
+                        // so the rule stays where it is.
                         if (it.due()) {
                             LevelUpWords(
                                 Modifier
                                     .layout { measurable, constraints ->
                                         val placeable = measurable.measure(constraints.copy(minHeight = 0))
-                                        layout(placeable.width, 0) { placeable.place(0, LevelUpDrop.roundToPx()) }
+                                        layout(placeable.width, 0) { placeable.place(0, 0) }
                                     }
                                     // It lies on the art only: as the band comes in it goes, the gold rule saying it still.
                                     .graphicsLayer { alpha = 1f - backdrop.progress }
@@ -216,18 +213,18 @@ fun BoxScope.PinnedCharacterHeader(
 }
 
 /**
- * «LEVEL UP» under the experience's rule while a level up is due (trial, 2026-10-13): «lvl»'s style — small, semibold,
- * spaced — in `accent.bright`, with [shadow] where it lies on a picture.
+ * «Level up» under the experience's rule while a level up is due (owner's choice from the device, 2026-10-13: A): the
+ * name's serif at `titleMedium`, in its own case, in `accent.bright`; where it lies on a picture, [shadow] drawn once —
+ * the name's deep one read as a stain under the thin letters.
  */
 @Composable
 fun LevelUpWords(modifier: Modifier = Modifier, shadow: Shadow? = null) {
     Text(
-        text = text("overview_level_up").uppercase(),
+        text = text("overview_level_up"),
         modifier = modifier
             .clip(RoundedCornerShape(6.dp))
-            .padding(horizontal = 6.dp, vertical = 2.dp)
-            .then(if (shadow != null) Modifier.drawWithContent { repeat(3) { drawContent() } } else Modifier),
-        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold, letterSpacing = 1.sp, shadow = shadow),
+            .padding(horizontal = 6.dp),
+        style = MaterialTheme.typography.titleMedium.copy(shadow = shadow),
         color = LocalDesignTokens.current.colors.accent.bright,
         maxLines = 1
     )
