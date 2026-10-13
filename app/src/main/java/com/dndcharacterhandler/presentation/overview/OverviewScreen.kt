@@ -1512,13 +1512,37 @@ private fun ExperienceDialog(
                 color = colors.text.muted
             )
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                OutlinedTextField(
+                // As tall as «Добавить» beside it (owner, 2026-10-13 — Material's 56dp field read too large under the
+                // counter): an outline with no fill, gold while typed in, round-ended as the button.
+                var grantFocused by remember { mutableStateOf(false) }
+                BasicTextField(
                     value = grant,
                     onValueChange = { grant = it.filter(Char::isDigit).take(MaxExperienceDigits) },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .onFocusChanged { grantFocused = it.isFocused },
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(color = colors.text.primary),
                     singleLine = true,
-                    placeholder = { Text("+ 0") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    decorationBox = { field ->
+                        Box(
+                            modifier = Modifier
+                                .height(ButtonDefaults.MinHeight)
+                                .border(
+                                    1.dp,
+                                    if (grantFocused) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                                    CircleShape
+                                )
+                                .padding(horizontal = 16.dp),
+                            contentAlignment = Alignment.CenterStart
+                        ) {
+                            if (grant.isEmpty()) {
+                                Text("+ 0", style = MaterialTheme.typography.bodyLarge, color = colors.text.subtle)
+                            }
+                            field()
+                        }
+                    }
                 )
                 Button(
                     onClick = {
