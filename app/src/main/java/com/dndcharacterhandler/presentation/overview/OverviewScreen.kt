@@ -1513,7 +1513,7 @@ private fun ExperienceDialog(
             )
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 // As tall as «Добавить» beside it (owner, 2026-10-13 — Material's 56dp field read too large under the
-                // counter): an outline with no fill, gold while typed in, round-ended as the button.
+                // counter): an outline with no fill, gold while typed in, its corners every field's (a capsule is a button's).
                 var grantFocused by remember { mutableStateOf(false) }
                 BasicTextField(
                     value = grant,
@@ -1532,7 +1532,7 @@ private fun ExperienceDialog(
                                 .border(
                                     1.dp,
                                     if (grantFocused) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
-                                    CircleShape
+                                    MaterialTheme.shapes.extraSmall
                                 )
                                 .padding(horizontal = 16.dp),
                             contentAlignment = Alignment.CenterStart
