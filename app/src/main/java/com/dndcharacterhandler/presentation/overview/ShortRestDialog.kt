@@ -9,10 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
@@ -20,18 +17,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.Bolt
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -53,6 +44,9 @@ import com.dndcharacterhandler.domain.dnd5e.rules.hitDiceHealing
 import com.dndcharacterhandler.domain.dnd5e.rules.hitDicePools
 import com.dndcharacterhandler.domain.dnd5e.rules.spellSlots
 import com.dndcharacterhandler.presentation.components.EditDialog
+import androidx.compose.ui.unit.sp
+import com.dndcharacterhandler.presentation.components.ToggleChip
+import com.dndcharacterhandler.presentation.components.SheetLabel
 import com.dndcharacterhandler.presentation.dice.DieIcon
 import com.dndcharacterhandler.presentation.dice.DieType
 import com.dndcharacterhandler.presentation.dice.LocalDiceSkin
@@ -115,11 +109,6 @@ internal fun ShortRestDialog(
                 onUpdateHitDieSides(sides)
             }
         )
-        Text(
-            text = text("overview_short_rest_dice_hint"),
-            style = MaterialTheme.typography.labelMedium,
-            color = LocalDesignTokens.current.colors.text.subtle
-        )
         RestRestores(characterBundle)
     }
 }
@@ -136,44 +125,40 @@ private fun hitDiceFormula(counts: Map<Int, Int>, constitution: Int): String {
 }
 
 /**
- * The hit points now, the bar beneath them, and [gain] — what the rest adds — in the healing's green: "≈ +13"
- * while it is an average (the short rest's dice), "+24" when [exact] (the long rest's).
+ * The hit points now, as a counter under a gold label (owner's choice from boards, 2026-10-13: Б — the labels as under
+ * the portrait), [gain] — what the rest adds — after them in the healing's green: "≈ +13" while it is an average (the
+ * short rest's dice), "+24" when [exact] (the long rest's); under them the overview's bar, the gain in it at half.
  */
 @Composable
 internal fun RestHitPoints(current: Int, max: Int, gain: Int, exact: Boolean = false) {
     val colors = LocalDesignTokens.current.colors
+    val typography = LocalDesignTokens.current.typography
     val now = current.coerceIn(0, max.coerceAtLeast(0))
     val added = gain.coerceIn(0, (max - now).coerceAtLeast(0))
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Row(verticalAlignment = Alignment.Bottom) {
+    val counter = MaterialTheme.typography.headlineMedium.copy(
+        fontSize = typography.hpTemporary.fontSizeSp.sp,
+        lineHeight = (typography.hpTemporary.lineHeightSp ?: typography.hpTemporary.fontSizeSp).sp
+    )
+    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        SheetLabel(text("overview_hp_kind_hit_points"))
+        Row {
+            Text(text = "$now", modifier = Modifier.alignByBaseline(), style = counter, color = colors.text.primary)
             Text(
-                text = text("overview_hp_kind_hit_points"),
-                modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.titleMedium,
-                color = colors.text.primary
+                text = " / $max",
+                modifier = Modifier.alignByBaseline(),
+                style = MaterialTheme.typography.titleLarge,
+                color = colors.text.primary.copy(alpha = LocalDesignTokens.current.alpha.veil)
             )
-            Text(text = "$now", style = MaterialTheme.typography.titleLarge, color = colors.text.primary)
-            Text(text = " / $max", style = MaterialTheme.typography.bodyLarge, color = colors.text.muted)
             if (added > 0) {
                 Text(
                     text = if (exact) "  +$added" else "  ≈ +$added",
+                    modifier = Modifier.alignByBaseline(),
                     style = MaterialTheme.typography.bodyLarge,
                     color = colors.accent.heal
                 )
             }
         }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(8.dp)
-                .clip(RoundedCornerShape(4.dp))
-                .background(colors.surface.button)
-        ) {
-            if (now > 0) Box(Modifier.weight(now.toFloat()).fillMaxHeight().background(colors.text.primary))
-            if (added > 0) Box(Modifier.weight(added.toFloat()).fillMaxHeight().background(colors.accent.heal))
-            val rest = max - now - added
-            if (rest > 0) Spacer(Modifier.weight(rest.toFloat()))
-        }
+        HpBar(current = now, temporary = 0, max = max, gain = added)
     }
 }
 
@@ -195,22 +180,13 @@ internal fun HitDicePools(
 ) {
     val colors = LocalDesignTokens.current.colors
     val russian = LocalStrings.current.language == AppLanguage.RUSSIAN
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = text("overview_hit_dice"),
-                modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.titleMedium,
-                color = colors.text.primary
-            )
-            val single = pools.singleOrNull()
-            if (single != null && single.classIds.isEmpty() && onUpdateHitDieSides != null) {
-                HitDieSidesPicker(sides = single.sides, onPick = onUpdateHitDieSides)
-            }
-        }
+    val single = pools.singleOrNull()
+    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        // The die's size is the dice's own and the toggles' (a label in capitals would write it «D8»).
+        SheetLabel(text("overview_hit_dice"))
         pools.forEach { pool ->
             val die = dieTypeOf(pool.sides) ?: DieType.D8
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 if (pools.size > 1) {
                     val classes = pool.classIds.mapNotNull { id -> catalog?.classes?.firstOrNull { it.id == id }?.name?.get(russian) }
                     Text(
@@ -220,7 +196,7 @@ internal fun HitDicePools(
                     )
                 }
                 FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     repeat(pool.total) { index ->
@@ -237,6 +213,9 @@ internal fun HitDicePools(
                     }
                 }
             }
+        }
+        if (single != null && single.classIds.isEmpty() && onUpdateHitDieSides != null) {
+            HitDieSidesPicker(sides = single.sides, onPick = onUpdateHitDieSides)
         }
     }
 }
@@ -297,22 +276,15 @@ private fun HitDieToken(die: DieType, state: HitDieState, onToggle: (() -> Unit)
 }
 
 
-/** The die's size beside the title, for a character whose class is only text: a tap lists the sizes. */
+/**
+ * The die's size, for a character whose class is only text: toggles, as every pick of a row (owner's choice from boards,
+ * 2026-10-13: Б — before, a gold link with a drop-down menu).
+ */
 @Composable
 private fun HitDieSidesPicker(sides: Int, onPick: (Int) -> Unit) {
-    var open by remember { mutableStateOf(false) }
-    Box {
-        TextButton(onClick = { open = true }) { Text("d$sides") }
-        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
-            HitDieSidesOptions.forEach { option ->
-                DropdownMenuItem(
-                    text = { Text("d$option") },
-                    onClick = {
-                        open = false
-                        if (option != sides) onPick(option)
-                    }
-                )
-            }
+    Row(horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally)) {
+        HitDieSidesOptions.forEach { option ->
+            ToggleChip(label = "d$option", selected = option == sides, onClick = { if (option != sides) onPick(option) })
         }
     }
 }
@@ -347,8 +319,8 @@ internal class RestRow(val icon: ImageVector, val name: String, val change: Stri
 internal fun RestRows(title: String, rows: List<RestRow>) {
     if (rows.isEmpty()) return
     val colors = LocalDesignTokens.current.colors
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Text(text = title, style = MaterialTheme.typography.titleMedium, color = colors.text.primary)
+    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        SheetLabel(title, modifier = Modifier.align(Alignment.CenterHorizontally))
         rows.forEach { row ->
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(

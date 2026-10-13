@@ -1851,7 +1851,7 @@ private val HpStepShade = 10.dp
 private val HpStepEmptyEdge = 10.dp
 
 /** The bar of what is left under the hit points: this wide at least, as wide as the numbers above it at most. */
-private val HpBarWidth = 150.dp
+internal val HpBarWidth = 150.dp
 
 /** The ability cards' gap: the overview's columns under the portrait stand on theirs. */
 private val ColumnGap = 10.dp
@@ -2194,8 +2194,9 @@ private fun HpStepButton(icon: ImageVector, description: String, enabled: Boolea
  * under; the number stays white (red at 0 only).
  */
 @Composable
-private fun HpBar(current: Int, temporary: Int, max: Int, width: Dp = HpBarWidth) {
+internal fun HpBar(current: Int, temporary: Int, max: Int, width: Dp = HpBarWidth, gain: Int = 0) {
     val colors = LocalDesignTokens.current.colors
+    val half = LocalDesignTokens.current.alpha.half
     Canvas(modifier = Modifier.padding(top = 4.dp).width(width).height(6.dp)) {
         val h = 4.dp.toPx()
         val y = size.height / 2 - h / 2
@@ -2203,6 +2204,11 @@ private fun HpBar(current: Int, temporary: Int, max: Int, width: Dp = HpBarWidth
         drawRoundRect(colors.border.faint, Offset(0f, y), Size(size.width, h), corner)
         if (max <= 0) return@Canvas
         val hp = size.width * (current.toFloat() / max).coerceIn(0f, 1f)
+        // What a rest would add (its pop-up): the healing's green at half, after the hit points' own part.
+        if (gain > 0) {
+            val added = (size.width * gain / max).coerceAtMost(size.width - hp)
+            if (added > 0f) drawRoundRect(colors.accent.heal.copy(alpha = half), Offset(0f, y), Size(hp + added, h), corner)
+        }
         if (temporary > 0) {
             val extra = (size.width * temporary / max).coerceAtMost(size.width - hp)
             if (extra > 0f) drawRoundRect(colors.accent.magic, Offset(0f, y), Size(hp + extra, h), corner)
@@ -2876,7 +2882,6 @@ private fun OverviewPreviewContent(
             "overview_hp_max_dialog_title" to "Edit Max HP",
             "overview_hp_max" to "Max HP",
             "overview_hit_dice" to "Hit Point Dice",
-            "overview_short_rest_dice_hint" to "Tap a die to pick it for the roll. Spent dice come back after a long rest.",
             "overview_rest_restores" to "Restores",
             "overview_short_rest_roll" to "Roll %1\$s",
             "overview_short_rest_confirm" to "Rest",

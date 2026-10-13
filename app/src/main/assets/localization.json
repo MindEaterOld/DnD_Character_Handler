@@ -5452,13 +5452,6 @@
     "fr": "Dés de vie",
     "es": "Dados de golpe"
   },
-  "overview_short_rest_dice_hint": {
-    "en": "Tap a die to pick it for the roll. Spent dice come back after a long rest.",
-    "ru": "Тап по кости — выбрать её для броска. Потраченные вернутся после долгого отдыха.",
-    "de": "Tippe einen Würfel an, um ihn für den Wurf zu wählen. Verbrauchte kommen nach einer langen Rast zurück.",
-    "fr": "Touchez un dé pour le lancer. Les dés dépensés reviennent après un repos long.",
-    "es": "Toca un dado para elegirlo para la tirada. Los gastados vuelven tras un descanso largo."
-  },
   "overview_rest_restores": {
     "en": "Restores",
     "ru": "Восстановится",
