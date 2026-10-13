@@ -12,6 +12,7 @@ import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.paddingFromBaseline
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
@@ -98,14 +99,17 @@ fun EditDialog(
                         text = title,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = DialogTitleInset),
+                            .padding(horizontal = DialogTitleInset)
+                            // The rule close under the title, measured from its baseline (owner, 2026-10-13): its
+                            // middle 12dp under it, clear of the letters' tails.
+                            .paddingFromBaseline(bottom = 7.5.dp),
                         style = MaterialTheme.typography.titleLarge,
                         color = colors.text.primary,
                         textAlign = TextAlign.Center
                     )
                     DialogTitleRule(
                         modifier = Modifier
-                            .padding(top = 10.dp, bottom = 16.dp)
+                            .padding(bottom = 16.dp)
                             .padding(horizontal = 24.dp)
                     )
                     // As Material's dialog gives its text: the muted colour, body type.
