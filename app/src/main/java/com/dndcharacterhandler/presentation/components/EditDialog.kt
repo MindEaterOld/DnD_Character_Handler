@@ -98,11 +98,6 @@ fun EditDialog(
     tabs: List<String>? = null,
     selectedTab: Int = 0,
     onSelectTab: (Int) -> Unit = {},
-    /**
-     * Over the title or the tabs, what the whole pop-up is about, the same on every tab (the experience's: the header's
-     * level, name and rule; owner, 2026-10-13). Kept off the corners' buttons as the title is.
-     */
-    heading: (@Composable () -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     val colors = LocalDesignTokens.current.colors
@@ -117,15 +112,6 @@ fun EditDialog(
                 Column(modifier = Modifier.padding(24.dp)) {
                     // Where the rule's diamond stands: under the picked tab's middle, or the rule's own middle.
                     var tabCentres by remember(tabs?.size) { mutableStateOf(List(tabs?.size ?: 0) { Float.NaN }) }
-                    if (heading != null) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = DialogTitleInset)
-                                .padding(bottom = DialogHeadingGap),
-                            contentAlignment = Alignment.Center
-                        ) { heading() }
-                    }
                     if (tabs == null) {
                         // The app's serif, as its sections' titles (owner's choice from boards, 2026-10-07: P1), in the middle;
                         // kept off the corners' buttons by as much on each side, so it stays in the middle.
@@ -264,9 +250,6 @@ fun EditDialog(
         }
     }
 }
-
-/** From what heads a pop-up down to its title or tabs. */
-private val DialogHeadingGap = 16.dp
 
 /**
  * How far the title keeps off each side of the content: the corners' icons stand 12dp in from the window's edge, the

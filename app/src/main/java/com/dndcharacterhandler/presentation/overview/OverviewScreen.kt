@@ -1,4 +1,6 @@
 package com.dndcharacterhandler.presentation.overview
+import com.dndcharacterhandler.domain.dnd5e.rules.experienceProgress
+import com.dndcharacterhandler.presentation.components.dialogLeadText
 import com.dndcharacterhandler.presentation.components.CharacterLevelTitle
 import com.dndcharacterhandler.presentation.components.buttonFill
 import androidx.compose.material3.Button
@@ -1434,9 +1436,7 @@ private fun ExperienceDialog(
         onSelectTab = { tab = it },
         onDismiss = onDismiss,
         onConfirm = if (tab == 0) ({ onSave(experience) }) else null,
-        scrollable = false,
-        // The header's level, name and rule over both tabs, the draft's experience on it (owner, 2026-10-13).
-        heading = { CharacterLevelTitle(name = character.name, level = HeaderLevel(character.level, experience)) }
+        scrollable = false
     ) {
         if (tab == 0) {
             val level = levelForExperience(experience)
@@ -1460,10 +1460,16 @@ private fun ExperienceDialog(
                 val measurer = rememberTextMeasurer()
                 val threshold = next?.let { " / $it" }.orEmpty()
                 BoxWithConstraints(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                    val (numberStyle, thresholdStyle) = scales.firstOrNull { (n, t) ->
-                        measurer.measure(experience.toString(), n).size.width +
-                            (if (threshold.isEmpty()) 0 else measurer.measure(threshold, t).size.width) <= constraints.maxWidth
-                    } ?: scales.last()
+                    fun widthAt(number: TextStyle, rest: TextStyle) = measurer.measure(experience.toString(), number).size.width +
+                        (if (threshold.isEmpty()) 0 else measurer.measure(threshold, rest).size.width)
+                    val (numberStyle, thresholdStyle) = scales.firstOrNull { (n, t) -> widthAt(n, t) <= constraints.maxWidth }
+                        ?: scales.last()
+                    // The level's bar under the numbers, as the hit points' under theirs (owner, 2026-10-13): as wide as
+                    // they are, 150dp at least.
+                    val barWidth = with(LocalDensity.current) {
+                        widthAt(numberStyle, thresholdStyle).toDp().coerceIn(HpBarWidth, maxOf(HpBarWidth, maxWidth))
+                    }
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.Bottom) {
                         // The experience typed in place, as the hit points are.
                         BasicTextField(
@@ -1490,6 +1496,8 @@ private fun ExperienceDialog(
                                 maxLines = 1
                             )
                         }
+                    }
+                    ExperienceBar(HeaderLevel(character.level, experience), barWidth)
                     }
                 }
                 HpStepButton(
@@ -1527,6 +1535,14 @@ private fun ExperienceDialog(
                 }
             }
         } else {
+            // The header's level, name and rule under the tabs' rule, over the levels (owner, 2026-10-13).
+            CharacterLevelTitle(
+                name = character.name,
+                level = HeaderLevel(character.level, experience),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .dialogLeadText(MaterialTheme.typography.titleLarge)
+            )
             Column(modifier = Modifier.padding(top = 4.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 (1..MAX_CHARACTER_LEVEL).chunked(5).forEach { row ->
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -1552,6 +1568,26 @@ private fun ExperienceDialog(
                 }
             }
         }
+    }
+}
+
+/**
+ * The way to the next level under the experience's numbers, drawn as the hit points' bar (4dp on the track, a capsule):
+ * gold, or `accent.bright` when a level up is due and at the last level, as the header's rule.
+ */
+@Composable
+private fun ExperienceBar(level: HeaderLevel, width: Dp) {
+    val colors = LocalDesignTokens.current.colors
+    val bright = level.level >= MAX_CHARACTER_LEVEL ||
+        (level.level < MAX_CHARACTER_LEVEL && levelForExperience(level.experience) > level.level)
+    val fill = if (bright) colors.accent.bright else MaterialTheme.colorScheme.primary
+    val progress = experienceProgress(level.level, level.experience)
+    Canvas(modifier = Modifier.padding(top = 4.dp).width(width).height(6.dp)) {
+        val h = 4.dp.toPx()
+        val y = size.height / 2 - h / 2
+        val corner = CornerRadius(h / 2)
+        drawRoundRect(colors.border.faint, Offset(0f, y), Size(size.width, h), corner)
+        if (progress > 0f) drawRoundRect(fill, Offset(0f, y), Size(size.width * progress, h), corner)
     }
 }
 
