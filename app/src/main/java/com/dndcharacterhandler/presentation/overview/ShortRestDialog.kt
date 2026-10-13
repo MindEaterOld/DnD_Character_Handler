@@ -21,6 +21,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -139,9 +144,12 @@ internal fun RestHitPoints(current: Int, max: Int, gain: Int, exact: Boolean = f
         fontSize = typography.hpTemporary.fontSizeSp.sp,
         lineHeight = (typography.hpTemporary.lineHeightSp ?: typography.hpTemporary.fontSizeSp).sp
     )
+    // The bar as wide as the numbers, 150dp at least, as the overview's.
+    val density = LocalDensity.current
+    var numbersWidth by remember { mutableStateOf(0.dp) }
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         SheetLabel(text("overview_hp_kind_hit_points"))
-        Row {
+        Row(modifier = Modifier.onSizeChanged { numbersWidth = with(density) { it.width.toDp() } }) {
             Text(text = "$now", modifier = Modifier.alignByBaseline(), style = counter, color = colors.text.primary)
             Text(
                 text = " / $max",
@@ -158,7 +166,7 @@ internal fun RestHitPoints(current: Int, max: Int, gain: Int, exact: Boolean = f
                 )
             }
         }
-        HpBar(current = now, temporary = 0, max = max, gain = added)
+        HpBar(current = now, temporary = 0, max = max, width = maxOf(HpBarWidth, numbersWidth), gain = added)
     }
 }
 
