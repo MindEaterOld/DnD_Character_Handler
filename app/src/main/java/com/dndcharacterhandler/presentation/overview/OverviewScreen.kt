@@ -1,6 +1,5 @@
 package com.dndcharacterhandler.presentation.overview
 import com.dndcharacterhandler.presentation.components.CharacterLevelTitle
-import com.dndcharacterhandler.presentation.components.dialogLeadText
 import com.dndcharacterhandler.presentation.components.buttonFill
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -1435,20 +1434,14 @@ private fun ExperienceDialog(
         onSelectTab = { tab = it },
         onDismiss = onDismiss,
         onConfirm = if (tab == 0) ({ onSave(experience) }) else null,
-        scrollable = false
+        scrollable = false,
+        // The header's level, name and rule over both tabs, the draft's experience on it (owner, 2026-10-13).
+        heading = { CharacterLevelTitle(name = character.name, level = HeaderLevel(character.level, experience)) }
     ) {
-        // The header's level, name and rule over either tab, the draft's experience on it (owner, 2026-10-13).
-        CharacterLevelTitle(
-            name = character.name,
-            level = HeaderLevel(character.level, experience),
-            modifier = Modifier
-                .fillMaxWidth()
-                .dialogLeadText(MaterialTheme.typography.titleLarge)
-        )
         if (tab == 0) {
             val level = levelForExperience(experience)
             val next = ExperienceThresholds.getOrNull(level)?.takeIf { level < MAX_CHARACTER_LEVEL }
-            Row(modifier = Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 HpStepButton(
                     icon = Icons.Outlined.Remove,
                     description = text("overview_exp_step_down"),
@@ -1534,7 +1527,7 @@ private fun ExperienceDialog(
                 }
             }
         } else {
-            Column(modifier = Modifier.padding(top = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(modifier = Modifier.padding(top = 4.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 (1..MAX_CHARACTER_LEVEL).chunked(5).forEach { row ->
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         row.forEach { level ->
