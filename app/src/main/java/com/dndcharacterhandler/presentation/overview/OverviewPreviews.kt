@@ -97,7 +97,6 @@ private fun OverviewPreviewContent(
             "overview_exp_current" to "Current EXP: %1\$s",
             "overview_exp_result" to "Result: %1\$s EXP",
             "overview_hp_max_dialog_title" to "Edit Max HP",
-            "overview_hp_max" to "Max HP",
             "overview_hit_dice" to "Hit Point Dice",
             "overview_rest_restores" to "Restores",
             "overview_short_rest_roll" to "Roll %1\$s",

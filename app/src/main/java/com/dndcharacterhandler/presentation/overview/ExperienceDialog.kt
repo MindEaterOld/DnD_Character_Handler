@@ -1,5 +1,9 @@
 package com.dndcharacterhandler.presentation.overview
 
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberUpdatedState
+import kotlinx.coroutines.delay
 import com.dndcharacterhandler.domain.dnd5e.rules.experienceProgress
 import com.dndcharacterhandler.presentation.components.StepButton
 import com.dndcharacterhandler.presentation.components.LevelUpWords
@@ -91,8 +95,8 @@ internal fun ExperienceDialog(
     fun setExperience(value: Int) {
         experience = value.coerceIn(0, MaxExperience)
         typed = experience.toString().let { TextFieldValue(it, TextRange(it.length)) }
-        onExperience(experience)
     }
+    SaveWhenSettled(experience, onExperience)
     EditDialog(
         title = text("overview_exp_dialog_title"),
         tabs = listOf(text("overview_exp_tab_experience"), text("overview_exp_tab_level")),
@@ -143,7 +147,6 @@ internal fun ExperienceDialog(
                                         val digits = value.text.filter(Char::isDigit).take(MaxExperienceDigits)
                                         typed = if (digits == value.text) value else TextFieldValue(digits, TextRange(digits.length))
                                         experience = digits.toIntOrNull() ?: 0
-                                        onExperience(experience)
                                     },
                                     modifier = Modifier
                                         .width(IntrinsicSize.Min)
@@ -307,6 +310,30 @@ private val ExperienceBarMinWidth = 120.dp
 
 /** The award's «+» and its field beside it: a stepper's size. */
 private val GrantAddSize = 48.dp
+
+/**
+ * Saves [value] once it settles — [SaveSettleMillis] after the last change — and as the pop-up goes, so a counter held
+ * or typed into writes its last value, not every step: the view model skips a value its (maybe a step old) character
+ * already has, and a quick step back could be lost.
+ */
+@Composable
+internal fun SaveWhenSettled(value: Int, onSave: (Int) -> Unit) {
+    val save by rememberUpdatedState(onSave)
+    val latest by rememberUpdatedState(value)
+    var first by remember { mutableStateOf(true) }
+    LaunchedEffect(value) {
+        if (first) {
+            first = false
+            return@LaunchedEffect
+        }
+        delay(SaveSettleMillis)
+        save(value)
+    }
+    DisposableEffect(Unit) { onDispose { if (!first) save(latest) } }
+}
+
+/** How long a counter rests before its value is saved. */
+private const val SaveSettleMillis = 300L
 
 /** The most experience the counter takes. */
 private const val MaxExperience = 9_999_999

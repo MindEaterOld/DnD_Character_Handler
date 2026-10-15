@@ -5438,12 +5438,26 @@
     "fr": "PV maximum",
     "es": "PG máximos"
   },
-  "overview_hp_max": {
-    "en": "Max HP",
-    "ru": "\u041c\u0430\u043a\u0441. HP",
-    "de": "Max. TP",
-    "fr": "pv max",
-    "es": "PG máx."
+  "overview_hp_now": {
+    "en": "Hit points now",
+    "ru": "Хиты сейчас",
+    "de": "TP jetzt",
+    "fr": "PV actuels",
+    "es": "PG actuales"
+  },
+  "overview_hp_max_step_down": {
+    "en": "One hit point less at most",
+    "ru": "Максимум на хит меньше",
+    "de": "Ein TP weniger Maximum",
+    "fr": "Un PV maximum de moins",
+    "es": "Un PG máximo menos"
+  },
+  "overview_hp_max_step_up": {
+    "en": "One hit point more at most",
+    "ru": "Максимум на хит больше",
+    "de": "Ein TP mehr Maximum",
+    "fr": "Un PV maximum de plus",
+    "es": "Un PG máximo más"
   },
   "overview_hit_dice": {
     "en": "Hit Point Dice",

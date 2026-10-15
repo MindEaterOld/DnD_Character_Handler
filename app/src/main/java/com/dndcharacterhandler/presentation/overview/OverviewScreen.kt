@@ -288,7 +288,6 @@ internal fun OverviewContent(
     var isExperienceDialogOpen by remember { mutableStateOf(false) }
     var experienceDialogOnLevels by remember { mutableStateOf(false) }
     var isMaxHpDialogOpen by remember { mutableStateOf(false) }
-    var maxHpDraft by remember(character?.id, character?.maxHp) { mutableStateOf("") }
     var activeMiniStatField by remember { mutableStateOf<OverviewMiniStatField?>(null) }
     var miniStatDraft by remember(character?.id, character?.armorClass, character?.initiativeBonus, character?.speed) {
         mutableStateOf("")
@@ -428,10 +427,7 @@ internal fun OverviewContent(
                                         onSetHitPoints = { now, temporary -> onSetHitPoints(character.id, now, temporary) },
                                         onStepDown = { onNudgeHitPoints(character.id, -1) },
                                         onStepUp = { onNudgeHitPoints(character.id, 1) },
-                                        onMaxHp = {
-                                            maxHpDraft = character.maxHp.toString()
-                                            isMaxHpDialogOpen = true
-                                        },
+                                        onMaxHp = { isMaxHpDialogOpen = true },
                                         modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 10.dp)
                                     )
                                 }
@@ -620,26 +616,11 @@ internal fun OverviewContent(
     }
 
     if (isMaxHpDialogOpen && characterBundle != null) {
-        val draftValue = maxHpDraft.toIntOrNull()?.coerceAtLeast(1) ?: characterBundle.character.maxHp
-
-        EditDialog(
-            title = text("overview_hp_max_dialog_title"),
-            onDismiss = { isMaxHpDialogOpen = false },
-            onConfirm = {
-                onUpdateMaxHitPoints(characterBundle, draftValue)
-                isMaxHpDialogOpen = false
-            }
-        ) {
-            OutlinedTextField(
-                value = maxHpDraft,
-                onValueChange = { value ->
-                    maxHpDraft = value.filter(Char::isDigit).take(MaxHpDigits)
-                },
-                singleLine = true,
-                label = { Text(text("overview_hp_max")) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-            )
-        }
+        MaxHitPointsDialog(
+            character = characterBundle.character,
+            onSave = { maximum -> onUpdateMaxHitPoints(characterBundle, maximum) },
+            onDismiss = { isMaxHpDialogOpen = false }
+        )
     }
 
     if (activeMiniStatField != null && characterBundle != null) {
