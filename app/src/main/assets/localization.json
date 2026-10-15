@@ -5384,12 +5384,12 @@
     "fr": "Utiles",
     "es": "Útiles"
   },
-  "conditions_exhaustion_cost": {
-    "en": "−%1$d to d20 rolls · speed −%2$d %3$s · death at 6",
-    "ru": "−%1$d к броскам d20 · скорость −%2$d %3$s · на 6 — смерть",
-    "de": "−%1$d auf W20-Würfe · Tempo −%2$d %3$s · bei 6 Tod",
-    "fr": "−%1$d aux jets de d20 · vitesse −%2$d %3$s · à 6, la mort",
-    "es": "−%1$d a tiradas de d20 · velocidad −%2$d %3$s · a 6, muerte"
+  "conditions_exhaustion_d20": {
+    "en": "d20 Tests",
+    "ru": "Броски d20",
+    "de": "W20-Proben",
+    "fr": "Tests d20",
+    "es": "Pruebas d20"
   },
   "conditions_exhaustion_death": {
     "en": "Death",

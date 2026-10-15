@@ -1,5 +1,7 @@
 package com.dndcharacterhandler.presentation.overview
 
+import androidx.compose.material.icons.automirrored.outlined.DirectionsRun
+import androidx.compose.material.icons.outlined.Casino
 import com.dndcharacterhandler.presentation.components.dialogSection
 import com.dndcharacterhandler.presentation.components.SheetLabel
 import com.dndcharacterhandler.presentation.components.buttonFill
@@ -254,7 +256,7 @@ private fun ConditionGroupTitle(name: String) {
     }
 }
 
-/** Exhaustion's level: seven pills, 0 to 6, a tap sets it; the level is lit in exhaustion's orange; what it costs under. */
+/** Exhaustion's level: seven pills, 0 to 6, a tap sets it; the level is lit in exhaustion's orange; what it costs under, a line each. */
 @Composable
 private fun ExhaustionPicker(level: Int, immune: Boolean, onPick: (Int) -> Unit) {
     val strings = LocalStrings.current
@@ -292,19 +294,23 @@ private fun ExhaustionPicker(level: Int, immune: Boolean, onPick: (Int) -> Unit)
                 }
             }
         }
-        // What the level costs; at 0 nothing to say (owner, 2026-10-15 — «Нет» under the pills said nothing).
-        val cost = when {
-            immune && level == 0 -> text("conditions_immune")
-            level == 0 -> null
-            level >= MAX_EXHAUSTION -> text("conditions_exhaustion_death")
-            else -> strings.format("conditions_exhaustion_cost", 2 * level, 5 * level, strings["inventory_unit_feet"])
-        }
-        cost?.let {
-            Text(
-                text = it,
+        // What the level costs, a line each as the armor class's sources (owner, 2026-10-15): at 0 nothing to say.
+        when {
+            immune && level == 0 -> Text(
+                text = text("conditions_immune"),
                 style = MaterialTheme.typography.labelMedium,
-                color = if (level == 0) colors.text.subtle else colors.text.muted
+                color = colors.text.subtle
             )
+            level == 0 -> Unit
+            level >= MAX_EXHAUSTION -> SourceLine(ExhaustionIcon, text("conditions_exhaustion_death"), null) {}
+            else -> {
+                SourceLine(Icons.Outlined.Casino, text("conditions_exhaustion_d20"), null) {
+                    SourceValue("−${2 * level}")
+                }
+                SourceLine(Icons.AutoMirrored.Outlined.DirectionsRun, text("overview_speed"), null) {
+                    SourceValue("−${5 * level}", unit = strings["inventory_unit_feet"])
+                }
+            }
         }
     }
 }

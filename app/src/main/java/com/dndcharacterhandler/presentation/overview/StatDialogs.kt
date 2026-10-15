@@ -121,25 +121,25 @@ internal fun ArmorClassAutoContent(
         SheetLabel(text("overview_ac_sources"), modifier = Modifier.align(Alignment.CenterHorizontally))
         breakdown.sources.forEach { source ->
             when (source) {
-                is ArmorClassSource.Unarmored -> ArmorClassSourceLine(Icons.Outlined.Person, text("overview_ac_unarmored"), null) {
+                is ArmorClassSource.Unarmored -> SourceLine(Icons.Outlined.Person, text("overview_ac_unarmored"), null) {
                     SourceValue("${source.value}")
                 }
-                is ArmorClassSource.Armor -> ArmorClassSourceLine(
+                is ArmorClassSource.Armor -> SourceLine(
                     Icons.Outlined.Shield, source.name, null, onClick = opener(onOpenItem, source.itemId)
                 ) { SourceValue("${source.value}") }
-                is ArmorClassSource.FeatureBase -> ArmorClassSourceLine(
+                is ArmorClassSource.FeatureBase -> SourceLine(
                     Icons.Outlined.AutoAwesome, source.name, null, onClick = opener(onOpenFeature, source.featureId)
                 ) { SourceValue("${source.value}") }
-                is ArmorClassSource.Ability -> ArmorClassSourceLine(
+                is ArmorClassSource.Ability -> SourceLine(
                     abilityIcon(source.ability),
                     text(abilityKey(source.ability)),
                     source.cap?.let { LocalStrings.current.format("overview_ac_dex_cap", signedValue(it)) }
                 ) { SourceValue(signedValue(source.value)) }
-                is ArmorClassSource.Shield -> ArmorClassSourceLine(
+                is ArmorClassSource.Shield -> SourceLine(
                     Icons.Outlined.Shield, source.name, null, onClick = opener(onOpenItem, source.itemId)
                 ) { SourceValue(signedValue(source.value)) }
                 // A species' bonus; one held only in a state the sheet doesn't keep is shown, not added.
-                is ArmorClassSource.FeatureBonus -> ArmorClassSourceLine(
+                is ArmorClassSource.FeatureBonus -> SourceLine(
                     Icons.Outlined.AutoAwesome,
                     source.name,
                     if (source.counted) null else text("overview_ac_bonus_shifted"),
@@ -159,7 +159,7 @@ private fun opener(open: ((Long) -> Unit)?, id: Long): (() -> Unit)? =
  * or an item opens its card on its screen by a tap ([onClick]).
  */
 @Composable
-private fun ArmorClassSourceLine(
+internal fun SourceLine(
     icon: ImageVector,
     name: String,
     note: String?,
@@ -185,9 +185,20 @@ private fun ArmorClassSourceLine(
 }
 
 @Composable
-private fun SourceValue(value: String, muted: Boolean = false) {
+internal fun SourceValue(value: String, muted: Boolean = false, unit: String? = null) {
     val colors = LocalDesignTokens.current.colors
-    Text(text = value, style = MaterialTheme.typography.titleMedium, color = if (muted) colors.text.subtle else colors.text.primary)
+    // A unit («фт») after the number in body text, muted, on its baseline — as under the portrait.
+    Row {
+        Text(
+            text = value,
+            modifier = Modifier.alignByBaseline(),
+            style = MaterialTheme.typography.titleMedium,
+            color = if (muted) colors.text.subtle else colors.text.primary
+        )
+        unit?.let {
+            Text(text = " $it", modifier = Modifier.alignByBaseline(), style = MaterialTheme.typography.bodyLarge, color = colors.text.muted)
+        }
+    }
 }
 
 /**
