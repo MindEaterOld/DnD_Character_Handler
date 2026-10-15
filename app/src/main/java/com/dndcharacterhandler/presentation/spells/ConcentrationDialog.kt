@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation.spells
 
+import androidx.compose.foundation.layout.PaddingValues
 import com.dndcharacterhandler.presentation.components.isBetter
 import com.dndcharacterhandler.presentation.components.isWorse
 import androidx.compose.foundation.layout.Arrangement
@@ -76,7 +77,9 @@ internal fun ConcentrationDialog(character: Character, spell: Spell, onEnd: () -
         onDismiss = onDismiss,
         scrollable = false,
         buttons = {
-            Button(onClick = {
+            // The die large (owner's choice from boards, 2026-10-15: А — 22dp was lost by the words), the button's
+            // height kept: the padding before it taken in.
+            Button(contentPadding = PaddingValues(start = 12.dp, end = 24.dp), onClick = {
                 val roll = AttackRoll(bonus = bonus, mode = effects.mode)
                 val label = strings["attributes_roll_save"]
                 rollDice(
@@ -87,7 +90,7 @@ internal fun ConcentrationDialog(character: Character, spell: Spell, onEnd: () -
                 )
                 onDismiss()
             }) {
-                DieIcon(DieType.D20, LocalDiceSkin.current, modifier = Modifier.size(22.dp))
+                DieIcon(DieType.D20, LocalDiceSkin.current, modifier = Modifier.size(30.dp))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("${text("concentration_save")} $signed")
                 if (effects.isWorse || effects.isBetter) {
