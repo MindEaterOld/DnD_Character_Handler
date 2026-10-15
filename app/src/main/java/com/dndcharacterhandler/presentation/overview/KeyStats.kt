@@ -195,6 +195,52 @@ private fun CacheDrawScope.keyStatsCrest(line: Color, inner: Color): DrawScope.(
 }
 
 /**
+ * The overview's crest by itself, as a pop-up shows it (owner, 2026-10-15 — the armor class's pop-up repeats the
+ * overview's): the shield and its inner line as under the portrait, no rules, «КБ» ([label]) in the frames' serif in
+ * gold over [number], both in the shield's upper part, where it is widest.
+ */
+@Composable
+internal fun ArmorClassCrest(label: String, modifier: Modifier = Modifier, number: @Composable () -> Unit) {
+    val tokens = LocalDesignTokens.current
+    val gold = MaterialTheme.colorScheme.primary
+    Box(
+        modifier = modifier
+            .size(width = KeyStatCrestWidth + KeyStatCrestInset * 2, height = KeyStatCrestHeight + KeyStatCrestInset)
+            .drawWithCache {
+                val line = gold.copy(alpha = tokens.alpha.half)
+                val inner = gold.copy(alpha = tokens.alpha.line)
+                val height = KeyStatCrestHeight.toPx()
+                val scale = height / 17.89f
+                val centre = Offset(size.width / 2, size.height / 2)
+                val shield = Path().apply {
+                    addPath(PathParser().parsePathString(KeyStatCrestPath).toPath())
+                    transform(Matrix().apply {
+                        translate(centre.x - 12f * scale, centre.y - height / 2 - 3.07f * scale)
+                        scale(scale, scale)
+                    })
+                }
+                val innerLine = closedPolyline(outlineOffset(shield, -KeyStatCrestInset.toPx(), 3.dp.toPx(), centre))
+                onDrawBehind {
+                    drawPath(shield, line, style = Stroke(width = 1.5.dp.toPx()))
+                    drawPath(innerLine, inner, style = Stroke(width = 1.dp.toPx()))
+                }
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            modifier = Modifier.padding(bottom = KeyStatCrestTaper),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(text = label, style = MaterialTheme.typography.titleMedium, color = gold, maxLines = 1)
+            number()
+        }
+    }
+}
+
+/** How far the crest's writing stands over its middle: the shield tapers below. */
+private val KeyStatCrestTaper = 10.dp
+
+/**
  * The closed [path]'s outline pushed out by [distance] (in when negative), as points round it: each sampled point moved
  * along the normal of the tangent taken [smooth] either side of it, so the corners come out rounded.
  */

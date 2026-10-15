@@ -83,9 +83,11 @@ internal fun ArmorClassDialog(
         scrollable = false
     ) {
         if (mode == ArmorClassMode.AUTOMATIC) {
-            Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                SheetLabel(text("overview_ac_full"))
-                Text(text = "${breakdown.total}", style = statCounterStyle(), color = colors.text.primary)
+            // The overview's crest round «КБ» and the number (owner, 2026-10-15).
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                ArmorClassCrest(label = text("stat_card_armor_class_short")) {
+                    Text(text = "${breakdown.total}", style = crestNumberStyle(), color = colors.text.primary)
+                }
             }
             Column(modifier = Modifier.fillMaxWidth().dialogSection(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 SheetLabel(text("overview_ac_sources"), modifier = Modifier.align(Alignment.CenterHorizontally))
@@ -112,7 +114,7 @@ internal fun ArmorClassDialog(
             }
         } else {
             Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                SheetLabel(text("overview_ac_full"))
+                // The crest between − and +, its number typed in place.
                 StatCounter(
                     value = manual,
                     onValue = { manual = it.coerceIn(1, MaxArmorClass) },
@@ -121,7 +123,8 @@ internal fun ArmorClassDialog(
                     max = MaxArmorClass,
                     unit = null,
                     downDescription = text("overview_ac_step_down"),
-                    upDescription = text("overview_ac_step_up")
+                    upDescription = text("overview_ac_step_up"),
+                    crest = text("stat_card_armor_class_short")
                 )
                 Text(
                     text = text("overview_ac_manual_note"),
@@ -188,7 +191,9 @@ private fun StatCounter(
     max: Int,
     unit: String?,
     downDescription: String,
-    upDescription: String
+    upDescription: String,
+    /** The crest's label: the number stands in the overview's crest under it, at the crest's size. */
+    crest: String? = null
 ) {
     val colors = LocalDesignTokens.current.colors
     var typed by remember { mutableStateOf(TextFieldValue(value.toString())) }
@@ -199,7 +204,7 @@ private fun StatCounter(
     }
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
         HpStepButton(Icons.Outlined.Remove, downDescription, enabled = value > min) { stepTo(value - step) }
-        Row(modifier = Modifier.widthIn(min = StatCounterRoom), horizontalArrangement = Arrangement.Center) {
+        val field: @Composable (Modifier, TextStyle) -> Unit = { modifier, style ->
             BasicTextField(
                 value = typed,
                 onValueChange = { next ->
@@ -207,13 +212,18 @@ private fun StatCounter(
                     typed = if (digits == next.text) next else TextFieldValue(digits, TextRange(digits.length))
                     digits.toIntOrNull()?.let { onValue(it.coerceIn(min, max)) }
                 },
-                modifier = Modifier.width(IntrinsicSize.Min).alignByBaseline(),
+                modifier = modifier.width(IntrinsicSize.Min),
                 // No centring of its own: the row centres it (centred, its intrinsic width came out nil).
-                textStyle = statCounterStyle().copy(color = colors.text.primary),
+                textStyle = style.copy(color = colors.text.primary),
                 singleLine = true,
                 cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
+        }
+        if (crest != null) {
+            ArmorClassCrest(label = crest) { field(Modifier, crestNumberStyle()) }
+        } else Row(modifier = Modifier.widthIn(min = StatCounterRoom), horizontalArrangement = Arrangement.Center) {
+            field(Modifier.alignByBaseline(), statCounterStyle())
             if (unit != null) {
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(text = unit, modifier = Modifier.alignByBaseline(), style = MaterialTheme.typography.bodyLarge, color = colors.text.muted)
@@ -221,6 +231,16 @@ private fun StatCounter(
         }
         HpStepButton(Icons.Outlined.Add, upDescription, enabled = value < max) { stepTo(value + step) }
     }
+}
+
+/** The number in the crest: the overview's (`miniStatValue`). */
+@Composable
+private fun crestNumberStyle(): TextStyle {
+    val token = LocalDesignTokens.current.typography.miniStatValue
+    return MaterialTheme.typography.headlineMedium.copy(
+        fontSize = token.fontSizeSp.sp,
+        lineHeight = (token.lineHeightSp ?: token.fontSizeSp).sp
+    )
 }
 
 /** The counters' number: `hpTemporary` 40 in the display serif, as the experience's and the maximum hit points'. */
