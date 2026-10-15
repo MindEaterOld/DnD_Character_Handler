@@ -1,5 +1,7 @@
 package com.dndcharacterhandler.presentation.overview
 
+import com.dndcharacterhandler.presentation.components.dialogSection
+import com.dndcharacterhandler.presentation.components.SheetLabel
 import com.dndcharacterhandler.presentation.components.buttonFill
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.layout.Placeable
@@ -19,10 +21,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -213,7 +213,7 @@ internal fun ConditionsSheet(
             }
         )
         ConditionGroups.forEach { (titleKey, conditions) ->
-            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Column(modifier = Modifier.dialogSection(), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 ConditionGroupTitle(text(titleKey))
                 conditions.forEach { condition ->
                     ConditionRow(
@@ -243,15 +243,15 @@ private val ConditionGroups = listOf(
     "conditions_group_helpful" to listOf(Condition.INVISIBLE)
 )
 
-/** A group's name, no count after it (owner's choice, 2026-10-07). */
+/**
+ * A group's name, no count after it (owner's choice, 2026-10-07): a gold small-caps label in the middle, as the
+ * pop-ups' sections (owner's choice from boards, 2026-10-15: А).
+ */
 @Composable
 private fun ConditionGroupTitle(name: String) {
-    Text(
-        text = name,
-        modifier = Modifier.padding(bottom = 4.dp),
-        style = MaterialTheme.typography.titleMedium,
-        color = LocalDesignTokens.current.colors.text.primary
-    )
+    Box(modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp), contentAlignment = Alignment.Center) {
+        SheetLabel(name)
+    }
 }
 
 /** Exhaustion's level: seven pills, 0 to 6, a tap sets it; the level is lit in exhaustion's orange; what it costs under. */
@@ -292,22 +292,26 @@ private fun ExhaustionPicker(level: Int, immune: Boolean, onPick: (Int) -> Unit)
                 }
             }
         }
-        Text(
-            text = when {
-                immune && level == 0 -> text("conditions_immune")
-                level == 0 -> text("common_none")
-                level >= MAX_EXHAUSTION -> text("conditions_exhaustion_death")
-                else -> strings.format("conditions_exhaustion_cost", 2 * level, 5 * level, strings["inventory_unit_feet"])
-            },
-            style = MaterialTheme.typography.labelMedium,
-            color = if (level == 0) colors.text.subtle else colors.text.muted
-        )
+        // What the level costs; at 0 nothing to say (owner, 2026-10-15 — «Нет» under the pills said nothing).
+        val cost = when {
+            immune && level == 0 -> text("conditions_immune")
+            level == 0 -> null
+            level >= MAX_EXHAUSTION -> text("conditions_exhaustion_death")
+            else -> strings.format("conditions_exhaustion_cost", 2 * level, 5 * level, strings["inventory_unit_feet"])
+        }
+        cost?.let {
+            Text(
+                text = it,
+                style = MaterialTheme.typography.labelMedium,
+                color = if (level == 0) colors.text.subtle else colors.text.muted
+            )
+        }
     }
 }
 
 /**
- * A condition to put on or off: its icon, its name and what it does; while on, the row is lit in its colour at 12 %
- * with a check in it. An immunity is quiet and can't be put on.
+ * A condition to put on or off: its icon, its name and what it does; while on, the row is lit in its colour at 15 % —
+ * no circle, no check (owner, 2026-10-15: the row's two looks say it). An immunity is quiet and can't be put on.
  */
 @Composable
 private fun ConditionRow(condition: Condition, on: Boolean, immune: Boolean, onToggle: () -> Unit) {
@@ -355,23 +359,6 @@ private fun ConditionRow(condition: Condition, on: Boolean, immune: Boolean, onT
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
-        }
-        Box(
-            modifier = Modifier
-                .padding(start = 8.dp)
-                .size(22.dp)
-                .clip(CircleShape)
-                .then(if (on) Modifier.background(accent) else Modifier.border(1.5.dp, colors.border.default, CircleShape)),
-            contentAlignment = Alignment.Center
-        ) {
-            if (on) {
-                Icon(
-                    imageVector = Icons.Outlined.Check,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    modifier = Modifier.size(16.dp)
-                )
-            }
         }
     }
 }

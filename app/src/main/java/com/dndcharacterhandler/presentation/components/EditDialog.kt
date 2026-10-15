@@ -270,7 +270,7 @@ fun Modifier.dialogSection(): Modifier = padding(top = DialogSectionGap - Dialog
 
 /** Under a pop-up's title: a gold rule melting toward its ends, a small diamond in its middle (`primary` at half). */
 @Composable
-private fun DialogTitleRule(modifier: Modifier = Modifier, diamondX: Float = Float.NaN) {
+internal fun DialogTitleRule(modifier: Modifier = Modifier, diamondX: Float = Float.NaN) {
     val gold = MaterialTheme.colorScheme.primary.copy(alpha = LocalDesignTokens.current.alpha.half)
     Canvas(modifier = modifier.fillMaxWidth().height(9.dp)) {
         val y = size.height / 2

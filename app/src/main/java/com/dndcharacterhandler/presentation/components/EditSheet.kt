@@ -1,5 +1,7 @@
 package com.dndcharacterhandler.presentation.components
 
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.foundation.layout.paddingFromBaseline
 import androidx.core.view.WindowCompat
 import androidx.compose.ui.window.DialogWindowProvider
 import androidx.compose.ui.platform.LocalView
@@ -68,19 +70,23 @@ fun EditSheet(
                 .heightIn(max = maxHeight)
                 .padding(start = 24.dp, end = 24.dp, bottom = 24.dp)
         ) {
-            // The title stays; what is under it scrolls, its edges soft.
+            // The title stays, as a pop-up's (owner's choice from boards, 2026-10-15: А): centred over the gold rule
+            // with a diamond, the rule as close under it; what is under it scrolls, its edges soft.
             Text(
                 text = title,
-                modifier = Modifier.padding(bottom = 4.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .paddingFromBaseline(bottom = 7.5.dp),
                 style = MaterialTheme.typography.titleLarge,
-                color = colors.text.primary
+                color = colors.text.primary,
+                textAlign = TextAlign.Center
             )
+            DialogTitleRule(modifier = Modifier.padding(bottom = 8.dp).padding(horizontal = 24.dp))
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fadingVerticalScroll()
-                    .padding(top = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                    .fadingVerticalScroll(),
+                verticalArrangement = Arrangement.spacedBy(DialogLineGap),
                 content = content
             )
         }
