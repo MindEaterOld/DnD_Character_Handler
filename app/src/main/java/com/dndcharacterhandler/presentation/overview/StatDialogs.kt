@@ -1,5 +1,11 @@
 package com.dndcharacterhandler.presentation.overview
 
+import com.dndcharacterhandler.presentation.components.nameKey
+import com.dndcharacterhandler.presentation.components.icon
+import com.dndcharacterhandler.domain.dnd5e.rules.activeConditions
+import com.dndcharacterhandler.domain.dnd5e.rules.speedBreakdown
+import com.dndcharacterhandler.domain.dnd5e.rules.SpeedSource
+import com.dndcharacterhandler.domain.dnd5e.rules.SpeedBreakdown
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -7,24 +13,18 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.DirectionsRun
-import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.Face
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Remove
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material3.Icon
@@ -32,17 +32,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dndcharacterhandler.domain.dnd5e.model.CharacterBundle
@@ -79,24 +73,62 @@ internal fun ArmorClassDialog(
 }
 
 /**
- * The speed (owner's choice from boards, 2026-10-15): a counter in feet, − and + a step of 5 (speeds in D&D go by 5),
- * any number typed; saved as it settles, no «Сохранить».
+ * The speed, as the armor class (owner, 2026-10-15): shown, not set — the speed in the middle as under the portrait (the
+ * runner in gold, the number, «фт»), «Из чего» under it: the species' speed, a feature's bonus while it holds, heavy
+ * armor worn without its Strength, exhaustion, a condition that holds the character in place; a feature's or an
+ * item's line opens it.
  */
 @Composable
-internal fun SpeedDialog(speed: Int, onSave: (Int) -> Unit, onDismiss: () -> Unit) {
-    var value by remember { mutableStateOf(speed.coerceIn(0, MaxSpeed)) }
-    SaveWhenSettled(value, onSave)
+internal fun SpeedDialog(
+    characterBundle: CharacterBundle,
+    onDismiss: () -> Unit,
+    onOpenFeature: ((Long) -> Unit)? = null,
+    onOpenItem: ((Long) -> Unit)? = null
+) {
+    val character = characterBundle.character
+    val speed = speedBreakdown(
+        character, characterBundle.inventoryItems, characterBundle.features,
+        activeConditions(character.conditions, character.currentHp)
+    )
     EditDialog(title = text("overview_edit_speed_title"), onDismiss = onDismiss, scrollable = false) {
-        StatCounter(
-            value = value,
-            onValue = { value = it.coerceIn(0, MaxSpeed) },
-            step = SpeedStep,
-            min = 0,
-            max = MaxSpeed,
-            unit = text("inventory_unit_feet"),
-            downDescription = text("overview_speed_step_down"),
-            upDescription = text("overview_speed_step_up")
-        )
+        SpeedContent(speed, onOpenFeature, onOpenItem)
+    }
+}
+
+/** The speed's pop-up: the speed as under the portrait over «Из чего», a line a source. */
+@Composable
+internal fun SpeedContent(speed: SpeedBreakdown, onOpenFeature: ((Long) -> Unit)?, onOpenItem: ((Long) -> Unit)?) {
+    val colors = LocalDesignTokens.current.colors
+    val feet = text("inventory_unit_feet")
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+        Icon(Icons.AutoMirrored.Outlined.DirectionsRun, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
+        Spacer(modifier = Modifier.width(6.dp))
+        Row {
+            Text(text = "${speed.total}", modifier = Modifier.alignByBaseline(), style = crestNumberStyle(), color = colors.text.primary)
+            Text(text = " $feet", modifier = Modifier.alignByBaseline(), style = MaterialTheme.typography.bodyLarge, color = colors.text.muted)
+        }
+    }
+    Column(modifier = Modifier.fillMaxWidth().dialogSection(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        SheetLabel(text("overview_ac_sources"), modifier = Modifier.align(Alignment.CenterHorizontally))
+        speed.sources.forEach { source ->
+            when (source) {
+                is SpeedSource.Species -> SourceLine(Icons.Outlined.Person, source.race.ifBlank { text("overview_speed_base") }, null) {
+                    SourceValue("${source.value}", unit = feet)
+                }
+                is SpeedSource.FeatureBonus -> SourceLine(
+                    Icons.Outlined.AutoAwesome, source.name, null, onClick = opener(onOpenFeature, source.featureId)
+                ) { SourceValue(signedValue(source.value), unit = feet) }
+                is SpeedSource.HeavyArmor -> SourceLine(
+                    Icons.Outlined.Shield, source.name, text("overview_speed_heavy_note"), onClick = opener(onOpenItem, source.itemId)
+                ) { SourceValue(signedValue(source.value), unit = feet) }
+                is SpeedSource.Exhaustion -> SourceLine(
+                    ExhaustionIcon, LocalStrings.current.format("conditions_exhaustion_level", source.level), null
+                ) { SourceValue(signedValue(source.value), unit = feet) }
+                is SpeedSource.Stopped -> SourceLine(source.condition.icon, text(source.condition.nameKey), text("overview_speed_stopped_note")) {
+                    SourceValue("0", unit = feet)
+                }
+            }
+        }
     }
 }
 
@@ -201,71 +233,10 @@ internal fun SourceValue(value: String, muted: Boolean = false, unit: String? = 
     }
 }
 
-/**
- * A number between − and + as the experience's and the maximum hit points' (the hit points' − and +, the number at 40,
- * typed in place, at least [StatCounterRoom] between the signs), [unit] after it on its baseline.
- */
-@Composable
-private fun StatCounter(
-    value: Int,
-    onValue: (Int) -> Unit,
-    step: Int,
-    min: Int,
-    max: Int,
-    unit: String?,
-    downDescription: String,
-    upDescription: String
-) {
-    val colors = LocalDesignTokens.current.colors
-    var typed by remember { mutableStateOf(TextFieldValue(value.toString())) }
-    fun stepTo(next: Int) {
-        val clamped = next.coerceIn(min, max)
-        typed = clamped.toString().let { TextFieldValue(it, TextRange(it.length)) }
-        onValue(clamped)
-    }
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-        HpStepButton(Icons.Outlined.Remove, downDescription, enabled = value > min) { stepTo(value - step) }
-        val field: @Composable (Modifier, TextStyle) -> Unit = { modifier, style ->
-            BasicTextField(
-                value = typed,
-                onValueChange = { next ->
-                    val digits = next.text.filter(Char::isDigit).take(max.toString().length)
-                    typed = if (digits == next.text) next else TextFieldValue(digits, TextRange(digits.length))
-                    digits.toIntOrNull()?.let { onValue(it.coerceIn(min, max)) }
-                },
-                modifier = modifier.width(IntrinsicSize.Min),
-                // No centring of its own: the row centres it (centred, its intrinsic width came out nil).
-                textStyle = style.copy(color = colors.text.primary),
-                singleLine = true,
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-            )
-        }
-        Row(modifier = Modifier.widthIn(min = StatCounterRoom), horizontalArrangement = Arrangement.Center) {
-            field(Modifier.alignByBaseline(), statCounterStyle())
-            if (unit != null) {
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(text = unit, modifier = Modifier.alignByBaseline(), style = MaterialTheme.typography.bodyLarge, color = colors.text.muted)
-            }
-        }
-        HpStepButton(Icons.Outlined.Add, upDescription, enabled = value < max) { stepTo(value + step) }
-    }
-}
-
 /** The number in the crest: the overview's (`miniStatValue`). */
 @Composable
 private fun crestNumberStyle(): TextStyle {
     val token = LocalDesignTokens.current.typography.miniStatValue
-    return MaterialTheme.typography.headlineMedium.copy(
-        fontSize = token.fontSizeSp.sp,
-        lineHeight = (token.lineHeightSp ?: token.fontSizeSp).sp
-    )
-}
-
-/** The counters' number: `hpTemporary` 40 in the display serif, as the experience's and the maximum hit points'. */
-@Composable
-private fun statCounterStyle(): TextStyle {
-    val token = LocalDesignTokens.current.typography.hpTemporary
     return MaterialTheme.typography.headlineMedium.copy(
         fontSize = token.fontSizeSp.sp,
         lineHeight = (token.lineHeightSp ?: token.fontSizeSp).sp
@@ -288,10 +259,5 @@ private fun abilityIcon(ability: ArmorClassAbility): ImageVector = when (ability
 
 private fun signedValue(value: Int): String = if (value >= 0) "+$value" else "−${-value}"
 
-/** The number's room between − and + at least, as the maximum hit points'. */
-private val StatCounterRoom = 72.dp
 
 
-/** The fastest speed the counter takes, in feet, and its step. */
-private const val MaxSpeed = 999
-private const val SpeedStep = 5

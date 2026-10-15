@@ -4057,6 +4057,27 @@
     "fr": "Classe d'armure",
     "es": "Clase de Armadura"
   },
+  "overview_speed_base": {
+    "en": "Base speed",
+    "ru": "Базовая скорость",
+    "de": "Grundbewegung",
+    "fr": "Vitesse de base",
+    "es": "Velocidad base"
+  },
+  "overview_speed_heavy_note": {
+    "en": "not enough Strength",
+    "ru": "не хватает Силы",
+    "de": "zu wenig Stärke",
+    "fr": "Force insuffisante",
+    "es": "falta Fuerza"
+  },
+  "overview_speed_stopped_note": {
+    "en": "speed 0",
+    "ru": "скорость 0",
+    "de": "Bewegungsrate 0",
+    "fr": "vitesse 0",
+    "es": "velocidad 0"
+  },
   "overview_ac_sources": {
     "en": "Made of",
     "ru": "Из чего",
@@ -4084,20 +4105,6 @@
     "de": "höchstens %1$s",
     "fr": "au plus %1$s",
     "es": "como máximo %1$s"
-  },
-  "overview_speed_step_down": {
-    "en": "5 feet slower",
-    "ru": "На 5 футов медленнее",
-    "de": "5 Fuß langsamer",
-    "fr": "5 pieds de moins",
-    "es": "5 pies menos"
-  },
-  "overview_speed_step_up": {
-    "en": "5 feet faster",
-    "ru": "На 5 футов быстрее",
-    "de": "5 Fuß schneller",
-    "fr": "5 pieds de plus",
-    "es": "5 pies más"
   },
   "overview_initiative": {
     "maxChars": 11,

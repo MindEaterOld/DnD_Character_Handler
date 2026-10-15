@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation.overview
 
+import com.dndcharacterhandler.domain.dnd5e.rules.speedBreakdown
 import com.dndcharacterhandler.domain.dnd5e.rules.hitDicePools
 import kotlinx.coroutines.flow.first
 import com.dndcharacterhandler.presentation.components.CharacterHeaderRow
@@ -19,7 +20,6 @@ import com.dndcharacterhandler.presentation.attributes.AttributesViewModel
 import com.dndcharacterhandler.domain.dnd5e.rules.RollMode
 import com.dndcharacterhandler.domain.dnd5e.rules.attacksAgainst
 import com.dndcharacterhandler.presentation.components.EndConcentrationDialog
-import com.dndcharacterhandler.domain.dnd5e.rules.effectiveSpeed
 import com.dndcharacterhandler.domain.dnd5e.rules.activeConditions
 import com.dndcharacterhandler.domain.dnd5e.rules.isDead
 import com.dndcharacterhandler.domain.dnd5e.rules.rollEffects
@@ -356,11 +356,12 @@ internal fun OverviewContent(
         }
     }
 
-    val miniStats = remember(character, strings) {
+    val miniStats = remember(characterBundle, strings) {
         val active = character?.let { activeConditions(it.conditions, it.currentHp) }.orEmpty()
-        val exhaustion = character?.exhaustion ?: 0
-        val baseSpeed = character?.speed ?: 30
-        val speed = effectiveSpeed(baseSpeed, active, exhaustion)
+        // The speed as its pop-up makes it up; what exhaustion and the conditions took is coloured.
+        val speedMade = characterBundle?.let { speedBreakdown(it.character, it.inventoryItems, it.features, active) }
+        val speed = speedMade?.total ?: (character?.speed ?: 30)
+        val baseSpeed = speedMade?.unhindered ?: speed
         // In the row's order: the armor class in its shield, the speed. The initiative is off the overview (owner's wish,
         // 2026-10-09; its roll and its bonus's pop-ups wait for their new place, see the backlog).
         listOf(
@@ -629,9 +630,16 @@ internal fun OverviewContent(
 
     if (activeMiniStatField == OverviewMiniStatField.SPEED && characterBundle != null) {
         SpeedDialog(
-            speed = characterBundle.character.speed,
-            onSave = { speed -> onUpdateSpeed(characterBundle, speed) },
-            onDismiss = { activeMiniStatField = null }
+            characterBundle = characterBundle,
+            onDismiss = { activeMiniStatField = null },
+            onOpenFeature = { id ->
+                activeMiniStatField = null
+                onOpenFeature(id)
+            },
+            onOpenItem = { id ->
+                activeMiniStatField = null
+                onOpenItem(id)
+            }
         )
     }
 
