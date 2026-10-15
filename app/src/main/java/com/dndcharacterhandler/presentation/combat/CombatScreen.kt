@@ -1,6 +1,7 @@
 package com.dndcharacterhandler.presentation.combat
 
 import com.dndcharacterhandler.domain.dnd5e.rules.automaticArmorClass
+import com.dndcharacterhandler.presentation.overview.ArmorClassDialog
 import com.dndcharacterhandler.presentation.components.buttonFill
 import com.dndcharacterhandler.presentation.components.damageTypeColor
 import com.dndcharacterhandler.presentation.components.CharacterLoadingScreen
@@ -348,7 +349,6 @@ internal fun CombatContent(
     onUpdateCombatResource: (CharacterBundle, CombatResource) -> Unit = { _, _ -> },
     onDeleteCombatResource: (CharacterBundle, CombatResource) -> Unit = { _, _ -> }
 ) {
-    val colors = LocalDesignTokens.current.colors
     val character = characterBundle?.character
     var editingAttack by remember { mutableStateOf<Attack?>(null) }
     var editingSpellAttack by remember { mutableStateOf<Spell?>(null) }
@@ -361,13 +361,6 @@ internal fun CombatContent(
     var isSpellAttackPickerOpen by remember { mutableStateOf(false) }
     var isArmorClassDialogOpen by remember { mutableStateOf(false) }
     var isSpellcastingAbilityDialogOpen by remember { mutableStateOf(false) }
-    var armorClassBaseDraft by remember(character?.id, character?.baseArmorClass) { mutableStateOf(character?.baseArmorClass?.toString().orEmpty()) }
-    var armorClassManualDraft by remember(character?.id, character?.armorClass, character?.armorClassMode) {
-        mutableStateOf(if (character?.armorClassMode == ArmorClassMode.MANUAL) character.armorClass.toString() else "")
-    }
-    var armorClassModeDraft by remember(character?.id, character?.armorClassMode) {
-        mutableStateOf(character?.armorClassMode ?: ArmorClassMode.AUTOMATIC)
-    }
 
     if (character == null) {
         CharacterLoadingScreen(onOpenDrawer = onOpenDrawer, onOpenDice = onOpenDice)
@@ -448,16 +441,7 @@ internal fun CombatContent(
                             valueMarker = if (attacksAgainstMode != RollMode.NORMAL) ({
                                 RollMarker(worse = attacksAgainstMode == RollMode.ADVANTAGE, better = attacksAgainstMode == RollMode.DISADVANTAGE, size = 20.dp)
                             }) else null,
-                            onClick = {
-                                armorClassBaseDraft = character.baseArmorClass.toString()
-                                armorClassManualDraft = if (character.armorClassMode == ArmorClassMode.MANUAL) {
-                                    character.armorClass.toString()
-                                } else {
-                                    ""
-                                }
-                                armorClassModeDraft = character.armorClassMode
-                                isArmorClassDialogOpen = true
-                            }
+                            onClick = { isArmorClassDialogOpen = true }
                         )
                         MiniStatCard(
                             modifier = Modifier.weight(1f),
@@ -683,58 +667,12 @@ internal fun CombatContent(
     }
 
     if (isArmorClassDialogOpen) {
-        val parsedBaseArmorClass = armorClassBaseDraft.toIntOrNull()?.coerceAtLeast(1) ?: 10
-        val parsedManualArmorClass = armorClassManualDraft.toIntOrNull()?.coerceAtLeast(1)
-        EditDialog(
-            title = text("overview_edit_ac_title"),
-            onDismiss = { isArmorClassDialogOpen = false },
-            onConfirm = {
-                onUpdateArmorClass(
-                    resolvedBundle,
-                    parsedBaseArmorClass,
-                    armorClassModeDraft,
-                    parsedManualArmorClass
-                )
-                isArmorClassDialogOpen = false
-            }
-        ) {
-            OutlinedTextField(
-                value = armorClassBaseDraft,
-                onValueChange = { value -> armorClassBaseDraft = value.filter(Char::isDigit) },
-                singleLine = true,
-                label = { Text(text("overview_ac_base")) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-            )
-
-            Text(
-                text = text("overview_ac_mode"),
-                style = MaterialTheme.typography.bodyLarge,
-                color = colors.text.primary
-            )
-
-            ArmorClassModeOption(
-                title = text("overview_ac_mode_automatic"),
-                description = text("overview_ac_mode_automatic_hint"),
-                selected = armorClassModeDraft == ArmorClassMode.AUTOMATIC,
-                onClick = { armorClassModeDraft = ArmorClassMode.AUTOMATIC }
-            )
-            ArmorClassModeOption(
-                title = text("overview_ac_mode_manual"),
-                description = text("overview_ac_mode_manual_hint"),
-                selected = armorClassModeDraft == ArmorClassMode.MANUAL,
-                onClick = { armorClassModeDraft = ArmorClassMode.MANUAL }
-            )
-
-            if (armorClassModeDraft == ArmorClassMode.MANUAL) {
-                OutlinedTextField(
-                    value = armorClassManualDraft,
-                    onValueChange = { value -> armorClassManualDraft = value.filter(Char::isDigit) },
-                    singleLine = true,
-                    label = { Text(text("overview_ac_manual")) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                )
-            }
-        }
+        // The overview's pop-up: one armor class's pop-up for the whole app.
+        ArmorClassDialog(
+            characterBundle = resolvedBundle,
+            onSave = { base, mode, manual -> onUpdateArmorClass(resolvedBundle, base, mode, manual) },
+            onDismiss = { isArmorClassDialogOpen = false }
+        )
     }
 
     if (isSpellcastingAbilityDialogOpen) {
@@ -992,39 +930,6 @@ private data class DialogActionItem(
     val label: String,
     val onClick: () -> Unit
 )
-
-@Composable
-private fun ArmorClassModeOption(
-    title: String,
-    description: String,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    val colors = LocalDesignTokens.current.colors
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(12.dp),
-        color = toggleFill(selected)
-    ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyLarge,
-                color = toggleContent(selected)
-            )
-            Text(
-                text = description,
-                style = MaterialTheme.typography.bodyMedium,
-                color = toggleContent(selected, colors.text.muted)
-            )
-        }
-    }
-}
 
 @Composable
 private fun SpellcastingAbilityOption(

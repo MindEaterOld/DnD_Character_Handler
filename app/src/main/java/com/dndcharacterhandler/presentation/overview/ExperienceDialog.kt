@@ -317,7 +317,7 @@ private val GrantAddSize = 48.dp
  * already has, and a quick step back could be lost.
  */
 @Composable
-internal fun SaveWhenSettled(value: Int, onSave: (Int) -> Unit) {
+internal fun <T> SaveWhenSettled(value: T, onSave: (T) -> Unit) {
     val save by rememberUpdatedState(onSave)
     val latest by rememberUpdatedState(value)
     var first by remember { mutableStateOf(true) }
