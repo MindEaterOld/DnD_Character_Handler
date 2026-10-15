@@ -93,11 +93,6 @@ internal fun LongRestDialog(
         )
         if (diceBack) {
             HitDicePools(pools = pools, spentComeBack = true)
-            Text(
-                text = text("overview_long_rest_dice_hint"),
-                style = MaterialTheme.typography.labelMedium,
-                color = colors.text.subtle
-            )
         }
         RestRows(title = text("overview_rest_restores"), rows = restores)
         RestRows(title = text("overview_long_rest_ends"), rows = ends)

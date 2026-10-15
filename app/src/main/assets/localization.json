@@ -3875,12 +3875,12 @@
     "fr": "Prend fin",
     "es": "Termina"
   },
-  "overview_long_rest_dice_hint": {
-    "en": "The spent hit dice come back.",
-    "ru": "Потраченные кости хитов вернутся.",
-    "de": "Die verbrauchten Trefferpunktwürfel kommen zurück.",
-    "fr": "Les dés de vie dépensés reviennent.",
-    "es": "Los dados de golpe gastados vuelven."
+  "overview_hit_dice_returning": {
+    "en": "%1$s return",
+    "ru": "вернутся %1$s",
+    "de": "%1$s kehren zurück",
+    "fr": "%1$s reviennent",
+    "es": "vuelven %1$s"
   },
   "overview_long_rest_concentration": {
     "en": "Concentration: %1$s",

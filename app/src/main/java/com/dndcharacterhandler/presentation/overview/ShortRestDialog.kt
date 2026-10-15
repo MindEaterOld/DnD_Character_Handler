@@ -184,7 +184,14 @@ internal fun HitDicePools(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        SheetLabel(text("overview_hit_dice"))
+        val returning = if (spentComeBack) spent.size else 0
+        SheetLabel(
+            if (returning > 0) {
+                text("overview_hit_dice") + " · " + LocalStrings.current.format("overview_hit_dice_returning", returning)
+            } else {
+                text("overview_hit_dice")
+            }
+        )
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
             verticalArrangement = Arrangement.spacedBy(8.dp)

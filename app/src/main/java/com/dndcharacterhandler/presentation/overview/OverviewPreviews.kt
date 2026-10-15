@@ -65,7 +65,6 @@ private fun OverviewPreviewContent(
             "overview_short_rest" to "Short Rest",
             "overview_long_rest" to "Long Rest",
             "overview_long_rest_ends" to "Ends",
-            "overview_long_rest_dice_hint" to "The spent hit dice come back.",
             "overview_long_rest_concentration" to "Concentration: %1\$s",
             "overview_long_rest_temporary" to "Temporary hit points",
             "overview_long_rest_all_full" to "Hit points, hit dice and abilities are already full.",
