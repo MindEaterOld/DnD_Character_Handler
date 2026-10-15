@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import com.dndcharacterhandler.presentation.components.isBetter
 import com.dndcharacterhandler.presentation.components.isWorse
 import com.dndcharacterhandler.presentation.components.RollMarker
-import com.dndcharacterhandler.presentation.components.EndConcentrationDialog
 import com.dndcharacterhandler.presentation.components.ConcentrationToggle
 import com.dndcharacterhandler.domain.dnd5e.rules.rollEffects
 import com.dndcharacterhandler.domain.dnd5e.rules.activeConditions
@@ -369,7 +368,6 @@ internal fun SpellsContent(
     // A spell attack is an attack roll: the conditions count.
     val attackEffects = rollEffects(D20Test.Attack, activeConditions(character.conditions, character.currentHp), character.exhaustion)
     val spellAttackBonus = signedNumber(proficiencyBonus + spellModifier + attackEffects.modifier)
-    val concentrationSpell = resolvedBundle.spells.firstOrNull { it.id == character.concentrationSpellId }
     val canConcentrate = !breaksConcentration(activeConditions(character.conditions, character.currentHp))
     val spellSaveDc = (8 + proficiencyBonus + spellModifier).toString()
     val slotMaximums = remember(character.spellSlotMaximums) { character.spellSlotMaximums.toSpellSlotList() }
@@ -378,6 +376,8 @@ internal fun SpellsContent(
     val displayedSpells = remember(resolvedBundle.spells, catalogById, strings) {
         resolvedBundle.spells.localizedWith(catalogById, strings)
     }
+    // The held spell in the language in use, as the list shows it.
+    val concentrationSpell = displayedSpells.firstOrNull { it.id == character.concentrationSpellId }
     val filteredSpells = remember(displayedSpells, query) {
         val needle = query.trim()
         displayedSpells.filter { spell ->
@@ -569,10 +569,10 @@ internal fun SpellsContent(
         )
     }
 
-    val heldSpell = characterBundle.spells.firstOrNull { it.id == character.concentrationSpellId }
-    if (isEndConcentrationOpen && heldSpell != null) {
-        EndConcentrationDialog(
-            spellName = heldSpell.name,
+    if (isEndConcentrationOpen && concentrationSpell != null) {
+        ConcentrationDialog(
+            character = character,
+            spell = concentrationSpell,
             onEnd = {
                 onEndConcentration(characterBundle)
                 isEndConcentrationOpen = false
@@ -2279,7 +2279,7 @@ private fun areaShapeLabel(shape: AreaShape, strings: LocalizedStrings): String 
     ]
 
 @Composable
-private fun spellLevelTitle(level: Int): String =
+internal fun spellLevelTitle(level: Int): String =
     spellLevelTitle(level, LocalStrings.current)
 
 private fun spellLevelTitle(level: Int, strings: LocalizedStrings): String =
@@ -2298,19 +2298,20 @@ private fun spellLevelTitle(level: Int, strings: LocalizedStrings): String =
     }
 
 @Composable
-private fun spellSchoolLabel(value: String): String =
+internal fun spellSchoolLabel(value: String): String =
     spellSchoolLabel(value, LocalStrings.current)
 
+// The app's school names, or Foundry's keys as Character Wizard stores them ("evo").
 private fun spellSchoolLabel(value: String, strings: LocalizedStrings): String =
     when (value.lowercase()) {
-        "abjuration" -> strings["spells_school_abjuration"]
-        "conjuration" -> strings["spells_school_conjuration"]
-        "divination" -> strings["spells_school_divination"]
-        "enchantment" -> strings["spells_school_enchantment"]
-        "evocation" -> strings["spells_school_evocation"]
-        "illusion" -> strings["spells_school_illusion"]
-        "necromancy" -> strings["spells_school_necromancy"]
-        "transmutation" -> strings["spells_school_transmutation"]
+        "abjuration", "abj" -> strings["spells_school_abjuration"]
+        "conjuration", "con" -> strings["spells_school_conjuration"]
+        "divination", "div" -> strings["spells_school_divination"]
+        "enchantment", "enc" -> strings["spells_school_enchantment"]
+        "evocation", "evo" -> strings["spells_school_evocation"]
+        "illusion", "ill" -> strings["spells_school_illusion"]
+        "necromancy", "nec" -> strings["spells_school_necromancy"]
+        "transmutation", "trs" -> strings["spells_school_transmutation"]
         else -> value.ifBlank { strings["spells_school_abjuration"] }
     }
 

@@ -98,6 +98,11 @@ fun EditDialog(
     tabs: List<String>? = null,
     selectedTab: Int = 0,
     onSelectTab: (Int) -> Unit = {},
+    /**
+     * Buttons of the pop-up's own in place of delete and the main action, laid out from the left (concentration's save
+     * on the left, «Прервать» on the right — owner's choice from boards, 2026-10-15: 3).
+     */
+    buttons: (@Composable RowScope.() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     val colors = LocalDesignTokens.current.colors
@@ -181,7 +186,10 @@ fun EditDialog(
                             content = content
                         )
                     }
-                    if (onConfirm != null || onDelete != null) {
+                    if (buttons != null) {
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, content = buttons)
+                    } else if (onConfirm != null || onDelete != null) {
                         Spacer(modifier = Modifier.height(24.dp))
                         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                             if (onDelete != null) {

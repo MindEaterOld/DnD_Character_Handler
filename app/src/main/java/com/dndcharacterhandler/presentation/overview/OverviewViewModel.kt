@@ -1,5 +1,7 @@
 package com.dndcharacterhandler.presentation.overview
 
+import com.dndcharacterhandler.domain.dnd5e.model.SpellCatalogItem
+import com.dndcharacterhandler.domain.dnd5e.repository.SpellCatalogRepository
 import com.dndcharacterhandler.domain.dnd5e.rules.UnarmoredBase
 import com.dndcharacterhandler.domain.dnd5e.rules.automaticArmorClass
 import com.dndcharacterhandler.domain.dnd5e.rules.stepHitPoints
@@ -54,6 +56,7 @@ class OverviewViewModel(
     private val characterRepository: CharacterRepository,
     private val characterCatalogRepository: CharacterCatalogRepository,
     private val inventoryCatalogRepository: InventoryCatalogRepository,
+    private val spellCatalogRepository: SpellCatalogRepository,
     getCharacterBundleUseCase: GetCharacterBundleUseCase,
     selectedCharacterHolder: SelectedCharacterHolder
 ) : BaseCharacterViewModel(getCharacterBundleUseCase, selectedCharacterHolder) {
@@ -65,8 +68,13 @@ class OverviewViewModel(
     /** The app's equipment by English name: Character Wizard shows and adds starting equipment as these items. */
     val equipmentItems: StateFlow<Map<String, InventoryCatalogItem>> = _equipmentItems.asStateFlow()
 
+    private val _spellCatalog = MutableStateFlow<Map<String, SpellCatalogItem>>(emptyMap())
+    /** The spells by catalog id: the held spell's name in the language in use. */
+    val spellCatalog: StateFlow<Map<String, SpellCatalogItem>> = _spellCatalog.asStateFlow()
+
     init {
         viewModelScope.launch { _catalog.value = characterCatalogRepository.getCatalog() }
+        viewModelScope.launch { _spellCatalog.value = spellCatalogRepository.getItems().associateBy { it.id } }
         viewModelScope.launch { _equipmentItems.value = loadEquipmentItems() }
         // Proficiencies Character Wizard wrote as names before the fields held ids: turned into ids once.
         viewModelScope.launch {

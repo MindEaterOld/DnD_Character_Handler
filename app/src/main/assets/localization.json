@@ -5435,12 +5435,55 @@
     "fr": "Mettre fin",
     "es": "Terminar"
   },
-  "concentration_end_hint": {
-    "en": "Lasts until you're incapacitated or fail a Constitution save after taking damage. Casting another concentration spell ends it.",
-    "ru": "Держится, пока вы не выведены из строя и не провалили спасбросок Телосложения после урона. Новое заклинание с концентрацией прерывает прежнее.",
-    "de": "Hält, bis du kampfunfähig wirst oder nach Schaden einen Konstitutionsrettungswurf nicht schaffst. Ein neuer Konzentrationszauber beendet sie.",
-    "fr": "Dure jusqu'à ce que vous soyez neutralisé ou ratiez un jet de sauvegarde de Constitution après des dégâts. Lancer un autre sort de concentration y met fin.",
-    "es": "Dura hasta que quedes incapacitado o falles una salvación de Constitución tras recibir daño. Lanzar otro conjuro de concentración la termina."
+  "concentration_breaks": {
+    "en": "Ends if",
+    "ru": "Прервётся, если",
+    "de": "Endet, wenn",
+    "fr": "Prend fin si",
+    "es": "Termina si"
+  },
+  "concentration_breaks_incapacitated": {
+    "en": "You're incapacitated",
+    "ru": "Вы выведены из строя",
+    "de": "Du bist kampfunfähig",
+    "fr": "Vous êtes neutralisé",
+    "es": "Quedas incapacitado"
+  },
+  "concentration_breaks_save": {
+    "en": "Failed saving throw",
+    "ru": "Провален спасбросок",
+    "de": "Rettungswurf misslungen",
+    "fr": "Sauvegarde ratée",
+    "es": "Salvación fallida"
+  },
+  "concentration_breaks_save_note": {
+    "en": "Constitution, after damage",
+    "ru": "Телосложения после урона",
+    "de": "Konstitution, nach Schaden",
+    "fr": "de Constitution après des dégâts",
+    "es": "de Constitución tras recibir daño"
+  },
+  "concentration_breaks_new": {
+    "en": "Another spell cast",
+    "ru": "Начато другое заклинание",
+    "de": "Anderer Zauber gewirkt",
+    "fr": "Autre sort lancé",
+    "es": "Otro conjuro lanzado"
+  },
+  "concentration_breaks_new_note": {
+    "en": "with concentration",
+    "ru": "с концентрацией",
+    "de": "mit Konzentration",
+    "fr": "avec concentration",
+    "es": "con concentración"
+  },
+  "concentration_save": {
+    "maxChars": 12,
+    "en": "Save",
+    "ru": "Спасбросок",
+    "de": "Rettungswurf",
+    "fr": "Sauvegarde",
+    "es": "Salvación"
   },
   "overview_hp_kind_hit_points": {
     "maxChars": 11,

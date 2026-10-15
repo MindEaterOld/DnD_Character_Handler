@@ -334,7 +334,7 @@ private fun RollPart.breakdown(): String {
 
 /** An attack read off the table: the hit total (gold on a critical, red on a natural 1) and the damage. */
 @Composable
-private fun AttackResult(title: String, rollLabel: String?, roll: AttackRoll, outcome: AttackOutcome, damageType: String, healing: Boolean) {
+internal fun AttackResult(title: String, rollLabel: String?, roll: AttackRoll, outcome: AttackOutcome, damageType: String, healing: Boolean) {
     val colors = LocalDesignTokens.current.colors
     val strings = LocalStrings.current
     val rollDice = LocalDiceRoller.current

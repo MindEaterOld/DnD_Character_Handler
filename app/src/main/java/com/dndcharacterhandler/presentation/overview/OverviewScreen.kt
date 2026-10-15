@@ -1,5 +1,8 @@
 package com.dndcharacterhandler.presentation.overview
 
+import com.dndcharacterhandler.presentation.spells.localizedWith
+import com.dndcharacterhandler.presentation.spells.ConcentrationDialog
+import com.dndcharacterhandler.domain.dnd5e.model.SpellCatalogItem
 import com.dndcharacterhandler.domain.dnd5e.rules.speedBreakdown
 import com.dndcharacterhandler.domain.dnd5e.rules.hitDicePools
 import kotlinx.coroutines.flow.first
@@ -19,7 +22,6 @@ import com.dndcharacterhandler.presentation.attributes.AttributesSection
 import com.dndcharacterhandler.presentation.attributes.AttributesViewModel
 import com.dndcharacterhandler.domain.dnd5e.rules.RollMode
 import com.dndcharacterhandler.domain.dnd5e.rules.attacksAgainst
-import com.dndcharacterhandler.presentation.components.EndConcentrationDialog
 import com.dndcharacterhandler.domain.dnd5e.rules.activeConditions
 import com.dndcharacterhandler.domain.dnd5e.rules.isDead
 import com.dndcharacterhandler.domain.dnd5e.rules.rollEffects
@@ -164,10 +166,12 @@ fun OverviewScreen(
         state.character?.let(viewModel::syncAutomaticArmorClass)
     }
     val catalog by viewModel.catalog.collectAsStateWithLifecycle()
+    val spellCatalog by viewModel.spellCatalog.collectAsStateWithLifecycle()
     AttributesSection(viewModel = attributesViewModel) { attributesItems ->
         OverviewContent(
             characterBundle = state.character,
             catalog = catalog,
+            spellCatalog = spellCatalog,
             moreItems = attributesItems,
             onOpenLevelUp = onOpenLevelUp,
             onOpenFeature = onOpenFeature,
@@ -230,6 +234,8 @@ internal fun OverviewContent(
     characterBundle: CharacterBundle?,
     /** For the hit dice by class; null while it loads (and in previews): one pool of the sheet's die. */
     catalog: CharacterCatalog? = null,
+    /** The spells by catalog id, for the held spell's name in the language in use. */
+    spellCatalog: Map<String, SpellCatalogItem> = emptyMap(),
     onOpenLevelUp: (Int) -> Unit = {},
     onOpenFeature: (Long) -> Unit = {},
     onOpenItem: (Long) -> Unit = {},
@@ -332,6 +338,7 @@ internal fun OverviewContent(
     }
 
     val concentrationSpell = characterBundle?.spells?.firstOrNull { it.id == character?.concentrationSpellId }
+        ?.let { it.localizedWith(it.catalogId?.let(spellCatalog::get), strings) }
 
     // The experience's pop-up, adding: the «XP» coin, a long press on the level under the name.
     val openAddExperience: () -> Unit = {
@@ -770,8 +777,9 @@ internal fun OverviewContent(
     }
 
     if (isEndConcentrationOpen && characterBundle != null && concentrationSpell != null) {
-        EndConcentrationDialog(
-            spellName = concentrationSpell.name,
+        ConcentrationDialog(
+            character = characterBundle.character,
+            spell = concentrationSpell,
             onEnd = {
                 onEndConcentration(characterBundle)
                 isEndConcentrationOpen = false

@@ -96,19 +96,3 @@ fun ConcentrationToggle(
         )
     }
 }
-
-/** Letting go of concentration on [spellName]: what holds it, and "End" in the danger colour. */
-@Composable
-fun EndConcentrationDialog(spellName: String, onEnd: () -> Unit, onDismiss: () -> Unit) {
-    val colors = LocalDesignTokens.current.colors
-    EditDialog(
-        title = text("concentration_title"),
-        onDismiss = onDismiss,
-        onConfirm = onEnd,
-        confirmLabel = text("concentration_end"),
-        confirmIsDanger = true
-    ) {
-        Text(text = spellName, style = MaterialTheme.typography.titleMedium, color = colors.text.primary)
-        Text(text = text("concentration_end_hint"), style = MaterialTheme.typography.bodyMedium, color = colors.text.muted)
-    }
-}
