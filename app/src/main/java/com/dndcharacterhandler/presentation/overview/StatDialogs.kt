@@ -1,5 +1,9 @@
 package com.dndcharacterhandler.presentation.overview
 
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -67,7 +71,11 @@ import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 internal fun ArmorClassDialog(
     characterBundle: CharacterBundle,
     onSave: (baseArmorClass: Int, mode: ArmorClassMode, manualArmorClass: Int?) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    /** A tap on a feature's line: its card on the Features screen. None where there's nowhere to go (combat). */
+    onOpenFeature: ((Long) -> Unit)? = null,
+    /** A tap on the armor's or the shield's line: its card on the Inventory screen. */
+    onOpenItem: ((Long) -> Unit)? = null
 ) {
     val character = characterBundle.character
     val colors = LocalDesignTokens.current.colors
@@ -98,19 +106,26 @@ internal fun ArmorClassDialog(
                         is ArmorClassSource.Unarmored -> ArmorClassSourceLine(Icons.Outlined.Person, text("overview_ac_unarmored"), null) {
                             SourceValue("${source.value}")
                         }
-                        is ArmorClassSource.Armor -> ArmorClassSourceLine(Icons.Outlined.Shield, source.name, null) { SourceValue("${source.value}") }
-                        is ArmorClassSource.FeatureBase -> ArmorClassSourceLine(Icons.Outlined.AutoAwesome, source.name, null) { SourceValue("${source.value}") }
+                        is ArmorClassSource.Armor -> ArmorClassSourceLine(
+                            Icons.Outlined.Shield, source.name, null, onClick = opener(onOpenItem, source.itemId)
+                        ) { SourceValue("${source.value}") }
+                        is ArmorClassSource.FeatureBase -> ArmorClassSourceLine(
+                            Icons.Outlined.AutoAwesome, source.name, null, onClick = opener(onOpenFeature, source.featureId)
+                        ) { SourceValue("${source.value}") }
                         is ArmorClassSource.Ability -> ArmorClassSourceLine(
                             abilityIcon(source.ability),
                             text(abilityKey(source.ability)),
                             source.cap?.let { LocalStrings.current.format("overview_ac_dex_cap", signedValue(it)) }
                         ) { SourceValue(signedValue(source.value)) }
-                        is ArmorClassSource.Shield -> ArmorClassSourceLine(Icons.Outlined.Shield, source.name, null) { SourceValue(signedValue(source.value)) }
+                        is ArmorClassSource.Shield -> ArmorClassSourceLine(
+                            Icons.Outlined.Shield, source.name, null, onClick = opener(onOpenItem, source.itemId)
+                        ) { SourceValue(signedValue(source.value)) }
                         // A species' bonus; one held only in a state the sheet doesn't keep is shown, not added.
                         is ArmorClassSource.FeatureBonus -> ArmorClassSourceLine(
                             Icons.Outlined.AutoAwesome,
                             source.name,
-                            if (source.counted) null else text("overview_ac_bonus_shifted")
+                            if (source.counted) null else text("overview_ac_bonus_shifted"),
+                            onClick = opener(onOpenFeature, source.featureId)
                         ) { SourceValue(signedValue(source.bonus), muted = !source.counted) }
                     }
                 }
@@ -164,11 +179,31 @@ internal fun SpeedDialog(speed: Int, onSave: (Int) -> Unit, onDismiss: () -> Uni
     }
 }
 
-/** A line of the armor class's sources: its icon in gold, its name (a note under it), what it adds at the end. */
+/** The tap that opens [id] by [open]: none without a way to go or a stored id. */
+private fun opener(open: ((Long) -> Unit)?, id: Long): (() -> Unit)? =
+    if (open != null && id != 0L) ({ open(id) }) else null
+
+/**
+ * A line of the armor class's sources: its icon in gold, its name (a note under it), what it adds at the end; a feature
+ * or an item opens its card on its screen by a tap ([onClick]).
+ */
 @Composable
-private fun ArmorClassSourceLine(icon: ImageVector, name: String, note: String?, value: @Composable () -> Unit) {
+private fun ArmorClassSourceLine(
+    icon: ImageVector,
+    name: String,
+    note: String?,
+    onClick: (() -> Unit)? = null,
+    value: @Composable () -> Unit
+) {
     val colors = LocalDesignTokens.current.colors
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp))
+            .then(if (onClick != null) Modifier.clickable(role = Role.Button, onClick = onClick) else Modifier)
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Icon(imageVector = icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
         Column(modifier = Modifier.padding(start = 10.dp).weight(1f)) {
             Text(text = name, style = MaterialTheme.typography.bodyLarge, color = colors.text.primary)

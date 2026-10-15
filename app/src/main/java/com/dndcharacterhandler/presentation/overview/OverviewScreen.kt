@@ -141,7 +141,11 @@ fun OverviewScreen(
     attributesViewModel: AttributesViewModel,
     onOpenDrawer: () -> Unit,
     onOpenDice: () -> Unit,
-    onOpenLevelUp: (targetLevel: Int) -> Unit = {}
+    onOpenLevelUp: (targetLevel: Int) -> Unit = {},
+    /** A feature to show on the Features screen (a line of the armor class's sources). */
+    onOpenFeature: (Long) -> Unit = {},
+    /** An item to show on the Inventory screen. */
+    onOpenItem: (Long) -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     // Only re-sync AC when an input that actually affects it changes (keys compare structurally),
@@ -166,6 +170,8 @@ fun OverviewScreen(
             catalog = catalog,
             moreItems = attributesItems,
             onOpenLevelUp = onOpenLevelUp,
+            onOpenFeature = onOpenFeature,
+            onOpenItem = onOpenItem,
             onOpenDrawer = onOpenDrawer,
             onOpenDice = onOpenDice,
             onUpdateIdentity = viewModel::updateIdentity,
@@ -225,6 +231,8 @@ internal fun OverviewContent(
     /** For the hit dice by class; null while it loads (and in previews): one pool of the sheet's die. */
     catalog: CharacterCatalog? = null,
     onOpenLevelUp: (Int) -> Unit = {},
+    onOpenFeature: (Long) -> Unit = {},
+    onOpenItem: (Long) -> Unit = {},
     onOpenDrawer: () -> Unit,
     onOpenDice: () -> Unit,
     onUpdateIdentity: (CharacterBundle, String?, String?, String?, Int?) -> Unit,
@@ -608,7 +616,15 @@ internal fun OverviewContent(
         ArmorClassDialog(
             characterBundle = characterBundle,
             onSave = { base, mode, manual -> onUpdateArmorClass(characterBundle, base, mode, manual) },
-            onDismiss = { activeMiniStatField = null }
+            onDismiss = { activeMiniStatField = null },
+            onOpenFeature = { id ->
+                activeMiniStatField = null
+                onOpenFeature(id)
+            },
+            onOpenItem = { id ->
+                activeMiniStatField = null
+                onOpenItem(id)
+            }
         )
     }
 

@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation
 
+import com.dndcharacterhandler.presentation.components.ScreenFocus
 import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -108,6 +109,8 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
     val currentRoute = backStackEntry?.destination?.route ?: AppScreen.Overview.route
     val managerState by appState.characterManagerViewModel.uiState.collectAsStateWithLifecycle()
     var levelUpTarget by remember { mutableStateOf<Int?>(null) }
+    // A card another screen is asked to show (a tap on the armor class's sources).
+    var screenFocus by remember { mutableStateOf<ScreenFocus?>(null) }
     val strings = remember(managerState.language) {
         appState.localizationRepository.getStrings(managerState.language)
     }
@@ -301,12 +304,23 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                         startDestination = AppScreen.Overview.route
                     ) {
                         composable(AppScreen.Overview.route) {
+                            // The jump to a card's screen, as a tab's: the overview stays under it.
+                            val focusOn: (ScreenFocus, AppScreen) -> Unit = { focus, screen ->
+                                screenFocus = focus
+                                navController.navigate(screen.route) {
+                                    popUpTo(navController.graph.startDestinationId) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            }
                             OverviewScreen(
                                 viewModel = appState.overviewViewModel,
                                 attributesViewModel = appState.attributesViewModel,
                                 onOpenDrawer = { scope.launch { drawerState.open() } },
                                 onOpenDice = openDice,
-                                onOpenLevelUp = { levelUpTarget = it }
+                                onOpenLevelUp = { levelUpTarget = it },
+                                onOpenFeature = { id -> focusOn(ScreenFocus.OnFeature(id), AppScreen.Features) },
+                                onOpenItem = { id -> focusOn(ScreenFocus.OnItem(id), AppScreen.Inventory) }
                             )
                         }
                             composable(AppScreen.Combat.route) {
@@ -320,7 +334,9 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                                 InventoryScreen(
                                     viewModel = appState.inventoryViewModel,
                                     onOpenDrawer = { scope.launch { drawerState.open() } },
-                                    onOpenDice = openDice
+                                    onOpenDice = openDice,
+                                    focusItemId = (screenFocus as? ScreenFocus.OnItem)?.itemId,
+                                    onFocusDone = { screenFocus = null }
                                 )
                             }
                             composable(AppScreen.Spells.route) {
@@ -335,7 +351,9 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                                     viewModel = appState.featuresViewModel,
                                     onOpenDrawer = { scope.launch { drawerState.open() } },
                                     onOpenDice = openDice,
-                                    onOpenLevelUp = { levelUpTarget = it }
+                                    onOpenLevelUp = { levelUpTarget = it },
+                                    focusFeatureId = (screenFocus as? ScreenFocus.OnFeature)?.featureId,
+                                    onFocusDone = { screenFocus = null }
                                 )
                             }
                             composable(AppScreen.Biography.route) {

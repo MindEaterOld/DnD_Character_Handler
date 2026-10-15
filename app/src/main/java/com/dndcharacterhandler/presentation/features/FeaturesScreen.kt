@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation.features
 
+import androidx.compose.runtime.LaunchedEffect
 import com.dndcharacterhandler.presentation.components.CharacterLoadingScreen
 import androidx.compose.foundation.lazy.rememberLazyListState
 import com.dndcharacterhandler.presentation.components.rememberHeaderBackdrop
@@ -176,7 +177,10 @@ fun FeaturesScreen(
     viewModel: FeaturesViewModel,
     onOpenDrawer: () -> Unit,
     onOpenDice: () -> Unit,
-    onOpenLevelUp: (targetLevel: Int) -> Unit = {}
+    onOpenLevelUp: (targetLevel: Int) -> Unit = {},
+    /** A feature to show: unfolded and scrolled into sight, then [onFocusDone]. */
+    focusFeatureId: Long? = null,
+    onFocusDone: () -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val catalogState by viewModel.catalogUiState.collectAsStateWithLifecycle()
@@ -191,7 +195,9 @@ fun FeaturesScreen(
         onDeleteFeature = viewModel::deleteFeature,
         onOpenLevelUp = onOpenLevelUp,
         onUpdateRace = viewModel::updateRace,
-        onUpdateBackground = viewModel::updateBackground
+        onUpdateBackground = viewModel::updateBackground,
+        focusFeatureId = focusFeatureId,
+        onFocusDone = onFocusDone
     )
 }
 
@@ -209,7 +215,9 @@ internal fun FeaturesContent(
     onUpdateRace: (CharacterBundle, String) -> Unit = { _, _ -> },
     onUpdateBackground: (CharacterBundle, String) -> Unit = { _, _ -> },
     /** Features shown unfolded at first (the screen preview uses it). */
-    initiallyExpanded: Set<Long> = emptySet()
+    initiallyExpanded: Set<Long> = emptySet(),
+    focusFeatureId: Long? = null,
+    onFocusDone: () -> Unit = {}
 ) {
     val character = characterBundle?.character
     val russian = LocalStrings.current.language == AppLanguage.RUSSIAN
@@ -253,6 +261,31 @@ internal fun FeaturesContent(
 
     val listState = rememberLazyListState()
     val backdrop = rememberHeaderBackdrop(listState)
+    // A feature asked for (from the armor class's sources): the search cleared, its card unfolded and scrolled to.
+    LaunchedEffect(focusFeatureId, groupedFeatures) {
+        val id = focusFeatureId ?: return@LaunchedEffect
+        if (query.isNotBlank()) {
+            query = ""
+            return@LaunchedEffect
+        }
+        // The list: the summary's cards, the search, then each group's title and its cards.
+        var index = 2
+        var found = -1
+        for ((_, features) in groupedFeatures) {
+            index += 1
+            val at = features.indexOfFirst { it.id == id }
+            if (at >= 0) {
+                found = index + at
+                break
+            }
+            index += features.size
+        }
+        if (found >= 0) {
+            expandedFeatures = expandedFeatures + id
+            listState.animateScrollToItem(found)
+        }
+        onFocusDone()
+    }
     ScreenBackground {
         Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(

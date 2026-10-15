@@ -1,5 +1,8 @@
 package com.dndcharacterhandler.presentation.inventory
 
+import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.runtime.LaunchedEffect
 import com.dndcharacterhandler.presentation.theme.AlphaTokens
 import com.dndcharacterhandler.presentation.components.CharacterLoadingScreen
 import com.dndcharacterhandler.presentation.components.rememberHeaderBackdrop
@@ -281,7 +284,10 @@ data class InventoryCatalogUiState(
 fun InventoryScreen(
     viewModel: InventoryViewModel,
     onOpenDrawer: () -> Unit,
-    onOpenDice: () -> Unit
+    onOpenDice: () -> Unit,
+    /** An item to show: unfolded and scrolled into sight, then [onFocusDone]. */
+    focusItemId: Long? = null,
+    onFocusDone: () -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val catalogState by viewModel.catalogUiState.collectAsStateWithLifecycle()
@@ -298,6 +304,8 @@ fun InventoryScreen(
         characterBundle = state.character,
         catalogItems = catalogState.items,
         characterCatalog = characterCatalog,
+        focusItemId = focusItemId,
+        onFocusDone = onFocusDone,
         onOpenDrawer = onOpenDrawer,
         onOpenDice = onOpenDice,
         onAddItem = { isAddItemDialogOpen = true },
@@ -412,10 +420,14 @@ internal fun InventoryContent(
     onEditItem: (InventoryItem) -> Unit = {},
     onMoveItem: (InventoryItem) -> Unit = {},
     /** Items shown unfolded at first (the screen preview uses it). */
-    initiallyExpanded: Set<Long> = emptySet()
+    initiallyExpanded: Set<Long> = emptySet(),
+    focusItemId: Long? = null,
+    onFocusDone: () -> Unit = {}
 ) {
     val character = characterBundle?.character
     var query by remember { mutableStateOf("") }
+    // The row to bring into sight once its section is: an item asked for from another screen.
+    var rowInSight by remember { mutableStateOf<Long?>(null) }
     // Unfolded rows, kept while scrolling; several can be open at once.
     var expandedItems by remember(characterBundle?.character?.id) { mutableStateOf(initiallyExpanded) }
 
@@ -454,6 +466,39 @@ internal fun InventoryContent(
     val carryLimit = carryingCapacity(character.strength, character.size)
     val listState = rememberLazyListState()
     val backdrop = rememberHeaderBackdrop(listState)
+    // An item asked for (from the armor class's sources): the search cleared, the item and the containers it lies in
+    // unfolded, its section scrolled to, then its row brought into sight.
+    LaunchedEffect(focusItemId, tree) {
+        val id = focusItemId ?: return@LaunchedEffect
+        if (query.isNotBlank()) {
+            query = ""
+            return@LaunchedEffect
+        }
+        val item = displayedItems.firstOrNull { it.id == id }
+        if (item != null) {
+            var top: InventoryItem = item
+            val opened = mutableSetOf(id)
+            while (true) {
+                val holder = tree.containerOf(top) ?: break
+                opened += holder.id
+                top = holder
+            }
+            expandedItems = expandedItems + opened
+            // The list: the coins, the weight, the search, then each category's title and its card.
+            var index = 3
+            for (category in InventoryCategory.values()) {
+                val shown = tree.topLevel.any { it.category == category }
+                if (category == top.category) {
+                    index += 1
+                    break
+                }
+                if (shown) index += 2
+            }
+            listState.animateScrollToItem(index)
+            rowInSight = id
+        }
+        onFocusDone()
+    }
 
     ScreenBackground {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -507,7 +552,8 @@ internal fun InventoryContent(
                                 expanded = expandedItems,
                                 onExpandedChange = { item, open ->
                                     expandedItems = if (open) expandedItems + item.id else expandedItems - item.id
-                                }
+                                },
+                                rowInSight = rowInSight
                             )
                         }
                     }
@@ -1111,12 +1157,14 @@ internal fun InventorySectionCard(
     /** Rows say which container they lie in (search results). */
     showLocation: Boolean = false,
     expanded: Set<Long> = emptySet(),
-    onExpandedChange: (InventoryItem, Boolean) -> Unit = { _, _ -> }
+    onExpandedChange: (InventoryItem, Boolean) -> Unit = { _, _ -> },
+    /** A row to bring into sight (an item asked for from another screen). */
+    rowInSight: Long? = null
 ) {
     val colors = LocalDesignTokens.current.colors
     val tree = inventory ?: remember(items) { InventoryTree(items) }
     val rows = if (inventory == null) tree.topLevel else items
-    val actions = InventoryRowActions(onToggleEquipped, onEditItem, onMoveItem, masteryOf, expanded, onExpandedChange)
+    val actions = InventoryRowActions(onToggleEquipped, onEditItem, onMoveItem, masteryOf, expanded, onExpandedChange, rowInSight)
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
@@ -1136,7 +1184,8 @@ private class InventoryRowActions(
     val onMove: ((InventoryItem) -> Unit)?,
     val masteryOf: (InventoryItem) -> CatalogWeaponMastery?,
     val expanded: Set<Long>,
-    val onExpandedChange: (InventoryItem, Boolean) -> Unit
+    val onExpandedChange: (InventoryItem, Boolean) -> Unit,
+    val rowInSight: Long? = null
 )
 
 @Composable
@@ -1201,10 +1250,17 @@ private fun InventoryItemRow(
     val onExpandedChange: (Boolean) -> Unit = { open -> actions.onExpandedChange(item, open) }
     // A tap unfolds the row, a long press edits; Character Wizard's rows only show the item.
     val canExpand = onEdit != null
+    // Asked for from another screen: brought into sight once unfolded.
+    val sight = remember { BringIntoViewRequester() }
+    val inSight = actions.rowInSight == item.id
+    LaunchedEffect(inSight, expanded) {
+        if (inSight && expanded) sight.bringIntoView()
+    }
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .bringIntoViewRequester(sight)
             .then(
                 if (canExpand) {
                     Modifier.combinedClickable(onClick = { onExpandedChange(!expanded) }, onLongClick = onEdit)
