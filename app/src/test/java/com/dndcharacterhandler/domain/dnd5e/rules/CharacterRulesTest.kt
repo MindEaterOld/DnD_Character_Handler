@@ -194,6 +194,38 @@ class CharacterRulesTest {
     }
 
     @Test
+    fun armorClassBreakdown_sahuaginsNaturalArmorIsTwelvePlusDexterityWithAShield() {
+        val shield = armorItem(InventoryArmorType.SHIELD, armorClass = 2, appliesDex = false, maxDex = null)
+        val breakdown = armorClassBreakdown(
+            dexterityScore = 14, inventoryItems = listOf(shield),
+            features = listOf(feature("p7T9qFfyjhT3zQ9T", "Природная броня", id = 7))
+        )
+        assertEquals(16, breakdown.total)
+        assertEquals(ArmorClassSource.FeatureBase("Природная броня", 12, featureId = 7), breakdown.sources.first())
+    }
+
+    @Test
+    fun armorClassBreakdown_warforgedsBonusCountsInArmorToo() {
+        val armor = armorItem(InventoryArmorType.HEAVY, armorClass = 16, appliesDex = false, maxDex = null)
+        val breakdown = armorClassBreakdown(
+            dexterityScore = 10, inventoryItems = listOf(armor),
+            features = listOf(feature("1qDTlwdYDCWXqr7W", "Встроенная защита", id = 3))
+        )
+        assertEquals(17, breakdown.total)
+        assertEquals(ArmorClassSource.FeatureBonus("Встроенная защита", 1, featureId = 3), breakdown.sources[1])
+    }
+
+    @Test
+    fun armorClassBreakdown_beasthidesBonusIsShownNotCounted() {
+        val breakdown = armorClassBreakdown(
+            dexterityScore = 10, inventoryItems = emptyList(),
+            features = listOf(feature("cR3keUbFlBqxxPPD", "Зверошкурый"))
+        )
+        assertEquals(10, breakdown.total)
+        assertEquals(false, (breakdown.sources[1] as ArmorClassSource.FeatureBonus).counted)
+    }
+
+    @Test
     fun armorClass_withoutArmorIsTenPlusDexterity() {
         val ac = calculateArmorClass(dexterityScore = 1, inventoryItems = emptyList())
         assertEquals(5, ac)
@@ -244,5 +276,6 @@ class CharacterRulesTest {
         org.junit.Assert.assertEquals(480.0, carryingCapacity(16, com.dndcharacterhandler.domain.dnd5e.model.CreatureSize.LARGE), 0.0)
     }
 
-    private fun feature(catalogId: String, name: String) = Feature(name = name, description = "", catalogId = catalogId)
+    private fun feature(catalogId: String, name: String, id: Long = 0) =
+        Feature(id = id, name = name, description = "", catalogId = catalogId)
 }

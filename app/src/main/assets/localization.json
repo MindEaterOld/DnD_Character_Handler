@@ -4087,6 +4087,13 @@
     "fr": "Sans armure",
     "es": "Sin armadura"
   },
+  "overview_ac_bonus_shifted": {
+    "en": "while shifted, not counted",
+    "ru": "в обороте, не учтено",
+    "de": "nur verwandelt, nicht gezählt",
+    "fr": "transformé, non compté",
+    "es": "transformado, no contado"
+  },
   "overview_ac_dex_cap": {
     "en": "at most %1$s",
     "ru": "не больше %1$s",

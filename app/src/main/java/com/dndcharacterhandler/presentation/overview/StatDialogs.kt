@@ -106,6 +106,12 @@ internal fun ArmorClassDialog(
                             source.cap?.let { LocalStrings.current.format("overview_ac_dex_cap", signedValue(it)) }
                         ) { SourceValue(signedValue(source.value)) }
                         is ArmorClassSource.Shield -> ArmorClassSourceLine(Icons.Outlined.Shield, source.name, null) { SourceValue(signedValue(source.value)) }
+                        // A species' bonus; one held only in a state the sheet doesn't keep is shown, not added.
+                        is ArmorClassSource.FeatureBonus -> ArmorClassSourceLine(
+                            Icons.Outlined.AutoAwesome,
+                            source.name,
+                            if (source.counted) null else text("overview_ac_bonus_shifted")
+                        ) { SourceValue(signedValue(source.bonus), muted = !source.counted) }
                     }
                 }
             }
@@ -173,8 +179,9 @@ private fun ArmorClassSourceLine(icon: ImageVector, name: String, note: String?,
 }
 
 @Composable
-private fun SourceValue(value: String) {
-    Text(text = value, style = MaterialTheme.typography.titleMedium, color = LocalDesignTokens.current.colors.text.primary)
+private fun SourceValue(value: String, muted: Boolean = false) {
+    val colors = LocalDesignTokens.current.colors
+    Text(text = value, style = MaterialTheme.typography.titleMedium, color = if (muted) colors.text.subtle else colors.text.primary)
 }
 
 /**

@@ -80,17 +80,34 @@ sealed interface ArmorClassSource {
     /** The base without armor: 10 (PHB 2024; the base the player could set before 2026-10-15 no longer counts). */
     data class Unarmored(override val value: Int) : ArmorClassSource
 
-    /** The armor worn: its own class and its magic bonus. */
-    data class Armor(val name: String, override val value: Int) : ArmorClassSource
+    /** The armor worn, [itemId] in the inventory: its own class and its magic bonus. */
+    data class Armor(val name: String, override val value: Int, val itemId: Long = 0) : ArmorClassSource
 
-    /** A feature that sets the base without armor (a barbarian's or a monk's Unarmored Defense): 10. */
-    data class FeatureBase(val name: String, override val value: Int) : ArmorClassSource
+    /**
+     * A feature that sets the base without armor in its place, [featureId] among the character's features: the
+     * barbarian's or the monk's Unarmored Defense (10), the Sahuagin's Natural Armor (12).
+     */
+    data class FeatureBase(val name: String, override val value: Int, val featureId: Long = 0) : ArmorClassSource
+
+    /**
+     * A feature's bonus on top of the armor class, [featureId] among the character's features: the Warforged's
+     * Integrated Protection (+1, always). [counted] false: it holds only in a state the sheet doesn't keep (the
+     * Beasthide shifter's +1 while shifted) — shown, not added.
+     */
+    data class FeatureBonus(
+        val name: String,
+        val bonus: Int,
+        val featureId: Long = 0,
+        val counted: Boolean = true
+    ) : ArmorClassSource {
+        override val value: Int get() = if (counted) bonus else 0
+    }
 
     /** An ability's modifier — Dexterity as far as the armor lets it in ([cap] when it held it back). */
     data class Ability(val ability: ArmorClassAbility, override val value: Int, val cap: Int? = null) : ArmorClassSource
 
-    /** The shield held: its class and its magic bonus. */
-    data class Shield(val name: String, override val value: Int) : ArmorClassSource
+    /** The shield held, [itemId] in the inventory: its class and its magic bonus. */
+    data class Shield(val name: String, override val value: Int, val itemId: Long = 0) : ArmorClassSource
 }
 
 /** The armor class and what it is made of. */
@@ -100,27 +117,44 @@ data class ArmorClassBreakdown(val total: Int, val sources: List<ArmorClassSourc
 const val UnarmoredBase = 10
 
 /**
- * A feature from the catalog that sets the armor class without armor (PHB 2024): 10 + Dexterity + [ability], with a
- * shield or not as [shieldAllowed] says.
+ * A feature from the catalog that sets the armor class without armor: [base] + Dexterity + [ability] (none for the
+ * Sahuagin's), with a shield or not as [shieldAllowed] says.
  */
-private class UnarmoredDefense(val catalogId: String, val ability: ArmorClassAbility, val shieldAllowed: Boolean)
+private class UnarmoredDefense(
+    val catalogId: String,
+    val base: Int,
+    val ability: ArmorClassAbility?,
+    val shieldAllowed: Boolean
+)
 
 private val UnarmoredDefenses = listOf(
-    // Barbarian's Unarmored Defense: Constitution, a shield allowed.
-    UnarmoredDefense("phbbrbUnarmoredD", ArmorClassAbility.CONSTITUTION, shieldAllowed = true),
-    // Monk's Unarmored Defense: Wisdom, no shield.
-    UnarmoredDefense("phbmnkUnarmoredD", ArmorClassAbility.WISDOM, shieldAllowed = false),
-    // Draconic Sorcerer's Draconic Resilience: Charisma, only armor rules it out.
-    UnarmoredDefense("phbscrDraconicRe", ArmorClassAbility.CHARISMA, shieldAllowed = true),
-    // College of Dance's Dazzling Footwork: Charisma, no shield.
-    UnarmoredDefense("phbbrdDazzlingFo", ArmorClassAbility.CHARISMA, shieldAllowed = false)
+    // Barbarian's Unarmored Defense: 10 + Dexterity + Constitution, a shield allowed.
+    UnarmoredDefense("phbbrbUnarmoredD", 10, ArmorClassAbility.CONSTITUTION, shieldAllowed = true),
+    // Monk's Unarmored Defense: 10 + Dexterity + Wisdom, no shield.
+    UnarmoredDefense("phbmnkUnarmoredD", 10, ArmorClassAbility.WISDOM, shieldAllowed = false),
+    // Draconic Sorcerer's Draconic Resilience: 10 + Dexterity + Charisma, only armor rules it out.
+    UnarmoredDefense("phbscrDraconicRe", 10, ArmorClassAbility.CHARISMA, shieldAllowed = true),
+    // College of Dance's Dazzling Footwork: 10 + Dexterity + Charisma, no shield.
+    UnarmoredDefense("phbbrdDazzlingFo", 10, ArmorClassAbility.CHARISMA, shieldAllowed = false),
+    // Sahuagin's Natural Armor (Exploring Eberron): 12 + Dexterity, a shield allowed.
+    UnarmoredDefense("p7T9qFfyjhT3zQ9T", 12, null, shieldAllowed = true)
+)
+
+/** A species' bonus to the armor class: the Warforged's always; the Beasthide shifter's only while shifted. */
+private class ArmorClassBonus(val catalogId: String, val bonus: Int, val always: Boolean)
+
+private val ArmorClassBonuses = listOf(
+    // Warforged's Integrated Protection (Eberron: Forge of the Artificer): +1, armor or not.
+    ArmorClassBonus("1qDTlwdYDCWXqr7W", 1, always = true),
+    // Shifter's Beasthide: +1 while shifted, a state the sheet doesn't keep yet.
+    ArmorClassBonus("cR3keUbFlBqxxPPD", 1, always = false)
 )
 
 /**
- * What the armor class is made of (owner, 2026-10-15). In armor: the armor, Dexterity as far as it lets it in (none for
- * heavy armor; medium armor's cap noted), the shield. Without: the base and Dexterity, or a feature's unarmored defense
- * where the character has one and it comes out higher (the rules let only one way count). Magic bonuses are in their
- * items. Never under 1.
+ * What the armor class is made of (owner, 2026-10-15), each line knowing its feature or item. The base: the armor
+ * worn, or without it the plain 10 or a feature's own base (the highest way counts, the rules letting only one);
+ * then a species' bonuses; then Dexterity as far as the armor lets it in (none for heavy armor; medium armor's cap
+ * noted) and a feature's ability; then the shield. Magic bonuses are in their items. Never under 1.
  */
 fun armorClassBreakdown(
     dexterityScore: Int,
@@ -138,12 +172,17 @@ fun armorClassBreakdown(
         it.isEquipped && it.armorDetails?.armorType == InventoryArmorType.SHIELD
     }
     val shield = shieldItem?.let { item ->
-        ArmorClassSource.Shield(item.name, (item.armorDetails?.armorClass ?: 0) + item.armorMagicBonus())
+        ArmorClassSource.Shield(item.name, (item.armorDetails?.armorClass ?: 0) + item.armorMagicBonus(), item.id)
+    }
+    val byCatalogId = features.filter { it.catalogId != null }.associateBy { it.catalogId!! }
+    val bonuses = ArmorClassBonuses.mapNotNull { bonus ->
+        byCatalogId[bonus.catalogId]?.let { ArmorClassSource.FeatureBonus(it.name, bonus.bonus, it.id, counted = bonus.always) }
     }
     val worn = armorItem?.armorDetails
     val sources = if (armorItem != null && worn != null) {
         buildList {
-            add(ArmorClassSource.Armor(armorItem.name, worn.armorClass + armorItem.armorMagicBonus()))
+            add(ArmorClassSource.Armor(armorItem.name, worn.armorClass + armorItem.armorMagicBonus(), armorItem.id))
+            addAll(bonuses)
             // Dexterity as far as the armor lets it in; none at all, no line (heavy armor).
             if (worn.appliesDexterityBonus) {
                 val applied = worn.appliedDexterityModifier(dexterityModifier)
@@ -158,17 +197,18 @@ fun armorClassBreakdown(
             ArmorClassAbility.WISDOM to abilityModifier(wisdomScore),
             ArmorClassAbility.CHARISMA to abilityModifier(charismaScore)
         )
-        val known = features.mapNotNull { feature -> feature.catalogId?.let { it to feature.name } }.toMap()
+        val dexterity = ArmorClassSource.Ability(ArmorClassAbility.DEXTERITY, dexterityModifier)
         val ways = buildList {
-            add(listOfNotNull(ArmorClassSource.Unarmored(UnarmoredBase), ArmorClassSource.Ability(ArmorClassAbility.DEXTERITY, dexterityModifier), shield))
+            add(listOfNotNull(ArmorClassSource.Unarmored(UnarmoredBase), *bonuses.toTypedArray(), dexterity, shield))
             UnarmoredDefenses.forEach { defense ->
-                val name = known[defense.catalogId] ?: return@forEach
+                val feature = byCatalogId[defense.catalogId] ?: return@forEach
                 if (shield != null && !defense.shieldAllowed) return@forEach
                 add(
                     listOfNotNull(
-                        ArmorClassSource.FeatureBase(name, 10),
-                        ArmorClassSource.Ability(ArmorClassAbility.DEXTERITY, dexterityModifier),
-                        ArmorClassSource.Ability(defense.ability, modifiers.getValue(defense.ability)),
+                        ArmorClassSource.FeatureBase(feature.name, defense.base, feature.id),
+                        *bonuses.toTypedArray(),
+                        dexterity,
+                        defense.ability?.let { ArmorClassSource.Ability(it, modifiers.getValue(it)) },
                         shield
                     )
                 )
