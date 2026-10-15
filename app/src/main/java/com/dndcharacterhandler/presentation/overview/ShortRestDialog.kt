@@ -48,6 +48,7 @@ import com.dndcharacterhandler.domain.dnd5e.rules.hitDiceHealing
 import com.dndcharacterhandler.domain.dnd5e.rules.hitDicePools
 import com.dndcharacterhandler.domain.dnd5e.rules.spellSlots
 import com.dndcharacterhandler.presentation.components.EditDialog
+import com.dndcharacterhandler.presentation.components.dialogSection
 import androidx.compose.ui.unit.sp
 import com.dndcharacterhandler.presentation.components.SheetLabel
 import com.dndcharacterhandler.presentation.dice.DieIcon
@@ -179,7 +180,7 @@ internal fun HitDicePools(
     val dice = pools.sortedByDescending { it.sides }.flatMap { pool -> List(pool.total) { index -> pool to index } }
     val (atHand, spent) = dice.partition { (pool, index) -> index < pool.available }
     Column(
-        modifier = Modifier.fillMaxWidth().padding(top = RestSectionGap),
+        modifier = Modifier.fillMaxWidth().dialogSection(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -279,13 +280,6 @@ private fun RestRestores(characterBundle: CharacterBundle) {
     RestRows(title = text("overview_rest_restores"), rows = rows)
 }
 
-/**
- * More air before a rest's section (the hit dice, what comes back, what ends) than the pop-up's 12dp between its lines:
- * 24dp in all, so each label starts a part of its own (owner, 2026-10-15 — the hit dice's label stood too close under
- * the hit points' bar).
- */
-private val RestSectionGap = 12.dp
-
 /** "1 → 2": a count before a rest and after it. */
 internal fun restChange(from: Int, to: Int): String = "$from → $to"
 
@@ -297,7 +291,7 @@ internal class RestRow(val icon: ImageVector, val name: String, val change: Stri
 internal fun RestRows(title: String, rows: List<RestRow>) {
     if (rows.isEmpty()) return
     val colors = LocalDesignTokens.current.colors
-    Column(modifier = Modifier.fillMaxWidth().padding(top = RestSectionGap), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+    Column(modifier = Modifier.fillMaxWidth().dialogSection(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         SheetLabel(title, modifier = Modifier.align(Alignment.CenterHorizontally))
         rows.forEach { row ->
             Row(verticalAlignment = Alignment.CenterVertically) {

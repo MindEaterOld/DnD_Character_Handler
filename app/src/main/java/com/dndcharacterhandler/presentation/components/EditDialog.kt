@@ -177,7 +177,7 @@ fun EditDialog(
                             modifier = Modifier
                                 .weight(1f, fill = false)
                                 .then(if (scrollable) Modifier.fadingVerticalScroll() else Modifier),
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(DialogLineGap),
                             content = content
                         )
                     }
@@ -256,6 +256,17 @@ fun EditDialog(
  * content 24dp, so they take 12dp of the title's line on their side — and 4dp of air.
  */
 private val DialogTitleInset = 16.dp
+
+/**
+ * A pop-up's spacing (owner's choice from the device, 2026-10-15: 20 — 12 ran the sections together, 24 drew them
+ * apart): [DialogLineGap] between the lines of a section, [DialogSectionGap] between sections. The content is laid
+ * out [DialogLineGap] apart; a section that opens a new part takes [dialogSection] for the rest.
+ */
+val DialogLineGap = 12.dp
+val DialogSectionGap = 20.dp
+
+/** On what opens a new section of a pop-up's content (a gold label and what is under it): [DialogSectionGap] over it. */
+fun Modifier.dialogSection(): Modifier = padding(top = DialogSectionGap - DialogLineGap)
 
 /** Under a pop-up's title: a gold rule melting toward its ends, a small diamond in its middle (`primary` at half). */
 @Composable
