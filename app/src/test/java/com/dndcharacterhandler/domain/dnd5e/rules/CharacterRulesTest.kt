@@ -4,6 +4,7 @@ import com.dndcharacterhandler.domain.dnd5e.model.Character
 import com.dndcharacterhandler.domain.dnd5e.model.CreatureSize
 import com.dndcharacterhandler.domain.dnd5e.model.InventoryArmorDetails
 import com.dndcharacterhandler.domain.dnd5e.model.InventoryArmorType
+import com.dndcharacterhandler.domain.dnd5e.model.Feature
 import com.dndcharacterhandler.domain.dnd5e.model.InventoryCategory
 import com.dndcharacterhandler.domain.dnd5e.model.InventoryItem
 import com.dndcharacterhandler.domain.dnd5e.model.SpellcastingAbility
@@ -134,6 +135,65 @@ class CharacterRulesTest {
     }
 
     @Test
+    fun armorClassBreakdown_heavyArmorHasNoDexterityLine() {
+        val armor = armorItem(InventoryArmorType.HEAVY, armorClass = 16, appliesDex = false, maxDex = null)
+        val shield = armorItem(InventoryArmorType.SHIELD, armorClass = 2, appliesDex = false, maxDex = null)
+        val breakdown = armorClassBreakdown(baseArmorClass = 10, dexterityScore = 14, inventoryItems = listOf(armor, shield))
+        assertEquals(18, breakdown.total)
+        assertEquals(listOf(ArmorClassSource.Armor::class, ArmorClassSource.Shield::class), breakdown.sources.map { it::class })
+    }
+
+    @Test
+    fun armorClassBreakdown_mediumArmorWritesTheDexterityItLetsIn() {
+        val armor = armorItem(InventoryArmorType.MEDIUM, armorClass = 14, appliesDex = true, maxDex = 2)
+        val breakdown = armorClassBreakdown(baseArmorClass = 10, dexterityScore = 18, inventoryItems = listOf(armor))
+        assertEquals(ArmorClassSource.Ability(ArmorClassAbility.DEXTERITY, 2, cap = 2), breakdown.sources[1])
+        assertEquals(16, breakdown.total)
+    }
+
+    @Test
+    fun armorClassBreakdown_barbariansUnarmoredDefenseKeepsTheShield() {
+        val shield = armorItem(InventoryArmorType.SHIELD, armorClass = 2, appliesDex = false, maxDex = null)
+        val breakdown = armorClassBreakdown(
+            baseArmorClass = 10, dexterityScore = 14, inventoryItems = listOf(shield), constitutionScore = 16,
+            features = listOf(feature("phbbrbUnarmoredD", "Защита без брони"))
+        )
+        assertEquals(17, breakdown.total)
+        assertEquals(ArmorClassSource.FeatureBase("Защита без брони", 10), breakdown.sources.first())
+    }
+
+    @Test
+    fun armorClassBreakdown_monksUnarmoredDefenseIsLostWithAShield() {
+        val shield = armorItem(InventoryArmorType.SHIELD, armorClass = 2, appliesDex = false, maxDex = null)
+        val monk = listOf(feature("phbmnkUnarmoredD", "Защита без брони"))
+        val bare = armorClassBreakdown(baseArmorClass = 10, dexterityScore = 16, inventoryItems = emptyList(), wisdomScore = 16, features = monk)
+        assertEquals(16, bare.total)
+        val shielded = armorClassBreakdown(baseArmorClass = 10, dexterityScore = 16, inventoryItems = listOf(shield), wisdomScore = 16, features = monk)
+        assertEquals(15, shielded.total)
+        assertEquals(ArmorClassSource.Unarmored(10), shielded.sources.first())
+    }
+
+    @Test
+    fun armorClassBreakdown_armorRulesOutUnarmoredDefense() {
+        val armor = armorItem(InventoryArmorType.LIGHT, armorClass = 11, appliesDex = true, maxDex = null)
+        val breakdown = armorClassBreakdown(
+            baseArmorClass = 10, dexterityScore = 14, inventoryItems = listOf(armor), constitutionScore = 18,
+            features = listOf(feature("phbbrbUnarmoredD", "Защита без брони"))
+        )
+        assertEquals(13, breakdown.total)
+    }
+
+    @Test
+    fun armorClassBreakdown_aHigherBaseBeatsAWeakerFeature() {
+        val breakdown = armorClassBreakdown(
+            baseArmorClass = 13, dexterityScore = 10, inventoryItems = emptyList(), charismaScore = 10,
+            features = listOf(feature("phbscrDraconicRe", "Драконья стойкость"))
+        )
+        assertEquals(13, breakdown.total)
+        assertEquals(ArmorClassSource.Unarmored(13), breakdown.sources.first())
+    }
+
+    @Test
     fun armorClass_neverDropsBelowOne() {
         val ac = calculateArmorClass(baseArmorClass = 1, dexterityScore = 1, inventoryItems = emptyList())
         assertEquals(1, ac)
@@ -183,4 +243,6 @@ class CharacterRulesTest {
         org.junit.Assert.assertEquals(240.0, carryingCapacity(16, com.dndcharacterhandler.domain.dnd5e.model.CreatureSize.SMALL), 0.0)
         org.junit.Assert.assertEquals(480.0, carryingCapacity(16, com.dndcharacterhandler.domain.dnd5e.model.CreatureSize.LARGE), 0.0)
     }
+
+    private fun feature(catalogId: String, name: String) = Feature(name = name, description = "", catalogId = catalogId)
 }

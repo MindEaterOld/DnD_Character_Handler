@@ -150,8 +150,12 @@ fun OverviewScreen(
         state.character?.character?.id,
         state.character?.character?.baseArmorClass,
         state.character?.character?.dexterity,
+        state.character?.character?.constitution,
+        state.character?.character?.wisdom,
+        state.character?.character?.charisma,
         state.character?.character?.armorClassMode,
-        state.character?.inventoryItems
+        state.character?.inventoryItems,
+        state.character?.features
     ) {
         state.character?.let(viewModel::syncAutomaticArmorClass)
     }

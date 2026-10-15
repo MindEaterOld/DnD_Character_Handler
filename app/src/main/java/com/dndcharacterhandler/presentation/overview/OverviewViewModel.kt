@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation.overview
 
+import com.dndcharacterhandler.domain.dnd5e.rules.automaticArmorClass
 import com.dndcharacterhandler.domain.dnd5e.rules.stepHitPoints
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.withLock
@@ -29,7 +30,6 @@ import com.dndcharacterhandler.domain.dnd5e.model.equipmentNameKey
 import com.dndcharacterhandler.domain.dnd5e.model.matchedEquipmentItem
 import com.dndcharacterhandler.domain.dnd5e.model.InventoryCatalogItem
 import com.dndcharacterhandler.domain.dnd5e.rules.abilityModifier
-import com.dndcharacterhandler.domain.dnd5e.rules.calculateArmorClass
 import com.dndcharacterhandler.domain.dnd5e.rules.calculateInitiative
 import com.dndcharacterhandler.domain.dnd5e.repository.CharacterCatalogRepository
 import com.dndcharacterhandler.domain.repository.CharacterRepository
@@ -222,11 +222,8 @@ class OverviewViewModel(
         val current = characterBundle.character
         val sanitizedBaseArmorClass = baseArmorClass.coerceAtLeast(1)
         val sanitizedArmorClass = when (armorClassMode) {
-            ArmorClassMode.AUTOMATIC -> calculateArmorClass(
-                baseArmorClass = sanitizedBaseArmorClass,
-                dexterityScore = current.dexterity,
-                inventoryItems = characterBundle.inventoryItems
-            )
+            ArmorClassMode.AUTOMATIC ->
+                automaticArmorClass(current, characterBundle.inventoryItems, characterBundle.features, sanitizedBaseArmorClass).total
             ArmorClassMode.MANUAL -> manualArmorClass?.coerceAtLeast(1) ?: current.armorClass
         }
         if (
@@ -249,11 +246,7 @@ class OverviewViewModel(
         val current = characterBundle.character
         if (current.armorClassMode != ArmorClassMode.AUTOMATIC) return
 
-        val recalculatedArmorClass = calculateArmorClass(
-            baseArmorClass = current.baseArmorClass,
-            dexterityScore = current.dexterity,
-            inventoryItems = characterBundle.inventoryItems
-        )
+        val recalculatedArmorClass = automaticArmorClass(current, characterBundle.inventoryItems, characterBundle.features).total
         if (recalculatedArmorClass == current.armorClass) return
 
         viewModelScope.launch {

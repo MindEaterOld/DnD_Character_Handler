@@ -559,6 +559,9 @@ interface CharacterDao {
     @Query("DELETE FROM features WHERE characterOwnerId = :characterId")
     suspend fun deleteFeaturesForCharacter(characterId: Long)
 
+    @Query("SELECT * FROM features WHERE characterOwnerId = :characterId")
+    suspend fun getFeaturesForCharacter(characterId: Long): List<FeatureEntity>
+
     @Query("SELECT * FROM features WHERE id = :featureId AND characterOwnerId = :characterId LIMIT 1")
     suspend fun getFeatureById(characterId: Long, featureId: Long): FeatureEntity?
 

@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation.combat
 
+import com.dndcharacterhandler.domain.dnd5e.rules.automaticArmorClass
 import com.dndcharacterhandler.presentation.components.buttonFill
 import com.dndcharacterhandler.presentation.components.damageTypeColor
 import com.dndcharacterhandler.presentation.components.CharacterLoadingScreen
@@ -101,7 +102,6 @@ import com.dndcharacterhandler.domain.dnd5e.model.Spell
 import com.dndcharacterhandler.domain.dnd5e.model.SpellCatalogItem
 import com.dndcharacterhandler.domain.dnd5e.model.SpellcastingAbility
 import com.dndcharacterhandler.domain.dnd5e.rules.abilityModifier
-import com.dndcharacterhandler.domain.dnd5e.rules.calculateArmorClass
 import com.dndcharacterhandler.domain.dnd5e.rules.proficiencyBonusForLevel
 import com.dndcharacterhandler.domain.dnd5e.rules.scoreForSpellcastingAbility
 import com.dndcharacterhandler.domain.dnd5e.repository.CharacterCatalogRepository
@@ -176,11 +176,8 @@ class CombatViewModel(
         val current = characterBundle.character
         val sanitizedBaseArmorClass = baseArmorClass.coerceAtLeast(1)
         val sanitizedArmorClass = when (armorClassMode) {
-            ArmorClassMode.AUTOMATIC -> calculateArmorClass(
-                baseArmorClass = sanitizedBaseArmorClass,
-                dexterityScore = current.dexterity,
-                inventoryItems = characterBundle.inventoryItems
-            )
+            ArmorClassMode.AUTOMATIC ->
+                automaticArmorClass(current, characterBundle.inventoryItems, characterBundle.features, sanitizedBaseArmorClass).total
             ArmorClassMode.MANUAL -> manualArmorClass?.coerceAtLeast(1) ?: current.armorClass
         }
         if (

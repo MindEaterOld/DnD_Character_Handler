@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation.attributes
 
+import com.dndcharacterhandler.domain.dnd5e.rules.automaticArmorClass
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.CompositingStrategy
@@ -152,7 +153,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import com.dndcharacterhandler.domain.dnd5e.rules.abilityModifier
-import com.dndcharacterhandler.domain.dnd5e.rules.calculateArmorClass
 import com.dndcharacterhandler.domain.dnd5e.rules.proficiencyBonusForLevel
 import com.dndcharacterhandler.domain.dnd5e.repository.CharacterCatalogRepository
 import com.dndcharacterhandler.domain.repository.CharacterRepository
@@ -241,12 +241,10 @@ class AttributesViewModel(
         if (updated == current) return
 
         viewModelScope.launch {
-            val armorClass = if (ability == AbilityType.DEXTERITY && current.armorClassMode == ArmorClassMode.AUTOMATIC) {
-                calculateArmorClass(
-                    baseArmorClass = current.baseArmorClass,
-                    dexterityScore = sanitizedValue,
-                    inventoryItems = characterBundle.inventoryItems
-                )
+            // Dexterity, and the abilities a feature's unarmored defense adds (Constitution, Wisdom, Charisma).
+            val armorAbilities = setOf(AbilityType.DEXTERITY, AbilityType.CONSTITUTION, AbilityType.WISDOM, AbilityType.CHARISMA)
+            val armorClass = if (ability in armorAbilities && current.armorClassMode == ArmorClassMode.AUTOMATIC) {
+                automaticArmorClass(updated, characterBundle.inventoryItems, characterBundle.features).total
             } else {
                 null
             }

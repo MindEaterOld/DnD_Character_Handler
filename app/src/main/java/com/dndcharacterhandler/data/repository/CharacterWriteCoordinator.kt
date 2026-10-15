@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.data.repository
 
+import com.dndcharacterhandler.domain.dnd5e.model.Feature
 import androidx.room.withTransaction
 import com.dndcharacterhandler.data.local.AppDatabase
 import com.dndcharacterhandler.data.local.dao.CharacterDao
@@ -204,7 +205,11 @@ class CharacterWriteCoordinator(
                 ArmorClassMode.AUTOMATIC -> calculateArmorClass(
                     baseArmorClass = sanitizedBaseArmorClass,
                     dexterityScore = character.dexterity,
-                    inventoryItems = characterDao.getInventoryItemsForCharacter(characterId).map(InventoryItemEntity::toDomain)
+                    inventoryItems = characterDao.getInventoryItemsForCharacter(characterId).map(InventoryItemEntity::toDomain),
+                    constitutionScore = character.constitution,
+                    wisdomScore = character.wisdom,
+                    charismaScore = character.charisma,
+                    features = armorClassFeatures(characterId)
                 )
                 ArmorClassMode.MANUAL -> manualArmorClass?.coerceAtLeast(1) ?: character.armorClass
             }
@@ -340,13 +345,21 @@ class CharacterWriteCoordinator(
         }
     }
 
+    /** The character's features as the armor class needs them: their names and catalog ids (unarmored defenses). */
+    private suspend fun armorClassFeatures(characterId: Long): List<Feature> =
+        characterDao.getFeaturesForCharacter(characterId).map { Feature(name = it.name, description = "", catalogId = it.catalogId) }
+
     private suspend fun refreshInventoryDerivedCharacterState(characterId: Long, updatedAt: Long) {
         val character = characterDao.getCharacterEntity(characterId) ?: return
         if (character.armorClassMode == ArmorClassMode.AUTOMATIC) {
             val armorClass = calculateArmorClass(
                 baseArmorClass = character.baseArmorClass,
                 dexterityScore = character.dexterity,
-                inventoryItems = characterDao.getInventoryItemsForCharacter(characterId).map(InventoryItemEntity::toDomain)
+                inventoryItems = characterDao.getInventoryItemsForCharacter(characterId).map(InventoryItemEntity::toDomain),
+                constitutionScore = character.constitution,
+                wisdomScore = character.wisdom,
+                charismaScore = character.charisma,
+                features = armorClassFeatures(characterId)
             )
             characterDao.updateArmorClass(characterId, armorClass, updatedAt)
         } else {
