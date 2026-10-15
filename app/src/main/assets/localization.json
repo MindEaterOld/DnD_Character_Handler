@@ -5385,11 +5385,18 @@
     "es": "Útiles"
   },
   "conditions_exhaustion_d20": {
-    "en": "d20 Tests",
-    "ru": "Броски d20",
-    "de": "W20-Proben",
-    "fr": "Tests d20",
-    "es": "Pruebas d20"
+    "en": "Penalty to d20 Tests",
+    "ru": "Штраф к броскам d20",
+    "de": "Abzug auf W20-Proben",
+    "fr": "Malus aux tests d20",
+    "es": "Penalización a pruebas d20"
+  },
+  "conditions_exhaustion_speed": {
+    "en": "Penalty to Speed",
+    "ru": "Штраф к скорости",
+    "de": "Abzug auf Bewegungsrate",
+    "fr": "Malus à la vitesse",
+    "es": "Penalización a la velocidad"
   },
   "conditions_exhaustion_death": {
     "en": "Death",

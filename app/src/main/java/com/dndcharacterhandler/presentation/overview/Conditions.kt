@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation.overview
 
+import com.dndcharacterhandler.presentation.components.SkullIcon
 import androidx.compose.material.icons.automirrored.outlined.DirectionsRun
 import androidx.compose.material.icons.outlined.Casino
 import com.dndcharacterhandler.presentation.components.dialogSection
@@ -302,12 +303,13 @@ private fun ExhaustionPicker(level: Int, immune: Boolean, onPick: (Int) -> Unit)
                 color = colors.text.subtle
             )
             level == 0 -> Unit
-            level >= MAX_EXHAUSTION -> SourceLine(ExhaustionIcon, text("conditions_exhaustion_death"), null) {}
+            // Death by the death saves' cracked skull (owner, 2026-10-15).
+            level >= MAX_EXHAUSTION -> SourceLine(SkullIcon, text("conditions_exhaustion_death"), null) {}
             else -> {
                 SourceLine(Icons.Outlined.Casino, text("conditions_exhaustion_d20"), null) {
                     SourceValue("−${2 * level}")
                 }
-                SourceLine(Icons.AutoMirrored.Outlined.DirectionsRun, text("overview_speed"), null) {
+                SourceLine(Icons.AutoMirrored.Outlined.DirectionsRun, text("conditions_exhaustion_speed"), null) {
                     SourceValue("−${5 * level}", unit = strings["inventory_unit_feet"])
                 }
             }
