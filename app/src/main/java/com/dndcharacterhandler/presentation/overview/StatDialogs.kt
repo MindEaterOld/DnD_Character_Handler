@@ -46,6 +46,7 @@ import com.dndcharacterhandler.domain.dnd5e.model.ArmorClassMode
 import com.dndcharacterhandler.domain.dnd5e.model.CharacterBundle
 import com.dndcharacterhandler.domain.dnd5e.rules.ArmorClassAbility
 import com.dndcharacterhandler.domain.dnd5e.rules.ArmorClassSource
+import com.dndcharacterhandler.domain.dnd5e.rules.UnarmoredBase
 import com.dndcharacterhandler.domain.dnd5e.rules.automaticArmorClass
 import com.dndcharacterhandler.presentation.components.DialogLineGap
 import com.dndcharacterhandler.presentation.components.EditDialog
@@ -60,7 +61,7 @@ import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
  * «Авто», «Вручную» — the tab picked being the character's mode, switched at once. «Авто»: the armor class as it comes
  * out, and «Из чего»: the armor or the base without it, Dexterity as far as the armor lets it in (no line for heavy
  * armor, medium's cap noted), a class feature's unarmored defense with its ability, the shield; the base without armor
- * has its own − and + in its line. «Вручную»: the armor class itself as a counter. Saved as it settles, no «Сохранить».
+ * is the rules' 10, not to be set (a spell such as Mage Armor goes by «Вручную» for now). «Вручную»: the armor class itself as a counter. Saved as it settles, no «Сохранить».
  */
 @Composable
 internal fun ArmorClassDialog(
@@ -71,10 +72,10 @@ internal fun ArmorClassDialog(
     val character = characterBundle.character
     val colors = LocalDesignTokens.current.colors
     var mode by remember { mutableStateOf(character.armorClassMode) }
-    var base by remember { mutableStateOf(character.baseArmorClass.coerceIn(1, MaxArmorClass)) }
     var manual by remember { mutableStateOf(character.armorClass.coerceIn(1, MaxArmorClass)) }
-    SaveWhenSettled(Triple(base, mode, manual)) { (b, m, a) -> onSave(b, m, if (m == ArmorClassMode.MANUAL) a else null) }
-    val breakdown = automaticArmorClass(character, characterBundle.inventoryItems, characterBundle.features, base)
+    // The base without armor is the rules' 10: the one stored goes back to it as the pop-up saves.
+    SaveWhenSettled(mode to manual) { (m, a) -> onSave(UnarmoredBase, m, if (m == ArmorClassMode.MANUAL) a else null) }
+    val breakdown = automaticArmorClass(character, characterBundle.inventoryItems, characterBundle.features)
     EditDialog(
         title = text("overview_edit_ac_title"),
         tabs = listOf(text("overview_ac_tab_auto"), text("overview_ac_tab_manual")),
@@ -95,12 +96,7 @@ internal fun ArmorClassDialog(
                 breakdown.sources.forEach { source ->
                     when (source) {
                         is ArmorClassSource.Unarmored -> ArmorClassSourceLine(Icons.Outlined.Person, text("overview_ac_unarmored"), null) {
-                            // The base without armor: its own − and + (10 for most, more by a feature written by hand).
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                HpStepButton(Icons.Outlined.Remove, text("overview_ac_step_down"), enabled = base > 1) { base = (base - 1).coerceAtLeast(1) }
-                                Text(text = "$base", modifier = Modifier.widthIn(min = 28.dp), style = MaterialTheme.typography.titleMedium, color = colors.text.primary, textAlign = TextAlign.Center)
-                                HpStepButton(Icons.Outlined.Add, text("overview_ac_step_up"), enabled = base < MaxArmorClass) { base = (base + 1).coerceAtMost(MaxArmorClass) }
-                            }
+                            SourceValue("${source.value}")
                         }
                         is ArmorClassSource.Armor -> ArmorClassSourceLine(Icons.Outlined.Shield, source.name, null) { SourceValue("${source.value}") }
                         is ArmorClassSource.FeatureBase -> ArmorClassSourceLine(Icons.Outlined.AutoAwesome, source.name, null) { SourceValue("${source.value}") }

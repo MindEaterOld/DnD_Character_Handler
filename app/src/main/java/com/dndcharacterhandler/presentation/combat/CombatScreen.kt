@@ -178,7 +178,7 @@ class CombatViewModel(
         val sanitizedBaseArmorClass = baseArmorClass.coerceAtLeast(1)
         val sanitizedArmorClass = when (armorClassMode) {
             ArmorClassMode.AUTOMATIC ->
-                automaticArmorClass(current, characterBundle.inventoryItems, characterBundle.features, sanitizedBaseArmorClass).total
+                automaticArmorClass(current, characterBundle.inventoryItems, characterBundle.features).total
             ArmorClassMode.MANUAL -> manualArmorClass?.coerceAtLeast(1) ?: current.armorClass
         }
         if (

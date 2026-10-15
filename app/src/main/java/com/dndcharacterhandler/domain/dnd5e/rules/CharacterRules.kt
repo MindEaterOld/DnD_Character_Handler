@@ -46,7 +46,6 @@ fun scoreForSpellcastingAbility(character: Character, ability: SpellcastingAbili
     }
 
 fun calculateArmorClass(
-    baseArmorClass: Int,
     dexterityScore: Int,
     inventoryItems: List<InventoryItem>,
     constitutionScore: Int = 10,
@@ -54,17 +53,15 @@ fun calculateArmorClass(
     charismaScore: Int = 10,
     features: List<Feature> = emptyList()
 ): Int = armorClassBreakdown(
-    baseArmorClass, dexterityScore, inventoryItems, constitutionScore, wisdomScore, charismaScore, features
+    dexterityScore, inventoryItems, constitutionScore, wisdomScore, charismaScore, features
 ).total
 
-/** The automatic armor class of [character] with its [inventoryItems] and [features]; [baseArmorClass] in place of its own. */
+/** The automatic armor class of [character] with its [inventoryItems] and [features]. */
 fun automaticArmorClass(
     character: Character,
     inventoryItems: List<InventoryItem>,
-    features: List<Feature>,
-    baseArmorClass: Int = character.baseArmorClass
+    features: List<Feature>
 ): ArmorClassBreakdown = armorClassBreakdown(
-    baseArmorClass = baseArmorClass,
     dexterityScore = character.dexterity,
     inventoryItems = inventoryItems,
     constitutionScore = character.constitution,
@@ -80,7 +77,7 @@ enum class ArmorClassAbility { DEXTERITY, CONSTITUTION, WISDOM, CHARISMA }
 sealed interface ArmorClassSource {
     val value: Int
 
-    /** The base without armor: 10, or what the player set. */
+    /** The base without armor: 10 (PHB 2024; the base the player could set before 2026-10-15 no longer counts). */
     data class Unarmored(override val value: Int) : ArmorClassSource
 
     /** The armor worn: its own class and its magic bonus. */
@@ -98,6 +95,9 @@ sealed interface ArmorClassSource {
 
 /** The armor class and what it is made of. */
 data class ArmorClassBreakdown(val total: Int, val sources: List<ArmorClassSource>)
+
+/** The armor class without armor (PHB 2024): 10 + Dexterity. */
+const val UnarmoredBase = 10
 
 /**
  * A feature from the catalog that sets the armor class without armor (PHB 2024): 10 + Dexterity + [ability], with a
@@ -123,7 +123,6 @@ private val UnarmoredDefenses = listOf(
  * items. Never under 1.
  */
 fun armorClassBreakdown(
-    baseArmorClass: Int,
     dexterityScore: Int,
     inventoryItems: List<InventoryItem>,
     constitutionScore: Int = 10,
@@ -161,7 +160,7 @@ fun armorClassBreakdown(
         )
         val known = features.mapNotNull { feature -> feature.catalogId?.let { it to feature.name } }.toMap()
         val ways = buildList {
-            add(listOfNotNull(ArmorClassSource.Unarmored(baseArmorClass), ArmorClassSource.Ability(ArmorClassAbility.DEXTERITY, dexterityModifier), shield))
+            add(listOfNotNull(ArmorClassSource.Unarmored(UnarmoredBase), ArmorClassSource.Ability(ArmorClassAbility.DEXTERITY, dexterityModifier), shield))
             UnarmoredDefenses.forEach { defense ->
                 val name = known[defense.catalogId] ?: return@forEach
                 if (shield != null && !defense.shieldAllowed) return@forEach
@@ -175,7 +174,7 @@ fun armorClassBreakdown(
                 )
             }
         }
-        // The first way wins a tie: the base the player set stays unless a feature does better.
+        // The first way wins a tie: the plain base stays unless a feature does better.
         ways.maxWith(compareBy<List<ArmorClassSource>> { way -> way.sumOf { it.value } }.thenByDescending { ways.indexOf(it) })
     }
     return ArmorClassBreakdown(sources.sumOf { it.value }.coerceAtLeast(1), sources)

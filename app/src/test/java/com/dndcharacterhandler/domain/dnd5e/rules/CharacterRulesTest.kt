@@ -75,28 +75,28 @@ class CharacterRulesTest {
 
     @Test
     fun armorClass_withoutArmorUsesBasePlusDexterity() {
-        val ac = calculateArmorClass(baseArmorClass = 10, dexterityScore = 16, inventoryItems = emptyList())
+        val ac = calculateArmorClass(dexterityScore = 16, inventoryItems = emptyList())
         assertEquals(13, ac)
     }
 
     @Test
     fun armorClass_lightArmorAddsFullDexterity() {
         val armor = armorItem(InventoryArmorType.LIGHT, armorClass = 11, appliesDex = true, maxDex = null)
-        val ac = calculateArmorClass(baseArmorClass = 10, dexterityScore = 16, inventoryItems = listOf(armor))
+        val ac = calculateArmorClass(dexterityScore = 16, inventoryItems = listOf(armor))
         assertEquals(14, ac)
     }
 
     @Test
     fun armorClass_mediumArmorCapsDexterityBonus() {
         val armor = armorItem(InventoryArmorType.MEDIUM, armorClass = 14, appliesDex = true, maxDex = 2)
-        val ac = calculateArmorClass(baseArmorClass = 10, dexterityScore = 18, inventoryItems = listOf(armor))
+        val ac = calculateArmorClass(dexterityScore = 18, inventoryItems = listOf(armor))
         assertEquals(16, ac)
     }
 
     @Test
     fun armorClass_heavyArmorIgnoresDexterity() {
         val armor = armorItem(InventoryArmorType.HEAVY, armorClass = 18, appliesDex = false, maxDex = null)
-        val ac = calculateArmorClass(baseArmorClass = 10, dexterityScore = 16, inventoryItems = listOf(armor))
+        val ac = calculateArmorClass(dexterityScore = 16, inventoryItems = listOf(armor))
         assertEquals(18, ac)
     }
 
@@ -104,7 +104,7 @@ class CharacterRulesTest {
     fun armorClass_shieldStacksOnTopOfArmor() {
         val armor = armorItem(InventoryArmorType.HEAVY, armorClass = 18, appliesDex = false, maxDex = null)
         val shield = armorItem(InventoryArmorType.SHIELD, armorClass = 2, appliesDex = false, maxDex = null)
-        val ac = calculateArmorClass(baseArmorClass = 10, dexterityScore = 16, inventoryItems = listOf(armor, shield))
+        val ac = calculateArmorClass(dexterityScore = 16, inventoryItems = listOf(armor, shield))
         assertEquals(20, ac)
     }
 
@@ -114,7 +114,7 @@ class CharacterRulesTest {
             .copy(isMagical = true, magicalBonus = 1)
         val shield = armorItem(InventoryArmorType.SHIELD, armorClass = 2, appliesDex = false, maxDex = null)
             .copy(isMagical = true, magicalBonus = 2)
-        val ac = calculateArmorClass(baseArmorClass = 10, dexterityScore = 10, inventoryItems = listOf(armor, shield))
+        val ac = calculateArmorClass(dexterityScore = 10, inventoryItems = listOf(armor, shield))
         assertEquals(23, ac)
     }
 
@@ -122,7 +122,7 @@ class CharacterRulesTest {
     fun armorClass_ignoresBonusOfMundaneArmor() {
         val armor = armorItem(InventoryArmorType.HEAVY, armorClass = 18, appliesDex = false, maxDex = null)
             .copy(isMagical = false, magicalBonus = 1)
-        val ac = calculateArmorClass(baseArmorClass = 10, dexterityScore = 10, inventoryItems = listOf(armor))
+        val ac = calculateArmorClass(dexterityScore = 10, inventoryItems = listOf(armor))
         assertEquals(18, ac)
     }
 
@@ -130,7 +130,7 @@ class CharacterRulesTest {
     fun armorClass_onlyCountsEquippedItems() {
         val unequipped = armorItem(InventoryArmorType.HEAVY, armorClass = 18, appliesDex = false, maxDex = null)
             .copy(isEquipped = false)
-        val ac = calculateArmorClass(baseArmorClass = 10, dexterityScore = 14, inventoryItems = listOf(unequipped))
+        val ac = calculateArmorClass(dexterityScore = 14, inventoryItems = listOf(unequipped))
         assertEquals(12, ac)
     }
 
@@ -138,7 +138,7 @@ class CharacterRulesTest {
     fun armorClassBreakdown_heavyArmorHasNoDexterityLine() {
         val armor = armorItem(InventoryArmorType.HEAVY, armorClass = 16, appliesDex = false, maxDex = null)
         val shield = armorItem(InventoryArmorType.SHIELD, armorClass = 2, appliesDex = false, maxDex = null)
-        val breakdown = armorClassBreakdown(baseArmorClass = 10, dexterityScore = 14, inventoryItems = listOf(armor, shield))
+        val breakdown = armorClassBreakdown(dexterityScore = 14, inventoryItems = listOf(armor, shield))
         assertEquals(18, breakdown.total)
         assertEquals(listOf(ArmorClassSource.Armor::class, ArmorClassSource.Shield::class), breakdown.sources.map { it::class })
     }
@@ -146,7 +146,7 @@ class CharacterRulesTest {
     @Test
     fun armorClassBreakdown_mediumArmorWritesTheDexterityItLetsIn() {
         val armor = armorItem(InventoryArmorType.MEDIUM, armorClass = 14, appliesDex = true, maxDex = 2)
-        val breakdown = armorClassBreakdown(baseArmorClass = 10, dexterityScore = 18, inventoryItems = listOf(armor))
+        val breakdown = armorClassBreakdown(dexterityScore = 18, inventoryItems = listOf(armor))
         assertEquals(ArmorClassSource.Ability(ArmorClassAbility.DEXTERITY, 2, cap = 2), breakdown.sources[1])
         assertEquals(16, breakdown.total)
     }
@@ -155,7 +155,7 @@ class CharacterRulesTest {
     fun armorClassBreakdown_barbariansUnarmoredDefenseKeepsTheShield() {
         val shield = armorItem(InventoryArmorType.SHIELD, armorClass = 2, appliesDex = false, maxDex = null)
         val breakdown = armorClassBreakdown(
-            baseArmorClass = 10, dexterityScore = 14, inventoryItems = listOf(shield), constitutionScore = 16,
+            dexterityScore = 14, inventoryItems = listOf(shield), constitutionScore = 16,
             features = listOf(feature("phbbrbUnarmoredD", "Защита без брони"))
         )
         assertEquals(17, breakdown.total)
@@ -166,9 +166,9 @@ class CharacterRulesTest {
     fun armorClassBreakdown_monksUnarmoredDefenseIsLostWithAShield() {
         val shield = armorItem(InventoryArmorType.SHIELD, armorClass = 2, appliesDex = false, maxDex = null)
         val monk = listOf(feature("phbmnkUnarmoredD", "Защита без брони"))
-        val bare = armorClassBreakdown(baseArmorClass = 10, dexterityScore = 16, inventoryItems = emptyList(), wisdomScore = 16, features = monk)
+        val bare = armorClassBreakdown(dexterityScore = 16, inventoryItems = emptyList(), wisdomScore = 16, features = monk)
         assertEquals(16, bare.total)
-        val shielded = armorClassBreakdown(baseArmorClass = 10, dexterityScore = 16, inventoryItems = listOf(shield), wisdomScore = 16, features = monk)
+        val shielded = armorClassBreakdown(dexterityScore = 16, inventoryItems = listOf(shield), wisdomScore = 16, features = monk)
         assertEquals(15, shielded.total)
         assertEquals(ArmorClassSource.Unarmored(10), shielded.sources.first())
     }
@@ -177,26 +177,26 @@ class CharacterRulesTest {
     fun armorClassBreakdown_armorRulesOutUnarmoredDefense() {
         val armor = armorItem(InventoryArmorType.LIGHT, armorClass = 11, appliesDex = true, maxDex = null)
         val breakdown = armorClassBreakdown(
-            baseArmorClass = 10, dexterityScore = 14, inventoryItems = listOf(armor), constitutionScore = 18,
+            dexterityScore = 14, inventoryItems = listOf(armor), constitutionScore = 18,
             features = listOf(feature("phbbrbUnarmoredD", "Защита без брони"))
         )
         assertEquals(13, breakdown.total)
     }
 
     @Test
-    fun armorClassBreakdown_aHigherBaseBeatsAWeakerFeature() {
+    fun armorClassBreakdown_thePlainBaseWinsATie() {
         val breakdown = armorClassBreakdown(
-            baseArmorClass = 13, dexterityScore = 10, inventoryItems = emptyList(), charismaScore = 10,
+            dexterityScore = 12, inventoryItems = emptyList(), charismaScore = 10,
             features = listOf(feature("phbscrDraconicRe", "Драконья стойкость"))
         )
-        assertEquals(13, breakdown.total)
-        assertEquals(ArmorClassSource.Unarmored(13), breakdown.sources.first())
+        assertEquals(11, breakdown.total)
+        assertEquals(ArmorClassSource.Unarmored(10), breakdown.sources.first())
     }
 
     @Test
-    fun armorClass_neverDropsBelowOne() {
-        val ac = calculateArmorClass(baseArmorClass = 1, dexterityScore = 1, inventoryItems = emptyList())
-        assertEquals(1, ac)
+    fun armorClass_withoutArmorIsTenPlusDexterity() {
+        val ac = calculateArmorClass(dexterityScore = 1, inventoryItems = emptyList())
+        assertEquals(5, ac)
     }
 
     @Test

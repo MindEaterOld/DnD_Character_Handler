@@ -203,7 +203,6 @@ class CharacterWriteCoordinator(
             val sanitizedBaseArmorClass = baseArmorClass.coerceAtLeast(1)
             val sanitizedArmorClass = when (armorClassMode) {
                 ArmorClassMode.AUTOMATIC -> calculateArmorClass(
-                    baseArmorClass = sanitizedBaseArmorClass,
                     dexterityScore = character.dexterity,
                     inventoryItems = characterDao.getInventoryItemsForCharacter(characterId).map(InventoryItemEntity::toDomain),
                     constitutionScore = character.constitution,
@@ -353,7 +352,6 @@ class CharacterWriteCoordinator(
         val character = characterDao.getCharacterEntity(characterId) ?: return
         if (character.armorClassMode == ArmorClassMode.AUTOMATIC) {
             val armorClass = calculateArmorClass(
-                baseArmorClass = character.baseArmorClass,
                 dexterityScore = character.dexterity,
                 inventoryItems = characterDao.getInventoryItemsForCharacter(characterId).map(InventoryItemEntity::toDomain),
                 constitutionScore = character.constitution,
