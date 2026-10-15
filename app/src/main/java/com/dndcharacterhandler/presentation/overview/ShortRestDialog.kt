@@ -178,7 +178,11 @@ internal fun HitDicePools(
     // Each die by its pool and its place in it: a pool's dice at hand come first, so the picked are among them.
     val dice = pools.sortedByDescending { it.sides }.flatMap { pool -> List(pool.total) { index -> pool to index } }
     val (atHand, spent) = dice.partition { (pool, index) -> index < pool.available }
-    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(top = RestSectionGap),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         SheetLabel(text("overview_hit_dice"))
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
@@ -275,6 +279,13 @@ private fun RestRestores(characterBundle: CharacterBundle) {
     RestRows(title = text("overview_rest_restores"), rows = rows)
 }
 
+/**
+ * More air before a rest's section (the hit dice, what comes back, what ends) than the pop-up's 12dp between its lines:
+ * 24dp in all, so each label starts a part of its own (owner, 2026-10-15 — the hit dice's label stood too close under
+ * the hit points' bar).
+ */
+private val RestSectionGap = 12.dp
+
 /** "1 → 2": a count before a rest and after it. */
 internal fun restChange(from: Int, to: Int): String = "$from → $to"
 
@@ -286,7 +297,7 @@ internal class RestRow(val icon: ImageVector, val name: String, val change: Stri
 internal fun RestRows(title: String, rows: List<RestRow>) {
     if (rows.isEmpty()) return
     val colors = LocalDesignTokens.current.colors
-    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+    Column(modifier = Modifier.fillMaxWidth().padding(top = RestSectionGap), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         SheetLabel(title, modifier = Modifier.align(Alignment.CenterHorizontally))
         rows.forEach { row ->
             Row(verticalAlignment = Alignment.CenterVertically) {
