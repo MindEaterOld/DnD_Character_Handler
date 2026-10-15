@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.sp
 import com.dndcharacterhandler.domain.dnd5e.model.ArmorClassMode
 import com.dndcharacterhandler.domain.dnd5e.model.CharacterBundle
 import com.dndcharacterhandler.domain.dnd5e.rules.ArmorClassAbility
+import com.dndcharacterhandler.domain.dnd5e.rules.ArmorClassBreakdown
 import com.dndcharacterhandler.domain.dnd5e.rules.ArmorClassSource
 import com.dndcharacterhandler.domain.dnd5e.rules.UnarmoredBase
 import com.dndcharacterhandler.domain.dnd5e.rules.automaticArmorClass
@@ -93,43 +94,7 @@ internal fun ArmorClassDialog(
         scrollable = false
     ) {
         if (mode == ArmorClassMode.AUTOMATIC) {
-            // The overview's crest round «КБ» and the number (owner, 2026-10-15).
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                ArmorClassCrest(label = text("stat_card_armor_class_short")) {
-                    Text(text = "${breakdown.total}", style = crestNumberStyle(), color = colors.text.primary)
-                }
-            }
-            Column(modifier = Modifier.fillMaxWidth().dialogSection(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                SheetLabel(text("overview_ac_sources"), modifier = Modifier.align(Alignment.CenterHorizontally))
-                breakdown.sources.forEach { source ->
-                    when (source) {
-                        is ArmorClassSource.Unarmored -> ArmorClassSourceLine(Icons.Outlined.Person, text("overview_ac_unarmored"), null) {
-                            SourceValue("${source.value}")
-                        }
-                        is ArmorClassSource.Armor -> ArmorClassSourceLine(
-                            Icons.Outlined.Shield, source.name, null, onClick = opener(onOpenItem, source.itemId)
-                        ) { SourceValue("${source.value}") }
-                        is ArmorClassSource.FeatureBase -> ArmorClassSourceLine(
-                            Icons.Outlined.AutoAwesome, source.name, null, onClick = opener(onOpenFeature, source.featureId)
-                        ) { SourceValue("${source.value}") }
-                        is ArmorClassSource.Ability -> ArmorClassSourceLine(
-                            abilityIcon(source.ability),
-                            text(abilityKey(source.ability)),
-                            source.cap?.let { LocalStrings.current.format("overview_ac_dex_cap", signedValue(it)) }
-                        ) { SourceValue(signedValue(source.value)) }
-                        is ArmorClassSource.Shield -> ArmorClassSourceLine(
-                            Icons.Outlined.Shield, source.name, null, onClick = opener(onOpenItem, source.itemId)
-                        ) { SourceValue(signedValue(source.value)) }
-                        // A species' bonus; one held only in a state the sheet doesn't keep is shown, not added.
-                        is ArmorClassSource.FeatureBonus -> ArmorClassSourceLine(
-                            Icons.Outlined.AutoAwesome,
-                            source.name,
-                            if (source.counted) null else text("overview_ac_bonus_shifted"),
-                            onClick = opener(onOpenFeature, source.featureId)
-                        ) { SourceValue(signedValue(source.bonus), muted = !source.counted) }
-                    }
-                }
-            }
+            ArmorClassAutoContent(breakdown, onOpenFeature, onOpenItem)
         } else {
             Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                 // The crest between − and +, its number typed in place.
@@ -176,6 +141,56 @@ internal fun SpeedDialog(speed: Int, onSave: (Int) -> Unit, onDismiss: () -> Uni
             downDescription = text("overview_speed_step_down"),
             upDescription = text("overview_speed_step_up")
         )
+    }
+}
+
+/**
+ * The «Авто» tab: the armor class in the overview's crest over «Из чего», a line a source; a feature's or an item's
+ * line opens it by a tap where [onOpenFeature] / [onOpenItem] are given.
+ */
+@Composable
+internal fun ArmorClassAutoContent(
+    breakdown: ArmorClassBreakdown,
+    onOpenFeature: ((Long) -> Unit)?,
+    onOpenItem: ((Long) -> Unit)?
+) {
+    val colors = LocalDesignTokens.current.colors
+    // The overview's crest round «КБ» and the number (owner, 2026-10-15).
+    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        ArmorClassCrest(label = text("stat_card_armor_class_short")) {
+            Text(text = "${breakdown.total}", style = crestNumberStyle(), color = colors.text.primary)
+        }
+    }
+    Column(modifier = Modifier.fillMaxWidth().dialogSection(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        SheetLabel(text("overview_ac_sources"), modifier = Modifier.align(Alignment.CenterHorizontally))
+        breakdown.sources.forEach { source ->
+            when (source) {
+                is ArmorClassSource.Unarmored -> ArmorClassSourceLine(Icons.Outlined.Person, text("overview_ac_unarmored"), null) {
+                    SourceValue("${source.value}")
+                }
+                is ArmorClassSource.Armor -> ArmorClassSourceLine(
+                    Icons.Outlined.Shield, source.name, null, onClick = opener(onOpenItem, source.itemId)
+                ) { SourceValue("${source.value}") }
+                is ArmorClassSource.FeatureBase -> ArmorClassSourceLine(
+                    Icons.Outlined.AutoAwesome, source.name, null, onClick = opener(onOpenFeature, source.featureId)
+                ) { SourceValue("${source.value}") }
+                is ArmorClassSource.Ability -> ArmorClassSourceLine(
+                    abilityIcon(source.ability),
+                    text(abilityKey(source.ability)),
+                    source.cap?.let { LocalStrings.current.format("overview_ac_dex_cap", signedValue(it)) }
+                ) { SourceValue(signedValue(source.value)) }
+                is ArmorClassSource.Shield -> ArmorClassSourceLine(
+                    Icons.Outlined.Shield, source.name, null, onClick = opener(onOpenItem, source.itemId)
+                ) { SourceValue(signedValue(source.value)) }
+                // A species' bonus; one held only in a state the sheet doesn't keep is shown, not added.
+                is ArmorClassSource.FeatureBonus -> ArmorClassSourceLine(
+                    Icons.Outlined.AutoAwesome,
+                    source.name,
+                    if (source.counted) null else text("overview_ac_bonus_shifted"),
+                    onClick = opener(onOpenFeature, source.featureId)
+                ) { SourceValue(signedValue(source.bonus), muted = !source.counted) }
+            }
+        }
     }
 }
 
