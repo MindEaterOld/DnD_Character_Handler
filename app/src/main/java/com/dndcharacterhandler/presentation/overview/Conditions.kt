@@ -215,35 +215,32 @@ internal fun ConditionsSheet(
                 onExhaustion(it)
             }
         )
-        ConditionGroups.forEach { (titleKey, conditions) ->
-            Column(modifier = Modifier.dialogSection(), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                ConditionGroupTitle(text(titleKey))
-                conditions.forEach { condition ->
-                    ConditionRow(
-                        condition = condition,
-                        on = condition in picked,
-                        immune = condition in immune && condition !in picked,
-                        onToggle = {
-                            picked = if (condition in picked) picked - condition else picked + condition
-                            onConditions(picked)
-                        }
-                    )
-                }
+        Column(modifier = Modifier.dialogSection(), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            ConditionGroupTitle(text("conditions_section"))
+            ConditionOrder.forEach { condition ->
+                ConditionRow(
+                    condition = condition,
+                    on = condition in picked,
+                    immune = condition in immune && condition !in picked,
+                    onToggle = {
+                        picked = if (condition in picked) picked - condition else picked + condition
+                        onConditions(picked)
+                    }
+                )
             }
         }
     }
 }
 
-/** The groups, each condition once: what hinders, what takes the character out, what helps. */
-private val ConditionGroups = listOf(
-    "conditions_group_hindering" to listOf(
-        Condition.POISONED, Condition.FRIGHTENED, Condition.CHARMED, Condition.BLINDED,
-        Condition.DEAFENED, Condition.GRAPPLED, Condition.RESTRAINED, Condition.PRONE
-    ),
-    "conditions_group_incapacitating" to listOf(
-        Condition.INCAPACITATED, Condition.STUNNED, Condition.PARALYZED, Condition.UNCONSCIOUS, Condition.PETRIFIED
-    ),
-    "conditions_group_helpful" to listOf(Condition.INVISIBLE)
+/**
+ * The conditions in one section, «Статусы» (owner, 2026-10-15 — the groups «Мешают», «Выводят из строя», «Помогают»
+ * went): what hinders first, then what takes the character out, then what helps.
+ */
+private val ConditionOrder = listOf(
+    Condition.POISONED, Condition.FRIGHTENED, Condition.CHARMED, Condition.BLINDED,
+    Condition.DEAFENED, Condition.GRAPPLED, Condition.RESTRAINED, Condition.PRONE,
+    Condition.INCAPACITATED, Condition.STUNNED, Condition.PARALYZED, Condition.UNCONSCIOUS, Condition.PETRIFIED,
+    Condition.INVISIBLE
 )
 
 /**

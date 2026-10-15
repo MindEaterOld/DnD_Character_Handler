@@ -5244,6 +5244,13 @@
     "fr": "Lancer les dés du critique : %1$s",
     "es": "Tirar los dados del crítico: %1$s"
   },
+  "conditions_section": {
+    "en": "Statuses",
+    "ru": "Статусы",
+    "de": "Status",
+    "fr": "Statuts",
+    "es": "Estados"
+  },
   "conditions_title": {
     "en": "Conditions",
     "ru": "Состояния",
@@ -5362,27 +5369,6 @@
     "de": "Eigene Angriffe mit Vorteil, gegen dich mit Nachteil",
     "fr": "Vos attaques : avantage ; contre vous : désavantage",
     "es": "Tus ataques con ventaja; contra ti, con desventaja"
-  },
-  "conditions_group_hindering": {
-    "en": "Hindering",
-    "ru": "Мешают",
-    "de": "Hinderlich",
-    "fr": "Gênants",
-    "es": "Perjudiciales"
-  },
-  "conditions_group_incapacitating": {
-    "en": "Taking you out",
-    "ru": "Выводят из строя",
-    "de": "Außer Gefecht",
-    "fr": "Neutralisants",
-    "es": "Incapacitantes"
-  },
-  "conditions_group_helpful": {
-    "en": "Helpful",
-    "ru": "Помогают",
-    "de": "Hilfreich",
-    "fr": "Utiles",
-    "es": "Útiles"
   },
   "conditions_exhaustion_d20": {
     "en": "Penalty to d20 Tests",
