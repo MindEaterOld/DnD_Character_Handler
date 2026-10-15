@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.wrapContentHeight
 import com.dndcharacterhandler.presentation.overview.PortraitSideStep
 import com.dndcharacterhandler.presentation.overview.PortraitSideButtonSize
 import com.dndcharacterhandler.presentation.components.CharacterHeaderRow
@@ -363,7 +365,8 @@ fun DndCharacterApp(appState: DndCharacterAppState) {
                     .align(Alignment.TopCenter)
                     .statusBarsPadding()
                     .padding(top = NoticeTop, start = NoticeSide, end = NoticeSide)
-                    .height(PortraitSideButtonSize)
+                    .heightIn(min = PortraitSideButtonSize)
+                    .wrapContentHeight(Alignment.CenterVertically)
             )
 
             // Covers the whole app, bottom navigation included.

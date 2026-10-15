@@ -4742,12 +4742,13 @@
     "fr": "\u00c9quipement",
     "es": "Equipo"
   },
-  "levelup_level_down_unavailable": {
-    "en": "Character Wizard can't take levels back yet: that comes later. For now the level can only go up.",
-    "ru": "\u0421\u043d\u0438\u043c\u0430\u0442\u044c \u0443\u0440\u043e\u0432\u043d\u0438 Character Wizard \u043f\u043e\u043a\u0430 \u043d\u0435 \u0443\u043c\u0435\u0435\u0442 \u2014 \u044d\u0442\u043e \u0431\u0443\u0434\u0435\u0442 \u043f\u043e\u0437\u0436\u0435. \u0421\u0435\u0439\u0447\u0430\u0441 \u0443\u0440\u043e\u0432\u0435\u043d\u044c \u043c\u043e\u0436\u043d\u043e \u0442\u043e\u043b\u044c\u043a\u043e \u043f\u043e\u0432\u044b\u0448\u0430\u0442\u044c.",
-    "de": "Character Wizard kann noch keine Stufen zur\u00fccknehmen; das kommt sp\u00e4ter. Vorerst geht es nur aufw\u00e4rts.",
-    "fr": "Character Wizard ne peut pas encore retirer de niveaux ; cela viendra plus tard. Pour l'instant, le niveau ne peut que monter.",
-    "es": "Character Wizard a\u00fan no puede quitar niveles; llegar\u00e1 m\u00e1s adelante. Por ahora el nivel solo puede subir."
+  "overview_level_down_unavailable": {
+    "maxChars": 27,
+    "en": "Levels can't go down yet",
+    "ru": "Понижать уровни пока нельзя",
+    "de": "Abstufen noch nicht möglich",
+    "fr": "Rétrograder : pas encore",
+    "es": "Aún no se puede bajar nivel"
   },
   "overview_exp_dialog_title": {
     "maxChars": 15,

@@ -278,7 +278,6 @@ internal fun OverviewContent(
         }
     }
     var activeField by remember { mutableStateOf<OverviewEditableField?>(null) }
-    var isLevelDownNoticeOpen by remember { mutableStateOf(false) }
     var isPortraitMenuOpen by remember { mutableStateOf(false) }
     var isPortraitViewerOpen by remember { mutableStateOf(false) }
     var isPortraitFramingOpen by remember { mutableStateOf(false) }
@@ -541,16 +540,6 @@ internal fun OverviewContent(
         }
     }
 
-    if (isLevelDownNoticeOpen) {
-        // A notice from Character Wizard: its name as the title, the cross closes it.
-        EditDialog(
-            title = text("levelup_title"),
-            onDismiss = { isLevelDownNoticeOpen = false }
-        ) {
-            Text(text("levelup_level_down_unavailable"))
-        }
-    }
-
     if (activeField != null && characterBundle != null) {
         val field = activeField!!
         EditDialog(
@@ -599,11 +588,9 @@ internal fun OverviewContent(
                         onOpenLevelUp(current + 1)
                         isExperienceDialogOpen = false
                     }
-                    // The wizard can't take levels back yet.
-                    characterBundle.character.classes.isNotEmpty() -> {
-                        isLevelDownNoticeOpen = true
-                        isExperienceDialogOpen = false
-                    }
+                    // The wizard can't take levels back yet: a notice says so, the pop-up stays (owner, 2026-10-15).
+                    characterBundle.character.classes.isNotEmpty() ->
+                        snackbar.show(strings["overview_level_down_unavailable"], null) {}
                     else -> onUpdateIdentity(characterBundle, null, null, null, current - 1)
                 }
             },

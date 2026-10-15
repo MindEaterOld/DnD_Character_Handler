@@ -16,7 +16,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -28,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.layer.GraphicsLayer
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 
@@ -72,13 +72,13 @@ fun AppNoticeHost(
 /**
  * A notice (owner's choices from the device, 2026-10-13): a pill as wide as its words, on the tab bar's plate — its
  * outline `border.faint`, the screens behind it blurred and tinted ([GlassPlateBack]) — its words `bodyMedium`, its
- * action in gold after them. Stands in the middle of the height it is given.
+ * action in gold after them. Its words wrap to three lines at most.
  */
 @Composable
 fun AppNotice(data: SnackbarData, backdrop: GraphicsLayer?, backdropOrigin: Offset) {
     val colors = LocalDesignTokens.current.colors
     val shape = RoundedCornerShape(50)
-    Box(modifier = Modifier.fillMaxHeight(), contentAlignment = Alignment.Center) {
+    Box(contentAlignment = Alignment.Center) {
         Box(
             modifier = Modifier
                 .clip(shape)
@@ -91,11 +91,14 @@ fun AppNotice(data: SnackbarData, backdrop: GraphicsLayer?, backdropOrigin: Offs
                     .padding(horizontal = 20.dp, vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // A long notice wraps, three lines at most, its lines centred («Персонаж мёртв — …»).
                 Text(
                     text = data.visuals.message,
+                    modifier = Modifier.weight(1f, fill = false),
                     style = MaterialTheme.typography.bodyMedium,
                     color = colors.text.primary,
-                    maxLines = 1
+                    textAlign = TextAlign.Center,
+                    maxLines = NoticeMaxLines
                 )
                 data.visuals.actionLabel?.let { label ->
                     Text(
@@ -119,6 +122,9 @@ private const val NoticeLongMillis = 10_000L
 
 /** How long the pill waits for a notice's replacement before it fades. */
 private const val NoticeSwapGraceMillis = 120L
+
+/** The most lines a notice's words take. */
+private const val NoticeMaxLines = 3
 
 /** The pill's fade in and out. */
 private const val NoticeFadeMillis = 200
