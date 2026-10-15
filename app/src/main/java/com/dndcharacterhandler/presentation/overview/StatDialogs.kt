@@ -47,6 +47,7 @@ import com.dndcharacterhandler.domain.dnd5e.model.CharacterBundle
 import com.dndcharacterhandler.domain.dnd5e.rules.ArmorClassAbility
 import com.dndcharacterhandler.domain.dnd5e.rules.ArmorClassSource
 import com.dndcharacterhandler.domain.dnd5e.rules.automaticArmorClass
+import com.dndcharacterhandler.presentation.components.DialogLineGap
 import com.dndcharacterhandler.presentation.components.EditDialog
 import com.dndcharacterhandler.presentation.components.SheetLabel
 import com.dndcharacterhandler.presentation.components.dialogSection
@@ -128,6 +129,8 @@ internal fun ArmorClassDialog(
                 )
                 Text(
                     text = text("overview_ac_manual_note"),
+                    // The pop-up's line gap under the crest.
+                    modifier = Modifier.padding(top = DialogLineGap),
                     style = MaterialTheme.typography.bodyMedium,
                     color = colors.text.muted,
                     textAlign = TextAlign.Center
