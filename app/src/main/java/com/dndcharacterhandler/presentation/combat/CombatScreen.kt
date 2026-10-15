@@ -670,7 +670,6 @@ internal fun CombatContent(
         // The overview's pop-up: one armor class's pop-up for the whole app.
         ArmorClassDialog(
             characterBundle = resolvedBundle,
-            onSave = { base, mode, manual -> onUpdateArmorClass(resolvedBundle, base, mode, manual) },
             onDismiss = { isArmorClassDialogOpen = false }
         )
     }

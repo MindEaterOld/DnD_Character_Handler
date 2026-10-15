@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation.overview
 
+import com.dndcharacterhandler.domain.dnd5e.rules.UnarmoredBase
 import com.dndcharacterhandler.domain.dnd5e.rules.automaticArmorClass
 import com.dndcharacterhandler.domain.dnd5e.rules.stepHitPoints
 import kotlinx.coroutines.flow.first
@@ -244,17 +245,21 @@ class OverviewViewModel(
 
     fun syncAutomaticArmorClass(characterBundle: CharacterBundle) {
         val current = characterBundle.character
-        if (current.armorClassMode != ArmorClassMode.AUTOMATIC) return
-
+        // No manual armor class any more (owner, 2026-10-15): one set by hand, or a base other than the rules' 10, is
+        // turned automatic here.
         val recalculatedArmorClass = automaticArmorClass(current, characterBundle.inventoryItems, characterBundle.features).total
-        if (recalculatedArmorClass == current.armorClass) return
+        if (
+            current.armorClassMode == ArmorClassMode.AUTOMATIC &&
+            current.baseArmorClass == UnarmoredBase &&
+            recalculatedArmorClass == current.armorClass
+        ) return
 
         viewModelScope.launch {
             characterRepository.updateArmorClassSettings(
                 characterId = current.id,
-                baseArmorClass = current.baseArmorClass,
-                armorClassMode = current.armorClassMode,
-                manualArmorClass = recalculatedArmorClass
+                baseArmorClass = UnarmoredBase,
+                armorClassMode = ArmorClassMode.AUTOMATIC,
+                manualArmorClass = null
             )
         }
     }

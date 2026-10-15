@@ -4057,22 +4057,6 @@
     "fr": "Classe d'armure",
     "es": "Clase de Armadura"
   },
-  "overview_ac_tab_auto": {
-    "maxChars": 8,
-    "en": "Auto",
-    "ru": "Авто",
-    "de": "Auto",
-    "fr": "Auto",
-    "es": "Auto"
-  },
-  "overview_ac_tab_manual": {
-    "maxChars": 8,
-    "en": "Manual",
-    "ru": "Вручную",
-    "de": "Manuell",
-    "fr": "Manuel",
-    "es": "Manual"
-  },
   "overview_ac_sources": {
     "en": "Made of",
     "ru": "Из чего",
@@ -4100,27 +4084,6 @@
     "de": "höchstens %1$s",
     "fr": "au plus %1$s",
     "es": "como máximo %1$s"
-  },
-  "overview_ac_manual_note": {
-    "en": "Equipment and Dexterity don't count",
-    "ru": "Снаряжение и Ловкость не учитываются",
-    "de": "Ausrüstung und Geschick zählen nicht",
-    "fr": "Équipement et Dextérité ne comptent pas",
-    "es": "El equipo y la Destreza no cuentan"
-  },
-  "overview_ac_step_down": {
-    "en": "One less",
-    "ru": "На единицу меньше",
-    "de": "Eins weniger",
-    "fr": "Un de moins",
-    "es": "Uno menos"
-  },
-  "overview_ac_step_up": {
-    "en": "One more",
-    "ru": "На единицу больше",
-    "de": "Eins mehr",
-    "fr": "Un de plus",
-    "es": "Uno más"
   },
   "overview_speed_step_down": {
     "en": "5 feet slower",

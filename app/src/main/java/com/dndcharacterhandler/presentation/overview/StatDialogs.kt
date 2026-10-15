@@ -43,17 +43,13 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.dndcharacterhandler.domain.dnd5e.model.ArmorClassMode
 import com.dndcharacterhandler.domain.dnd5e.model.CharacterBundle
 import com.dndcharacterhandler.domain.dnd5e.rules.ArmorClassAbility
 import com.dndcharacterhandler.domain.dnd5e.rules.ArmorClassBreakdown
 import com.dndcharacterhandler.domain.dnd5e.rules.ArmorClassSource
-import com.dndcharacterhandler.domain.dnd5e.rules.UnarmoredBase
 import com.dndcharacterhandler.domain.dnd5e.rules.automaticArmorClass
-import com.dndcharacterhandler.presentation.components.DialogLineGap
 import com.dndcharacterhandler.presentation.components.EditDialog
 import com.dndcharacterhandler.presentation.components.SheetLabel
 import com.dndcharacterhandler.presentation.components.dialogSection
@@ -62,63 +58,23 @@ import com.dndcharacterhandler.presentation.localization.text
 import com.dndcharacterhandler.presentation.theme.LocalDesignTokens
 
 /**
- * The armor class (owner's choices from boards, 2026-10-15: Б, and its sources): its modes as the title's tabs —
- * «Авто», «Вручную» — the tab picked being the character's mode, switched at once. «Авто»: the armor class as it comes
- * out, and «Из чего»: the armor or the base without it, Dexterity as far as the armor lets it in (no line for heavy
- * armor, medium's cap noted), a class feature's unarmored defense with its ability, the shield; the base without armor
- * is the rules' 10, not to be set (a spell such as Mage Armor goes by «Вручную» for now). «Вручную»: the armor class itself as a counter. Saved as it settles, no «Сохранить».
+ * The armor class (owner's choices from boards and the device, 2026-10-15): «Класс брони», the armor class in the
+ * overview's crest and «Из чего» under it — the armor or «Без брони» 10, Dexterity as far as the armor lets it in, a
+ * feature's own base, a species' bonus, the shield; a feature's or an item's line opens it. Shown, not set: there is no
+ * manual armor class any more (owner, 2026-10-15 — «От ручного КБ отказываемся»).
  */
 @Composable
 internal fun ArmorClassDialog(
     characterBundle: CharacterBundle,
-    onSave: (baseArmorClass: Int, mode: ArmorClassMode, manualArmorClass: Int?) -> Unit,
     onDismiss: () -> Unit,
     /** A tap on a feature's line: its card on the Features screen. None where there's nowhere to go (combat). */
     onOpenFeature: ((Long) -> Unit)? = null,
     /** A tap on the armor's or the shield's line: its card on the Inventory screen. */
     onOpenItem: ((Long) -> Unit)? = null
 ) {
-    val character = characterBundle.character
-    val colors = LocalDesignTokens.current.colors
-    var mode by remember { mutableStateOf(character.armorClassMode) }
-    var manual by remember { mutableStateOf(character.armorClass.coerceIn(1, MaxArmorClass)) }
-    // The base without armor is the rules' 10: the one stored goes back to it as the pop-up saves.
-    SaveWhenSettled(mode to manual) { (m, a) -> onSave(UnarmoredBase, m, if (m == ArmorClassMode.MANUAL) a else null) }
-    val breakdown = automaticArmorClass(character, characterBundle.inventoryItems, characterBundle.features)
-    EditDialog(
-        title = text("overview_edit_ac_title"),
-        tabs = listOf(text("overview_ac_tab_auto"), text("overview_ac_tab_manual")),
-        selectedTab = if (mode == ArmorClassMode.AUTOMATIC) 0 else 1,
-        onSelectTab = { tab -> mode = if (tab == 0) ArmorClassMode.AUTOMATIC else ArmorClassMode.MANUAL },
-        onDismiss = onDismiss,
-        scrollable = false
-    ) {
-        if (mode == ArmorClassMode.AUTOMATIC) {
-            ArmorClassAutoContent(breakdown, onOpenFeature, onOpenItem)
-        } else {
-            Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                // The crest between − and +, its number typed in place.
-                StatCounter(
-                    value = manual,
-                    onValue = { manual = it.coerceIn(1, MaxArmorClass) },
-                    step = 1,
-                    min = 1,
-                    max = MaxArmorClass,
-                    unit = null,
-                    downDescription = text("overview_ac_step_down"),
-                    upDescription = text("overview_ac_step_up"),
-                    crest = text("stat_card_armor_class_short")
-                )
-                Text(
-                    text = text("overview_ac_manual_note"),
-                    // The pop-up's line gap under the crest.
-                    modifier = Modifier.padding(top = DialogLineGap),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = colors.text.muted,
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
+    val breakdown = automaticArmorClass(characterBundle.character, characterBundle.inventoryItems, characterBundle.features)
+    EditDialog(title = text("overview_edit_ac_title"), onDismiss = onDismiss, scrollable = false) {
+        ArmorClassAutoContent(breakdown, onOpenFeature, onOpenItem)
     }
 }
 
@@ -145,7 +101,7 @@ internal fun SpeedDialog(speed: Int, onSave: (Int) -> Unit, onDismiss: () -> Uni
 }
 
 /**
- * The «Авто» tab: the armor class in the overview's crest over «Из чего», a line a source; a feature's or an item's
+ * The armor class's pop-up: the armor class in the overview's crest over «Из чего», a line a source; a feature's or an item's
  * line opens it by a tap where [onOpenFeature] / [onOpenItem] are given.
  */
 @Composable
@@ -247,9 +203,7 @@ private fun StatCounter(
     max: Int,
     unit: String?,
     downDescription: String,
-    upDescription: String,
-    /** The crest's label: the number stands in the overview's crest under it, at the crest's size. */
-    crest: String? = null
+    upDescription: String
 ) {
     val colors = LocalDesignTokens.current.colors
     var typed by remember { mutableStateOf(TextFieldValue(value.toString())) }
@@ -276,9 +230,7 @@ private fun StatCounter(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
         }
-        if (crest != null) {
-            ArmorClassCrest(label = crest) { field(Modifier, crestNumberStyle()) }
-        } else Row(modifier = Modifier.widthIn(min = StatCounterRoom), horizontalArrangement = Arrangement.Center) {
+        Row(modifier = Modifier.widthIn(min = StatCounterRoom), horizontalArrangement = Arrangement.Center) {
             field(Modifier.alignByBaseline(), statCounterStyle())
             if (unit != null) {
                 Spacer(modifier = Modifier.width(4.dp))
@@ -328,8 +280,6 @@ private fun signedValue(value: Int): String = if (value >= 0) "+$value" else "�
 /** The number's room between − and + at least, as the maximum hit points'. */
 private val StatCounterRoom = 72.dp
 
-/** The highest armor class the counters take. */
-private const val MaxArmorClass = 99
 
 /** The fastest speed the counter takes, in feet, and its step. */
 private const val MaxSpeed = 999

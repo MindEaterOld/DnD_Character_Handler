@@ -615,7 +615,6 @@ internal fun OverviewContent(
     if (activeMiniStatField == OverviewMiniStatField.ARMOR_CLASS && characterBundle != null) {
         ArmorClassDialog(
             characterBundle = characterBundle,
-            onSave = { base, mode, manual -> onUpdateArmorClass(characterBundle, base, mode, manual) },
             onDismiss = { activeMiniStatField = null },
             onOpenFeature = { id ->
                 activeMiniStatField = null
