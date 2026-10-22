@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation.attributes
 
+import com.dndcharacterhandler.presentation.components.dialogLeadText
 import com.dndcharacterhandler.domain.dnd5e.rules.automaticArmorClass
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.compositeOver
@@ -514,6 +515,8 @@ internal fun attributesSectionItems(
     var defenseDraft by remember { mutableStateOf(emptySet<String>()) }
     var masteryDraft by remember { mutableStateOf(emptySet<String>()) }
     var editingAbility by remember { mutableStateOf<AbilityScore?>(null) }
+    // A save's training, set from the save's own gear (owner, 2026-10-22: not in the ability's editor).
+    var editingSave by remember { mutableStateOf<AbilityScore?>(null) }
     var editingSkill by remember { mutableStateOf<SkillRow?>(null) }
     var rolling by remember { mutableStateOf<AbilityRoll?>(null) }
     var rollingSkill by remember { mutableStateOf<SkillRow?>(null) }
@@ -907,8 +910,12 @@ internal fun attributesSectionItems(
             ),
             onEdit = {
                 rolling = null
-                editingAbility = score
-                abilityDraft = score.value.toString()
+                if (roll.save) {
+                    editingSave = score
+                } else {
+                    editingAbility = score
+                    abilityDraft = score.value.toString()
+                }
                 saveProficientDraft = score.saveProficient
             },
             onDismiss = { rolling = null }
@@ -941,34 +948,65 @@ internal fun attributesSectionItems(
 
     val currentEditingAbility = editingAbility
     if (currentEditingAbility != null && characterBundle != null) {
+        // The ability's name alone (owner, 2026-10-22 — «Изменить Интеллект» ran onto two lines), the score typed and its
+        // modifier beside it, lit in the modifiers' blue so it doesn't read as a second field; the save's training is
+        // the save's own.
         EditDialog(
-            title = LocalStrings.current.format("attributes_edit_ability_title", LocalStrings.current[currentEditingAbility.displayNameKey]),
+            title = LocalStrings.current[currentEditingAbility.displayNameKey],
             onDismiss = { editingAbility = null },
             onConfirm = {
                 onUpdateAbilityScore(
                     characterBundle,
                     currentEditingAbility.type,
                     abilityDraft.toIntOrNull() ?: currentEditingAbility.value,
-                    saveProficientDraft
+                    currentEditingAbility.saveProficient
                 )
                 editingAbility = null
             }
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text(LocalStrings.current.format("attributes_edit_ability_hint", LocalStrings.current[currentEditingAbility.displayNameKey]))
+            val magic = LocalDesignTokens.current.colors.accent.magic
+            val draftModifier = abilityModifier(abilityDraft.toIntOrNull() ?: currentEditingAbility.value)
+            Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
                     value = abilityDraft,
                     onValueChange = { abilityDraft = it },
+                    modifier = Modifier.weight(1f),
                     label = { Text(LocalStrings.current.format("attributes_ability_score_label", LocalStrings.current[currentEditingAbility.shortNameKey])) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
-                // The save's training: a chip, gold while trained (no checkboxes; owner, 2026-10-09). The title names the
-                // ability.
-                OptionGroup {
-                    OptionChip(text("attributes_save_proficiency_chip"), saveProficientDraft) {
-                        saveProficientDraft = !saveProficientDraft
-                    }
+                Box(
+                    modifier = Modifier
+                        .size(width = 72.dp, height = 56.dp)
+                        .clip(MaterialTheme.shapes.extraSmall)
+                        .background(magic.copy(alpha = LocalDesignTokens.current.alpha.faint)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = if (draftModifier >= 0) "+$draftModifier" else "−${-draftModifier}",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = magic
+                    )
+                }
+            }
+        }
+    }
+
+    val currentEditingSave = editingSave
+    if (currentEditingSave != null && characterBundle != null) {
+        // The save's training, from its gear: a chip, gold while trained (no checkboxes; owner, 2026-10-09).
+        EditDialog(
+            title = text("attributes_roll_save"),
+            onDismiss = { editingSave = null },
+            onConfirm = {
+                onUpdateAbilityScore(characterBundle, currentEditingSave.type, currentEditingSave.value, saveProficientDraft)
+                editingSave = null
+            }
+        ) {
+            Text(LocalStrings.current[currentEditingSave.displayNameKey], modifier = Modifier.dialogLeadText(), color = LocalDesignTokens.current.colors.text.primary)
+            OptionGroup {
+                OptionChip(text("attributes_save_proficiency_chip"), saveProficientDraft) {
+                    saveProficientDraft = !saveProficientDraft
                 }
             }
         }

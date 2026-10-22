@@ -742,20 +742,6 @@
     "fr": "Touche-à-tout",
     "es": "Aprendiz de todo"
   },
-  "attributes_edit_ability_title": {
-    "en": "Edit %s",
-    "ru": "Изменить %s",
-    "de": "%s bearbeiten",
-    "fr": "Modifier %s",
-    "es": "Editar %s"
-  },
-  "attributes_edit_ability_hint": {
-    "en": "Set %s score, not the modifier.",
-    "ru": "Введите значение %s, а не модификатор.",
-    "de": "Gib den Wert für %s ein, nicht den Modifikator.",
-    "fr": "%s : saisissez la valeur, pas le modificateur.",
-    "es": "Introduce la puntuación de %s, no el modificador."
-  },
   "attributes_ability_score_label": {
     "en": "%s score",
     "ru": "Значение %s",

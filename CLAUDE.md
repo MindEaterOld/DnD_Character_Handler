@@ -94,7 +94,7 @@ What can be pressed as an action and what shows a value must look different at a
 
 ## Saving throws — a section of their own (owner's choices from boards, 2026-10-08: S1, in two frames)
 
-- The saving throws are out of the ability cards (which show the modifier over the score only): a section «Спасброски» right after «Характеристики», the body's three (Strength, Dexterity, Constitution) in a frame beside the mind's three, each frame as a skills' group, a line each as a skill's — the training's dot, the name (`attributes_save_<ability>`, `maxChars` 14), the conditions' arrows and the bonus; a trained save's dot gold, its name and bonus as every line's (as the skills). A tap rolls the save; its training is changed in the ability's editor, as before.
+- The saving throws are out of the ability cards (which show the modifier over the score only): a section «Спасброски» right after «Характеристики», the body's three (Strength, Dexterity, Constitution) in a frame beside the mind's three, each frame as a skills' group, a line each as a skill's — the training's dot, the name (`attributes_save_<ability>`, `maxChars` 14), the conditions' arrows and the bonus; a trained save's dot gold, its name and bonus as every line's (as the skills). A tap rolls the save; its training is set from the save's own gear (a pop-up «Спасбросок» with the chip; owner, 2026-10-22 — no longer in the ability's editor). **The ability's editor** (its card's gear): its name alone as the title, the score typed and its modifier beside it, lit in `accent.magic` at 15 % so it doesn't read as a second field.
 
 ## Skills — what is trained is a gold dot (owner's wish, 2026-10-10; before it, N4 from boards, 2026-10-08)
 
