@@ -742,6 +742,14 @@
     "fr": "Touche-à-tout",
     "es": "Aprendiz de todo"
   },
+  "attributes_edit_ability_title": {
+    "maxChars": 15,
+    "en": "Edit %s",
+    "ru": "Изменить %s",
+    "de": "%s ändern",
+    "fr": "Modifier %s",
+    "es": "Editar %s"
+  },
   "attributes_ability_score_label": {
     "en": "%s score",
     "ru": "Значение %s",

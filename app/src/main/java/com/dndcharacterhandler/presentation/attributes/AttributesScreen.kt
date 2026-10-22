@@ -948,11 +948,11 @@ internal fun attributesSectionItems(
 
     val currentEditingAbility = editingAbility
     if (currentEditingAbility != null && characterBundle != null) {
-        // The ability's name alone (owner, 2026-10-22 — «Изменить Интеллект» ran onto two lines), the score typed and its
-        // modifier beside it, lit in the modifiers' blue so it doesn't read as a second field; the save's training is
-        // the save's own.
+        // «Изменить ИНТ» — the short name, one line for every ability (owner's choice from boards, 2026-10-22: 4 —
+        // «Изменить Телосложение» ran onto two), the score typed and its modifier beside it, lit in the stats' gold so it
+        // doesn't read as a second field (blue is for what is magic); the save's training is the save's own.
         EditDialog(
-            title = LocalStrings.current[currentEditingAbility.displayNameKey],
+            title = LocalStrings.current.format("attributes_edit_ability_title", LocalStrings.current[currentEditingAbility.shortNameKey]),
             onDismiss = { editingAbility = null },
             onConfirm = {
                 onUpdateAbilityScore(
@@ -964,7 +964,7 @@ internal fun attributesSectionItems(
                 editingAbility = null
             }
         ) {
-            val magic = LocalDesignTokens.current.colors.accent.magic
+            val gold = MaterialTheme.colorScheme.primary
             val draftModifier = abilityModifier(abilityDraft.toIntOrNull() ?: currentEditingAbility.value)
             Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
@@ -979,13 +979,13 @@ internal fun attributesSectionItems(
                     modifier = Modifier
                         .size(width = 72.dp, height = 56.dp)
                         .clip(MaterialTheme.shapes.extraSmall)
-                        .background(magic.copy(alpha = LocalDesignTokens.current.alpha.faint)),
+                        .background(gold.copy(alpha = LocalDesignTokens.current.alpha.faint)),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = if (draftModifier >= 0) "+$draftModifier" else "−${-draftModifier}",
                         style = MaterialTheme.typography.titleLarge,
-                        color = magic
+                        color = gold
                     )
                 }
             }
