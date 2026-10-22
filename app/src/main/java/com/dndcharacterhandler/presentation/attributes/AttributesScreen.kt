@@ -902,7 +902,8 @@ internal fun attributesSectionItems(
                 effects = effects,
                 damage = null,
                 damageType = "",
-                rollLabel = LocalStrings.current[if (roll.save) "attributes_roll_save" else "attributes_roll_check"]
+                rollLabel = LocalStrings.current[if (roll.save) "attributes_roll_save" else "attributes_roll_check"],
+                detail = "$abilityName ${score.value}"
             ),
             onEdit = {
                 rolling = null
@@ -916,6 +917,7 @@ internal fun attributesSectionItems(
 
     rollingSkill?.let { skill ->
         val effects = checkEffects[skill.abilityType]
+        val skillScore = abilityScores.firstOrNull { it.type == skill.abilityType }
         com.dndcharacterhandler.presentation.combat.RollDialog(
             input = com.dndcharacterhandler.presentation.combat.RollInput(
                 title = LocalStrings.current[skill.nameKey],
@@ -923,7 +925,8 @@ internal fun attributesSectionItems(
                 effects = effects,
                 damage = null,
                 damageType = "",
-                rollLabel = LocalStrings.current["attributes_roll_check"]
+                rollLabel = LocalStrings.current["attributes_roll_check"],
+                detail = skillScore?.let { "${LocalStrings.current[it.displayNameKey]} ${it.value}" }
             ),
             onEdit = {
                 rollingSkill = null
@@ -1501,7 +1504,7 @@ private fun abilityArt(type: AbilityType): Int = when (type) {
  * faded art melts into the screen, not into a darker plate (owner, 2026-10-11).
  */
 @Composable
-private fun AbilityScoreCard(
+internal fun AbilityScoreCard(
     score: AbilityScore,
     modifier: Modifier = Modifier,
     /** The conditions on this ability's checks: the value as it is now, with arrows. */
@@ -2223,7 +2226,7 @@ private fun CustomEntries(
     }
 }
 
-private data class AbilityScore(
+internal data class AbilityScore(
     val type: AbilityType,
     val shortNameKey: String,
     val displayNameKey: String,

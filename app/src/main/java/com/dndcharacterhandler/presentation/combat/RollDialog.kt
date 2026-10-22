@@ -1,5 +1,9 @@
 package com.dndcharacterhandler.presentation.combat
 
+import androidx.compose.ui.unit.sp
+import com.dndcharacterhandler.presentation.components.SheetLabel
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.IconButton
 import com.dndcharacterhandler.presentation.dice.LocalDiceSkin
 import com.dndcharacterhandler.presentation.dice.DieType
 import com.dndcharacterhandler.presentation.dice.DieIcon
@@ -104,7 +108,9 @@ internal data class RollInput(
     /** The edit link's own words, when "Edit" isn't what it opens. */
     val editLabel: String? = null,
     /** The table's reading's title, when it says more than [title] (the slot a spell was cast with). */
-    val resultTitle: String? = null
+    val resultTitle: String? = null,
+    /** Under a stat's throw: what it is thrown from ("Сила 16"). */
+    val detail: String? = null
 )
 
 /**
@@ -142,9 +148,27 @@ internal fun RollDialog(
     val damageType = if (twoHanded) input.alternateDamageType ?: input.damageType else input.damageType
     val valid = attackExtra != null && damageExtra != null
 
-    EditDialog(title = input.title, onDismiss = onDismiss) {
+    // A stat's throw (a check, a save, a skill, initiative): no damage, no bonus to add — the throw large, what it is
+    // thrown from under it, the gear in the corner to set the stat (owner's choice from boards, 2026-10-22: В).
+    val statRoll = input.rollLabel != null && input.damage == null && input.attackBonus != null
+    EditDialog(
+        title = input.title,
+        onDismiss = onDismiss,
+        titleLeading = if (statRoll) {
+            {
+                IconButton(onClick = onEdit) {
+                    Icon(Icons.Outlined.Settings, contentDescription = input.editLabel ?: text("common_edit"))
+                }
+            }
+        } else {
+            null
+        }
+    ) {
         header?.invoke(this)
-        input.attackBonus?.let { bonus ->
+        if (statRoll) {
+            StatRollHeader(input.rollLabel!!, input.attackBonus!!, input.effects, input.detail)
+        }
+        input.attackBonus?.takeIf { !statRoll }?.let { bonus ->
             RollLine(
                 label = input.rollLabel ?: text("combat_roll_attack"),
                 value = DiceFormula.of(1, 20, bonus).label(),
@@ -175,7 +199,7 @@ internal fun RollDialog(
                 )
             }
         }
-        if (input.attackBonus != null && input.effects?.autoFail.isNullOrEmpty()) {
+        if (input.attackBonus != null && !statRoll && input.effects?.autoFail.isNullOrEmpty()) {
             BonusField(
                 value = attackExtraText,
                 onValueChange = { attackExtraText = it },
@@ -279,7 +303,40 @@ internal fun RollDialog(
                 onDismiss()
             }
         }
-        TextButton(onClick = onEdit) { Text(input.editLabel ?: text("common_edit")) }
+        if (!statRoll) {
+            TextButton(onClick = onEdit) { Text(input.editLabel ?: text("common_edit")) }
+        }
+    }
+}
+
+/**
+ * A stat's throw over its buttons: the gold label («Проверка»), «1d20 +3» large in the conditions' colour with their
+ * arrows, what it is thrown from muted under it, and why the conditions move it.
+ */
+@Composable
+private fun StatRollHeader(label: String, bonus: Int, effects: RollEffects?, detail: String?) {
+    val colors = LocalDesignTokens.current.colors
+    val large = LocalDesignTokens.current.typography.hpTemporary
+    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        SheetLabel(label)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (effects?.changesRoll == true) {
+                RollMarker(effects, size = 22.dp)
+                Spacer(modifier = Modifier.width(6.dp))
+            }
+            Text(
+                text = "1d20 " + if (bonus >= 0) "+$bonus" else "−${-bonus}",
+                style = MaterialTheme.typography.headlineMedium.copy(
+                    fontSize = large.fontSizeSp.sp,
+                    lineHeight = (large.lineHeightSp ?: large.fontSizeSp).sp
+                ),
+                color = changedValueColor(effects?.modifier ?: 0) ?: colors.text.primary
+            )
+        }
+        detail?.let { Text(text = it, style = MaterialTheme.typography.bodyLarge, color = colors.text.muted) }
+        rollReason(effects)?.let { reason ->
+            Text(text = reason, style = MaterialTheme.typography.bodyMedium, color = colors.text.muted, textAlign = TextAlign.Center)
+        }
     }
 }
 
