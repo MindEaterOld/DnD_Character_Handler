@@ -86,13 +86,13 @@ internal fun DicePickerDialog(
         titleLeading = if (choosingSkin) {
             {
                 IconButton(onClick = { choosingSkin = false }) {
-                    Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = text("common_back"))
+                    Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = text("common_back"), tint = LocalDesignTokens.current.colors.text.muted)
                 }
             }
         } else {
             {
                 IconButton(onClick = { choosingSkin = true }) {
-                    Icon(Icons.Outlined.Settings, contentDescription = text("dice_skin_title"))
+                    Icon(Icons.Outlined.Settings, contentDescription = text("dice_skin_title"), tint = LocalDesignTokens.current.colors.text.muted)
                 }
             }
         }

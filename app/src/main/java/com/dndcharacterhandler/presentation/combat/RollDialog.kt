@@ -157,7 +157,7 @@ internal fun RollDialog(
         titleLeading = if (statRoll) {
             {
                 IconButton(onClick = onEdit) {
-                    Icon(Icons.Outlined.Settings, contentDescription = input.editLabel ?: text("common_edit"))
+                    Icon(Icons.Outlined.Settings, contentDescription = input.editLabel ?: text("common_edit"), tint = colors.text.muted)
                 }
             }
         } else {
