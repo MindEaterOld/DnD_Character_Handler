@@ -5104,12 +5104,13 @@
     "fr": "Avec avantage",
     "es": "Con ventaja"
   },
-  "combat_roll_normal": {
-    "en": "Normal roll",
-    "ru": "Обычный бросок",
-    "de": "Normaler Wurf",
-    "fr": "Jet normal",
-    "es": "Tirada normal"
+  "combat_roll_throw": {
+    "maxChars": 8,
+    "en": "Roll",
+    "ru": "Бросить",
+    "de": "Würfeln",
+    "fr": "Lancer",
+    "es": "Tirar"
   },
   "combat_roll_disadvantage": {
     "en": "With disadvantage",

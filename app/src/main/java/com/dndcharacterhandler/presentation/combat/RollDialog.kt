@@ -1,5 +1,16 @@
 package com.dndcharacterhandler.presentation.combat
 
+import com.dndcharacterhandler.presentation.dice.LocalDiceSkin
+import com.dndcharacterhandler.presentation.dice.DieType
+import com.dndcharacterhandler.presentation.dice.DieIcon
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.Role
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.border
 import com.dndcharacterhandler.presentation.components.buttonFill
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.background
@@ -207,10 +218,37 @@ internal fun RollDialog(
                 )
                 onDismiss()
             }
-            val preferred = input.effects?.mode ?: RollMode.NORMAL
-            RollModeButton(text("combat_roll_advantage"), Icons.Outlined.KeyboardDoubleArrowUp, preferred == RollMode.ADVANTAGE, enabled) { roll(RollMode.ADVANTAGE) }
-            RollModeButton(text("combat_roll_normal"), Icons.Outlined.Casino, preferred == RollMode.NORMAL, enabled) { roll(RollMode.NORMAL) }
-            RollModeButton(text("combat_roll_disadvantage"), Icons.Outlined.KeyboardDoubleArrowDown, preferred == RollMode.DISADVANTAGE, enabled) { roll(RollMode.DISADVANTAGE) }
+            // One throw; advantage and disadvantage are its settings, toggles either side of it (owner's choice from
+            // boards, 2026-10-22: А): one lit at a time, a second tap puts it out; the conditions light theirs at first.
+            var mode by remember { mutableStateOf(input.effects?.mode ?: RollMode.NORMAL) }
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                RollModeToggle(
+                    icon = Icons.Outlined.KeyboardDoubleArrowUp,
+                    description = text("combat_roll_advantage"),
+                    on = mode == RollMode.ADVANTAGE,
+                    color = colors.accent.heal,
+                    enabled = enabled
+                ) { mode = if (mode == RollMode.ADVANTAGE) RollMode.NORMAL else RollMode.ADVANTAGE }
+                Spacer(modifier = Modifier.width(12.dp))
+                Button(
+                    onClick = { roll(mode) },
+                    enabled = enabled,
+                    modifier = Modifier.weight(1f).height(48.dp),
+                    contentPadding = PaddingValues(start = 12.dp, end = 20.dp)
+                ) {
+                    DieIcon(DieType.D20, LocalDiceSkin.current, modifier = Modifier.size(30.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text("combat_roll_throw"), style = MaterialTheme.typography.bodyLarge, maxLines = 1)
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                RollModeToggle(
+                    icon = Icons.Outlined.KeyboardDoubleArrowDown,
+                    description = text("combat_roll_disadvantage"),
+                    on = mode == RollMode.DISADVANTAGE,
+                    color = colors.accent.danger,
+                    enabled = enabled
+                ) { mode = if (mode == RollMode.DISADVANTAGE) RollMode.NORMAL else RollMode.DISADVANTAGE }
+            }
         } else if (input.attackBonus == null && damage != null && valid) {
             val formula = damage + (damageExtra ?: DiceFormula.Zero)
             // A flat amount with no dice (a homebrew "5 damage"): a spell is still cast, its amount read off the pop-up.
@@ -272,6 +310,36 @@ private fun BonusField(value: String, onValueChange: (String) -> Unit, label: St
         label = { Text(label) },
         placeholder = { Text(text("combat_roll_bonus_hint")) }
     )
+}
+
+/**
+ * Advantage's or disadvantage's toggle beside the throw: a 48dp circle of the buttons' fill, lit in its own colour —
+ * green, red — at 15 % and outlined in it while on (a pick that is its own colour keeps it).
+ */
+@Composable
+private fun RollModeToggle(icon: ImageVector, description: String, on: Boolean, color: Color, enabled: Boolean, onToggle: () -> Unit) {
+    val colors = LocalDesignTokens.current.colors
+    Box(
+        modifier = Modifier
+            .size(48.dp)
+            .clip(CircleShape)
+            .background(if (on) color.copy(alpha = LocalDesignTokens.current.alpha.faint) else buttonFill())
+            .then(if (on) Modifier.border(1.dp, color, CircleShape) else Modifier)
+            .toggleable(value = on, enabled = enabled, role = Role.Checkbox, onValueChange = { onToggle() })
+            .semantics { contentDescription = description },
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = when {
+                !enabled -> colors.text.subtle
+                on -> color
+                else -> colors.text.primary
+            },
+            modifier = Modifier.size(24.dp)
+        )
+    }
 }
 
 /** One way to throw: the conditions' choice in gold (the main action), the others on the button fill. */
