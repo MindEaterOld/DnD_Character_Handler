@@ -1085,8 +1085,9 @@ internal fun attributesSectionItems(
         EditSheet(
             title = text(
                 when (kind) {
-                    Defenses.RESISTANCE -> "attributes_defense_resistances"
-                    Defenses.VULNERABILITY -> "attributes_defense_vulnerabilities"
+                    // The frames' own names, one line (owner, 2026-10-23 — «Сопротивления урону» read long).
+                    Defenses.RESISTANCE -> "attributes_defense_resistances_sheet"
+                    Defenses.VULNERABILITY -> "attributes_defense_vulnerabilities_sheet"
                     else -> "attributes_defense_immunities"
                 }
             ),
@@ -1101,21 +1102,21 @@ internal fun attributesSectionItems(
                     onAll = { defenseDraft = if (whole) defenseDraft - keys.toSet() else defenseDraft + keys }
                 ) {
                     keys.sortedBy { defenseName(it, characterCatalog, strings) }.forEach { key ->
-                        OptionChip(defenseName(key, characterCatalog, strings), key in defenseDraft) { defenseDraft = defenseDraft.flipped(key) }
+                        OptionChip(defenseName(key, characterCatalog, strings), key in defenseDraft, dot = defenseDot(key)) { defenseDraft = defenseDraft.flipped(key) }
                     }
                 }
             }
             if (kind == Defenses.IMMUNITY) {
                 OptionGroup(title = text("attributes_defense_conditions")) {
                     conditionKeys.forEach { key ->
-                        OptionChip(defenseName(key, characterCatalog, strings), key in defenseDraft) { defenseDraft = defenseDraft.flipped(key) }
+                        OptionChip(defenseName(key, characterCatalog, strings), key in defenseDraft, dot = defenseDot(key)) { defenseDraft = defenseDraft.flipped(key) }
                     }
                 }
             }
             if (extras.isNotEmpty()) {
                 OptionGroup(title = text("attributes_group_other")) {
                     extras.forEach { key ->
-                        OptionChip(defenseName(key, characterCatalog, strings), key in defenseDraft) { defenseDraft = defenseDraft.flipped(key) }
+                        OptionChip(defenseName(key, characterCatalog, strings), key in defenseDraft, dot = defenseDot(key)) { defenseDraft = defenseDraft.flipped(key) }
                     }
                 }
             }
@@ -2145,8 +2146,8 @@ private fun OptionGroup(
 
 /** An option of a pop-up: a chip, gold while picked; several can be. */
 @Composable
-private fun OptionChip(label: String, selected: Boolean, onToggle: () -> Unit) {
-    ToggleChip(label = label, selected = selected, onClick = onToggle, role = Role.Checkbox)
+private fun OptionChip(label: String, selected: Boolean, dot: Color? = null, onToggle: () -> Unit) {
+    ToggleChip(label = label, selected = selected, onClick = onToggle, role = Role.Checkbox, dot = dot)
 }
 
 /** An entry the player typed: picked, with a cross; a tap takes it off. */

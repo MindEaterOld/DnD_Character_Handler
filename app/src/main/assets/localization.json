@@ -5035,6 +5035,22 @@
     "fr": "Résistances aux dégâts",
     "es": "Resistencias al daño"
   },
+  "attributes_defense_resistances_sheet": {
+    "maxChars": 15,
+    "en": "Resistances",
+    "ru": "Сопротивления",
+    "de": "Resistenzen",
+    "fr": "Résistances",
+    "es": "Resistencias"
+  },
+  "attributes_defense_vulnerabilities_sheet": {
+    "maxChars": 15,
+    "en": "Vulnerabilities",
+    "ru": "Уязвимости",
+    "de": "Anfälligkeiten",
+    "fr": "Vulnérabilités",
+    "es": "Vulnerabilid."
+  },
   "attributes_defense_immunities": {
     "en": "Immunities",
     "ru": "Иммунитеты",

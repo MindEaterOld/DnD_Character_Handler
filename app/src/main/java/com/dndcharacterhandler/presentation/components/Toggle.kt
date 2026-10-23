@@ -1,5 +1,10 @@
 package com.dndcharacterhandler.presentation.components
 
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
@@ -62,17 +67,23 @@ fun ToggleChip(
     selected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    role: Role = Role.RadioButton
+    role: Role = Role.RadioButton,
+    /** A dot of the option's own colour before its name (a damage type's, a condition's), as the sheet shows it. */
+    dot: Color? = null
 ) {
-    Box(
+    Row(
         modifier = modifier
             .height(32.dp)
             .clip(RoundedCornerShape(8.dp))
             .background(toggleFill(selected))
             .selectable(selected = selected, role = role, onClick = onClick)
             .padding(horizontal = 14.dp),
-        contentAlignment = Alignment.Center
+        verticalAlignment = Alignment.CenterVertically
     ) {
+        dot?.let {
+            Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(it))
+            Spacer(modifier = Modifier.width(8.dp))
+        }
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
