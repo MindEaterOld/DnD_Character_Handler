@@ -954,7 +954,8 @@ internal fun attributesSectionItems(
     // The training, from the throw's gear (owner, 2026-10-23): the scale alone, a tap sets it and goes back to the throw.
     skillRows.firstOrNull { it.nameKey == editingSkillKey }?.let { skill ->
         EditDialog(title = LocalStrings.current[skill.nameKey], onDismiss = { editingSkillKey = null }) {
-            SkillTrainingScale(skill = skill, onPick = { step ->
+            val abilityBonus = abilityScores.firstOrNull { it.type == skill.abilityType }?.modifier ?: 0
+            SkillTrainingScale(skill = skill, abilityBonus = abilityBonus, proficiencyBonus = proficiencyBonus, jackOfAllTrades = jackOfAllTrades, onPick = { step ->
                 if (characterBundle != null) {
                     onUpdateSkillTraining(characterBundle, skill.nameKey, step != SkillTraining.NONE, step == SkillTraining.EXPERTISE, false)
                 }
@@ -2390,7 +2391,13 @@ private fun SkillTrainingLines(skill: SkillRow, score: AbilityScore?, proficienc
  * А): expertise only over the training (PHB 2024), so no other mix can be picked.
  */
 @Composable
-private fun SkillTrainingScale(skill: SkillRow, onPick: (SkillTraining) -> Unit) {
+private fun SkillTrainingScale(
+    skill: SkillRow,
+    abilityBonus: Int,
+    proficiencyBonus: Int,
+    jackOfAllTrades: Boolean,
+    onPick: (SkillTraining) -> Unit
+) {
     val picked = when {
         skill.expertise -> SkillTraining.EXPERTISE
         skill.proficient -> SkillTraining.PROFICIENT
@@ -2402,7 +2409,13 @@ private fun SkillTrainingScale(skill: SkillRow, onPick: (SkillTraining) -> Unit)
             SkillTraining.PROFICIENT to "attributes_training_proficient",
             SkillTraining.EXPERTISE to "attributes_training_expertise"
         ).forEach { (step, key) ->
-            TrainingStepToggle(step = step, label = text(key), on = step == picked, onClick = { onPick(step) })
+            // What the check would be at each step, the ability's bonus in it (owner, 2026-10-23): «+0 / +2 / +4».
+            val bonus = abilityBonus + when (step) {
+                SkillTraining.EXPERTISE -> proficiencyBonus * 2
+                SkillTraining.PROFICIENT -> proficiencyBonus
+                SkillTraining.NONE -> if (jackOfAllTrades) proficiencyBonus / 2 else 0
+            }
+            TrainingStepToggle(step = step, label = text(key), bonus = signed(bonus), on = step == picked, onClick = { onPick(step) })
         }
     }
 }
@@ -2419,7 +2432,7 @@ private fun TrainingSourceLine(name: AnnotatedString, value: String) {
 
 /** One step of the training's scale: its dot over its word, lit in gold at 15 % and outlined in it while picked. */
 @Composable
-private fun RowScope.TrainingStepToggle(step: SkillTraining, label: String, on: Boolean, onClick: () -> Unit) {
+private fun RowScope.TrainingStepToggle(step: SkillTraining, label: String, bonus: String, on: Boolean, onClick: () -> Unit) {
     val colors = LocalDesignTokens.current.colors
     val gold = MaterialTheme.colorScheme.primary
     val shape = RoundedCornerShape(12.dp)
@@ -2438,6 +2451,8 @@ private fun RowScope.TrainingStepToggle(step: SkillTraining, label: String, on: 
             TrainingDot(proficient = step != SkillTraining.NONE, expertise = step == SkillTraining.EXPERTISE)
         }
         Text(label, style = MaterialTheme.typography.labelMedium, color = if (on) gold else colors.text.muted, maxLines = 1)
+        // As quiet as its word: what it gives, not the step's name (owner, 2026-10-23).
+        Text(bonus, style = MaterialTheme.typography.labelMedium, color = if (on) gold else colors.text.muted)
     }
 }
 
