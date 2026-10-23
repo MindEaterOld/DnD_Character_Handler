@@ -917,7 +917,7 @@ internal fun attributesSectionItems(
                 damage = null,
                 damageType = "",
                 rollLabel = LocalStrings.current[if (roll.save) "attributes_roll_save" else "attributes_roll_check"],
-                detail = if (roll.save) null else "$abilityName ${score.value}"
+                detail = null
             ),
             onEdit = {
                 if (roll.save) {
@@ -930,11 +930,8 @@ internal fun attributesSectionItems(
                 }
             },
             onDismiss = { rolling = null },
-            details = if (roll.save) {
-                { SaveTrainingLines(score = score, proficiencyBonus = proficiencyBonus) }
-            } else {
-                null
-            }
+            // A check shows the ability's line alone, as a save's or a skill's first line (owner, 2026-10-23).
+            details = { SaveTrainingLines(score = score, proficiencyBonus = proficiencyBonus, showTraining = roll.save) }
         )
     }
 
@@ -2391,7 +2388,7 @@ private fun SkillTrainingLines(skill: SkillRow, score: AbilityScore?, proficienc
 
 /** Under a save's throw, as a skill's: «Сила (10) +0», and «Владение +2» while trained. */
 @Composable
-private fun SaveTrainingLines(score: AbilityScore, proficiencyBonus: Int) {
+private fun SaveTrainingLines(score: AbilityScore, proficiencyBonus: Int, showTraining: Boolean = true) {
     val strings = LocalStrings.current
     val muted = LocalDesignTokens.current.colors.text.muted
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -2403,7 +2400,7 @@ private fun SaveTrainingLines(score: AbilityScore, proficiencyBonus: Int) {
             },
             value = signed(score.modifier)
         )
-        if (score.saveProficient) {
+        if (showTraining && score.saveProficient) {
             TrainingSourceLine(AnnotatedString(text("attributes_training_proficient")), signed(proficiencyBonus))
         }
     }
