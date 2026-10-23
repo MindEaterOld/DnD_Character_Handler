@@ -535,7 +535,6 @@ internal fun attributesSectionItems(
     /** The skill whose training is being set, from its throw's gear (owner, 2026-10-23). */
     var editingSkillKey by remember { mutableStateOf<String?>(null) }
     var abilityDraft by remember { mutableStateOf("") }
-    var saveProficientDraft by remember { mutableStateOf(false) }
     var armorDraft by remember { mutableStateOf(emptySet<String>()) }
     var weaponDraft by remember { mutableStateOf(emptySet<String>()) }
     var toolDraft by remember { mutableStateOf(emptySet<String>()) }
@@ -905,7 +904,8 @@ internal fun attributesSectionItems(
     }
 
     rolling?.let { roll ->
-        val score = roll.score
+        // Read anew: a save's training set from its gear shows at once.
+        val score = abilityScores.firstOrNull { it.type == roll.score.type } ?: roll.score
         val effects = if (roll.save) saveEffects[score.type] else checkEffects[score.type]
         val base = if (roll.save) score.saveModifier(proficiencyBonus) else score.modifier
         val abilityName = LocalStrings.current[score.displayNameKey]
@@ -917,19 +917,24 @@ internal fun attributesSectionItems(
                 damage = null,
                 damageType = "",
                 rollLabel = LocalStrings.current[if (roll.save) "attributes_roll_save" else "attributes_roll_check"],
-                detail = "$abilityName ${score.value}"
+                detail = if (roll.save) null else "$abilityName ${score.value}"
             ),
             onEdit = {
-                rolling = null
                 if (roll.save) {
+                    // The save's training over its throw, as a skill's (owner, 2026-10-23).
                     editingSave = score
                 } else {
+                    rolling = null
                     editingAbility = score
                     abilityDraft = score.value.toString()
                 }
-                saveProficientDraft = score.saveProficient
             },
-            onDismiss = { rolling = null }
+            onDismiss = { rolling = null },
+            details = if (roll.save) {
+                { SaveTrainingLines(score = score, proficiencyBonus = proficiencyBonus) }
+            } else {
+                null
+            }
         )
     }
 
@@ -1010,21 +1015,19 @@ internal fun attributesSectionItems(
         }
     }
 
-    val currentEditingSave = editingSave
+    val currentEditingSave = editingSave?.let { picked -> abilityScores.firstOrNull { it.type == picked.type } }
     if (currentEditingSave != null && characterBundle != null) {
-        // The save's training, from its gear: a chip, gold while trained (no checkboxes; owner, 2026-10-09).
-        EditDialog(
-            title = text("attributes_roll_save"),
-            onDismiss = { editingSave = null },
-            onConfirm = {
-                onUpdateAbilityScore(characterBundle, currentEditingSave.type, currentEditingSave.value, saveProficientDraft)
-                editingSave = null
-            }
-        ) {
-            Text(LocalStrings.current[currentEditingSave.displayNameKey], modifier = Modifier.dialogLeadText(), color = LocalDesignTokens.current.colors.text.primary)
-            OptionGroup {
-                OptionChip(text("attributes_save_proficiency_chip"), saveProficientDraft) {
-                    saveProficientDraft = !saveProficientDraft
+        // The save's training from its throw's gear (owner, 2026-10-23): two steps, «Нет / Владение», each with the save's
+        // bonus at it; a tap sets it and goes back to the throw.
+        EditDialog(title = LocalStrings.current[currentEditingSave.displayNameKey], onDismiss = { editingSave = null }) {
+            val picked = if (currentEditingSave.saveProficient) SkillTraining.PROFICIENT else SkillTraining.NONE
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf(SkillTraining.NONE to "attributes_training_none", SkillTraining.PROFICIENT to "attributes_training_proficient").forEach { (step, key) ->
+                    val bonus = currentEditingSave.modifier + if (step == SkillTraining.PROFICIENT) proficiencyBonus else 0
+                    TrainingStepToggle(step = step, label = text(key), bonus = signed(bonus), on = step == picked, onClick = {
+                        onUpdateAbilityScore(characterBundle, currentEditingSave.type, currentEditingSave.value, step == SkillTraining.PROFICIENT)
+                        editingSave = null
+                    })
                 }
             }
         }
@@ -2382,6 +2385,26 @@ private fun SkillTrainingLines(skill: SkillRow, score: AbilityScore?, proficienc
             skill.expertise -> TrainingSourceLine(AnnotatedString(text("attributes_training_expertise")), signed(proficiencyBonus * 2))
             skill.proficient -> TrainingSourceLine(AnnotatedString(text("attributes_training_proficient")), signed(proficiencyBonus))
             skill.jackOfAllTrades -> TrainingSourceLine(AnnotatedString(text("attributes_jack_of_all_trades")), signed(proficiencyBonus / 2))
+        }
+    }
+}
+
+/** Under a save's throw, as a skill's: «Сила (10) +0», and «Владение +2» while trained. */
+@Composable
+private fun SaveTrainingLines(score: AbilityScore, proficiencyBonus: Int) {
+    val strings = LocalStrings.current
+    val muted = LocalDesignTokens.current.colors.text.muted
+    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        TrainingSourceLine(
+            name = buildAnnotatedString {
+                append(strings[score.displayNameKey])
+                append(" ")
+                withStyle(SpanStyle(color = muted)) { append("(${score.value})") }
+            },
+            value = signed(score.modifier)
+        )
+        if (score.saveProficient) {
+            TrainingSourceLine(AnnotatedString(text("attributes_training_proficient")), signed(proficiencyBonus))
         }
     }
 }
