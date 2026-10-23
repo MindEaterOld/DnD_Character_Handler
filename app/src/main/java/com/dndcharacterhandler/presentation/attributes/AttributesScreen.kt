@@ -1,5 +1,9 @@
 package com.dndcharacterhandler.presentation.attributes
 
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.AnnotatedString
 import com.dndcharacterhandler.presentation.components.buttonFill
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.border
@@ -2353,36 +2357,30 @@ private fun Feature.isJackOfAllTrades(): Boolean =
 private enum class SkillTraining { NONE, PROFICIENT, EXPERTISE }
 
 /**
- * Under a skill's throw (owner, 2026-10-23): what it is made of — the ability, its score set apart in a cell («Харизма
- * [10] +0»), the training with its dot (expertise «владение ×2»), Jack of All Trades' half where the bard has it and the
- * skill isn't trained. The training itself is set from the gear.
+ * Under a skill's throw (owner's choices from boards, 2026-10-23: В): what it is made of, a line each — the ability with
+ * its score in brackets, muted («Харизма (10) +0»), the training («Владение +2», «Экспертиза +4») or, where the bard has
+ * it and the skill isn't trained, «Мастер на все руки +1». One line each, no dots, no notes. The training is set from the
+ * gear.
  */
 @Composable
 private fun SkillTrainingLines(skill: SkillRow, score: AbilityScore?, proficiencyBonus: Int) {
     val strings = LocalStrings.current
+    val muted = LocalDesignTokens.current.colors.text.muted
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         score?.let {
-            TrainingSourceLine(lead = {}, name = strings[it.displayNameKey], note = null, value = signed(it.modifier), score = it.value)
+            TrainingSourceLine(
+                name = buildAnnotatedString {
+                    append(strings[it.displayNameKey])
+                    append(" ")
+                    withStyle(SpanStyle(color = muted)) { append("(${it.value})") }
+                },
+                value = signed(it.modifier)
+            )
         }
         when {
-            skill.expertise -> TrainingSourceLine(
-                lead = { TrainingDot(proficient = true, expertise = true) },
-                name = text("attributes_training_expertise"),
-                note = text("attributes_training_expertise_note"),
-                value = signed(proficiencyBonus * 2)
-            )
-            skill.proficient -> TrainingSourceLine(
-                lead = { TrainingDot(proficient = true) },
-                name = text("attributes_training_proficient"),
-                note = null,
-                value = signed(proficiencyBonus)
-            )
-            skill.jackOfAllTrades -> TrainingSourceLine(
-                lead = { TrainingDot(proficient = false, jackOfAllTrades = true) },
-                name = text("attributes_jack_of_all_trades"),
-                note = text("attributes_jack_note"),
-                value = signed(proficiencyBonus / 2)
-            )
+            skill.expertise -> TrainingSourceLine(AnnotatedString(text("attributes_training_expertise")), signed(proficiencyBonus * 2))
+            skill.proficient -> TrainingSourceLine(AnnotatedString(text("attributes_training_proficient")), signed(proficiencyBonus))
+            skill.jackOfAllTrades -> TrainingSourceLine(AnnotatedString(text("attributes_jack_of_all_trades")), signed(proficiencyBonus / 2))
         }
     }
 }
@@ -2409,31 +2407,12 @@ private fun SkillTrainingScale(skill: SkillRow, onPick: (SkillTraining) -> Unit)
     }
 }
 
-/** A line of what the throw is made of: its dot, the name (a note under it), the value at the end. */
+/** A line of what the throw is made of: the name, what it adds at the end. */
 @Composable
-private fun TrainingSourceLine(lead: @Composable () -> Unit, name: String, note: String?, value: String, score: Int? = null) {
+private fun TrainingSourceLine(name: AnnotatedString, value: String) {
     val colors = LocalDesignTokens.current.colors
     Row(modifier = Modifier.fillMaxWidth().heightIn(min = 32.dp), verticalAlignment = Alignment.CenterVertically) {
-        Box(modifier = Modifier.width(24.dp), contentAlignment = Alignment.Center) { lead() }
-        Spacer(modifier = Modifier.width(12.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(name, style = MaterialTheme.typography.bodyLarge, color = colors.text.primary)
-                // The ability's score in a cell of its own, a stat's outline with no fill, so it doesn't read as the name's.
-                score?.let {
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "$it",
-                        modifier = Modifier
-                            .border(1.dp, colors.border.default, MaterialTheme.shapes.extraSmall)
-                            .padding(horizontal = 6.dp),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = colors.text.muted
-                    )
-                }
-            }
-            note?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = colors.text.muted) }
-        }
+        Text(name, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge, color = colors.text.primary)
         Text(value, style = MaterialTheme.typography.titleMedium, color = colors.text.primary)
     }
 }

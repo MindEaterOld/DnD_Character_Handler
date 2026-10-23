@@ -742,20 +742,6 @@
     "fr": "Expertise",
     "es": "Pericia"
   },
-  "attributes_training_expertise_note": {
-    "en": "proficiency ×2",
-    "ru": "владение ×2",
-    "de": "Übung ×2",
-    "fr": "maîtrise ×2",
-    "es": "competencia ×2"
-  },
-  "attributes_jack_note": {
-    "en": "not proficient: half the bonus",
-    "ru": "без владения: половина бонуса",
-    "de": "ungeübt: halber Bonus",
-    "fr": "sans maîtrise : moitié du bonus",
-    "es": "sin competencia: mitad del bonus"
-  },
   "attributes_jack_of_all_trades": {
     "maxChars": 30,
     "en": "Jack of All Trades",
