@@ -273,6 +273,15 @@ private val DialogTitleInset = 16.dp
 val DialogLineGap = 12.dp
 val DialogSectionGap = 20.dp
 
+/**
+ * A gear in a pop-up's corner (a stat's, the dice picker's): Material's gear fills its 24dp box nearly whole, the cross
+ * only 14dp of it, so the gear is drawn at 18dp — its edges then stand on the cross's, the centres on the same lines.
+ */
+val DialogGearSize = 18.dp
+
+/** The back arrow in a pop-up's corner, drawn a little smaller for the same reason: its edges on the cross's. */
+val DialogBackSize = 22.dp
+
 /** On what opens a new section of a pop-up's content (a gold label and what is under it): [DialogSectionGap] over it. */
 fun Modifier.dialogSection(): Modifier = padding(top = DialogSectionGap - DialogLineGap)
 

@@ -1,5 +1,7 @@
 package com.dndcharacterhandler.presentation.dice
 
+import com.dndcharacterhandler.presentation.components.DialogGearSize
+import com.dndcharacterhandler.presentation.components.DialogBackSize
 import com.dndcharacterhandler.presentation.components.buttonFill
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -86,13 +88,13 @@ internal fun DicePickerDialog(
         titleLeading = if (choosingSkin) {
             {
                 IconButton(onClick = { choosingSkin = false }) {
-                    Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = text("common_back"), tint = LocalDesignTokens.current.colors.text.muted)
+                    Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = text("common_back"), tint = LocalDesignTokens.current.colors.text.muted, modifier = Modifier.size(DialogBackSize))
                 }
             }
         } else {
             {
                 IconButton(onClick = { choosingSkin = true }) {
-                    Icon(Icons.Outlined.Settings, contentDescription = text("dice_skin_title"), tint = LocalDesignTokens.current.colors.text.muted)
+                    Icon(Icons.Outlined.Settings, contentDescription = text("dice_skin_title"), tint = LocalDesignTokens.current.colors.text.muted, modifier = Modifier.size(DialogGearSize))
                 }
             }
         }

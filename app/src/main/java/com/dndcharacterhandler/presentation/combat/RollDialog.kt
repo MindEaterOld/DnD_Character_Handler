@@ -1,5 +1,6 @@
 package com.dndcharacterhandler.presentation.combat
 
+import com.dndcharacterhandler.presentation.components.DialogGearSize
 import androidx.compose.ui.unit.sp
 import com.dndcharacterhandler.presentation.components.SheetLabel
 import androidx.compose.material.icons.outlined.Settings
@@ -161,7 +162,8 @@ internal fun RollDialog(
         titleLeading = if (statRoll && editable) {
             {
                 IconButton(onClick = onEdit) {
-                    Icon(Icons.Outlined.Settings, contentDescription = input.editLabel ?: text("common_edit"), tint = colors.text.muted)
+                    // The gear drawn smaller than its box, as the cross is: its edges on the cross's, not its box's (2026-10-23).
+                    Icon(Icons.Outlined.Settings, contentDescription = input.editLabel ?: text("common_edit"), tint = colors.text.muted, modifier = Modifier.size(DialogGearSize))
                 }
             }
         } else {
