@@ -994,6 +994,13 @@
     "fr": "Ma\u00eetrise des armes",
     "es": "Maestr\u00eda con armas"
   },
+  "attributes_mastery_picked": {
+    "en": "Picked %s",
+    "ru": "Выбрано %s",
+    "de": "Gewählt %s",
+    "fr": "Choisies %s",
+    "es": "Elegidas %s"
+  },
   "attributes_proficiency_masteries_short": {
     "maxChars": 13,
     "en": "Mastery",

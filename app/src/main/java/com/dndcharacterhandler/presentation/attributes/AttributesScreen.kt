@@ -1,5 +1,9 @@
 package com.dndcharacterhandler.presentation.attributes
 
+import androidx.compose.ui.focus.onFocusChanged
+import com.dndcharacterhandler.domain.dnd5e.model.AdvancementStep
+import com.dndcharacterhandler.presentation.components.dialogSection
+import com.dndcharacterhandler.presentation.components.EditSheet
 import com.dndcharacterhandler.presentation.components.SheetLabel
 import com.dndcharacterhandler.presentation.components.DialogGearSize
 import androidx.compose.material.icons.outlined.AutoAwesome
@@ -1011,16 +1015,13 @@ internal fun attributesSectionItems(
         }
     }
 
-    // The pop-ups of the sheet's rows: every option a chip, in groups that stay open (owner's choices from boards,
-    // 2026-10-05; no count after a group's name, 2026-10-07).
+    // The sheets of the sheet's rows (owner's choice from boards, 2026-10-23): every option a chip, in groups under gold
+    // labels that stay open; what is ticked is saved as it settles, no «Сохранить», no cross.
     if (isArmorDialogOpen) {
-        EditDialog(
+        com.dndcharacterhandler.presentation.overview.SaveWhenSettled(armorDraft) { onUpdateArmorProficiencies(characterBundle, it) }
+        EditSheet(
             title = text("attributes_proficiency_armor"),
-            onDismiss = { isArmorDialogOpen = false },
-            onConfirm = {
-                onUpdateArmorProficiencies(characterBundle, armorDraft)
-                isArmorDialogOpen = false
-            }
+            onDismiss = { isArmorDialogOpen = false }
         ) {
             OptionGroup {
                 armorProficiencyOptions.forEach { option ->
@@ -1038,13 +1039,10 @@ internal fun attributesSectionItems(
     }
 
     if (isWeaponDialogOpen) {
-        EditDialog(
+        com.dndcharacterhandler.presentation.overview.SaveWhenSettled(weaponDraft) { onUpdateWeaponProficiencies(characterBundle, it) }
+        EditSheet(
             title = text("attributes_proficiency_weapons"),
-            onDismiss = { isWeaponDialogOpen = false },
-            onConfirm = {
-                onUpdateWeaponProficiencies(characterBundle, weaponDraft)
-                isWeaponDialogOpen = false
-            }
+            onDismiss = { isWeaponDialogOpen = false }
         ) {
             // A group's «All» stands for every weapon of it; a tap on one of them then keeps the others.
             listOf(
@@ -1083,7 +1081,8 @@ internal fun attributesSectionItems(
         val extras = (decodeProficiencyIds(character.defenses) + defenseDraft)
             .filter { (it.startsWith("$kind:") || (kind == Defenses.IMMUNITY && it.startsWith("${Defenses.CONDITION_IMMUNITY}:"))) && it !in listed }
             .sortedBy { defenseName(it, characterCatalog, strings) }
-        EditDialog(
+        com.dndcharacterhandler.presentation.overview.SaveWhenSettled(defenseDraft) { onUpdateDefenses(characterBundle, it) }
+        EditSheet(
             title = text(
                 when (kind) {
                     Defenses.RESISTANCE -> "attributes_defense_resistances"
@@ -1091,11 +1090,7 @@ internal fun attributesSectionItems(
                     else -> "attributes_defense_immunities"
                 }
             ),
-            onDismiss = { editingDefenseKind = null },
-            onConfirm = {
-                onUpdateDefenses(characterBundle, defenseDraft)
-                editingDefenseKind = null
-            }
+            onDismiss = { editingDefenseKind = null }
         ) {
             Defenses.DamageGroups.forEach { (group, types) ->
                 val keys = types.map { "$kind:$it" }
@@ -1133,14 +1128,26 @@ internal fun attributesSectionItems(
         val saved = decodeProficiencyIds(character.weaponMasteries)
         val known = (simpleWeaponOptions + martialWeaponOptions).map { it.id }.toSet()
         val extras = (saved + masteryDraft).filter { it !in known }.sortedBy { weaponName(it, characterCatalog, strings) }
-        EditDialog(
+        com.dndcharacterhandler.presentation.overview.SaveWhenSettled(masteryDraft) { onUpdateWeaponMasteries(characterBundle, it) }
+        // How many weapons the classes and the feat let master (owner, 2026-10-23): «Выбрано 2/3», red when over.
+        val masteryLimit = remember(character.classes, characterCatalog, characterBundle.features) {
+            weaponMasteryLimit(character, characterBundle.features, characterCatalog)
+        }
+        EditSheet(
             title = text("attributes_proficiency_masteries_short"),
-            onDismiss = { isMasteryDialogOpen = false },
-            onConfirm = {
-                onUpdateWeaponMasteries(characterBundle, masteryDraft)
-                isMasteryDialogOpen = false
-            }
+            onDismiss = { isMasteryDialogOpen = false }
         ) {
+            // A class with no mastery and nothing picked says nothing; picked over a limit of 0 is still red.
+            masteryLimit?.takeIf { it > 0 || masteryDraft.isNotEmpty() }?.let { limit ->
+                val picked = masteryDraft.size
+                Text(
+                    text = strings.format("attributes_mastery_picked", "$picked/$limit"),
+                    modifier = Modifier.fillMaxWidth(),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (picked > limit) LocalDesignTokens.current.colors.accent.danger else LocalDesignTokens.current.colors.text.muted,
+                    textAlign = TextAlign.Center
+                )
+            }
             listOf("attributes_weapon_simple" to simpleWeaponOptions, "attributes_weapon_martial" to martialWeaponOptions).forEach { (titleKey, options) ->
                 val shown = options.filter { characterCatalog?.masteryOf(it.id) != null || it.id in saved }
                 OptionGroup(title = text(titleKey)) {
@@ -1160,13 +1167,10 @@ internal fun attributesSectionItems(
     }
 
     if (isToolsDialogOpen) {
-        EditDialog(
+        com.dndcharacterhandler.presentation.overview.SaveWhenSettled(toolDraft + customEntryIds(customToolDrafts)) { onUpdateToolProficiencies(characterBundle, it) }
+        EditSheet(
             title = text("attributes_proficiency_tools"),
-            onDismiss = { isToolsDialogOpen = false },
-            onConfirm = {
-                onUpdateToolProficiencies(characterBundle, toolDraft + customEntryIds(customToolDrafts + customToolInput))
-                isToolsDialogOpen = false
-            }
+            onDismiss = { isToolsDialogOpen = false }
         ) {
             toolProficiencyCategories.forEach { category ->
                 OptionGroup(title = strings[category.labelKey]) {
@@ -1192,13 +1196,10 @@ internal fun attributesSectionItems(
     }
 
     if (isLanguagesDialogOpen) {
-        EditDialog(
+        com.dndcharacterhandler.presentation.overview.SaveWhenSettled(languageDraft + customEntryIds(customLanguageDrafts)) { onUpdateLanguageProficiencies(characterBundle, it) }
+        EditSheet(
             title = text("attributes_proficiency_languages"),
-            onDismiss = { isLanguagesDialogOpen = false },
-            onConfirm = {
-                onUpdateLanguageProficiencies(characterBundle, languageDraft + customEntryIds(customLanguageDrafts + customLanguageInput))
-                isLanguagesDialogOpen = false
-            }
+            onDismiss = { isLanguagesDialogOpen = false }
         ) {
             languageProficiencyCategories.forEach { category ->
                 OptionGroup(title = strings[category.labelKey]) {
@@ -1221,6 +1222,28 @@ internal fun attributesSectionItems(
         }
     }
     return AttributesSectionParts(items = items)
+}
+
+/**
+ * How many weapons the character may master (PHB 2024): the classes' Weapon Mastery steps up to their levels, and the
+ * Weapon Mastery feat's two; null when no class of the catalog is known (a class written as text).
+ */
+private fun weaponMasteryLimit(character: Character, features: List<Feature>, catalog: CharacterCatalog?): Int? {
+    catalog ?: return null
+    var known = false
+    var limit = 0
+    character.classes.forEach { entry ->
+        val catalogClass = catalog.classes.firstOrNull { it.id == entry.classId } ?: return@forEach
+        known = true
+        catalogClass.advancement.filterIsInstance<AdvancementStep.Trait>()
+            .filter { it.mode == "mastery" && (it.level ?: 1) <= entry.levels }
+            .forEach { step -> limit += step.choices.sumOf { it.count } }
+    }
+    if (features.any { it.catalogId == "phbWeaponMastery" }) {
+        known = true
+        limit += 2
+    }
+    return limit.takeIf { known }
 }
 
 private fun Feature.isDarkvisionFeature(): Boolean {
@@ -2099,30 +2122,22 @@ private fun OptionGroup(
     onAll: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
-    val colors = LocalDesignTokens.current.colors
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        if (title != null) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = title,
-                    modifier = Modifier.weight(1f),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = colors.text.primary
-                )
-                if (onAll != null) {
-                    ToggleChip(label = text("attributes_group_all"), selected = all, onClick = onAll, role = Role.Checkbox)
-                }
-            }
-        }
+    // A group as the pop-ups' sections (owner's choice from boards, 2026-10-23): its gold small-caps label in the middle,
+    // the section's gap over it, its chips in the middle under it, «Всё» first.
+    Column(
+        modifier = Modifier.fillMaxWidth().then(if (title != null) Modifier.dialogSection() else Modifier),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        if (title != null) SheetLabel(title)
         FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
+            if (onAll != null) {
+                ToggleChip(label = text("attributes_group_all"), selected = all, onClick = onAll, role = Role.Checkbox)
+            }
             content()
         }
     }
@@ -2181,14 +2196,33 @@ private fun CustomEntries(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            OutlinedTextField(
+            // As tall as the «+» beside it, as the experience's award (owner, 2026-10-13): an outline with no fill, gold
+            // while typed in, every field's corners; what it is for written in it while empty.
+            var focused by remember { mutableStateOf(false) }
+            val colors = LocalDesignTokens.current.colors
+            BasicTextField(
                 value = input,
                 onValueChange = onInputChange,
-                modifier = Modifier.weight(1f),
-                label = { Text(inputLabel) },
+                modifier = Modifier.weight(1f).onFocusChanged { focused = it.isFocused },
+                textStyle = MaterialTheme.typography.bodyLarge.copy(color = colors.text.primary),
                 singleLine = true,
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(onDone = { onAdd() })
+                keyboardActions = KeyboardActions(onDone = { onAdd() }),
+                decorationBox = { field ->
+                    Box(
+                        modifier = Modifier
+                            .height(48.dp)
+                            .border(1.dp, if (focused) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline, MaterialTheme.shapes.extraSmall)
+                            .padding(horizontal = 14.dp),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        if (input.isEmpty()) {
+                            Text(text = inputLabel, style = MaterialTheme.typography.bodyLarge, color = colors.text.subtle, maxLines = 1)
+                        }
+                        field()
+                    }
+                }
             )
             StepButton(
                 icon = Icons.Outlined.Add,
