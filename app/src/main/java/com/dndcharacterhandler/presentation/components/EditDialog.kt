@@ -275,9 +275,10 @@ val DialogSectionGap = 20.dp
 
 /**
  * A gear in a pop-up's corner (a stat's, the dice picker's): Material's gear fills its 24dp box nearly whole, the cross
- * only 14dp of it, so the gear is drawn at 18dp — its edges then stand on the cross's, the centres on the same lines.
+ * only 14dp of it; but a round sign reads smaller than a cross of the same size, so the gear is drawn at 20dp — as large
+ * as the cross to the eye, on its centre lines (owner, 2026-10-23: 18dp, edge to edge, read smaller).
  */
-val DialogGearSize = 18.dp
+val DialogGearSize = 20.dp
 
 /** The back arrow in a pop-up's corner, drawn a little smaller for the same reason: its edges on the cross's. */
 val DialogBackSize = 22.dp
