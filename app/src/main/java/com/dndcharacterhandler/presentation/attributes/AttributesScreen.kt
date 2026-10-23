@@ -1,5 +1,9 @@
 package com.dndcharacterhandler.presentation.attributes
 
+import com.dndcharacterhandler.presentation.components.buttonFill
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.RowScope
 import com.dndcharacterhandler.presentation.components.dialogLeadText
 import com.dndcharacterhandler.domain.dnd5e.rules.automaticArmorClass
 import androidx.compose.ui.graphics.graphicsLayer
@@ -477,7 +481,7 @@ internal fun attributesSectionItems(
     }
     val proficiencyBonus = proficiencyBonusForLevel(character.level)
     val perceptionSkill = characterBundle?.skills?.firstOrNull { it.name == "skill_perception" }
-    val passiveBase = passivePerceptionValue(character, proficiencyBonus, perceptionSkill)
+    val passiveBase = passivePerceptionValue(character, proficiencyBonus, perceptionSkill, characterBundle?.features.orEmpty().any { it.isJackOfAllTrades() })
     // With advantage on the check +5, with disadvantage −5 (the rules' Passive Perception); not exhaustion's −2: no d20 is rolled.
     val passiveShift = when (checkEffects.getValue(AbilityType.WISDOM).mode) {
         RollMode.ADVANTAGE -> 5
@@ -491,18 +495,22 @@ internal fun attributesSectionItems(
         RollMode.DISADVANTAGE -> -5
         RollMode.NORMAL -> 0
     }
+    val bardsHalf = characterBundle?.features.orEmpty().any { it.isJackOfAllTrades() }
     val passiveInsight = 10 + abilityModifier(character.wisdom) +
-        skillTrainingBonus(characterBundle?.skills?.firstOrNull { it.name == "skill_insight" }, proficiencyBonus) + passiveShift
+        skillTrainingBonus(characterBundle?.skills?.firstOrNull { it.name == "skill_insight" }, proficiencyBonus, bardsHalf) + passiveShift
     val passiveInvestigation = 10 + abilityModifier(character.intelligence) +
-        skillTrainingBonus(characterBundle?.skills?.firstOrNull { it.name == "skill_investigation" }, proficiencyBonus) + investigationShift
+        skillTrainingBonus(characterBundle?.skills?.firstOrNull { it.name == "skill_investigation" }, proficiencyBonus, bardsHalf) + investigationShift
     val darkvisionCatalogLookup = remember(darkvisionCatalogItems) { FeatureCatalogLookup(darkvisionCatalogItems) }
     val darkvisionFeatures = remember(characterBundle?.features, darkvisionCatalogLookup, strings.language) {
         characterBundle?.features.orEmpty()
             .filter { it.isDarkvisionFeature() }
             .localizedWith(darkvisionCatalogLookup, russian = strings.language == AppLanguage.RUSSIAN)
     }
-    val skillRows = remember(characterBundle?.skills, abilityScores, proficiencyBonus) {
-        buildSkillRows(characterBundle?.skills.orEmpty(), abilityScores, proficiencyBonus)
+    // Jack of All Trades is the bard's feature, not a skill's setting (owner, 2026-10-23): with it every skill not
+    // trained takes half the proficiency bonus, nothing is ticked by hand.
+    val jackOfAllTrades = remember(characterBundle?.features) { characterBundle?.features.orEmpty().any { it.isJackOfAllTrades() } }
+    val skillRows = remember(characterBundle?.skills, abilityScores, proficiencyBonus, jackOfAllTrades) {
+        buildSkillRows(characterBundle?.skills.orEmpty(), abilityScores, proficiencyBonus, jackOfAllTrades)
     }
     var isPassiveDialogOpen by remember { mutableStateOf(false) }
     var isArmorDialogOpen by remember { mutableStateOf(false) }
@@ -517,14 +525,11 @@ internal fun attributesSectionItems(
     var editingAbility by remember { mutableStateOf<AbilityScore?>(null) }
     // A save's training, set from the save's own gear (owner, 2026-10-22: not in the ability's editor).
     var editingSave by remember { mutableStateOf<AbilityScore?>(null) }
-    var editingSkill by remember { mutableStateOf<SkillRow?>(null) }
     var rolling by remember { mutableStateOf<AbilityRoll?>(null) }
-    var rollingSkill by remember { mutableStateOf<SkillRow?>(null) }
+    /** The skill being thrown, by its key: its row is read anew as its training changes in the pop-up. */
+    var rollingSkillKey by remember { mutableStateOf<String?>(null) }
     var abilityDraft by remember { mutableStateOf("") }
     var saveProficientDraft by remember { mutableStateOf(false) }
-    var skillProficientDraft by remember { mutableStateOf(false) }
-    var skillExpertiseDraft by remember { mutableStateOf(false) }
-    var skillJackDraft by remember { mutableStateOf(false) }
     var armorDraft by remember { mutableStateOf(emptySet<String>()) }
     var weaponDraft by remember { mutableStateOf(emptySet<String>()) }
     var toolDraft by remember { mutableStateOf(emptySet<String>()) }
@@ -591,7 +596,7 @@ internal fun attributesSectionItems(
             SkillGroups(
                 skills = skillRows,
                 checkEffects = checkEffects,
-                onSkillClick = { skill -> if (characterBundle != null) rollingSkill = skill }
+                onSkillClick = { skill -> if (characterBundle != null) rollingSkillKey = skill.nameKey }
             )
         }
 
@@ -922,7 +927,7 @@ internal fun attributesSectionItems(
         )
     }
 
-    rollingSkill?.let { skill ->
+    skillRows.firstOrNull { it.nameKey == rollingSkillKey }?.let { skill ->
         val effects = checkEffects[skill.abilityType]
         val skillScore = abilityScores.firstOrNull { it.type == skill.abilityType }
         com.dndcharacterhandler.presentation.combat.RollDialog(
@@ -932,17 +937,29 @@ internal fun attributesSectionItems(
                 effects = effects,
                 damage = null,
                 damageType = "",
-                rollLabel = LocalStrings.current["attributes_roll_check"],
-                detail = skillScore?.let { "${LocalStrings.current[it.displayNameKey]} ${it.value}" }
+                rollLabel = LocalStrings.current["attributes_roll_check"]
             ),
-            onEdit = {
-                rollingSkill = null
-                editingSkill = skill
-                skillProficientDraft = skill.proficient
-                skillExpertiseDraft = skill.expertise
-                skillJackDraft = skill.jackOfAllTrades
-            },
-            onDismiss = { rollingSkill = null }
+            onEdit = {},
+            onDismiss = { rollingSkillKey = null },
+            editable = false,
+            details = {
+                SkillTrainingDetails(
+                    skill = skill,
+                    score = skillScore,
+                    proficiencyBonus = proficiencyBonus,
+                    onPick = { step ->
+                        if (characterBundle != null) {
+                            onUpdateSkillTraining(
+                                characterBundle,
+                                skill.nameKey,
+                                step != SkillTraining.NONE,
+                                step == SkillTraining.EXPERTISE,
+                                false
+                            )
+                        }
+                    }
+                )
+            }
         )
     }
 
@@ -1007,48 +1024,6 @@ internal fun attributesSectionItems(
             OptionGroup {
                 OptionChip(text("attributes_save_proficiency_chip"), saveProficientDraft) {
                     saveProficientDraft = !saveProficientDraft
-                }
-            }
-        }
-    }
-
-    val currentEditingSkill = editingSkill
-    if (currentEditingSkill != null && characterBundle != null) {
-        EditDialog(
-            title = strings[currentEditingSkill.nameKey],
-            onDismiss = { editingSkill = null },
-            onConfirm = {
-                onUpdateSkillTraining(
-                    characterBundle,
-                    currentEditingSkill.nameKey,
-                    skillProficientDraft,
-                    skillExpertiseDraft,
-                    skillJackDraft
-                )
-                editingSkill = null
-            }
-        ) {
-            // The skill's training: chips, gold while on (no checkboxes; owner, 2026-10-09). Expertise is on top of the
-            // training and brings it; a jack of all trades' half is for a skill not trained, so each takes the other off.
-            OptionGroup {
-                OptionChip(text("attributes_has_proficiency"), skillProficientDraft) {
-                    skillProficientDraft = !skillProficientDraft
-                    if (!skillProficientDraft) skillExpertiseDraft = false
-                    if (skillProficientDraft) skillJackDraft = false
-                }
-                OptionChip(text("attributes_has_expertise"), skillExpertiseDraft) {
-                    skillExpertiseDraft = !skillExpertiseDraft
-                    if (skillExpertiseDraft) {
-                        skillProficientDraft = true
-                        skillJackDraft = false
-                    }
-                }
-                OptionChip(text("attributes_jack_of_all_trades"), skillJackDraft) {
-                    skillJackDraft = !skillJackDraft
-                    if (skillJackDraft) {
-                        skillProficientDraft = false
-                        skillExpertiseDraft = false
-                    }
                 }
             }
         }
@@ -2306,21 +2281,27 @@ enum class AbilityType {
     fun toAbility(): SpellcastingAbility = SpellcastingAbility.valueOf(name)
 }
 
-private fun buildSkillRows(skills: List<Skill>, abilityScores: List<AbilityScore>, proficiencyBonus: Int): List<SkillRow> {
+private fun buildSkillRows(
+    skills: List<Skill>,
+    abilityScores: List<AbilityScore>,
+    proficiencyBonus: Int,
+    jackOfAllTrades: Boolean
+): List<SkillRow> {
     val skillState = skills.associateBy { it.name }
     val modifiers = abilityScores.associate { it.type to it.modifier }
     return skillDefinitions.map { definition ->
         val skill = skillState[definition.nameKey]
         val proficient = skill?.isProficient == true
         val expertise = skill?.isExpertise == true
-        val jackOfAllTrades = skill?.hasJackOfAllTrades == true
+        // Half the bonus on a skill not trained, by the bard's feature (PHB 2024); a trained one takes its own.
+        val half = jackOfAllTrades && !proficient
         SkillRow(
             nameKey = definition.nameKey,
             abilityType = definition.abilityType,
-            modifier = (modifiers[definition.abilityType] ?: 0) + skillTrainingBonus(skill, proficiencyBonus),
+            modifier = (modifiers[definition.abilityType] ?: 0) + skillTrainingBonus(proficient, expertise, half, proficiencyBonus),
             proficient = proficient,
             expertise = expertise,
-            jackOfAllTrades = jackOfAllTrades
+            jackOfAllTrades = half
         )
     }
 }
@@ -2351,16 +2332,124 @@ private val skillDefinitions = listOf(
     SkillDefinition("skill_survival", AbilityType.WISDOM)
 )
 
-private fun passivePerceptionValue(character: Character, proficiencyBonus: Int, perceptionSkill: Skill?): Int =
-    10 + abilityModifier(character.wisdom) + skillTrainingBonus(perceptionSkill, proficiencyBonus) + character.passivePerceptionBonus
+private fun passivePerceptionValue(character: Character, proficiencyBonus: Int, perceptionSkill: Skill?, jackOfAllTrades: Boolean = false): Int =
+    10 + abilityModifier(character.wisdom) + skillTrainingBonus(perceptionSkill, proficiencyBonus, jackOfAllTrades) + character.passivePerceptionBonus
 
-private fun skillTrainingBonus(skill: Skill?, proficiencyBonus: Int): Int =
+/** A stored skill's training bonus; [jackOfAllTrades] the bard's feature, half on a skill not trained. */
+private fun skillTrainingBonus(skill: Skill?, proficiencyBonus: Int, jackOfAllTrades: Boolean): Int {
+    val proficient = skill?.isProficient == true
+    return skillTrainingBonus(proficient, proficient && skill?.isExpertise == true, jackOfAllTrades && !proficient, proficiencyBonus)
+}
+
+private fun skillTrainingBonus(proficient: Boolean, expertise: Boolean, jackOfAllTrades: Boolean, proficiencyBonus: Int): Int =
     when {
-        skill?.isExpertise == true -> proficiencyBonus * 2
-        skill?.isProficient == true -> proficiencyBonus
-        skill?.hasJackOfAllTrades == true -> proficiencyBonus / 2
+        expertise -> proficiencyBonus * 2
+        proficient -> proficiencyBonus
+        jackOfAllTrades -> proficiencyBonus / 2
         else -> 0
     }
+
+/** The bard's Jack of All Trades, from the catalog or written by hand under its name. */
+private fun Feature.isJackOfAllTrades(): Boolean =
+    catalogId == "phbbrdJackOfAllT" || name.trim().lowercase().let { it == "jack of all trades" || it == "мастер на все руки" }
+
+/** A skill's training as one scale: expertise only over the training (PHB 2024). */
+private enum class SkillTraining { NONE, PROFICIENT, EXPERTISE }
+
+/**
+ * Under a skill's throw (owner's choice from boards, 2026-10-23: А): what it is made of — the ability, the training with
+ * its dot (expertise «владение ×2»), Jack of All Trades' half where the bard has it and the skill isn't trained — and the
+ * training as three toggles, «Нет / Владение / Экспертиза», a tap setting it at once.
+ */
+@Composable
+private fun SkillTrainingDetails(
+    skill: SkillRow,
+    score: AbilityScore?,
+    proficiencyBonus: Int,
+    onPick: (SkillTraining) -> Unit
+) {
+    val strings = LocalStrings.current
+    val picked = when {
+        skill.expertise -> SkillTraining.EXPERTISE
+        skill.proficient -> SkillTraining.PROFICIENT
+        else -> SkillTraining.NONE
+    }
+    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        score?.let {
+            TrainingSourceLine(lead = {}, name = "${strings[it.displayNameKey]} ${it.value}", note = null, value = signed(it.modifier))
+        }
+        when (picked) {
+            SkillTraining.EXPERTISE -> TrainingSourceLine(
+                lead = { TrainingDot(proficient = true, expertise = true) },
+                name = text("attributes_training_expertise"),
+                note = text("attributes_training_expertise_note"),
+                value = signed(proficiencyBonus * 2)
+            )
+            SkillTraining.PROFICIENT -> TrainingSourceLine(
+                lead = { TrainingDot(proficient = true) },
+                name = text("attributes_training_proficient"),
+                note = null,
+                value = signed(proficiencyBonus)
+            )
+            SkillTraining.NONE -> if (skill.jackOfAllTrades) {
+                TrainingSourceLine(
+                    lead = { TrainingDot(proficient = false, jackOfAllTrades = true) },
+                    name = text("attributes_jack_of_all_trades"),
+                    note = text("attributes_jack_note"),
+                    value = signed(proficiencyBonus / 2)
+                )
+            }
+        }
+    }
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        listOf(
+            SkillTraining.NONE to "attributes_training_none",
+            SkillTraining.PROFICIENT to "attributes_training_proficient",
+            SkillTraining.EXPERTISE to "attributes_training_expertise"
+        ).forEach { (step, key) ->
+            TrainingStepToggle(step = step, label = text(key), on = step == picked, onClick = { if (step != picked) onPick(step) })
+        }
+    }
+}
+
+/** A line of what the throw is made of: its dot, the name (a note under it), the value at the end. */
+@Composable
+private fun TrainingSourceLine(lead: @Composable () -> Unit, name: String, note: String?, value: String) {
+    val colors = LocalDesignTokens.current.colors
+    Row(modifier = Modifier.fillMaxWidth().heightIn(min = 32.dp), verticalAlignment = Alignment.CenterVertically) {
+        Box(modifier = Modifier.width(24.dp), contentAlignment = Alignment.Center) { lead() }
+        Spacer(modifier = Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(name, style = MaterialTheme.typography.bodyLarge, color = colors.text.primary)
+            note?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = colors.text.muted) }
+        }
+        Text(value, style = MaterialTheme.typography.titleMedium, color = colors.text.primary)
+    }
+}
+
+/** One step of the training's scale: its dot over its word, lit in gold at 15 % and outlined in it while picked. */
+@Composable
+private fun RowScope.TrainingStepToggle(step: SkillTraining, label: String, on: Boolean, onClick: () -> Unit) {
+    val colors = LocalDesignTokens.current.colors
+    val gold = MaterialTheme.colorScheme.primary
+    val shape = RoundedCornerShape(12.dp)
+    Column(
+        modifier = Modifier
+            .weight(1f)
+            .clip(shape)
+            .background(if (on) gold.copy(alpha = LocalDesignTokens.current.alpha.faint) else buttonFill())
+            .then(if (on) Modifier.border(1.dp, gold, shape) else Modifier)
+            .selectable(selected = on, role = Role.RadioButton, onClick = onClick)
+            .padding(horizontal = 4.dp, vertical = 10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        Box(modifier = Modifier.size(20.dp), contentAlignment = Alignment.Center) {
+            TrainingDot(proficient = step != SkillTraining.NONE, expertise = step == SkillTraining.EXPERTISE)
+        }
+        Text(label, style = MaterialTheme.typography.labelMedium, color = if (on) gold else colors.text.muted, maxLines = 1)
+    }
+}
 
 private fun signed(value: Int): String = if (value >= 0) "+$value" else value.toString()
 

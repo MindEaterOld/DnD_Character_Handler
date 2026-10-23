@@ -718,21 +718,43 @@
     "fr": "Bonus supplémentaire",
     "es": "Bonificador adicional"
   },
-  "attributes_has_proficiency": {
-    "maxChars": 30,
-    "en": "Has proficiency",
-    "ru": "Есть владение",
-    "de": "Geübt",
-    "fr": "Possède la maîtrise",
-    "es": "Tiene competencia"
+  "attributes_training_none": {
+    "maxChars": 11,
+    "en": "None",
+    "ru": "Нет",
+    "de": "Keine",
+    "fr": "Aucune",
+    "es": "Ninguna"
   },
-  "attributes_has_expertise": {
-    "maxChars": 30,
-    "en": "Has expertise",
-    "ru": "Есть экспертиза",
+  "attributes_training_proficient": {
+    "maxChars": 11,
+    "en": "Proficient",
+    "ru": "Владение",
+    "de": "Geübt",
+    "fr": "Maîtrise",
+    "es": "Competente"
+  },
+  "attributes_training_expertise": {
+    "maxChars": 11,
+    "en": "Expertise",
+    "ru": "Экспертиза",
     "de": "Expertise",
-    "fr": "Possède l'expertise",
-    "es": "Tiene pericia"
+    "fr": "Expertise",
+    "es": "Pericia"
+  },
+  "attributes_training_expertise_note": {
+    "en": "proficiency ×2",
+    "ru": "владение ×2",
+    "de": "Übung ×2",
+    "fr": "maîtrise ×2",
+    "es": "competencia ×2"
+  },
+  "attributes_jack_note": {
+    "en": "not proficient: half the bonus",
+    "ru": "без владения: половина бонуса",
+    "de": "ungeübt: halber Bonus",
+    "fr": "sans maîtrise : moitié du bonus",
+    "es": "sin competencia: mitad del bonus"
   },
   "attributes_jack_of_all_trades": {
     "maxChars": 30,

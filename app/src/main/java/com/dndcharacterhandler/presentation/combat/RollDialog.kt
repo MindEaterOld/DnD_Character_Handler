@@ -134,7 +134,11 @@ internal fun RollDialog(
     /** The one button of a spell that rolls nothing ("Cast"); null where there is always a roll. */
     castLabel: String? = null,
     /** The damage-only (healing-only) button's words when a cast comes with it. */
-    damageOnlyLabel: String? = null
+    damageOnlyLabel: String? = null,
+    /** Under a stat's throw: what it is made of, set right there (a skill's training). */
+    details: (@Composable ColumnScope.() -> Unit)? = null,
+    /** Off where the stat is set in the pop-up itself: no gear. */
+    editable: Boolean = true
 ) {
     val colors = LocalDesignTokens.current.colors
     val strings = LocalStrings.current
@@ -154,7 +158,7 @@ internal fun RollDialog(
     EditDialog(
         title = input.title,
         onDismiss = onDismiss,
-        titleLeading = if (statRoll) {
+        titleLeading = if (statRoll && editable) {
             {
                 IconButton(onClick = onEdit) {
                     Icon(Icons.Outlined.Settings, contentDescription = input.editLabel ?: text("common_edit"), tint = colors.text.muted)
@@ -167,6 +171,7 @@ internal fun RollDialog(
         header?.invoke(this)
         if (statRoll) {
             StatRollHeader(input.rollLabel!!, input.attackBonus!!, input.effects, input.detail)
+            details?.invoke(this)
         }
         input.attackBonus?.takeIf { !statRoll }?.let { bonus ->
             RollLine(
