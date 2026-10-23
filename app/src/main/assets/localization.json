@@ -601,6 +601,69 @@
     "fr": "Survie",
     "es": "Supervivencia"
   },
+  "attributes_passive_label": {
+    "en": "Passive",
+    "ru": "Пассивная",
+    "de": "Passiv",
+    "fr": "Passive",
+    "es": "Pasiva"
+  },
+  "attributes_passive_base": {
+    "en": "Base",
+    "ru": "База",
+    "de": "Basis",
+    "fr": "Base",
+    "es": "Base"
+  },
+  "attributes_passive_advantage": {
+    "en": "Advantage",
+    "ru": "Преимущество",
+    "de": "Vorteil",
+    "fr": "Avantage",
+    "es": "Ventaja"
+  },
+  "attributes_passive_disadvantage": {
+    "en": "Disadvantage",
+    "ru": "Помеха",
+    "de": "Nachteil",
+    "fr": "Désavantage",
+    "es": "Desventaja"
+  },
+  "attributes_darkvision_range": {
+    "en": "Range",
+    "ru": "Дальность",
+    "de": "Reichweite",
+    "fr": "Portée",
+    "es": "Alcance"
+  },
+  "attributes_darkvision_own": {
+    "en": "Own range",
+    "ru": "Своя дальность",
+    "de": "Eigene Reichw.",
+    "fr": "Portée propre",
+    "es": "Alcance propio"
+  },
+  "attributes_darkvision_auto_hint": {
+    "en": "None — from the features",
+    "ru": "Нет — брать из особенностей",
+    "de": "Keine — aus den Merkmalen",
+    "fr": "Aucune — d’après les aptitudes",
+    "es": "Ninguno — de los rasgos"
+  },
+  "attributes_darkvision_no_feature": {
+    "en": "No feature with darkvision",
+    "ru": "Нет особенности с тёмным зрением",
+    "de": "Kein Merkmal mit Dunkelsicht",
+    "fr": "Aucune aptitude de vision dans le noir",
+    "es": "Ningún rasgo con visión en la oscuridad"
+  },
+  "attributes_darkvision_add_feature": {
+    "en": "+ Add a feature",
+    "ru": "+ Добавить особенность",
+    "de": "+ Merkmal hinzufügen",
+    "fr": "+ Ajouter une aptitude",
+    "es": "+ Añadir un rasgo"
+  },
   "attributes_darkvision_title": {
     "maxChars": 15,
     "en": "Darkvision",
@@ -632,27 +695,6 @@
     "fr": "Vision noir",
     "es": "Visi\u00f3n osc."
   },
-  "attributes_darkvision_mode_auto": {
-    "en": "Auto",
-    "ru": "Авто",
-    "de": "Auto",
-    "fr": "Auto",
-    "es": "Auto"
-  },
-  "attributes_darkvision_mode_manual": {
-    "en": "Manual",
-    "ru": "Вручную",
-    "de": "Manuell",
-    "fr": "Manuel",
-    "es": "Manual"
-  },
-  "attributes_darkvision_none": {
-    "en": "You don't have Darkvision right now.",
-    "ru": "Сейчас у вас нет Тёмного зрения.",
-    "de": "Du hast derzeit keine Dunkelsicht.",
-    "fr": "Vous n'avez pas de vision dans le noir pour l'instant.",
-    "es": "Ahora mismo no tienes visión en la oscuridad."
-  },
   "attributes_darkvision_add": {
     "maxChars": 15,
     "en": "Vision Source",
@@ -660,20 +702,6 @@
     "de": "Sichtquelle",
     "fr": "Origine vision",
     "es": "Origen visión"
-  },
-  "attributes_darkvision_manual_hint": {
-    "en": "You're entering Darkvision manually.",
-    "ru": "Вы вводите Тёмное зрение вручную.",
-    "de": "Du gibst die Dunkelsicht manuell ein.",
-    "fr": "Vous saisissez la vision dans le noir manuellement.",
-    "es": "Estás introduciendo la visión en la oscuridad manualmente."
-  },
-  "attributes_darkvision_feet": {
-    "en": "Feet",
-    "ru": "Футы",
-    "de": "Fuß",
-    "fr": "Pieds",
-    "es": "Pies"
   },
   "attributes_ability_scores": {
     "en": "Ability Scores",
@@ -703,13 +731,6 @@
     "de": "Wahrnehmung",
     "fr": "Perception",
     "es": "Percepción"
-  },
-  "attributes_base_value": {
-    "en": "Base value: %s",
-    "ru": "Базовое значение: %s",
-    "de": "Grundwert: %s",
-    "fr": "Valeur de base : %s",
-    "es": "Valor base: %s"
   },
   "attributes_additional_bonus": {
     "en": "Additional bonus",

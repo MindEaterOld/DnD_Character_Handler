@@ -1,5 +1,10 @@
 package com.dndcharacterhandler.presentation.attributes
 
+import com.dndcharacterhandler.presentation.components.SheetLabel
+import com.dndcharacterhandler.presentation.components.DialogGearSize
+import androidx.compose.material.icons.outlined.AutoAwesome
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.outlined.Remove
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.TextRange
@@ -548,16 +553,12 @@ internal fun attributesSectionItems(
     /** What is typed in a pop-up's field for its own entry, not added as a chip yet; Save keeps it too. */
     var customToolInput by remember { mutableStateOf("") }
     var customLanguageInput by remember { mutableStateOf("") }
-    var passiveDraft by remember(character.passivePerceptionBonus) {
-        mutableStateOf(character.passivePerceptionBonus.toString())
-    }
     var isDarkvisionDialogOpen by remember { mutableStateOf(false) }
+    var isDarkvisionOwnOpen by remember { mutableStateOf(false) }
+    var isPassiveBonusOpen by remember { mutableStateOf(false) }
     var expandedDarkvision by remember { mutableStateOf(setOf<Long>()) }
     var isDarkvisionCatalogOpen by remember { mutableStateOf(false) }
     var editingFeature by remember { mutableStateOf<Feature?>(null) }
-    var darkvisionManualDraft by remember(character.darkvisionManualFeet) {
-        mutableStateOf(character.darkvisionManualFeet.takeIf { it > 0 }?.toString().orEmpty())
-    }
 
     // The darkvision: its feature's feet, or the feet the player wrote.
     val darkvisionFeet = when (character.darkvisionMode) {
@@ -638,7 +639,6 @@ internal fun attributesSectionItems(
                             valueColor = changedValueColor(passiveShift),
                             onClick = {
                                 // A fresh draft each time: what was typed and dismissed last time isn't kept.
-                                passiveDraft = character.passivePerceptionBonus.toString()
                                 isPassiveDialogOpen = true
                             }
                         )
@@ -767,93 +767,143 @@ internal fun attributesSectionItems(
     }
 
     if (isPassiveDialogOpen && characterBundle != null) {
+        // The passive perception as a throw's pop-up (owner's choice from boards, 2026-10-23: А): the value large, what it
+        // is made of a line each; the extra bonus — a magic item's, say — behind the gear.
+        val wisdom = abilityScores.first { it.type == AbilityType.WISDOM }
+        val perceptionRow = skillRows.firstOrNull { it.nameKey == "skill_perception" }
         EditDialog(
             title = text("attributes_passive_perception_bonus_title"),
             onDismiss = { isPassiveDialogOpen = false },
-            onConfirm = {
-                // Empty is no bonus; what isn't a number leaves the bonus as it was.
-                val bonus = if (passiveDraft.isBlank()) 0 else passiveDraft.trim().toIntOrNull()
-                if (bonus != null) onUpdatePassivePerceptionBonus(characterBundle, bonus)
-                isPassiveDialogOpen = false
+            scrollable = false,
+            titleLeading = {
+                IconButton(onClick = { isPassiveBonusOpen = true }) {
+                    Icon(Icons.Outlined.Settings, contentDescription = text("common_edit"), tint = LocalDesignTokens.current.colors.text.muted, modifier = Modifier.size(DialogGearSize))
+                }
             }
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                // The value before the bonus being edited.
-                Text(LocalStrings.current.format("attributes_base_value", passivePerception - character.passivePerceptionBonus))
-                OutlinedTextField(
-                    value = passiveDraft,
-                    onValueChange = { passiveDraft = it },
-                    label = { Text(text("attributes_additional_bonus")) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                )
+            SenseValue(label = text("attributes_passive_label"), value = "$passivePerception", unit = null)
+            Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                TrainingSourceLine(AnnotatedString(text("attributes_passive_base")), "10")
+                AbilityLine(wisdom)
+                perceptionRow?.let { row ->
+                    when {
+                        row.expertise -> TrainingSourceLine(AnnotatedString(text("attributes_training_expertise")), signed(proficiencyBonus * 2))
+                        row.proficient -> TrainingSourceLine(AnnotatedString(text("attributes_training_proficient")), signed(proficiencyBonus))
+                        row.jackOfAllTrades -> TrainingSourceLine(AnnotatedString(text("attributes_jack_of_all_trades")), signed(proficiencyBonus / 2))
+                    }
+                }
+                if (passiveShift != 0) {
+                    TrainingSourceLine(
+                        AnnotatedString(text(if (passiveShift > 0) "attributes_passive_advantage" else "attributes_passive_disadvantage")),
+                        signed(passiveShift)
+                    )
+                }
+                if (character.passivePerceptionBonus != 0) {
+                    TrainingSourceLine(AnnotatedString(text("attributes_additional_bonus")), signed(character.passivePerceptionBonus))
+                }
             }
         }
     }
 
+    if (isPassiveBonusOpen && characterBundle != null) {
+        var bonus by remember { mutableStateOf(character.passivePerceptionBonus) }
+        com.dndcharacterhandler.presentation.overview.SaveWhenSettled(bonus) { onUpdatePassivePerceptionBonus(characterBundle, it) }
+        EditDialog(title = text("attributes_passive_perception_bonus_title"), onDismiss = { isPassiveBonusOpen = false }, scrollable = false) {
+            SenseCounter(
+                label = text("attributes_additional_bonus"),
+                value = signed(bonus),
+                canDown = bonus > -MaxSenseBonus,
+                canUp = bonus < MaxSenseBonus,
+                onDown = { bonus -= 1 },
+                onUp = { bonus += 1 }
+            )
+        }
+    }
+
     if (isDarkvisionDialogOpen && characterBundle != null) {
-        // The cross closes without saving the typed feet, as in every pop-up; Save keeps them.
+        // The darkvision as the armor class (owner's choice from boards, 2026-10-23: В): the range large, the feature it
+        // comes from a line that opens it; one's own range behind the gear, no «Авто / Вручную» in the content.
+        val gold = MaterialTheme.colorScheme.primary
         EditDialog(
             title = text("attributes_darkvision_title"),
             onDismiss = { isDarkvisionDialogOpen = false },
-            onConfirm = {
-                if (character.darkvisionMode == DarkvisionMode.MANUAL) {
-                    onUpdateDarkvisionManualFeet(characterBundle, darkvisionManualDraft.toIntOrNull() ?: 0)
+            scrollable = false,
+            titleLeading = {
+                IconButton(onClick = { isDarkvisionOwnOpen = true }) {
+                    Icon(Icons.Outlined.Settings, contentDescription = text("common_edit"), tint = LocalDesignTokens.current.colors.text.muted, modifier = Modifier.size(DialogGearSize))
                 }
-                isDarkvisionDialogOpen = false
             }
         ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                DarkvisionModeChip(
-                    label = text("attributes_darkvision_mode_auto"),
-                    selected = character.darkvisionMode == DarkvisionMode.AUTO,
-                    onClick = { onUpdateDarkvisionMode(characterBundle, DarkvisionMode.AUTO) }
+            SenseValue(
+                label = text("attributes_darkvision_range"),
+                value = if (darkvisionFeet > 0) "$darkvisionFeet" else text("common_none"),
+                unit = if (darkvisionFeet > 0) text("inventory_unit_feet") else null
+            )
+            if (character.darkvisionMode == DarkvisionMode.MANUAL) {
+                TrainingSourceLine(AnnotatedString(text("attributes_darkvision_own")), "${character.darkvisionManualFeet} ${text("inventory_unit_feet")}")
+            } else if (darkvisionFeatures.isEmpty()) {
+                Text(
+                    text = text("attributes_darkvision_no_feature"),
+                    modifier = Modifier.fillMaxWidth(),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = LocalDesignTokens.current.colors.text.muted,
+                    textAlign = TextAlign.Center
                 )
-                DarkvisionModeChip(
-                    label = text("attributes_darkvision_mode_manual"),
-                    selected = character.darkvisionMode == DarkvisionMode.MANUAL,
-                    onClick = { onUpdateDarkvisionMode(characterBundle, DarkvisionMode.MANUAL) }
-                )
-            }
-            when (character.darkvisionMode) {
-                DarkvisionMode.AUTO -> {
-                    if (darkvisionFeatures.isEmpty()) {
-                        Text(
-                            text = text("attributes_darkvision_none"),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = LocalDesignTokens.current.colors.text.muted
-                        )
-                        TextButton(onClick = { isDarkvisionCatalogOpen = true }) {
-                            Text(text("attributes_darkvision_add"))
-                        }
-                    } else {
-                        darkvisionFeatures.forEach { feature ->
-                            FeatureCard(
-                                feature = feature,
-                                expanded = feature.id in expandedDarkvision,
-                                onExpandedChange = { open ->
-                                    expandedDarkvision = if (open) expandedDarkvision + feature.id else expandedDarkvision - feature.id
-                                },
-                                onEdit = { editingFeature = feature }
-                            )
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    TextButton(onClick = { isDarkvisionCatalogOpen = true }) { Text(text("attributes_darkvision_add_feature"), color = gold) }
+                }
+            } else {
+                Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    darkvisionFeatures.forEach { feature ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable(role = Role.Button) { editingFeature = feature },
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Outlined.AutoAwesome, contentDescription = null, tint = gold, modifier = Modifier.size(20.dp))
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Box(modifier = Modifier.weight(1f)) {
+                                TrainingSourceLine(
+                                    AnnotatedString(feature.name),
+                                    feature.darkvisionFeet()?.let { "$it ${text("inventory_unit_feet")}" }.orEmpty()
+                                )
+                            }
                         }
                     }
                 }
-                DarkvisionMode.MANUAL -> {
-                    Text(
-                        text = text("attributes_darkvision_manual_hint"),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = LocalDesignTokens.current.colors.text.muted
-                    )
-                    OutlinedTextField(
-                        value = darkvisionManualDraft,
-                        onValueChange = { darkvisionManualDraft = it.filter(Char::isDigit) },
-                        label = { Text(text("attributes_darkvision_feet")) },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                    )
-                }
             }
+        }
+    }
+
+    if (isDarkvisionOwnOpen && characterBundle != null) {
+        // One's own range, 30 feet a step; 0 is the features' again.
+        var feet by remember { mutableStateOf(if (character.darkvisionMode == DarkvisionMode.MANUAL) character.darkvisionManualFeet else 0) }
+        com.dndcharacterhandler.presentation.overview.SaveWhenSettled(feet) { value ->
+            if (value > 0) {
+                onUpdateDarkvisionManualFeet(characterBundle, value)
+                onUpdateDarkvisionMode(characterBundle, DarkvisionMode.MANUAL)
+            } else {
+                onUpdateDarkvisionMode(characterBundle, DarkvisionMode.AUTO)
+            }
+        }
+        EditDialog(title = text("attributes_darkvision_title"), onDismiss = { isDarkvisionOwnOpen = false }, scrollable = false) {
+            SenseCounter(
+                label = text("attributes_darkvision_own"),
+                value = if (feet > 0) "$feet ${text("inventory_unit_feet")}" else text("common_none"),
+                canDown = feet > 0,
+                canUp = feet < MaxDarkvisionFeet,
+                onDown = { feet = (feet - DarkvisionStep).coerceAtLeast(0) },
+                onUp = { feet = (feet + DarkvisionStep).coerceAtMost(MaxDarkvisionFeet) }
+            )
+            Text(
+                text = text("attributes_darkvision_auto_hint"),
+                modifier = Modifier.fillMaxWidth(),
+                style = MaterialTheme.typography.bodyMedium,
+                color = LocalDesignTokens.current.colors.text.muted,
+                textAlign = TextAlign.Center
+            )
         }
     }
 
@@ -1206,27 +1256,6 @@ internal fun attributesSectionItems(
         }
     }
     return AttributesSectionParts(items = items)
-}
-
-@Composable
-private fun DarkvisionModeChip(
-    label: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        modifier = modifier.clickable(onClick = onClick),
-        shape = RoundedCornerShape(8.dp),
-        color = toggleFill(selected)
-    ) {
-        Text(
-            text = label,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-            style = MaterialTheme.typography.bodyLarge,
-            color = toggleContent(selected)
-        )
-    }
 }
 
 private fun Feature.isDarkvisionFeature(): Boolean {
@@ -2423,6 +2452,62 @@ private fun AbilityScoreEditor(score: AbilityScore, onSave: (Int) -> Unit, onDis
 
 /** The highest ability score the rules know (a god's 30). */
 private const val MaxAbilityScore = 30
+
+/** A sense's value large under its gold label, as a throw's number: the passive perception, the darkvision's range. */
+@Composable
+private fun SenseValue(label: String, value: String, unit: String?) {
+    val colors = LocalDesignTokens.current.colors
+    val large = LocalDesignTokens.current.typography.hpTemporary
+    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        SheetLabel(label)
+        Row {
+            Text(
+                text = value,
+                modifier = Modifier.alignByBaseline(),
+                style = MaterialTheme.typography.headlineMedium.copy(
+                    fontSize = large.fontSizeSp.sp,
+                    lineHeight = (large.lineHeightSp ?: large.fontSizeSp).sp
+                ),
+                color = colors.text.primary
+            )
+            unit?.let { Text(" $it", modifier = Modifier.alignByBaseline(), style = MaterialTheme.typography.bodyLarge, color = colors.text.muted) }
+        }
+    }
+}
+
+/** A sense's setting as a counter under its gold label: the steppers either side, saved as it settles. */
+@Composable
+private fun SenseCounter(label: String, value: String, canDown: Boolean, canUp: Boolean, onDown: () -> Unit, onUp: () -> Unit) {
+    val colors = LocalDesignTokens.current.colors
+    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        SheetLabel(label)
+        Spacer(modifier = Modifier.height(4.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            com.dndcharacterhandler.presentation.overview.HpStepButton(Icons.Outlined.Remove, text("common_decrease"), canDown, onDown)
+            Text(value, modifier = Modifier.widthIn(min = 96.dp), style = MaterialTheme.typography.titleLarge, color = colors.text.primary, textAlign = TextAlign.Center)
+            com.dndcharacterhandler.presentation.overview.HpStepButton(Icons.Outlined.Add, text("common_increase"), canUp, onUp)
+        }
+    }
+}
+
+/** An ability's line, as a throw's first: «Мудрость (12) +1». */
+@Composable
+private fun AbilityLine(score: AbilityScore) {
+    val strings = LocalStrings.current
+    val muted = LocalDesignTokens.current.colors.text.muted
+    TrainingSourceLine(
+        name = buildAnnotatedString {
+            append(strings[score.displayNameKey])
+            append(" ")
+            withStyle(SpanStyle(color = muted)) { append("(${score.value})") }
+        },
+        value = signed(score.modifier)
+    )
+}
+
+private const val MaxSenseBonus = 20
+private const val DarkvisionStep = 30
+private const val MaxDarkvisionFeet = 300
 
 /** Under a save's throw, as a skill's: «Сила (10) +0», and «Владение +2» while trained. */
 @Composable
