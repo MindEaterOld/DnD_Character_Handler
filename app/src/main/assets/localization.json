@@ -732,13 +732,6 @@
     "fr": "Perception",
     "es": "Percepción"
   },
-  "attributes_additional_bonus": {
-    "en": "Additional bonus",
-    "ru": "Дополнительный бонус",
-    "de": "Zusätzlicher Bonus",
-    "fr": "Bonus supplémentaire",
-    "es": "Bonificador adicional"
-  },
   "attributes_training_none": {
     "maxChars": 11,
     "en": "None",

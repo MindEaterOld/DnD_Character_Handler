@@ -277,15 +277,6 @@ class AttributesViewModel(
         }
     }
 
-    fun updatePassivePerceptionBonus(characterBundle: CharacterBundle, bonus: Int) {
-        val current = characterBundle.character
-        if (bonus == current.passivePerceptionBonus) return
-
-        viewModelScope.launch {
-            characterRepository.updatePassivePerceptionBonus(current.id, bonus)
-        }
-    }
-
     fun updateArmorProficiencies(characterBundle: CharacterBundle, selectedIds: Set<String>) {
         updateCharacterProficiencyString(
             characterBundle = characterBundle,
@@ -432,7 +423,6 @@ fun AttributesSection(
             characterBundle = bundle,
             darkvisionCatalogItems = darkvisionCatalog,
             characterCatalog = characterCatalog,
-            onUpdatePassivePerceptionBonus = viewModel::updatePassivePerceptionBonus,
             onUpdateAbilityScore = viewModel::updateAbilityScore,
             onUpdateSkillTraining = viewModel::updateSkillTraining,
             onUpdateArmorProficiencies = viewModel::updateArmorProficiencies,
@@ -468,7 +458,6 @@ internal fun attributesSectionItems(
     darkvisionCatalogItems: List<FeatureCatalogItem> = emptyList(),
     /** Weapons' mastery properties; without it the masteries show by weapon only. */
     characterCatalog: CharacterCatalog? = null,
-    onUpdatePassivePerceptionBonus: (CharacterBundle, Int) -> Unit,
     onUpdateAbilityScore: (CharacterBundle, AbilityType, Int, Boolean) -> Unit = { _, _, _, _ -> },
     onUpdateSkillTraining: (CharacterBundle, String, Boolean, Boolean, Boolean) -> Unit = { _, _, _, _, _ -> },
     onUpdateArmorProficiencies: (CharacterBundle, Set<String>) -> Unit = { _, _ -> },
@@ -555,7 +544,6 @@ internal fun attributesSectionItems(
     var customLanguageInput by remember { mutableStateOf("") }
     var isDarkvisionDialogOpen by remember { mutableStateOf(false) }
     var isDarkvisionOwnOpen by remember { mutableStateOf(false) }
-    var isPassiveBonusOpen by remember { mutableStateOf(false) }
     var expandedDarkvision by remember { mutableStateOf(setOf<Long>()) }
     var isDarkvisionCatalogOpen by remember { mutableStateOf(false) }
     var editingFeature by remember { mutableStateOf<Feature?>(null) }
@@ -768,18 +756,13 @@ internal fun attributesSectionItems(
 
     if (isPassiveDialogOpen && characterBundle != null) {
         // The passive perception as a throw's pop-up (owner's choice from boards, 2026-10-23: А): the value large, what it
-        // is made of a line each; the extra bonus — a magic item's, say — behind the gear.
+        // is made of a line each. No bonus set by hand (owner, 2026-10-23): a feature's or an item's is to come as a line.
         val wisdom = abilityScores.first { it.type == AbilityType.WISDOM }
         val perceptionRow = skillRows.firstOrNull { it.nameKey == "skill_perception" }
         EditDialog(
             title = text("attributes_passive_perception_bonus_title"),
             onDismiss = { isPassiveDialogOpen = false },
-            scrollable = false,
-            titleLeading = {
-                IconButton(onClick = { isPassiveBonusOpen = true }) {
-                    Icon(Icons.Outlined.Settings, contentDescription = text("common_edit"), tint = LocalDesignTokens.current.colors.text.muted, modifier = Modifier.size(DialogGearSize))
-                }
-            }
+            scrollable = false
         ) {
             SenseValue(label = text("attributes_passive_label"), value = "$passivePerception", unit = null)
             Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -798,25 +781,7 @@ internal fun attributesSectionItems(
                         signed(passiveShift)
                     )
                 }
-                if (character.passivePerceptionBonus != 0) {
-                    TrainingSourceLine(AnnotatedString(text("attributes_additional_bonus")), signed(character.passivePerceptionBonus))
-                }
             }
-        }
-    }
-
-    if (isPassiveBonusOpen && characterBundle != null) {
-        var bonus by remember { mutableStateOf(character.passivePerceptionBonus) }
-        com.dndcharacterhandler.presentation.overview.SaveWhenSettled(bonus) { onUpdatePassivePerceptionBonus(characterBundle, it) }
-        EditDialog(title = text("attributes_passive_perception_bonus_title"), onDismiss = { isPassiveBonusOpen = false }, scrollable = false) {
-            SenseCounter(
-                label = text("attributes_additional_bonus"),
-                value = signed(bonus),
-                canDown = bonus > -MaxSenseBonus,
-                canUp = bonus < MaxSenseBonus,
-                onDown = { bonus -= 1 },
-                onUp = { bonus += 1 }
-            )
         }
     }
 
@@ -2329,7 +2294,7 @@ private val skillDefinitions = listOf(
 )
 
 private fun passivePerceptionValue(character: Character, proficiencyBonus: Int, perceptionSkill: Skill?, jackOfAllTrades: Boolean = false): Int =
-    10 + abilityModifier(character.wisdom) + skillTrainingBonus(perceptionSkill, proficiencyBonus, jackOfAllTrades) + character.passivePerceptionBonus
+    10 + abilityModifier(character.wisdom) + skillTrainingBonus(perceptionSkill, proficiencyBonus, jackOfAllTrades)
 
 /** A stored skill's training bonus; [jackOfAllTrades] the bard's feature, half on a skill not trained. */
 private fun skillTrainingBonus(skill: Skill?, proficiencyBonus: Int, jackOfAllTrades: Boolean): Int {
@@ -2505,7 +2470,6 @@ private fun AbilityLine(score: AbilityScore) {
     )
 }
 
-private const val MaxSenseBonus = 20
 private const val DarkvisionStep = 30
 private const val MaxDarkvisionFeet = 300
 

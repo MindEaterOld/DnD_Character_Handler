@@ -137,8 +137,7 @@ fun AttributesScreenPreview() {
                     spells = emptyList(),
                     features = emptyList(),
                     notes = emptyList()
-                ),
-                onUpdatePassivePerceptionBonus = { _, _ -> }
+                )
             )
             ScreenBackground {
                 LazyColumn(
