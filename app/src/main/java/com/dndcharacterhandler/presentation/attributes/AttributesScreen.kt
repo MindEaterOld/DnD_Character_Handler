@@ -1,5 +1,10 @@
 package com.dndcharacterhandler.presentation.attributes
 
+import androidx.compose.material.icons.outlined.Remove
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -534,7 +539,6 @@ internal fun attributesSectionItems(
     var rollingSkillKey by remember { mutableStateOf<String?>(null) }
     /** The skill whose training is being set, from its throw's gear (owner, 2026-10-23). */
     var editingSkillKey by remember { mutableStateOf<String?>(null) }
-    var abilityDraft by remember { mutableStateOf("") }
     var armorDraft by remember { mutableStateOf(emptySet<String>()) }
     var weaponDraft by remember { mutableStateOf(emptySet<String>()) }
     var toolDraft by remember { mutableStateOf(emptySet<String>()) }
@@ -926,7 +930,6 @@ internal fun attributesSectionItems(
                 } else {
                     rolling = null
                     editingAbility = score
-                    abilityDraft = score.value.toString()
                 }
             },
             onDismiss = { rolling = null },
@@ -968,48 +971,11 @@ internal fun attributesSectionItems(
 
     val currentEditingAbility = editingAbility
     if (currentEditingAbility != null && characterBundle != null) {
-        // «Изменить ИНТ» — the short name, one line for every ability (owner's choice from boards, 2026-10-22: 4 —
-        // «Изменить Телосложение» ran onto two), the score typed and its modifier beside it, lit in the stats' gold so it
-        // doesn't read as a second field (blue is for what is magic); the save's training is the save's own.
-        EditDialog(
-            title = LocalStrings.current.format("attributes_edit_ability_title", LocalStrings.current[currentEditingAbility.shortNameKey]),
-            onDismiss = { editingAbility = null },
-            onConfirm = {
-                onUpdateAbilityScore(
-                    characterBundle,
-                    currentEditingAbility.type,
-                    abilityDraft.toIntOrNull() ?: currentEditingAbility.value,
-                    currentEditingAbility.saveProficient
-                )
-                editingAbility = null
-            }
-        ) {
-            val gold = MaterialTheme.colorScheme.primary
-            val draftModifier = abilityModifier(abilityDraft.toIntOrNull() ?: currentEditingAbility.value)
-            Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedTextField(
-                    value = abilityDraft,
-                    onValueChange = { abilityDraft = it },
-                    modifier = Modifier.weight(1f),
-                    label = { Text(LocalStrings.current.format("attributes_ability_score_label", LocalStrings.current[currentEditingAbility.shortNameKey])) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                )
-                Box(
-                    modifier = Modifier
-                        .size(width = 72.dp, height = 56.dp)
-                        .clip(MaterialTheme.shapes.extraSmall)
-                        .background(gold.copy(alpha = LocalDesignTokens.current.alpha.faint)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = if (draftModifier >= 0) "+$draftModifier" else "−${-draftModifier}",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = gold
-                    )
-                }
-            }
-        }
+        AbilityScoreEditor(
+            score = currentEditingAbility,
+            onSave = { value -> onUpdateAbilityScore(characterBundle, currentEditingAbility.type, value, currentEditingAbility.saveProficient) },
+            onDismiss = { editingAbility = null }
+        )
     }
 
     val currentEditingSave = editingSave?.let { picked -> abilityScores.firstOrNull { it.type == picked.type } }
@@ -2385,6 +2351,78 @@ private fun SkillTrainingLines(skill: SkillRow, score: AbilityScore?, proficienc
         }
     }
 }
+
+/**
+ * «Изменить ИНТ» (owner's choice from boards, 2026-10-22: 4) as a counter (owner, 2026-10-23): − and + beside the score,
+ * held they step quicker and quicker, the score typed in place, saved as it settles, no «Сохранить»; under it the
+ * modifier, lit in the stats' gold.
+ */
+@Composable
+private fun AbilityScoreEditor(score: AbilityScore, onSave: (Int) -> Unit, onDismiss: () -> Unit) {
+    val strings = LocalStrings.current
+    val colors = LocalDesignTokens.current.colors
+    val tokens = LocalDesignTokens.current.typography
+    val gold = MaterialTheme.colorScheme.primary
+    var value by remember { mutableStateOf(score.value.coerceIn(1, MaxAbilityScore)) }
+    var typed by remember { mutableStateOf(TextFieldValue(value.toString())) }
+    fun set(next: Int) {
+        value = next.coerceIn(1, MaxAbilityScore)
+        typed = value.toString().let { TextFieldValue(it, TextRange(it.length)) }
+    }
+    com.dndcharacterhandler.presentation.overview.SaveWhenSettled(value, onSave)
+    EditDialog(
+        title = strings.format("attributes_edit_ability_title", strings[score.shortNameKey]),
+        onDismiss = onDismiss,
+        scrollable = false
+    ) {
+        val counter = MaterialTheme.typography.headlineMedium.copy(
+            fontSize = tokens.hpTemporary.fontSizeSp.sp,
+            lineHeight = (tokens.hpTemporary.lineHeightSp ?: tokens.hpTemporary.fontSizeSp).sp
+        )
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+            com.dndcharacterhandler.presentation.overview.HpStepButton(
+                icon = Icons.Outlined.Remove,
+                description = text("common_decrease"),
+                enabled = value > 1,
+                onStep = { set(value - 1) }
+            )
+            BasicTextField(
+                value = typed,
+                onValueChange = { next ->
+                    val digits = next.text.filter(Char::isDigit).take(2)
+                    typed = if (digits == next.text) next else TextFieldValue(digits, TextRange(digits.length))
+                    digits.toIntOrNull()?.takeIf { it in 1..MaxAbilityScore }?.let { value = it }
+                },
+                modifier = Modifier.width(IntrinsicSize.Min).widthIn(min = 72.dp),
+                textStyle = counter.copy(color = colors.text.primary, textAlign = TextAlign.Center),
+                singleLine = true,
+                cursorBrush = SolidColor(gold),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            )
+            com.dndcharacterhandler.presentation.overview.HpStepButton(
+                icon = Icons.Outlined.Add,
+                description = text("common_increase"),
+                enabled = value < MaxAbilityScore,
+                onStep = { set(value + 1) }
+            )
+        }
+        val modifier = abilityModifier(value)
+        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            Text(
+                text = if (modifier >= 0) "+$modifier" else "−${-modifier}",
+                modifier = Modifier
+                    .clip(MaterialTheme.shapes.extraSmall)
+                    .background(gold.copy(alpha = LocalDesignTokens.current.alpha.faint))
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                style = MaterialTheme.typography.titleLarge,
+                color = gold
+            )
+        }
+    }
+}
+
+/** The highest ability score the rules know (a god's 30). */
+private const val MaxAbilityScore = 30
 
 /** Under a save's throw, as a skill's: «Сила (10) +0», and «Владение +2» while trained. */
 @Composable

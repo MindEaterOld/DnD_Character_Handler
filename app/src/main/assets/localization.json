@@ -758,13 +758,6 @@
     "fr": "Modifier %s",
     "es": "Editar %s"
   },
-  "attributes_ability_score_label": {
-    "en": "%s score",
-    "ru": "Значение %s",
-    "de": "%s-Wert",
-    "fr": "Valeur (%s)",
-    "es": "Puntuación de %s"
-  },
   "attributes_saving_throws": {
     "en": "Saving Throws",
     "ru": "Спасброски",
