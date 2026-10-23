@@ -528,6 +528,8 @@ internal fun attributesSectionItems(
     var rolling by remember { mutableStateOf<AbilityRoll?>(null) }
     /** The skill being thrown, by its key: its row is read anew as its training changes in the pop-up. */
     var rollingSkillKey by remember { mutableStateOf<String?>(null) }
+    /** The skill whose training is being set, from its throw's gear (owner, 2026-10-23). */
+    var editingSkillKey by remember { mutableStateOf<String?>(null) }
     var abilityDraft by remember { mutableStateOf("") }
     var saveProficientDraft by remember { mutableStateOf(false) }
     var armorDraft by remember { mutableStateOf(emptySet<String>()) }
@@ -939,28 +941,22 @@ internal fun attributesSectionItems(
                 damageType = "",
                 rollLabel = LocalStrings.current["attributes_roll_check"]
             ),
-            onEdit = {},
+            onEdit = { editingSkillKey = skill.nameKey },
             onDismiss = { rollingSkillKey = null },
-            editable = false,
-            details = {
-                SkillTrainingDetails(
-                    skill = skill,
-                    score = skillScore,
-                    proficiencyBonus = proficiencyBonus,
-                    onPick = { step ->
-                        if (characterBundle != null) {
-                            onUpdateSkillTraining(
-                                characterBundle,
-                                skill.nameKey,
-                                step != SkillTraining.NONE,
-                                step == SkillTraining.EXPERTISE,
-                                false
-                            )
-                        }
-                    }
-                )
-            }
+            details = { SkillTrainingLines(skill = skill, score = skillScore, proficiencyBonus = proficiencyBonus) }
         )
+    }
+
+    // The training, from the throw's gear (owner, 2026-10-23): the scale alone, a tap sets it and goes back to the throw.
+    skillRows.firstOrNull { it.nameKey == editingSkillKey }?.let { skill ->
+        EditDialog(title = LocalStrings.current[skill.nameKey], onDismiss = { editingSkillKey = null }) {
+            SkillTrainingScale(skill = skill, onPick = { step ->
+                if (characterBundle != null) {
+                    onUpdateSkillTraining(characterBundle, skill.nameKey, step != SkillTraining.NONE, step == SkillTraining.EXPERTISE, false)
+                }
+                editingSkillKey = null
+            })
+        }
     }
 
     val currentEditingAbility = editingAbility
@@ -2357,49 +2353,50 @@ private fun Feature.isJackOfAllTrades(): Boolean =
 private enum class SkillTraining { NONE, PROFICIENT, EXPERTISE }
 
 /**
- * Under a skill's throw (owner's choice from boards, 2026-10-23: А): what it is made of — the ability, the training with
- * its dot (expertise «владение ×2»), Jack of All Trades' half where the bard has it and the skill isn't trained — and the
- * training as three toggles, «Нет / Владение / Экспертиза», a tap setting it at once.
+ * Under a skill's throw (owner, 2026-10-23): what it is made of — the ability, its score set apart in a cell («Харизма
+ * [10] +0»), the training with its dot (expertise «владение ×2»), Jack of All Trades' half where the bard has it and the
+ * skill isn't trained. The training itself is set from the gear.
  */
 @Composable
-private fun SkillTrainingDetails(
-    skill: SkillRow,
-    score: AbilityScore?,
-    proficiencyBonus: Int,
-    onPick: (SkillTraining) -> Unit
-) {
+private fun SkillTrainingLines(skill: SkillRow, score: AbilityScore?, proficiencyBonus: Int) {
     val strings = LocalStrings.current
-    val picked = when {
-        skill.expertise -> SkillTraining.EXPERTISE
-        skill.proficient -> SkillTraining.PROFICIENT
-        else -> SkillTraining.NONE
-    }
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         score?.let {
-            TrainingSourceLine(lead = {}, name = "${strings[it.displayNameKey]} ${it.value}", note = null, value = signed(it.modifier))
+            TrainingSourceLine(lead = {}, name = strings[it.displayNameKey], note = null, value = signed(it.modifier), score = it.value)
         }
-        when (picked) {
-            SkillTraining.EXPERTISE -> TrainingSourceLine(
+        when {
+            skill.expertise -> TrainingSourceLine(
                 lead = { TrainingDot(proficient = true, expertise = true) },
                 name = text("attributes_training_expertise"),
                 note = text("attributes_training_expertise_note"),
                 value = signed(proficiencyBonus * 2)
             )
-            SkillTraining.PROFICIENT -> TrainingSourceLine(
+            skill.proficient -> TrainingSourceLine(
                 lead = { TrainingDot(proficient = true) },
                 name = text("attributes_training_proficient"),
                 note = null,
                 value = signed(proficiencyBonus)
             )
-            SkillTraining.NONE -> if (skill.jackOfAllTrades) {
-                TrainingSourceLine(
-                    lead = { TrainingDot(proficient = false, jackOfAllTrades = true) },
-                    name = text("attributes_jack_of_all_trades"),
-                    note = text("attributes_jack_note"),
-                    value = signed(proficiencyBonus / 2)
-                )
-            }
+            skill.jackOfAllTrades -> TrainingSourceLine(
+                lead = { TrainingDot(proficient = false, jackOfAllTrades = true) },
+                name = text("attributes_jack_of_all_trades"),
+                note = text("attributes_jack_note"),
+                value = signed(proficiencyBonus / 2)
+            )
         }
+    }
+}
+
+/**
+ * A skill's training as one scale of three toggles, «Нет / Владение / Экспертиза» (owner's choice from boards, 2026-10-23:
+ * А): expertise only over the training (PHB 2024), so no other mix can be picked.
+ */
+@Composable
+private fun SkillTrainingScale(skill: SkillRow, onPick: (SkillTraining) -> Unit) {
+    val picked = when {
+        skill.expertise -> SkillTraining.EXPERTISE
+        skill.proficient -> SkillTraining.PROFICIENT
+        else -> SkillTraining.NONE
     }
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         listOf(
@@ -2407,20 +2404,34 @@ private fun SkillTrainingDetails(
             SkillTraining.PROFICIENT to "attributes_training_proficient",
             SkillTraining.EXPERTISE to "attributes_training_expertise"
         ).forEach { (step, key) ->
-            TrainingStepToggle(step = step, label = text(key), on = step == picked, onClick = { if (step != picked) onPick(step) })
+            TrainingStepToggle(step = step, label = text(key), on = step == picked, onClick = { onPick(step) })
         }
     }
 }
 
 /** A line of what the throw is made of: its dot, the name (a note under it), the value at the end. */
 @Composable
-private fun TrainingSourceLine(lead: @Composable () -> Unit, name: String, note: String?, value: String) {
+private fun TrainingSourceLine(lead: @Composable () -> Unit, name: String, note: String?, value: String, score: Int? = null) {
     val colors = LocalDesignTokens.current.colors
     Row(modifier = Modifier.fillMaxWidth().heightIn(min = 32.dp), verticalAlignment = Alignment.CenterVertically) {
         Box(modifier = Modifier.width(24.dp), contentAlignment = Alignment.Center) { lead() }
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
-            Text(name, style = MaterialTheme.typography.bodyLarge, color = colors.text.primary)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(name, style = MaterialTheme.typography.bodyLarge, color = colors.text.primary)
+                // The ability's score in a cell of its own, a stat's outline with no fill, so it doesn't read as the name's.
+                score?.let {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "$it",
+                        modifier = Modifier
+                            .border(1.dp, colors.border.default, MaterialTheme.shapes.extraSmall)
+                            .padding(horizontal = 6.dp),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = colors.text.muted
+                    )
+                }
+            }
             note?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = colors.text.muted) }
         }
         Text(value, style = MaterialTheme.typography.titleMedium, color = colors.text.primary)
