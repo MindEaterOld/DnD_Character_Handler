@@ -84,8 +84,9 @@ internal fun PortraitFramingDialog(
     // The gesture's loop runs once; it reads the picture's size and the window's as they are now.
     val currentImage by rememberUpdatedState(image)
     val currentWindow by rememberUpdatedState(window)
-    // The canvas: the window with an even margin round it, the margin the same as at its sides.
-    val canvasAspect = 1f / (WindowShare / heroAspect + (1f - WindowShare))
+    // The canvas: the window with the dimmed picture beside it, no margin over and under (owner, 2026-10-23 — the margin
+    // over it, empty at the picture's own zoom, read as a gap under the hint).
+    val canvasAspect = heroAspect / WindowShare
     EditDialog(
         title = text("overview_portrait_frame"),
         onDismiss = onDismiss,
