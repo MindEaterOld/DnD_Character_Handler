@@ -183,35 +183,34 @@ fun CharacterManagerDrawer(
                 }
             }
 
+            // The app's own right under them, past a rule (owner, 2026-11-01 — pinned to the foot, a hole stood above them).
             item {
-                Spacer(modifier = Modifier.height(12.dp))
+                DrawerOrnamentDivider(modifier = Modifier.padding(top = 10.dp, bottom = 4.dp))
+                val snackbar = LocalAppSnackbar.current
+                val uriHandler = LocalUriHandler.current
+                val strings = LocalStrings.current
+                Row(horizontalArrangement = Arrangement.spacedBy(DrawerActionGap)) {
+                    DrawerActionCard(
+                        label = text("drawer_settings_short"),
+                        icon = Icons.Outlined.Settings,
+                        onClick = onOpenSettings,
+                        modifier = Modifier.weight(1f)
+                    )
+                    DrawerActionCard(
+                        label = text("drawer_contact"),
+                        icon = Icons.Outlined.MailOutline,
+                        onClick = {
+                            val url = ContactPageUrl
+                            if (url != null) uriHandler.openUri(url) else snackbar.show(strings["drawer_contact_soon"], null) {}
+                        },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
-        }
-        // The app's own, pinned to the bottom where the screens have their tab bar: the settings and a way to the author.
-        val snackbar = LocalAppSnackbar.current
-        val uriHandler = LocalUriHandler.current
-        val strings = LocalStrings.current
-        Row(
-            modifier = Modifier
-                .navigationBarsPadding()
-                .padding(horizontal = 20.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(DrawerActionGap)
-        ) {
-            DrawerActionCard(
-                label = text("drawer_settings_short"),
-                icon = Icons.Outlined.Settings,
-                onClick = onOpenSettings,
-                modifier = Modifier.weight(1f)
-            )
-            DrawerActionCard(
-                label = text("drawer_contact"),
-                icon = Icons.Outlined.MailOutline,
-                onClick = {
-                    val url = ContactPageUrl
-                    if (url != null) uriHandler.openUri(url) else snackbar.show(strings["drawer_contact_soon"], null) {}
-                },
-                modifier = Modifier.weight(1f)
-            )
+
+            item {
+                Spacer(modifier = Modifier.navigationBarsPadding().height(12.dp))
+            }
         }
         }
         if (onClose != null) {
