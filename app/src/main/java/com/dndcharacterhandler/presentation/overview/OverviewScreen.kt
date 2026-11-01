@@ -588,20 +588,19 @@ internal fun OverviewContent(
     if (isExperienceDialogOpen && characterBundle != null) {
         ExperienceDialog(
             character = characterBundle.character,
-            startOnLevels = experienceDialogOnLevels,
             onExperience = { experience -> onUpdateExperience(characterBundle, experience) },
-            onLevelStep = { up ->
+            onPickLevel = { target ->
                 val current = characterBundle.character.level
                 when {
-                    // Going up walks the wizard through every level, as Foundry does.
-                    up -> {
-                        onOpenLevelUp(current + 1)
+                    // Going up walks the wizard through every level up to the one picked, as Foundry does.
+                    target > current -> {
+                        onOpenLevelUp(target)
                         isExperienceDialogOpen = false
                     }
                     // The wizard can't take levels back yet: a notice says so, the pop-up stays (owner, 2026-10-15).
                     characterBundle.character.classes.isNotEmpty() ->
                         snackbar.show(strings["overview_level_down_unavailable"], null) {}
-                    else -> onUpdateIdentity(characterBundle, null, null, null, current - 1)
+                    else -> onUpdateIdentity(characterBundle, null, null, null, target)
                 }
             },
             onLevelUp = { experience ->

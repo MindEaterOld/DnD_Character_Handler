@@ -4807,13 +4807,13 @@
     "fr": "Rétrograder : pas encore",
     "es": "Aún no se puede bajar nivel"
   },
-  "overview_exp_dialog_title": {
+  "overview_exp_level_title": {
     "maxChars": 15,
-    "en": "Experience",
-    "ru": "Опыт",
-    "de": "Erfahrung",
-    "fr": "Expérience",
-    "es": "Experiencia"
+    "en": "XP and level",
+    "ru": "Опыт и уровень",
+    "de": "EP und Stufe",
+    "fr": "PX et niveau",
+    "es": "PX y nivel"
   },
   "overview_exp_tab_experience": {
     "maxChars": 11,
@@ -4831,14 +4831,6 @@
     "fr": "Niveau",
     "es": "Nivel"
   },
-  "overview_exp_grant": {
-    "maxChars": 14,
-    "en": "Add experience",
-    "ru": "Начислить опыт",
-    "de": "EP vergeben",
-    "fr": "Ajouter des PX",
-    "es": "Añadir PX"
-  },
   "overview_exp_step_down": {
     "en": "One experience point less",
     "ru": "На единицу опыта меньше",
@@ -4852,27 +4844,6 @@
     "de": "Ein Erfahrungspunkt mehr",
     "fr": "Un point d'expérience de plus",
     "es": "Un punto de experiencia más"
-  },
-  "overview_level_step_down": {
-    "en": "One level lower",
-    "ru": "На уровень ниже",
-    "de": "Eine Stufe niedriger",
-    "fr": "Un niveau de moins",
-    "es": "Un nivel menos"
-  },
-  "overview_level_step_up": {
-    "en": "One level higher",
-    "ru": "На уровень выше",
-    "de": "Eine Stufe höher",
-    "fr": "Un niveau de plus",
-    "es": "Un nivel más"
-  },
-  "overview_exp_add": {
-    "en": "Add",
-    "ru": "\u0414\u043e\u0431\u0430\u0432\u0438\u0442\u044c",
-    "de": "Hinzufügen",
-    "fr": "Ajouter",
-    "es": "Añadir"
   },
   "overview_exp_set": {
     "en": "Set",
