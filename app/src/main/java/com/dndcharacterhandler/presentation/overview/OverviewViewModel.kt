@@ -114,7 +114,15 @@ class OverviewViewModel(
                     equipmentItem = { item, count -> matchedEquipmentItem(items, item, count, russian) }
                 )
             }
-            characterRepository.replaceCharacterBundle(updated)
+            // The experience at least the new level's own (owner, 2026-11-01): picked up a level by hand, the bar starts at
+            // its threshold, never under it.
+            val floor = levelExperienceFloor(updated.character.level)
+            val withExperience = if (updated.character.experience < floor) {
+                updated.copy(character = updated.character.copy(experience = floor))
+            } else {
+                updated
+            }
+            characterRepository.replaceCharacterBundle(withExperience)
         }
     }
 
@@ -148,6 +156,10 @@ class OverviewViewModel(
                 characterClass = newClass,
                 level = newLevel
             )
+            // A level set by hand brings the experience up to that level's own, as the wizard's does.
+            if (newLevel != current.level && current.experience < levelExperienceFloor(newLevel)) {
+                characterRepository.updateExperience(current.id, levelExperienceFloor(newLevel))
+            }
         }
     }
 
@@ -439,3 +451,7 @@ class OverviewViewModel(
         }
     }
 }
+
+/** The least experience a character of [level] has: its own threshold (PHB 2024). */
+private fun levelExperienceFloor(level: Int): Int =
+    com.dndcharacterhandler.domain.dnd5e.rules.ExperienceThresholds.getOrElse(level - 1) { 0 }
