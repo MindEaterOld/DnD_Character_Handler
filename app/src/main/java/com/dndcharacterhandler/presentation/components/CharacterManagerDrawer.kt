@@ -1,5 +1,7 @@
 package com.dndcharacterhandler.presentation.components
 
+import androidx.compose.material.icons.outlined.MailOutline
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.foundation.layout.width
 import com.dndcharacterhandler.domain.dnd5e.rules.experienceProgress
 import androidx.compose.ui.text.font.FontWeight
@@ -146,68 +148,71 @@ fun CharacterManagerDrawer(
                 }
             }
 
+            // Export and delete act on the picked character: they stand on its card (owner's choice from boards, 2026-11-01: В).
             items(state.characters, key = { it.character.id }) { characterBundle ->
+                val selected = state.selectedCharacterId == characterBundle.character.id
                 DrawerCharacterCard(
                     characterBundle = characterBundle,
-                    selected = state.selectedCharacterId == characterBundle.character.id,
-                    onClick = { onSelectCharacter(characterBundle.character.id) }
+                    selected = selected,
+                    onClick = { onSelectCharacter(characterBundle.character.id) },
+                    onExport = onExportCharacter.takeIf { selected },
+                    onDelete = onDeleteCharacter.takeIf { selected }
                 )
             }
 
-            // Characters are made in a system with its rules and sheet only.
-            if (state.gameSystem.available) {
-                item {
-                    DrawerActionCard(
-                        label = text("drawer_new_character"),
-                        icon = Icons.Outlined.AddCircleOutline,
-                        onClick = onCreateCharacter,
-                        modifier = Modifier.padding(top = 16.dp)
-                    )
-                }
-            }
-
-            // Export and delete act on the selected character: none without characters.
-            if (state.characters.isNotEmpty()) {
-                item {
-                    DrawerOrnamentDivider(modifier = Modifier.padding(top = 10.dp, bottom = 6.dp))
-                    DrawerActionCard(
-                        label = text("drawer_export_character"),
-                        icon = Icons.Outlined.FileUpload,
-                        onClick = onExportCharacter
-                    )
-                }
-
-                item {
-                    DrawerActionCard(
-                        label = text("drawer_delete_character"),
-                        icon = Icons.Outlined.Delete,
-                        onClick = onDeleteCharacter
-                    )
-                }
-            }
-
+            // A character comes in: made anew (in a system with its rules and sheet only) or imported, side by side.
             item {
-                DrawerOrnamentDivider(modifier = Modifier.padding(top = 10.dp, bottom = 6.dp))
-                DrawerActionCard(
-                    label = text("drawer_import_character"),
-                    icon = Icons.Outlined.FileDownload,
-                    onClick = onImportCharacter
-                )
+                Row(
+                    modifier = Modifier.padding(top = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(DrawerActionGap)
+                ) {
+                    if (state.gameSystem.available) {
+                        DrawerActionCard(
+                            label = text("drawer_new_short"),
+                            icon = Icons.Outlined.AddCircleOutline,
+                            onClick = onCreateCharacter,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    DrawerActionCard(
+                        label = text("drawer_import_short"),
+                        icon = Icons.Outlined.FileDownload,
+                        onClick = onImportCharacter,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
 
             item {
                 Spacer(modifier = Modifier.height(12.dp))
             }
         }
-        // Pinned to the bottom, where the screens have their tab bar.
-        DrawerActionCard(
-            label = text("overview_settings"),
-            icon = Icons.Outlined.Settings,
-            onClick = onOpenSettings,
+        // The app's own, pinned to the bottom where the screens have their tab bar: the settings and a way to the author.
+        val snackbar = LocalAppSnackbar.current
+        val uriHandler = LocalUriHandler.current
+        val strings = LocalStrings.current
+        Row(
             modifier = Modifier
                 .navigationBarsPadding()
-                .padding(horizontal = 20.dp, vertical = 8.dp)
-        )
+                .padding(horizontal = 20.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(DrawerActionGap)
+        ) {
+            DrawerActionCard(
+                label = text("drawer_settings_short"),
+                icon = Icons.Outlined.Settings,
+                onClick = onOpenSettings,
+                modifier = Modifier.weight(1f)
+            )
+            DrawerActionCard(
+                label = text("drawer_contact"),
+                icon = Icons.Outlined.MailOutline,
+                onClick = {
+                    val url = ContactPageUrl
+                    if (url != null) uriHandler.openUri(url) else snackbar.show(strings["drawer_contact_soon"], null) {}
+                },
+                modifier = Modifier.weight(1f)
+            )
+        }
         }
         if (onClose != null) {
             OverlayCloseButton(onClick = onClose, modifier = Modifier.align(Alignment.TopEnd))
@@ -226,7 +231,10 @@ fun CharacterManagerDrawer(
 private fun DrawerCharacterCard(
     characterBundle: CharacterBundle,
     selected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    /** The picked card's own actions: null on the others. */
+    onExport: (() -> Unit)?,
+    onDelete: (() -> Unit)?
 ) {
     val character = characterBundle.character
     val strings = LocalStrings.current
@@ -266,7 +274,7 @@ private fun DrawerCharacterCard(
         Column(
             modifier = Modifier
                 .fillMaxHeight()
-                .padding(start = DrawerTextStart, end = 14.dp),
+                .padding(start = DrawerTextStart, end = if (onExport != null) DrawerToolsRoom else 14.dp),
             verticalArrangement = Arrangement.Center
         ) {
             Row {
@@ -307,6 +315,24 @@ private fun DrawerCharacterCard(
                 overflow = TextOverflow.Ellipsis
             )
         }
+        // Export over delete at the card's right end, round buttons as a pop-up's trash (CLAUDE.md, buttons).
+        if (onExport != null && onDelete != null) {
+            Column(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 10.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                DrawerCardTool(Icons.Outlined.FileUpload, text("drawer_export_character"), colors.text.primary, buttonFill(), onExport)
+                DrawerCardTool(
+                    Icons.Outlined.Delete,
+                    text("drawer_delete_character"),
+                    colors.accent.danger,
+                    colors.accent.danger.copy(alpha = LocalDesignTokens.current.alpha.faint),
+                    onDelete
+                )
+            }
+        }
     }
 }
 
@@ -314,6 +340,32 @@ private val DrawerCardHeight = 96.dp
 private val DrawerPortraitWidth = 120.dp
 private val DrawerTextStart = 104.dp
 private val DrawerRuleWidth = 140.dp
+/** The picked card's text stops short of its two buttons. */
+private val DrawerToolsRoom = 60.dp
+private val DrawerToolSize = 38.dp
+/** Between two actions side by side. */
+private val DrawerActionGap = 8.dp
+
+/**
+ * Where «Связаться с нами» leads: the app's page on itch.io (owner, 2026-11-01). Null until the page is up — the button
+ * says so in a notice meanwhile.
+ */
+private val ContactPageUrl: String? = null
+
+/** One of the picked card's actions: a round button, its fill and its icon's colour by its role. */
+@Composable
+private fun DrawerCardTool(icon: ImageVector, description: String, tint: Color, fill: Color, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .size(DrawerToolSize)
+            .clip(CircleShape)
+            .background(fill)
+            .clickable(role = Role.Button, onClickLabel = description, onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(imageVector = icon, contentDescription = description, tint = tint, modifier = Modifier.size(20.dp))
+    }
+}
 
 @Composable
 private fun DrawerActionCard(

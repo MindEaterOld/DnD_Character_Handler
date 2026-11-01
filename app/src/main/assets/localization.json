@@ -69,19 +69,51 @@
     "fr": "Personnages",
     "es": "Personajes"
   },
-  "drawer_new_character": {
-    "en": "New Character",
-    "ru": "Новый персонаж",
-    "de": "Neuer Charakter",
-    "fr": "Nouveau personnage",
-    "es": "Nuevo personaje"
-  },
   "drawer_export_character": {
     "en": "Export Character",
     "ru": "Экспорт персонажа",
     "de": "Charakter exportieren",
     "fr": "Exporter le personnage",
     "es": "Exportar personaje"
+  },
+  "drawer_new_short": {
+    "maxChars": 10,
+    "en": "New",
+    "ru": "Новый",
+    "de": "Neu",
+    "fr": "Nouveau",
+    "es": "Nuevo"
+  },
+  "drawer_import_short": {
+    "maxChars": 10,
+    "en": "Import",
+    "ru": "Импорт",
+    "de": "Import",
+    "fr": "Importer",
+    "es": "Importar"
+  },
+  "drawer_settings_short": {
+    "maxChars": 10,
+    "en": "Settings",
+    "ru": "Настройки",
+    "de": "Optionen",
+    "fr": "Réglages",
+    "es": "Ajustes"
+  },
+  "drawer_contact": {
+    "maxChars": 10,
+    "en": "Contact us",
+    "ru": "Связаться",
+    "de": "Kontakt",
+    "fr": "Contact",
+    "es": "Contacto"
+  },
+  "drawer_contact_soon": {
+    "en": "The page is coming soon",
+    "ru": "Страница скоро появится",
+    "de": "Die Seite kommt bald",
+    "fr": "La page arrive bientôt",
+    "es": "La página llegará pronto"
   },
   "drawer_delete_character": {
     "en": "Delete Character",
@@ -118,13 +150,6 @@
     "de": "Löschen",
     "fr": "Supprimer",
     "es": "Eliminar"
-  },
-  "drawer_import_character": {
-    "en": "Import Character",
-    "ru": "Импорт персонажа",
-    "de": "Charakter importieren",
-    "fr": "Importer un personnage",
-    "es": "Importar personaje"
   },
   "settings_language": {
     "en": "Language",
