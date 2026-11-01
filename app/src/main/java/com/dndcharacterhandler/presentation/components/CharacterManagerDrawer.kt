@@ -1,5 +1,17 @@
 package com.dndcharacterhandler.presentation.components
 
+import androidx.compose.foundation.layout.width
+import com.dndcharacterhandler.domain.dnd5e.rules.experienceProgress
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.semantics.Role
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.border
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
@@ -203,6 +215,13 @@ fun CharacterManagerDrawer(
     }
 }
 
+/**
+ * A character in the drawer (owner's choice from boards, 2026-11-01: А — before, a round portrait in rings and a radio
+ * dot): the portrait a window on the card's left, the whole height, melting into the card toward its middle as the
+ * overview's does (an alpha mask, no colour laid over it); beside it the header's line — the Roman numeral and «LVL»,
+ * the name — the experience's rule under it as the header's, and the species and class muted. The picked one is told by
+ * its gold outline alone.
+ */
 @Composable
 private fun DrawerCharacterCard(
     characterBundle: CharacterBundle,
@@ -211,148 +230,90 @@ private fun DrawerCharacterCard(
 ) {
     val character = characterBundle.character
     val strings = LocalStrings.current
-    val tokens = LocalDesignTokens.current.typography
     val colors = LocalDesignTokens.current.colors
+    val gold = MaterialTheme.colorScheme.primary
     val characterName = character.name.ifBlank { text("overview_name_placeholder") }
     val classLabel = buildDrawerClassLabel(characterBundle, strings)
-
-    Surface(
+    val shape = RoundedCornerShape(8.dp)
+    val portraitReference = character.portraitUri ?: AssetReferences.portraitPlaceholderPath("portrait_placeholder.webp")
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(96.dp)
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(8.dp),
-        color = colors.surface.card.copy(alpha = LocalDesignTokens.current.alpha.veil),
-        border = BorderStroke(1.dp, if (selected) MaterialTheme.colorScheme.primary else colors.border.default)
+            .height(DrawerCardHeight)
+            .clip(shape)
+            .background(colors.surface.card.copy(alpha = LocalDesignTokens.current.alpha.veil))
+            .border(1.dp, if (selected) gold else colors.border.default, shape)
+            .selectable(selected = selected, role = Role.RadioButton, onClick = onClick)
     ) {
-        Row(
+        AppImage(
+            imageRef = portraitReference,
+            contentDescription = characterName,
             modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 10.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .width(DrawerPortraitWidth)
+                .fillMaxHeight()
+                .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+                .drawWithContent {
+                    drawContent()
+                    drawRect(
+                        Brush.horizontalGradient(0.45f to Color.Black, 1f to Color.Transparent),
+                        blendMode = BlendMode.DstIn
+                    )
+                },
+            contentScale = ContentScale.Crop,
+            framing = character.portraitFraming,
+            fallback = {}
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .padding(start = DrawerTextStart, end = 14.dp),
+            verticalArrangement = Arrangement.Center
         ) {
-            DrawerSelectionDot(selected = selected)
-            DrawerPortrait(
-                portraitUri = character.portraitUri,
-                framing = character.portraitFraming,
-                characterName = characterName,
-                modifier = Modifier.padding(start = 8.dp)
-            )
-            Column(
-                modifier = Modifier
-                    .padding(start = 12.dp)
-                    .weight(1f),
-                verticalArrangement = Arrangement.Center
-            ) {
+            Row {
+                Text(
+                    text = romanNumeral(character.level),
+                    modifier = Modifier.alignByBaseline(),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = colors.text.primary
+                )
+                Text(
+                    text = " " + text("overview_level_short").uppercase() + "  ",
+                    modifier = Modifier.alignByBaseline(),
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold, letterSpacing = 1.sp),
+                    color = colors.text.muted
+                )
                 Text(
                     text = characterName,
+                    modifier = Modifier.alignByBaseline(),
                     style = MaterialTheme.typography.titleLarge,
                     color = colors.text.primary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                Text(
-                    text = classLabel,
-                    modifier = Modifier.padding(top = 3.dp),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = colors.text.muted,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = strings.format("drawer_level", character.level),
-                    modifier = Modifier.padding(top = 2.dp),
-                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = tokens.subtitleToken.fontSizeSp.sp),
-                    color = MaterialTheme.colorScheme.primary
-                )
             }
-        }
-    }
-}
-
-@Composable
-private fun DrawerSelectionDot(selected: Boolean) {
-    val colors = LocalDesignTokens.current.colors
-    Box(
-        modifier = Modifier
-            .size(20.dp)
-            .clip(CircleShape)
-            .background(Color.Transparent),
-        contentAlignment = Alignment.Center
-    ) {
-        Canvas(modifier = Modifier.size(18.dp)) {
-            drawCircle(
-                color = if (selected) colors.accent.bright else Color.Transparent,
-                radius = 6.dp.toPx()
-            )
-            drawCircle(
-                color = if (selected) colors.accent.bright else colors.text.muted,
-                radius = 7.dp.toPx(),
-                style = Stroke(width = 1.5.dp.toPx())
+            // The experience's rule as the header's: 3dp on the faint track, gold as far as it goes.
+            val progress = experienceProgress(character.level, character.experience)
+            Canvas(modifier = Modifier.padding(top = 6.dp).width(DrawerRuleWidth).height(3.dp)) {
+                val corner = CornerRadius(size.height / 2)
+                drawRoundRect(colors.border.faint, size = size, cornerRadius = corner)
+                if (progress > 0f) drawRoundRect(gold, size = Size(size.width * progress, size.height), cornerRadius = corner)
+            }
+            Text(
+                text = classLabel,
+                modifier = Modifier.padding(top = 8.dp),
+                style = MaterialTheme.typography.bodyMedium,
+                color = colors.text.muted,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
 }
 
-@Composable
-private fun DrawerPortrait(
-    portraitUri: String?,
-    framing: PortraitFraming,
-    characterName: String,
-    modifier: Modifier = Modifier
-) {
-    val portraitReference = portraitUri ?: AssetReferences.portraitPlaceholderPath("portrait_placeholder.webp")
-    val colors = LocalDesignTokens.current.colors
-
-    Box(
-        modifier = modifier.size(70.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            drawCircle(
-                color = colors.border.rule,
-                radius = size.minDimension / 2f - 4.dp.toPx(),
-                style = Stroke(width = 1.dp.toPx())
-            )
-            drawCircle(
-                color = colors.border.default,
-                radius = size.minDimension / 2f - 9.dp.toPx(),
-                style = Stroke(width = 1.dp.toPx())
-            )
-        }
-        Surface(
-            modifier = Modifier
-                .size(56.dp)
-                .clip(CircleShape),
-            shape = CircleShape,
-            color = colors.background.page
-        ) {
-            AppImage(
-                imageRef = portraitReference,
-                contentDescription = characterName,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop,
-                framing = framing,
-                fallback = {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(colors.surface.raised),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = characterName.take(1).ifBlank { "?" },
-                            style = MaterialTheme.typography.headlineMedium.copy(
-                                fontSize = LocalDesignTokens.current.typography.portraitInitial.fontSizeSp.sp
-                            ),
-                            color = colors.text.primary
-                        )
-                    }
-                }
-            )
-        }
-    }
-}
+private val DrawerCardHeight = 96.dp
+private val DrawerPortraitWidth = 120.dp
+private val DrawerTextStart = 104.dp
+private val DrawerRuleWidth = 140.dp
 
 @Composable
 private fun DrawerActionCard(
