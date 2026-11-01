@@ -185,7 +185,8 @@ fun CharacterManagerDrawer(
 
             // The app's own right under them, past a rule (owner, 2026-11-01 — pinned to the foot, a hole stood above them).
             item {
-                DrawerOrnamentDivider(modifier = Modifier.padding(top = 10.dp, bottom = 4.dp))
+                // As much air over the rule as under it: the list's 6dp gap stands over this item, so 6dp under the rule.
+                DrawerOrnamentDivider(modifier = Modifier.padding(bottom = 6.dp))
                 val snackbar = LocalAppSnackbar.current
                 val uriHandler = LocalUriHandler.current
                 val strings = LocalStrings.current
