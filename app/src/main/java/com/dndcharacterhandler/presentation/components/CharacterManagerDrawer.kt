@@ -134,7 +134,8 @@ fun CharacterManagerDrawer(
                     },
                     modifier = Modifier.padding(top = 12.dp)
                 )
-                DrawerOrnamentDivider(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp))
+                // 20dp of air over the rule and under it: the rule is the middle of its 18dp, the list's 6dp gap under the item.
+                DrawerOrnamentDivider(modifier = Modifier.padding(top = 11.dp, bottom = 5.dp))
             }
 
             if (state.isLoaded && state.characters.isEmpty()) {
@@ -163,7 +164,8 @@ fun CharacterManagerDrawer(
             // A character comes in: made anew (in a system with its rules and sheet only) or imported, side by side.
             item {
                 Row(
-                    modifier = Modifier.padding(top = 16.dp),
+                    // 10dp under the cards (with the list's 6dp gap): they go with the list, not with the rule below.
+                    modifier = Modifier.padding(top = 4.dp),
                     horizontalArrangement = Arrangement.spacedBy(DrawerActionGap)
                 ) {
                     if (state.gameSystem.available) {
@@ -185,8 +187,8 @@ fun CharacterManagerDrawer(
 
             // The app's own right under them, past a rule (owner, 2026-11-01 — pinned to the foot, a hole stood above them).
             item {
-                // As much air over the rule as under it: the list's 6dp gap stands over this item, so 6dp under the rule.
-                DrawerOrnamentDivider(modifier = Modifier.padding(bottom = 6.dp))
+                // 20dp of air over the rule and under it, as under the system's card (the list's 6dp gap over the item).
+                DrawerOrnamentDivider(modifier = Modifier.padding(top = 5.dp, bottom = 11.dp))
                 val snackbar = LocalAppSnackbar.current
                 val uriHandler = LocalUriHandler.current
                 val strings = LocalStrings.current
